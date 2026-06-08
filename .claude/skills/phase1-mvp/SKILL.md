@@ -1,9 +1,9 @@
----
+﻿---
 name: phase1-mvp
-description: LocalIndia Phase 1 MVP — scaffold + backend auth/listings/search + beautiful Next.js frontend + admin + Railway deploy. Weeks 1-6. Load this skill at the start of every Phase 1 session.
+description: LocalIndia Phase 1 MVP â€” scaffold + backend auth/listings/search + beautiful Next.js frontend + admin + Railway deploy. Weeks 1-6. Load this skill at the start of every Phase 1 session.
 ---
 
-# Phase 1 — MVP Build Guide
+# Phase 1 â€” MVP Build Guide
 
 ## Goal
 A live, beautiful, fast website on Railway where an Indian user can:
@@ -28,9 +28,9 @@ backend/
     main.py
     core/
       __init__.py
-      config.py       ← pydantic-settings, all env vars
-      database.py     ← SQLAlchemy 2.0 async engine + get_db dep
-      security.py     ← JWT create/verify, bcrypt hash/verify
+      config.py       â† pydantic-settings, all env vars
+      database.py     â† SQLAlchemy 2.0 async engine + get_db dep
+      security.py     â† JWT create/verify, bcrypt hash/verify
     models/
       __init__.py
       city.py  user.py  category.py  listing.py  listing_image.py
@@ -41,19 +41,19 @@ backend/
       auth.py  upload.py  search.py  admin.py
     routers/
       __init__.py
-      auth.py         ← /auth/otp/send, /auth/otp/verify, /auth/google, /auth/google/callback
+      auth.py         â† /auth/otp/send, /auth/otp/verify, /auth/google, /auth/google/callback
     services/
       __init__.py
-      msg91.py        ← MOCK if MSG91_AUTH_KEY not set (print OTP to console)
+      msg91.py        â† MOCK if MSG91_AUTH_KEY not set (print OTP to console)
   migrations/
     env.py
-    versions/         ← alembic generates these
+    versions/         â† alembic generates these
   tests/
     __init__.py
-    conftest.py       ← test DB, test client, user fixture, city fixture
-    test_auth.py      ← TC-001 through TC-004, TC-017
+    conftest.py       â† test DB, test client, user fixture, city fixture
+    test_auth.py      â† TC-001 through TC-004, TC-017
   scripts/
-    seed_cities.py    ← seed 140 cities from BUILD_PLAN.md
+    seed_cities.py    â† seed 140 cities from BUILD_PLAN.md
 ```
 
 ### Mock mode pattern (use for MSG91 + Cloudinary)
@@ -74,7 +74,7 @@ Run `alembic revision --autogenerate -m "initial schema"` after all models defin
 Run `alembic upgrade head` to apply.
 Invoke db-reviewer agent to check migration vs ARCHITECTURE.md DDL.
 
-**Gate:** `pytest tests/test_auth.py -x -q` — all green before Week 2-3
+**Gate:** `pytest tests/test_auth.py -x -q` â€” all green before Week 2-3
 
 ---
 
@@ -83,22 +83,22 @@ Invoke db-reviewer agent to check migration vs ARCHITECTURE.md DDL.
 ### Additional files
 ```
 app/routers/
-  cities.py     ← GET /cities, GET /cities/{slug}
-  listings.py   ← full CRUD + /report + /renew + /fulfill
-  uploads.py    ← POST/DELETE /upload/image
-  search.py     ← GET /search (pg_trgm + tsvector)
-  admin.py      ← pending queue, approve, reject, reports
+  cities.py     â† GET /cities, GET /cities/{slug}
+  listings.py   â† full CRUD + /report + /renew + /fulfill
+  uploads.py    â† POST/DELETE /upload/image
+  search.py     â† GET /search (pg_trgm + tsvector)
+  admin.py      â† pending queue, approve, reject, reports
 app/services/
-  cloudinary_svc.py   ← upload_image (mock: save to /tmp), delete_image
-  search_svc.py       ← build_search_query with relevance ranking
+  cloudinary_svc.py   â† upload_image (mock: save to /tmp), delete_image
+  search_svc.py       â† build_search_query with relevance ranking
 tests/
   test_listings.py
-  test_search.py      ← TC-009 SQL injection MUST be tested explicitly
+  test_search.py      â† TC-009 SQL injection MUST be tested explicitly
 ```
 
 ### Search query pattern
 ```python
-# services/search_svc.py — use parameterized, NEVER string format
+# services/search_svc.py â€” use parameterized, NEVER string format
 from sqlalchemy import text
 query = text("""
     SELECT *, ts_rank(search_vector, plainto_tsquery('simple', :q)) AS rank
@@ -115,7 +115,7 @@ query = text("""
 
 Invoke security-reviewer agent after `auth.py` and `search.py` complete.
 
-**Gate:** `pytest tests/ -x -q` — all green before Week 3-4
+**Gate:** `pytest tests/ -x -q` â€” all green before Week 3-4
 
 ---
 
@@ -135,20 +135,20 @@ npm install framer-motion next-intl lucide-react @cloudinary/next
 ### Files to create
 ```
 frontend/
-  next.config.ts         ← next-intl plugin, image domains: res.cloudinary.com
-  middleware.ts          ← next-intl locale detection
+  next.config.ts         â† next-intl plugin, image domains: res.cloudinary.com
+  middleware.ts          â† next-intl locale detection
   app/
-    layout.tsx           ← root layout: NextIntlClientProvider + fonts + Toaster
-    page.tsx             ← city selector landing
-    globals.css          ← Tailwind base + CSS custom properties
+    layout.tsx           â† root layout: NextIntlClientProvider + fonts + Toaster
+    page.tsx             â† city selector landing
+    globals.css          â† Tailwind base + CSS custom properties
     [city]/
-      layout.tsx         ← sticky header with city chip + language switcher
-      page.tsx           ← city home (SSG)
+      layout.tsx         â† sticky header with city chip + language switcher
+      page.tsx           â† city home (SSG)
     auth/
       login/page.tsx
       callback/page.tsx
   components/
-    ui/                  ← shadcn components (auto-generated)
+    ui/                  â† shadcn components (auto-generated)
     city-selector/
       CitySelector.tsx
       CitySearch.tsx
@@ -164,8 +164,8 @@ frontend/
     empty-state/
       EmptyState.tsx
   lib/
-    api.ts               ← typed fetch wrapper with JWT refresh
-    utils.ts             ← cn(), formatPrice(), timeAgo()
+    api.ts               â† typed fetch wrapper with JWT refresh
+    utils.ts             â† cn(), formatPrice(), timeAgo()
   messages/
     en.json  hi.json  te.json
 ```
@@ -187,10 +187,10 @@ export default function RootLayout({ children }) {
 ### CSS variables (globals.css)
 ```css
 :root {
-  --primary:    #FF6B35;   /* saffron orange — post CTA */
+  --primary:    #FF6B35;   /* saffron orange â€” post CTA */
   --wa-green:   #25D366;   /* WhatsApp green */
-  --featured:   #F7B731;   /* amber — featured badge */
-  --nav-bg:     #1A1A2E;   /* deep navy — header */
+  --featured:   #F7B731;   /* amber â€” featured badge */
+  --nav-bg:     #1A1A2E;   /* deep navy â€” header */
   --card-bg:    #FFFFFF;
   --page-bg:    #F5F5F5;
   --text-main:  #1A1A2E;
@@ -199,13 +199,13 @@ export default function RootLayout({ children }) {
 }
 ```
 
-**Gate:** `npm run build && npm run lint` — zero errors before Week 4-5
+**Gate:** `npm run build && npm run lint` â€” zero errors before Week 4-5
 
 ---
 
 ## Week 4-5: Core Listing Flow
 
-### Beautiful UI patterns — implement ALL of these
+### Beautiful UI patterns â€” implement ALL of these
 
 #### City Selector (app/page.tsx)
 ```typescript
@@ -231,7 +231,7 @@ const cardVariants = {
 // Category chip: bottom-left on image, semi-transparent dark
 // Hover: subtle shadow + scale(1.02) via Framer Motion whileHover
 // WhatsApp button: full-width green button at card bottom
-// Time ago: "2 hours ago", "3 days ago" — not date strings
+// Time ago: "2 hours ago", "3 days ago" â€” not date strings
 // Status badge: only show if 'featured' (amber) or 'fulfilled' (gray strikethrough)
 
 // ListingCardSkeleton: exact same dimensions, Tailwind animate-pulse
@@ -241,7 +241,7 @@ const cardVariants = {
 ```typescript
 // Hero: search bar full-width, placeholder: "Search tiffin, PG, tutor..."
 // Below search: horizontal scroll category chips with emoji icons
-//   🍱 Tiffin  🏠 PG/Roommate  💼 Jobs  🚗 Vehicles  📱 Electronics  🎉 Events  🏪 Businesses
+//   ðŸ± Tiffin  ðŸ  PG/Roommate  ðŸ’¼ Jobs  ðŸš— Vehicles  ðŸ“± Electronics  ðŸŽ‰ Events  ðŸª Businesses
 // Below categories: "Featured" section (if any), then "Latest" grid
 // City name in hero: "Discover [City]" with state in smaller text
 // SSG with ISR: revalidate every 3600 seconds
@@ -250,37 +250,37 @@ const cardVariants = {
 #### Listing Detail (app/[city]/classifieds/[id]/page.tsx)
 ```
 MOBILE LAYOUT (375px):
-┌─────────────────────┐
-│  ← Back   [Report]  │  ← sticky header
-├─────────────────────┤
-│  Image carousel     │  ← swipeable, Framer Motion drag
-│  (tap to fullscreen)│
-├─────────────────────┤
-│  Category • Time    │
-│  Title (2xl bold)   │
-│  ₹ Price (primary)  │
-├─────────────────────┤
-│  Description        │
-│  (Show more...)     │
-├─────────────────────┤
-│  📍 Location        │
-├─────────────────────┤
-│  ── Seller Info ──  │
-│  [Avatar] Name      │
-│  Member since...    │
-├─────────────────────┤
-│  [WhatsApp seller]  │  ← FULL WIDTH, fixed at bottom of screen
-└─────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  â† Back   [Report]  â”‚  â† sticky header
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚  Image carousel     â”‚  â† swipeable, Framer Motion drag
+â”‚  (tap to fullscreen)â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚  Category â€¢ Time    â”‚
+â”‚  Title (2xl bold)   â”‚
+â”‚  â‚¹ Price (primary)  â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚  Description        â”‚
+â”‚  (Show more...)     â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚  ðŸ“ Location        â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚  â”€â”€ Seller Info â”€â”€  â”‚
+â”‚  [Avatar] Name      â”‚
+â”‚  Member since...    â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚  [WhatsApp seller]  â”‚  â† FULL WIDTH, fixed at bottom of screen
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 #### Post Listing Form (app/[city]/classifieds/post/page.tsx)
 ```
 3-step wizard with progress bar:
-Step 1 — Details:   title, category (grid of category cards), description, price (optional)
-Step 2 — Photos:    drag-drop zone "Add up to 5 photos", thumbnail preview, reorder
-Step 3 — Contact:   phone (prefill if logged in), WhatsApp toggle + URL, city confirm
+Step 1 â€” Details:   title, category (grid of category cards), description, price (optional)
+Step 2 â€” Photos:    drag-drop zone "Add up to 5 photos", thumbnail preview, reorder
+Step 3 â€” Contact:   phone (prefill if logged in), WhatsApp toggle + URL, city confirm
 
-Submit → success screen: "Your listing is under review" + "View my listings" button
+Submit â†’ success screen: "Your listing is under review" + "View my listings" button
 Each step validates inline before allowing Next
 Back button saves entered data (don't wipe on back navigation)
 ```
@@ -315,7 +315,7 @@ Loading: skeleton grid (8 cards)
 #### Bottom Navigation (components/bottom-nav/BottomNav.tsx)
 ```
 Mobile only (hidden md:hidden):
-[🏠 Home] [🔍 Search] [➕ Post] [📋 My Listings] [👤 Profile]
+[ðŸ  Home] [ðŸ” Search] [âž• Post] [ðŸ“‹ My Listings] [ðŸ‘¤ Profile]
 Post button: bg-primary (saffron), rounded-full, slightly raised (+2px)
 Active tab: primary color icon + label
 Inactive: muted gray
@@ -324,11 +324,11 @@ Fixed at bottom, z-50, white bg with top border
 
 ### Additional pages
 ```
-app/[city]/classifieds/page.tsx  — listing grid + category filter + sort
-app/[city]/classifieds/[id]/edit/page.tsx — edit form (owner only, pre-filled)
-app/auth/login/page.tsx — Google button + Phone OTP tabs
-app/auth/callback/page.tsx — Google OAuth callback
-app/profile/page.tsx — my listings, edit profile, city/language settings
+app/[city]/classifieds/page.tsx  â€” listing grid + category filter + sort
+app/[city]/classifieds/[id]/edit/page.tsx â€” edit form (owner only, pre-filled)
+app/auth/login/page.tsx â€” Google button + Phone OTP tabs
+app/auth/callback/page.tsx â€” Google OAuth callback
+app/profile/page.tsx â€” my listings, edit profile, city/language settings
 ```
 
 ### i18n key structure (messages/en.json)
@@ -344,7 +344,7 @@ app/profile/page.tsx — my listings, edit profile, city/language settings
 }
 ```
 
-**Gate:** Playwright E2E — post listing → admin approve → visible in grid. Run `npm run build` clean.
+**Gate:** Playwright E2E â€” post listing â†’ admin approve â†’ visible in grid. Run `npm run build` clean.
 
 ---
 
@@ -353,10 +353,10 @@ app/profile/page.tsx — my listings, edit profile, city/language settings
 ### Admin panel
 ```
 app/admin/
-  layout.tsx        ← sidebar nav (Pending badge count, Flagged, Reports, Users)
-  listings/page.tsx ← data table: title, city, user, status, approve/reject actions
-  reports/page.tsx  ← flagged listings with report reasons listed
-  users/page.tsx    ← user list with role management
+  layout.tsx        â† sidebar nav (Pending badge count, Flagged, Reports, Users)
+  listings/page.tsx â† data table: title, city, user, status, approve/reject actions
+  reports/page.tsx  â† flagged listings with report reasons listed
+  users/page.tsx    â† user list with role management
 
 Admin sidebar design:
   Dark bg (#1A1A2E), white text
@@ -366,7 +366,7 @@ Admin sidebar design:
 
 ### Seed script
 ```python
-# scripts/seed_cities.py — reads city list from BUILD_PLAN.md
+# scripts/seed_cities.py â€” reads city list from BUILD_PLAN.md
 # Creates all 140 cities with correct lang_default per state
 # Idempotent: uses INSERT ... ON CONFLICT DO NOTHING
 ```
@@ -379,7 +379,7 @@ Admin sidebar design:
 4. alembic upgrade head on Railway Postgres
 5. seed_cities.py run on Railway
 6. /api/v1/health returns 200
-7. localindia.in DNS pointed to Railway
+7. localsindia.com DNS pointed to Railway
 ```
 
 **Gate:** Live URL loads, post + approve + WhatsApp flow works end-to-end.
@@ -397,3 +397,4 @@ Admin sidebar design:
 - [ ] Language switcher changes UI labels (not listing content)
 - [ ] Category icons display correctly
 - [ ] Framer Motion transitions run at 60fps (no janky animations)
+

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
@@ -42,7 +42,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <LayoutDashboard className="w-5 h-5 text-white/70" />
             <span className="text-white font-bold text-sm">Admin</span>
           </div>
-          <p className="text-white/40 text-xs mt-1">localindia.in</p>
+          <p className="text-white/40 text-xs mt-1">localsindia.com</p>
         </div>
 
         <nav className="flex-1 p-3 space-y-1">
@@ -82,3 +82,4 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     </div>
   );
 }
+

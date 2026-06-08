@@ -1,7 +1,7 @@
-# LocalIndia — Full Architecture Document
-> India's hyperlocal community platform — city-wise, multilingual, WhatsApp-native
+﻿# LocalIndia â€” Full Architecture Document
+> India's hyperlocal community platform â€” city-wise, multilingual, WhatsApp-native
 
-**[Chain: BA → DB Architect → Senior Engineer → DevOps → QA → Docs Writer]**
+**[Chain: BA â†’ DB Architect â†’ Senior Engineer â†’ DevOps â†’ QA â†’ Docs Writer]**
 
 **Assumptions:** All Indian cities, Google OAuth + phone OTP (MSG91), WhatsApp wa.me links (Phase 1), monetization post-traction, all major Indian languages (Hindi, Telugu, Tamil, Kannada, Marathi, Bengali, Gujarati, Punjabi, Malayalam, Odia + English), Next.js 14 + FastAPI + PostgreSQL, Railway deployment.
 
@@ -9,13 +9,13 @@
 
 ## 1. EXECUTIVE SUMMARY
 
-**What:** LocalIndia is a city-wise Indian community discovery platform where residents discover local events, post classifieds, find services (tiffin, tutors, carpool, cricket clubs), list PGs/roommates, and connect with local businesses — all in their regional language.
+**What:** LocalIndia is a city-wise Indian community discovery platform where residents discover local events, post classifieds, find services (tiffin, tutors, carpool, cricket clubs), list PGs/roommates, and connect with local businesses â€” all in their regional language.
 
 **Who:** Indian urban and semi-urban residents in 700+ cities. Primary demographics: students, young professionals, homemakers, local business owners, event organizers.
 
 **Why it matters:** OLX/Quikr are transactional buy-sell platforms with no community soul. Sulekha is services-only. No platform exists that replicates the "discover your city" experience with regional language support, WhatsApp-native contact, and local culture categories (temple events, Sankranti melas, carpool groups, tiffin services). This is the gap.
 
-**Business model:** Free listings at launch → featured listing fees → local business ads → event ticketing commission (Phase 3).
+**Business model:** Free listings at launch â†’ featured listing fees â†’ local business ads â†’ event ticketing commission (Phase 3).
 
 ---
 
@@ -88,18 +88,18 @@ FR-34: When a listing receives 3+ reports, the system shall auto-flag for admin 
 ## 3. NON-FUNCTIONAL REQUIREMENTS
 
 ```
-NFR-01: PERFORMANCE  — Page load < 2.5s on 4G mobile (Core Web Vitals: LCP < 2.5s, CLS < 0.1)
-NFR-02: MOBILE       — Mobile-first responsive design; 80%+ Indian internet traffic is mobile
-NFR-03: LANGUAGE     — Full Unicode support for all 11 languages; RTL not required (all are LTR)
-NFR-04: UPTIME       — 99.5% availability SLA
-NFR-05: SECURITY     — All passwords bcrypt-hashed; JWT tokens; HTTPS only; input sanitization
-NFR-06: COMPLIANCE   — India PDPB 2023 compliant: user consent on signup, right to delete account + data
-NFR-07: IMAGES       — CDN-served via Cloudinary; max 5MB upload; auto-compressed to WebP
-NFR-08: SEO          — City + category pages must be server-side rendered for Google indexing
-NFR-09: SCALE        — Handle 10,000 concurrent users at launch; horizontal scaling via Railway
-NFR-10: SEARCH       — Full-text search response < 500ms for queries on 1M+ listings
-NFR-11: RATE LIMITING — Max 10 listings/day per free user; 5 OTP requests/hour per phone
-NFR-12: ACCESSIBILITY — WCAG 2.1 AA minimum on all core flows
+NFR-01: PERFORMANCE  â€” Page load < 2.5s on 4G mobile (Core Web Vitals: LCP < 2.5s, CLS < 0.1)
+NFR-02: MOBILE       â€” Mobile-first responsive design; 80%+ Indian internet traffic is mobile
+NFR-03: LANGUAGE     â€” Full Unicode support for all 11 languages; RTL not required (all are LTR)
+NFR-04: UPTIME       â€” 99.5% availability SLA
+NFR-05: SECURITY     â€” All passwords bcrypt-hashed; JWT tokens; HTTPS only; input sanitization
+NFR-06: COMPLIANCE   â€” India PDPB 2023 compliant: user consent on signup, right to delete account + data
+NFR-07: IMAGES       â€” CDN-served via Cloudinary; max 5MB upload; auto-compressed to WebP
+NFR-08: SEO          â€” City + category pages must be server-side rendered for Google indexing
+NFR-09: SCALE        â€” Handle 10,000 concurrent users at launch; horizontal scaling via Railway
+NFR-10: SEARCH       â€” Full-text search response < 500ms for queries on 1M+ listings
+NFR-11: RATE LIMITING â€” Max 10 listings/day per free user; 5 OTP requests/hour per phone
+NFR-12: ACCESSIBILITY â€” WCAG 2.1 AA minimum on all core flows
 ```
 
 ---
@@ -107,35 +107,35 @@ NFR-12: ACCESSIBILITY — WCAG 2.1 AA minimum on all core flows
 ## 4. ACCEPTANCE CRITERIA (Key FRs)
 
 ```
-FR-02 — Phone OTP Login:
+FR-02 â€” Phone OTP Login:
   Given: User enters valid Indian mobile number (+91XXXXXXXXXX)
   When:  They tap "Send OTP"
   Then:  OTP delivered via MSG91 within 30 seconds
   And:   OTP is valid for 10 minutes, single use only
   And:   After 3 failed attempts, account locked for 15 minutes
 
-FR-12 — Post a Listing:
+FR-12 â€” Post a Listing:
   Given: Authenticated user on /[city]/post
   When:  They submit a listing with title, category, city, phone
   Then:  Listing created with status = 'pending'
   And:   User sees "Your listing is under review" confirmation
   And:   Admin notified via dashboard alert
 
-FR-27 — Search:
+FR-27 â€” Search:
   Given: User is on /hyderabad with search term "tiffin"
   When:  They submit the search
   Then:  Results appear in < 500ms
   And:   Only listings from Hyderabad are shown
   And:   Results ranked by relevance then recency
 
-FR-09 — Language Switch:
-  Given: User selects "తెలుగు" from language switcher
+FR-09 â€” Language Switch:
+  Given: User selects "à°¤à±†à°²à±à°—à±" from language switcher
   When:  Page reloads
   Then:  All UI labels render in Telugu
   And:   Preference saved to localStorage and user account
   And:   User-generated listing content is NOT auto-translated (shown as-is)
 
-FR-34 — Auto-flag Reported Listing:
+FR-34 â€” Auto-flag Reported Listing:
   Given: A listing has received 3 unique user reports
   When:  The 3rd report is submitted
   Then:  Listing status changes to 'flagged'
@@ -148,13 +148,13 @@ FR-34 — Auto-flag Reported Listing:
 ## 5. ENHANCEMENT OPPORTUNITIES
 
 ```
-[Recommended]  PWA with offline support — India has patchy connectivity, especially Tier 2/3 cities
+[Recommended]  PWA with offline support â€” India has patchy connectivity, especially Tier 2/3 cities
 [Recommended]  WhatsApp Business API for listing confirmations + renewal reminders (Phase 2)
 [Recommended]  AI-powered listing category auto-suggestion (Claude API)
 [Recommended]  SEO: auto-generate city landing pages with static content (festival guides, local tips)
-[Nice to Have] "Post via WhatsApp" — user sends listing details to a WhatsApp bot number
-[Nice to Have] Multilingual listing search — search "టిఫిన్" and find "tiffin" listings too
-[Nice to Have] Map view for listings (Leaflet.js + OpenStreetMap — free)
+[Nice to Have] "Post via WhatsApp" â€” user sends listing details to a WhatsApp bot number
+[Nice to Have] Multilingual listing search â€” search "à°Ÿà°¿à°«à°¿à°¨à±" and find "tiffin" listings too
+[Nice to Have] Map view for listings (Leaflet.js + OpenStreetMap â€” free)
 [Future Phase] Paid featured listings with Razorpay integration
 [Future Phase] Event ticketing with QR code entry (Razorpay payment)
 [Future Phase] LocalIndia mobile app (Flutter)
@@ -425,137 +425,137 @@ CREATE INDEX idx_otp_expires ON otp_requests(expires_at) WHERE verified = false;
 
 ```
 localindia/
-├── frontend/                        # Next.js 14
-│   ├── app/
-│   │   ├── layout.tsx               # Root layout with language provider
-│   │   ├── page.tsx                 # Landing / city selector
-│   │   ├── [city]/
-│   │   │   ├── page.tsx             # City home (SSG)
-│   │   │   ├── classifieds/
-│   │   │   │   ├── page.tsx         # Listings grid
-│   │   │   │   ├── [id]/page.tsx    # Listing detail
-│   │   │   │   └── post/page.tsx    # Post listing form
-│   │   │   ├── events/page.tsx
-│   │   │   ├── businesses/
-│   │   │   │   ├── page.tsx
-│   │   │   │   └── [id]/page.tsx
-│   │   │   └── search/page.tsx
-│   │   ├── admin/
-│   │   │   ├── listings/page.tsx
-│   │   │   ├── reports/page.tsx
-│   │   │   └── users/page.tsx
-│   │   └── auth/
-│   │       ├── login/page.tsx
-│   │       └── callback/page.tsx
-│   ├── components/
-│   │   ├── ui/                      # shadcn/ui components
-│   │   ├── city-selector/
-│   │   ├── listing-card/
-│   │   ├── language-switcher/
-│   │   ├── whatsapp-button/
-│   │   └── image-upload/
-│   ├── lib/
-│   │   ├── api.ts
-│   │   └── utils.ts
-│   ├── messages/                    # next-intl translation files
-│   │   ├── en.json  hi.json  te.json  ta.json  kn.json  mr.json
-│   │   └── bn.json  gu.json  pa.json  ml.json  or.json
-│   └── next.config.ts
-│
-├── backend/                         # FastAPI
-│   ├── app/
-│   │   ├── main.py
-│   │   ├── core/
-│   │   │   ├── config.py
-│   │   │   ├── security.py
-│   │   │   └── database.py
-│   │   ├── routers/
-│   │   │   ├── auth.py  cities.py  listings.py  events.py
-│   │   │   ├── businesses.py  search.py  uploads.py  admin.py
-│   │   ├── models/
-│   │   ├── schemas/
-│   │   └── services/
-│   │       ├── msg91.py  cloudinary_svc.py  search_svc.py
-│   ├── migrations/versions/
-│   ├── tests/
-│   │   ├── test_auth.py  test_listings.py  test_search.py  conftest.py
-│   ├── Dockerfile
-│   └── requirements.txt
-│
-├── CLAUDE.md
-├── BUILD_PLAN.md
-├── UI_STACK.md
-├── docker-compose.yml
-├── .claudeignore
-├── .claude/
-│   ├── settings.json
-│   └── skills/
-│       ├── phase1-mvp/SKILL.md
-│       ├── phase2-community/SKILL.md
-│       └── phase3-monetize/SKILL.md
-└── .github/workflows/ci.yml
+â”œâ”€â”€ frontend/                        # Next.js 14
+â”‚   â”œâ”€â”€ app/
+â”‚   â”‚   â”œâ”€â”€ layout.tsx               # Root layout with language provider
+â”‚   â”‚   â”œâ”€â”€ page.tsx                 # Landing / city selector
+â”‚   â”‚   â”œâ”€â”€ [city]/
+â”‚   â”‚   â”‚   â”œâ”€â”€ page.tsx             # City home (SSG)
+â”‚   â”‚   â”‚   â”œâ”€â”€ classifieds/
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ page.tsx         # Listings grid
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ [id]/page.tsx    # Listing detail
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ post/page.tsx    # Post listing form
+â”‚   â”‚   â”‚   â”œâ”€â”€ events/page.tsx
+â”‚   â”‚   â”‚   â”œâ”€â”€ businesses/
+â”‚   â”‚   â”‚   â”‚   â”œâ”€â”€ page.tsx
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€ [id]/page.tsx
+â”‚   â”‚   â”‚   â””â”€â”€ search/page.tsx
+â”‚   â”‚   â”œâ”€â”€ admin/
+â”‚   â”‚   â”‚   â”œâ”€â”€ listings/page.tsx
+â”‚   â”‚   â”‚   â”œâ”€â”€ reports/page.tsx
+â”‚   â”‚   â”‚   â””â”€â”€ users/page.tsx
+â”‚   â”‚   â””â”€â”€ auth/
+â”‚   â”‚       â”œâ”€â”€ login/page.tsx
+â”‚   â”‚       â””â”€â”€ callback/page.tsx
+â”‚   â”œâ”€â”€ components/
+â”‚   â”‚   â”œâ”€â”€ ui/                      # shadcn/ui components
+â”‚   â”‚   â”œâ”€â”€ city-selector/
+â”‚   â”‚   â”œâ”€â”€ listing-card/
+â”‚   â”‚   â”œâ”€â”€ language-switcher/
+â”‚   â”‚   â”œâ”€â”€ whatsapp-button/
+â”‚   â”‚   â””â”€â”€ image-upload/
+â”‚   â”œâ”€â”€ lib/
+â”‚   â”‚   â”œâ”€â”€ api.ts
+â”‚   â”‚   â””â”€â”€ utils.ts
+â”‚   â”œâ”€â”€ messages/                    # next-intl translation files
+â”‚   â”‚   â”œâ”€â”€ en.json  hi.json  te.json  ta.json  kn.json  mr.json
+â”‚   â”‚   â””â”€â”€ bn.json  gu.json  pa.json  ml.json  or.json
+â”‚   â””â”€â”€ next.config.ts
+â”‚
+â”œâ”€â”€ backend/                         # FastAPI
+â”‚   â”œâ”€â”€ app/
+â”‚   â”‚   â”œâ”€â”€ main.py
+â”‚   â”‚   â”œâ”€â”€ core/
+â”‚   â”‚   â”‚   â”œâ”€â”€ config.py
+â”‚   â”‚   â”‚   â”œâ”€â”€ security.py
+â”‚   â”‚   â”‚   â””â”€â”€ database.py
+â”‚   â”‚   â”œâ”€â”€ routers/
+â”‚   â”‚   â”‚   â”œâ”€â”€ auth.py  cities.py  listings.py  events.py
+â”‚   â”‚   â”‚   â”œâ”€â”€ businesses.py  search.py  uploads.py  admin.py
+â”‚   â”‚   â”œâ”€â”€ models/
+â”‚   â”‚   â”œâ”€â”€ schemas/
+â”‚   â”‚   â””â”€â”€ services/
+â”‚   â”‚       â”œâ”€â”€ msg91.py  cloudinary_svc.py  search_svc.py
+â”‚   â”œâ”€â”€ migrations/versions/
+â”‚   â”œâ”€â”€ tests/
+â”‚   â”‚   â”œâ”€â”€ test_auth.py  test_listings.py  test_search.py  conftest.py
+â”‚   â”œâ”€â”€ Dockerfile
+â”‚   â””â”€â”€ requirements.txt
+â”‚
+â”œâ”€â”€ CLAUDE.md
+â”œâ”€â”€ BUILD_PLAN.md
+â”œâ”€â”€ UI_STACK.md
+â”œâ”€â”€ docker-compose.yml
+â”œâ”€â”€ .claudeignore
+â”œâ”€â”€ .claude/
+â”‚   â”œâ”€â”€ settings.json
+â”‚   â””â”€â”€ skills/
+â”‚       â”œâ”€â”€ phase1-mvp/SKILL.md
+â”‚       â”œâ”€â”€ phase2-community/SKILL.md
+â”‚       â””â”€â”€ phase3-monetize/SKILL.md
+â””â”€â”€ .github/workflows/ci.yml
 ```
 
 ### API Endpoints
 
 ```
 AUTH
-POST   /api/v1/auth/otp/send           {phone} → {message, expires_in}
-POST   /api/v1/auth/otp/verify         {phone, otp} → {access_token, refresh_token, user}
+POST   /api/v1/auth/otp/send           {phone} â†’ {message, expires_in}
+POST   /api/v1/auth/otp/verify         {phone, otp} â†’ {access_token, refresh_token, user}
 GET    /api/v1/auth/google             Redirect to Google OAuth
-GET    /api/v1/auth/google/callback    {code} → {access_token, refresh_token, user}
-POST   /api/v1/auth/refresh            {refresh_token} → {access_token}
-DELETE /api/v1/auth/logout             Auth: Bearer → 204
+GET    /api/v1/auth/google/callback    {code} â†’ {access_token, refresh_token, user}
+POST   /api/v1/auth/refresh            {refresh_token} â†’ {access_token}
+DELETE /api/v1/auth/logout             Auth: Bearer â†’ 204
 
 CITIES
-GET /api/v1/cities                     {state?, active?} → [{id, name, state, slug}]
-GET /api/v1/cities/{slug}              → {city}
+GET /api/v1/cities                     {state?, active?} â†’ [{id, name, state, slug}]
+GET /api/v1/cities/{slug}              â†’ {city}
 
 LISTINGS
-GET    /api/v1/listings                {city_slug, category?, page, limit} → {items[], total, page}
-POST   /api/v1/listings                Auth; ListingCreate → {listing}
-GET    /api/v1/listings/{id}           → {listing + images}
-PATCH  /api/v1/listings/{id}           Auth (owner only) → {listing}
-DELETE /api/v1/listings/{id}           Auth (owner or admin) → 204
-POST   /api/v1/listings/{id}/report    Auth; {reason, notes} → 201
-POST   /api/v1/listings/{id}/renew     Auth (owner only) → {listing}
-POST   /api/v1/listings/{id}/fulfill   Auth (owner only) → {listing}
+GET    /api/v1/listings                {city_slug, category?, page, limit} â†’ {items[], total, page}
+POST   /api/v1/listings                Auth; ListingCreate â†’ {listing}
+GET    /api/v1/listings/{id}           â†’ {listing + images}
+PATCH  /api/v1/listings/{id}           Auth (owner only) â†’ {listing}
+DELETE /api/v1/listings/{id}           Auth (owner or admin) â†’ 204
+POST   /api/v1/listings/{id}/report    Auth; {reason, notes} â†’ 201
+POST   /api/v1/listings/{id}/renew     Auth (owner only) â†’ {listing}
+POST   /api/v1/listings/{id}/fulfill   Auth (owner only) â†’ {listing}
 
 EVENTS
-GET    /api/v1/events                  {city_slug, category?, from_date?, page} → {items[], total}
-POST   /api/v1/events                  Auth; EventCreate → {event}
-GET    /api/v1/events/{id}             → {event}
-PATCH  /api/v1/events/{id}             Auth (owner only) → {event}
-DELETE /api/v1/events/{id}             Auth (owner or admin) → 204
+GET    /api/v1/events                  {city_slug, category?, from_date?, page} â†’ {items[], total}
+POST   /api/v1/events                  Auth; EventCreate â†’ {event}
+GET    /api/v1/events/{id}             â†’ {event}
+PATCH  /api/v1/events/{id}             Auth (owner only) â†’ {event}
+DELETE /api/v1/events/{id}             Auth (owner or admin) â†’ 204
 
 BUSINESSES
-GET  /api/v1/businesses                {city_slug, category?, page} → {items[], total}
-POST /api/v1/businesses                Auth; BusinessCreate → {business}
-GET  /api/v1/businesses/{id}           → {business + reviews}
-POST /api/v1/businesses/{id}/claim     Auth → {business}
-POST /api/v1/businesses/{id}/reviews   Auth; {rating, body} → {review}
+GET  /api/v1/businesses                {city_slug, category?, page} â†’ {items[], total}
+POST /api/v1/businesses                Auth; BusinessCreate â†’ {business}
+GET  /api/v1/businesses/{id}           â†’ {business + reviews}
+POST /api/v1/businesses/{id}/claim     Auth â†’ {business}
+POST /api/v1/businesses/{id}/reviews   Auth; {rating, body} â†’ {review}
 
 SEARCH
-GET /api/v1/search                     {q, city_slug, category?, min_price?, max_price?, sort?} → {items[], total}
+GET /api/v1/search                     {q, city_slug, category?, min_price?, max_price?, sort?} â†’ {items[], total}
 
 UPLOADS
-POST   /api/v1/upload/image            Auth; Form {file} → {url, cloudinary_id}
-DELETE /api/v1/upload/image/{cid}      Auth → 204
+POST   /api/v1/upload/image            Auth; Form {file} â†’ {url, cloudinary_id}
+DELETE /api/v1/upload/image/{cid}      Auth â†’ 204
 
 ADMIN (role=admin required)
-GET   /api/v1/admin/listings/pending   {page} → {items[], total}
-PATCH /api/v1/admin/listings/{id}/approve → {listing}
-PATCH /api/v1/admin/listings/{id}/reject  {reason} → {listing}
-GET   /api/v1/admin/reports            {page} → {items[], total}
+GET   /api/v1/admin/listings/pending   {page} â†’ {items[], total}
+PATCH /api/v1/admin/listings/{id}/approve â†’ {listing}
+PATCH /api/v1/admin/listings/{id}/reject  {reason} â†’ {listing}
+GET   /api/v1/admin/reports            {page} â†’ {items[], total}
 ```
 
 ### Business Logic Rules
 
 ```
-BL-01: Phone must be Indian format — /^\+91[6-9]\d{9}$/ server-side
+BL-01: Phone must be Indian format â€” /^\+91[6-9]\d{9}$/ server-side
 BL-02: Max 10 active listings per user per city (free tier)
 BL-03: Listings auto-expire after 30 days; expired hidden from public, visible in dashboard
-BL-04: 3+ reports → status='flagged', hidden from public
+BL-04: 3+ reports â†’ status='flagged', hidden from public
 BL-05: Only listing owner or admin can edit/delete
 BL-06: OTP valid 10 minutes, max 3 attempts, 15-min phone lockout after failures
 BL-07: Max 5 OTP requests per phone per hour
@@ -565,7 +565,7 @@ BL-10: Business avg_rating updated by application after each review
 BL-11: Admin approval required before listing goes active
 BL-12: WhatsApp URL must match /^https:\/\/wa\.me\/91\d{10}$/
 BL-13: Google OAuth email must be Gmail (configurable)
-BL-14: Soft-delete only — no hard deletes (PDPB compliance)
+BL-14: Soft-delete only â€” no hard deletes (PDPB compliance)
 BL-15: City slug must match /^[a-z0-9-]+$/
 ```
 
@@ -573,23 +573,23 @@ BL-15: City slug must match /^[a-z0-9-]+$/
 
 ```
 Strategy:  next-intl with App Router
-Routing:   /[city]?lang=te  (query param — avoids breaking city SSG)
+Routing:   /[city]?lang=te  (query param â€” avoids breaking city SSG)
 Keys:      messages/{lang}.json
-Content:   User-generated content NOT auto-translated — shown as-is
+Content:   User-generated content NOT auto-translated â€” shown as-is
 Fonts:     Noto Sans family loaded via next/font (zero FOUT)
 
 Languages + Font:
-  en → Noto Sans
-  hi → Noto Sans Devanagari
-  te → Noto Sans Telugu
-  ta → Noto Sans Tamil
-  kn → Noto Sans Kannada
-  mr → Noto Sans Devanagari
-  bn → Noto Sans Bengali
-  gu → Noto Sans Gujarati
-  pa → Noto Sans Gurmukhi
-  ml → Noto Sans Malayalam
-  or → Noto Sans Oriya
+  en â†’ Noto Sans
+  hi â†’ Noto Sans Devanagari
+  te â†’ Noto Sans Telugu
+  ta â†’ Noto Sans Tamil
+  kn â†’ Noto Sans Kannada
+  mr â†’ Noto Sans Devanagari
+  bn â†’ Noto Sans Bengali
+  gu â†’ Noto Sans Gujarati
+  pa â†’ Noto Sans Gurmukhi
+  ml â†’ Noto Sans Malayalam
+  or â†’ Noto Sans Oriya
 ```
 
 ---
@@ -598,9 +598,9 @@ Languages + Font:
 
 ### Environments
 ```
-local      → docker-compose (Postgres + FastAPI + Next.js)
-staging    → Railway (auto-deploy on PR merge to develop)
-production → Railway (auto-deploy on merge to main, manual gate)
+local      â†’ docker-compose (Postgres + FastAPI + Next.js)
+staging    â†’ Railway (auto-deploy on PR merge to develop)
+production â†’ Railway (auto-deploy on merge to main, manual gate)
 ```
 
 ### Environment Variables
@@ -618,13 +618,13 @@ GOOGLE_CLIENT_SECRET=<google oauth>
 CLOUDINARY_CLOUD_NAME=<name>
 CLOUDINARY_API_KEY=<key>
 CLOUDINARY_API_SECRET=<secret>
-FRONTEND_URL=https://localindia.in  # CONFIRMED domain
+FRONTEND_URL=https://localsindia.com  # CONFIRMED domain
 
 # Frontend
-NEXT_PUBLIC_API_URL=https://api.localindia.in
+NEXT_PUBLIC_API_URL=https://api.localsindia.com
 NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=<name>
 NEXTAUTH_SECRET=<secret>
-NEXTAUTH_URL=https://localindia.in
+NEXTAUTH_URL=https://localsindia.com
 ```
 
 ### GitHub Actions CI
@@ -719,7 +719,7 @@ volumes:
 ### Test Matrix
 | Layer | Tool | Coverage |
 |---|---|---|
-| Unit — Backend | pytest | 80% |
+| Unit â€” Backend | pytest | 80% |
 | API Integration | pytest + httpx | All endpoints |
 | Frontend | Jest + RTL | Core UI |
 | E2E | Playwright | 5 critical flows |
@@ -729,33 +729,33 @@ volumes:
 
 ### Critical Test Cases
 ```
-TC-001: Phone OTP — valid Indian number receives OTP within 30s          [P1]
-TC-002: Phone OTP — non-Indian number rejected with 400                  [P1]
-TC-003: Phone OTP — 3 failed attempts locks account 15 minutes           [P1]
-TC-004: Google OAuth — valid Gmail creates user + returns JWT             [P1]
-TC-005: Post listing — all required fields → status=pending              [P1]
-TC-006: Post listing — missing title returns 422 with field error         [P1]
-TC-007: Post listing — unauthenticated user returns 401                   [P1]
-TC-008: Search — "tiffin" in Hyderabad returns only Hyderabad results    [P1]
-TC-009: Search — SQL injection in query param does not execute            [P1 Security]
-TC-010: Image upload — 6MB file rejected with 413                         [P2]
-TC-011: Image upload — non-image file (PDF) rejected with 400             [P2]
-TC-012: Report listing — 3rd report triggers status=flagged + hidden      [P1]
-TC-013: Language switch — UI renders in Telugu script correctly            [P2]
-TC-014: City selector — selecting Vijayawada shows only Vijayawada data  [P1]
-TC-015: Listing auto-expire — expired not returned in GET /listings       [P2]
-TC-016: Admin approve — listing moves to active and appears publicly      [P1]
-TC-017: Rate limit — 6th OTP request in 1 hour returns 429               [P1 Security]
-TC-018: WhatsApp URL — invalid format rejected server-side with 422       [P2]
-TC-019: Review — user cannot submit 2 reviews for same business           [P2]
-TC-020: Soft delete — deleted listing not returned but exists in DB       [P2]
+TC-001: Phone OTP â€” valid Indian number receives OTP within 30s          [P1]
+TC-002: Phone OTP â€” non-Indian number rejected with 400                  [P1]
+TC-003: Phone OTP â€” 3 failed attempts locks account 15 minutes           [P1]
+TC-004: Google OAuth â€” valid Gmail creates user + returns JWT             [P1]
+TC-005: Post listing â€” all required fields â†’ status=pending              [P1]
+TC-006: Post listing â€” missing title returns 422 with field error         [P1]
+TC-007: Post listing â€” unauthenticated user returns 401                   [P1]
+TC-008: Search â€” "tiffin" in Hyderabad returns only Hyderabad results    [P1]
+TC-009: Search â€” SQL injection in query param does not execute            [P1 Security]
+TC-010: Image upload â€” 6MB file rejected with 413                         [P2]
+TC-011: Image upload â€” non-image file (PDF) rejected with 400             [P2]
+TC-012: Report listing â€” 3rd report triggers status=flagged + hidden      [P1]
+TC-013: Language switch â€” UI renders in Telugu script correctly            [P2]
+TC-014: City selector â€” selecting Vijayawada shows only Vijayawada data  [P1]
+TC-015: Listing auto-expire â€” expired not returned in GET /listings       [P2]
+TC-016: Admin approve â€” listing moves to active and appears publicly      [P1]
+TC-017: Rate limit â€” 6th OTP request in 1 hour returns 429               [P1 Security]
+TC-018: WhatsApp URL â€” invalid format rejected server-side with 422       [P2]
+TC-019: Review â€” user cannot submit 2 reviews for same business           [P2]
+TC-020: Soft delete â€” deleted listing not returned but exists in DB       [P2]
 ```
 
 ---
 
 ## 10. BUILD PHASES
 
-### Phase 1 — MVP (Weeks 1-6)
+### Phase 1 â€” MVP (Weeks 1-6)
 - [ ] DB schema + migrations
 - [ ] FastAPI: auth, cities, listings CRUD, image upload, search
 - [ ] Next.js: city selector, listings grid + detail, post form
@@ -764,7 +764,7 @@ TC-020: Soft delete — deleted listing not returned but exists in DB       [P2]
 - [ ] Deploy to Railway
 - [ ] 50 cities seeded
 
-### Phase 2 — Community (Weeks 7-10)
+### Phase 2 â€” Community (Weeks 7-10)
 - [ ] Events module (post + browse)
 - [ ] Business directory + reviews
 - [ ] Remaining 8 languages
@@ -772,7 +772,7 @@ TC-020: Soft delete — deleted listing not returned but exists in DB       [P2]
 - [ ] PWA manifest + service worker
 - [ ] Full 700+ cities seeded
 
-### Phase 3 — Monetization (Weeks 11-14)
+### Phase 3 â€” Monetization (Weeks 11-14)
 - [ ] Razorpay integration
 - [ ] Featured listings (paid boost)
 - [ ] Business ad banners (city pages)
@@ -784,9 +784,10 @@ TC-020: Soft delete — deleted listing not returned but exists in DB       [P2]
 ## 11. OPEN QUESTIONS
 
 ```
-Q1: Domain — localindia.in CONFIRMED
-Q2: Seed cities — 140 South India-focused cities (see BUILD_PLAN.md)
+Q1: Domain â€” localsindia.com CONFIRMED
+Q2: Seed cities â€” 140 South India-focused cities (see BUILD_PLAN.md)
 Q3: Admin team size at launch?
 Q4: MSG91 account ready or need setup guide?
 Q5: Cloudinary free tier (25GB) sufficient for Phase 1?
 ```
+

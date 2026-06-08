@@ -1,80 +1,80 @@
-# LocalIndia — 14-Week Build Plan
+﻿# LocalIndia â€” 14-Week Build Plan
 
-## Pre-Build Setup (Day 1 — ~2 hours)
+## Pre-Build Setup (Day 1 â€” ~2 hours)
 
 ```
 1. git init localindia
 2. Create full folder structure (see ARCHITECTURE.md Section 7)
-3. docker-compose.yml → Postgres 16 local
-4. backend/ → FastAPI scaffold + requirements.txt + alembic init
-5. frontend/ → npx create-next-app@14 --typescript --tailwind --app
-6. shadcn/ui init → npx shadcn@latest init
+3. docker-compose.yml â†’ Postgres 16 local
+4. backend/ â†’ FastAPI scaffold + requirements.txt + alembic init
+5. frontend/ â†’ npx create-next-app@14 --typescript --tailwind --app
+6. shadcn/ui init â†’ npx shadcn@latest init
 7. CLAUDE.md + .claudeignore + .claude/settings.json done (already created)
 8. GitHub repo + Actions skeleton
-9. alembic upgrade head → all 10 tables + indexes created
-10. Verify: docker-compose up → Postgres healthy, FastAPI /docs loads
+9. alembic upgrade head â†’ all 10 tables + indexes created
+10. Verify: docker-compose up â†’ Postgres healthy, FastAPI /docs loads
 ```
 
 ---
 
-## Phase 1 — MVP (Weeks 1-6)
+## Phase 1 â€” MVP (Weeks 1-6)
 
 ### Week 1-2: Backend Foundation
 **Files to create:**
-- `backend/app/core/config.py` — pydantic-settings, all env vars
-- `backend/app/core/database.py` — SQLAlchemy async engine + session
-- `backend/app/core/security.py` — JWT create/verify, bcrypt hash
-- `backend/app/models/` — all 10 ORM models (cities, users, categories, listings, listing_images, events, businesses, reviews, reports, otp_requests)
-- `backend/app/schemas/` — Pydantic request/response schemas for each model
-- `backend/app/routers/auth.py` — OTP send/verify + Google OAuth (authlib)
-- `backend/app/services/msg91.py` — SMS wrapper (mock mode if no key)
-- `backend/tests/test_auth.py` — TC-001 through TC-004, TC-017
+- `backend/app/core/config.py` â€” pydantic-settings, all env vars
+- `backend/app/core/database.py` â€” SQLAlchemy async engine + session
+- `backend/app/core/security.py` â€” JWT create/verify, bcrypt hash
+- `backend/app/models/` â€” all 10 ORM models (cities, users, categories, listings, listing_images, events, businesses, reviews, reports, otp_requests)
+- `backend/app/schemas/` â€” Pydantic request/response schemas for each model
+- `backend/app/routers/auth.py` â€” OTP send/verify + Google OAuth (authlib)
+- `backend/app/services/msg91.py` â€” SMS wrapper (mock mode if no key)
+- `backend/tests/test_auth.py` â€” TC-001 through TC-004, TC-017
 
-**Gate:** `pytest tests/test_auth.py -x -q` — all green
+**Gate:** `pytest tests/test_auth.py -x -q` â€” all green
 
 ### Week 2-3: Listings Backend
 **Files to create:**
-- `backend/app/routers/cities.py` — GET /cities, GET /cities/{slug}
-- `backend/app/routers/listings.py` — full CRUD + report + renew + fulfill
-- `backend/app/routers/uploads.py` — Cloudinary upload/delete
-- `backend/app/routers/search.py` — pg_trgm + tsvector query
-- `backend/app/services/cloudinary_svc.py` — upload, delete, WebP transform
-- `backend/app/services/search_svc.py` — search logic, relevance ranking
-- `backend/app/routers/admin.py` — approve/reject, pending list, reports
-- `backend/tests/test_listings.py` — TC-005 through TC-012, TC-018-020
-- `backend/tests/test_search.py` — TC-008, TC-009 (SQL injection), TC-014
+- `backend/app/routers/cities.py` â€” GET /cities, GET /cities/{slug}
+- `backend/app/routers/listings.py` â€” full CRUD + report + renew + fulfill
+- `backend/app/routers/uploads.py` â€” Cloudinary upload/delete
+- `backend/app/routers/search.py` â€” pg_trgm + tsvector query
+- `backend/app/services/cloudinary_svc.py` â€” upload, delete, WebP transform
+- `backend/app/services/search_svc.py` â€” search logic, relevance ranking
+- `backend/app/routers/admin.py` â€” approve/reject, pending list, reports
+- `backend/tests/test_listings.py` â€” TC-005 through TC-012, TC-018-020
+- `backend/tests/test_search.py` â€” TC-008, TC-009 (SQL injection), TC-014
 
-**Gate:** `pytest tests/ -x -q` — all green
+**Gate:** `pytest tests/ -x -q` â€” all green
 
 ### Week 3-4: Frontend Shell
 **Components to build:**
 - shadcn/ui install: Button, Card, Badge, Sheet, Dialog, Input, Select, Skeleton, Tabs, Avatar, DropdownMenu
-- `frontend/app/layout.tsx` — NextIntlProvider + Noto font loader (11 fonts)
-- `frontend/app/page.tsx` — City selector landing (animated card grid, searchable)
-- `frontend/components/city-selector/` — search input + 700 cities list + Framer Motion transitions
-- `frontend/components/language-switcher/` — query param locale, flag icons
-- `frontend/components/whatsapp-button/` — green CTA button, wa.me link
-- `frontend/messages/en.json` — all UI label keys
-- `frontend/messages/hi.json` — Hindi translations
-- `frontend/messages/te.json` — Telugu translations
+- `frontend/app/layout.tsx` â€” NextIntlProvider + Noto font loader (11 fonts)
+- `frontend/app/page.tsx` â€” City selector landing (animated card grid, searchable)
+- `frontend/components/city-selector/` â€” search input + 700 cities list + Framer Motion transitions
+- `frontend/components/language-switcher/` â€” query param locale, flag icons
+- `frontend/components/whatsapp-button/` â€” green CTA button, wa.me link
+- `frontend/messages/en.json` â€” all UI label keys
+- `frontend/messages/hi.json` â€” Hindi translations
+- `frontend/messages/te.json` â€” Telugu translations
 
 **UX Patterns:**
 - City selector: full-screen modal on mobile, popover on desktop
 - Language switcher: top-right chip showing current language
 - WhatsApp button: always green (#25D366), WhatsApp icon, prominent placement
 
-**Gate:** `npm run build && npm run lint` — no errors
+**Gate:** `npm run build && npm run lint` â€” no errors
 
 ### Week 4-5: Core Listing Flow
 **Pages to build:**
-- `frontend/app/[city]/page.tsx` — City home: search bar + category chips + featured listings
-- `frontend/app/[city]/classifieds/page.tsx` — 2-col mobile / 4-col desktop card grid with skeleton
-- `frontend/app/[city]/classifieds/[id]/page.tsx` — Detail: images carousel + WhatsApp CTA (above fold on mobile)
-- `frontend/app/[city]/classifieds/post/page.tsx` — Multi-step form (3 steps: details → images → contact)
-- `frontend/app/[city]/search/page.tsx` — Search results with category/price/date filters
-- `frontend/components/listing-card/` — Image-first card, price badge, category chip, WhatsApp button
-- `frontend/components/image-upload/` — Drag-drop + preview, 5-image max, Cloudinary direct upload
-- `frontend/app/auth/login/page.tsx` — Google + Phone OTP tabs
+- `frontend/app/[city]/page.tsx` â€” City home: search bar + category chips + featured listings
+- `frontend/app/[city]/classifieds/page.tsx` â€” 2-col mobile / 4-col desktop card grid with skeleton
+- `frontend/app/[city]/classifieds/[id]/page.tsx` â€” Detail: images carousel + WhatsApp CTA (above fold on mobile)
+- `frontend/app/[city]/classifieds/post/page.tsx` â€” Multi-step form (3 steps: details â†’ images â†’ contact)
+- `frontend/app/[city]/search/page.tsx` â€” Search results with category/price/date filters
+- `frontend/components/listing-card/` â€” Image-first card, price badge, category chip, WhatsApp button
+- `frontend/components/image-upload/` â€” Drag-drop + preview, 5-image max, Cloudinary direct upload
+- `frontend/app/auth/login/page.tsx` â€” Google + Phone OTP tabs
 
 **Mobile UX Rules:**
 - Bottom navigation bar: Home / Post / Search / Profile (Sheet on mobile)
@@ -83,21 +83,21 @@
 - Image carousel: swipeable on mobile (Framer Motion drag)
 
 **Playwright E2E (write these):**
-- Post listing → appears as pending in admin → admin approves → visible in grid
-- Search "tiffin" on /hyderabad → only hyderabad results shown
-- Report listing 3x → status=flagged → hidden from grid
+- Post listing â†’ appears as pending in admin â†’ admin approves â†’ visible in grid
+- Search "tiffin" on /hyderabad â†’ only hyderabad results shown
+- Report listing 3x â†’ status=flagged â†’ hidden from grid
 
 **Gate:** E2E passes + `npm run build` clean
 
 ### Week 5-6: Admin + Deploy
 **Files:**
-- `frontend/app/admin/listings/page.tsx` — pending queue with approve/reject buttons
-- `frontend/app/admin/reports/page.tsx` — flagged listings with report reasons
-- `frontend/app/admin/users/page.tsx` — user list, soft-delete, role change
-- `backend/scripts/seed_cities.py` — seed 50 cities (10 metro + 40 AP/Telangana)
+- `frontend/app/admin/listings/page.tsx` â€” pending queue with approve/reject buttons
+- `frontend/app/admin/reports/page.tsx` â€” flagged listings with report reasons
+- `frontend/app/admin/users/page.tsx` â€” user list, soft-delete, role change
+- `backend/scripts/seed_cities.py` â€” seed 50 cities (10 metro + 40 AP/Telangana)
 
 **Deploy:**
-- `railway.toml` — Railway project config for backend + frontend
+- `railway.toml` â€” Railway project config for backend + frontend
 - Set all env vars in Railway dashboard
 - GitHub Actions CI: verify both test jobs green on main branch
 - Seed 50 cities on Railway Postgres
@@ -106,45 +106,45 @@
 
 ---
 
-## Phase 2 — Community (Weeks 7-10)
+## Phase 2 â€” Community (Weeks 7-10)
 
 ### Week 7-8: Events Module
-- `backend/app/routers/events.py` — full CRUD
+- `backend/app/routers/events.py` â€” full CRUD
 - `backend/tests/test_events.py`
-- `frontend/app/[city]/events/page.tsx` — date-sorted calendar view
-- `frontend/app/[city]/events/[id]/page.tsx` — event detail + ticket URL button
+- `frontend/app/[city]/events/page.tsx` â€” date-sorted calendar view
+- `frontend/app/[city]/events/[id]/page.tsx` â€” event detail + ticket URL button
 
 ### Week 8-9: Business Directory
-- `backend/app/routers/businesses.py` — CRUD + claim + reviews
-- `frontend/app/[city]/businesses/page.tsx` — category grid (Yellow Pages style)
-- `frontend/app/[city]/businesses/[id]/page.tsx` — profile + star rating + WhatsApp
+- `backend/app/routers/businesses.py` â€” CRUD + claim + reviews
+- `frontend/app/[city]/businesses/page.tsx` â€” category grid (Yellow Pages style)
+- `frontend/app/[city]/businesses/[id]/page.tsx` â€” profile + star rating + WhatsApp
 - Business avg_rating update logic after each review POST
 
 ### Week 9-10: Language Expansion + PWA
 - Create remaining 8 translation files: ta, kn, mr, bn, gu, pa, ml, or
-- `frontend/public/manifest.json` — PWA manifest
-- `frontend/public/sw.js` — service worker (cache city pages + listing images)
-- `backend/scripts/seed_cities_full.py` — seed all 700+ cities from CSV
+- `frontend/public/manifest.json` â€” PWA manifest
+- `frontend/public/sw.js` â€” service worker (cache city pages + listing images)
+- `backend/scripts/seed_cities_full.py` â€” seed all 700+ cities from CSV
 
 ---
 
-## Phase 3 — Monetization (Weeks 11-14)
+## Phase 3 â€” Monetization (Weeks 11-14)
 
 ### Week 11-12: Razorpay Featured Listings
 - Razorpay SDK integration (backend + frontend)
-- `backend/app/routers/payments.py` — create order, verify webhook
+- `backend/app/routers/payments.py` â€” create order, verify webhook
 - Featured listing boost: `is_featured=true`, appears at top of city grid
 - Admin can manually feature (free) or user pays to feature
 
 ### Week 12-13: Business Ads + Analytics
 - City page header ad banner slots (business owners)
-- `frontend/app/[city]/businesses/dashboard/page.tsx` — views, clicks, WhatsApp taps
+- `frontend/app/[city]/businesses/dashboard/page.tsx` â€” views, clicks, WhatsApp taps
 - Basic analytics tracking (server-side, no 3rd party)
 
 ### Week 13-14: Event Ticketing
 - Razorpay payment for paid events
 - QR code generation on payment (`qrcode` npm package)
-- `frontend/app/[city]/events/[id]/ticket/page.tsx` — ticket + QR display
+- `frontend/app/[city]/events/[id]/ticket/page.tsx` â€” ticket + QR display
 
 ---
 
@@ -160,7 +160,7 @@
 
 ---
 
-## Seed Cities — Phase 1 (130 South India-focused cities)
+## Seed Cities â€” Phase 1 (130 South India-focused cities)
 
 Strategy: Full South India coverage from Day 1 (AP + Telangana + TN + Karnataka + Kerala + Goa + Puducherry) + 10 national metro cities.
 
@@ -332,7 +332,7 @@ Strategy: Full South India coverage from Day 1 (AP + Telangana + TN + Karnataka 
 | Ponda | Goa | ponda |
 | Puducherry | Puducherry | puducherry |
 
-**Total: 140 cities** — full South India from Day 1.
+**Total: 140 cities** â€” full South India from Day 1.
 
 ---
 
@@ -360,10 +360,11 @@ STATE_LANG = {
 
 ## Pre-Build Checklist
 
-- [x] Q1: Domain — **localindia.in** confirmed
-- [x] Q2: Seed cities — 140 South India-focused cities (see above)
-- [ ] Q3: MSG91 account — see SETUP_GUIDE.md (mock mode works for Day 1)
-- [ ] Q4: Cloudinary account — see SETUP_GUIDE.md (5 min setup, free tier)
-- [ ] Q5: Google OAuth — see SETUP_GUIDE.md (10 min setup)
-- [ ] Q6: Railway account + project — see SETUP_GUIDE.md
+- [x] Q1: Domain â€” **localsindia.com** confirmed
+- [x] Q2: Seed cities â€” 140 South India-focused cities (see above)
+- [ ] Q3: MSG91 account â€” see SETUP_GUIDE.md (mock mode works for Day 1)
+- [ ] Q4: Cloudinary account â€” see SETUP_GUIDE.md (5 min setup, free tier)
+- [ ] Q5: Google OAuth â€” see SETUP_GUIDE.md (10 min setup)
+- [ ] Q6: Railway account + project â€” see SETUP_GUIDE.md
 - [ ] Q7: GitHub repo created
+
