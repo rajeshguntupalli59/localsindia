@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import { Noto_Sans, Noto_Sans_Devanagari, Noto_Sans_Telugu } from 'next/font/google';
 import { NextIntlClientProvider } from 'next-intl';
+import { getLocale, getMessages } from 'next-intl/server';
 import { Toaster } from '@/components/ui/sonner';
-import { cookies } from 'next/headers';
 import { cn } from '@/lib/utils';
 import './globals.css';
 
@@ -28,28 +28,15 @@ const notoTelugu = Noto_Sans_Telugu({
 });
 
 export const metadata: Metadata = {
-  title: 'LocalIndia — Your City, Your Community',
+  title: 'LocalsIndia — Your City, Your Community',
   description: "India's hyperlocal classifieds and community platform",
 };
-
-const LOCALES = ['en', 'hi', 'te'] as const;
-type Locale = (typeof LOCALES)[number];
-
-async function getMessages(locale: Locale) {
-  try {
-    return (await import(`../../messages/${locale}.json`)).default as Record<string, unknown>;
-  } catch {
-    return (await import('../../messages/en.json')).default as Record<string, unknown>;
-  }
-}
 
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const cookieStore = cookies();
-  const rawLang = (cookieStore as ReturnType<typeof cookies>).get('lang')?.value ?? 'en';
-  const locale: Locale = LOCALES.includes(rawLang as Locale) ? (rawLang as Locale) : 'en';
-  const messages = await getMessages(locale);
+  const locale = await getLocale();
+  const messages = await getMessages();
 
   return (
     <html
@@ -57,7 +44,7 @@ export default async function RootLayout({
       className={cn(notoSans.variable, notoDevanagari.variable, notoTelugu.variable)}
     >
       <body className="antialiased">
-        <NextIntlClientProvider locale={locale} messages={messages}>
+        <NextIntlClientProvider messages={messages}>
           {children}
           <Toaster richColors position="top-center" />
         </NextIntlClientProvider>
