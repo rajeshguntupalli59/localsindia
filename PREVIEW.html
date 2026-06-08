@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>LocalsIndia — UI Preview</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',sans-serif;background:#0f0f1a;display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:24px 16px;}
+
+/* Screen switcher */
+.screen-nav{display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap;justify-content:center;}
+.screen-btn{padding:8px 16px;border-radius:20px;border:1.5px solid #333;background:transparent;color:#999;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;}
+.screen-btn.active{background:#FF6B35;border-color:#FF6B35;color:#fff;}
+.screen{display:none;} .screen.active{display:block;}
+
+/* Phone frame */
+.phone{width:375px;min-height:780px;background:#f5f5f5;border-radius:40px;overflow:hidden;box-shadow:0 40px 80px rgba(0,0,0,.6),0 0 0 1px #222,inset 0 0 0 2px #111;position:relative;}
+.phone-inner{overflow:hidden;border-radius:38px;}
+
+/* ─── COLORS ─── */
+:root{
+  --saffron:#FF6B35;
+  --navy:#1A1A2E;
+  --wa:#25D366;
+  --amber:#F7B731;
+  --page:#F5F5F5;
+  --card:#fff;
+  --muted:#6B7280;
+  --border:#E5E7EB;
+}
+
+/* ─── CITY SELECTOR SCREEN ─── */
+.cs-hero{background:linear-gradient(160deg,#1A1A2E 0%,#16213E 50%,#FF6B35 150%);padding:48px 20px 32px;text-align:center;}
+.cs-logo{font-size:28px;font-weight:800;color:#fff;letter-spacing:-1px;}
+.cs-logo span{color:#FF6B35;}
+.cs-tagline{color:rgba(255,255,255,.55);font-size:13px;margin-top:4px;}
+.cs-search{margin-top:20px;background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.2);border-radius:14px;padding:12px 16px;display:flex;align-items:center;gap:10px;backdrop-filter:blur(10px);}
+.cs-search span{color:rgba(255,255,255,.4);font-size:14px;}
+.cs-body{background:#f5f5f5;padding:20px;}
+.section-label{font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;}
+.recent-chips{display:flex;gap:8px;margin-bottom:20px;}
+.chip{padding:6px 14px;background:#fff;border:1.5px solid #E5E7EB;border-radius:20px;font-size:13px;font-weight:500;color:#374151;box-shadow:0 1px 3px rgba(0,0,0,.06);}
+.chip.active{background:#FF6B35;border-color:#FF6B35;color:#fff;}
+.city-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:24px;}
+.city-card{background:#fff;border-radius:16px;padding:14px 10px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06);cursor:pointer;border:2px solid transparent;transition:all .15s;}
+.city-card:hover{border-color:#FF6B35;}
+.city-icon{font-size:24px;margin-bottom:6px;}
+.city-name{font-size:12px;font-weight:700;color:#1A1A2E;}
+.city-state{font-size:10px;color:#9CA3AF;margin-top:2px;}
+.state-section{margin-bottom:16px;}
+.state-header{font-size:12px;font-weight:700;color:#374151;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.state-header::after{content:'';flex:1;height:1px;background:#E5E7EB;}
+.state-cities{display:flex;flex-wrap:wrap;gap:6px;}
+
+/* ─── CITY HOME ─── */
+.nav{background:#1A1A2E;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;}
+.nav-left{display:flex;align-items:center;gap:8px;}
+.nav-city{color:#fff;font-weight:700;font-size:15px;}
+.nav-state{color:rgba(255,255,255,.4);font-size:11px;}
+.nav-icons{display:flex;gap:14px;}
+.nav-icon{color:rgba(255,255,255,.6);font-size:18px;cursor:pointer;}
+.search-bar{margin:12px 16px;background:#fff;border:1.5px solid #E5E7EB;border-radius:12px;padding:11px 14px;display:flex;align-items:center;gap:8px;box-shadow:0 2px 6px rgba(0,0,0,.05);}
+.search-bar span{color:#9CA3AF;font-size:13px;}
+.categories-row{padding:0 16px;display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;}
+.categories-row::-webkit-scrollbar{display:none;}
+.cat-pill{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:56px;cursor:pointer;}
+.cat-icon-wrap{width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:22px;}
+.cat-label{font-size:10px;font-weight:600;color:#374151;white-space:nowrap;}
+.section-header{display:flex;justify-content:space-between;align-items:center;padding:16px 16px 10px;}
+.section-title{font-size:15px;font-weight:700;color:#1A1A2E;}
+.see-all{font-size:12px;font-weight:600;color:#FF6B35;}
+.featured-row{padding:0 16px;display:flex;gap:12px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;}
+.featured-row::-webkit-scrollbar{display:none;}
+.featured-card{min-width:180px;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.08);}
+.featured-img{height:110px;background:linear-gradient(135deg,#667eea,#764ba2);position:relative;display:flex;align-items:flex-end;padding:8px;}
+.featured-badge{background:#F7B731;color:#1A1A2E;font-size:9px;font-weight:700;padding:3px 7px;border-radius:6px;text-transform:uppercase;letter-spacing:.5px;}
+.featured-info{padding:10px;}
+.featured-title{font-size:13px;font-weight:700;color:#1A1A2E;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.featured-price{font-size:14px;font-weight:800;color:#FF6B35;margin-top:2px;}
+.featured-loc{font-size:10px;color:#9CA3AF;margin-top:3px;display:flex;align-items:center;gap:3px;}
+.listings-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px;}
+.listing-card{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.06);}
+.listing-img{height:110px;position:relative;display:flex;align-items:flex-start;justify-content:flex-end;padding:8px;}
+.listing-img-bg{position:absolute;inset:0;width:100%;height:100%;}
+.price-badge{background:rgba(0,0,0,.65);color:#fff;font-size:11px;font-weight:700;padding:4px 8px;border-radius:8px;backdrop-filter:blur(4px);position:relative;z-index:1;}
+.cat-badge{position:absolute;bottom:8px;left:8px;background:rgba(0,0,0,.55);color:#fff;font-size:9px;font-weight:600;padding:3px 7px;border-radius:6px;backdrop-filter:blur(4px);}
+.listing-body{padding:10px;}
+.listing-title{font-size:12px;font-weight:700;color:#1A1A2E;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.listing-meta{font-size:10px;color:#9CA3AF;margin-top:3px;display:flex;align-items:center;gap:4px;}
+.listing-wa{margin:6px 8px 8px;background:#25D366;color:#fff;border:none;border-radius:10px;padding:7px;font-size:11px;font-weight:700;width:calc(100% - 16px);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;}
+.bottom-nav{background:#fff;border-top:1px solid #E5E7EB;display:flex;align-items:center;justify-content:space-around;padding:8px 0 16px;position:sticky;bottom:0;}
+.bnav-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;}
+.bnav-icon{font-size:20px;color:#9CA3AF;}
+.bnav-icon.active{color:#FF6B35;}
+.bnav-label{font-size:9px;font-weight:600;color:#9CA3AF;}
+.bnav-label.active{color:#FF6B35;}
+.bnav-post{width:48px;height:48px;background:linear-gradient(135deg,#FF6B35,#ff8c5a);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;box-shadow:0 4px 14px rgba(255,107,53,.5);margin-top:-12px;}
+
+/* ─── LISTING DETAIL ─── */
+.detail-img{height:280px;background:linear-gradient(135deg,#1A1A2E,#374151);position:relative;}
+.detail-float-nav{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:16px;}
+.float-btn{width:36px;height:36px;background:rgba(0,0,0,.45);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;cursor:pointer;backdrop-filter:blur(8px);}
+.carousel-dots{position:absolute;bottom:14px;left:0;right:0;display:flex;justify-content:center;gap:6px;}
+.dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.4);}
+.dot.active{background:#fff;width:18px;border-radius:3px;}
+.detail-body{background:#fff;padding:16px;}
+.detail-meta{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.detail-cat{background:#FFF3EC;color:#FF6B35;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;}
+.detail-time{font-size:11px;color:#9CA3AF;}
+.detail-title{font-size:20px;font-weight:800;color:#1A1A2E;line-height:1.25;}
+.detail-price{font-size:26px;font-weight:800;color:#FF6B35;margin:10px 0;}
+.detail-loc{display:flex;align-items:center;gap:6px;font-size:13px;color:#6B7280;margin-bottom:16px;}
+.divider{height:1px;background:#F3F4F6;margin:14px 0;}
+.detail-section-title{font-size:12px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;}
+.detail-desc{font-size:13px;color:#374151;line-height:1.6;}
+.show-more{color:#FF6B35;font-size:12px;font-weight:600;margin-top:6px;cursor:pointer;}
+.seller-card{background:#F9FAFB;border-radius:14px;padding:14px;display:flex;align-items:center;gap:12px;}
+.seller-avatar{width:44px;height:44px;background:linear-gradient(135deg,#667eea,#764ba2);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px;}
+.seller-name{font-size:14px;font-weight:700;color:#1A1A2E;}
+.seller-sub{font-size:11px;color:#9CA3AF;margin-top:2px;}
+.verified{background:#EFF6FF;color:#3B82F6;font-size:9px;font-weight:700;padding:2px 6px;border-radius:5px;margin-left:6px;}
+.similar-row{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;margin-top:8px;}
+.similar-row::-webkit-scrollbar{display:none;}
+.similar-card{min-width:100px;background:#F9FAFB;border-radius:12px;overflow:hidden;}
+.similar-img{height:70px;background:linear-gradient(135deg,#a8edea,#fed6e3);}
+.similar-info{padding:7px;}
+.similar-title{font-size:10px;font-weight:700;color:#1A1A2E;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.similar-price{font-size:11px;font-weight:800;color:#FF6B35;margin-top:2px;}
+.wa-sticky{background:#fff;border-top:1px solid #E5E7EB;padding:12px 16px 20px;}
+.wa-btn{background:#25D366;color:#fff;border:none;border-radius:14px;padding:15px;font-size:15px;font-weight:700;width:100%;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 14px rgba(37,211,102,.35);}
+
+/* ─── POST WIZARD ─── */
+.wizard-nav{background:#1A1A2E;padding:14px 16px;display:flex;align-items:center;gap:12px;}
+.wizard-close{color:#fff;font-size:20px;cursor:pointer;}
+.wizard-title{color:#fff;font-size:15px;font-weight:700;flex:1;}
+.progress-wrap{height:4px;background:rgba(255,255,255,.15);margin:0 16px;border-radius:2px;}
+.progress-bar{height:4px;background:linear-gradient(90deg,#FF6B35,#ff8c5a);border-radius:2px;transition:width .4s ease;}
+.step-label{font-size:11px;color:rgba(255,255,255,.5);padding:6px 16px 14px;text-align:center;}
+.wizard-body{background:#f5f5f5;padding:16px;flex:1;}
+.field-label{font-size:12px;font-weight:700;color:#374151;margin-bottom:6px;display:block;}
+.field-input{width:100%;background:#fff;border:1.5px solid #E5E7EB;border-radius:12px;padding:13px 14px;font-size:14px;color:#1A1A2E;outline:none;font-family:inherit;margin-bottom:16px;}
+.field-input:focus{border-color:#FF6B35;}
+.field-textarea{width:100%;background:#fff;border:1.5px solid #E5E7EB;border-radius:12px;padding:13px 14px;font-size:14px;color:#1A1A2E;outline:none;font-family:inherit;resize:none;height:90px;margin-bottom:4px;}
+.char-count{font-size:10px;color:#9CA3AF;text-align:right;margin-bottom:16px;}
+.cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
+.cat-btn{background:#fff;border:2px solid #E5E7EB;border-radius:14px;padding:12px 8px;text-align:center;cursor:pointer;transition:all .15s;}
+.cat-btn.selected{border-color:#FF6B35;background:#FFF3EC;}
+.cat-btn-icon{font-size:24px;margin-bottom:5px;}
+.cat-btn-label{font-size:11px;font-weight:600;color:#374151;}
+.price-row{display:flex;gap:10px;align-items:center;margin-bottom:8px;}
+.price-prefix{background:#fff;border:1.5px solid #E5E7EB;border-radius:12px;padding:13px 14px;font-size:15px;font-weight:700;color:#9CA3AF;}
+.price-input{flex:1;background:#fff;border:1.5px solid #E5E7EB;border-radius:12px;padding:13px 14px;font-size:14px;color:#1A1A2E;outline:none;font-family:inherit;}
+.price-input:focus{border-color:#FF6B35;}
+.check-row{display:flex;gap:16px;margin-bottom:20px;}
+.check-item{display:flex;align-items:center;gap:6px;font-size:13px;color:#374151;cursor:pointer;}
+.wizard-footer{background:#fff;padding:12px 16px 24px;border-top:1px solid #E5E7EB;}
+.next-btn{background:linear-gradient(135deg,#FF6B35,#ff8c5a);color:#fff;border:none;border-radius:14px;padding:15px;font-size:15px;font-weight:700;width:100%;cursor:pointer;box-shadow:0 4px 14px rgba(255,107,53,.35);}
+
+/* ─── PROFILE ─── */
+.profile-hero{background:linear-gradient(160deg,#1A1A2E,#16213E);padding:40px 20px 28px;text-align:center;}
+.profile-avatar{width:72px;height:72px;background:linear-gradient(135deg,#FF6B35,#ff8c5a);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:28px;font-weight:800;margin:0 auto 12px;border:3px solid rgba(255,255,255,.2);}
+.profile-name{color:#fff;font-size:18px;font-weight:800;}
+.profile-phone{color:rgba(255,255,255,.5);font-size:13px;margin-top:4px;}
+.profile-badges{display:flex;gap:8px;justify-content:center;margin-top:12px;}
+.badge-chip{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;}
+.badge-verified{background:rgba(59,130,246,.2);color:#93C5FD;}
+.badge-admin{background:rgba(255,107,53,.2);color:#FDBA74;}
+.profile-stats{display:flex;margin:0 16px;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.08);transform:translateY(-16px);}
+.stat-item{flex:1;text-align:center;padding:16px 8px;}
+.stat-item+.stat-item{border-left:1px solid #F3F4F6;}
+.stat-num{font-size:22px;font-weight:800;color:#1A1A2E;}
+.stat-label{font-size:10px;color:#9CA3AF;font-weight:600;margin-top:2px;}
+.profile-menu{padding:0 16px;}
+.menu-item{display:flex;align-items:center;gap:12px;padding:15px 0;border-bottom:1px solid #F3F4F6;cursor:pointer;}
+.menu-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;}
+.menu-text{flex:1;font-size:14px;font-weight:600;color:#1A1A2E;}
+.menu-arrow{color:#D1D5DB;font-size:16px;}
+.menu-signout{color:#EF4444;font-size:14px;font-weight:600;padding:16px 0;text-align:center;cursor:pointer;}
+
+/* ─── ADMIN ─── */
+.admin-wrap{display:flex;height:780px;}
+.admin-sidebar{width:56px;background:#1A1A2E;display:flex;flex-direction:column;align-items:center;padding:16px 0;gap:6px;}
+.admin-logo{width:36px;height:36px;background:#FF6B35;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;margin-bottom:10px;}
+.admin-nav-item{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;color:rgba(255,255,255,.4);}
+.admin-nav-item.active{background:rgba(255,255,255,.12);color:#fff;}
+.admin-badge{position:absolute;top:-3px;right:-3px;background:#EF4444;color:#fff;font-size:8px;font-weight:700;padding:2px 4px;border-radius:6px;}
+.admin-nav-wrap{position:relative;}
+.admin-main{flex:1;background:#F9FAFB;overflow-y:auto;}
+.admin-header{padding:14px 14px 10px;border-bottom:1px solid #E5E7EB;background:#fff;}
+.admin-page-title{font-size:15px;font-weight:700;color:#1A1A2E;}
+.admin-page-sub{font-size:11px;color:#9CA3AF;margin-top:1px;}
+.admin-card{background:#fff;margin:10px;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.05);}
+.admin-card-img{height:80px;background:linear-gradient(135deg,#a8edea,#fed6e3);display:flex;align-items:flex-end;padding:6px;}
+.admin-card-body{padding:10px;}
+.admin-card-title{font-size:13px;font-weight:700;color:#1A1A2E;}
+.admin-card-meta{font-size:10px;color:#9CA3AF;margin-top:3px;}
+.admin-card-actions{display:flex;gap:8px;margin-top:10px;}
+.admin-btn{flex:1;padding:9px;border-radius:10px;border:none;font-size:12px;font-weight:700;cursor:pointer;}
+.admin-btn-approve{background:#D1FAE5;color:#065F46;}
+.admin-btn-reject{background:#FEE2E2;color:#991B1B;}
+.admin-status{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;}
+.status-pending{background:#FEF3C7;color:#92400E;}
+
+/* ─── SEARCH ─── */
+.search-header{background:#1A1A2E;padding:14px 16px;}
+.search-back-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.search-back{color:rgba(255,255,255,.7);font-size:18px;}
+.search-input-wrap{flex:1;background:rgba(255,255,255,.12);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:8px;}
+.search-input-text{color:#fff;font-size:14px;}
+.search-filter-icon{color:rgba(255,255,255,.7);font-size:18px;}
+.active-filters{display:flex;gap:8px;padding:10px 16px;background:#fff;border-bottom:1px solid #E5E7EB;overflow-x:auto;scrollbar-width:none;}
+.active-filters::-webkit-scrollbar{display:none;}
+.filter-chip{display:flex;align-items:center;gap:5px;background:#FFF3EC;border:1px solid #FDBA74;color:#C2410C;font-size:11px;font-weight:600;padding:5px 10px;border-radius:20px;white-space:nowrap;}
+.results-count{padding:12px 16px;font-size:12px;font-weight:600;color:#6B7280;}
+.results-count span{color:#1A1A2E;}
+.search-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px;}
+
+/* Bottom sheet */
+.bottom-sheet-overlay{position:relative;background:rgba(0,0,0,.4);border-radius:0 0 38px 38px;}
+.bottom-sheet{background:#fff;border-radius:20px 20px 0 0;padding:20px;}
+.bs-handle{width:36px;height:4px;background:#D1D5DB;border-radius:2px;margin:0 auto 16px;}
+.bs-title{font-size:16px;font-weight:700;color:#1A1A2E;margin-bottom:16px;}
+.bs-field-label{font-size:12px;font-weight:600;color:#6B7280;margin-bottom:8px;}
+.bs-select{width:100%;background:#F9FAFB;border:1.5px solid #E5E7EB;border-radius:10px;padding:12px;font-size:14px;color:#1A1A2E;font-family:inherit;outline:none;margin-bottom:16px;appearance:none;}
+.price-range-track{height:4px;background:#E5E7EB;border-radius:2px;position:relative;margin:16px 0;}
+.price-range-fill{position:absolute;left:0;width:60%;height:4px;background:#FF6B35;border-radius:2px;}
+.price-range-thumb{position:absolute;top:-8px;left:58%;width:20px;height:20px;background:#FF6B35;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.2);}
+.radio-group{display:flex;gap:8px;margin-bottom:20px;}
+.radio-item{flex:1;padding:10px;background:#F9FAFB;border-radius:10px;border:2px solid #E5E7EB;font-size:12px;font-weight:600;text-align:center;cursor:pointer;color:#374151;}
+.radio-item.selected{border-color:#FF6B35;background:#FFF3EC;color:#FF6B35;}
+.apply-btn{background:linear-gradient(135deg,#FF6B35,#ff8c5a);color:#fff;border:none;border-radius:14px;padding:15px;font-size:15px;font-weight:700;width:100%;cursor:pointer;}
+
+.label{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#9CA3AF;margin-bottom:16px;text-align:center;}
+</style>
+</head>
+<body>
+
+<div style="text-align:center;margin-bottom:8px;">
+  <h1 style="color:#FF6B35;font-size:22px;font-weight:800;letter-spacing:-1px;">LocalsIndia</h1>
+  <p style="color:#666;font-size:12px;margin-top:4px;">UI Preview — Click a screen below</p>
+</div>
+
+<div class="screen-nav">
+  <button class="screen-btn active" onclick="show('home')">🏙️ City Home</button>
+  <button class="screen-btn" onclick="show('city')">📍 City Selector</button>
+  <button class="screen-btn" onclick="show('detail')">📦 Listing Detail</button>
+  <button class="screen-btn" onclick="show('post')">➕ Post Listing</button>
+  <button class="screen-btn" onclick="show('search')">🔍 Search</button>
+  <button class="screen-btn" onclick="show('profile')">👤 Profile</button>
+  <button class="screen-btn" onclick="show('admin')">🛡️ Admin</button>
+</div>
+
+<!-- ═══ CITY SELECTOR ═══ -->
+<div id="screen-city" class="screen">
+<div class="phone"><div class="phone-inner">
+  <div class="cs-hero">
+    <div class="cs-logo">Locals<span>India</span></div>
+    <div class="cs-tagline">Your city. Your community.</div>
+    <div class="cs-search">
+      <span>🔍</span>
+      <span>Search your city...</span>
+    </div>
+  </div>
+  <div class="cs-body">
+    <div class="section-label">📍 Recent</div>
+    <div class="recent-chips">
+      <div class="chip active">Hyderabad</div>
+      <div class="chip">Chennai</div>
+      <div class="chip">Bengaluru</div>
+    </div>
+    <div class="section-label">🔥 Popular Cities</div>
+    <div class="city-grid">
+      <div class="city-card">
+        <div class="city-icon">🏙️</div>
+        <div class="city-name">Hyderabad</div>
+        <div class="city-state">Telangana</div>
+      </div>
+      <div class="city-card">
+        <div class="city-icon">🌴</div>
+        <div class="city-name">Chennai</div>
+        <div class="city-state">Tamil Nadu</div>
+      </div>
+      <div class="city-card">
+        <div class="city-icon">🌿</div>
+        <div class="city-name">Bengaluru</div>
+        <div class="city-state">Karnataka</div>
+      </div>
+      <div class="city-card">
+        <div class="city-icon">🌊</div>
+        <div class="city-name">Vizag</div>
+        <div class="city-state">Andhra Pradesh</div>
+      </div>
+      <div class="city-card">
+        <div class="city-icon">🕌</div>
+        <div class="city-name">Kochi</div>
+        <div class="city-state">Kerala</div>
+      </div>
+      <div class="city-card">
+        <div class="city-icon">🏖️</div>
+        <div class="city-name">Coimbatore</div>
+        <div class="city-state">Tamil Nadu</div>
+      </div>
+    </div>
+    <div class="state-section">
+      <div class="state-header">Andhra Pradesh</div>
+      <div class="state-cities">
+        <div class="chip">Vijayawada</div>
+        <div class="chip">Guntur</div>
+        <div class="chip">Tirupati</div>
+        <div class="chip">Nellore</div>
+        <div class="chip">+8 more</div>
+      </div>
+    </div>
+    <div class="state-section">
+      <div class="state-header">Telangana</div>
+      <div class="state-cities">
+        <div class="chip">Warangal</div>
+        <div class="chip">Karimnagar</div>
+        <div class="chip">Nizamabad</div>
+        <div class="chip">+5 more</div>
+      </div>
+    </div>
+  </div>
+</div></div>
+</div>
+
+<!-- ═══ CITY HOME ═══ -->
+<div id="screen-home" class="screen active">
+<div class="phone"><div class="phone-inner">
+  <div class="nav">
+    <div class="nav-left">
+      <div>
+        <div class="nav-city">📍 Hyderabad</div>
+        <div class="nav-state">Telangana</div>
+      </div>
+    </div>
+    <div class="nav-icons">
+      <span class="nav-icon">🔔</span>
+      <span class="nav-icon">👤</span>
+    </div>
+  </div>
+
+  <div style="background:#fff;padding-bottom:4px;">
+    <div class="search-bar">
+      <span>🔍</span>
+      <span>Search tiffin, PG, jobs, cars...</span>
+    </div>
+    <div class="categories-row">
+      <div class="cat-pill">
+        <div class="cat-icon-wrap" style="background:#FFF3EC;">🍱</div>
+        <div class="cat-label">Tiffin</div>
+      </div>
+      <div class="cat-pill">
+        <div class="cat-icon-wrap" style="background:#EFF6FF;">🏠</div>
+        <div class="cat-label">PG/Room</div>
+      </div>
+      <div class="cat-pill">
+        <div class="cat-icon-wrap" style="background:#F0FDF4;">💼</div>
+        <div class="cat-label">Jobs</div>
+      </div>
+      <div class="cat-pill">
+        <div class="cat-icon-wrap" style="background:#FDF4FF;">🚗</div>
+        <div class="cat-label">Vehicles</div>
+      </div>
+      <div class="cat-pill">
+        <div class="cat-icon-wrap" style="background:#FFFBEB;">📱</div>
+        <div class="cat-label">Electronics</div>
+      </div>
+      <div class="cat-pill">
+        <div class="cat-icon-wrap" style="background:#FFF1F2;">🎉</div>
+        <div class="cat-label">Events</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <div class="section-title">⭐ Featured</div>
+    <div class="see-all">See all</div>
+  </div>
+  <div class="featured-row">
+    <div class="featured-card">
+      <div class="featured-img" style="background:linear-gradient(135deg,#667eea,#764ba2);">
+        <div class="featured-badge">⭐ FEATURED</div>
+      </div>
+      <div class="featured-info">
+        <div class="featured-title">Honda Activa 6G</div>
+        <div class="featured-price">₹ 68,000</div>
+        <div class="featured-loc">📍 Kukatpally</div>
+      </div>
+    </div>
+    <div class="featured-card">
+      <div class="featured-img" style="background:linear-gradient(135deg,#f093fb,#f5576c);">
+        <div class="featured-badge">⭐ FEATURED</div>
+      </div>
+      <div class="featured-info">
+        <div class="featured-title">2BHK Flat for Rent</div>
+        <div class="featured-price">₹ 14,000/mo</div>
+        <div class="featured-loc">📍 Madhapur</div>
+      </div>
+    </div>
+    <div class="featured-card">
+      <div class="featured-img" style="background:linear-gradient(135deg,#4facfe,#00f2fe);">
+        <div class="featured-badge">⭐ FEATURED</div>
+      </div>
+      <div class="featured-info">
+        <div class="featured-title">iPhone 15 Pro Max</div>
+        <div class="featured-price">₹ 95,000</div>
+        <div class="featured-loc">📍 Banjara Hills</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <div class="section-title">🕐 Latest</div>
+    <div class="see-all">See all</div>
+  </div>
+  <div class="listings-grid">
+    <div class="listing-card">
+      <div class="listing-img" style="background:linear-gradient(135deg,#a18cd1,#fbc2eb);">
+        <div class="price-badge">₹ 42,000</div>
+        <div class="cat-badge">📱 Electronics</div>
+      </div>
+      <div class="listing-body">
+        <div class="listing-title">iPhone 13 Pro 256GB</div>
+        <div class="listing-meta">📍 SR Nagar · 2h ago</div>
+      </div>
+      <button class="listing-wa">💬 WhatsApp</button>
+    </div>
+    <div class="listing-card">
+      <div class="listing-img" style="background:linear-gradient(135deg,#ffecd2,#fcb69f);">
+        <div class="price-badge">₹ 80/meal</div>
+        <div class="cat-badge">🍱 Tiffin</div>
+      </div>
+      <div class="listing-body">
+        <div class="listing-title">Home Tiffin Service</div>
+        <div class="listing-meta">📍 KPHB · 3h ago</div>
+      </div>
+      <button class="listing-wa">💬 WhatsApp</button>
+    </div>
+    <div class="listing-card">
+      <div class="listing-img" style="background:linear-gradient(135deg,#a8edea,#fed6e3);">
+        <div class="price-badge">₹ 9,500/mo</div>
+        <div class="cat-badge">🏠 PG</div>
+      </div>
+      <div class="listing-body">
+        <div class="listing-title">PG for Boys — AC</div>
+        <div class="listing-meta">📍 Gachibowli · 5h ago</div>
+      </div>
+      <button class="listing-wa">💬 WhatsApp</button>
+    </div>
+    <div class="listing-card">
+      <div class="listing-img" style="background:linear-gradient(135deg,#d299c2,#fef9d7);">
+        <div class="price-badge">₹ 55,000</div>
+        <div class="cat-badge">🚗 Vehicles</div>
+      </div>
+      <div class="listing-body">
+        <div class="listing-title">TVS Jupiter 2022</div>
+        <div class="listing-meta">📍 Miyapur · 1d ago</div>
+      </div>
+      <button class="listing-wa">💬 WhatsApp</button>
+    </div>
+  </div>
+  <div style="height:16px;"></div>
+
+  <div class="bottom-nav">
+    <div class="bnav-item">
+      <div class="bnav-icon active">🏠</div>
+      <div class="bnav-label active">Home</div>
+    </div>
+    <div class="bnav-item">
+      <div class="bnav-icon">🔍</div>
+      <div class="bnav-label">Search</div>
+    </div>
+    <div class="bnav-post">➕</div>
+    <div class="bnav-item">
+      <div class="bnav-icon">📋</div>
+      <div class="bnav-label">My Ads</div>
+    </div>
+    <div class="bnav-item">
+      <div class="bnav-icon">👤</div>
+      <div class="bnav-label">Profile</div>
+    </div>
+  </div>
+</div></div>
+</div>
+
+<!-- ═══ LISTING DETAIL ═══ -->
+<div id="screen-detail" class="screen">
+<div class="phone"><div class="phone-inner">
+  <div class="detail-img" style="background:linear-gradient(160deg,#1A1A2E 0%,#667eea 100%);">
+    <div class="detail-float-nav">
+      <div class="float-btn">←</div>
+      <div style="display:flex;gap:8px;">
+        <div class="float-btn">♡</div>
+        <div class="float-btn">⋯</div>
+      </div>
+    </div>
+    <div style="position:absolute;bottom:50%;left:50%;transform:translate(-50%,50%);font-size:64px;">📱</div>
+    <div class="carousel-dots">
+      <div class="dot active"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+  </div>
+
+  <div style="overflow-y:auto;height:500px;">
+    <div class="detail-body">
+      <div class="detail-meta">
+        <div class="detail-cat">📱 Electronics</div>
+        <div class="detail-time">2 hours ago</div>
+      </div>
+      <div class="detail-title">iPhone 13 Pro — 256GB Midnight</div>
+      <div class="detail-price">₹ 42,000</div>
+      <div class="detail-loc">📍 Srinagar Colony, Hyderabad</div>
+      <div class="divider"></div>
+      <div class="detail-section-title">About this listing</div>
+      <div class="detail-desc">Bought in Jan 2023, used 18 months. Battery health 87%. Box, charger and all accessories included. No scratches, no repairs. Face ID works perfectly.</div>
+      <div class="show-more">Show more ▼</div>
+      <div class="divider"></div>
+      <div class="detail-section-title">Seller</div>
+      <div class="seller-card">
+        <div class="seller-avatar">R</div>
+        <div>
+          <div style="display:flex;align-items:center;">
+            <div class="seller-name">Ramesh K.</div>
+            <div class="verified">✅ Verified</div>
+          </div>
+          <div class="seller-sub">Member since Jan 2025 · ⭐ 4.8</div>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="detail-section-title">Similar listings</div>
+      <div class="similar-row">
+        <div class="similar-card">
+          <div class="similar-img" style="background:linear-gradient(135deg,#667eea,#764ba2);"></div>
+          <div class="similar-info">
+            <div class="similar-title">iPhone 12 Pro</div>
+            <div class="similar-price">₹ 32,000</div>
+          </div>
+        </div>
+        <div class="similar-card">
+          <div class="similar-img" style="background:linear-gradient(135deg,#f093fb,#f5576c);"></div>
+          <div class="similar-info">
+            <div class="similar-title">iPhone 13</div>
+            <div class="similar-price">₹ 38,000</div>
+          </div>
+        </div>
+        <div class="similar-card">
+          <div class="similar-img" style="background:linear-gradient(135deg,#4facfe,#00f2fe);"></div>
+          <div class="similar-info">
+            <div class="similar-title">Samsung S22</div>
+            <div class="similar-price">₹ 28,000</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wa-sticky">
+    <button class="wa-btn">💬 Chat on WhatsApp</button>
+  </div>
+</div></div>
+</div>
+
+<!-- ═══ POST WIZARD ═══ -->
+<div id="screen-post" class="screen">
+<div class="phone"><div class="phone-inner">
+  <div style="background:#1A1A2E;">
+    <div class="wizard-nav">
+      <div class="wizard-close">✕</div>
+      <div class="wizard-title">Post Free Listing</div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-bar" style="width:33%;"></div>
+    </div>
+    <div class="step-label">Step 1 of 3 — Details</div>
+  </div>
+
+  <div style="overflow-y:auto;height:636px;background:#f5f5f5;">
+    <div class="wizard-body">
+      <label class="field-label">What are you selling? *</label>
+      <input class="field-input" placeholder="e.g. iPhone 13, Home Tiffin, Honda Activa..." value="iPhone 13 Pro 256GB"/>
+
+      <label class="field-label">Category *</label>
+      <div class="cat-grid">
+        <div class="cat-btn">
+          <div class="cat-btn-icon">🍱</div>
+          <div class="cat-btn-label">Tiffin</div>
+        </div>
+        <div class="cat-btn">
+          <div class="cat-btn-icon">🏠</div>
+          <div class="cat-btn-label">PG/Room</div>
+        </div>
+        <div class="cat-btn">
+          <div class="cat-btn-icon">💼</div>
+          <div class="cat-btn-label">Jobs</div>
+        </div>
+        <div class="cat-btn">
+          <div class="cat-btn-icon">🚗</div>
+          <div class="cat-btn-label">Vehicles</div>
+        </div>
+        <div class="cat-btn selected">
+          <div class="cat-btn-icon">📱</div>
+          <div class="cat-btn-label">Electronics</div>
+        </div>
+        <div class="cat-btn">
+          <div class="cat-btn-icon">🎉</div>
+          <div class="cat-btn-label">Events</div>
+        </div>
+      </div>
+
+      <label class="field-label">Description</label>
+      <textarea class="field-textarea" placeholder="Describe your item — condition, age, accessories included...">Bought in Jan 2023. Battery health 87%. Box and charger included.</textarea>
+      <div class="char-count">68 / 500</div>
+
+      <label class="field-label">Price</label>
+      <div class="price-row">
+        <div class="price-prefix">₹</div>
+        <input class="price-input" placeholder="Enter amount" value="42000"/>
+      </div>
+      <div class="check-row">
+        <label class="check-item"><input type="checkbox"/> Free</label>
+        <label class="check-item"><input type="checkbox"/> Price on request</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="wizard-footer">
+    <button class="next-btn">Next: Add Photos →</button>
+  </div>
+</div></div>
+</div>
+
+<!-- ═══ SEARCH ═══ -->
+<div id="screen-search" class="screen">
+<div class="phone"><div class="phone-inner">
+  <div class="search-header">
+    <div class="search-back-row">
+      <div class="search-back">←</div>
+      <div class="search-input-wrap">
+        <span style="color:rgba(255,255,255,.5);">🔍</span>
+        <div class="search-input-text">tiffin</div>
+      </div>
+      <div class="search-filter-icon">≡</div>
+    </div>
+  </div>
+
+  <div class="active-filters">
+    <div class="filter-chip">🍱 Tiffin ✕</div>
+    <div class="filter-chip">₹0 – ₹200 ✕</div>
+    <div class="filter-chip">📅 This week ✕</div>
+  </div>
+
+  <div class="results-count"><span>14 results</span> in Hyderabad</div>
+
+  <div class="search-grid">
+    <div class="listing-card">
+      <div class="listing-img" style="background:linear-gradient(135deg,#ffecd2,#fcb69f);">
+        <div class="price-badge">₹ 80/meal</div>
+        <div class="cat-badge">🍱 Tiffin</div>
+      </div>
+      <div class="listing-body">
+        <div class="listing-title">Amma Home Tiffin</div>
+        <div class="listing-meta">📍 KPHB · Today</div>
+      </div>
+      <button class="listing-wa">💬 WhatsApp</button>
+    </div>
+    <div class="listing-card">
+      <div class="listing-img" style="background:linear-gradient(135deg,#a1c4fd,#c2e9fb);">
+        <div class="price-badge">₹ 70/meal</div>
+        <div class="cat-badge">🍱 Tiffin</div>
+      </div>
+      <div class="listing-body">
+        <div class="listing-title">Sri Tiffin Centre</div>
+        <div class="listing-meta">📍 Miyapur · Today</div>
+      </div>
+      <button class="listing-wa">💬 WhatsApp</button>
+    </div>
+    <div class="listing-card">
+      <div class="listing-img" style="background:linear-gradient(135deg,#d4fc79,#96e6a1);">
+        <div class="price-badge">₹ 90/meal</div>
+        <div class="cat-badge">🍱 Tiffin</div>
+      </div>
+      <div class="listing-body">
+        <div class="listing-title">Healthy Tiffin Daily</div>
+        <div class="listing-meta">📍 Kondapur · 2d ago</div>
+      </div>
+      <button class="listing-wa">💬 WhatsApp</button>
+    </div>
+    <div class="listing-card">
+      <div class="listing-img" style="background:linear-gradient(135deg,#fddb92,#d1fdff);">
+        <div class="price-badge">₹ 65/meal</div>
+        <div class="cat-badge">🍱 Tiffin</div>
+      </div>
+      <div class="listing-body">
+        <div class="listing-title">Andhra Meals Tiffin</div>
+        <div class="listing-meta">📍 Nizampet · 3d ago</div>
+      </div>
+      <button class="listing-wa">💬 WhatsApp</button>
+    </div>
+  </div>
+
+  <!-- Bottom sheet overlaid -->
+  <div style="height:16px;"></div>
+  <div class="bottom-sheet" style="border-top:1px solid #E5E7EB;margin-top:8px;">
+    <div class="bs-handle"></div>
+    <div class="bs-title">Filter Results</div>
+    <div class="bs-field-label">Category</div>
+    <select class="bs-select"><option>🍱 Tiffin / Food</option></select>
+    <div class="bs-field-label">Price Range  —  ₹0 to ₹200</div>
+    <div class="price-range-track">
+      <div class="price-range-fill"></div>
+      <div class="price-range-thumb"></div>
+    </div>
+    <div class="bs-field-label">Posted</div>
+    <div class="radio-group">
+      <div class="radio-item">Today</div>
+      <div class="radio-item selected">This Week</div>
+      <div class="radio-item">This Month</div>
+    </div>
+    <button class="apply-btn">Show 14 Results</button>
+  </div>
+
+</div></div>
+</div>
+
+<!-- ═══ PROFILE ═══ -->
+<div id="screen-profile" class="screen">
+<div class="phone"><div class="phone-inner">
+  <div class="profile-hero">
+    <div class="profile-avatar">R</div>
+    <div class="profile-name">Rajesh K.</div>
+    <div class="profile-phone">+91 98765 43210</div>
+    <div class="profile-badges">
+      <div class="badge-chip badge-verified">✅ Verified</div>
+      <div class="badge-chip badge-admin">👑 Admin</div>
+    </div>
+  </div>
+
+  <div class="profile-stats">
+    <div class="stat-item">
+      <div class="stat-num">4</div>
+      <div class="stat-label">Active</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">12</div>
+      <div class="stat-label">Total Ads</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">4.8 ⭐</div>
+      <div class="stat-label">Rating</div>
+    </div>
+  </div>
+
+  <div class="profile-menu">
+    <div class="menu-item">
+      <div class="menu-icon" style="background:#FFF3EC;">📋</div>
+      <div class="menu-text">My Listings</div>
+      <div style="background:#FF6B35;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;margin-right:8px;">4</div>
+      <div class="menu-arrow">›</div>
+    </div>
+    <div class="menu-item">
+      <div class="menu-icon" style="background:#F0FDF4;">➕</div>
+      <div class="menu-text">Post New Listing</div>
+      <div class="menu-arrow">›</div>
+    </div>
+    <div class="menu-item">
+      <div class="menu-icon" style="background:#EFF6FF;">🌐</div>
+      <div class="menu-text">Language</div>
+      <div style="font-size:12px;color:#9CA3AF;margin-right:8px;">English</div>
+      <div class="menu-arrow">›</div>
+    </div>
+    <div class="menu-item">
+      <div class="menu-icon" style="background:#F5F3FF;">📍</div>
+      <div class="menu-text">My City</div>
+      <div style="font-size:12px;color:#9CA3AF;margin-right:8px;">Hyderabad</div>
+      <div class="menu-arrow">›</div>
+    </div>
+    <div class="menu-item">
+      <div class="menu-icon" style="background:#FFF1F2;">🛡️</div>
+      <div class="menu-text">Admin Panel</div>
+      <div class="menu-arrow">›</div>
+    </div>
+    <div class="menu-item">
+      <div class="menu-icon" style="background:#F9FAFB;">❓</div>
+      <div class="menu-text">Help & Support</div>
+      <div class="menu-arrow">›</div>
+    </div>
+    <div class="menu-signout">🚪 Sign Out</div>
+  </div>
+</div></div>
+</div>
+
+<!-- ═══ ADMIN ═══ -->
+<div id="screen-admin" class="screen">
+<div class="phone"><div class="phone-inner">
+  <div class="admin-wrap">
+    <div class="admin-sidebar">
+      <div class="admin-logo">🛡️</div>
+      <div class="admin-nav-wrap">
+        <div class="admin-nav-item active">📋</div>
+        <div class="admin-badge">3</div>
+      </div>
+      <div class="admin-nav-wrap">
+        <div class="admin-nav-item">🚩</div>
+        <div class="admin-badge">1</div>
+      </div>
+      <div class="admin-nav-item">👥</div>
+      <div style="flex:1;"></div>
+      <div class="admin-nav-item">🚪</div>
+    </div>
+
+    <div class="admin-main">
+      <div class="admin-header">
+        <div class="admin-page-title">Pending Queue</div>
+        <div class="admin-page-sub">3 listings waiting for review</div>
+      </div>
+
+      <div class="admin-card">
+        <div class="admin-card-img" style="background:linear-gradient(135deg,#a18cd1,#fbc2eb);">
+          <div class="admin-status status-pending">⏳ Pending</div>
+        </div>
+        <div class="admin-card-body">
+          <div class="admin-card-title">iPhone 13 Pro 256GB Midnight</div>
+          <div class="admin-card-meta">📱 Electronics · 📍 SR Nagar · +91 98765 43210</div>
+          <div class="admin-card-meta" style="margin-top:3px;">Submitted 2 hours ago by Ramesh K.</div>
+          <div class="admin-card-actions">
+            <button class="admin-btn admin-btn-approve">✅ Approve</button>
+            <button class="admin-btn admin-btn-reject">❌ Reject</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <div class="admin-card-img" style="background:linear-gradient(135deg,#ffecd2,#fcb69f);">
+          <div class="admin-status status-pending">⏳ Pending</div>
+        </div>
+        <div class="admin-card-body">
+          <div class="admin-card-title">Home Tiffin Service — KPHB</div>
+          <div class="admin-card-meta">🍱 Tiffin · 📍 KPHB · +91 87654 32109</div>
+          <div class="admin-card-meta" style="margin-top:3px;">Submitted 3 hours ago by Lakshmi D.</div>
+          <div class="admin-card-actions">
+            <button class="admin-btn admin-btn-approve">✅ Approve</button>
+            <button class="admin-btn admin-btn-reject">❌ Reject</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <div class="admin-card-img" style="background:linear-gradient(135deg,#a8edea,#fed6e3);">
+          <div class="admin-status status-pending">⏳ Pending</div>
+        </div>
+        <div class="admin-card-body">
+          <div class="admin-card-title">PG for Boys — AC Room Gachibowli</div>
+          <div class="admin-card-meta">🏠 PG/Room · 📍 Gachibowli · +91 76543 21098</div>
+          <div class="admin-card-meta" style="margin-top:3px;">Submitted 5 hours ago by Srinivas M.</div>
+          <div class="admin-card-actions">
+            <button class="admin-btn admin-btn-approve">✅ Approve</button>
+            <button class="admin-btn admin-btn-reject">❌ Reject</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div></div>
+</div>
+
+<script>
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.screen-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>
