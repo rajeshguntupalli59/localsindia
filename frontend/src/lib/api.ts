@@ -1,5 +1,6 @@
 import type {
   City,
+  Category,
   Listing,
   ListingImage,
   User,
@@ -53,6 +54,9 @@ function qs(params: Record<string, string | undefined>): string {
 }
 
 export const api = {
+  categories: {
+    list: () => req<Category[]>('/api/v1/categories'),
+  },
   cities: {
     list: () => req<City[]>('/api/v1/cities'),
     get: (slug: string) => req<City>(`/api/v1/cities/${slug}`),

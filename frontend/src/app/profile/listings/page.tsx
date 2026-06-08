@@ -1,0 +1,218 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
+import { ArrowLeft, Plus, RefreshCw, CheckCircle, Trash2 } from 'lucide-react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { api, ApiError } from '@/lib/api';
+import type { Listing } from '@/lib/types';
+import { formatPrice, timeAgo } from '@/lib/utils';
+import EmptyState from '@/components/empty-state/EmptyState';
+import { toast } from 'sonner';
+
+const STATUS_STYLES: Record<string, string> = {
+  active: 'bg-green-100 text-green-700',
+  pending: 'bg-yellow-100 text-yellow-700',
+  flagged: 'bg-red-100 text-red-700',
+  fulfilled: 'bg-gray-100 text-gray-500',
+  expired: 'bg-gray-100 text-gray-500',
+};
+
+const STATUS_LABELS: Record<string, string> = {
+  active: 'Active',
+  pending: 'Under Review',
+  flagged: 'Flagged',
+  fulfilled: 'Sold',
+  expired: 'Expired',
+};
+
+export default function MyListingsPage() {
+  const router = useRouter();
+  const [listings, setListings] = useState<Listing[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [actionId, setActionId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem('access_token');
+    if (!token) { router.replace('/auth/login'); return; }
+    fetchMyListings(token);
+  }, [router]);
+
+  const fetchMyListings = async (token?: string) => {
+    const t = token ?? localStorage.getItem('access_token');
+    if (!t) return;
+    setLoading(true);
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'}/api/v1/listings/mine`, {
+        headers: { Authorization: `Bearer ${t}` },
+      });
+      if (!res.ok) throw new Error('Failed');
+      const data: Listing[] = await res.json();
+      setListings(data);
+    } catch {
+      toast.error('Could not load listings');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFulfill = async (id: string) => {
+    const token = localStorage.getItem('access_token');
+    if (!token) return;
+    setActionId(id);
+    try {
+      await api.listings.fulfill(id, token);
+      toast.success('Marked as sold!');
+      fetchMyListings();
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : 'Failed');
+    } finally {
+      setActionId(null);
+    }
+  };
+
+  const handleRenew = async (id: string) => {
+    const token = localStorage.getItem('access_token');
+    if (!token) return;
+    setActionId(id);
+    try {
+      await api.listings.renew(id, token);
+      toast.success('Listing renewed for 30 days');
+      fetchMyListings();
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : 'Failed');
+    } finally {
+      setActionId(null);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    const token = localStorage.getItem('access_token');
+    if (!token) return;
+    if (!confirm('Delete this listing?')) return;
+    setActionId(id);
+    try {
+      await api.listings.delete(id, token);
+      toast.success('Listing deleted');
+      setListings(ls => ls.filter(l => l.id !== id));
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : 'Failed');
+    } finally {
+      setActionId(null);
+    }
+  };
+
+  return (
+    <div className="min-h-screen pb-20" style={{ background: 'var(--li-page-bg)' }}>
+      <div className="sticky top-0 z-30 bg-white border-b px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <button onClick={() => router.back()} className="text-muted-foreground">
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <h1 className="font-semibold">My Listings</h1>
+        </div>
+        <Link
+          href="/"
+          className="flex items-center gap-1.5 text-sm font-semibold px-3 py-1.5 rounded-full text-white"
+          style={{ background: 'var(--li-primary)' }}
+        >
+          <Plus className="w-4 h-4" /> Post
+        </Link>
+      </div>
+
+      <div className="p-4 space-y-3">
+        {loading ? (
+          Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="h-28 bg-white rounded-xl animate-pulse" />
+          ))
+        ) : listings.length === 0 ? (
+          <EmptyState
+            icon={Plus}
+            title="No listings yet"
+            description="Post your first free listing and reach thousands of buyers in your city"
+            action={{ label: 'Post Free', href: '/' }}
+          />
+        ) : (
+          listings.map((listing, i) => (
+            <motion.div
+              key={listing.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.04 }}
+              className="bg-white rounded-xl shadow-sm overflow-hidden"
+            >
+              <div className="flex gap-3 p-3">
+                <div className="relative w-20 h-20 rounded-lg overflow-hidden bg-muted shrink-0">
+                  {listing.images && listing.images[0] ? (
+                    <Image src={listing.images[0].url} alt={listing.title} fill className="object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-3xl">🏷️</div>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-sm truncate">{listing.title}</p>
+                  <p className="text-sm font-bold mt-0.5" style={{ color: 'var(--li-primary)' }}>
+                    {listing.price !== null ? formatPrice(listing.price) : 'Price on request'}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{timeAgo(listing.created_at)}</p>
+                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full mt-1 inline-block ${STATUS_STYLES[listing.status] ?? ''}`}>
+                    {STATUS_LABELS[listing.status] ?? listing.status}
+                  </span>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex border-t">
+                {listing.status === 'active' && (
+                  <ActionBtn
+                    icon={<CheckCircle className="w-4 h-4" />}
+                    label="Mark Sold"
+                    disabled={actionId === listing.id}
+                    onClick={() => handleFulfill(listing.id)}
+                    color="text-green-600"
+                  />
+                )}
+                {(listing.status === 'active' || listing.status === 'expired') && (
+                  <ActionBtn
+                    icon={<RefreshCw className="w-4 h-4" />}
+                    label="Renew"
+                    disabled={actionId === listing.id}
+                    onClick={() => handleRenew(listing.id)}
+                    color="text-blue-600"
+                  />
+                )}
+                <ActionBtn
+                  icon={<Trash2 className="w-4 h-4" />}
+                  label="Delete"
+                  disabled={actionId === listing.id}
+                  onClick={() => handleDelete(listing.id)}
+                  color="text-destructive"
+                />
+              </div>
+            </motion.div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ActionBtn({ icon, label, disabled, onClick, color }: {
+  icon: React.ReactNode;
+  label: string;
+  disabled: boolean;
+  onClick: () => void;
+  color: string;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-semibold transition-colors disabled:opacity-40 hover:bg-muted ${color}`}
+    >
+      {icon} {label}
+    </button>
+  );
+}

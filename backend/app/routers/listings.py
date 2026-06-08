@@ -190,6 +190,19 @@ async def renew_listing(
     return listing
 
 
+@router.get("/listings/mine", response_model=list[ListingOut])
+async def my_listings(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    result = await db.execute(
+        select(Listing)
+        .where(Listing.user_id == current_user.id, Listing.deleted_at.is_(None))
+        .order_by(Listing.created_at.desc())
+    )
+    return result.scalars().all()
+
+
 @router.post("/listings/{listing_id}/fulfill", response_model=ListingOut)
 async def fulfill_listing(
     listing_id: uuid.UUID,
