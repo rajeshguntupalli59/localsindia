@@ -1,0 +1,48 @@
+# Dependencies
+node_modules/
+.next/
+dist/
+build/
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Lock files (read-only reference, never edit)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+poetry.lock
+
+# Database migrations (manual review only)
+backend/migrations/versions/
+
+# Generated files
+*.generated.*
+*.min.js
+*.min.css
+coverage/
+.coverage
+htmlcov/
+*.egg-info/
+
+# Environment files (never read or write)
+.env
+.env.local
+.env.production
+.env.staging
+*.env
+
+# Static assets (large binaries)
+frontend/public/fonts/
+*.woff
+*.woff2
+*.ttf
+
+# Logs
+*.log
+logs/
+
+# Railway / Docker artifacts
+.railway/
+pgdata/

@@ -1,0 +1,52 @@
+{
+  "nav": {
+    "home": "Home",
+    "search": "Search",
+    "post": "Post Free",
+    "myListings": "My Listings",
+    "profile": "Profile"
+  },
+  "city": {
+    "selectCity": "Select your city",
+    "searchPlaceholder": "Search city...",
+    "recentCities": "Recent"
+  },
+  "listing": {
+    "post": "Post Free Listing",
+    "whatsapp": "Chat on WhatsApp",
+    "priceOnRequest": "Price on request",
+    "pending": "Under Review",
+    "active": "Active",
+    "featured": "Featured",
+    "fulfilled": "Sold",
+    "expired": "Expired",
+    "timeAgo": "{time} ago"
+  },
+  "search": {
+    "placeholder": "Search tiffin, PG, tutor...",
+    "noResults": "No results for \"{q}\"",
+    "filters": "Filters"
+  },
+  "post": {
+    "title": "What are you selling?",
+    "step1": "Details",
+    "step2": "Photos",
+    "step3": "Contact",
+    "success": "Your listing is under review"
+  },
+  "errors": {
+    "phoneInvalid": "Enter a valid Indian mobile number",
+    "required": "This field is required",
+    "imageTooLarge": "Image must be under 5MB"
+  },
+  "categories": {
+    "classifieds": "Classifieds",
+    "services": "Services",
+    "pgRoommate": "PG / Roommate",
+    "jobs": "Jobs",
+    "vehicles": "Vehicles",
+    "electronics": "Electronics",
+    "events": "Events",
+    "businesses": "Businesses"
+  }
+}

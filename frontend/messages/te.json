@@ -1,0 +1,52 @@
+{
+  "nav": {
+    "home": "హోమ్",
+    "search": "వెతకండి",
+    "post": "ఉచిత పోస్ట్",
+    "myListings": "నా జాబితాలు",
+    "profile": "ప్రొఫైల్"
+  },
+  "city": {
+    "selectCity": "మీ నగరాన్ని ఎంచుకోండి",
+    "searchPlaceholder": "నగరం వెతకండి...",
+    "recentCities": "ఇటీవల"
+  },
+  "listing": {
+    "post": "ఉచిత జాబితా పోస్ట్",
+    "whatsapp": "WhatsApp లో చాట్",
+    "priceOnRequest": "ధర అడగండి",
+    "pending": "సమీక్షలో ఉంది",
+    "active": "యాక్టివ్",
+    "featured": "ఫీచర్డ్",
+    "fulfilled": "అమ్ముడైంది",
+    "expired": "గడువు తీరింది",
+    "timeAgo": "{time} క్రితం"
+  },
+  "search": {
+    "placeholder": "టిఫిన్, PG, ట్యూటర్ వెతకండి...",
+    "noResults": "\"{q}\" కోసం ఫలితాలు లేవు",
+    "filters": "ఫిల్టర్లు"
+  },
+  "post": {
+    "title": "మీరు ఏమి అమ్ముతున్నారు?",
+    "step1": "వివరాలు",
+    "step2": "ఫోటోలు",
+    "step3": "సంప్రదింపు",
+    "success": "మీ జాబితా సమీక్షలో ఉంది"
+  },
+  "errors": {
+    "phoneInvalid": "చెల్లుబాటు అయ్యే భారతీయ మొబైల్ నంబర్ నమోదు చేయండి",
+    "required": "ఈ ఫీల్డ్ అవసరం",
+    "imageTooLarge": "చిత్రం 5MB కంటే తక్కువగా ఉండాలి"
+  },
+  "categories": {
+    "classifieds": "వర్గీకరణలు",
+    "services": "సేవలు",
+    "pgRoommate": "PG / రూమ్‌మేట్",
+    "jobs": "ఉద్యోగాలు",
+    "vehicles": "వాహనాలు",
+    "electronics": "ఎలక్ట్రానిక్స్",
+    "events": "ఈవెంట్లు",
+    "businesses": "వ్యాపారాలు"
+  }
+}

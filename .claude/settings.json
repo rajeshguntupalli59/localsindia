@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "deny": [
+      "Edit(backend/migrations/versions/**)",
+      "Write(backend/migrations/versions/**)",
+      "Write(.env)",
+      "Write(.env.local)",
+      "Write(.env.production)",
+      "Bash(git push --force*)",
+      "Bash(DROP TABLE*)",
+      "Bash(DELETE FROM*)"
+    ],
+    "allow": [
+      "Bash(pytest*)",
+      "Bash(npm run*)",
+      "Bash(alembic upgrade head)",
+      "Bash(docker-compose*)",
+      "Bash(git status)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git add*)",
+      "Bash(git commit*)"
+    ]
+  }
+}

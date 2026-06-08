@@ -1,0 +1,52 @@
+{
+  "nav": {
+    "home": "होम",
+    "search": "खोजें",
+    "post": "मुफ्त पोस्ट",
+    "myListings": "मेरी सूचियाँ",
+    "profile": "प्रोफाइल"
+  },
+  "city": {
+    "selectCity": "अपना शहर चुनें",
+    "searchPlaceholder": "शहर खोजें...",
+    "recentCities": "हाल का"
+  },
+  "listing": {
+    "post": "मुफ्त लिस्टिंग पोस्ट करें",
+    "whatsapp": "WhatsApp पर चैट",
+    "priceOnRequest": "कीमत पूछें",
+    "pending": "समीक्षाधीन",
+    "active": "सक्रिय",
+    "featured": "विशेष",
+    "fulfilled": "बिक गया",
+    "expired": "समाप्त",
+    "timeAgo": "{time} पहले"
+  },
+  "search": {
+    "placeholder": "टिफिन, PG, ट्यूटर खोजें...",
+    "noResults": "\"{q}\" के लिए कोई परिणाम नहीं",
+    "filters": "फ़िल्टर"
+  },
+  "post": {
+    "title": "आप क्या बेच रहे हैं?",
+    "step1": "विवरण",
+    "step2": "फ़ोटो",
+    "step3": "संपर्क",
+    "success": "आपकी लिस्टिंग समीक्षाधीन है"
+  },
+  "errors": {
+    "phoneInvalid": "वैध भारतीय मोबाइल नंबर दर्ज करें",
+    "required": "यह फ़ील्ड आवश्यक है",
+    "imageTooLarge": "छवि 5MB से कम होनी चाहिए"
+  },
+  "categories": {
+    "classifieds": "क्लासिफाइड",
+    "services": "सेवाएं",
+    "pgRoommate": "PG / रूममेट",
+    "jobs": "नौकरियाँ",
+    "vehicles": "वाहन",
+    "electronics": "इलेक्ट्रॉनिक्स",
+    "events": "कार्यक्रम",
+    "businesses": "व्यवसाय"
+  }
+}
