@@ -49,7 +49,8 @@ const config: Config = {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        sans: ["var(--font-sans)", "system-ui", "sans-serif"],
+        sans: ["var(--font-jakarta)", "var(--font-sans)", "system-ui", "sans-serif"],
+        jakarta: ["var(--font-jakarta)", "system-ui", "sans-serif"],
         devanagari: ["var(--font-devanagari)", "system-ui", "sans-serif"],
         telugu: ["var(--font-telugu)", "system-ui", "sans-serif"],
       },
