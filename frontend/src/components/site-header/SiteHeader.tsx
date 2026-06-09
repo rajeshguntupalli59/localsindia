@@ -91,7 +91,7 @@ export default function SiteHeader({ citySlug, cityName }: Props) {
             href={citySlug ? `/${citySlug}/classifieds/post` : '/'}
             className="cta-btn px-4 py-2 text-sm rounded-xl"
           >
-            + Post Free Ad
+            + Post a Listing
           </Link>
         </nav>
       </div>

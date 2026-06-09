@@ -120,7 +120,7 @@ export default function CityHomePage() {
               href={`/${citySlug}/classifieds/post`}
               className="cta-btn px-6 py-3 rounded-xl font-bold text-sm"
             >
-              + Post Free Ad
+              + Post a Listing
             </Link>
           </div>
 
@@ -245,7 +245,7 @@ export default function CityHomePage() {
               icon={SearchX}
               title="No listings yet"
               description="Be the first to post in your city!"
-              action={{ label: '+ Post Free Ad', href: `/${citySlug}/classifieds/post` }}
+              action={{ label: '+ Post a Listing', href: `/${citySlug}/classifieds/post` }}
             />
           ) : (
             <div className="grid grid-cols-4 gap-5">
