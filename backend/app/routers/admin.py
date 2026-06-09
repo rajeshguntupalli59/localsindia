@@ -68,6 +68,35 @@ async def reject_listing(
     return listing
 
 
+@router.get("/users")
+async def list_users(
+    page: int = 1,
+    page_size: int = 50,
+    db: AsyncSession = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+):
+    result = await db.execute(
+        select(User)
+        .where(User.deleted_at.is_(None))
+        .order_by(User.created_at.desc())
+        .offset((page - 1) * page_size)
+        .limit(page_size)
+    )
+    users = result.scalars().all()
+    return [
+        {
+            "id": str(u.id),
+            "phone": u.phone,
+            "email": u.email,
+            "name": u.name,
+            "role": u.role,
+            "is_active": u.is_active,
+            "created_at": u.created_at.isoformat(),
+        }
+        for u in users
+    ]
+
+
 @router.get("/reports")
 async def list_reports(
     page: int = 1,
