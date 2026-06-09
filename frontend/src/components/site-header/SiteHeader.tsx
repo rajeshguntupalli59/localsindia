@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Search } from 'lucide-react';
+import { Search, MapPin } from 'lucide-react';
 import { useState } from 'react';
 
 interface Props {
@@ -63,16 +63,16 @@ export default function SiteHeader({ citySlug, cityName }: Props) {
 
         {/* Right nav */}
         <nav className="flex items-center gap-1 ml-auto">
-          {citySlug && (
-            <div
-              className="hidden md:flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold cursor-pointer"
-              style={{ background: '#F3F4F6', color: 'var(--li-text)' }}
-              onClick={() => router.push('/')}
-            >
-              📍 {cityName ?? citySlug}
-              <span style={{ color: 'var(--li-muted)', fontSize: 11 }}>▾</span>
-            </div>
-          )}
+          <button
+            className="hidden md:flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition-colors hover:bg-gray-200"
+            style={{ background: '#F3F4F6', color: 'var(--li-text)' }}
+            onClick={() => router.push('/')}
+            title="Change city"
+          >
+            <MapPin className="w-3.5 h-3.5 shrink-0" style={{ color: 'var(--li-primary)' }} />
+            {cityName ?? (citySlug ? citySlug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : 'All India')}
+            <span style={{ color: 'var(--li-muted)', fontSize: 11 }}>▾</span>
+          </button>
           <Link
             href={citySlug ? `/${citySlug}` : '/'}
             className="hidden md:flex px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-gray-100"

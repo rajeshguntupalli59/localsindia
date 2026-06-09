@@ -87,45 +87,36 @@ export default function CityHomePage() {
 
       {/* ── CITY HERO BANNER ── */}
       <div
-        className="py-8 border-b"
+        className="pt-6 pb-5 border-b"
         style={{
           background: 'linear-gradient(135deg, #1A1A2E 0%, #16213E 100%)',
           borderColor: 'rgba(255,255,255,0.06)',
         }}
       >
         <div className="page-wrap">
-          <div className="flex items-center justify-between">
-            <div>
-              {loading ? (
-                <div className="space-y-2">
-                  <div className="h-3 w-24 bg-white/15 rounded animate-pulse" />
-                  <div className="h-9 w-64 bg-white/15 rounded animate-pulse" />
-                </div>
-              ) : (
-                <motion.div initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }}>
-                  <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                    {city?.state}
-                  </p>
-                  <h1 className="text-3xl font-black text-white">
-                    Discover <span style={{ color: 'var(--li-primary)' }}>{city?.name}</span>
-                  </h1>
-                  <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.45)' }}>
-                    {latest.length + featured.length} active listings · updated just now
-                  </p>
-                </motion.div>
-              )}
-            </div>
-
-            <Link
-              href={`/${citySlug}/classifieds/post`}
-              className="cta-btn px-6 py-3 rounded-xl font-bold text-sm"
-            >
-              + Post a Listing
-            </Link>
+          <div>
+            {loading ? (
+              <div className="space-y-2">
+                <div className="h-3 w-24 bg-white/15 rounded animate-pulse" />
+                <div className="h-9 w-64 bg-white/15 rounded animate-pulse" />
+              </div>
+            ) : (
+              <motion.div initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }}>
+                <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                  {city?.state}
+                </p>
+                <h1 className="text-3xl font-black text-white">
+                  Discover <span style={{ color: 'var(--li-primary)' }}>{city?.name}</span>
+                </h1>
+                <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                  {latest.length + featured.length} active listings · updated just now
+                </p>
+              </motion.div>
+            )}
           </div>
 
           {/* Category pill strip */}
-          <div className="flex gap-2 mt-6 flex-wrap">
+          <div className="flex gap-2 mt-4 flex-wrap">
             {CATEGORIES.map(cat => {
               const Icon = cat.icon;
               return (
