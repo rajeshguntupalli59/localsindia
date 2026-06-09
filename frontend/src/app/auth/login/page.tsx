@@ -11,6 +11,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
+const GOOGLE_AUTH_ENABLED = process.env.NEXT_PUBLIC_GOOGLE_AUTH_ENABLED === 'true';
 
 const GoogleIcon = () => (
   <svg viewBox="0 0 24 24" className="w-5 h-5" aria-hidden>
@@ -93,25 +94,27 @@ export default function LoginPage() {
 
         {step === 'phone' && (
           <>
-            {/* ── Google button ── */}
-            <a
-              href={`${BACKEND_URL}/api/v1/auth/google`}
-              className="flex items-center justify-center gap-3 w-full h-12 px-4
-                bg-white rounded-xl border border-slate-200
-                text-sm font-semibold text-slate-700
-                hover:bg-slate-50 hover:border-slate-300
-                transition-all duration-200 shadow-sm"
-            >
-              <GoogleIcon />
-              Continue with Google
-            </a>
-
-            {/* Divider */}
-            <div className="flex items-center gap-3 my-5">
-              <div className="flex-1 h-px bg-slate-200" />
-              <span className="text-xs font-medium text-slate-400">or use your phone</span>
-              <div className="flex-1 h-px bg-slate-200" />
-            </div>
+            {/* ── Google button — shown only after domain verification ── */}
+            {GOOGLE_AUTH_ENABLED && (
+              <>
+                <a
+                  href={`${BACKEND_URL}/api/v1/auth/google`}
+                  className="flex items-center justify-center gap-3 w-full h-12 px-4
+                    bg-white rounded-xl border border-slate-200
+                    text-sm font-semibold text-slate-700
+                    hover:bg-slate-50 hover:border-slate-300
+                    transition-all duration-200 shadow-sm"
+                >
+                  <GoogleIcon />
+                  Continue with Google
+                </a>
+                <div className="flex items-center gap-3 my-5">
+                  <div className="flex-1 h-px bg-slate-200" />
+                  <span className="text-xs font-medium text-slate-400">or use your phone</span>
+                  <div className="flex-1 h-px bg-slate-200" />
+                </div>
+              </>
+            )}
 
             {/* ── OTP form ── */}
             <form onSubmit={sendOtp} className="space-y-5">
