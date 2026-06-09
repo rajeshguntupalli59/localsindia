@@ -3,7 +3,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, SearchX, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { Search, SearchX, X, ChevronDown, ChevronUp, Tag, UtensilsCrossed, Building2, Briefcase, Car, Smartphone, CalendarDays, Store, GraduationCap } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { api } from '@/lib/api';
 import type { Category, SearchResult } from '@/lib/types';
 import SiteHeader from '@/components/site-header/SiteHeader';
@@ -13,9 +14,9 @@ import ListingCardSkeleton from '@/components/listing-card/ListingCardSkeleton';
 import EmptyState from '@/components/empty-state/EmptyState';
 
 const PAGE_SIZE = 12;
-const CATEGORY_ICONS: Record<string, string> = {
-  tiffin: '🍱', 'pg-roommate': '🏠', jobs: '💼', vehicles: '🚗',
-  electronics: '📱', events: '🎉', businesses: '🏪', education: '📚',
+const CATEGORY_ICONS: Record<string, LucideIcon> = {
+  tiffin: UtensilsCrossed, 'pg-roommate': Building2, jobs: Briefcase, vehicles: Car,
+  electronics: Smartphone, events: CalendarDays, businesses: Store, education: GraduationCap,
 };
 const DATE_OPTIONS = [
   { label: 'Any time', value: '' },
@@ -222,18 +223,23 @@ export default function SearchPage() {
                         className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium text-left transition-colors"
                         style={!localCat ? { background: 'var(--li-primary-light)', color: 'var(--li-primary)', fontWeight: 700 } : { color: 'var(--li-text)' }}
                       >
-                        🏷️ All categories
+                        <Tag className="w-3.5 h-3.5 shrink-0" strokeWidth={2} />
+                        All categories
                       </button>
-                      {categories.map(cat => (
-                        <button
-                          key={cat.id}
-                          onClick={() => applyCategory(cat.id)}
-                          className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-left transition-colors"
-                          style={localCat === cat.id ? { background: 'var(--li-primary-light)', color: 'var(--li-primary)', fontWeight: 700 } : { color: 'var(--li-text)' }}
-                        >
-                          {CATEGORY_ICONS[cat.slug] ?? '🏷️'} {cat.name}
-                        </button>
-                      ))}
+                      {categories.map(cat => {
+                        const Icon = CATEGORY_ICONS[cat.slug] ?? Tag;
+                        return (
+                          <button
+                            key={cat.id}
+                            onClick={() => applyCategory(cat.id)}
+                            className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-left transition-colors"
+                            style={localCat === cat.id ? { background: 'var(--li-primary-light)', color: 'var(--li-primary)', fontWeight: 700 } : { color: 'var(--li-text)' }}
+                          >
+                            <Icon className="w-3.5 h-3.5 shrink-0" strokeWidth={2} />
+                            {cat.name}
+                          </button>
+                        );
+                      })}
                     </div>
                   </motion.div>
                 )}

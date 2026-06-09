@@ -37,6 +37,7 @@ const notoTelugu = Noto_Sans_Telugu({
 export const metadata: Metadata = {
   title: 'LocalsIndia — Your City, Your Community',
   description: "India's hyperlocal classifieds and community platform",
+  viewport: { width: 'device-width', initialScale: 1 },
 };
 
 export default async function RootLayout({

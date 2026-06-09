@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { SearchX, SlidersHorizontal, ChevronDown } from 'lucide-react';
+import { SearchX, SlidersHorizontal, ChevronDown, Tag, UtensilsCrossed, Building2, Briefcase, Car, Smartphone, CalendarDays, Store, GraduationCap, Star } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import Link from 'next/link';
 import { api } from '@/lib/api';
 import type { City, Listing } from '@/lib/types';
@@ -13,16 +14,18 @@ import ListingCard from '@/components/listing-card/ListingCard';
 import ListingCardSkeleton from '@/components/listing-card/ListingCardSkeleton';
 import EmptyState from '@/components/empty-state/EmptyState';
 
-const CATEGORIES = [
-  { label: 'All',        slug: '',            icon: '🏷️' },
-  { label: 'Tiffin',     slug: 'tiffin',      icon: '🍱' },
-  { label: 'PG / Rooms', slug: 'pg-roommate', icon: '🏠' },
-  { label: 'Jobs',       slug: 'jobs',        icon: '💼' },
-  { label: 'Vehicles',   slug: 'vehicles',    icon: '🚗' },
-  { label: 'Electronics',slug: 'electronics', icon: '📱' },
-  { label: 'Events',     slug: 'events',      icon: '🎉' },
-  { label: 'Businesses', slug: 'businesses',  icon: '🏪' },
-  { label: 'Education',  slug: 'education',   icon: '📚' },
+interface CatDef { label: string; slug: string; icon: LucideIcon }
+
+const CATEGORIES: CatDef[] = [
+  { label: 'All',          slug: '',            icon: Tag },
+  { label: 'Tiffin',       slug: 'tiffin',      icon: UtensilsCrossed },
+  { label: 'PG / Rooms',   slug: 'pg-roommate', icon: Building2 },
+  { label: 'Jobs',          slug: 'jobs',        icon: Briefcase },
+  { label: 'Vehicles',      slug: 'vehicles',    icon: Car },
+  { label: 'Electronics',   slug: 'electronics', icon: Smartphone },
+  { label: 'Events',        slug: 'events',      icon: CalendarDays },
+  { label: 'Businesses',    slug: 'businesses',  icon: Store },
+  { label: 'Education',     slug: 'education',   icon: GraduationCap },
 ];
 
 const SORT_OPTIONS = [
@@ -123,21 +126,24 @@ export default function CityHomePage() {
 
           {/* Category pill strip */}
           <div className="flex gap-2 mt-6 flex-wrap">
-            {CATEGORIES.map(cat => (
-              <button
-                key={cat.slug}
-                onClick={() => handleCategoryClick(cat.slug)}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold transition-all"
-                style={
-                  activeCategory === cat.slug
-                    ? { background: 'var(--li-primary)', color: 'white' }
-                    : { background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.15)' }
-                }
-              >
-                <span>{cat.icon}</span>
-                {cat.label}
-              </button>
-            ))}
+            {CATEGORIES.map(cat => {
+              const Icon = cat.icon;
+              return (
+                <button
+                  key={cat.slug}
+                  onClick={() => handleCategoryClick(cat.slug)}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold transition-all"
+                  style={
+                    activeCategory === cat.slug
+                      ? { background: 'var(--li-primary)', color: 'white' }
+                      : { background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.15)' }
+                  }
+                >
+                  <Icon className="w-3.5 h-3.5" strokeWidth={2} />
+                  {cat.label}
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -153,8 +159,9 @@ export default function CityHomePage() {
               transition={{ duration: 0.35 }}
             >
               <div className="flex items-center justify-between mb-5">
-                <h2 className="section-title">
-                  <span style={{ color: 'var(--li-featured)' }}>★</span> Featured Listings
+                <h2 className="section-title flex items-center gap-2">
+                  <Star className="w-4 h-4 fill-current" style={{ color: 'var(--li-featured)' }} strokeWidth={0} />
+                  Featured Listings
                 </h2>
                 <Link
                   href={`/${citySlug}/search?featured=true`}

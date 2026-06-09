@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft, Flag, ChevronLeft, ChevronRight, MapPin, Clock, Shield, MessageCircle } from 'lucide-react';
+import { ArrowLeft, Flag, ChevronLeft, ChevronRight, MapPin, Clock, Shield, MessageCircle, Tag, Star, User } from 'lucide-react';
 import { formatPrice, timeAgo } from '@/lib/utils';
 import { api, ApiError } from '@/lib/api';
 import type { Listing } from '@/lib/types';
@@ -112,7 +112,9 @@ export default function ListingDetailPage() {
                     />
                   </motion.div>
                 ) : (
-                  <div className="absolute inset-0 flex items-center justify-center text-8xl opacity-15">🏷️</div>
+                  <div className="absolute inset-0 flex items-center justify-center opacity-10">
+                    <Tag className="w-24 h-24 text-white" strokeWidth={1} />
+                  </div>
                 )}
               </AnimatePresence>
 
@@ -137,7 +139,9 @@ export default function ListingDetailPage() {
               )}
 
               {listing.is_featured && (
-                <span className="badge-featured absolute top-4 left-4">⭐ Featured</span>
+                <span className="badge-featured absolute top-4 left-4 flex items-center gap-1">
+                  <Star className="w-2.5 h-2.5 fill-current" strokeWidth={0} /> Featured
+                </span>
               )}
               {listing.status === 'fulfilled' && (
                 <div className="absolute inset-0 bg-black/55 flex items-center justify-center">
@@ -260,10 +264,10 @@ export default function ListingDetailPage() {
               <p className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: 'var(--li-muted)' }}>Seller</p>
               <div className="flex items-center gap-3 mb-5">
                 <div
-                  className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shrink-0"
+                  className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0"
                   style={{ background: '#FFF3EC' }}
                 >
-                  👤
+                  <User className="w-6 h-6" style={{ color: 'var(--li-primary)' }} strokeWidth={1.8} />
                 </div>
                 <div>
                   <p className="font-bold" style={{ color: 'var(--li-text)' }}>Seller</p>

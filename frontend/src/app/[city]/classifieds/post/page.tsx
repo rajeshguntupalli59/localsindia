@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, X, CheckCircle, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Upload, X, CheckCircle, ArrowLeft, ArrowRight, Sparkles, Lightbulb, Camera, MapPin, Tag, UtensilsCrossed, Building2, Briefcase, Car, Smartphone, CalendarDays, Store, GraduationCap } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import Link from 'next/link';
 import { api, ApiError } from '@/lib/api';
 import type { Category, City } from '@/lib/types';
@@ -16,9 +17,9 @@ const STEPS = [
   { label: 'Contact', desc: 'Phone & WhatsApp' },
 ];
 
-const CATEGORY_ICONS: Record<string, string> = {
-  tiffin: '🍱', 'pg-roommate': '🏠', jobs: '💼', vehicles: '🚗',
-  electronics: '📱', events: '🎉', businesses: '🏪', education: '📚',
+const CATEGORY_ICONS: Record<string, LucideIcon> = {
+  tiffin: UtensilsCrossed, 'pg-roommate': Building2, jobs: Briefcase, vehicles: Car,
+  electronics: Smartphone, events: CalendarDays, businesses: Store, education: GraduationCap,
 };
 
 interface FormData {
@@ -291,28 +292,41 @@ export default function PostListingPage() {
                     Pick a category <span style={{ color: '#EF4444' }}>*</span>
                   </h2>
                   <div className="grid grid-cols-4 gap-3">
-                    {categories.map(cat => (
-                      <motion.button
-                        key={cat.id}
-                        whileHover={{ y: -2 }}
-                        whileTap={{ scale: 0.97 }}
-                        onClick={() => save({ category_id: cat.id })}
-                        className="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all"
-                        style={
-                          form.category_id === cat.id
-                            ? { borderColor: 'var(--li-primary)', background: 'var(--li-primary-light)' }
-                            : { borderColor: 'var(--li-border)' }
-                        }
-                      >
-                        <span className="text-3xl">{CATEGORY_ICONS[cat.slug] ?? cat.icon ?? '🏷️'}</span>
-                        <span
-                          className="text-xs font-bold text-center leading-tight"
-                          style={{ color: form.category_id === cat.id ? 'var(--li-primary)' : 'var(--li-text)' }}
+                    {categories.map(cat => {
+                      const Icon = CATEGORY_ICONS[cat.slug] ?? Tag;
+                      const isActive = form.category_id === cat.id;
+                      return (
+                        <motion.button
+                          key={cat.id}
+                          whileHover={{ y: -2 }}
+                          whileTap={{ scale: 0.97 }}
+                          onClick={() => save({ category_id: cat.id })}
+                          className="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all"
+                          style={
+                            isActive
+                              ? { borderColor: 'var(--li-primary)', background: 'var(--li-primary-light)' }
+                              : { borderColor: 'var(--li-border)' }
+                          }
                         >
-                          {cat.name}
-                        </span>
-                      </motion.button>
-                    ))}
+                          <div
+                            className="w-10 h-10 rounded-xl flex items-center justify-center transition-colors"
+                            style={{ background: isActive ? 'rgba(255,107,53,0.15)' : '#F3F4F6' }}
+                          >
+                            <Icon
+                              className="w-5 h-5"
+                              style={{ color: isActive ? 'var(--li-primary)' : 'var(--li-muted)' }}
+                              strokeWidth={1.8}
+                            />
+                          </div>
+                          <span
+                            className="text-xs font-bold text-center leading-tight"
+                            style={{ color: isActive ? 'var(--li-primary)' : 'var(--li-text)' }}
+                          >
+                            {cat.name}
+                          </span>
+                        </motion.button>
+                      );
+                    })}
                   </div>
                   {errors.category_id && <p className="text-xs mt-3" style={{ color: '#EF4444' }}>{errors.category_id}</p>}
                 </div>
@@ -348,7 +362,10 @@ export default function PostListingPage() {
                   className="rounded-3xl p-5 border"
                   style={{ background: '#F0FDF4', borderColor: '#86EFAC' }}
                 >
-                  <p className="text-sm font-bold mb-2" style={{ color: '#166534' }}>💡 Tips for more inquiries</p>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Lightbulb className="w-4 h-4 shrink-0" style={{ color: '#166534' }} strokeWidth={2} />
+                    <p className="text-sm font-bold" style={{ color: '#166534' }}>Tips for more inquiries</p>
+                  </div>
                   <ul className="space-y-1.5">
                     {['Use a specific title (model, brand, year)', 'Write 3-4 sentences of description', 'Set a fair price to get quick responses'].map(tip => (
                       <li key={tip} className="flex items-start gap-2 text-xs" style={{ color: '#166534' }}>
@@ -435,7 +452,10 @@ export default function PostListingPage() {
                   className="rounded-3xl p-5 border"
                   style={{ background: '#FFFBEB', borderColor: '#FDE68A' }}
                 >
-                  <p className="text-sm font-bold mb-3" style={{ color: '#92400E' }}>📸 Photo tips</p>
+                  <div className="flex items-center gap-2 mb-3">
+                    <Camera className="w-4 h-4 shrink-0" style={{ color: '#92400E' }} strokeWidth={2} />
+                    <p className="text-sm font-bold" style={{ color: '#92400E' }}>Photo tips</p>
+                  </div>
                   <ul className="space-y-2">
                     {[
                       'Shoot in natural light near a window',
@@ -531,7 +551,10 @@ export default function PostListingPage() {
                     </p>
                   )}
                   {city && (
-                    <p className="text-xs mt-2" style={{ color: 'var(--li-muted)' }}>📍 {city.name}, {city.state}</p>
+                    <p className="flex items-center gap-1 text-xs mt-2" style={{ color: 'var(--li-muted)' }}>
+                      <MapPin className="w-3 h-3 shrink-0" strokeWidth={2} />
+                      {city.name}, {city.state}
+                    </p>
                   )}
                 </div>
               </div>
@@ -561,7 +584,7 @@ export default function PostListingPage() {
             className="flex items-center gap-2 px-8 py-3 rounded-2xl font-bold text-sm text-white disabled:opacity-60 transition-opacity"
             style={{ background: 'var(--li-primary)' }}
           >
-            {submitting ? 'Posting...' : step === 2 ? '🎉 Post Free Listing' : <>Next <ArrowRight className="w-4 h-4" /></>}
+            {submitting ? 'Posting...' : step === 2 ? <><Sparkles className="w-4 h-4" strokeWidth={2} /> Post Free Listing</> : <>Next <ArrowRight className="w-4 h-4" /></>}
           </motion.button>
         </div>
       </div>

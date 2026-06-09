@@ -5,8 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import {
   Search, MapPin, ChevronDown, X,
-  UtensilsCrossed, Building2, Briefcase, Car,
-  Smartphone, CalendarDays, Store, GraduationCap,
+  Utensils, Home, Briefcase, Car,
+  Smartphone, Calendar, Store, GraduationCap,
   Zap, MessageCircle, Globe, Languages,
   type LucideIcon,
 } from 'lucide-react';
@@ -38,14 +38,14 @@ const STATE_ORDER = [
 ];
 
 const CATEGORIES: CategoryDef[] = [
-  { icon: UtensilsCrossed, name: 'Tiffin & Food',  iconBg: 'bg-orange-50',  iconColor: 'text-orange-500',  count: '2,840' },
-  { icon: Building2,       name: 'PG / Rooms',     iconBg: 'bg-blue-50',    iconColor: 'text-blue-500',    count: '5,120' },
-  { icon: Briefcase,       name: 'Jobs',            iconBg: 'bg-emerald-50', iconColor: 'text-emerald-600', count: '3,460' },
-  { icon: Car,             name: 'Vehicles',        iconBg: 'bg-violet-50',  iconColor: 'text-violet-500',  count: '4,780' },
-  { icon: Smartphone,      name: 'Electronics',     iconBg: 'bg-amber-50',   iconColor: 'text-amber-500',   count: '6,910' },
-  { icon: CalendarDays,    name: 'Events',          iconBg: 'bg-rose-50',    iconColor: 'text-rose-500',    count: '890'   },
-  { icon: Store,           name: 'Businesses',      iconBg: 'bg-teal-50',    iconColor: 'text-teal-600',    count: '1,230' },
-  { icon: GraduationCap,   name: 'Education',       iconBg: 'bg-indigo-50',  iconColor: 'text-indigo-500',  count: '2,100' },
+  { icon: Utensils,      name: 'Tiffin & Food', iconBg: 'bg-amber-100/70',   iconColor: 'text-amber-600',   count: '2,840' },
+  { icon: Home,          name: 'PG / Rooms',    iconBg: 'bg-sky-100/70',     iconColor: 'text-sky-600',     count: '5,120' },
+  { icon: Briefcase,     name: 'Jobs',          iconBg: 'bg-emerald-100/70', iconColor: 'text-emerald-600', count: '3,460' },
+  { icon: Car,           name: 'Vehicles',      iconBg: 'bg-violet-100/70',  iconColor: 'text-violet-600',  count: '4,780' },
+  { icon: Smartphone,    name: 'Electronics',   iconBg: 'bg-cyan-100/70',    iconColor: 'text-cyan-600',    count: '6,910' },
+  { icon: Calendar,      name: 'Events',        iconBg: 'bg-rose-100/70',    iconColor: 'text-rose-600',    count: '890'   },
+  { icon: Store,         name: 'Businesses',    iconBg: 'bg-teal-100/70',    iconColor: 'text-teal-600',    count: '1,230' },
+  { icon: GraduationCap, name: 'Education',     iconBg: 'bg-indigo-100/70',  iconColor: 'text-indigo-600',  count: '2,100' },
 ];
 
 const POPULAR_TAGS = ['Tiffin Service', 'PG for Boys', 'Used Laptop', 'Honda Activa', 'Home Tutor', '2BHK Flat'];
@@ -291,30 +291,40 @@ export default function HomePage() {
       {/* ══════════════════════════════════════════════
           CATEGORY GRID
       ══════════════════════════════════════════════ */}
-      <section className="bg-white border-b border-slate-100 py-14">
+      <section className="bg-white py-16 border-b border-slate-100">
         <div className="page-wrap">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-xl font-bold text-slate-900 tracking-tight">Browse by Category</h2>
-            <span className="text-xs font-medium text-slate-400">8 categories</span>
+
+          {/* Section header */}
+          <div className="mb-10">
+            <p className="text-[11px] font-bold uppercase tracking-widest text-orange-500 mb-2.5">
+              What are you looking for?
+            </p>
+            <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
+              Browse by Category
+            </h2>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
             {CATEGORIES.map(({ icon: Icon, name, iconBg, iconColor, count }) => (
               <button
                 key={name}
                 onClick={() => setShowCityPicker(true)}
-                className="flex flex-col items-center gap-3 p-5 rounded-2xl
+                className="group flex flex-col items-center gap-3.5 p-4 pb-5 rounded-2xl
                   bg-white border border-slate-100
-                  hover:-translate-y-1 hover:shadow-md hover:shadow-slate-200/80 hover:border-slate-200
-                  transition-all duration-300 group w-full"
+                  hover:-translate-y-1.5 hover:shadow-xl hover:shadow-slate-900/[0.07]
+                  hover:border-slate-200/80
+                  transition-all duration-300 ease-in-out w-full"
               >
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${iconBg}
-                  group-hover:scale-110 transition-transform duration-300`}>
-                  <Icon className={`w-5 h-5 ${iconColor}`} strokeWidth={1.8} />
+                <div
+                  className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0
+                    ${iconBg} ring-1 ring-inset ring-black/[0.04]
+                    group-hover:scale-110 transition-transform duration-300 ease-in-out`}
+                >
+                  <Icon className={`w-[22px] h-[22px] ${iconColor}`} strokeWidth={1.75} />
                 </div>
-                <div className="text-center">
-                  <p className="text-sm font-semibold text-slate-800 leading-tight">{name}</p>
-                  <p className="text-xs text-slate-400 mt-1">{count} listings</p>
+                <div className="text-center space-y-0.5">
+                  <p className="text-[13px] font-semibold text-slate-800 leading-snug">{name}</p>
+                  <p className="text-[11px] text-slate-400 font-medium tabular-nums">{count}</p>
                 </div>
               </button>
             ))}
