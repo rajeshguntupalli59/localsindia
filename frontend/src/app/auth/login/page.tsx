@@ -148,6 +148,8 @@ export default function LoginPage() {
               <div className="mb-5 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-sm text-red-700">
                 {oauthError === 'google_denied'
                   ? 'Google sign-in was cancelled.'
+                  : oauthError === 'account_deactivated'
+                  ? 'Your account has been deactivated. Contact support.'
                   : 'Google sign-in failed. Please try again or use your phone number.'}
               </div>
             )}

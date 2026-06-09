@@ -128,6 +128,8 @@ async def verify_otp(body: OtpVerifyRequest, db: AsyncSession = Depends(get_db))
         user = User(phone=phone, name=phone)  # name updated on profile setup
         db.add(user)
         is_new = True
+    elif not user.is_active:
+        raise HTTPException(status_code=403, detail="Your account has been deactivated. Contact support.")
 
     await db.commit()
     await db.refresh(user)
@@ -277,6 +279,8 @@ async def google_oauth_callback(
         user = User(email=email, name=name, avatar_url=avatar_url)
         db.add(user)
     else:
+        if not user.is_active:
+            return RedirectResponse(f"{settings.FRONTEND_URL}/auth/login?error=account_deactivated")
         if avatar_url:
             user.avatar_url = avatar_url
         if name and user.name == user.email:
