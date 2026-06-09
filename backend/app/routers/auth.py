@@ -68,14 +68,16 @@ async def send_otp(body: OtpSendRequest, db: AsyncSession = Depends(get_db)):
     db.add(otp_record)
     await db.commit()
 
+    if settings.OTP_DEBUG:
+        # Debug mode: skip SMS, return OTP in response for testing without DLT
+        logger.warning(f"[OTP_DEBUG] OTP for {phone}: {otp}")
+        return {"message": "OTP sent successfully", "expires_in": OTP_EXPIRE_MINUTES * 60, "otp": otp}
+
     sent = await msg91.send_otp(phone, otp)
     if not sent:
         raise HTTPException(status_code=500, detail="Failed to send OTP. Try again.")
 
-    response: dict = {"message": "OTP sent successfully", "expires_in": OTP_EXPIRE_MINUTES * 60}
-    if settings.OTP_DEBUG:
-        response["otp"] = otp
-    return response
+    return {"message": "OTP sent successfully", "expires_in": OTP_EXPIRE_MINUTES * 60}
 
 
 @router.post("/otp/verify", response_model=AuthResponse)
