@@ -40,10 +40,29 @@ def do_run_migrations(connection: Connection) -> None:
 
 
 async def run_async_migrations() -> None:
+    cfg = config.get_section(config.config_ini_section, {})
+
+    # Allow DATABASE_URL env var to override alembic.ini (used for Azure migrations)
+    db_url = os.getenv("DATABASE_URL") or cfg.get("sqlalchemy.url")
+
+    # asyncpg requires ssl as connect_arg, not a URL query param
+    connect_args = {}
+    if db_url and "?" in db_url:
+        base, qs = db_url.split("?", 1)
+        params = dict(p.split("=", 1) for p in qs.split("&") if "=" in p)
+        ssl_val = params.pop("ssl", None) or params.pop("sslmode", None)
+        if ssl_val and ssl_val not in ("disable", "allow"):
+            connect_args["ssl"] = True
+        remaining = "&".join(f"{k}={v}" for k, v in params.items())
+        db_url = f"{base}?{remaining}" if remaining else base
+
+    cfg["sqlalchemy.url"] = db_url
+
     connectable = async_engine_from_config(
-        config.get_section(config.config_ini_section, {}),
+        cfg,
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
+        connect_args=connect_args,
     )
     async with connectable.connect() as connection:
         await connection.run_sync(do_run_migrations)

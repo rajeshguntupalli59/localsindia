@@ -162,7 +162,17 @@ CITIES = [
 
 
 async def seed():
-    engine = create_async_engine(settings.DATABASE_URL, echo=False)
+    url = settings.DATABASE_URL
+    connect_args = {}
+    if "?" in url:
+        base, qs = url.split("?", 1)
+        params = dict(p.split("=", 1) for p in qs.split("&") if "=" in p)
+        ssl_val = params.pop("ssl", None) or params.pop("sslmode", None)
+        if ssl_val and ssl_val not in ("disable", "allow"):
+            connect_args["ssl"] = True
+        remaining = "&".join(f"{k}={v}" for k, v in params.items())
+        url = f"{base}?{remaining}" if remaining else base
+    engine = create_async_engine(url, echo=False, connect_args=connect_args)
     Session = async_sessionmaker(engine, expire_on_commit=False)
 
     async with Session() as session:
