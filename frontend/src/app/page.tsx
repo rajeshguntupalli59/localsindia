@@ -300,7 +300,7 @@ export default function HomePage() {
             <p className="text-xs font-bold uppercase tracking-widest text-orange-500 mb-2">
               What are you looking for?
             </p>
-            <h2 className="text-3xl font-bold text-slate-900 tracking-tight">
+            <h2 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
               Browse by Category
             </h2>
           </div>
@@ -310,10 +310,11 @@ export default function HomePage() {
               <div
                 key={name}
                 onClick={() => setShowCityPicker(true)}
-                className="group relative bg-white p-6 rounded-2xl border border-slate-100
-                  hover:border-transparent cursor-pointer
+                className="group relative bg-white dark:bg-slate-900/40 p-6 rounded-2xl
+                  border border-slate-100 dark:border-slate-800/80
+                  hover:border-transparent dark:hover:border-transparent cursor-pointer
                   transition-all duration-300 ease-in-out
-                  hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-900/5"
+                  hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-900/5 dark:hover:shadow-black/20"
               >
                 <div className="flex flex-col h-full justify-between space-y-4">
                   <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${color}
@@ -321,7 +322,7 @@ export default function HomePage() {
                     <Icon className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-base font-semibold text-slate-800
+                    <h3 className="text-base font-semibold text-slate-800 dark:text-slate-200
                       group-hover:text-orange-500 transition-colors duration-200">
                       {name}
                     </h3>
