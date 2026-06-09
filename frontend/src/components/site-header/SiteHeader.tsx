@@ -174,13 +174,22 @@ export default function SiteHeader({ citySlug, cityName }: Props) {
               )}
             </div>
           ) : (
-            <Link
-              href="/auth/login"
-              className="hidden md:flex px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-gray-100"
-              style={{ color: '#374151' }}
-            >
-              Login
-            </Link>
+            <div className="hidden md:flex items-center gap-2">
+              <Link
+                href="/auth/login"
+                className="px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-gray-100"
+                style={{ color: '#374151' }}
+              >
+                Login
+              </Link>
+              <Link
+                href="/auth/login?mode=signup"
+                className="px-4 py-2 rounded-xl text-sm font-semibold text-white transition-colors"
+                style={{ background: 'var(--li-primary)' }}
+              >
+                Sign Up Free
+              </Link>
+            </div>
           )}
 
           <Link

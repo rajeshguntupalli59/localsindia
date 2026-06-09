@@ -1,8 +1,9 @@
 'use client';
 
-import { Home, Search, Plus, List, User } from 'lucide-react';
+import { Home, Search, Plus, List, User, LogIn } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 interface Props {
@@ -11,13 +12,20 @@ interface Props {
 
 export default function BottomNav({ citySlug }: Props) {
   const pathname = usePathname();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    setIsLoggedIn(!!localStorage.getItem('access_token'));
+  }, []);
 
   const items = [
     { icon: Home, label: 'Home', href: `/${citySlug}` },
     { icon: Search, label: 'Search', href: `/${citySlug}/search` },
     { icon: Plus, label: 'Post', href: `/${citySlug}/classifieds/post`, featured: true },
     { icon: List, label: 'My Listings', href: '/profile/listings' },
-    { icon: User, label: 'Profile', href: '/profile' },
+    isLoggedIn
+      ? { icon: User, label: 'Profile', href: '/profile' }
+      : { icon: LogIn, label: 'Sign Up', href: '/auth/login?mode=signup' },
   ];
 
   return (

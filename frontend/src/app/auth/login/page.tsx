@@ -27,6 +27,9 @@ export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [step, setStep] = useState<'phone' | 'otp' | 'name'>('phone');
+  const [mode, setMode] = useState<'signin' | 'signup'>(
+    searchParams.get('mode') === 'signup' ? 'signup' : 'signin'
+  );
   const [digits, setDigits] = useState('');
   const [otp, setOtp] = useState('');
   const [name, setName] = useState('');
@@ -111,11 +114,37 @@ export default function LoginPage() {
         <div className="rounded-2xl overflow-hidden shadow-xl border border-slate-200 bg-white">
 
           {/* Header band */}
-          <div className="px-6 pt-8 pb-7" style={{ background: 'var(--li-nav-bg)' }}>
+          <div className="px-6 pt-8 pb-6" style={{ background: 'var(--li-nav-bg)' }}>
             <h1 className="text-2xl font-bold text-white">
-              {step === 'name' ? 'Create Account' : 'Sign In'}
+              {step === 'name' ? 'Almost done!' : 'Welcome to LocalsIndia'}
             </h1>
-            <p className="text-white/60 text-sm mt-1">{stepLabels[step]}</p>
+            <p className="text-white/60 text-sm mt-1">
+              {step === 'name' ? 'Tell us your name' : 'Buy, sell and discover in your city'}
+            </p>
+
+            {/* Sign In / Sign Up tabs — only on phone step */}
+            {step === 'phone' && (
+              <div className="flex gap-1 mt-5 bg-white/10 p-1 rounded-xl">
+                <button
+                  type="button"
+                  onClick={() => setMode('signin')}
+                  className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-colors ${
+                    mode === 'signin' ? 'bg-white text-slate-900' : 'text-white/70 hover:text-white'
+                  }`}
+                >
+                  Sign In
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMode('signup')}
+                  className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-colors ${
+                    mode === 'signup' ? 'bg-white text-slate-900' : 'text-white/70 hover:text-white'
+                  }`}
+                >
+                  Create Account
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="px-6 py-7">
@@ -199,8 +228,19 @@ export default function LoginPage() {
                     <p className="text-xs text-muted-foreground">Enter your 10-digit mobile number</p>
                   </div>
                   <Button type="submit" className="w-full text-white" style={{ background: 'var(--li-primary)' }} disabled={loading}>
-                    {loading ? 'Sending...' : 'Send OTP'}
+                    {loading ? 'Sending...' : mode === 'signup' ? 'Create Free Account →' : 'Send OTP →'}
                   </Button>
+                  {mode === 'signup' ? (
+                    <p className="text-xs text-center text-muted-foreground">
+                      Already have an account?{' '}
+                      <button type="button" className="underline" style={{ color: 'var(--li-primary)' }} onClick={() => setMode('signin')}>Sign in</button>
+                    </p>
+                  ) : (
+                    <p className="text-xs text-center text-muted-foreground">
+                      New to LocalsIndia?{' '}
+                      <button type="button" className="underline" style={{ color: 'var(--li-primary)' }} onClick={() => setMode('signup')}>Create free account</button>
+                    </p>
+                  )}
                 </form>
               </>
             )}
