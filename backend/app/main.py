@@ -9,9 +9,16 @@ app = FastAPI(
     version="1.0.0",
 )
 
+_cors_origins = list({
+    settings.FRONTEND_URL,
+    settings.FRONTEND_URL.replace("https://www.", "https://"),
+    settings.FRONTEND_URL.replace("https://", "https://www."),
+    "http://localhost:3000",
+})
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.FRONTEND_URL, "http://localhost:3000"],
+    allow_origins=_cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
