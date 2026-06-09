@@ -31,12 +31,17 @@ jobs:
           zip -r ../backend.zip . -x "*.pyc" -x "__pycache__/*" -x ".env" -x "tests/*" -x ".pytest_cache/*"
 
       - name: Login to Azure
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+        run: |
+          az login --service-principal \
+            --username "${{ secrets.AZURE_CLIENT_ID }}" \
+            --password "${{ secrets.AZURE_CLIENT_SECRET }}" \
+            --tenant "${{ secrets.AZURE_TENANT_ID }}"
+          az account set --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
 
       - name: Deploy to Azure App Service
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: localsindia-backend
-          package: backend.zip
+        run: |
+          az webapp deploy \
+            --resource-group localsindia-rg \
+            --name localsindia-backend \
+            --src-path backend.zip \
+            --type zip
