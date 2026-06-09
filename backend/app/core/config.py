@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     SECRET_KEY: str = "local-dev-secret-key-change-before-production"
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
-    REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 30
 
     MSG91_AUTH_KEY: str = ""
     MSG91_TEMPLATE_ID: str = ""

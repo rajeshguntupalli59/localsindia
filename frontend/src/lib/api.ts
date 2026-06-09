@@ -21,9 +21,36 @@ export class ApiError extends Error {
   }
 }
 
+function clearSession() {
+  localStorage.removeItem('access_token');
+  localStorage.removeItem('refresh_token');
+  localStorage.removeItem('user');
+  window.location.href = '/auth/login';
+}
+
+async function tryRefresh(): Promise<string | null> {
+  const refreshToken = localStorage.getItem('refresh_token');
+  if (!refreshToken) return null;
+  try {
+    const res = await fetch(`${API_BASE}/api/v1/auth/refresh`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh_token: refreshToken }),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    localStorage.setItem('access_token', data.access_token);
+    if (data.refresh_token) localStorage.setItem('refresh_token', data.refresh_token);
+    return data.access_token as string;
+  } catch {
+    return null;
+  }
+}
+
 async function req<T>(
   path: string,
-  init?: RequestInit & { token?: string }
+  init?: RequestInit & { token?: string },
+  _retry = true,
 ): Promise<T> {
   const { token, ...rest } = init ?? {};
   const headers: Record<string, string> = {
@@ -35,6 +62,18 @@ async function req<T>(
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
   const res = await fetch(`${API_BASE}${path}`, { ...rest, headers });
+
+  // Auto-refresh on 401 then retry once
+  if (res.status === 401 && _retry && token) {
+    const newToken = await tryRefresh();
+    if (newToken) {
+      return req<T>(path, { ...init, token: newToken }, false);
+    }
+    // Refresh failed — session expired, force logout
+    clearSession();
+    throw new ApiError(401, 'Session expired. Please sign in again.');
+  }
+
   if (!res.ok) {
     const data = await res.json().catch(() => ({ detail: res.statusText }));
     const msg = (data as { detail?: string }).detail ?? 'Request failed';
