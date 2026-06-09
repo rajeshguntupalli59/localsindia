@@ -22,6 +22,9 @@ async def send_otp(phone: str, otp: str) -> bool:
         async with httpx.AsyncClient(timeout=10) as client:
             resp = await client.post(url, params=params)
             data = resp.json()
+            logger.info(f"MSG91 response for {phone}: {data}")
+            if data.get("type") != "success":
+                logger.error(f"MSG91 error: {data}")
             return data.get("type") == "success"
     except Exception as exc:
         logger.error(f"MSG91 send failed: {exc}")
