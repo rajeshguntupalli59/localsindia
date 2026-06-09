@@ -63,7 +63,7 @@ export default function LoginPage() {
       localStorage.setItem('refresh_token', res.refresh_token);
       localStorage.setItem('user', JSON.stringify(res.user));
       toast.success(`Welcome${res.user.name ? `, ${res.user.name}` : ''}!`);
-      router.back();
+      router.push('/');
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : 'Invalid OTP');
     } finally {
@@ -111,7 +111,7 @@ export default function LoginPage() {
                 localStorage.setItem('refresh_token', res.refresh_token);
                 localStorage.setItem('user', JSON.stringify(res.user));
                 toast.success('Dev login — skipped OTP');
-                router.back();
+                router.push('/');
               } catch { toast.error('Dev login failed'); }
               finally { setLoading(false); }
             }}
