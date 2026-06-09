@@ -95,6 +95,8 @@ export const api = {
       req<SearchResult>(`/api/v1/search${qs(params as unknown as Record<string, string>)}`),
   },
   auth: {
+    devLogin: () =>
+      req<AuthTokens>('/api/v1/auth/dev-login', { method: 'POST' }),
     sendOtp: (phone: string) =>
       req<{ message: string; otp?: string }>('/api/v1/auth/otp/send', {
         method: 'POST',

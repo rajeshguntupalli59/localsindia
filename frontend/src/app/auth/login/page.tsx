@@ -12,6 +12,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
 const GOOGLE_AUTH_ENABLED = process.env.NEXT_PUBLIC_GOOGLE_AUTH_ENABLED === 'true';
+const OTP_DEBUG = process.env.NEXT_PUBLIC_OTP_DEBUG === 'true';
 
 const GoogleIcon = () => (
   <svg viewBox="0 0 24 24" className="w-5 h-5" aria-hidden>
@@ -96,6 +97,29 @@ export default function LoginPage() {
 
           {/* Form area */}
           <div className="px-6 py-7">
+
+        {/* Dev bypass button */}
+        {OTP_DEBUG && (
+          <button
+            type="button"
+            className="w-full mb-5 py-2.5 rounded-xl bg-yellow-400 text-slate-900 text-sm font-bold hover:bg-yellow-300"
+            onClick={async () => {
+              setLoading(true);
+              try {
+                const res = await api.auth.devLogin();
+                localStorage.setItem('access_token', res.access_token);
+                localStorage.setItem('refresh_token', res.refresh_token);
+                localStorage.setItem('user', JSON.stringify(res.user));
+                toast.success('Dev login — skipped OTP');
+                router.back();
+              } catch { toast.error('Dev login failed'); }
+              finally { setLoading(false); }
+            }}
+            disabled={loading}
+          >
+            ⚡ Dev Login (skip OTP)
+          </button>
+        )}
 
         {/* Google OAuth error banner */}
         {oauthError && (

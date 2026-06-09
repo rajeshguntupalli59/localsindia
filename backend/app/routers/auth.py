@@ -156,6 +156,26 @@ async def logout():
     return
 
 
+@router.post("/dev-login", response_model=AuthResponse)
+async def dev_login(db: AsyncSession = Depends(get_db)):
+    """Dev-only bypass — only works when OTP_DEBUG=true."""
+    if not settings.OTP_DEBUG:
+        raise HTTPException(status_code=403, detail="Not available in production.")
+    phone = "+919999999999"
+    result = await db.execute(select(User).where(User.phone == phone))
+    user = result.scalar_one_or_none()
+    if not user:
+        user = User(phone=phone, name="Dev User")
+        db.add(user)
+        await db.commit()
+        await db.refresh(user)
+    return AuthResponse(
+        access_token=create_access_token(str(user.id)),
+        refresh_token=create_refresh_token(str(user.id)),
+        user=UserOut.model_validate(user),
+    )
+
+
 # ─── Google OAuth ─────────────────────────────────────────────
 
 @router.get("/google")
