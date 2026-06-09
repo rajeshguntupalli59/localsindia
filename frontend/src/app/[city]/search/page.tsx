@@ -52,6 +52,11 @@ export default function SearchPage() {
   const [localQ, setLocalQ] = useState(q);
 
   const doSearch = useCallback(async () => {
+    if (!q.trim()) {
+      setResult(null);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
       const res = await api.search.query({

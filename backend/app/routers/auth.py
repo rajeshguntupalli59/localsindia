@@ -1,9 +1,12 @@
+import logging
 import re
 import urllib.parse
 from datetime import datetime, timezone, timedelta
 
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, status
+
+logger = logging.getLogger(__name__)
 from fastapi.responses import RedirectResponse
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -165,8 +168,12 @@ async def dev_login(db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(User).where(User.phone == phone))
     user = result.scalar_one_or_none()
     if not user:
-        user = User(phone=phone, name="Dev User")
+        user = User(phone=phone, name="Dev User", role="admin")
         db.add(user)
+        await db.commit()
+        await db.refresh(user)
+    elif user.role != "admin":
+        user.role = "admin"
         await db.commit()
         await db.refresh(user)
     return AuthResponse(
