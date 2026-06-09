@@ -26,9 +26,10 @@ export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [step, setStep] = useState<'phone' | 'otp'>('phone');
-  const [phone, setPhone] = useState('');
+  const [digits, setDigits] = useState('');
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
+  const phone = `+91${digits}`;
 
   // Show error from Google OAuth redirect if present
   const oauthError = searchParams.get('error');
@@ -39,7 +40,7 @@ export default function LoginPage() {
     try {
       await api.auth.sendOtp(phone);
       setStep('otp');
-      toast.success('OTP sent! (check console in dev mode)');
+      toast.success('OTP sent to your mobile!');
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : 'Failed to send OTP');
     } finally {
@@ -84,7 +85,7 @@ export default function LoginPage() {
           <div className="px-6 pt-8 pb-7" style={{ background: 'var(--li-nav-bg)' }}>
             <h1 className="text-2xl font-bold text-white">Sign In</h1>
             <p className="text-white/60 text-sm mt-1">
-              {step === 'otp' ? `Enter the OTP sent to ${phone}` : 'Choose how you want to continue'}
+              {step === 'otp' ? `Enter the OTP sent to +91 ${digits}` : 'Choose how you want to continue'}
             </p>
           </div>
 
@@ -128,19 +129,23 @@ export default function LoginPage() {
             <form onSubmit={sendOtp} className="space-y-5">
               <div className="space-y-2">
                 <Label htmlFor="phone">Mobile Number</Label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
+                <div className="flex rounded-lg border border-input overflow-hidden focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-0">
+                  <div className="flex items-center gap-1.5 px-3 bg-slate-50 border-r border-input shrink-0">
+                    <Phone className="w-3.5 h-3.5 text-muted-foreground" />
+                    <span className="text-sm font-semibold text-slate-700">+91</span>
+                  </div>
+                  <input
                     id="phone"
-                    className="pl-10"
-                    placeholder="+91XXXXXXXXXX"
-                    value={phone}
-                    onChange={e => setPhone(e.target.value)}
-                    pattern="\+91[6-9]\d{9}"
+                    className="flex-1 px-3 py-2 text-sm bg-white outline-none"
+                    placeholder="9876543210"
+                    value={digits}
+                    onChange={e => setDigits(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                    inputMode="numeric"
+                    maxLength={10}
                     required
                   />
                 </div>
-                <p className="text-xs text-muted-foreground">Indian number: +91 followed by 10 digits</p>
+                <p className="text-xs text-muted-foreground">Enter your 10-digit mobile number</p>
               </div>
               <Button
                 type="submit"
