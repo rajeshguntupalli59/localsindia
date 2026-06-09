@@ -65,23 +65,31 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: 'var(--li-page-bg)' }}>
+    <div className="min-h-screen flex flex-col items-center justify-center py-12 px-4" style={{ background: 'var(--li-page-bg)' }}>
 
-      {/* Dark header band */}
-      <div className="px-4 pt-12 pb-8" style={{ background: 'var(--li-nav-bg)' }}>
+      <div className="w-full max-w-sm">
+
+        {/* Back link */}
         <Link
           href="/"
-          className="flex items-center gap-2 text-white/70 hover:text-white mb-5 w-fit text-sm"
+          className="flex items-center gap-2 text-slate-500 hover:text-slate-800 mb-6 w-fit text-sm"
         >
-          <ArrowLeft className="w-4 h-4" /> Back
+          <ArrowLeft className="w-4 h-4" /> Back to home
         </Link>
-        <h1 className="text-2xl font-bold text-white">Sign In</h1>
-        <p className="text-white/60 text-sm mt-1">
-          {step === 'otp' ? `Enter the OTP sent to ${phone}` : 'Choose how you want to continue'}
-        </p>
-      </div>
 
-      <div className="flex-1 px-4 py-8 max-w-sm w-full">
+        {/* Card */}
+        <div className="rounded-2xl overflow-hidden shadow-xl border border-slate-200 bg-white">
+
+          {/* Dark header band */}
+          <div className="px-6 pt-8 pb-7" style={{ background: 'var(--li-nav-bg)' }}>
+            <h1 className="text-2xl font-bold text-white">Sign In</h1>
+            <p className="text-white/60 text-sm mt-1">
+              {step === 'otp' ? `Enter the OTP sent to ${phone}` : 'Choose how you want to continue'}
+            </p>
+          </div>
+
+          {/* Form area */}
+          <div className="px-6 py-7">
 
         {/* Google OAuth error banner */}
         {oauthError && (
@@ -182,6 +190,8 @@ export default function LoginPage() {
             </button>
           </form>
         )}
+          </div>
+        </div>
       </div>
     </div>
   );
