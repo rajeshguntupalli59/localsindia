@@ -147,13 +147,13 @@ export default function HomePage() {
           <nav className="flex items-center gap-1">
             <button
               onClick={() => setShowCityPicker(true)}
-              className="px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors"
+              className="hidden md:flex px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors"
             >
               Browse Cities
             </button>
             <Link
               href="/auth/login"
-              className="px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors"
+              className="hidden md:flex px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors"
             >
               Login
             </Link>
@@ -161,7 +161,8 @@ export default function HomePage() {
               onClick={() => setShowCityPicker(true)}
               className="ml-1 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-orange-500 hover:bg-orange-600 transition-colors shadow-sm shadow-orange-500/25"
             >
-              Post a Listing
+              <span className="hidden sm:inline">Post a Listing</span>
+              <span className="sm:hidden">+ Post</span>
             </button>
           </nav>
         </div>

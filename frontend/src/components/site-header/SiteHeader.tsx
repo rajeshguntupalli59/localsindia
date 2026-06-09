@@ -42,10 +42,10 @@ export default function SiteHeader({ citySlug, cityName }: Props) {
           </span>
         </Link>
 
-        {/* Search bar */}
-        <form onSubmit={handleSearch} className="flex-1 max-w-xl">
+        {/* Search bar — hidden on mobile */}
+        <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-xl">
           <div
-            className="flex items-center gap-3 rounded-xl px-4 h-10 border transition-colors"
+            className="flex items-center gap-3 rounded-xl px-4 h-10 border transition-colors w-full"
             style={{ background: '#F3F4F6', borderColor: 'transparent' }}
             onFocus={e => (e.currentTarget.style.borderColor = 'var(--li-primary)')}
             onBlur={e => (e.currentTarget.style.borderColor = 'transparent')}
@@ -65,7 +65,7 @@ export default function SiteHeader({ citySlug, cityName }: Props) {
         <nav className="flex items-center gap-1 ml-auto">
           {citySlug && (
             <div
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold cursor-pointer"
+              className="hidden md:flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold cursor-pointer"
               style={{ background: '#F3F4F6', color: 'var(--li-text)' }}
               onClick={() => router.push('/')}
             >
@@ -75,14 +75,14 @@ export default function SiteHeader({ citySlug, cityName }: Props) {
           )}
           <Link
             href={citySlug ? `/${citySlug}` : '/'}
-            className="px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-gray-100"
+            className="hidden md:flex px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-gray-100"
             style={{ color: '#374151' }}
           >
             Browse
           </Link>
           <Link
             href="/auth/login"
-            className="px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-gray-100"
+            className="hidden md:flex px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-gray-100"
             style={{ color: '#374151' }}
           >
             Login
@@ -91,7 +91,8 @@ export default function SiteHeader({ citySlug, cityName }: Props) {
             href={citySlug ? `/${citySlug}/classifieds/post` : '/'}
             className="cta-btn px-4 py-2 text-sm rounded-xl"
           >
-            + Post a Listing
+            <span className="hidden sm:inline">+ Post a Listing</span>
+            <span className="sm:hidden">+ Post</span>
           </Link>
         </nav>
       </div>

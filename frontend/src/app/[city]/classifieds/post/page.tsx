@@ -54,6 +54,10 @@ export default function PostListingPage() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    if (!localStorage.getItem('access_token')) {
+      router.replace(`/auth/login?next=/${citySlug}/classifieds/post`);
+      return;
+    }
     const stored = localStorage.getItem('li_post_form');
     if (stored) { try { setForm(JSON.parse(stored)); } catch { /* */ } }
     api.categories.list().then(setCategories).catch(() => {});
@@ -62,7 +66,7 @@ export default function PostListingPage() {
       const u = JSON.parse(localStorage.getItem('user') ?? '{}');
       if (u.phone) setForm(f => ({ ...f, contact_phone: u.phone }));
     } catch { /* */ }
-  }, [citySlug]);
+  }, [citySlug, router]);
 
   const save = (next: Partial<FormData>) => {
     const merged = { ...form, ...next };
