@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ArrowLeft, Phone, Lock } from 'lucide-react';
+import { ArrowLeft, Phone, Lock, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -26,13 +26,14 @@ const GoogleIcon = () => (
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [step, setStep] = useState<'phone' | 'otp'>('phone');
+  const [step, setStep] = useState<'phone' | 'otp' | 'name'>('phone');
   const [digits, setDigits] = useState('');
   const [otp, setOtp] = useState('');
+  const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [tokens, setTokens] = useState<{ access: string; refresh: string; user: object } | null>(null);
   const phone = `+91${digits}`;
 
-  // Show error from Google OAuth redirect if present
   const oauthError = searchParams.get('error');
 
   const sendOtp = async (e: React.FormEvent) => {
@@ -42,7 +43,6 @@ export default function LoginPage() {
       const res = await api.auth.sendOtp(phone);
       setStep('otp');
       if (res?.otp) {
-        // Debug mode: OTP returned in response (testing without SMS)
         toast.info(`OTP: ${res.otp}`, { duration: 60000 });
       } else {
         toast.success('OTP sent to your mobile!');
@@ -62,8 +62,15 @@ export default function LoginPage() {
       localStorage.setItem('access_token', res.access_token);
       localStorage.setItem('refresh_token', res.refresh_token);
       localStorage.setItem('user', JSON.stringify(res.user));
-      toast.success(`Welcome${res.user.name ? `, ${res.user.name}` : ''}!`);
-      router.push('/');
+
+      if (res.is_new_user) {
+        // New user — ask for their name before going home
+        setTokens({ access: res.access_token, refresh: res.refresh_token, user: res.user });
+        setStep('name');
+      } else {
+        toast.success(`Welcome back, ${res.user.name}!`);
+        router.push('/');
+      }
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : 'Invalid OTP');
     } finally {
@@ -71,159 +78,186 @@ export default function LoginPage() {
     }
   };
 
+  const saveName = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim() || !tokens) return;
+    setLoading(true);
+    try {
+      const updated = await api.auth.updateProfile({ name: name.trim() }, tokens.access);
+      localStorage.setItem('user', JSON.stringify(updated));
+      toast.success(`Welcome to LocalsIndia, ${updated.name}!`);
+      router.push('/');
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : 'Failed to save name');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const stepLabels: Record<typeof step, string> = {
+    phone: 'Choose how you want to continue',
+    otp: `Enter the OTP sent to +91 ${digits}`,
+    name: 'One last thing…',
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center py-12 px-4" style={{ background: 'var(--li-page-bg)' }}>
-
       <div className="w-full max-w-sm">
 
-        {/* Back link */}
-        <Link
-          href="/"
-          className="flex items-center gap-2 text-slate-500 hover:text-slate-800 mb-6 w-fit text-sm"
-        >
+        <Link href="/" className="flex items-center gap-2 text-slate-500 hover:text-slate-800 mb-6 w-fit text-sm">
           <ArrowLeft className="w-4 h-4" /> Back to home
         </Link>
 
-        {/* Card */}
         <div className="rounded-2xl overflow-hidden shadow-xl border border-slate-200 bg-white">
 
-          {/* Dark header band */}
+          {/* Header band */}
           <div className="px-6 pt-8 pb-7" style={{ background: 'var(--li-nav-bg)' }}>
-            <h1 className="text-2xl font-bold text-white">Sign In</h1>
-            <p className="text-white/60 text-sm mt-1">
-              {step === 'otp' ? `Enter the OTP sent to +91 ${digits}` : 'Choose how you want to continue'}
-            </p>
+            <h1 className="text-2xl font-bold text-white">
+              {step === 'name' ? 'Create Account' : 'Sign In'}
+            </h1>
+            <p className="text-white/60 text-sm mt-1">{stepLabels[step]}</p>
           </div>
 
-          {/* Form area */}
           <div className="px-6 py-7">
 
-        {/* Dev bypass button */}
-        {OTP_DEBUG && (
-          <button
-            type="button"
-            className="w-full mb-5 py-2.5 rounded-xl bg-yellow-400 text-slate-900 text-sm font-bold hover:bg-yellow-300"
-            onClick={async () => {
-              setLoading(true);
-              try {
-                const res = await api.auth.devLogin();
-                localStorage.setItem('access_token', res.access_token);
-                localStorage.setItem('refresh_token', res.refresh_token);
-                localStorage.setItem('user', JSON.stringify(res.user));
-                toast.success('Dev login — skipped OTP');
-                router.push('/');
-              } catch { toast.error('Dev login failed'); }
-              finally { setLoading(false); }
-            }}
-            disabled={loading}
-          >
-            ⚡ Dev Login (skip OTP)
-          </button>
-        )}
+            {/* Dev bypass */}
+            {OTP_DEBUG && step === 'phone' && (
+              <button
+                type="button"
+                className="w-full mb-5 py-2.5 rounded-xl bg-yellow-400 text-slate-900 text-sm font-bold hover:bg-yellow-300"
+                onClick={async () => {
+                  setLoading(true);
+                  try {
+                    const res = await api.auth.devLogin();
+                    localStorage.setItem('access_token', res.access_token);
+                    localStorage.setItem('refresh_token', res.refresh_token);
+                    localStorage.setItem('user', JSON.stringify(res.user));
+                    toast.success('Dev login — skipped OTP');
+                    router.push('/');
+                  } catch { toast.error('Dev login failed'); }
+                  finally { setLoading(false); }
+                }}
+                disabled={loading}
+              >
+                ⚡ Dev Login (skip OTP)
+              </button>
+            )}
 
-        {/* Google OAuth error banner */}
-        {oauthError && (
-          <div className="mb-5 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-sm text-red-700">
-            {oauthError === 'google_denied'
-              ? 'Google sign-in was cancelled.'
-              : 'Google sign-in failed. Please try again or use your phone number.'}
-          </div>
-        )}
+            {/* Google error */}
+            {oauthError && (
+              <div className="mb-5 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-sm text-red-700">
+                {oauthError === 'google_denied'
+                  ? 'Google sign-in was cancelled.'
+                  : 'Google sign-in failed. Please try again or use your phone number.'}
+              </div>
+            )}
 
-        {step === 'phone' && (
-          <>
-            {/* ── Google button — shown only after domain verification ── */}
-            {GOOGLE_AUTH_ENABLED && (
+            {/* ── Step 1: Phone ── */}
+            {step === 'phone' && (
               <>
-                <a
-                  href={`${BACKEND_URL}/api/v1/auth/google`}
-                  className="flex items-center justify-center gap-3 w-full h-12 px-4
-                    bg-white rounded-xl border border-slate-200
-                    text-sm font-semibold text-slate-700
-                    hover:bg-slate-50 hover:border-slate-300
-                    transition-all duration-200 shadow-sm"
-                >
-                  <GoogleIcon />
-                  Continue with Google
-                </a>
-                <div className="flex items-center gap-3 my-5">
-                  <div className="flex-1 h-px bg-slate-200" />
-                  <span className="text-xs font-medium text-slate-400">or use your phone</span>
-                  <div className="flex-1 h-px bg-slate-200" />
-                </div>
+                {GOOGLE_AUTH_ENABLED && (
+                  <>
+                    <a
+                      href={`${BACKEND_URL}/api/v1/auth/google`}
+                      className="flex items-center justify-center gap-3 w-full h-12 px-4
+                        bg-white rounded-xl border border-slate-200
+                        text-sm font-semibold text-slate-700
+                        hover:bg-slate-50 hover:border-slate-300
+                        transition-all duration-200 shadow-sm"
+                    >
+                      <GoogleIcon />
+                      Continue with Google
+                    </a>
+                    <div className="flex items-center gap-3 my-5">
+                      <div className="flex-1 h-px bg-slate-200" />
+                      <span className="text-xs font-medium text-slate-400">or use your phone</span>
+                      <div className="flex-1 h-px bg-slate-200" />
+                    </div>
+                  </>
+                )}
+                <form onSubmit={sendOtp} className="space-y-5">
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Mobile Number</Label>
+                    <div className="flex rounded-lg border border-input overflow-hidden focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-0">
+                      <div className="flex items-center gap-1.5 px-3 bg-slate-50 border-r border-input shrink-0">
+                        <Phone className="w-3.5 h-3.5 text-muted-foreground" />
+                        <span className="text-sm font-semibold text-slate-700">+91</span>
+                      </div>
+                      <input
+                        id="phone"
+                        className="flex-1 px-3 py-2 text-sm bg-white outline-none"
+                        placeholder="9876543210"
+                        value={digits}
+                        onChange={e => setDigits(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                        inputMode="numeric"
+                        maxLength={10}
+                        required
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground">Enter your 10-digit mobile number</p>
+                  </div>
+                  <Button type="submit" className="w-full text-white" style={{ background: 'var(--li-primary)' }} disabled={loading}>
+                    {loading ? 'Sending...' : 'Send OTP'}
+                  </Button>
+                </form>
               </>
             )}
 
-            {/* ── OTP form ── */}
-            <form onSubmit={sendOtp} className="space-y-5">
-              <div className="space-y-2">
-                <Label htmlFor="phone">Mobile Number</Label>
-                <div className="flex rounded-lg border border-input overflow-hidden focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-0">
-                  <div className="flex items-center gap-1.5 px-3 bg-slate-50 border-r border-input shrink-0">
-                    <Phone className="w-3.5 h-3.5 text-muted-foreground" />
-                    <span className="text-sm font-semibold text-slate-700">+91</span>
+            {/* ── Step 2: OTP ── */}
+            {step === 'otp' && (
+              <form onSubmit={verifyOtp} className="space-y-5">
+                <div className="space-y-2">
+                  <Label htmlFor="otp">6-digit OTP</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      id="otp"
+                      className="pl-10 text-center tracking-[0.5em] text-xl"
+                      placeholder="------"
+                      value={otp}
+                      onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                      maxLength={6}
+                      autoFocus
+                      required
+                    />
                   </div>
-                  <input
-                    id="phone"
-                    className="flex-1 px-3 py-2 text-sm bg-white outline-none"
-                    placeholder="9876543210"
-                    value={digits}
-                    onChange={e => setDigits(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                    inputMode="numeric"
-                    maxLength={10}
-                    required
-                  />
                 </div>
-                <p className="text-xs text-muted-foreground">Enter your 10-digit mobile number</p>
-              </div>
-              <Button
-                type="submit"
-                className="w-full text-white"
-                style={{ background: 'var(--li-primary)' }}
-                disabled={loading}
-              >
-                {loading ? 'Sending...' : 'Send OTP'}
-              </Button>
-            </form>
-          </>
-        )}
+                <Button type="submit" className="w-full text-white" style={{ background: 'var(--li-primary)' }} disabled={loading || otp.length < 6}>
+                  {loading ? 'Verifying...' : 'Verify OTP'}
+                </Button>
+                <button type="button" className="text-sm underline w-full text-center" style={{ color: 'var(--li-primary)' }} onClick={() => { setStep('phone'); setOtp(''); }}>
+                  Change number
+                </button>
+              </form>
+            )}
 
-        {step === 'otp' && (
-          <form onSubmit={verifyOtp} className="space-y-5">
-            <div className="space-y-2">
-              <Label htmlFor="otp">6-digit OTP</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  id="otp"
-                  className="pl-10 text-center tracking-[0.5em] text-xl"
-                  placeholder="------"
-                  value={otp}
-                  onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  maxLength={6}
-                  autoFocus
-                  required
-                />
-              </div>
-            </div>
-            <Button
-              type="submit"
-              className="w-full text-white"
-              style={{ background: 'var(--li-primary)' }}
-              disabled={loading || otp.length < 6}
-            >
-              {loading ? 'Verifying...' : 'Verify OTP'}
-            </Button>
-            <button
-              type="button"
-              className="text-sm underline w-full text-center"
-              style={{ color: 'var(--li-primary)' }}
-              onClick={() => { setStep('phone'); setOtp(''); }}
-            >
-              Change number
-            </button>
-          </form>
-        )}
+            {/* ── Step 3: Name (new users only) ── */}
+            {step === 'name' && (
+              <form onSubmit={saveName} className="space-y-5">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Your Name</Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      id="name"
+                      className="pl-10"
+                      placeholder="e.g. Rajesh Kumar"
+                      value={name}
+                      onChange={e => setName(e.target.value)}
+                      autoFocus
+                      required
+                      minLength={2}
+                      maxLength={60}
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">This is shown to other users on your listings</p>
+                </div>
+                <Button type="submit" className="w-full text-white" style={{ background: 'var(--li-primary)' }} disabled={loading || name.trim().length < 2}>
+                  {loading ? 'Saving...' : 'Continue →'}
+                </Button>
+              </form>
+            )}
+
           </div>
         </div>
       </div>

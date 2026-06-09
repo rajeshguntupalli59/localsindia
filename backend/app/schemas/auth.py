@@ -49,8 +49,14 @@ class UserOut(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class ProfileUpdate(BaseModel):
+    name: str | None = None
+    lang_pref: str | None = None
+
+
 class AuthResponse(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str = "bearer"
     user: UserOut
+    is_new_user: bool = False

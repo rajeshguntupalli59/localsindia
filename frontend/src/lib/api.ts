@@ -103,9 +103,15 @@ export const api = {
         body: JSON.stringify({ phone }),
       }),
     verifyOtp: (data: { phone: string; otp: string }) =>
-      req<AuthTokens>('/api/v1/auth/otp/verify', {
+      req<AuthTokens & { is_new_user: boolean }>('/api/v1/auth/otp/verify', {
         method: 'POST',
         body: JSON.stringify(data),
+      }),
+    updateProfile: (data: { name?: string }, token: string) =>
+      req<User>('/api/v1/auth/me', {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+        token,
       }),
   },
   upload: {

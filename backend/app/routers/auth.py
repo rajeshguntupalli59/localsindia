@@ -19,9 +19,10 @@ from app.core.security import (
 )
 from app.models.otp_request import OtpRequest
 from app.models.user import User
+from app.core.deps import get_current_user
 from app.schemas.auth import (
     OtpSendRequest, OtpVerifyRequest, AuthResponse,
-    RefreshRequest, TokenResponse, UserOut,
+    RefreshRequest, TokenResponse, UserOut, ProfileUpdate,
 )
 from app.services import msg91
 
@@ -122,9 +123,11 @@ async def verify_otp(body: OtpVerifyRequest, db: AsyncSession = Depends(get_db))
     user_result = await db.execute(select(User).where(User.phone == phone))
     user = user_result.scalar_one_or_none()
 
+    is_new = False
     if not user:
         user = User(phone=phone, name=phone)  # name updated on profile setup
         db.add(user)
+        is_new = True
 
     await db.commit()
     await db.refresh(user)
@@ -133,6 +136,7 @@ async def verify_otp(body: OtpVerifyRequest, db: AsyncSession = Depends(get_db))
         access_token=create_access_token(str(user.id)),
         refresh_token=create_refresh_token(str(user.id)),
         user=UserOut.model_validate(user),
+        is_new_user=is_new,
     )
 
 
@@ -181,6 +185,28 @@ async def dev_login(db: AsyncSession = Depends(get_db)):
         refresh_token=create_refresh_token(str(user.id)),
         user=UserOut.model_validate(user),
     )
+
+
+# ─── Profile ──────────────────────────────────────────────────
+
+@router.patch("/me", response_model=UserOut)
+async def update_profile(
+    body: ProfileUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    if body.name is not None:
+        current_user.name = body.name.strip()
+    if body.lang_pref is not None:
+        current_user.lang_pref = body.lang_pref
+    await db.commit()
+    await db.refresh(current_user)
+    return UserOut.model_validate(current_user)
+
+
+@router.get("/me", response_model=UserOut)
+async def get_me(current_user: User = Depends(get_current_user)):
+    return UserOut.model_validate(current_user)
 
 
 # ─── Google OAuth ─────────────────────────────────────────────
