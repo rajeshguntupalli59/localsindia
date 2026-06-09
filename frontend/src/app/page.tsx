@@ -61,7 +61,7 @@ const TRUST: TrustDef[] = [
   {
     icon: Zap,
     title: 'Instant Posting',
-    subtitle: 'Go live in under a minute, for free.',
+    subtitle: 'Go live in under a minute with verified reach.',
     iconBg: 'bg-orange-500/[0.15]',
     iconColor: 'text-orange-400',
   },
@@ -162,7 +162,7 @@ export default function HomePage() {
               onClick={() => setShowCityPicker(true)}
               className="ml-1 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-orange-500 hover:bg-orange-600 transition-colors shadow-sm shadow-orange-500/25"
             >
-              Post Free Ad
+              Post a Listing
             </button>
           </nav>
         </div>
@@ -253,17 +253,17 @@ export default function HomePage() {
             </form>
 
             {/* Popular tags */}
-            <div className="flex items-center gap-2 mt-4 flex-wrap">
-              <span className="text-xs font-medium text-slate-500">Try:</span>
+            <div className="flex items-center gap-1.5 mt-5 flex-wrap">
+              <span className="text-[11px] font-medium text-slate-600 mr-1">Try:</span>
               {POPULAR_TAGS.map(t => (
                 <button
                   key={t}
                   type="button"
                   onClick={() => setQ(t)}
-                  className="text-xs px-3 py-1.5 rounded-full
-                    bg-white/[0.07] border border-white/[0.1] text-slate-400
-                    hover:bg-white/[0.14] hover:text-slate-200 hover:border-white/[0.22]
-                    transition-all duration-200"
+                  className="text-[11px] font-medium px-3 py-1 rounded-full
+                    text-slate-500
+                    hover:text-white hover:bg-white/[0.09]
+                    transition-all duration-150"
                 >
                   {t}
                 </button>
