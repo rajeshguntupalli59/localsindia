@@ -27,7 +27,6 @@ export default function LoginPage() {
   const [step, setStep] = useState<'phone' | 'otp'>('phone');
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
-  const [requestId, setRequestId] = useState('');
   const [loading, setLoading] = useState(false);
 
   // Show error from Google OAuth redirect if present
@@ -37,8 +36,7 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await api.auth.sendOtp(phone);
-      setRequestId(res.otp_request_id);
+      await api.auth.sendOtp(phone);
       setStep('otp');
       toast.success('OTP sent! (check console in dev mode)');
     } catch (err) {
@@ -52,7 +50,7 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await api.auth.verifyOtp({ otp_request_id: requestId, otp });
+      const res = await api.auth.verifyOtp({ phone, otp });
       localStorage.setItem('access_token', res.access_token);
       localStorage.setItem('refresh_token', res.refresh_token);
       localStorage.setItem('user', JSON.stringify(res.user));

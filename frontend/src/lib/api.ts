@@ -96,11 +96,11 @@ export const api = {
   },
   auth: {
     sendOtp: (phone: string) =>
-      req<{ otp_request_id: string }>('/api/v1/auth/otp/send', {
+      req<{ message: string }>('/api/v1/auth/otp/send', {
         method: 'POST',
         body: JSON.stringify({ phone }),
       }),
-    verifyOtp: (data: { otp_request_id: string; otp: string }) =>
+    verifyOtp: (data: { phone: string; otp: string }) =>
       req<AuthTokens>('/api/v1/auth/otp/verify', {
         method: 'POST',
         body: JSON.stringify(data),
