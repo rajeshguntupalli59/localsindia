@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Plus, RefreshCw, CheckCircle, Trash2 } from 'lucide-react';
+import { ArrowLeft, Plus, RefreshCw, CheckCircle, Trash2, Pencil } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { api, ApiError } from '@/lib/api';
@@ -165,6 +165,13 @@ export default function MyListingsPage() {
 
               {/* Actions */}
               <div className="flex border-t">
+                <ActionBtn
+                  icon={<Pencil className="w-4 h-4" />}
+                  label="Edit"
+                  disabled={actionId === listing.id}
+                  onClick={() => router.push(`/profile/listings/${listing.id}/edit`)}
+                  color="text-blue-600"
+                />
                 {listing.status === 'active' && (
                   <ActionBtn
                     icon={<CheckCircle className="w-4 h-4" />}
@@ -180,7 +187,7 @@ export default function MyListingsPage() {
                     label="Renew"
                     disabled={actionId === listing.id}
                     onClick={() => handleRenew(listing.id)}
-                    color="text-blue-600"
+                    color="text-slate-600"
                   />
                 )}
                 <ActionBtn

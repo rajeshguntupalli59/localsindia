@@ -32,6 +32,24 @@ async def pending_listings(
     return result.scalars().all()
 
 
+@router.get("/listings", response_model=list[ListingOut])
+async def list_listings_by_status(
+    status: str = "active",
+    page: int = 1,
+    page_size: int = 50,
+    db: AsyncSession = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+):
+    result = await db.execute(
+        select(Listing)
+        .where(Listing.status == status, Listing.deleted_at.is_(None))
+        .order_by(Listing.created_at.desc())
+        .offset((page - 1) * page_size)
+        .limit(page_size)
+    )
+    return result.scalars().all()
+
+
 @router.patch("/listings/{listing_id}/approve", response_model=ListingOut)
 async def approve_listing(
     listing_id: uuid.UUID,

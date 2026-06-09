@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { CheckCircle, XCircle, Clock } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import { formatPrice, timeAgo } from '@/lib/utils';
 import type { Listing } from '@/lib/types';
@@ -11,32 +11,43 @@ import { toast } from 'sonner';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
 
+const STATUS_TABS = [
+  { key: 'pending', label: 'Pending' },
+  { key: 'active', label: 'Active' },
+  { key: 'flagged', label: 'Flagged' },
+  { key: 'rejected', label: 'Rejected' },
+];
+
 export default function AdminListingsPage() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState('pending');
   const [actionId, setActionId] = useState<string | null>(null);
   const [rejectModal, setRejectModal] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState('');
+  const [deleteModal, setDeleteModal] = useState<string | null>(null);
 
   const token = () => localStorage.getItem('access_token') ?? '';
 
-  const fetchPending = async () => {
+  const fetchListings = async (status: string) => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/v1/admin/listings/pending`, {
+      const endpoint = status === 'pending'
+        ? `${API_BASE}/api/v1/admin/listings/pending`
+        : `${API_BASE}/api/v1/admin/listings?status=${status}`;
+      const res = await fetch(endpoint, {
         headers: { Authorization: `Bearer ${token()}` },
       });
       if (!res.ok) throw new Error();
       setListings(await res.json());
     } catch {
-      toast.error('Failed to load queue');
+      toast.error('Failed to load listings');
     } finally {
       setLoading(false);
     }
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { fetchPending(); }, []);
+  useEffect(() => { fetchListings(tab); }, [tab]);
 
   const approve = async (id: string) => {
     setActionId(id);
@@ -76,19 +87,52 @@ export default function AdminListingsPage() {
     }
   };
 
+  const deleteListing = async (id: string) => {
+    setActionId(id);
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/listings/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token()}` },
+      });
+      if (!res.ok) throw new Error();
+      toast.success('Listing deleted');
+      setListings(ls => ls.filter(l => l.id !== id));
+      setDeleteModal(null);
+    } catch {
+      toast.error('Failed to delete');
+    } finally {
+      setActionId(null);
+    }
+  };
+
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-bold">Pending Queue</h1>
-          <p className="text-sm text-muted-foreground">{listings.length} listings awaiting review</p>
+          <h1 className="text-xl font-bold">Listings</h1>
+          <p className="text-sm text-muted-foreground">{listings.length} {tab} listings</p>
         </div>
         <button
-          onClick={fetchPending}
+          onClick={() => fetchListings(tab)}
           className="text-sm px-4 py-2 rounded-lg border hover:bg-muted transition-colors"
         >
           Refresh
         </button>
+      </div>
+
+      {/* Status tabs */}
+      <div className="flex gap-1 mb-5 bg-muted p-1 rounded-xl w-fit">
+        {STATUS_TABS.map(t => (
+          <button
+            key={t.key}
+            onClick={() => setTab(t.key)}
+            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+              tab === t.key ? 'bg-white shadow-sm text-slate-900' : 'text-muted-foreground hover:text-slate-700'
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
       </div>
 
       {loading ? (
@@ -98,7 +142,7 @@ export default function AdminListingsPage() {
           ))}
         </div>
       ) : listings.length === 0 ? (
-        <EmptyState icon={Clock} title="Queue is empty" description="All listings have been reviewed" />
+        <EmptyState icon={Clock} title="No listings" description={`No ${tab} listings found`} />
       ) : (
         <div className="space-y-3">
           {listings.map((listing, i) => (
@@ -130,20 +174,33 @@ export default function AdminListingsPage() {
                     <span className="truncate">{listing.contact_phone}</span>
                   </div>
                 </div>
-                <div className="flex gap-2 shrink-0">
+
+                {/* Action buttons */}
+                <div className="flex flex-col gap-2 shrink-0">
+                  {tab === 'pending' && (
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => approve(listing.id)}
+                        disabled={actionId === listing.id}
+                        className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-green-50 text-green-700 text-xs font-semibold hover:bg-green-100 transition-colors disabled:opacity-50"
+                      >
+                        <CheckCircle className="w-3.5 h-3.5" /> Approve
+                      </button>
+                      <button
+                        onClick={() => { setRejectModal(listing.id); setRejectReason(''); }}
+                        disabled={actionId === listing.id}
+                        className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-red-50 text-red-700 text-xs font-semibold hover:bg-red-100 transition-colors disabled:opacity-50"
+                      >
+                        <XCircle className="w-3.5 h-3.5" /> Reject
+                      </button>
+                    </div>
+                  )}
                   <button
-                    onClick={() => approve(listing.id)}
+                    onClick={() => setDeleteModal(listing.id)}
                     disabled={actionId === listing.id}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-green-50 text-green-700 text-xs font-semibold hover:bg-green-100 transition-colors disabled:opacity-50"
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-red-50 text-red-700 text-xs font-semibold hover:bg-red-100 transition-colors disabled:opacity-50 self-end"
                   >
-                    <CheckCircle className="w-3.5 h-3.5" /> Approve
-                  </button>
-                  <button
-                    onClick={() => { setRejectModal(listing.id); setRejectReason(''); }}
-                    disabled={actionId === listing.id}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-red-50 text-red-700 text-xs font-semibold hover:bg-red-100 transition-colors disabled:opacity-50"
-                  >
-                    <XCircle className="w-3.5 h-3.5" /> Reject
+                    <Trash2 className="w-3.5 h-3.5" /> Delete
                   </button>
                 </div>
               </div>
@@ -174,6 +231,27 @@ export default function AdminListingsPage() {
                 className="flex-1 py-2.5 rounded-xl bg-red-600 text-white text-sm font-semibold disabled:opacity-50"
               >
                 Reject
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete confirm modal */}
+      {deleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setDeleteModal(null)} />
+          <div className="relative bg-white rounded-2xl p-5 w-full max-w-sm space-y-4">
+            <h2 className="font-semibold text-red-600">Delete Listing</h2>
+            <p className="text-sm text-muted-foreground">This listing will be permanently removed. This cannot be undone.</p>
+            <div className="flex gap-3">
+              <button onClick={() => setDeleteModal(null)} className="flex-1 py-2.5 rounded-xl border text-sm font-semibold">Cancel</button>
+              <button
+                onClick={() => deleteListing(deleteModal)}
+                disabled={!!actionId}
+                className="flex-1 py-2.5 rounded-xl bg-red-600 text-white text-sm font-semibold disabled:opacity-50"
+              >
+                Delete
               </button>
             </div>
           </div>
