@@ -217,8 +217,8 @@ export default function HomePage() {
               <button
                 type="button"
                 onClick={() => setShowCityPicker(true)}
-                className="flex items-center gap-2 px-4 sm:px-5 h-[58px] rounded-l-2xl
-                  border-r border-slate-100 min-w-[132px] sm:min-w-[160px] shrink-0 group
+                className="flex items-center gap-2 px-5 h-[58px] rounded-l-2xl
+                  border-r border-slate-100 min-w-[140px] sm:min-w-[164px] shrink-0 group
                   hover:bg-slate-50/80 transition-colors duration-150"
               >
                 <MapPin className="w-4 h-4 text-orange-500 shrink-0" strokeWidth={2.2} />
@@ -236,14 +236,14 @@ export default function HomePage() {
                 value={q}
                 onChange={e => setQ(e.target.value)}
                 placeholder="Search tiffin, PG, laptop, Honda Activa..."
-                className="flex-1 min-w-0 px-4 sm:px-5 h-[58px] text-sm text-slate-800
+                className="flex-1 min-w-0 px-5 h-[58px] text-sm text-slate-800
                   placeholder:text-slate-400 outline-none bg-transparent"
               />
 
               {/* Submit button */}
               <button
                 type="submit"
-                className="flex items-center gap-2 px-5 sm:px-7 h-[58px] rounded-r-2xl
+                className="flex items-center gap-2 px-6 sm:px-7 h-[58px] rounded-r-2xl
                   bg-orange-500 text-white text-sm font-semibold
                   hover:bg-orange-600 transition-colors duration-150 shrink-0"
               >
@@ -252,18 +252,20 @@ export default function HomePage() {
               </button>
             </form>
 
-            {/* Popular tags */}
-            <div className="flex items-center gap-1.5 mt-5 flex-wrap">
-              <span className="text-[11px] font-medium text-slate-600 mr-1">Try:</span>
+            {/* ── Popular tags — visible micro-pills on dark bg ── */}
+            <div className="flex items-center gap-2 mt-5 flex-wrap">
+              <span className="text-[11px] font-semibold text-slate-500 mr-0.5 tracking-wide uppercase">
+                Try:
+              </span>
               {POPULAR_TAGS.map(t => (
                 <button
                   key={t}
                   type="button"
                   onClick={() => setQ(t)}
-                  className="text-[11px] font-medium px-3 py-1 rounded-full
-                    text-slate-500
-                    hover:text-white hover:bg-white/[0.09]
-                    transition-all duration-150"
+                  className="text-[11px] font-medium px-3 py-1.5 rounded-full
+                    bg-white/[0.07] border border-white/[0.11] text-slate-400
+                    hover:bg-orange-500/[0.18] hover:border-orange-500/[0.35] hover:text-orange-300
+                    transition-all duration-200"
                 >
                   {t}
                 </button>
@@ -271,17 +273,19 @@ export default function HomePage() {
             </div>
           </motion.div>
 
-          {/* Stats row */}
+          {/* ── Stats row — numbers prominent, labels clearly subordinate ── */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3, duration: 0.45 }}
-            className="flex flex-wrap gap-x-10 gap-y-4 mt-14 pt-8 border-t border-white/[0.07]"
+            className="flex flex-wrap gap-x-12 gap-y-5 mt-16 pt-8 border-t border-white/[0.07]"
           >
             {STATS.map(([num, label]) => (
-              <div key={num}>
-                <div className="text-2xl font-extrabold text-white tracking-tight">{num}</div>
-                <div className="text-xs text-slate-500 font-medium mt-0.5">{label}</div>
+              <div key={num} className="flex flex-col gap-1.5">
+                <div className="text-3xl font-black text-white tracking-tight leading-none">{num}</div>
+                <div className="text-[11px] font-medium text-slate-500 uppercase tracking-widest leading-none">
+                  {label}
+                </div>
               </div>
             ))}
           </motion.div>
@@ -311,7 +315,7 @@ export default function HomePage() {
                 onClick={() => setShowCityPicker(true)}
                 className="group flex flex-col items-center gap-3.5 p-4 pb-5 rounded-2xl
                   bg-white border border-slate-100
-                  hover:-translate-y-1.5 hover:shadow-xl hover:shadow-slate-900/[0.07]
+                  hover:-translate-y-1.5 hover:shadow-xl hover:shadow-slate-900/[0.08]
                   hover:border-slate-200/80
                   transition-all duration-300 ease-in-out w-full"
               >
@@ -322,9 +326,9 @@ export default function HomePage() {
                 >
                   <Icon className={`w-[22px] h-[22px] ${iconColor}`} strokeWidth={1.75} />
                 </div>
-                <div className="text-center space-y-0.5">
-                  <p className="text-[13px] font-semibold text-slate-800 leading-snug">{name}</p>
-                  <p className="text-[11px] text-slate-400 font-medium tabular-nums">{count}</p>
+                <div className="text-center space-y-1">
+                  <p className="text-sm font-semibold text-slate-800 leading-snug">{name}</p>
+                  <p className="text-xs text-slate-400 font-medium tabular-nums">{count}</p>
                 </div>
               </button>
             ))}
@@ -470,7 +474,7 @@ export default function HomePage() {
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-white">{title}</p>
-                  <p className="text-xs text-slate-500 mt-1 leading-relaxed">{subtitle}</p>
+                  <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">{subtitle}</p>
                 </div>
               </div>
             ))}
