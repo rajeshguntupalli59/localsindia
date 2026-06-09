@@ -72,7 +72,10 @@ async def send_otp(body: OtpSendRequest, db: AsyncSession = Depends(get_db)):
     if not sent:
         raise HTTPException(status_code=500, detail="Failed to send OTP. Try again.")
 
-    return {"message": "OTP sent successfully", "expires_in": OTP_EXPIRE_MINUTES * 60}
+    response: dict = {"message": "OTP sent successfully", "expires_in": OTP_EXPIRE_MINUTES * 60}
+    if settings.OTP_DEBUG:
+        response["otp"] = otp
+    return response
 
 
 @router.post("/otp/verify", response_model=AuthResponse)

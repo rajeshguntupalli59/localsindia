@@ -38,9 +38,14 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      await api.auth.sendOtp(phone);
+      const res = await api.auth.sendOtp(phone);
       setStep('otp');
-      toast.success('OTP sent to your mobile!');
+      if (res?.otp) {
+        // Debug mode: OTP returned in response (testing without SMS)
+        toast.info(`OTP: ${res.otp}`, { duration: 60000 });
+      } else {
+        toast.success('OTP sent to your mobile!');
+      }
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : 'Failed to send OTP');
     } finally {

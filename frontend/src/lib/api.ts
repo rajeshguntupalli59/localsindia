@@ -96,7 +96,7 @@ export const api = {
   },
   auth: {
     sendOtp: (phone: string) =>
-      req<{ message: string }>('/api/v1/auth/otp/send', {
+      req<{ message: string; otp?: string }>('/api/v1/auth/otp/send', {
         method: 'POST',
         body: JSON.stringify({ phone }),
       }),
