@@ -19,8 +19,7 @@ import SiteFooter from '@/components/site-footer/SiteFooter';
 interface CategoryDef {
   icon: LucideIcon;
   name: string;
-  iconBg: string;
-  iconColor: string;
+  color: string;
   count: string;
 }
 interface TrustDef {
@@ -38,14 +37,14 @@ const STATE_ORDER = [
 ];
 
 const CATEGORIES: CategoryDef[] = [
-  { icon: Utensils,      name: 'Tiffin & Food', iconBg: 'bg-amber-100/70',   iconColor: 'text-amber-600',   count: '2,840' },
-  { icon: Home,          name: 'PG / Rooms',    iconBg: 'bg-sky-100/70',     iconColor: 'text-sky-600',     count: '5,120' },
-  { icon: Briefcase,     name: 'Jobs',          iconBg: 'bg-emerald-100/70', iconColor: 'text-emerald-600', count: '3,460' },
-  { icon: Car,           name: 'Vehicles',      iconBg: 'bg-violet-100/70',  iconColor: 'text-violet-600',  count: '4,780' },
-  { icon: Smartphone,    name: 'Electronics',   iconBg: 'bg-cyan-100/70',    iconColor: 'text-cyan-600',    count: '6,910' },
-  { icon: Calendar,      name: 'Events',        iconBg: 'bg-rose-100/70',    iconColor: 'text-rose-600',    count: '890'   },
-  { icon: Store,         name: 'Businesses',    iconBg: 'bg-teal-100/70',    iconColor: 'text-teal-600',    count: '1,230' },
-  { icon: GraduationCap, name: 'Education',     iconBg: 'bg-indigo-100/70',  iconColor: 'text-indigo-600',  count: '2,100' },
+  { icon: Utensils,      name: 'Tiffin & Food', color: 'text-amber-500 bg-amber-500/10',   count: '2,840' },
+  { icon: Home,          name: 'PG / Rooms',    color: 'text-blue-500 bg-blue-500/10',     count: '5,120' },
+  { icon: Briefcase,     name: 'Jobs',          color: 'text-emerald-500 bg-emerald-500/10', count: '3,460' },
+  { icon: Car,           name: 'Vehicles',      color: 'text-orange-500 bg-orange-500/10', count: '4,780' },
+  { icon: Smartphone,    name: 'Electronics',   color: 'text-purple-500 bg-purple-500/10', count: '6,910' },
+  { icon: Calendar,      name: 'Events',        color: 'text-rose-500 bg-rose-500/10',     count: '890'   },
+  { icon: Store,         name: 'Businesses',    color: 'text-cyan-500 bg-cyan-500/10',     count: '1,230' },
+  { icon: GraduationCap, name: 'Education',     color: 'text-indigo-500 bg-indigo-500/10', count: '2,100' },
 ];
 
 const POPULAR_TAGS = ['Tiffin Service', 'PG for Boys', 'Used Laptop', 'Honda Activa', 'Home Tutor', '2BHK Flat'];
@@ -252,20 +251,18 @@ export default function HomePage() {
               </button>
             </form>
 
-            {/* ── Popular tags — visible micro-pills on dark bg ── */}
-            <div className="flex items-center gap-2 mt-5 flex-wrap">
-              <span className="text-[11px] font-semibold text-slate-500 mr-0.5 tracking-wide uppercase">
-                Try:
-              </span>
+            {/* ── Popular tags — high-contrast micro-pills on dark bg ── */}
+            <div className="flex flex-wrap items-center gap-2 mt-4 text-sm">
+              <span className="text-slate-400 font-medium">Try:</span>
               {POPULAR_TAGS.map(t => (
                 <button
                   key={t}
                   type="button"
                   onClick={() => setQ(t)}
-                  className="text-[11px] font-medium px-3 py-1.5 rounded-full
-                    bg-white/[0.07] border border-white/[0.11] text-slate-400
-                    hover:bg-orange-500/[0.18] hover:border-orange-500/[0.35] hover:text-orange-300
-                    transition-all duration-200"
+                  className="px-3 py-1 text-xs font-medium text-slate-300
+                    bg-slate-800/60 hover:bg-slate-700/80
+                    border border-slate-700/50 hover:border-slate-600
+                    rounded-full transition-all duration-200"
                 >
                   {t}
                 </button>
@@ -295,42 +292,45 @@ export default function HomePage() {
       {/* ══════════════════════════════════════════════
           CATEGORY GRID
       ══════════════════════════════════════════════ */}
-      <section className="bg-white py-16 border-b border-slate-100">
-        <div className="page-wrap">
+      <section className="bg-white border-b border-slate-100">
+        <div className="page-wrap py-16">
 
           {/* Section header */}
-          <div className="mb-10">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-orange-500 mb-2.5">
+          <div className="text-center md:text-left mb-8">
+            <p className="text-xs font-bold uppercase tracking-widest text-orange-500 mb-2">
               What are you looking for?
             </p>
-            <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
+            <h2 className="text-3xl font-bold text-slate-900 tracking-tight">
               Browse by Category
             </h2>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
-            {CATEGORIES.map(({ icon: Icon, name, iconBg, iconColor, count }) => (
-              <button
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {CATEGORIES.map(({ icon: Icon, name, color, count }) => (
+              <div
                 key={name}
                 onClick={() => setShowCityPicker(true)}
-                className="group flex flex-col items-center gap-3.5 p-4 pb-5 rounded-2xl
-                  bg-white border border-slate-100
-                  hover:-translate-y-1.5 hover:shadow-xl hover:shadow-slate-900/[0.08]
-                  hover:border-slate-200/80
-                  transition-all duration-300 ease-in-out w-full"
+                className="group relative bg-white p-6 rounded-2xl border border-slate-100
+                  hover:border-transparent cursor-pointer
+                  transition-all duration-300 ease-in-out
+                  hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-900/5"
               >
-                <div
-                  className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0
-                    ${iconBg} ring-1 ring-inset ring-black/[0.04]
-                    group-hover:scale-110 transition-transform duration-300 ease-in-out`}
-                >
-                  <Icon className={`w-[22px] h-[22px] ${iconColor}`} strokeWidth={1.75} />
+                <div className="flex flex-col h-full justify-between space-y-4">
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${color}
+                    transition-transform duration-300 group-hover:scale-110`}>
+                    <Icon className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-semibold text-slate-800
+                      group-hover:text-orange-500 transition-colors duration-200">
+                      {name}
+                    </h3>
+                    <p className="text-xs font-medium text-slate-400 mt-1">
+                      {count} listings
+                    </p>
+                  </div>
                 </div>
-                <div className="text-center space-y-1">
-                  <p className="text-sm font-semibold text-slate-800 leading-snug">{name}</p>
-                  <p className="text-xs text-slate-400 font-medium tabular-nums">{count}</p>
-                </div>
-              </button>
+              </div>
             ))}
           </div>
         </div>
