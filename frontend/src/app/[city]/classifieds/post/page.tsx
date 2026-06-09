@@ -80,6 +80,14 @@ export default function PostListingPage() {
     if (!form.category_id) e.category_id = 'Please pick a category';
     if (!form.description.trim() || form.description.length < 20) e.description = 'At least 20 characters';
     setErrors(e);
+    if (Object.keys(e).length > 0) {
+      const msgs = [];
+      if (e.title) msgs.push('Title too short');
+      if (e.category_id) msgs.push('Pick a category');
+      if (e.description) msgs.push('Description too short (20+ chars)');
+      toast.error(msgs.join(' · '));
+      document.querySelector('[data-step1-form]')?.scrollIntoView({ behavior: 'smooth' });
+    }
     return Object.keys(e).length === 0;
   };
 
@@ -90,6 +98,7 @@ export default function PostListingPage() {
       : `+91${form.contact_phone.trim()}`;
     if (!PHONE_RE.test(phone)) e.contact_phone = 'Enter a valid Indian mobile number (+91XXXXXXXXXX)';
     setErrors(e);
+    if (Object.keys(e).length > 0) toast.error('Enter a valid 10-digit mobile number');
     return Object.keys(e).length === 0;
   };
 
@@ -251,7 +260,7 @@ export default function PostListingPage() {
               className="grid grid-cols-[1fr_360px] gap-8 items-start"
             >
               {/* Left: Title + Category + Description */}
-              <div className="space-y-6">
+              <div className="space-y-6" data-step1-form>
                 <div className="bg-white rounded-3xl p-6 border" style={{ borderColor: 'var(--li-border)' }}>
                   <h2 className="text-lg font-black mb-5" style={{ color: 'var(--li-text)' }}>What are you selling?</h2>
 

@@ -101,6 +101,17 @@ export default function SearchPage() {
     router.replace(`/${citySlug}/search?${params.toString()}`);
   };
 
+  const filteredItems = result?.items.filter(l => {
+    if (priceMin && (l.price == null || l.price < parseFloat(priceMin))) return false;
+    if (priceMax && (l.price == null || l.price > parseFloat(priceMax))) return false;
+    if (dateRange) {
+      const days = dateRange === 'today' ? 1 : dateRange === 'week' ? 7 : 30;
+      const cutoff = new Date(Date.now() - days * 86400000);
+      if (new Date(l.created_at) < cutoff) return false;
+    }
+    return true;
+  }) ?? [];
+
   const totalPages = result ? Math.ceil(result.total / PAGE_SIZE) : 1;
   const hasActiveFilters = localCat || priceMin || priceMax || dateRange;
 
@@ -330,10 +341,10 @@ export default function SearchPage() {
             <div className="grid grid-cols-3 gap-5">
               {Array.from({ length: 9 }).map((_, i) => <ListingCardSkeleton key={i} />)}
             </div>
-          ) : result && result.items.length > 0 ? (
+          ) : result && filteredItems.length > 0 ? (
             <>
               <div className="grid grid-cols-3 gap-5">
-                {result.items.map((l, i) => (
+                {filteredItems.map((l, i) => (
                   <motion.div
                     key={l.id}
                     initial={{ opacity: 0, y: 12 }}
