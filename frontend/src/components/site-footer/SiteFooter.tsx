@@ -33,7 +33,7 @@ const SOCIALS = [
 ];
 
 const FOOTER_LINKS = {
-  Platform: ['Browse Listings', 'Post Free Ad', 'All Categories', 'All Cities', 'Featured Ads'],
+  Platform: ['Browse Listings', 'Post a Listing', 'All Categories', 'All Cities', 'Featured Ads'],
   Company:  ['About Us', 'Blog', 'Careers', 'Press', 'Contact'],
   Legal:    ['Privacy Policy', 'Terms of Service', 'Safety Tips', 'Cookie Policy'],
 };
