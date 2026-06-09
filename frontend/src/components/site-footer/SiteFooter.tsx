@@ -32,10 +32,20 @@ const SOCIALS = [
   { label: 'YouTube',     Icon: IconYouTube,    hover: 'hover:text-red-400   hover:bg-red-500/[0.12]'  },
 ];
 
-const FOOTER_LINKS = {
-  Platform: ['Browse Listings', 'Post a Listing', 'All Categories', 'All Cities', 'Featured Ads'],
-  Company:  ['About Us', 'Blog', 'Careers', 'Press', 'Contact'],
-  Legal:    ['Privacy Policy', 'Terms of Service', 'Safety Tips', 'Cookie Policy'],
+const FOOTER_LINKS: Record<string, { label: string; href: string }[]> = {
+  Platform: [
+    { label: 'Browse Listings', href: '/' },
+    { label: 'Post a Listing', href: '/auth/login?mode=signup' },
+    { label: 'All Cities', href: '/' },
+  ],
+  Company: [
+    { label: 'About Us', href: '/' },
+    { label: 'Contact', href: 'mailto:rajeshguntupalli59@gmail.com' },
+  ],
+  Legal: [
+    { label: 'Privacy Policy', href: '/privacy' },
+    { label: 'Terms of Service', href: '/terms' },
+  ],
 };
 
 export default function SiteFooter() {
@@ -78,12 +88,12 @@ export default function SiteFooter() {
               </p>
               <ul className="space-y-3">
                 {links.map(l => (
-                  <li key={l}>
+                  <li key={l.label}>
                     <Link
-                      href="/"
+                      href={l.href}
                       className="text-sm text-slate-500 hover:text-slate-200 transition-colors duration-150"
                     >
-                      {l}
+                      {l.label}
                     </Link>
                   </li>
                 ))}
