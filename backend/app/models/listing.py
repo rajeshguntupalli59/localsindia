@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime, timezone, timedelta
 from typing import Any
 from sqlalchemy import String, Text, Numeric, Boolean, Integer, ForeignKey, CheckConstraint, Index, Computed, DateTime
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID, TSVECTOR
 from app.core.database import Base
 
@@ -46,6 +46,13 @@ class Listing(Base):
             persisted=True,
         ),
         nullable=True,
+    )
+
+    images: Mapped[list["ListingImage"]] = relationship(
+        "ListingImage",
+        primaryjoin="Listing.id == foreign(ListingImage.listing_id)",
+        order_by="ListingImage.display_order",
+        lazy="selectin",
     )
 
     __table_args__ = (

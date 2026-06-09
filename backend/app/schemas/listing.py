@@ -67,6 +67,7 @@ class ListingOut(BaseModel):
     city_id: uuid.UUID
     category_id: uuid.UUID
     user_id: uuid.UUID
+    images: list[ListingImageOut] = []
 
     model_config = {"from_attributes": True}
 
