@@ -8,7 +8,7 @@ import {
   Utensils, Home, Briefcase, Car,
   Smartphone, Calendar, Store, GraduationCap,
   Zap, MessageCircle, Globe, Languages,
-  LocateFixed, Loader2, CheckCircle2, ArrowRight,
+  LocateFixed, Loader2, CheckCircle2,
   type LucideIcon,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -525,86 +525,71 @@ export default function HomePage() {
       {/* ══════════════════════════════════════════════
           CATEGORY GRID
       ══════════════════════════════════════════════ */}
-      <section className="bg-white border-b border-slate-100">
-        <div className="page-wrap py-14 sm:py-16">
+      <section className="bg-[#FAFAFA] border-b border-slate-100/80">
+        <div className="page-wrap py-16 sm:py-20">
 
           {/* Section header */}
-          <div className="flex items-end justify-between mb-8">
+          <div className="flex items-center justify-between mb-10 sm:mb-12">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-orange-500 mb-2">
-                What are you looking for?
+              <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-orange-500 mb-2.5">
+                Explore
               </p>
-              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+              <h2 className="text-2xl sm:text-[1.75rem] font-bold text-slate-900 tracking-[-0.02em]">
                 Browse by Category
               </h2>
             </div>
-            <span className="hidden sm:block text-[11px] font-medium text-slate-400 pb-0.5">
+            <span className="hidden sm:flex items-center gap-1.5
+              text-[11px] font-medium text-slate-400 tabular-nums">
+              <span className="w-1.5 h-1.5 rounded-full bg-slate-300 inline-block" />
               {CATEGORIES.length} categories
             </span>
           </div>
 
-          {/* Grid: 2-col mobile → 4-col desktop, gap tightens on mobile */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-            {CATEGORIES.map(({ icon: Icon, name, color, count }) => (
+          {/* Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
+            {CATEGORIES.map(({ icon: Icon, name, color, count }, i) => (
               <motion.div
                 key={name}
                 onClick={() => setShowCityPicker(true)}
-                whileHover={{ y: -4 }}
-                whileTap={{ scale: 0.97 }}
-                transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
-                className="group relative bg-white rounded-2xl border border-slate-100
-                  cursor-pointer overflow-hidden
-                  shadow-[0_1px_4px_rgba(0,0,0,0.06)]
-                  hover:shadow-[0_14px_36px_-6px_rgba(0,0,0,0.10)]
-                  hover:border-transparent
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-40px' }}
+                transition={{ duration: 0.35, delay: i * 0.05, ease: [0.22, 1, 0.36, 1] }}
+                whileHover={{ y: -3, transition: { duration: 0.2, ease: [0.22, 1, 0.36, 1] } }}
+                whileTap={{ scale: 0.98 }}
+                className="group bg-white rounded-2xl border border-slate-100
+                  cursor-pointer
+                  shadow-[0_1px_3px_rgba(0,0,0,0.05),0_1px_2px_rgba(0,0,0,0.03)]
+                  hover:shadow-[0_18px_44px_-8px_rgba(0,0,0,0.10),0_4px_12px_-4px_rgba(0,0,0,0.05)]
+                  hover:border-slate-200/60
                   transition-[box-shadow,border-color] duration-300"
               >
-                {/* Very subtle orange gradient wash on hover */}
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100
-                  transition-opacity duration-300 pointer-events-none
-                  bg-gradient-to-br from-transparent via-transparent to-orange-500/[0.04]" />
+                <div className="p-6 sm:p-7">
 
-                {/* Card body — flex-col with flex-1 spacer pins text to bottom */}
-                <div className="relative flex flex-col p-5 sm:p-6
-                  min-h-[152px] sm:min-h-[172px]">
-
-                  {/* Icon — top-anchored */}
-                  <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl shrink-0
-                    flex items-center justify-center ${color}
-                    transition-transform duration-200
-                    group-hover:scale-110`}>
-                    <Icon className="w-[18px] h-[18px] sm:w-5 sm:h-5" />
+                  {/* Icon */}
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-5
+                    ${color}
+                    group-hover:scale-[1.07]
+                    transition-transform duration-200 ease-out`}>
+                    <Icon className="w-5 h-5 sm:w-[22px] sm:h-[22px]" strokeWidth={1.8} />
                   </div>
 
-                  {/* Spacer fills available height */}
-                  <div className="flex-1" />
+                  {/* Name */}
+                  <h3 className="text-[15px] font-semibold text-slate-800 leading-snug mb-2
+                    group-hover:text-orange-500 transition-colors duration-200">
+                    {name}
+                  </h3>
 
-                  {/* Name + count — bottom-anchored, always aligned */}
-                  <div>
-                    <h3 className="text-sm sm:text-[15px] font-semibold text-slate-800
-                      leading-snug group-hover:text-orange-500
-                      transition-colors duration-200">
-                      {name}
-                    </h3>
-                    <div className="flex items-center justify-between mt-1.5">
-                      <p className="text-[11px] font-medium text-slate-400/80
-                        tabular-nums tracking-[0.005em]">
-                        {count} listings
-                      </p>
-                      {/* Arrow slides in from left on hover */}
-                      <ArrowRight
-                        className="w-3 h-3 text-orange-400 shrink-0
-                          opacity-0 -translate-x-1
-                          group-hover:opacity-100 group-hover:translate-x-0
-                          transition-all duration-200"
-                        strokeWidth={2.5}
-                      />
-                    </div>
-                  </div>
+                  {/* Count — muted but legible */}
+                  <p className="text-[12px] font-medium text-slate-400 tabular-nums tracking-[-0.01em]">
+                    {count} listings
+                  </p>
+
                 </div>
               </motion.div>
             ))}
           </div>
+
         </div>
       </section>
 
