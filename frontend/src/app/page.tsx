@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import {
-  Search, MapPin, ChevronDown, X, Plus,
+  Search, MapPin, ChevronDown, X, Plus, ArrowRight,
   Utensils, Home, Briefcase, Car,
   Smartphone, Calendar, Store, GraduationCap,
   Zap, MessageCircle, Globe, Languages,
@@ -20,7 +20,7 @@ import FreshListingsSection from '@/components/fresh-listings/FreshListingsSecti
 import SiteLogo from '@/components/site-logo/SiteLogo';
 
 // ─── types ───────────────────────────────────────────────────
-interface CategoryDef { icon: LucideIcon; name: string; color: string; count: string }
+interface CategoryDef { icon: LucideIcon; name: string; color: string; accent: string; count: string }
 interface TrustDef { icon: LucideIcon; title: string; subtitle: string; iconBg: string; iconColor: string; isWhatsApp?: true }
 type GeoStatus = 'idle' | 'locating' | 'located' | 'denied' | 'failed';
 
@@ -31,14 +31,14 @@ const STATE_ORDER = [
 ];
 
 const CATEGORIES: CategoryDef[] = [
-  { icon: Utensils,      name: 'Tiffin & Food', color: 'text-amber-500 bg-amber-500/10',     count: '2,840' },
-  { icon: Home,          name: 'PG / Rooms',    color: 'text-blue-500 bg-blue-500/10',       count: '5,120' },
-  { icon: Briefcase,     name: 'Jobs',          color: 'text-emerald-500 bg-emerald-500/10', count: '3,460' },
-  { icon: Car,           name: 'Vehicles',      color: 'text-orange-500 bg-orange-500/10',   count: '4,780' },
-  { icon: Smartphone,    name: 'Electronics',   color: 'text-purple-500 bg-purple-500/10',   count: '6,910' },
-  { icon: Calendar,      name: 'Events',        color: 'text-rose-500 bg-rose-500/10',       count: '890'   },
-  { icon: Store,         name: 'Businesses',    color: 'text-cyan-500 bg-cyan-500/10',       count: '1,230' },
-  { icon: GraduationCap, name: 'Education',     color: 'text-indigo-500 bg-indigo-500/10',   count: '2,100' },
+  { icon: Utensils,      name: 'Tiffin & Food', color: 'text-amber-500 bg-amber-500/10',     accent: 'bg-amber-400/60',   count: '2,840' },
+  { icon: Home,          name: 'PG / Rooms',    color: 'text-blue-500 bg-blue-500/10',       accent: 'bg-blue-400/60',    count: '5,120' },
+  { icon: Briefcase,     name: 'Jobs',          color: 'text-emerald-500 bg-emerald-500/10', accent: 'bg-emerald-400/60', count: '3,460' },
+  { icon: Car,           name: 'Vehicles',      color: 'text-orange-500 bg-orange-500/10',   accent: 'bg-orange-400/60',  count: '4,780' },
+  { icon: Smartphone,    name: 'Electronics',   color: 'text-purple-500 bg-purple-500/10',   accent: 'bg-purple-400/60',  count: '6,910' },
+  { icon: Calendar,      name: 'Events',        color: 'text-rose-500 bg-rose-500/10',       accent: 'bg-rose-400/60',    count: '890'   },
+  { icon: Store,         name: 'Businesses',    color: 'text-cyan-500 bg-cyan-500/10',       accent: 'bg-cyan-400/60',    count: '1,230' },
+  { icon: GraduationCap, name: 'Education',     color: 'text-indigo-500 bg-indigo-500/10',   accent: 'bg-indigo-400/60',  count: '2,100' },
 ];
 
 const POPULAR_TAGS = ['Tiffin Service', 'PG for Boys', 'Used Laptop', 'Honda Activa', 'Home Tutor', '2BHK Flat'];
@@ -332,177 +332,204 @@ export default function HomePage() {
               in your language, in your neighbourhood.
             </p>
 
-            {/* ── Unified Search Bar ─────────────────────── */}
+            {/* ══ Search Capsule ═══════════════════════════ */}
             <motion.form
               onSubmit={handleSearch}
               animate={geoStatus === 'located' ? {
                 boxShadow: [
-                  '0 24px 64px -12px rgba(0,0,0,0.55), 0 0 0 1px rgba(0,0,0,0.06)',
-                  '0 24px 64px -12px rgba(249,115,22,0.22), 0 0 0 2px rgba(249,115,22,0.18)',
-                  '0 24px 64px -12px rgba(0,0,0,0.55), 0 0 0 1px rgba(0,0,0,0.06)',
+                  '0 24px 64px -12px rgba(0,0,0,0.55), 0 0 0 1px rgba(0,0,0,0.07)',
+                  '0 24px 64px -12px rgba(247,146,30,0.24), 0 0 0 2px rgba(247,146,30,0.20)',
+                  '0 24px 64px -12px rgba(0,0,0,0.55), 0 0 0 1px rgba(0,0,0,0.07)',
                 ],
               } : {}}
-              transition={{ duration: 1, ease: 'easeOut' }}
-              className="flex max-w-2xl w-full overflow-hidden rounded-[22px] bg-white
-                shadow-[0_24px_64px_-12px_rgba(0,0,0,0.55),0_0_0_1px_rgba(0,0,0,0.06)]
-                focus-within:shadow-[0_24px_64px_-12px_rgba(249,115,22,0.18),0_0_0_2px_rgba(249,115,22,0.22)]
+              transition={{ duration: 1.1, ease: 'easeOut' }}
+              className="flex max-w-2xl w-full overflow-hidden rounded-[20px] bg-white
+                shadow-[0_24px_64px_-12px_rgba(0,0,0,0.55),0_0_0_1px_rgba(0,0,0,0.07)]
+                focus-within:shadow-[0_24px_64px_-12px_rgba(247,146,30,0.20),0_0_0_2px_rgba(247,146,30,0.22)]
                 transition-shadow duration-300"
             >
-              {/* ── City trigger ── */}
+              {/* ── Segment 1: City trigger ─────────────────── */}
               <button
                 type="button"
                 onClick={() => setShowCityPicker(true)}
-                className="flex items-center gap-2 pl-5 pr-3 h-[60px] shrink-0
-                  w-[118px] sm:w-[148px]
-                  border-r border-slate-100
-                  hover:bg-slate-50/60 transition-colors duration-150 group"
+                className="flex flex-col justify-center gap-[3px] shrink-0
+                  pl-5 pr-3 h-[60px]
+                  w-[108px] sm:w-[152px]
+                  border-r border-slate-200/60
+                  hover:bg-slate-50/70 transition-colors duration-150 group"
               >
-                <motion.span
-                  animate={selectedCityName ? { scale: [1, 1.3, 1] } : {}}
-                  transition={{ duration: 0.3, ease: 'easeOut' }}
-                  className="shrink-0"
-                >
-                  <MapPin className="w-4 h-4 text-orange-500" strokeWidth={2.2} />
-                </motion.span>
-                <div className="flex-1 overflow-hidden text-left min-w-0">
-                  <AnimatePresence mode="wait" initial={false}>
-                    <motion.span
-                      key={selectedCityName ?? '__none'}
-                      initial={{ opacity: 0, y: 5 }}
-                      animate={{ opacity: 1, y: 0, transition: { duration: 0.18, ease: 'easeOut' } }}
-                      exit={{ opacity: 0, y: -5, transition: { duration: 0.12, ease: 'easeIn' } }}
-                      className="block text-[13px] font-semibold text-slate-800 truncate leading-none"
-                    >
-                      {selectedCityName ?? 'Select City'}
-                    </motion.span>
-                  </AnimatePresence>
+                {/* Micro-label */}
+                <span className="text-[9px] font-semibold uppercase tracking-[0.13em]
+                  text-slate-400 leading-none select-none">
+                  City
+                </span>
+                {/* Selected city + icons row */}
+                <div className="flex items-center gap-1.5 w-full min-w-0">
+                  <motion.span
+                    animate={selectedCityName ? { scale: [1, 1.25, 1] } : {}}
+                    transition={{ duration: 0.28, ease: 'easeOut' }}
+                    className="shrink-0"
+                  >
+                    <MapPin
+                      className="w-3.5 h-3.5 text-[#F7921E]"
+                      strokeWidth={2.3}
+                    />
+                  </motion.span>
+                  <div className="flex-1 overflow-hidden min-w-0">
+                    <AnimatePresence mode="wait" initial={false}>
+                      <motion.span
+                        key={selectedCityName ?? '__none'}
+                        initial={{ opacity: 0, y: 4 }}
+                        animate={{ opacity: 1, y: 0, transition: { duration: 0.16, ease: 'easeOut' } }}
+                        exit={{ opacity: 0, y: -4, transition: { duration: 0.10, ease: 'easeIn' } }}
+                        className="block text-[12.5px] font-semibold text-slate-800
+                          truncate leading-none"
+                      >
+                        {selectedCityName ?? 'Select...'}
+                      </motion.span>
+                    </AnimatePresence>
+                  </div>
+                  <ChevronDown
+                    className="w-2.5 h-2.5 text-slate-300 shrink-0
+                      group-hover:text-slate-500 transition-colors"
+                    strokeWidth={2.5}
+                  />
                 </div>
-                <ChevronDown
-                  className="w-3 h-3 text-slate-300 shrink-0 group-hover:text-slate-500 transition-colors"
-                  strokeWidth={2.5}
-                />
               </button>
 
-              {/* ── Geo locate button ── */}
-              <div className="flex items-center shrink-0 px-2 border-r border-slate-100">
+              {/* ── Segment 2: Geo button — hidden on mobile ─── */}
+              <div className="hidden sm:flex items-center justify-center shrink-0
+                w-[52px] border-r border-slate-200/60">
                 <button
                   type="button"
                   onClick={handleGeoLocate}
                   disabled={geoStatus === 'locating' || geoStatus === 'denied'}
+                  aria-label="Detect current location"
                   title={
-                    geoStatus === 'denied'  ? 'Location denied — enable in browser settings' :
+                    geoStatus === 'denied'  ? 'Location access denied' :
                     geoStatus === 'located' ? `Located in ${selectedCityName}` :
                     'Use my current location'
                   }
-                  aria-label="Detect current location"
-                  className={`flex items-center justify-center w-9 h-9 rounded-xl shrink-0
+                  className={`flex items-center justify-center w-9 h-9 rounded-[10px]
                     transition-all duration-200
                     ${geoStatus === 'located'
-                      ? 'text-orange-500 bg-orange-50'
+                      ? 'text-[#F7921E] bg-[#F7921E]/[0.08]'
                       : geoStatus === 'denied'
                       ? 'text-slate-200 cursor-not-allowed'
-                      : 'text-slate-300 hover:text-orange-500 hover:bg-orange-50/80'
+                      : 'text-slate-350 hover:text-[#F7921E] hover:bg-[#F7921E]/[0.07]'
                     }`}
                 >
                   <AnimatePresence mode="wait" initial={false}>
                     {geoStatus === 'locating' ? (
                       <motion.span key="spin"
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                        transition={{ duration: 0.15 }}
+                        transition={{ duration: 0.12 }}
                       >
-                        <Loader2 className="w-4 h-4 animate-spin" strokeWidth={2} />
+                        <Loader2 className="w-[15px] h-[15px] animate-spin" strokeWidth={2} />
                       </motion.span>
                     ) : geoStatus === 'located' ? (
                       <motion.span key="check"
-                        initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
-                        transition={{ duration: 0.2, ease: 'backOut' }}
+                        initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.18, ease: 'backOut' }}
                       >
-                        <CheckCircle2 className="w-4 h-4" strokeWidth={2} />
+                        <CheckCircle2 className="w-[15px] h-[15px]" strokeWidth={2} />
                       </motion.span>
                     ) : (
                       <motion.span key="locate"
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                        transition={{ duration: 0.15 }}
+                        transition={{ duration: 0.12 }}
                       >
-                        <LocateFixed className="w-4 h-4" strokeWidth={2} />
+                        <LocateFixed className="w-[15px] h-[15px]" strokeWidth={2} />
                       </motion.span>
                     )}
                   </AnimatePresence>
                 </button>
               </div>
 
-              {/* ── Search input ── */}
+              {/* ── Segment 3: Search input ─────────────────── */}
               <input
                 value={q}
                 onChange={e => setQ(e.target.value)}
                 placeholder="Search tiffin, PG, jobs, vehicles…"
-                className="flex-1 min-w-0 px-4 h-[60px]
+                aria-label="Search listings"
+                className="flex-1 min-w-0 px-3 sm:px-5 h-[60px]
                   text-[14px] font-normal leading-none text-slate-800 tracking-[-0.01em]
-                  placeholder:text-slate-300/80 placeholder:font-normal
-                  caret-orange-500 outline-none bg-transparent"
+                  placeholder:text-slate-300 placeholder:font-normal
+                  caret-[#F7921E] outline-none bg-transparent"
               />
 
-              {/* ── Submit button — perfectly inset on all 4 sides ── */}
+              {/* ── Segment 4: Submit — uniform inset padding ── */}
               <div className="flex items-center shrink-0 p-[9px]">
                 <button
                   type="submit"
-                  className="flex items-center gap-2 px-5 sm:px-6 h-[42px] rounded-[14px]
-                    bg-orange-500 text-white
-                    text-[13px] font-semibold
-                    shadow-[0_2px_10px_rgba(249,115,22,0.32)]
-                    hover:bg-orange-600
-                    hover:shadow-[0_4px_18px_rgba(249,115,22,0.45)]
-                    active:scale-[0.97] transition-all duration-200 shrink-0"
+                  className="flex items-center gap-2 h-[42px]
+                    px-4 sm:px-6 rounded-[11px]
+                    bg-[#F7921E]
+                    shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]
+                    hover:bg-[#E07B0A]
+                    active:scale-[0.97] active:bg-[#D16E05]
+                    transition-all duration-200 shrink-0 select-none"
                 >
-                  <Search className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} />
-                  <span className="hidden sm:inline">Search</span>
+                  <Search
+                    className="w-[14px] h-[14px] text-white shrink-0"
+                    strokeWidth={2.5}
+                  />
+                  <span className="hidden sm:inline text-[13px] font-semibold
+                    text-white tracking-tight">
+                    Search
+                  </span>
                 </button>
               </div>
             </motion.form>
 
-            {/* ── Geo feedback message ── */}
+            {/* ── Geo feedback toast ─────────────────────────── */}
             <AnimatePresence>
               {geoMsg && (
                 <motion.p
-                  initial={{ opacity: 0, y: -5 }}
+                  initial={{ opacity: 0, y: -4 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -5 }}
-                  transition={{ duration: 0.2 }}
+                  exit={{ opacity: 0, y: -4 }}
+                  transition={{ duration: 0.18 }}
                   className={`mt-3 text-xs font-medium flex items-center gap-1.5 ${
                     geoStatus === 'located' ? 'text-emerald-400' :
                     geoStatus === 'denied'  ? 'text-red-400/80' :
                     'text-amber-400/80'
                   }`}
                 >
-                  {geoStatus === 'located' && <CheckCircle2 className="w-3.5 h-3.5 shrink-0" strokeWidth={2} />}
+                  {geoStatus === 'located' && (
+                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0" strokeWidth={2} />
+                  )}
                   {geoMsg}
                 </motion.p>
               )}
             </AnimatePresence>
 
-            {/* ── Popular tags ── */}
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-2.5 mt-7">
-              <span className="text-[10px] font-semibold uppercase tracking-[0.13em] text-slate-500 mr-0.5">
+            {/* ══ Trending tags ════════════════════════════════ */}
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-2 mt-8">
+              {/* Label */}
+              <span className="flex items-center gap-1.5 shrink-0 mr-1
+                text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500/70">
+                <span className="w-[3px] h-[3px] rounded-full bg-slate-500/50 inline-block" />
                 Trending
               </span>
-              {POPULAR_TAGS.map((t, i) => (
+              {POPULAR_TAGS.map((tag, i) => (
                 <motion.button
-                  key={t}
+                  key={tag}
                   type="button"
-                  onClick={() => setQ(t)}
-                  initial={{ opacity: 0, y: 8 }}
+                  onClick={() => setQ(tag)}
+                  initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.35 + i * 0.05, duration: 0.3, ease: 'easeOut' }}
-                  whileTap={{ scale: 0.95 }}
-                  className="px-4 py-[7px]
-                    text-[12px] font-medium text-slate-300/80
-                    bg-white/[0.06] border border-white/[0.09]
-                    rounded-full
-                    hover:bg-orange-500/[0.13] hover:border-orange-400/[0.28]
-                    hover:text-orange-300
-                    transition-all duration-200"
+                  transition={{ delay: 0.32 + i * 0.05, duration: 0.28, ease: 'easeOut' }}
+                  whileTap={{ scale: 0.94 }}
+                  className="px-3.5 py-[5.5px] rounded-full
+                    text-[11.5px] font-medium leading-none
+                    text-slate-300 bg-white/[0.07] border border-white/[0.12]
+                    hover:bg-[#F7921E]/[0.14] hover:border-[#F7921E]/[0.28]
+                    hover:text-[#F7921E]
+                    transition-all duration-180 select-none"
                 >
-                  {t}
+                  {tag}
                 </motion.button>
               ))}
             </div>
@@ -530,67 +557,116 @@ export default function HomePage() {
       {/* ══════════════════════════════════════════════
           CATEGORY GRID
       ══════════════════════════════════════════════ */}
-      <section className="bg-[#FAFAFA] border-b border-slate-100/80">
-        <div className="page-wrap py-16 sm:py-20">
+      <section className="bg-white py-20 sm:py-24 border-b border-slate-100">
+        <div className="page-wrap">
 
-          {/* Section header */}
-          <div className="flex items-center justify-between mb-10 sm:mb-12">
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-orange-500 mb-2.5">
-                Explore
-              </p>
-              <h2 className="text-2xl sm:text-[1.75rem] font-bold text-slate-900 tracking-[-0.02em]">
-                Browse by Category
-              </h2>
+          {/* ─── Section header ─────────────────────────────── */}
+          <div className="mb-12 sm:mb-16">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-[10.5px] font-bold uppercase tracking-[0.18em]
+                  text-[#F7921E] mb-3 leading-none">
+                  Explore
+                </p>
+                <h2 className="text-[1.625rem] sm:text-[2rem] font-bold text-slate-900
+                  tracking-[-0.03em] leading-tight">
+                  Browse by Category
+                </h2>
+                <p className="text-[13px] text-slate-400 mt-2 font-normal leading-none">
+                  27,330+ active listings across all categories
+                </p>
+              </div>
+
+              {/* Live indicator */}
+              <div className="hidden sm:flex items-center gap-2 shrink-0 mt-1.5">
+                <span className="relative flex h-[7px] w-[7px]">
+                  <span className="animate-ping absolute inset-0 rounded-full bg-emerald-400/60" />
+                  <span className="relative inline-flex rounded-full h-[7px] w-[7px] bg-emerald-400/70" />
+                </span>
+                <span className="text-[11px] font-medium text-slate-400 leading-none">
+                  Updated daily
+                </span>
+              </div>
             </div>
-            <span className="hidden sm:flex items-center gap-1.5
-              text-[11px] font-medium text-slate-400 tabular-nums">
-              <span className="w-1.5 h-1.5 rounded-full bg-slate-300 inline-block" />
-              {CATEGORIES.length} categories
-            </span>
+
+            {/* Gradient rule */}
+            <div className="mt-6 h-px bg-gradient-to-r
+              from-slate-200 via-slate-100/80 to-transparent" />
           </div>
 
-          {/* Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
-            {CATEGORIES.map(({ icon: Icon, name, color, count }, i) => (
+          {/* ─── Grid ───────────────────────────────────────── */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-5">
+            {CATEGORIES.map(({ icon: Icon, name, color, accent, count }, i) => (
               <motion.div
                 key={name}
                 onClick={() => setShowCityPicker(true)}
-                initial={{ opacity: 0, y: 16 }}
+                initial={{ opacity: 0, y: 14 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-40px' }}
-                transition={{ duration: 0.35, delay: i * 0.05, ease: [0.22, 1, 0.36, 1] }}
-                whileHover={{ y: -3, transition: { duration: 0.2, ease: [0.22, 1, 0.36, 1] } }}
-                whileTap={{ scale: 0.98 }}
-                className="group bg-white rounded-2xl border border-slate-100
-                  cursor-pointer
-                  shadow-[0_1px_3px_rgba(0,0,0,0.05),0_1px_2px_rgba(0,0,0,0.03)]
-                  hover:shadow-[0_18px_44px_-8px_rgba(0,0,0,0.10),0_4px_12px_-4px_rgba(0,0,0,0.05)]
-                  hover:border-slate-200/60
-                  transition-[box-shadow,border-color] duration-300"
+                viewport={{ once: true, margin: '-30px' }}
+                transition={{ duration: 0.32, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
+                whileHover={{ y: -5, transition: { duration: 0.22, ease: [0.22, 1, 0.36, 1] } }}
+                whileTap={{ scale: 0.975 }}
+                className="group relative bg-white border border-slate-100/80 rounded-[22px]
+                  cursor-pointer select-none overflow-hidden
+                  shadow-[0_1px_3px_rgba(0,0,0,0.04),0_1px_2px_rgba(0,0,0,0.03)]
+                  hover:shadow-[0_24px_56px_-8px_rgba(0,0,0,0.10),0_8px_18px_-4px_rgba(0,0,0,0.05)]
+                  hover:border-slate-200/70
+                  transition-[box-shadow,border-color,transform] duration-300"
               >
-                <div className="p-6 sm:p-7">
+                {/* Top-edge category color accent — slides in on hover */}
+                <div className={`absolute inset-x-0 top-0 h-[2.5px] opacity-0
+                  group-hover:opacity-100 transition-opacity duration-300 ${accent}`}
+                  aria-hidden
+                />
 
-                  {/* Icon */}
-                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-5
+                <div className="p-6 sm:p-8">
+
+                  {/* ── Icon ── */}
+                  <div className={`w-[52px] h-[52px] sm:w-[56px] sm:h-[56px]
+                    rounded-[14px] sm:rounded-[16px]
+                    flex items-center justify-center mb-5 sm:mb-6
                     ${color}
-                    group-hover:scale-[1.07]
-                    transition-transform duration-200 ease-out`}>
-                    <Icon className="w-5 h-5 sm:w-[22px] sm:h-[22px]" strokeWidth={1.8} />
+                    group-hover:scale-[1.08]
+                    transition-transform duration-200
+                    ease-[cubic-bezier(0.22,1,0.36,1)]`}>
+                    <Icon className="w-[22px] h-[22px] sm:w-6 sm:h-6" strokeWidth={1.75} />
                   </div>
 
-                  {/* Name */}
-                  <h3 className="text-[15px] font-semibold text-slate-800 leading-snug mb-2
-                    group-hover:text-orange-500 transition-colors duration-200">
+                  {/* ── Name ── */}
+                  <h3 className="text-[14.5px] sm:text-[15.5px] font-semibold
+                    text-slate-800 leading-snug tracking-[-0.01em]
+                    group-hover:text-[#F7921E]
+                    transition-colors duration-200 mb-2.5">
                     {name}
                   </h3>
 
-                  {/* Count — muted but legible */}
-                  <p className="text-[12px] font-medium text-slate-400 tabular-nums tracking-[-0.01em]">
-                    {count} listings
-                  </p>
+                  {/* ── Counter — number + dot + "listings" label ── */}
+                  <div className="flex items-center gap-[5px]">
+                    <span className="text-[12px] font-semibold text-slate-500
+                      tabular-nums leading-none">
+                      {count}
+                    </span>
+                    <span className="w-[3px] h-[3px] rounded-full bg-slate-200
+                      shrink-0 inline-block" />
+                    <span className="text-[11px] font-medium text-slate-400 leading-none">
+                      listings
+                    </span>
+                  </div>
 
                 </div>
+
+                {/* ── Hover arrow — slides in from right ── */}
+                <div className="absolute bottom-[22px] right-[22px]
+                  opacity-0 group-hover:opacity-100
+                  translate-x-2 group-hover:translate-x-0
+                  transition-all duration-220 ease-[cubic-bezier(0.22,1,0.36,1)]">
+                  <ArrowRight
+                    className="w-[14px] h-[14px] text-slate-300"
+                    strokeWidth={2}
+                    aria-hidden
+                  />
+                </div>
+
               </motion.div>
             ))}
           </div>
