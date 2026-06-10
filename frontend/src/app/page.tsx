@@ -196,40 +196,71 @@ export default function HomePage() {
       {/* ══════════════════════════════════════════════
           HEADER
       ══════════════════════════════════════════════ */}
-      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-slate-100 shadow-sm shadow-slate-900/[0.04]">
-        <div className="page-wrap h-16 flex items-center gap-6">
-          <Link href="/" className="shrink-0 flex flex-col leading-none">
-            <span className="text-xl font-extrabold tracking-tight text-slate-900">
+      <header className="sticky top-0 z-50 bg-white/98 backdrop-blur-md border-b border-slate-100/80">
+        <div className="page-wrap h-[60px] flex items-center">
+
+          {/* ── Wordmark ─────────────────────────────── */}
+          <Link href="/" className="shrink-0 flex flex-col leading-none select-none">
+            <span className="text-[17px] font-extrabold tracking-[-0.02em] text-slate-900">
               Locals<span className="text-orange-500">India</span>
             </span>
-            <span className="text-[10px] font-medium text-slate-400 tracking-wide">localsindia.com</span>
+            <span className="text-[9px] font-medium text-slate-400 tracking-[0.09em] uppercase mt-[3px]">
+              localsindia.com
+            </span>
           </Link>
 
           <div className="flex-1" />
 
+          {/* ── Nav ──────────────────────────────────── */}
           <nav className="flex items-center gap-1">
+
+            {/* Browse Cities */}
             <button
               onClick={() => setShowCityPicker(true)}
-              className="hidden md:flex px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors"
+              className="hidden md:flex items-center gap-1.5 px-3.5 py-2 rounded-xl
+                text-[13px] font-medium text-slate-500
+                hover:text-slate-900 hover:bg-slate-50
+                transition-all duration-150"
             >
-              Browse Cities
+              <MapPin className="w-3.5 h-3.5 shrink-0" strokeWidth={2} />
+              Cities
             </button>
+
+            {/* Sign in */}
             <Link
               href="/auth/login"
-              className="hidden md:flex px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors"
+              className="hidden md:flex items-center px-3.5 py-2 rounded-xl
+                text-[13px] font-medium text-slate-500
+                hover:text-slate-900 hover:bg-slate-50
+                transition-all duration-150"
             >
-              Login
+              Sign in
             </Link>
+
+            {/* Subtle divider */}
+            <div className="hidden md:block w-px h-4 bg-slate-200 mx-2" />
 
             {/* Language selector */}
             <LanguageSelector />
 
+            {/* Post a Listing — primary CTA */}
             <button
               onClick={() => setShowCityPicker(true)}
-              className="ml-1 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-orange-500 hover:bg-orange-600 transition-colors shadow-sm shadow-orange-500/25"
+              className="flex items-center gap-1.5 ml-2
+                pl-4 pr-5 py-[9px] rounded-2xl
+                text-[13px] font-semibold text-white
+                bg-orange-500
+                hover:bg-orange-600
+                shadow-[0_2px_10px_rgba(249,115,22,0.30)]
+                hover:shadow-[0_4px_18px_rgba(249,115,22,0.40)]
+                active:scale-[0.975]
+                transition-all duration-200"
             >
-              <span className="hidden sm:inline">Post a Listing</span>
-              <span className="sm:hidden">+ Post</span>
+              <svg viewBox="0 0 12 12" fill="currentColor" className="w-3 h-3 shrink-0" aria-hidden>
+                <path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none" />
+              </svg>
+              <span className="hidden sm:inline">Post Listing</span>
+              <span className="sm:hidden">Post</span>
             </button>
           </nav>
         </div>

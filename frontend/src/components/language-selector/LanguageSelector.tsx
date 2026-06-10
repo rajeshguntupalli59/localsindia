@@ -265,25 +265,25 @@ export default function LanguageSelector() {
         aria-label="Select language"
         aria-expanded={isOpen}
         aria-haspopup="dialog"
-        className={`relative flex items-center gap-1.5 rounded-lg transition-colors duration-150
-          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50
-          px-2.5 py-2 text-sm font-medium
-          ${isOpen ? 'bg-slate-100 text-slate-900' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'}`}
+        className={`relative flex items-center gap-1.5 rounded-xl transition-all duration-150
+          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/40
+          px-2.5 py-2
+          ${isOpen ? 'bg-slate-100 text-slate-900' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'}`}
       >
-        {/* Orange dot when non-English is active */}
+        {/* Orange dot indicator for non-English */}
         {isNonDefault && (
-          <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-orange-500 ring-2 ring-white" />
+          <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-orange-500 ring-[1.5px] ring-white" />
         )}
 
         <Globe
           className="w-4 h-4 shrink-0"
           style={{ color: isNonDefault ? 'var(--li-primary)' : undefined }}
-          strokeWidth={2}
+          strokeWidth={1.8}
         />
 
-        {/* Language name — visible md+ only */}
-        <span className="hidden md:inline max-w-[80px] truncate leading-none">
-          {activeLang.native}
+        {/* Compact 2-char code — visible md+ */}
+        <span className="hidden md:inline text-[12px] font-semibold tracking-wide leading-none uppercase">
+          {activeLang.code}
         </span>
 
         {/* Chevron — desktop only */}
