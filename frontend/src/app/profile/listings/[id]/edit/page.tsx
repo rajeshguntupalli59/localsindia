@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, Globe, Save, Share2 } from 'lucide-react';
+import { ArrowLeft, Globe, MapPin, Save, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -24,6 +24,7 @@ export default function EditListingPage() {
   const [whatsappUrl, setWhatsappUrl] = useState('');
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [socialUrl, setSocialUrl] = useState('');
+  const [area, setArea] = useState('');
 
   useEffect(() => {
     const token = localStorage.getItem('access_token');
@@ -50,6 +51,7 @@ export default function EditListingPage() {
       setWhatsappUrl(data.whatsapp_url ?? '');
       setWebsiteUrl(data.website_url ?? '');
       setSocialUrl(data.social_url ?? '');
+      setArea(data.area ?? '');
     } catch {
       toast.error('Listing not found');
       router.replace('/profile/listings');
@@ -72,6 +74,7 @@ export default function EditListingPage() {
         whatsapp_url: whatsappUrl.trim() || undefined,
         website_url: websiteUrl.trim() || undefined,
         social_url: socialUrl.trim() || undefined,
+        area: area.trim() || undefined,
       }, token);
       toast.success('Listing updated!');
       router.push('/profile/listings');
@@ -156,6 +159,21 @@ export default function EditListingPage() {
               value={price}
               onChange={e => setPrice(e.target.value)}
               placeholder="Leave blank for price on request"
+            />
+          </div>
+        </div>
+
+        {/* Area */}
+        <div className="space-y-2">
+          <Label htmlFor="area">Area / Neighbourhood <span className="text-muted-foreground font-normal">— optional</span></Label>
+          <div className="flex items-center gap-2">
+            <MapPin className="w-4 h-4 shrink-0" style={{ color: 'var(--li-primary)' }} />
+            <Input
+              id="area"
+              value={area}
+              onChange={e => setArea(e.target.value)}
+              placeholder="e.g. Koramangala, Banjara Hills..."
+              maxLength={100}
             />
           </div>
         </div>

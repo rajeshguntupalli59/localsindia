@@ -192,7 +192,7 @@ export default function ListingDetailPage() {
               <div className="flex items-center gap-4 text-sm" style={{ color: 'var(--li-muted)' }}>
                 <span className="flex items-center gap-1.5">
                   <MapPin className="w-4 h-4" style={{ color: 'var(--li-primary)' }} />
-                  {citySlug.charAt(0).toUpperCase() + citySlug.slice(1)}
+                  {listing.area ? `${listing.area}, ` : ''}{citySlug.charAt(0).toUpperCase() + citySlug.slice(1)}
                 </span>
                 <span className="flex items-center gap-1.5">
                   <Clock className="w-4 h-4" />

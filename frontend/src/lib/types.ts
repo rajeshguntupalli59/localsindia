@@ -30,6 +30,7 @@ export interface Listing {
   whatsapp_url: string | null;
   website_url: string | null;
   social_url: string | null;
+  area: string | null;
   status: 'active' | 'pending' | 'flagged' | 'fulfilled' | 'expired';
   is_featured: boolean;
   expires_at: string;
@@ -122,4 +123,5 @@ export interface CreateListingInput {
   whatsapp_url?: string;
   website_url?: string;
   social_url?: string;
+  area?: string;
 }

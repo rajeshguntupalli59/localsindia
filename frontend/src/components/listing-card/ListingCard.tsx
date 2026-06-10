@@ -90,11 +90,13 @@ export default function ListingCard({ listing, citySlug = '' }: Props) {
             {listing.title}
           </p>
           <div className="flex items-center gap-3 text-xs" style={{ color: 'var(--li-muted)' }}>
-            <span className="flex items-center gap-1">
-              <MapPin className="w-3 h-3" />
-              {listing.contact_phone}
-            </span>
-            <span className="flex items-center gap-1 ml-auto">
+            {listing.area && (
+              <span className="flex items-center gap-1 truncate">
+                <MapPin className="w-3 h-3 shrink-0" />
+                {listing.area}
+              </span>
+            )}
+            <span className="flex items-center gap-1 ml-auto shrink-0">
               <Clock className="w-3 h-3" />
               {timeAgo(listing.created_at)}
             </span>

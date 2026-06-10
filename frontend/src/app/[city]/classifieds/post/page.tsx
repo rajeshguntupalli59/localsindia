@@ -31,12 +31,13 @@ interface FormData {
   whatsapp_toggle: boolean;
   website_url: string;
   social_url: string;
+  area: string;
 }
 
 const EMPTY: FormData = {
   title: '', description: '', category_id: '', price: '',
   contact_phone: '', whatsapp_toggle: true,
-  website_url: '', social_url: '',
+  website_url: '', social_url: '', area: '',
 };
 
 const PHONE_RE = /^\+91[6-9]\d{9}$/;
@@ -148,6 +149,7 @@ export default function PostListingPage() {
         whatsapp_url: form.whatsapp_toggle ? `https://wa.me/91${phone.replace('+91', '')}` : undefined,
         website_url: form.website_url.trim() || undefined,
         social_url: form.social_url.trim() || undefined,
+        area: form.area.trim() || undefined,
       }, token);
 
       for (const photo of photos) {
@@ -506,6 +508,32 @@ export default function PostListingPage() {
 
                 <div>
                   <label className="text-sm font-bold mb-2 block" style={{ color: 'var(--li-text)' }}>
+                    Area / Neighbourhood <span className="font-normal text-xs" style={{ color: 'var(--li-muted)' }}>(optional)</span>
+                  </label>
+                  <div className="flex rounded-xl border-2 overflow-hidden" style={{ borderColor: 'var(--li-border)' }}>
+                    <span
+                      className="flex items-center px-3 border-r-2 shrink-0"
+                      style={{ background: '#F3F4F6', borderColor: 'var(--li-border)' }}
+                    >
+                      <MapPin className="w-4 h-4" style={{ color: 'var(--li-muted)' }} />
+                    </span>
+                    <input
+                      type="text"
+                      value={form.area}
+                      onChange={e => save({ area: e.target.value })}
+                      placeholder="e.g. Koramangala, Banjara Hills, Andheri West..."
+                      className="flex-1 px-3 py-3 text-sm outline-none bg-white"
+                      style={{ color: 'var(--li-text)' }}
+                      maxLength={100}
+                    />
+                  </div>
+                  <p className="text-xs mt-1.5" style={{ color: 'var(--li-muted)' }}>
+                    Helps buyers find listings near them — beats city-only searches
+                  </p>
+                </div>
+
+                <div>
+                  <label className="text-sm font-bold mb-2 block" style={{ color: 'var(--li-text)' }}>
                     Your mobile number <span style={{ color: '#EF4444' }}>*</span>
                   </label>
                   <div className="flex">
@@ -615,7 +643,7 @@ export default function PostListingPage() {
                   {city && (
                     <p className="flex items-center gap-1 text-xs mt-2" style={{ color: 'var(--li-muted)' }}>
                       <MapPin className="w-3 h-3 shrink-0" strokeWidth={2} />
-                      {city.name}, {city.state}
+                      {form.area ? `${form.area}, ` : ''}{city.name}, {city.state}
                     </p>
                   )}
                 </div>

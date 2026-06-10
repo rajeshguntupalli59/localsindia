@@ -17,6 +17,7 @@ class ListingCreate(BaseModel):
     whatsapp_url: str | None = None
     website_url: str | None = None
     social_url: str | None = None
+    area: str | None = None
 
     @field_validator("contact_phone")
     @classmethod
@@ -40,6 +41,7 @@ class ListingUpdate(BaseModel):
     whatsapp_url: str | None = None
     website_url: str | None = None
     social_url: str | None = None
+    area: str | None = None
 
     @field_validator("whatsapp_url")
     @classmethod
@@ -66,6 +68,7 @@ class ListingOut(BaseModel):
     whatsapp_url: str | None
     website_url: str | None = None
     social_url: str | None = None
+    area: str | None = None
     status: str
     is_featured: bool
     expires_at: datetime
