@@ -1,0 +1,52 @@
+{
+  "nav": {
+    "home": "ਹੋਮ",
+    "search": "ਖੋਜ",
+    "post": "ਮੁਫ਼ਤ ਪੋਸਟ ਕਰੋ",
+    "myListings": "ਮੇਰੀਆਂ ਇਸ਼ਤਿਹਾਰਾਂ",
+    "profile": "ਪ੍ਰੋਫਾਈਲ"
+  },
+  "city": {
+    "selectCity": "ਆਪਣਾ ਸ਼ਹਿਰ ਚੁਣੋ",
+    "searchPlaceholder": "ਸ਼ਹਿਰ ਖੋਜੋ...",
+    "recentCities": "ਹਾਲੀਆ"
+  },
+  "listing": {
+    "post": "ਮੁਫ਼ਤ ਇਸ਼ਤਿਹਾਰ ਦਿਓ",
+    "whatsapp": "WhatsApp ਤੇ ਗੱਲ ਕਰੋ",
+    "priceOnRequest": "ਕੀਮਤ ਪੁੱਛੋ",
+    "pending": "ਸਮੀਖਿਆ ਅਧੀਨ",
+    "active": "ਸਰਗਰਮ",
+    "featured": "ਵਿਸ਼ੇਸ਼",
+    "fulfilled": "ਵੇਚਿਆ ਗਿਆ",
+    "expired": "ਮਿਆਦ ਖਤਮ",
+    "timeAgo": "{time} ਪਹਿਲਾਂ"
+  },
+  "search": {
+    "placeholder": "ਟਿਫਿਨ, PG, ਟਿਊਟਰ ਖੋਜੋ...",
+    "noResults": "\"{q}\" ਲਈ ਕੋਈ ਨਤੀਜਾ ਨਹੀਂ",
+    "filters": "ਫਿਲਟਰ"
+  },
+  "post": {
+    "title": "ਤੁਸੀਂ ਕੀ ਵੇਚ ਰਹੇ ਹੋ?",
+    "step1": "ਵੇਰਵੇ",
+    "step2": "ਫੋਟੋ",
+    "step3": "ਸੰਪਰਕ",
+    "success": "ਤੁਹਾਡਾ ਇਸ਼ਤਿਹਾਰ ਸਮੀਖਿਆ ਅਧੀਨ ਹੈ"
+  },
+  "errors": {
+    "phoneInvalid": "ਸਹੀ ਭਾਰਤੀ ਮੋਬਾਈਲ ਨੰਬਰ ਦਰਜ ਕਰੋ",
+    "required": "ਇਹ ਖੇਤਰ ਲਾਜ਼ਮੀ ਹੈ",
+    "imageTooLarge": "ਤਸਵੀਰ 5MB ਤੋਂ ਘੱਟ ਹੋਣੀ ਚਾਹੀਦੀ ਹੈ"
+  },
+  "categories": {
+    "classifieds": "ਇਸ਼ਤਿਹਾਰ",
+    "services": "ਸੇਵਾਵਾਂ",
+    "pgRoommate": "PG / ਰੂਮਮੇਟ",
+    "jobs": "ਨੌਕਰੀਆਂ",
+    "vehicles": "ਵਾਹਨ",
+    "electronics": "ਇਲੈਕਟ੍ਰੋਨਿਕਸ",
+    "events": "ਸਮਾਗਮ",
+    "businesses": "ਕਾਰੋਬਾਰ"
+  }
+}

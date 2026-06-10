@@ -1,0 +1,52 @@
+{
+  "nav": {
+    "home": "ഹോം",
+    "search": "തിരയൽ",
+    "post": "സൗജന്യ പോസ്റ്റ്",
+    "myListings": "എന്റെ പരസ്യങ്ങൾ",
+    "profile": "പ്രൊഫൈൽ"
+  },
+  "city": {
+    "selectCity": "നിങ്ങളുടെ നഗരം തിരഞ്ഞെടുക്കൂ",
+    "searchPlaceholder": "നഗരം തിരയൂ...",
+    "recentCities": "സമീപകാലം"
+  },
+  "listing": {
+    "post": "സൗജന്യ പരസ്യം നൽകൂ",
+    "whatsapp": "WhatsApp-ൽ സംസാരിക്കൂ",
+    "priceOnRequest": "വില ചോദിക്കൂ",
+    "pending": "അവലോകനത്തിൽ",
+    "active": "സജീവം",
+    "featured": "ഫീച്ചർ ചെയ്തത്",
+    "fulfilled": "വിറ്റഴിഞ്ഞു",
+    "expired": "കാലഹരണപ്പെട്ടു",
+    "timeAgo": "{time} മുമ്പ്"
+  },
+  "search": {
+    "placeholder": "ടിഫ്ഫിൻ, PG, ട്യൂട്ടർ തിരയൂ...",
+    "noResults": "\"{q}\" നായി ഫലങ്ങൾ ഇല്ല",
+    "filters": "ഫിൽട്ടറുകൾ"
+  },
+  "post": {
+    "title": "നിങ്ങൾ എന്ത് വിൽക്കുന്നു?",
+    "step1": "വിവരങ്ങൾ",
+    "step2": "ഫോട്ടോകൾ",
+    "step3": "ബന്ധപ്പെടൽ",
+    "success": "നിങ്ങളുടെ പരസ്യം അവലോകനത്തിൽ ആണ്"
+  },
+  "errors": {
+    "phoneInvalid": "സാധുവായ ഇന്ത്യൻ മൊബൈൽ നമ്പർ നൽകൂ",
+    "required": "ഈ ഫീൽഡ് ആവശ്യമാണ്",
+    "imageTooLarge": "ചിത്രം 5MB-ൽ കൂടരുത്"
+  },
+  "categories": {
+    "classifieds": "പരസ്യങ്ങൾ",
+    "services": "സേവനങ്ങൾ",
+    "pgRoommate": "PG / റൂംമേറ്റ്",
+    "jobs": "ജോലികൾ",
+    "vehicles": "വാഹനങ്ങൾ",
+    "electronics": "ഇലക്ട്രോണിക്സ്",
+    "events": "ഇവന്റുകൾ",
+    "businesses": "ബിസിനസുകൾ"
+  }
+}

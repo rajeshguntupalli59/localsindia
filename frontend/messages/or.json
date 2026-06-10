@@ -1,0 +1,52 @@
+{
+  "nav": {
+    "home": "ହୋମ",
+    "search": "ଖୋଜ",
+    "post": "ମୁଫ ପୋଷ୍ଟ",
+    "myListings": "ମୋ ବିଜ୍ଞାପନ",
+    "profile": "ପ୍ରୋଫାଇଲ"
+  },
+  "city": {
+    "selectCity": "ଆପଣଙ୍କ ସହର ବାଛନ୍ତୁ",
+    "searchPlaceholder": "ସହର ଖୋଜ...",
+    "recentCities": "ସଦ୍ୟ"
+  },
+  "listing": {
+    "post": "ମୁଫ ବିଜ୍ଞାପନ ଦିଅ",
+    "whatsapp": "WhatsApp ରେ କଥା କୁହ",
+    "priceOnRequest": "ମୂଲ୍ୟ ଜିଜ୍ଞାସ କର",
+    "pending": "ସମୀକ୍ଷାରେ",
+    "active": "ସକ୍ରିୟ",
+    "featured": "ବିଶେଷ",
+    "fulfilled": "ବିକ୍ରି ହୋଇଛି",
+    "expired": "ମିଆଦ ଶେଷ",
+    "timeAgo": "{time} ପୂର୍ବ"
+  },
+  "search": {
+    "placeholder": "ଟିଫିନ, PG, ଟ୍ୟୁଟର ଖୋଜ...",
+    "noResults": "\"{q}\" ପାଇଁ ଫଳ ନାହିଁ",
+    "filters": "ଫିଲ୍ଟର"
+  },
+  "post": {
+    "title": "ଆପଣ କ'ଣ ବିକ୍ରୟ କରୁଛନ୍ତି?",
+    "step1": "ବିବରଣ",
+    "step2": "ଫୋଟୋ",
+    "step3": "ଯୋଗାଯୋଗ",
+    "success": "ଆପଣଙ୍କ ବିଜ୍ଞାପନ ସମୀକ୍ଷାରେ ଅଛି"
+  },
+  "errors": {
+    "phoneInvalid": "ବୈଧ ଭାରତୀୟ ମୋବାଇଲ ନମ୍ବର ଦିଅ",
+    "required": "ଏହି ଫିଲ୍ଡ ଆବଶ୍ୟକ",
+    "imageTooLarge": "ଛବି 5MB ରୁ କମ ହେବ"
+  },
+  "categories": {
+    "classifieds": "ବିଜ୍ଞାପନ",
+    "services": "ସେବା",
+    "pgRoommate": "PG / ରୁମମେଟ",
+    "jobs": "ଚାକିରି",
+    "vehicles": "ଯାନ",
+    "electronics": "ଇଲେକ୍ଟ୍ରୋନିକ୍ସ",
+    "events": "ଇଭେଣ୍ଟ",
+    "businesses": "ବ୍ୟବସାୟ"
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "nav": {
+    "home": "હોમ",
+    "search": "શોધ",
+    "post": "મફત પોસ્ટ કરો",
+    "myListings": "મારી જાહેરાતો",
+    "profile": "પ્રોફાઇલ"
+  },
+  "city": {
+    "selectCity": "તમારું શહેર પસંદ કરો",
+    "searchPlaceholder": "શહેર શોધો...",
+    "recentCities": "તાજેતરના"
+  },
+  "listing": {
+    "post": "મફત જાહેરાત નાખો",
+    "whatsapp": "WhatsApp પર વાત કરો",
+    "priceOnRequest": "ભાવ પૂછો",
+    "pending": "સમીક્ષા હેઠળ",
+    "active": "સક્રિય",
+    "featured": "વિશેષ",
+    "fulfilled": "વેચાઈ ગયું",
+    "expired": "અવધિ સમાપ્ત",
+    "timeAgo": "{time} પહેલા"
+  },
+  "search": {
+    "placeholder": "ટિફિન, PG, ટ્યૂટર શોધો...",
+    "noResults": "\"{q}\" માટે કોઈ પરિણામ નહીં",
+    "filters": "ફિલ્ટર"
+  },
+  "post": {
+    "title": "તમે શું વેચો છો?",
+    "step1": "વિગતો",
+    "step2": "ફોટો",
+    "step3": "સંપર્ક",
+    "success": "તમારી જાહેરાત સમીક્ષા હેઠળ છે"
+  },
+  "errors": {
+    "phoneInvalid": "માન્ય ભારતીય મોબાઇલ નંબર દાખલ કરો",
+    "required": "આ ક્ષેત્ર જરૂરી છે",
+    "imageTooLarge": "છબી 5MB કરતાં ઓછી હોવી જોઈએ"
+  },
+  "categories": {
+    "classifieds": "જાહેરાતો",
+    "services": "સેવાઓ",
+    "pgRoommate": "PG / રૂममेट",
+    "jobs": "નોકરીઓ",
+    "vehicles": "વાહનો",
+    "electronics": "ઈલેક્ટ્રૉનિક્સ",
+    "events": "ઇવેન્ટ્સ",
+    "businesses": "વ્યવસાયો"
+  }
+}

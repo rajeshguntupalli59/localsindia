@@ -1,0 +1,52 @@
+{
+  "nav": {
+    "home": "ಮುಖಪುಟ",
+    "search": "ಹುಡುಕಾಟ",
+    "post": "ಉಚಿತ ಪ್ರಕಟಿಸಿ",
+    "myListings": "ನನ್ನ ಜಾಹೀರಾತುಗಳು",
+    "profile": "ಪ್ರೊಫೈಲ್"
+  },
+  "city": {
+    "selectCity": "ನಿಮ್ಮ ನಗರ ಆಯ್ಕೆ ಮಾಡಿ",
+    "searchPlaceholder": "ನಗರ ಹುಡುಕಿ...",
+    "recentCities": "ಇತ್ತೀಚಿನ"
+  },
+  "listing": {
+    "post": "ಉಚಿತ ಜಾಹೀರಾತು ಪ್ರಕಟಿಸಿ",
+    "whatsapp": "WhatsApp ನಲ್ಲಿ ಮಾತನಾಡಿ",
+    "priceOnRequest": "ಬೆಲೆ ಕೇಳಿ",
+    "pending": "ಪರಿಶೀಲನೆಯಲ್ಲಿ",
+    "active": "ಸಕ್ರಿಯ",
+    "featured": "ವಿಶೇಷ",
+    "fulfilled": "ಮಾರಾಟವಾಗಿದೆ",
+    "expired": "ಅವಧಿ ಮೀರಿದೆ",
+    "timeAgo": "{time} ಹಿಂದೆ"
+  },
+  "search": {
+    "placeholder": "ಟಿಫಿನ್, PG, ಶಿಕ್ಷಕ ಹುಡುಕಿ...",
+    "noResults": "\"{q}\" ಗೆ ಫಲಿತಾಂಶಗಳಿಲ್ಲ",
+    "filters": "ಫಿಲ್ಟರ್‌ಗಳು"
+  },
+  "post": {
+    "title": "ನೀವು ಏನು ಮಾರುತ್ತಿದ್ದೀರಿ?",
+    "step1": "ವಿವರಗಳು",
+    "step2": "ಫೋಟೋಗಳು",
+    "step3": "ಸಂಪರ್ಕ",
+    "success": "ನಿಮ್ಮ ಜಾಹೀರಾತು ಪರಿಶೀಲನೆಯಲ್ಲಿದೆ"
+  },
+  "errors": {
+    "phoneInvalid": "ಮಾನ್ಯ ಭಾರತೀಯ ಮೊಬೈಲ್ ಸಂಖ್ಯೆ ನಮೂದಿಸಿ",
+    "required": "ಈ ಕ್ಷೇತ್ರ ಅಗತ್ಯ",
+    "imageTooLarge": "ಚಿತ್ರ 5MB ಗಿಂತ ಕಡಿಮೆ ಇರಬೇಕು"
+  },
+  "categories": {
+    "classifieds": "ಜಾಹೀರಾತುಗಳು",
+    "services": "ಸೇವೆಗಳು",
+    "pgRoommate": "PG / ರೂಮ್‌ಮೇಟ್",
+    "jobs": "ಉದ್ಯೋಗಗಳು",
+    "vehicles": "ವಾಹನಗಳು",
+    "electronics": "ಎಲೆಕ್ಟ್ರಾನಿಕ್ಸ್",
+    "events": "ಕಾರ್ಯಕ್ರಮಗಳು",
+    "businesses": "ವ್ಯವಹಾರಗಳು"
+  }
+}

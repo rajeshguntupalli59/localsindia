@@ -1,0 +1,52 @@
+{
+  "nav": {
+    "home": "मुखपृष्ठ",
+    "search": "शोध",
+    "post": "मोफत पोस्ट करा",
+    "myListings": "माझ्या जाहिराती",
+    "profile": "प्रोफाइल"
+  },
+  "city": {
+    "selectCity": "तुमचे शहर निवडा",
+    "searchPlaceholder": "शहर शोधा...",
+    "recentCities": "अलीकडील"
+  },
+  "listing": {
+    "post": "मोफत जाहिरात पोस्ट करा",
+    "whatsapp": "WhatsApp वर बोला",
+    "priceOnRequest": "किंमत विचारा",
+    "pending": "पुनरावलोकनात",
+    "active": "सक्रिय",
+    "featured": "वैशिष्ट्यीकृत",
+    "fulfilled": "विकले",
+    "expired": "कालबाह्य",
+    "timeAgo": "{time} पूर्वी"
+  },
+  "search": {
+    "placeholder": "टिफिन, PG, शिक्षक शोधा...",
+    "noResults": "\"{q}\" साठी कोणतेही परिणाम नाहीत",
+    "filters": "फिल्टर"
+  },
+  "post": {
+    "title": "तुम्ही काय विकत आहात?",
+    "step1": "तपशील",
+    "step2": "फोटो",
+    "step3": "संपर्क",
+    "success": "तुमची जाहिरात पुनरावलोकनात आहे"
+  },
+  "errors": {
+    "phoneInvalid": "वैध भारतीय मोबाईल नंबर प्रविष्ट करा",
+    "required": "हे फील्ड आवश्यक आहे",
+    "imageTooLarge": "प्रतिमा 5MB पेक्षा कमी असणे आवश्यक आहे"
+  },
+  "categories": {
+    "classifieds": "जाहिराती",
+    "services": "सेवा",
+    "pgRoommate": "PG / रूममेट",
+    "jobs": "नोकऱ्या",
+    "vehicles": "वाहने",
+    "electronics": "इलेक्ट्रॉनिक्स",
+    "events": "कार्यक्रम",
+    "businesses": "व्यवसाय"
+  }
+}

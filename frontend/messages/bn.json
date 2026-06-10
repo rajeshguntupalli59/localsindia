@@ -1,0 +1,52 @@
+{
+  "nav": {
+    "home": "হোম",
+    "search": "অনুসন্ধান",
+    "post": "বিনামূল্যে পোস্ট করুন",
+    "myListings": "আমার বিজ্ঞাপন",
+    "profile": "প্রোফাইল"
+  },
+  "city": {
+    "selectCity": "আপনার শহর বেছে নিন",
+    "searchPlaceholder": "শহর খুঁজুন...",
+    "recentCities": "সাম্প্রতিক"
+  },
+  "listing": {
+    "post": "বিনামূল্যে বিজ্ঞাপন দিন",
+    "whatsapp": "WhatsApp-এ চ্যাট করুন",
+    "priceOnRequest": "দাম জিজ্ঞাসা করুন",
+    "pending": "পর্যালোচনায়",
+    "active": "সক্রিয়",
+    "featured": "বিশেষ",
+    "fulfilled": "বিক্রি হয়েছে",
+    "expired": "মেয়াদ শেষ",
+    "timeAgo": "{time} আগে"
+  },
+  "search": {
+    "placeholder": "টিফিন, PG, শিক্ষক খুঁজুন...",
+    "noResults": "\"{q}\" এর জন্য কোন ফলাফল নেই",
+    "filters": "ফিল্টার"
+  },
+  "post": {
+    "title": "আপনি কী বিক্রি করছেন?",
+    "step1": "বিবরণ",
+    "step2": "ছবি",
+    "step3": "যোগাযোগ",
+    "success": "আপনার বিজ্ঞাপন পর্যালোচনায় আছে"
+  },
+  "errors": {
+    "phoneInvalid": "একটি বৈধ ভারতীয় মোবাইল নম্বর লিখুন",
+    "required": "এই ক্ষেত্রটি আবশ্যক",
+    "imageTooLarge": "ছবি 5MB এর কম হতে হবে"
+  },
+  "categories": {
+    "classifieds": "বিজ্ঞাপন",
+    "services": "সেবা",
+    "pgRoommate": "PG / রুমমেট",
+    "jobs": "চাকরি",
+    "vehicles": "যানবাহন",
+    "electronics": "ইলেকট্রনিক্স",
+    "events": "অনুষ্ঠান",
+    "businesses": "ব্যবসা"
+  }
+}
