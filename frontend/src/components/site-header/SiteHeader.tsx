@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Search, MapPin, LogOut, List, User, ChevronDown } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
+import LanguageSelector from '@/components/language-selector/LanguageSelector';
 
 interface Props {
   citySlug?: string;
@@ -120,6 +121,9 @@ export default function SiteHeader({ citySlug, cityName }: Props) {
           >
             Browse
           </Link>
+
+          {/* Language selector — visible on all screen sizes */}
+          <LanguageSelector />
 
           {/* Auth section */}
           {user ? (

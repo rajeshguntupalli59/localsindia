@@ -15,6 +15,7 @@ import Link from 'next/link';
 import { api } from '@/lib/api';
 import type { City } from '@/lib/types';
 import SiteFooter from '@/components/site-footer/SiteFooter';
+import LanguageSelector from '@/components/language-selector/LanguageSelector';
 
 // ─── types ───────────────────────────────────────────────────
 interface CategoryDef { icon: LucideIcon; name: string; color: string; count: string }
@@ -210,6 +211,10 @@ export default function HomePage() {
             >
               Login
             </Link>
+
+            {/* Language selector */}
+            <LanguageSelector />
+
             <button
               onClick={() => setShowCityPicker(true)}
               className="ml-1 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-orange-500 hover:bg-orange-600 transition-colors shadow-sm shadow-orange-500/25"
