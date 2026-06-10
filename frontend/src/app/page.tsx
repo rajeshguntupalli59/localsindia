@@ -44,7 +44,7 @@ const POPULAR_TAGS = ['Tiffin Service', 'PG for Boys', 'Used Laptop', 'Honda Act
 
 const STATS: [string, string][] = [
   ['1.2L+', 'Active Listings'],
-  ['140+', 'Cities'],
+  ['496+', 'Cities'],
   ['3.8L+', 'Users'],
   ['11', 'Languages'],
 ];
@@ -52,7 +52,7 @@ const STATS: [string, string][] = [
 const TRUST: TrustDef[] = [
   { icon: Zap,          title: 'Instant Posting',      subtitle: 'Go live in under a minute with verified reach.', iconBg: 'bg-orange-500/[0.15]',  iconColor: 'text-orange-400'  },
   { icon: MessageCircle,title: 'WhatsApp Native',       subtitle: 'Contact sellers directly — no middlemen.',       iconBg: 'bg-emerald-500/[0.15]', iconColor: 'text-emerald-400', isWhatsApp: true },
-  { icon: MapPin,       title: 'Localized Scale',       subtitle: '140+ cities across South India.',                iconBg: 'bg-blue-500/[0.15]',    iconColor: 'text-blue-400'    },
+  { icon: MapPin,       title: 'Localized Scale',       subtitle: '496+ cities across India.',                iconBg: 'bg-blue-500/[0.15]',    iconColor: 'text-blue-400'    },
   { icon: Languages,    title: 'Multilingual Support',  subtitle: '11 native languages, your way.',                 iconBg: 'bg-violet-500/[0.15]',  iconColor: 'text-violet-400'  },
 ];
 
@@ -175,8 +175,16 @@ export default function HomePage() {
   // ── derived data ──────────────────────────────────────────────
   const recentCities = cities.filter(c => recentSlugs.includes(c.slug));
   const grouped: Record<string, City[]> = {};
+  const search = citySearch.toLowerCase();
   for (const s of STATE_ORDER) {
-    const sc = cities.filter(c => c.state === s && c.name.toLowerCase().includes(citySearch.toLowerCase()));
+    const sc = cities.filter(c => c.state === s && c.name.toLowerCase().includes(search));
+    if (sc.length) grouped[s] = sc;
+  }
+  const otherStates = Array.from(new Set(cities.map(c => c.state)))
+    .filter(s => !STATE_ORDER.includes(s))
+    .sort();
+  for (const s of otherStates) {
+    const sc = cities.filter(c => c.state === s && c.name.toLowerCase().includes(search));
     if (sc.length) grouped[s] = sc;
   }
   const selectedCityName = cities.find(c => c.slug === selectedCity)?.name;
