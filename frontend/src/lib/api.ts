@@ -8,9 +8,12 @@ import type {
   SearchResult,
   SearchParams,
   CreateListingInput,
+  Event,
+  Business,
+  Review,
 } from './types';
 
-export type { User };
+export type { User, Event, Business, Review };
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
 
@@ -152,6 +155,30 @@ export const api = {
         body: JSON.stringify(data),
         token,
       }),
+  },
+  events: {
+    list: (citySlug: string, params?: Record<string, string>) =>
+      req<Event[]>(`/api/v1/events${qs({ city_slug: citySlug, ...params })}`),
+    get: (id: string) => req<Event>(`/api/v1/events/${id}`),
+    create: (data: object, token: string) =>
+      req<Event>('/api/v1/events', { method: 'POST', body: JSON.stringify(data), token }),
+    update: (id: string, data: object, token: string) =>
+      req<Event>(`/api/v1/events/${id}`, { method: 'PATCH', body: JSON.stringify(data), token }),
+    delete: (id: string, token: string) =>
+      req<void>(`/api/v1/events/${id}`, { method: 'DELETE', token }),
+  },
+  businesses: {
+    list: (citySlug: string, params?: Record<string, string>) =>
+      req<Business[]>(`/api/v1/businesses${qs({ city_slug: citySlug, ...params })}`),
+    get: (id: string) => req<Business>(`/api/v1/businesses/${id}`),
+    create: (data: object, token: string) =>
+      req<Business>('/api/v1/businesses', { method: 'POST', body: JSON.stringify(data), token }),
+    update: (id: string, data: object, token: string) =>
+      req<Business>(`/api/v1/businesses/${id}`, { method: 'PATCH', body: JSON.stringify(data), token }),
+    claim: (id: string, token: string) =>
+      req<Business>(`/api/v1/businesses/${id}/claim`, { method: 'POST', token }),
+    addReview: (id: string, data: { rating: number; body?: string }, token: string) =>
+      req<Review>(`/api/v1/businesses/${id}/reviews`, { method: 'POST', body: JSON.stringify(data), token }),
   },
   upload: {
     image: (listingId: string, file: File, token: string) => {

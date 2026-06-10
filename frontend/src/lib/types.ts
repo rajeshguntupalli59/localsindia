@@ -69,6 +69,47 @@ export interface SearchParams {
   page_size?: string;
 }
 
+export interface Event {
+  id: string;
+  title: string;
+  description: string;
+  venue: string;
+  event_date: string;
+  is_free: boolean;
+  ticket_url: string | null;
+  status: string;
+  city_id: string;
+  user_id: string;
+  category_id: string | null;
+  created_at: string;
+}
+
+export interface Review {
+  id: string;
+  rating: number;
+  body: string | null;
+  user_id: string;
+  created_at: string;
+}
+
+export interface Business {
+  id: string;
+  name: string;
+  description: string | null;
+  address: string | null;
+  phone: string | null;
+  whatsapp_url: string | null;
+  website_url: string | null;
+  verified: boolean;
+  avg_rating: number | null;
+  review_count: number;
+  city_id: string;
+  category_id: string | null;
+  owner_id: string | null;
+  created_at: string;
+  reviews?: Review[];
+}
+
 export interface CreateListingInput {
   title: string;
   description: string;

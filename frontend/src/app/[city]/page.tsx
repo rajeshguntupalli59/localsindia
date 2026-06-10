@@ -69,6 +69,8 @@ export default function CityHomePage() {
 
   const handleCategoryClick = (slug: string) => {
     setActiveCategory(slug);
+    if (slug === 'events') { router.push(`/${citySlug}/events`); return; }
+    if (slug === 'businesses') { router.push(`/${citySlug}/businesses`); return; }
     if (slug) router.push(`/${citySlug}/search?category=${slug}`);
   };
 

@@ -1,0 +1,148 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { toast } from 'sonner';
+import { api, ApiError } from '@/lib/api';
+import type { City } from '@/lib/types';
+
+export default function AddBusinessPage() {
+  const params = useParams();
+  const router = useRouter();
+  const citySlug = params.city as string;
+
+  const [city, setCity] = useState<City | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [form, setForm] = useState({
+    name: '',
+    description: '',
+    address: '',
+    phone: '',
+    whatsapp_url: '',
+    website_url: '',
+  });
+
+  useEffect(() => {
+    api.cities.get(citySlug).then(setCity).catch(() => {});
+  }, [citySlug]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const token = localStorage.getItem('access_token');
+    if (!token) { router.push('/auth/login'); return; }
+    if (!city) return;
+    setLoading(true);
+    try {
+      const biz = await api.businesses.create(
+        {
+          name: form.name,
+          description: form.description || null,
+          address: form.address || null,
+          phone: form.phone || null,
+          whatsapp_url: form.whatsapp_url || null,
+          website_url: form.website_url || null,
+          city_id: city.id,
+        },
+        token,
+      );
+      toast.success('Business listed!');
+      router.push(`/${citySlug}/businesses/${biz.id}`);
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : 'Failed to add business');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen" style={{ background: 'var(--li-page-bg)' }}>
+      <div className="max-w-lg mx-auto px-4 py-10">
+        <Link
+          href={`/${citySlug}/businesses`}
+          className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-800 mb-6"
+        >
+          <ArrowLeft className="w-4 h-4" /> Back to Businesses
+        </Link>
+
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+          <h1 className="text-2xl font-black mb-1" style={{ color: 'var(--li-text)' }}>Add Your Business</h1>
+          <p className="text-sm text-slate-500 mb-6">Get discovered by local customers in {city?.name || citySlug}</p>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="space-y-1.5">
+              <Label>Business Name *</Label>
+              <Input
+                placeholder="e.g. Sri Venkateshwara Tiffin Centre"
+                value={form.name}
+                onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
+                required minLength={2} maxLength={150}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>Description</Label>
+              <textarea
+                className="w-full rounded-lg border border-input px-3 py-2 text-sm min-h-[80px] resize-none outline-none focus:ring-2 focus:ring-ring"
+                placeholder="What do you offer?"
+                value={form.description}
+                onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>Address</Label>
+              <Input
+                placeholder="Street, Area, City"
+                value={form.address}
+                onChange={e => setForm(p => ({ ...p, address: e.target.value }))}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>Phone</Label>
+              <Input
+                placeholder="+91 9876543210"
+                value={form.phone}
+                onChange={e => setForm(p => ({ ...p, phone: e.target.value }))}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>WhatsApp URL</Label>
+              <Input
+                placeholder="https://wa.me/919876543210"
+                value={form.whatsapp_url}
+                onChange={e => setForm(p => ({ ...p, whatsapp_url: e.target.value }))}
+              />
+              <p className="text-xs text-slate-400">Format: https://wa.me/91XXXXXXXXXX</p>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>Website URL</Label>
+              <Input
+                type="url"
+                placeholder="https://yourbusiness.com"
+                value={form.website_url}
+                onChange={e => setForm(p => ({ ...p, website_url: e.target.value }))}
+              />
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full text-white"
+              style={{ background: 'var(--li-primary)' }}
+              disabled={loading}
+            >
+              {loading ? 'Adding...' : 'Add Business →'}
+            </Button>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}

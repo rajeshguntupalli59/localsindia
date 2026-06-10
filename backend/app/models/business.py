@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime, timezone
 from sqlalchemy import String, Text, Boolean, Integer, Numeric, ForeignKey, Index, DateTime
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID
 from app.core.database import Base
 
@@ -34,6 +34,13 @@ class Business(Base):
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
         onupdate=lambda: datetime.now(timezone.utc),
+    )
+
+    reviews: Mapped[list["Review"]] = relationship(
+        "Review",
+        primaryjoin="Business.id == foreign(Review.business_id)",
+        order_by="Review.created_at.desc()",
+        lazy="selectin",
     )
 
     __table_args__ = (
