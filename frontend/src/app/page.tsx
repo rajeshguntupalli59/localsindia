@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import {
-  Search, MapPin, ChevronDown, X,
+  Search, MapPin, ChevronDown, X, Plus,
   Utensils, Home, Briefcase, Car,
   Smartphone, Calendar, Store, GraduationCap,
   Zap, MessageCircle, Globe, Languages,
@@ -197,62 +197,73 @@ export default function HomePage() {
       {/* ══════════════════════════════════════════════
           HEADER
       ══════════════════════════════════════════════ */}
-      <header className="sticky top-0 z-50 bg-white/98 backdrop-blur-md border-b border-slate-100/80">
-        <div className="page-wrap h-[60px] flex items-center">
+      <header className="sticky top-0 z-50 bg-white/[0.98] backdrop-blur-md border-b border-slate-200/60">
+        <div className="page-wrap h-16 flex items-center">
 
           {/* ── Logo ─────────────────────────────────── */}
           <SiteLogo href="/" size="sm" variant="default" className="shrink-0" />
 
           <div className="flex-1" />
 
-          {/* ── Nav ──────────────────────────────────── */}
-          <nav className="flex items-center gap-1">
+          {/* ── Right nav ─────────────────────────────── */}
+          <nav className="flex items-center gap-0.5" aria-label="Site navigation">
 
-            {/* Browse Cities */}
+            {/* Browse Cities — pill chip */}
             <button
+              type="button"
               onClick={() => setShowCityPicker(true)}
-              className="hidden md:flex items-center gap-1.5 px-3.5 py-2 rounded-xl
-                text-[13px] font-medium text-slate-500
-                hover:text-slate-900 hover:bg-slate-50
+              className="hidden md:flex items-center gap-1.5 h-8 px-3.5 rounded-full
+                text-[12.5px] font-medium shrink-0
+                text-slate-600 bg-slate-50 border border-slate-100/80
+                hover:bg-[#FEF3E2] hover:border-orange-200/60 hover:text-[#E07B0A]
                 transition-all duration-150"
             >
-              <MapPin className="w-3.5 h-3.5 shrink-0" strokeWidth={2} />
+              <MapPin
+                className="w-3 h-3 text-[#F7921E] shrink-0"
+                strokeWidth={2.5}
+                aria-hidden
+              />
               Cities
             </button>
 
-            {/* Sign in */}
+            {/* Hairline divider */}
+            <div className="hidden md:block w-px h-[14px] bg-slate-200/70 mx-2.5 shrink-0" />
+
+            {/* Language selector */}
+            <LanguageSelector />
+
+            {/* Sign in — ghost link */}
             <Link
               href="/auth/login"
-              className="hidden md:flex items-center px-3.5 py-2 rounded-xl
-                text-[13px] font-medium text-slate-500
+              className="hidden md:flex items-center h-8 px-3.5 rounded-xl ml-0.5
+                text-[12.5px] font-medium text-slate-500
                 hover:text-slate-900 hover:bg-slate-50
                 transition-all duration-150"
             >
               Sign in
             </Link>
 
-            {/* Subtle divider */}
-            <div className="hidden md:block w-px h-4 bg-slate-200 mx-2" />
-
-            {/* Language selector */}
-            <LanguageSelector />
-
-            {/* Post a Listing — primary CTA */}
+            {/* Post Listing — primary CTA */}
             <button
+              type="button"
               onClick={() => setShowCityPicker(true)}
-              className="flex items-center gap-1.5 ml-2
-                pl-4 pr-5 py-[9px] rounded-2xl
-                text-[13px] font-semibold text-white
-                bg-orange-500
-                hover:bg-orange-600
-                shadow-[0_2px_10px_rgba(249,115,22,0.30)]
-                hover:shadow-[0_4px_18px_rgba(249,115,22,0.40)]
-                active:scale-[0.975]
-                transition-all duration-200"
+              className="ml-2 flex items-center gap-1.5 shrink-0
+                pl-[14px] pr-[18px] py-[9px] rounded-[10px]
+                text-[13px] font-semibold tracking-tight text-white
+                bg-[#F7921E]
+                shadow-[0_2px_12px_rgba(247,146,30,0.28),inset_0_1px_0_rgba(255,255,255,0.14)]
+                hover:bg-[#E07B0A]
+                hover:shadow-[0_4px_20px_rgba(247,146,30,0.44),inset_0_1px_0_rgba(255,255,255,0.10)]
+                hover:-translate-y-px
+                active:translate-y-0 active:scale-[0.985]
+                active:shadow-[0_1px_6px_rgba(247,146,30,0.22)]
+                transition-all duration-200 select-none"
             >
-              <svg viewBox="0 0 12 12" fill="currentColor" className="w-3 h-3 shrink-0" aria-hidden>
-                <path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none" />
-              </svg>
+              <Plus
+                className="w-[13px] h-[13px] shrink-0"
+                strokeWidth={2.8}
+                aria-hidden
+              />
               <span className="hidden sm:inline">Post Listing</span>
               <span className="sm:hidden">Post</span>
             </button>
