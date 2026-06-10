@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Globe, Check, X } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { usePrefs } from '@/context/PrefsContext';
 
 // ─── Language registry ───────────────────────────────────────
 export const LANGUAGES = [
@@ -21,20 +21,6 @@ export const LANGUAGES = [
 ] as const;
 
 export type LangCode = (typeof LANGUAGES)[number]['code'];
-
-// ─── Cookie helpers ──────────────────────────────────────────
-function readLangCookie(): LangCode {
-  if (typeof document === 'undefined') return 'en';
-  const m = document.cookie.match(/(?:^|;\s*)lang=([^;]*)/);
-  const v = m ? decodeURIComponent(m[1]) : 'en';
-  return LANGUAGES.some(l => l.code === v) ? (v as LangCode) : 'en';
-}
-
-function writeLangCookie(code: LangCode) {
-  const exp = new Date();
-  exp.setFullYear(exp.getFullYear() + 1);
-  document.cookie = `lang=${code}; path=/; expires=${exp.toUTCString()}; SameSite=Lax`;
-}
 
 // ─── Chevron icon (no extra dependency) ─────────────────────
 function ChevronIcon({ open }: { open: boolean }) {
@@ -185,21 +171,19 @@ function PanelContent({
 
 // ─── Main component ──────────────────────────────────────────
 export default function LanguageSelector() {
-  const router = useRouter();
-  const [currentLang, setCurrentLang] = useState<LangCode>('en');
+  // Lang state is now owned by PrefsContext — no local cookie management needed.
+  const { lang: currentLang, setLang } = usePrefs();
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Hydrate from cookie + track viewport
+  // Track viewport
   useEffect(() => {
-    setCurrentLang(readLangCookie());
-
     const mq = window.matchMedia('(max-width: 767px)');
     setIsMobile(mq.matches);
     const handler = (e: MediaQueryListEvent) => {
       setIsMobile(e.matches);
-      setIsOpen(false); // close on breakpoint change
+      setIsOpen(false);
     };
     mq.addEventListener('change', handler);
     return () => mq.removeEventListener('change', handler);
@@ -234,10 +218,8 @@ export default function LanguageSelector() {
   }, [isMobile, isOpen]);
 
   const selectLang = (code: LangCode) => {
-    setCurrentLang(code);
-    writeLangCookie(code);
+    setLang(code as import('@/lib/prefs').LangCode);
     setIsOpen(false);
-    router.refresh();
   };
 
   const activeLang = LANGUAGES.find(l => l.code === currentLang)!;

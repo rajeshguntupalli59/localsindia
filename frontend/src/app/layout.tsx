@@ -4,6 +4,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
 import { Toaster } from '@/components/ui/sonner';
 import ServiceWorker from '@/components/pwa/ServiceWorker';
+import { PrefsProvider } from '@/context/PrefsContext';
 import { cn } from '@/lib/utils';
 import './globals.css';
 
@@ -61,7 +62,9 @@ export default async function RootLayout({
     >
       <body className="antialiased">
         <NextIntlClientProvider messages={messages}>
-          {children}
+          <PrefsProvider>
+            {children}
+          </PrefsProvider>
           <Toaster richColors position="top-center" />
           <ServiceWorker />
         </NextIntlClientProvider>
