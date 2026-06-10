@@ -332,61 +332,54 @@ export default function HomePage() {
               onSubmit={handleSearch}
               animate={geoStatus === 'located' ? {
                 boxShadow: [
-                  '0 25px 50px -12px rgba(0,0,0,0.4)',
-                  '0 25px 50px -12px rgba(249,115,22,0.25), 0 0 0 3px rgba(249,115,22,0.2)',
-                  '0 25px 50px -12px rgba(0,0,0,0.4)',
+                  '0 24px 64px -12px rgba(0,0,0,0.55), 0 0 0 1px rgba(0,0,0,0.06)',
+                  '0 24px 64px -12px rgba(249,115,22,0.22), 0 0 0 2px rgba(249,115,22,0.18)',
+                  '0 24px 64px -12px rgba(0,0,0,0.55), 0 0 0 1px rgba(0,0,0,0.06)',
                 ],
               } : {}}
-              transition={{ duration: 0.9, ease: 'easeOut' }}
-              className="flex max-w-2xl w-full rounded-[20px] bg-white
-                shadow-[0_20px_60px_-10px_rgba(0,0,0,0.45)]
-                ring-1 ring-black/[0.07]
-                focus-within:ring-[3px] focus-within:ring-orange-500/[0.22]
-                focus-within:shadow-[0_20px_60px_-10px_rgba(249,115,22,0.15)]
-                transition-[box-shadow,ring] duration-300"
+              transition={{ duration: 1, ease: 'easeOut' }}
+              className="flex max-w-2xl w-full overflow-hidden rounded-[22px] bg-white
+                shadow-[0_24px_64px_-12px_rgba(0,0,0,0.55),0_0_0_1px_rgba(0,0,0,0.06)]
+                focus-within:shadow-[0_24px_64px_-12px_rgba(249,115,22,0.18),0_0_0_2px_rgba(249,115,22,0.22)]
+                transition-shadow duration-300"
             >
-              {/* ── City trigger + Geo button ── */}
-              <div className="flex items-center border-r border-slate-100 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => setShowCityPicker(true)}
-                  className="flex items-center gap-2 pl-5 pr-2 h-[58px] rounded-l-2xl
-                    min-w-[108px] sm:min-w-[136px]
-                    hover:bg-slate-50/80 transition-colors duration-150 group"
+              {/* ── City trigger ── */}
+              <button
+                type="button"
+                onClick={() => setShowCityPicker(true)}
+                className="flex items-center gap-2 pl-5 pr-3 h-[60px] shrink-0
+                  w-[118px] sm:w-[148px]
+                  border-r border-slate-100
+                  hover:bg-slate-50/60 transition-colors duration-150 group"
+              >
+                <motion.span
+                  animate={selectedCityName ? { scale: [1, 1.3, 1] } : {}}
+                  transition={{ duration: 0.3, ease: 'easeOut' }}
+                  className="shrink-0"
                 >
-                  {/* Pin icon pulses briefly when city changes */}
-                  <motion.span
-                    animate={selectedCityName ? { scale: [1, 1.35, 1] } : {}}
-                    transition={{ duration: 0.35, ease: 'easeOut' }}
-                  >
-                    <MapPin className="w-4 h-4 text-orange-500 shrink-0" strokeWidth={2.2} />
-                  </motion.span>
+                  <MapPin className="w-4 h-4 text-orange-500" strokeWidth={2.2} />
+                </motion.span>
+                <div className="flex-1 overflow-hidden text-left min-w-0">
+                  <AnimatePresence mode="wait" initial={false}>
+                    <motion.span
+                      key={selectedCityName ?? '__none'}
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0, transition: { duration: 0.18, ease: 'easeOut' } }}
+                      exit={{ opacity: 0, y: -5, transition: { duration: 0.12, ease: 'easeIn' } }}
+                      className="block text-[13px] font-semibold text-slate-800 truncate leading-none"
+                    >
+                      {selectedCityName ?? 'Select City'}
+                    </motion.span>
+                  </AnimatePresence>
+                </div>
+                <ChevronDown
+                  className="w-3 h-3 text-slate-300 shrink-0 group-hover:text-slate-500 transition-colors"
+                  strokeWidth={2.5}
+                />
+              </button>
 
-                  {/* Animated city label */}
-                  <div className="flex-1 overflow-hidden text-left">
-                    <AnimatePresence mode="wait" initial={false}>
-                      <motion.span
-                        key={selectedCityName ?? '__none'}
-                        initial={{ opacity: 0, y: 6 }}
-                        animate={{ opacity: 1, y: 0, transition: { duration: 0.2, ease: 'easeOut' } }}
-                        exit={{ opacity: 0, y: -6, transition: { duration: 0.12, ease: 'easeIn' } }}
-                        className="block text-sm font-semibold text-slate-800 truncate"
-                      >
-                        {selectedCityName ?? 'Select City'}
-                      </motion.span>
-                    </AnimatePresence>
-                  </div>
-
-                  <ChevronDown
-                    className="w-3.5 h-3.5 text-slate-400 shrink-0 group-hover:text-slate-600 transition-colors ml-1"
-                    strokeWidth={2}
-                  />
-                </button>
-
-                {/* Thin rule between city button and geo icon */}
-                <div className="h-5 w-px bg-slate-200/80 mx-1 shrink-0" />
-
-                {/* Geo locate button */}
+              {/* ── Geo locate button ── */}
+              <div className="flex items-center shrink-0 px-2 border-r border-slate-100">
                 <button
                   type="button"
                   onClick={handleGeoLocate}
@@ -397,19 +390,19 @@ export default function HomePage() {
                     'Use my current location'
                   }
                   aria-label="Detect current location"
-                  className={`flex items-center justify-center w-9 h-9 mr-2 rounded-xl shrink-0
+                  className={`flex items-center justify-center w-9 h-9 rounded-xl shrink-0
                     transition-all duration-200
                     ${geoStatus === 'located'
                       ? 'text-orange-500 bg-orange-50'
                       : geoStatus === 'denied'
-                      ? 'text-slate-300 cursor-not-allowed'
-                      : 'text-slate-400 hover:text-orange-500 hover:bg-orange-50'
+                      ? 'text-slate-200 cursor-not-allowed'
+                      : 'text-slate-300 hover:text-orange-500 hover:bg-orange-50/80'
                     }`}
                 >
                   <AnimatePresence mode="wait" initial={false}>
                     {geoStatus === 'locating' ? (
                       <motion.span key="spin"
-                        initial={{ opacity: 0, rotate: -90 }} animate={{ opacity: 1, rotate: 0 }} exit={{ opacity: 0 }}
+                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                         transition={{ duration: 0.15 }}
                       >
                         <Loader2 className="w-4 h-4 animate-spin" strokeWidth={2} />
@@ -437,23 +430,23 @@ export default function HomePage() {
               <input
                 value={q}
                 onChange={e => setQ(e.target.value)}
-                placeholder="Search tiffin, PG, laptop, Honda Activa..."
-                className="flex-1 min-w-0 px-5 h-[58px]
-                  text-[15px] font-normal leading-none text-slate-800 tracking-[-0.01em]
-                  placeholder:text-slate-400/45 placeholder:font-light placeholder:tracking-[0.02em]
+                placeholder="Search tiffin, PG, jobs, vehicles…"
+                className="flex-1 min-w-0 px-4 h-[60px]
+                  text-[14px] font-normal leading-none text-slate-800 tracking-[-0.01em]
+                  placeholder:text-slate-300/80 placeholder:font-normal
                   caret-orange-500 outline-none bg-transparent"
               />
 
-              {/* ── Submit button — floating pill inset from form edge ── */}
-              <div className="flex items-center shrink-0 pr-[7px]">
+              {/* ── Submit button — perfectly inset on all 4 sides ── */}
+              <div className="flex items-center shrink-0 p-[9px]">
                 <button
                   type="submit"
-                  className="flex items-center gap-2 px-5 sm:px-6 h-[44px] rounded-[13px]
-                    bg-gradient-to-br from-orange-500 to-orange-600 text-white
-                    text-[13px] font-semibold tracking-wide
-                    shadow-md shadow-orange-500/35
-                    hover:from-orange-500 hover:to-orange-700
-                    hover:shadow-lg hover:shadow-orange-500/40
+                  className="flex items-center gap-2 px-5 sm:px-6 h-[42px] rounded-[14px]
+                    bg-orange-500 text-white
+                    text-[13px] font-semibold
+                    shadow-[0_2px_10px_rgba(249,115,22,0.32)]
+                    hover:bg-orange-600
+                    hover:shadow-[0_4px_18px_rgba(249,115,22,0.45)]
                     active:scale-[0.97] transition-all duration-200 shrink-0"
                 >
                   <Search className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} />
@@ -466,9 +459,9 @@ export default function HomePage() {
             <AnimatePresence>
               {geoMsg && (
                 <motion.p
-                  initial={{ opacity: 0, y: -6 }}
+                  initial={{ opacity: 0, y: -5 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
+                  exit={{ opacity: 0, y: -5 }}
                   transition={{ duration: 0.2 }}
                   className={`mt-3 text-xs font-medium flex items-center gap-1.5 ${
                     geoStatus === 'located' ? 'text-emerald-400' :
@@ -483,35 +476,28 @@ export default function HomePage() {
             </AnimatePresence>
 
             {/* ── Popular tags ── */}
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-2 mt-5
-              justify-center sm:justify-start">
-              <span className="w-full sm:w-auto text-center sm:text-left
-                text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500/70 sm:mr-1">
-                Popular searches
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-2.5 mt-7">
+              <span className="text-[10px] font-semibold uppercase tracking-[0.13em] text-slate-500 mr-0.5">
+                Trending
               </span>
-              {POPULAR_TAGS.map(t => (
+              {POPULAR_TAGS.map((t, i) => (
                 <motion.button
                   key={t}
                   type="button"
                   onClick={() => setQ(t)}
-                  whileHover={{ scale: 1.05 }}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.35 + i * 0.05, duration: 0.3, ease: 'easeOut' }}
                   whileTap={{ scale: 0.95 }}
-                  className="group flex items-center gap-1 px-3.5 py-[7px]
-                    text-[11px] font-semibold text-slate-300/75
-                    bg-white/[0.05] backdrop-blur-sm
-                    border border-white/[0.1]
+                  className="px-4 py-[7px]
+                    text-[12px] font-medium text-slate-300/80
+                    bg-white/[0.06] border border-white/[0.09]
                     rounded-full
-                    hover:bg-orange-500/[0.14] hover:border-orange-400/[0.3]
+                    hover:bg-orange-500/[0.13] hover:border-orange-400/[0.28]
                     hover:text-orange-300
-                    transition-colors duration-200"
+                    transition-all duration-200"
                 >
                   {t}
-                  <ArrowRight
-                    className="w-2.5 h-2.5 shrink-0 opacity-0 -translate-x-1
-                      group-hover:opacity-100 group-hover:translate-x-0
-                      transition-all duration-200"
-                    strokeWidth={2.5}
-                  />
                 </motion.button>
               ))}
             </div>
