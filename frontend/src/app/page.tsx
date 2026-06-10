@@ -8,7 +8,7 @@ import {
   Utensils, Home, Briefcase, Car,
   Smartphone, Calendar, Store, GraduationCap,
   Zap, MessageCircle, Globe, Languages,
-  LocateFixed, Loader2, CheckCircle2,
+  LocateFixed, Loader2, CheckCircle2, ArrowRight,
   type LucideIcon,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -299,10 +299,12 @@ export default function HomePage() {
                 ],
               } : {}}
               transition={{ duration: 0.9, ease: 'easeOut' }}
-              className="flex max-w-2xl w-full rounded-2xl bg-white shadow-2xl shadow-black/30
-                ring-1 ring-white/[0.08]
-                focus-within:ring-4 focus-within:ring-orange-500/[0.18]
-                focus-within:shadow-orange-500/[0.08] transition-shadow duration-200"
+              className="flex max-w-2xl w-full rounded-[20px] bg-white
+                shadow-[0_20px_60px_-10px_rgba(0,0,0,0.45)]
+                ring-1 ring-black/[0.07]
+                focus-within:ring-[3px] focus-within:ring-orange-500/[0.22]
+                focus-within:shadow-[0_20px_60px_-10px_rgba(249,115,22,0.15)]
+                transition-[box-shadow,ring] duration-300"
             >
               {/* ── City trigger + Geo button ── */}
               <div className="flex items-center border-r border-slate-100 shrink-0">
@@ -392,26 +394,33 @@ export default function HomePage() {
                 </button>
               </div>
 
-              {/* ── Search input — refined padding + placeholder ── */}
+              {/* ── Search input ── */}
               <input
                 value={q}
                 onChange={e => setQ(e.target.value)}
                 placeholder="Search tiffin, PG, laptop, Honda Activa..."
-                className="flex-1 min-w-0 px-6 h-[58px] text-sm font-medium text-slate-800
-                  placeholder:text-slate-400/60 placeholder:font-normal placeholder:tracking-[0.01em]
-                  outline-none bg-transparent"
+                className="flex-1 min-w-0 px-5 h-[58px]
+                  text-[15px] font-normal leading-none text-slate-800 tracking-[-0.01em]
+                  placeholder:text-slate-400/45 placeholder:font-light placeholder:tracking-[0.02em]
+                  caret-orange-500 outline-none bg-transparent"
               />
 
-              {/* ── Submit button ── */}
-              <button
-                type="submit"
-                className="flex items-center gap-2 px-6 sm:px-7 h-[58px] rounded-r-2xl
-                  bg-orange-500 text-white text-sm font-semibold
-                  hover:bg-orange-600 active:scale-[0.98] transition-all duration-150 shrink-0"
-              >
-                <Search className="w-4 h-4" strokeWidth={2.2} />
-                <span className="hidden sm:inline">Search</span>
-              </button>
+              {/* ── Submit button — floating pill inset from form edge ── */}
+              <div className="flex items-center shrink-0 pr-[7px]">
+                <button
+                  type="submit"
+                  className="flex items-center gap-2 px-5 sm:px-6 h-[44px] rounded-[13px]
+                    bg-gradient-to-br from-orange-500 to-orange-600 text-white
+                    text-[13px] font-semibold tracking-wide
+                    shadow-md shadow-orange-500/35
+                    hover:from-orange-500 hover:to-orange-700
+                    hover:shadow-lg hover:shadow-orange-500/40
+                    active:scale-[0.97] transition-all duration-200 shrink-0"
+                >
+                  <Search className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} />
+                  <span className="hidden sm:inline">Search</span>
+                </button>
+              </div>
             </motion.form>
 
             {/* ── Geo feedback message ── */}
@@ -435,20 +444,36 @@ export default function HomePage() {
             </AnimatePresence>
 
             {/* ── Popular tags ── */}
-            <div className="flex flex-wrap items-center gap-2 mt-4 text-sm">
-              <span className="text-slate-400 font-medium">Try:</span>
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-2 mt-5
+              justify-center sm:justify-start">
+              <span className="w-full sm:w-auto text-center sm:text-left
+                text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500/70 sm:mr-1">
+                Popular searches
+              </span>
               {POPULAR_TAGS.map(t => (
-                <button
+                <motion.button
                   key={t}
                   type="button"
                   onClick={() => setQ(t)}
-                  className="px-3 py-1 text-xs font-medium text-slate-300
-                    bg-slate-800/60 hover:bg-slate-700/80
-                    border border-slate-700/50 hover:border-slate-600
-                    rounded-full transition-all duration-200"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="group flex items-center gap-1 px-3.5 py-[7px]
+                    text-[11px] font-semibold text-slate-300/75
+                    bg-white/[0.05] backdrop-blur-sm
+                    border border-white/[0.1]
+                    rounded-full
+                    hover:bg-orange-500/[0.14] hover:border-orange-400/[0.3]
+                    hover:text-orange-300
+                    transition-colors duration-200"
                 >
                   {t}
-                </button>
+                  <ArrowRight
+                    className="w-2.5 h-2.5 shrink-0 opacity-0 -translate-x-1
+                      group-hover:opacity-100 group-hover:translate-x-0
+                      transition-all duration-200"
+                    strokeWidth={2.5}
+                  />
+                </motion.button>
               ))}
             </div>
           </motion.div>
