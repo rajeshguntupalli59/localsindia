@@ -71,6 +71,7 @@ class ListingOut(BaseModel):
     area: str | None = None
     status: str
     is_featured: bool
+    wa_verified: bool = False
     expires_at: datetime
     created_at: datetime
     city_id: uuid.UUID

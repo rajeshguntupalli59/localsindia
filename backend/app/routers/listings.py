@@ -94,6 +94,9 @@ async def create_listing(
         price=body.price,
         contact_phone=body.contact_phone,
         whatsapp_url=body.whatsapp_url,
+        website_url=body.website_url,
+        social_url=body.social_url,
+        area=body.area,
         status="pending",  # BL-11: always pending on create
     )
     db.add(listing)
@@ -201,6 +204,23 @@ async def renew_listing(
     await db.commit()
     await db.refresh(listing)
     return listing
+
+
+@router.post("/listings/{listing_id}/wa-click", status_code=204)
+async def wa_click(listing_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
+    """Fire-and-forget: marks listing wa_verified=true on first WhatsApp tap."""
+    result = await db.execute(
+        select(Listing).where(
+            Listing.id == listing_id,
+            Listing.status == "active",
+            Listing.deleted_at.is_(None),
+            Listing.wa_verified == False,
+        )
+    )
+    listing = result.scalar_one_or_none()
+    if listing:
+        listing.wa_verified = True
+        await db.commit()
 
 
 @router.post("/listings/{listing_id}/fulfill", response_model=ListingOut)

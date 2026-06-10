@@ -5,9 +5,10 @@ import { useParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft, Flag, ChevronLeft, ChevronRight, MapPin, Clock, Shield, MessageCircle, Tag, Star, User, Globe, Share2 } from 'lucide-react';
+import { ArrowLeft, Flag, ChevronLeft, ChevronRight, MapPin, Clock, Shield, MessageCircle, Tag, Star, User, Globe, Share2, CheckCircle2 } from 'lucide-react';
 import { formatPrice, timeAgo } from '@/lib/utils';
 import { api, ApiError } from '@/lib/api';
+
 import type { Listing } from '@/lib/types';
 import SiteHeader from '@/components/site-header/SiteHeader';
 import SiteFooter from '@/components/site-footer/SiteFooter';
@@ -272,6 +273,12 @@ export default function ListingDetailPage() {
                 <div>
                   <p className="font-bold" style={{ color: 'var(--li-text)' }}>Seller</p>
                   <p className="text-sm" style={{ color: 'var(--li-muted)' }}>{listing.contact_phone}</p>
+                  {listing.wa_verified && (
+                    <span className="inline-flex items-center gap-1 text-[11px] font-bold mt-1 px-2 py-0.5 rounded-full" style={{ background: '#dcfce7', color: '#16a34a' }}>
+                      <CheckCircle2 className="w-3 h-3" />
+                      Active on WhatsApp
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -282,6 +289,7 @@ export default function ListingDetailPage() {
                 rel="noopener noreferrer"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.97 }}
+                onClick={() => api.listings.waClick(listing.id)}
                 className="wa-btn w-full py-4 flex items-center justify-center gap-3 text-base font-bold rounded-2xl"
                 style={{ display: 'flex' }}
               >
@@ -367,6 +375,7 @@ export default function ListingDetailPage() {
           target="_blank"
           rel="noopener noreferrer"
           whileTap={{ scale: 0.97 }}
+          onClick={() => api.listings.waClick(listing.id)}
           className="wa-btn w-full py-3.5 flex items-center justify-center gap-3 text-base font-bold rounded-2xl"
           style={{ display: 'flex' }}
         >

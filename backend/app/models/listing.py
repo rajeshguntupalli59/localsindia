@@ -28,6 +28,7 @@ class Listing(Base):
     website_url: Mapped[str | None] = mapped_column(Text, nullable=True)
     social_url: Mapped[str | None] = mapped_column(Text, nullable=True)
     area: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    wa_verified: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="pending")
     is_featured: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     report_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)

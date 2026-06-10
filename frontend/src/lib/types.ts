@@ -31,6 +31,7 @@ export interface Listing {
   website_url: string | null;
   social_url: string | null;
   area: string | null;
+  wa_verified: boolean;
   status: 'active' | 'pending' | 'flagged' | 'fulfilled' | 'expired';
   is_featured: boolean;
   expires_at: string;

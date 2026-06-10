@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { MapPin, Clock } from 'lucide-react';
 import { formatPrice, timeAgo } from '@/lib/utils';
+import { api } from '@/lib/api';
 import type { Listing } from '@/lib/types';
 
 interface Props {
@@ -103,13 +104,26 @@ export default function ListingCard({ listing, citySlug = '' }: Props) {
           </div>
         </Link>
 
+        {/* WA Verified badge */}
+        {listing.wa_verified && (
+          <div className="flex items-center gap-1 mt-2">
+            <span
+              className="flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full"
+              style={{ background: '#dcfce7', color: '#16a34a' }}
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-[#25D366] inline-block" />
+              Active on WA
+            </span>
+          </div>
+        )}
+
         {/* WhatsApp CTA */}
         <a
           href={waUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="wa-btn mt-3 w-full py-2.5 text-sm"
-          onClick={e => e.stopPropagation()}
+          onClick={e => { e.stopPropagation(); api.listings.waClick(listing.id); }}
         >
           💬 WhatsApp
         </a>

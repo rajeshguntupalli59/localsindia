@@ -127,6 +127,8 @@ export const api = {
         body: JSON.stringify({ reason }),
         token,
       }),
+    waClick: (id: string) =>
+      req<void>(`/api/v1/listings/${id}/wa-click`, { method: 'POST' }).catch(() => {}),
     fulfill: (id: string, token: string) =>
       req<Listing>(`/api/v1/listings/${id}/fulfill`, { method: 'POST', token }),
     renew: (id: string, token: string) =>
