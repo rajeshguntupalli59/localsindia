@@ -501,41 +501,83 @@ export default function HomePage() {
           CATEGORY GRID
       ══════════════════════════════════════════════ */}
       <section className="bg-white border-b border-slate-100">
-        <div className="page-wrap py-16">
-          <div className="text-center md:text-left mb-8">
-            <p className="text-xs font-bold uppercase tracking-widest text-orange-500 mb-2">
-              What are you looking for?
-            </p>
-            <h2 className="text-3xl font-bold text-slate-900 tracking-tight">
-              Browse by Category
-            </h2>
+        <div className="page-wrap py-14 sm:py-16">
+
+          {/* Section header */}
+          <div className="flex items-end justify-between mb-8">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-orange-500 mb-2">
+                What are you looking for?
+              </p>
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+                Browse by Category
+              </h2>
+            </div>
+            <span className="hidden sm:block text-[11px] font-medium text-slate-400 pb-0.5">
+              {CATEGORIES.length} categories
+            </span>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {/* Grid: 2-col mobile → 4-col desktop, gap tightens on mobile */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
             {CATEGORIES.map(({ icon: Icon, name, color, count }) => (
-              <div
+              <motion.div
                 key={name}
                 onClick={() => setShowCityPicker(true)}
-                className="group relative bg-white p-6 rounded-2xl
-                  border border-slate-100
-                  hover:border-transparent cursor-pointer
-                  transition-all duration-300 ease-in-out
-                  hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-900/5"
+                whileHover={{ y: -4 }}
+                whileTap={{ scale: 0.97 }}
+                transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+                className="group relative bg-white rounded-2xl border border-slate-100
+                  cursor-pointer overflow-hidden
+                  shadow-[0_1px_4px_rgba(0,0,0,0.06)]
+                  hover:shadow-[0_14px_36px_-6px_rgba(0,0,0,0.10)]
+                  hover:border-transparent
+                  transition-[box-shadow,border-color] duration-300"
               >
-                <div className="flex flex-col h-full justify-between space-y-4">
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${color}
-                    transition-transform duration-300 group-hover:scale-110`}>
-                    <Icon className="w-5 h-5" />
+                {/* Very subtle orange gradient wash on hover */}
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100
+                  transition-opacity duration-300 pointer-events-none
+                  bg-gradient-to-br from-transparent via-transparent to-orange-500/[0.04]" />
+
+                {/* Card body — flex-col with flex-1 spacer pins text to bottom */}
+                <div className="relative flex flex-col p-5 sm:p-6
+                  min-h-[152px] sm:min-h-[172px]">
+
+                  {/* Icon — top-anchored */}
+                  <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl shrink-0
+                    flex items-center justify-center ${color}
+                    transition-transform duration-200
+                    group-hover:scale-110`}>
+                    <Icon className="w-[18px] h-[18px] sm:w-5 sm:h-5" />
                   </div>
+
+                  {/* Spacer fills available height */}
+                  <div className="flex-1" />
+
+                  {/* Name + count — bottom-anchored, always aligned */}
                   <div>
-                    <h3 className="text-base font-semibold text-slate-800
-                      group-hover:text-orange-500 transition-colors duration-200">
+                    <h3 className="text-sm sm:text-[15px] font-semibold text-slate-800
+                      leading-snug group-hover:text-orange-500
+                      transition-colors duration-200">
                       {name}
                     </h3>
-                    <p className="text-xs font-medium text-slate-400 mt-1">{count} listings</p>
+                    <div className="flex items-center justify-between mt-1.5">
+                      <p className="text-[11px] font-medium text-slate-400/80
+                        tabular-nums tracking-[0.005em]">
+                        {count} listings
+                      </p>
+                      {/* Arrow slides in from left on hover */}
+                      <ArrowRight
+                        className="w-3 h-3 text-orange-400 shrink-0
+                          opacity-0 -translate-x-1
+                          group-hover:opacity-100 group-hover:translate-x-0
+                          transition-all duration-200"
+                        strokeWidth={2.5}
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
