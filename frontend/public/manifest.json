@@ -1,0 +1,20 @@
+{
+  "name": "LocalsIndia",
+  "short_name": "LocalsIndia",
+  "description": "India's hyperlocal classifieds — buy, sell, connect in your city",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#FF6B35",
+  "orientation": "portrait-primary",
+  "categories": ["classifieds", "community", "local"],
+  "lang": "en-IN",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

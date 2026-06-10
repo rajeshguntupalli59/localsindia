@@ -1,8 +1,9 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Plus_Jakarta_Sans, Noto_Sans, Noto_Sans_Devanagari, Noto_Sans_Telugu } from 'next/font/google';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
 import { Toaster } from '@/components/ui/sonner';
+import ServiceWorker from '@/components/pwa/ServiceWorker';
 import { cn } from '@/lib/utils';
 import './globals.css';
 
@@ -34,10 +35,17 @@ const notoTelugu = Noto_Sans_Telugu({
   display: 'swap',
 });
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  themeColor: '#FF6B35',
+};
+
 export const metadata: Metadata = {
   title: 'LocalsIndia — Your City, Your Community',
   description: "India's hyperlocal classifieds and community platform",
-  viewport: { width: 'device-width', initialScale: 1 },
+  manifest: '/manifest.json',
+  appleWebApp: { capable: true, statusBarStyle: 'default', title: 'LocalsIndia' },
 };
 
 export default async function RootLayout({
@@ -55,6 +63,7 @@ export default async function RootLayout({
         <NextIntlClientProvider messages={messages}>
           {children}
           <Toaster richColors position="top-center" />
+          <ServiceWorker />
         </NextIntlClientProvider>
       </body>
     </html>
