@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft, Globe, Save, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -22,15 +22,17 @@ export default function EditListingPage() {
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
   const [whatsappUrl, setWhatsappUrl] = useState('');
+  const [websiteUrl, setWebsiteUrl] = useState('');
+  const [socialUrl, setSocialUrl] = useState('');
 
   useEffect(() => {
     const token = localStorage.getItem('access_token');
     if (!token) { router.replace('/auth/login'); return; }
-    loadListing(token);
+    loadListing();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  const loadListing = async (token: string) => {
+  const loadListing = async () => {
     setLoading(true);
     try {
       const data = await api.listings.get(id);
@@ -46,6 +48,8 @@ export default function EditListingPage() {
       setDescription(data.description);
       setPrice(data.price !== null ? String(data.price) : '');
       setWhatsappUrl(data.whatsapp_url ?? '');
+      setWebsiteUrl(data.website_url ?? '');
+      setSocialUrl(data.social_url ?? '');
     } catch {
       toast.error('Listing not found');
       router.replace('/profile/listings');
@@ -66,6 +70,8 @@ export default function EditListingPage() {
         description: description.trim(),
         price: price ? parseFloat(price) : undefined,
         whatsapp_url: whatsappUrl.trim() || undefined,
+        website_url: websiteUrl.trim() || undefined,
+        social_url: socialUrl.trim() || undefined,
       }, token);
       toast.success('Listing updated!');
       router.push('/profile/listings');
@@ -163,6 +169,28 @@ export default function EditListingPage() {
             onChange={e => setWhatsappUrl(e.target.value)}
             placeholder="https://wa.me/91XXXXXXXXXX"
           />
+        </div>
+
+        {/* Online presence */}
+        <div className="space-y-3">
+          <Label className="text-sm font-medium">Online Presence <span className="text-muted-foreground font-normal">— optional</span></Label>
+          <div className="flex items-center gap-2">
+            <Globe className="w-4 h-4 shrink-0" style={{ color: 'var(--li-primary)' }} />
+            <Input
+              value={websiteUrl}
+              onChange={e => setWebsiteUrl(e.target.value)}
+              placeholder="https://yourwebsite.com"
+              type="url"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <Share2 className="w-4 h-4 shrink-0" style={{ color: 'var(--li-primary)' }} />
+            <Input
+              value={socialUrl}
+              onChange={e => setSocialUrl(e.target.value)}
+              placeholder="instagram.com/... or facebook.com/..."
+            />
+          </div>
         </div>
 
         {/* Save */}

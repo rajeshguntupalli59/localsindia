@@ -15,6 +15,8 @@ class ListingCreate(BaseModel):
     contact_phone: str
     price: float | None = None
     whatsapp_url: str | None = None
+    website_url: str | None = None
+    social_url: str | None = None
 
     @field_validator("contact_phone")
     @classmethod
@@ -36,6 +38,8 @@ class ListingUpdate(BaseModel):
     description: str | None = None
     price: float | None = None
     whatsapp_url: str | None = None
+    website_url: str | None = None
+    social_url: str | None = None
 
     @field_validator("whatsapp_url")
     @classmethod
@@ -60,6 +64,8 @@ class ListingOut(BaseModel):
     price: float | None
     contact_phone: str
     whatsapp_url: str | None
+    website_url: str | None = None
+    social_url: str | None = None
     status: str
     is_featured: bool
     expires_at: datetime

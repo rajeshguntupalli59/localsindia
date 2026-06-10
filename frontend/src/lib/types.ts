@@ -28,6 +28,8 @@ export interface Listing {
   price: number | null;
   contact_phone: string;
   whatsapp_url: string | null;
+  website_url: string | null;
+  social_url: string | null;
   status: 'active' | 'pending' | 'flagged' | 'fulfilled' | 'expired';
   is_featured: boolean;
   expires_at: string;
@@ -118,4 +120,6 @@ export interface CreateListingInput {
   contact_phone: string;
   price?: number;
   whatsapp_url?: string;
+  website_url?: string;
+  social_url?: string;
 }

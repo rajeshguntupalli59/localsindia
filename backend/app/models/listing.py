@@ -25,6 +25,8 @@ class Listing(Base):
     price: Mapped[float | None] = mapped_column(Numeric(12, 2), nullable=True)
     contact_phone: Mapped[str] = mapped_column(String(15), nullable=False)
     whatsapp_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    website_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    social_url: Mapped[str | None] = mapped_column(Text, nullable=True)
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="pending")
     is_featured: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     report_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)

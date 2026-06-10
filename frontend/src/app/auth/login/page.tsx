@@ -97,6 +97,7 @@ export default function LoginPage() {
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const stepLabels: Record<typeof step, string> = {
     phone: 'Choose how you want to continue',
     otp: `Enter the OTP sent to +91 ${digits}`,

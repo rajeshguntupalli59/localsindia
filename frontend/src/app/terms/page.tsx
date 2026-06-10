@@ -89,7 +89,7 @@ export default function TermsPage() {
 
           <section>
             <h2 className="text-lg font-bold mb-2">10. Disclaimers</h2>
-            <p>LocalsIndia is provided "as is" without warranties of any kind. We do not guarantee continuous, uninterrupted access to the platform. We are not liable for any indirect, incidental, or consequential damages arising from your use of the platform.</p>
+            <p>LocalsIndia is provided &ldquo;as is&rdquo; without warranties of any kind. We do not guarantee continuous, uninterrupted access to the platform. We are not liable for any indirect, incidental, or consequential damages arising from your use of the platform.</p>
           </section>
 
           <section>

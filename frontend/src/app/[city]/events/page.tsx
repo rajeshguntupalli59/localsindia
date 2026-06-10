@@ -130,7 +130,7 @@ export default function EventsPage() {
             <h1 className="text-2xl font-black" style={{ color: 'var(--li-text)' }}>
               Events in {cityName || citySlug}
             </h1>
-            <p className="text-sm text-slate-500 mt-0.5">Discover what's happening near you</p>
+            <p className="text-sm text-slate-500 mt-0.5">Discover what&apos;s happening near you</p>
           </div>
           <Link
             href={`/${citySlug}/events/post`}

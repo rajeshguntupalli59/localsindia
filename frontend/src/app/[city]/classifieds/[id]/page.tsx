@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft, Flag, ChevronLeft, ChevronRight, MapPin, Clock, Shield, MessageCircle, Tag, Star, User } from 'lucide-react';
+import { ArrowLeft, Flag, ChevronLeft, ChevronRight, MapPin, Clock, Shield, MessageCircle, Tag, Star, User, Globe, Share2 } from 'lucide-react';
 import { formatPrice, timeAgo } from '@/lib/utils';
 import { api, ApiError } from '@/lib/api';
 import type { Listing } from '@/lib/types';
@@ -292,6 +292,36 @@ export default function ListingDetailPage() {
               <p className="text-center text-xs mt-3" style={{ color: 'var(--li-muted)' }}>
                 Opens WhatsApp • Reply usually within an hour
               </p>
+
+              {/* Website / Social links */}
+              {(listing.website_url || listing.social_url) && (
+                <div className="flex gap-2 mt-4 pt-4 border-t" style={{ borderColor: 'var(--li-border)' }}>
+                  {listing.website_url && (
+                    <a
+                      href={listing.website_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 text-sm font-semibold transition-colors hover:border-orange-400"
+                      style={{ borderColor: 'var(--li-border)', color: 'var(--li-text)' }}
+                    >
+                      <Globe className="w-4 h-4" style={{ color: 'var(--li-primary)' }} />
+                      Website
+                    </a>
+                  )}
+                  {listing.social_url && (
+                    <a
+                      href={listing.social_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 text-sm font-semibold transition-colors hover:border-orange-400"
+                      style={{ borderColor: 'var(--li-border)', color: 'var(--li-text)' }}
+                    >
+                      <Share2 className="w-4 h-4" style={{ color: 'var(--li-primary)' }} />
+                      Social Page
+                    </a>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Safety tips */}

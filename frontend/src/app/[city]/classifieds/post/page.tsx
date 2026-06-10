@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, X, CheckCircle, ArrowLeft, ArrowRight, Sparkles, Lightbulb, Camera, MapPin, Tag, UtensilsCrossed, Building2, Briefcase, Car, Smartphone, CalendarDays, Store, GraduationCap } from 'lucide-react';
+import { Upload, X, CheckCircle, ArrowLeft, ArrowRight, Sparkles, Lightbulb, Camera, MapPin, Tag, UtensilsCrossed, Building2, Briefcase, Car, Smartphone, CalendarDays, Store, GraduationCap, Globe, Share2 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import Link from 'next/link';
 import { api, ApiError } from '@/lib/api';
@@ -29,11 +29,14 @@ interface FormData {
   price: string;
   contact_phone: string;
   whatsapp_toggle: boolean;
+  website_url: string;
+  social_url: string;
 }
 
 const EMPTY: FormData = {
   title: '', description: '', category_id: '', price: '',
   contact_phone: '', whatsapp_toggle: true,
+  website_url: '', social_url: '',
 };
 
 const PHONE_RE = /^\+91[6-9]\d{9}$/;
@@ -143,6 +146,8 @@ export default function PostListingPage() {
         contact_phone: phone,
         price: form.price ? parseFloat(form.price) : undefined,
         whatsapp_url: form.whatsapp_toggle ? `https://wa.me/91${phone.replace('+91', '')}` : undefined,
+        website_url: form.website_url.trim() || undefined,
+        social_url: form.social_url.trim() || undefined,
       }, token);
 
       for (const photo of photos) {
@@ -542,6 +547,50 @@ export default function PostListingPage() {
                       style={{ transform: form.whatsapp_toggle ? 'translateX(20px)' : 'translateX(2px)' }}
                     />
                   </button>
+                </div>
+
+                {/* Optional: Website + Social links */}
+                <div className="pt-2">
+                  <p className="text-sm font-bold mb-1" style={{ color: 'var(--li-text)' }}>
+                    Online presence <span className="font-normal text-xs" style={{ color: 'var(--li-muted)' }}>(optional)</span>
+                  </p>
+                  <p className="text-xs mb-4" style={{ color: 'var(--li-muted)' }}>
+                    Add your website or social page so buyers can learn more about you
+                  </p>
+                  <div className="space-y-3">
+                    <div className="flex rounded-xl border-2 overflow-hidden" style={{ borderColor: 'var(--li-border)' }}>
+                      <span
+                        className="flex items-center px-3 border-r-2 shrink-0"
+                        style={{ background: '#F3F4F6', borderColor: 'var(--li-border)' }}
+                      >
+                        <Globe className="w-4 h-4" style={{ color: 'var(--li-muted)' }} />
+                      </span>
+                      <input
+                        type="url"
+                        value={form.website_url}
+                        onChange={e => save({ website_url: e.target.value })}
+                        placeholder="https://yourwebsite.com"
+                        className="flex-1 px-3 py-3 text-sm outline-none bg-white"
+                        style={{ color: 'var(--li-text)' }}
+                      />
+                    </div>
+                    <div className="flex rounded-xl border-2 overflow-hidden" style={{ borderColor: 'var(--li-border)' }}>
+                      <span
+                        className="flex items-center px-3 border-r-2 shrink-0"
+                        style={{ background: '#F3F4F6', borderColor: 'var(--li-border)' }}
+                      >
+                        <Share2 className="w-4 h-4" style={{ color: 'var(--li-muted)' }} />
+                      </span>
+                      <input
+                        type="url"
+                        value={form.social_url}
+                        onChange={e => save({ social_url: e.target.value })}
+                        placeholder="https://instagram.com/yourpage or facebook.com/..."
+                        className="flex-1 px-3 py-3 text-sm outline-none bg-white"
+                        style={{ color: 'var(--li-text)' }}
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
 
