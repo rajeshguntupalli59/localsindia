@@ -19,12 +19,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     const stored = localStorage.getItem('user');
-    if (!stored) { router.replace('/auth/login'); return; }
+    if (!stored) { router.replace('/admin/login'); return; }
     try {
       const u = JSON.parse(stored);
-      if (u.role !== 'admin') { router.replace('/'); return; }
+      if (u.role !== 'admin') { router.replace('/admin/login'); return; }
       setRole(u.role);
-    } catch { router.replace('/'); }
+    } catch { router.replace('/admin/login'); }
   }, [router]);
 
   const handleLogout = () => {
