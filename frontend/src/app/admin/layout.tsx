@@ -3,10 +3,11 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { ClipboardList, Flag, Users, LayoutDashboard, LogOut } from 'lucide-react';
+import { ClipboardList, CalendarDays, Flag, Users, LayoutDashboard, LogOut } from 'lucide-react';
 
 const NAV = [
-  { href: '/admin/listings', icon: <ClipboardList className="w-4 h-4" />, label: 'Pending Queue', badge: 'pending' },
+  { href: '/admin/listings', icon: <ClipboardList className="w-4 h-4" />, label: 'Listings', badge: 'pending' },
+  { href: '/admin/events', icon: <CalendarDays className="w-4 h-4" />, label: 'Events', badge: null },
   { href: '/admin/reports', icon: <Flag className="w-4 h-4" />, label: 'Flagged', badge: 'flagged' },
   { href: '/admin/users', icon: <Users className="w-4 h-4" />, label: 'Users', badge: null },
 ];

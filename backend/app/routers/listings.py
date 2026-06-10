@@ -9,11 +9,13 @@ from app.core.database import get_db
 from app.core.deps import get_current_user
 from app.models.city import City
 from app.models.listing import Listing
+from app.models.listing_review import ListingReview
 from app.models.report import Report
 from app.models.user import User
 from app.schemas.listing import (
     ListingCreate, ListingOut, ListingUpdate, ReportCreate,
 )
+from app.schemas.listing_review import ListingReviewCreate, ListingReviewOut
 
 router = APIRouter(prefix="/api/v1", tags=["listings"])
 
@@ -36,6 +38,7 @@ async def _get_active_listing(listing_id: uuid.UUID, db: AsyncSession) -> Listin
 async def list_city_listings(
     slug: str,
     category_id: uuid.UUID | None = Query(default=None),
+    category_slug: str | None = Query(default=None),
     status: str = Query(default="active"),
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, le=50),
@@ -45,6 +48,14 @@ async def list_city_listings(
     city = city_result.scalar_one_or_none()
     if not city:
         raise HTTPException(status_code=404, detail="City not found.")
+
+    # Resolve category_slug → category_id if slug provided
+    if not category_id and category_slug:
+        from app.models.category import Category
+        cat_result = await db.execute(select(Category).where(Category.slug == category_slug))
+        cat = cat_result.scalar_one_or_none()
+        if cat:
+            category_id = cat.id
 
     q = (
         select(Listing)
@@ -221,6 +232,50 @@ async def wa_click(listing_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
     if listing:
         listing.wa_verified = True
         await db.commit()
+
+
+@router.get("/listings/{listing_id}/reviews", response_model=list[ListingReviewOut])
+async def get_reviews(
+    listing_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(
+        select(ListingReview)
+        .where(ListingReview.listing_id == listing_id)
+        .order_by(ListingReview.created_at.desc())
+        .limit(50)
+    )
+    return result.scalars().all()
+
+
+@router.post("/listings/{listing_id}/reviews", response_model=ListingReviewOut, status_code=201)
+async def submit_review(
+    listing_id: uuid.UUID,
+    body: ListingReviewCreate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    await _get_active_listing(listing_id, db)
+
+    existing = await db.execute(
+        select(ListingReview).where(
+            ListingReview.listing_id == listing_id,
+            ListingReview.user_id == current_user.id,
+        )
+    )
+    if existing.scalar_one_or_none():
+        raise HTTPException(status_code=409, detail="You have already reviewed this listing.")
+
+    review = ListingReview(
+        listing_id=listing_id,
+        user_id=current_user.id,
+        rating=body.rating,
+        body=body.body,
+    )
+    db.add(review)
+    await db.commit()
+    await db.refresh(review)
+    return review
 
 
 @router.post("/listings/{listing_id}/fulfill", response_model=ListingOut)

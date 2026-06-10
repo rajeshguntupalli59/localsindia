@@ -1,3 +1,12 @@
+export interface ListingReview {
+  id: string;
+  listing_id: string;
+  user_id: string;
+  rating: number;
+  body: string | null;
+  created_at: string;
+}
+
 export interface City {
   id: string;
   name: string;

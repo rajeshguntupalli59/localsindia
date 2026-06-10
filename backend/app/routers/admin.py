@@ -7,9 +7,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.core.deps import get_current_admin
+from app.models.event import Event
 from app.models.listing import Listing
 from app.models.report import Report
 from app.models.user import User
+from app.schemas.event import EventOut
 from app.schemas.listing import ListingOut
 
 router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
@@ -84,6 +86,77 @@ async def reject_listing(
     await db.commit()
     await db.refresh(listing)
     return listing
+
+
+@router.get("/events/pending", response_model=list[EventOut])
+async def pending_events(
+    page: int = 1,
+    page_size: int = 20,
+    db: AsyncSession = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+):
+    result = await db.execute(
+        select(Event)
+        .where(Event.status == "pending", Event.deleted_at.is_(None))
+        .order_by(Event.created_at.asc())
+        .offset((page - 1) * page_size)
+        .limit(page_size)
+    )
+    return result.scalars().all()
+
+
+@router.get("/events", response_model=list[EventOut])
+async def list_events_by_status(
+    status: str = "active",
+    page: int = 1,
+    page_size: int = 50,
+    db: AsyncSession = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+):
+    result = await db.execute(
+        select(Event)
+        .where(Event.status == status, Event.deleted_at.is_(None))
+        .order_by(Event.event_date.asc())
+        .offset((page - 1) * page_size)
+        .limit(page_size)
+    )
+    return result.scalars().all()
+
+
+@router.patch("/events/{event_id}/approve", response_model=EventOut)
+async def approve_event(
+    event_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+):
+    result = await db.execute(
+        select(Event).where(Event.id == event_id, Event.deleted_at.is_(None))
+    )
+    event = result.scalar_one_or_none()
+    if not event:
+        raise HTTPException(status_code=404, detail="Event not found.")
+    event.status = "active"
+    await db.commit()
+    await db.refresh(event)
+    return event
+
+
+@router.patch("/events/{event_id}/reject", response_model=EventOut)
+async def reject_event(
+    event_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+):
+    result = await db.execute(
+        select(Event).where(Event.id == event_id, Event.deleted_at.is_(None))
+    )
+    event = result.scalar_one_or_none()
+    if not event:
+        raise HTTPException(status_code=404, detail="Event not found.")
+    event.status = "cancelled"
+    await db.commit()
+    await db.refresh(event)
+    return event
 
 
 @router.get("/users")

@@ -1,15 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft, Flag, ChevronLeft, ChevronRight, MapPin, Clock, Shield, MessageCircle, Tag, Star, User, Globe, Share2, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Flag, ChevronLeft, ChevronRight, MapPin, Clock, Shield, MessageCircle, Tag, Star, User, Globe, Share2, CheckCircle2, X } from 'lucide-react';
 import { formatPrice, timeAgo } from '@/lib/utils';
 import { api, ApiError } from '@/lib/api';
 
-import type { Listing } from '@/lib/types';
+import type { Listing, ListingReview } from '@/lib/types';
 import SiteHeader from '@/components/site-header/SiteHeader';
 import SiteFooter from '@/components/site-footer/SiteFooter';
 import { toast } from 'sonner';
@@ -31,13 +31,57 @@ export default function ListingDetailPage() {
   const [showFull, setShowFull] = useState(false);
   const [activeTab, setActiveTab] = useState<'description' | 'details'>('description');
 
+  // Reviews
+  const [reviews, setReviews] = useState<ListingReview[]>([]);
+  const [reviewPrompt, setReviewPrompt] = useState(false);
+  const [pendingRating, setPendingRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [reviewBody, setReviewBody] = useState('');
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [alreadyReviewed, setAlreadyReviewed] = useState(false);
+  const waTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   useEffect(() => {
     api.listings
       .get(id)
       .then(setListing)
       .catch(() => router.replace(`/${citySlug}`))
       .finally(() => setLoading(false));
+    api.listings.reviews(id).then(setReviews).catch(() => {});
   }, [id, citySlug, router]);
+
+  useEffect(() => () => { if (waTimerRef.current) clearTimeout(waTimerRef.current); }, []);
+
+  const handleWaClick = () => {
+    api.listings.waClick(listing!.id);
+    const token = localStorage.getItem('access_token');
+    if (!token || alreadyReviewed) return;
+    waTimerRef.current = setTimeout(() => setReviewPrompt(true), 5000);
+  };
+
+  const submitReview = async () => {
+    if (pendingRating === 0) { toast.error('Please select a star rating'); return; }
+    const token = localStorage.getItem('access_token');
+    if (!token) { router.push('/auth/login'); return; }
+    setSubmittingReview(true);
+    try {
+      const r = await api.listings.submitReview(id, pendingRating, reviewBody.trim() || null, token);
+      setReviews(prev => [r, ...prev]);
+      setAlreadyReviewed(true);
+      setReviewPrompt(false);
+      toast.success('Review submitted — thanks!');
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 409) {
+        setAlreadyReviewed(true);
+        setReviewPrompt(false);
+        toast('You have already reviewed this listing');
+      } else {
+        toast.error('Failed to submit review');
+      }
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
 
   const handleReport = async () => {
     const token = localStorage.getItem('access_token');
@@ -256,6 +300,60 @@ export default function ListingDetailPage() {
                 )}
               </div>
             </div>
+
+            {/* Reviews */}
+            <div className="bg-white rounded-3xl border mt-5" style={{ borderColor: 'var(--li-border)' }}>
+              <div className="px-6 pt-5 pb-4 border-b" style={{ borderColor: 'var(--li-border)' }}>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="font-bold text-base" style={{ color: 'var(--li-text)' }}>Reviews</h2>
+                    {reviews.length > 0 && (
+                      <p className="text-sm mt-0.5" style={{ color: 'var(--li-muted)' }}>
+                        {(reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1)} / 5
+                        {' · '}{reviews.length} review{reviews.length !== 1 ? 's' : ''}
+                      </p>
+                    )}
+                  </div>
+                  {!alreadyReviewed && (
+                    <button
+                      onClick={() => setReviewPrompt(true)}
+                      className="text-sm font-semibold px-4 py-2 rounded-xl border-2 transition-colors hover:border-orange-400"
+                      style={{ borderColor: 'var(--li-border)', color: 'var(--li-primary)' }}
+                    >
+                      Rate seller
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <div className="divide-y" style={{ borderColor: 'var(--li-border)' }}>
+                {reviews.length === 0 ? (
+                  <p className="px-6 py-8 text-center text-sm" style={{ color: 'var(--li-muted)' }}>
+                    No reviews yet — be the first after chatting on WhatsApp!
+                  </p>
+                ) : (
+                  reviews.map(rv => (
+                    <div key={rv.id} className="px-6 py-4">
+                      <div className="flex items-center gap-2 mb-1.5">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <Star
+                            key={i}
+                            className="w-4 h-4"
+                            style={{ color: i < rv.rating ? '#F59E0B' : '#D1D5DB' }}
+                            fill={i < rv.rating ? '#F59E0B' : '#D1D5DB'}
+                            strokeWidth={0}
+                          />
+                        ))}
+                        <span className="text-xs ml-1" style={{ color: 'var(--li-muted)' }}>{timeAgo(rv.created_at)}</span>
+                      </div>
+                      {rv.body && (
+                        <p className="text-sm leading-relaxed" style={{ color: 'var(--li-text)' }}>{rv.body}</p>
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
           </div>
 
           {/* ── RIGHT COLUMN: Seller card + CTA + Safety ── */}
@@ -289,7 +387,7 @@ export default function ListingDetailPage() {
                 rel="noopener noreferrer"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.97 }}
-                onClick={() => api.listings.waClick(listing.id)}
+                onClick={handleWaClick}
                 className="wa-btn w-full py-4 flex items-center justify-center gap-3 text-base font-bold rounded-2xl"
                 style={{ display: 'flex' }}
               >
@@ -375,7 +473,7 @@ export default function ListingDetailPage() {
           target="_blank"
           rel="noopener noreferrer"
           whileTap={{ scale: 0.97 }}
-          onClick={() => api.listings.waClick(listing.id)}
+          onClick={handleWaClick}
           className="wa-btn w-full py-3.5 flex items-center justify-center gap-3 text-base font-bold rounded-2xl"
           style={{ display: 'flex' }}
         >
@@ -383,6 +481,73 @@ export default function ListingDetailPage() {
           Chat on WhatsApp
         </motion.a>
       </div>
+
+      {/* WA review prompt — appears 5s after WA click */}
+      <AnimatePresence>
+        {reviewPrompt && (
+          <motion.div
+            initial={{ opacity: 0, y: 80 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 80 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+            className="fixed bottom-0 left-0 right-0 z-50 md:left-auto md:right-6 md:bottom-6 md:w-96"
+          >
+            <div className="bg-white rounded-t-3xl md:rounded-3xl shadow-2xl p-6 border" style={{ borderColor: 'var(--li-border)' }}>
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <p className="font-bold" style={{ color: 'var(--li-text)' }}>How was the seller?</p>
+                  <p className="text-sm mt-0.5" style={{ color: 'var(--li-muted)' }}>Rate your WhatsApp experience</p>
+                </div>
+                <button
+                  onClick={() => setReviewPrompt(false)}
+                  className="p-1 rounded-full hover:bg-muted transition-colors"
+                  style={{ color: 'var(--li-muted)' }}
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Star picker */}
+              <div className="flex gap-2 mb-4">
+                {[1, 2, 3, 4, 5].map(n => (
+                  <button
+                    key={n}
+                    onMouseEnter={() => setHoverRating(n)}
+                    onMouseLeave={() => setHoverRating(0)}
+                    onClick={() => setPendingRating(n)}
+                    className="transition-transform hover:scale-110"
+                  >
+                    <Star
+                      className="w-9 h-9"
+                      style={{ color: n <= (hoverRating || pendingRating) ? '#F59E0B' : '#D1D5DB' }}
+                      fill={n <= (hoverRating || pendingRating) ? '#F59E0B' : '#D1D5DB'}
+                      strokeWidth={0}
+                    />
+                  </button>
+                ))}
+              </div>
+
+              <textarea
+                value={reviewBody}
+                onChange={e => setReviewBody(e.target.value)}
+                placeholder="Optional — share your experience..."
+                rows={3}
+                className="w-full border rounded-xl px-3 py-2.5 text-sm resize-none mb-4 focus:outline-none focus:ring-2"
+                style={{ borderColor: 'var(--li-border)' }}
+              />
+
+              <button
+                onClick={submitReview}
+                disabled={submittingReview || pendingRating === 0}
+                className="w-full py-3 rounded-xl font-bold text-sm text-white transition-opacity disabled:opacity-40"
+                style={{ background: 'var(--li-primary)' }}
+              >
+                {submittingReview ? 'Submitting...' : 'Submit Review'}
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <SiteFooter />
     </div>

@@ -8,6 +8,7 @@ import type {
   SearchResult,
   SearchParams,
   CreateListingInput,
+  ListingReview,
   Event,
   Business,
   Review,
@@ -129,6 +130,14 @@ export const api = {
       }),
     waClick: (id: string) =>
       req<void>(`/api/v1/listings/${id}/wa-click`, { method: 'POST' }).catch(() => {}),
+    reviews: (id: string) =>
+      req<ListingReview[]>(`/api/v1/listings/${id}/reviews`),
+    submitReview: (id: string, rating: number, body: string | null, token: string) =>
+      req<ListingReview>(`/api/v1/listings/${id}/reviews`, {
+        method: 'POST',
+        body: JSON.stringify({ rating, body }),
+        token,
+      }),
     fulfill: (id: string, token: string) =>
       req<Listing>(`/api/v1/listings/${id}/fulfill`, { method: 'POST', token }),
     renew: (id: string, token: string) =>
