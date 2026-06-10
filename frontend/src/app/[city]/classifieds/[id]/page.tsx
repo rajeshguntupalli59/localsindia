@@ -84,7 +84,7 @@ export default function ListingDetailPage() {
         </button>
 
         {/* 2-COLUMN LAYOUT */}
-        <div className="grid grid-cols-[1fr_360px] gap-8 items-start">
+        <div className="grid md:grid-cols-[1fr_360px] gap-6 md:gap-8 items-start pb-24 md:pb-0">
 
           {/* ── LEFT COLUMN: Image + Content ── */}
           <div>
@@ -360,6 +360,21 @@ export default function ListingDetailPage() {
         </div>
       </div>
 
+      {/* Fixed mobile WhatsApp bar — above the fold on phones */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-white/95 backdrop-blur-sm border-t px-4 py-3" style={{ borderColor: 'var(--li-border)' }}>
+        <motion.a
+          href={waUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          whileTap={{ scale: 0.97 }}
+          className="wa-btn w-full py-3.5 flex items-center justify-center gap-3 text-base font-bold rounded-2xl"
+          style={{ display: 'flex' }}
+        >
+          <MessageCircle className="w-5 h-5" />
+          Chat on WhatsApp
+        </motion.a>
+      </div>
+
       <SiteFooter />
     </div>
   );
@@ -370,7 +385,7 @@ function SkeletonPage() {
     <div style={{ background: 'var(--li-page-bg)', minHeight: '100vh' }}>
       <div className="h-16 bg-white border-b" style={{ borderColor: 'var(--li-border)' }} />
       <div className="page-wrap py-8">
-        <div className="grid grid-cols-[1fr_360px] gap-8">
+        <div className="grid md:grid-cols-[1fr_360px] gap-6 md:gap-8 pb-24 md:pb-0">
           <div className="space-y-4">
             <div className="w-full rounded-3xl bg-gray-200 animate-pulse" style={{ aspectRatio: '4/3' }} />
             <div className="bg-white rounded-3xl p-6 space-y-3 border" style={{ borderColor: 'var(--li-border)' }}>

@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, SearchX, X, ChevronDown, ChevronUp, Tag, UtensilsCrossed, Building2, Briefcase, Car, Smartphone, CalendarDays, Store, GraduationCap } from 'lucide-react';
+import { Search, SearchX, X, ChevronDown, ChevronUp, Tag, UtensilsCrossed, Building2, Briefcase, Car, Smartphone, CalendarDays, Store, GraduationCap, SlidersHorizontal } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { api } from '@/lib/api';
 import type { Category, SearchResult } from '@/lib/types';
@@ -47,6 +47,7 @@ export default function SearchPage() {
   const [catExpanded, setCatExpanded] = useState(true);
   const [priceExpanded, setPriceExpanded] = useState(true);
   const [dateExpanded, setDateExpanded] = useState(false);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   // live search box
   const [localQ, setLocalQ] = useState(q);
@@ -198,10 +199,10 @@ export default function SearchPage() {
       </div>
 
       {/* 2-column layout: sidebar + results */}
-      <div className="page-wrap py-8 flex gap-8 items-start">
+      <div className="page-wrap py-6 md:py-8 md:flex md:gap-8 md:items-start">
 
-        {/* ── SIDEBAR FILTERS ── */}
-        <aside className="w-64 shrink-0 space-y-4 sticky top-24">
+        {/* ── SIDEBAR FILTERS (desktop only) ── */}
+        <aside className="hidden md:block w-64 shrink-0 space-y-4 sticky top-24">
           <div className="bg-white rounded-3xl border overflow-hidden" style={{ borderColor: 'var(--li-border)' }}>
             <div className="px-5 py-4 border-b flex items-center justify-between" style={{ borderColor: 'var(--li-border)' }}>
               <h2 className="font-bold text-sm" style={{ color: 'var(--li-text)' }}>Filters</h2>
@@ -342,13 +343,112 @@ export default function SearchPage() {
 
         {/* ── RESULTS GRID ── */}
         <div className="flex-1 min-w-0">
+
+          {/* ── MOBILE FILTERS (hidden on md+) ── */}
+          <div className="md:hidden mb-4 space-y-3">
+            {/* Category chips horizontal scroll */}
+            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none -mx-4 px-4">
+              <button
+                onClick={() => applyCategory('')}
+                className="shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-colors"
+                style={!localCat ? { background: 'var(--li-primary)', color: 'white', borderColor: 'var(--li-primary)' } : { borderColor: 'var(--li-border)', color: 'var(--li-text)' }}
+              >
+                All
+              </button>
+              {categories.map(cat => (
+                <button
+                  key={cat.id}
+                  onClick={() => applyCategory(cat.id)}
+                  className="shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-colors"
+                  style={localCat === cat.id ? { background: 'var(--li-primary)', color: 'white', borderColor: 'var(--li-primary)' } : { borderColor: 'var(--li-border)', color: 'var(--li-text)' }}
+                >
+                  {cat.name}
+                </button>
+              ))}
+            </div>
+
+            {/* More filters toggle */}
+            <button
+              onClick={() => setMobileFiltersOpen(f => !f)}
+              className="flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-semibold transition-colors"
+              style={{ borderColor: 'var(--li-border)', color: 'var(--li-text)' }}
+            >
+              <SlidersHorizontal className="w-3.5 h-3.5" />
+              More filters
+              {(priceMin || priceMax || dateRange) && (
+                <span className="w-4 h-4 rounded-full bg-orange-500 text-white text-[10px] flex items-center justify-center">
+                  {[priceMin || priceMax ? 1 : 0, dateRange ? 1 : 0].filter(n => n > 0).length}
+                </span>
+              )}
+            </button>
+
+            <AnimatePresence>
+              {mobileFiltersOpen && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="bg-white rounded-2xl border p-4 space-y-3" style={{ borderColor: 'var(--li-border)' }}>
+                    <div>
+                      <p className="text-xs font-bold mb-2" style={{ color: 'var(--li-text)' }}>Price Range (₹)</p>
+                      <div className="flex gap-2">
+                        <input
+                          type="number"
+                          placeholder="Min"
+                          value={priceMin}
+                          onChange={e => setPriceMin(e.target.value)}
+                          className="flex-1 px-3 py-2 rounded-xl border text-sm bg-gray-50 outline-none focus:border-orange-400"
+                          style={{ borderColor: 'var(--li-border)' }}
+                        />
+                        <input
+                          type="number"
+                          placeholder="Max"
+                          value={priceMax}
+                          onChange={e => setPriceMax(e.target.value)}
+                          className="flex-1 px-3 py-2 rounded-xl border text-sm bg-gray-50 outline-none focus:border-orange-400"
+                          style={{ borderColor: 'var(--li-border)' }}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold mb-2" style={{ color: 'var(--li-text)' }}>Posted</p>
+                      <div className="flex flex-wrap gap-2">
+                        {DATE_OPTIONS.map(opt => (
+                          <button
+                            key={opt.value}
+                            onClick={() => setDateRange(opt.value)}
+                            className="px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors"
+                            style={dateRange === opt.value ? { background: 'var(--li-primary)', color: 'white', borderColor: 'var(--li-primary)' } : { borderColor: 'var(--li-border)', color: 'var(--li-text)' }}
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    {hasActiveFilters && (
+                      <button
+                        onClick={() => { clearAllFilters(); setMobileFiltersOpen(false); }}
+                        className="text-xs font-semibold underline"
+                        style={{ color: 'var(--li-primary)' }}
+                      >
+                        Clear all filters
+                      </button>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
           {loading ? (
-            <div className="grid grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-5">
               {Array.from({ length: 9 }).map((_, i) => <ListingCardSkeleton key={i} />)}
             </div>
           ) : result && filteredItems.length > 0 ? (
             <>
-              <div className="grid grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-5">
                 {filteredItems.map((l, i) => (
                   <motion.div
                     key={l.id}
