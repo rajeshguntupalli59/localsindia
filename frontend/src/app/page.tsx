@@ -16,6 +16,7 @@ import { api } from '@/lib/api';
 import type { City } from '@/lib/types';
 import SiteFooter from '@/components/site-footer/SiteFooter';
 import LanguageSelector from '@/components/language-selector/LanguageSelector';
+import FreshListingsSection from '@/components/fresh-listings/FreshListingsSection';
 
 // ─── types ───────────────────────────────────────────────────
 interface CategoryDef { icon: LucideIcon; name: string; color: string; count: string }
@@ -514,6 +515,11 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ══════════════════════════════════════════════
+          FRESH LISTINGS
+      ══════════════════════════════════════════════ */}
+      <FreshListingsSection onCityPickerOpen={() => setShowCityPicker(true)} />
 
       {/* ══════════════════════════════════════════════
           CITY PICKER MODAL
