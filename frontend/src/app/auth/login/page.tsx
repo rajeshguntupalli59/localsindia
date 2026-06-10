@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { api, ApiError } from '@/lib/api';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
+import SiteLogo from '@/components/site-logo/SiteLogo';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
 const GOOGLE_AUTH_ENABLED = process.env.NEXT_PUBLIC_GOOGLE_AUTH_ENABLED === 'true';
@@ -116,11 +117,15 @@ export default function LoginPage() {
 
           {/* Header band */}
           <div className="px-6 pt-8 pb-6" style={{ background: 'var(--li-nav-bg)' }}>
+            {/* Logo on dark header */}
+            <div className="mb-5">
+              <SiteLogo variant="light" size="md" tagline={true} />
+            </div>
             <h1 className="text-2xl font-bold text-white">
-              {step === 'name' ? 'Almost done!' : 'Welcome to LocalsIndia'}
+              {step === 'name' ? 'Almost done!' : 'Welcome back'}
             </h1>
             <p className="text-white/60 text-sm mt-1">
-              {step === 'name' ? 'Tell us your name' : 'Buy, sell and discover in your city'}
+              {step === 'name' ? 'Tell us your name to complete setup' : 'Buy, sell and discover in your city'}
             </p>
 
             {/* Sign In / Sign Up tabs — only on phone step */}

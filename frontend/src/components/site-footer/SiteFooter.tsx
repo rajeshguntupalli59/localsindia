@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import SiteLogo from '@/components/site-logo/SiteLogo';
 
 // ─── inline brand SVGs ────────────────────────────────────────
 const IconX = () => (
@@ -56,11 +57,11 @@ export default function SiteFooter() {
 
           {/* ── Brand col ── */}
           <div>
-            <div className="text-2xl font-extrabold tracking-tight text-white mb-3">
-              Locals<span className="text-orange-500">India</span>
+            <div className="mb-4">
+              <SiteLogo variant="light" size="md" tagline={true} />
             </div>
             <p className="text-sm leading-relaxed text-slate-500 max-w-xs">
-              India&apos;s hyperlocal community platform — buy, sell, and connect in your city, in your language.
+              India&apos;s hyperlocal community platform — post listings, find local services, and connect in your language.
             </p>
 
             {/* Social icons */}

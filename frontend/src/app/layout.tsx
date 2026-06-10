@@ -43,10 +43,25 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://www.localsindia.com'),
   title: 'LocalsIndia — Your City, Your Community',
-  description: "India's hyperlocal classifieds and community platform",
+  description: "India's hyperlocal classifieds and community platform. Buy, sell, and connect in your city — in your language.",
   manifest: '/manifest.json',
   appleWebApp: { capable: true, statusBarStyle: 'default', title: 'LocalsIndia' },
+  openGraph: {
+    title: 'LocalsIndia — Buy · Sell · Connect',
+    description: "India's hyperlocal community platform. Post listings, find local services, connect with your neighbourhood.",
+    url: 'https://www.localsindia.com',
+    siteName: 'LocalsIndia',
+    images: [{ url: '/logo.png', width: 400, height: 160, alt: 'LocalsIndia' }],
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'LocalsIndia — Buy · Sell · Connect',
+    description: "India's hyperlocal community platform.",
+    images: ['/logo.png'],
+  },
 };
 
 export default async function RootLayout({

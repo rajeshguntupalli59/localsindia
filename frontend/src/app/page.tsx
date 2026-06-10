@@ -17,6 +17,7 @@ import type { City } from '@/lib/types';
 import SiteFooter from '@/components/site-footer/SiteFooter';
 import LanguageSelector from '@/components/language-selector/LanguageSelector';
 import FreshListingsSection from '@/components/fresh-listings/FreshListingsSection';
+import SiteLogo from '@/components/site-logo/SiteLogo';
 
 // ─── types ───────────────────────────────────────────────────
 interface CategoryDef { icon: LucideIcon; name: string; color: string; count: string }
@@ -199,15 +200,8 @@ export default function HomePage() {
       <header className="sticky top-0 z-50 bg-white/98 backdrop-blur-md border-b border-slate-100/80">
         <div className="page-wrap h-[60px] flex items-center">
 
-          {/* ── Wordmark ─────────────────────────────── */}
-          <Link href="/" className="shrink-0 flex flex-col leading-none select-none">
-            <span className="text-[17px] font-extrabold tracking-[-0.02em] text-slate-900">
-              Locals<span className="text-orange-500">India</span>
-            </span>
-            <span className="text-[9px] font-medium text-slate-400 tracking-[0.09em] uppercase mt-[3px]">
-              localsindia.com
-            </span>
-          </Link>
+          {/* ── Logo ─────────────────────────────────── */}
+          <SiteLogo href="/" size="sm" variant="default" className="shrink-0" />
 
           <div className="flex-1" />
 

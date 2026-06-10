@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Search, MapPin, LogOut, List, User, ChevronDown } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import LanguageSelector from '@/components/language-selector/LanguageSelector';
+import SiteLogo from '@/components/site-logo/SiteLogo';
 
 interface Props {
   citySlug?: string;
@@ -73,14 +74,7 @@ export default function SiteHeader({ citySlug, cityName }: Props) {
       <div className="page-wrap h-16 flex items-center gap-6">
 
         {/* Logo */}
-        <Link href="/" className="shrink-0 flex flex-col leading-none">
-          <span className="text-xl font-black tracking-tight" style={{ color: 'var(--li-text)' }}>
-            Locals<span style={{ color: 'var(--li-primary)' }}>India</span>
-          </span>
-          <span className="text-[10px] font-semibold" style={{ color: 'var(--li-muted)' }}>
-            localsindia.com
-          </span>
-        </Link>
+        <SiteLogo href="/" size="sm" variant="default" className="shrink-0" />
 
         {/* Search bar — hidden on mobile */}
         <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-xl">
