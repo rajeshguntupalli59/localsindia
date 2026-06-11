@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import {
-  Search, MapPin, ChevronDown, X, Plus, ArrowRight,
+  Search, MapPin, ChevronDown, Plus, ArrowRight,
   Utensils, Home, Briefcase, Car,
   Smartphone, Calendar, Store, GraduationCap,
   Zap, MessageCircle, Globe, Languages,
@@ -12,8 +12,8 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import Link from 'next/link';
-import { api } from '@/lib/api';
-import type { City } from '@/lib/types';
+import { usePrefs } from '@/context/PrefsContext';
+import CityPickerModal from '@/components/city-picker/CityPickerModal';
 import SiteFooter from '@/components/site-footer/SiteFooter';
 import LanguageSelector from '@/components/language-selector/LanguageSelector';
 import FreshListingsSection from '@/components/fresh-listings/FreshListingsSection';
@@ -25,11 +25,6 @@ interface TrustDef { icon: LucideIcon; title: string; subtitle: string; iconBg: 
 type GeoStatus = 'idle' | 'locating' | 'located' | 'denied' | 'failed';
 
 // ─── static data ─────────────────────────────────────────────
-const STATE_ORDER = [
-  'Telangana', 'Andhra Pradesh', 'Karnataka', 'Tamil Nadu',
-  'Kerala', 'Goa', 'Puducherry', 'Metro',
-];
-
 const CATEGORIES: CategoryDef[] = [
   { icon: Utensils,      name: 'Tiffin & Food', color: 'text-amber-500 bg-amber-500/10',     accent: 'bg-amber-400/60',   count: '2,840' },
   { icon: Home,          name: 'PG / Rooms',    color: 'text-blue-500 bg-blue-500/10',       accent: 'bg-blue-400/60',    count: '5,120' },
@@ -63,13 +58,9 @@ const SPRING = { duration: 0.3, ease: [0.22, 1, 0.36, 1] } as const;
 // ─── component ───────────────────────────────────────────────
 export default function HomePage() {
   const router = useRouter();
+  const { citySlug, cityName, setCity, cities } = usePrefs();
   const [q, setQ] = useState('');
-  const [cities, setCities] = useState<City[]>([]);
-  const [selectedCity, setSelectedCity] = useState('');
-  const [citySearch, setCitySearch] = useState('');
   const [showCityPicker, setShowCityPicker] = useState(false);
-  const [recentSlugs, setRecentSlugs] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
 
   // geolocation
   const [geoStatus, setGeoStatus] = useState<GeoStatus>('idle');
@@ -77,8 +68,6 @@ export default function HomePage() {
   const geoTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
-    api.cities.list().then(c => { setCities(c); setLoading(false); }).catch(() => setLoading(false));
-    try { setRecentSlugs(JSON.parse(localStorage.getItem('recentCities') ?? '[]')); } catch { /* */ }
     return () => clearTimeout(geoTimer.current);
   }, []);
 
@@ -92,25 +81,6 @@ export default function HomePage() {
       // keep 'located' active (so the icon stays orange), clear errors
       if (status !== 'located') setGeoStatus(s => (s === status ? 'idle' : s));
     }, status === 'located' ? 2800 : 3500);
-  };
-
-  const handleCitySelect = (city: City) => {
-    setSelectedCity(city.slug);
-    const next = [city.slug, ...recentSlugs.filter(s => s !== city.slug)].slice(0, 3);
-    setRecentSlugs(next);
-    localStorage.setItem('recentCities', JSON.stringify(next));
-    setShowCityPicker(false);
-    if (q.trim()) router.push(`/${city.slug}/search?q=${encodeURIComponent(q.trim())}`);
-    else router.push(`/${city.slug}`);
-  };
-
-  // Geo: set city WITHOUT navigating — let user compose their search first
-  const handleGeoSetCity = (city: City) => {
-    setSelectedCity(city.slug);
-    const next = [city.slug, ...recentSlugs.filter(s => s !== city.slug)].slice(0, 3);
-    setRecentSlugs(next);
-    localStorage.setItem('recentCities', JSON.stringify(next));
-    setShowCityPicker(false);
   };
 
   const handleGeoLocate = () => {
@@ -146,7 +116,7 @@ export default function HomePage() {
           });
 
           if (match) {
-            handleGeoSetCity(match);
+            setCity(match);
             flashMsg(`Located in ${match.name}`, 'located');
           } else {
             flashMsg(raw ? `"${raw}" isn't in our city list yet` : 'City not detected', 'failed');
@@ -168,27 +138,10 @@ export default function HomePage() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedCity) { setShowCityPicker(true); return; }
-    if (q.trim()) router.push(`/${selectedCity}/search?q=${encodeURIComponent(q.trim())}`);
-    else router.push(`/${selectedCity}`);
+    if (!citySlug) { setShowCityPicker(true); return; }
+    if (q.trim()) router.push(`/${citySlug}/search?q=${encodeURIComponent(q.trim())}`);
+    else router.push(`/${citySlug}`);
   };
-
-  // ── derived data ──────────────────────────────────────────────
-  const recentCities = cities.filter(c => recentSlugs.includes(c.slug));
-  const grouped: Record<string, City[]> = {};
-  const search = citySearch.toLowerCase();
-  for (const s of STATE_ORDER) {
-    const sc = cities.filter(c => c.state === s && c.name.toLowerCase().includes(search));
-    if (sc.length) grouped[s] = sc;
-  }
-  const otherStates = Array.from(new Set(cities.map(c => c.state)))
-    .filter(s => !STATE_ORDER.includes(s))
-    .sort();
-  for (const s of otherStates) {
-    const sc = cities.filter(c => c.state === s && c.name.toLowerCase().includes(search));
-    if (sc.length) grouped[s] = sc;
-  }
-  const selectedCityName = cities.find(c => c.slug === selectedCity)?.name;
 
   // ─────────────────────────────────────────────────────────────
   return (
@@ -246,7 +199,10 @@ export default function HomePage() {
             {/* Post Listing — primary CTA */}
             <button
               type="button"
-              onClick={() => setShowCityPicker(true)}
+              onClick={() => citySlug
+                ? router.push(`/${citySlug}/classifieds/post`)
+                : setShowCityPicker(true)
+              }
               className="ml-2 flex items-center gap-1.5 shrink-0
                 pl-[14px] pr-[18px] py-[9px] rounded-[10px]
                 text-[13px] font-semibold tracking-tight text-white
@@ -315,13 +271,13 @@ export default function HomePage() {
               Buy. Sell. Connect.<br />
               <AnimatePresence mode="wait" initial={false}>
                 <motion.span
-                  key={selectedCityName ?? '__default'}
+                  key={cityName || '__default'}
                   initial={{ opacity: 0, y: 18 }}
                   animate={{ opacity: 1, y: 0, transition: SPRING }}
                   exit={{ opacity: 0, y: -10, transition: { duration: 0.16, ease: 'easeIn' } }}
                   className="text-orange-500 inline-block"
                 >
-                  {selectedCityName ? `In ${selectedCityName}.` : 'In Your City.'}
+                  {cityName ? `In ${cityName}.` : 'In Your City.'}
                 </motion.span>
               </AnimatePresence>
             </h1>
@@ -366,7 +322,7 @@ export default function HomePage() {
                 {/* Selected city + icons row */}
                 <div className="flex items-center gap-1.5 w-full min-w-0">
                   <motion.span
-                    animate={selectedCityName ? { scale: [1, 1.25, 1] } : {}}
+                    animate={cityName ? { scale: [1, 1.25, 1] } : {}}
                     transition={{ duration: 0.28, ease: 'easeOut' }}
                     className="shrink-0"
                   >
@@ -378,14 +334,14 @@ export default function HomePage() {
                   <div className="flex-1 overflow-hidden min-w-0">
                     <AnimatePresence mode="wait" initial={false}>
                       <motion.span
-                        key={selectedCityName ?? '__none'}
+                        key={cityName || '__none'}
                         initial={{ opacity: 0, y: 4 }}
                         animate={{ opacity: 1, y: 0, transition: { duration: 0.16, ease: 'easeOut' } }}
                         exit={{ opacity: 0, y: -4, transition: { duration: 0.10, ease: 'easeIn' } }}
                         className="block text-[12.5px] font-semibold text-slate-800
                           truncate leading-none"
                       >
-                        {selectedCityName ?? 'Select...'}
+                        {cityName || 'Select...'}
                       </motion.span>
                     </AnimatePresence>
                   </div>
@@ -407,7 +363,7 @@ export default function HomePage() {
                   aria-label="Detect current location"
                   title={
                     geoStatus === 'denied'  ? 'Location access denied' :
-                    geoStatus === 'located' ? `Located in ${selectedCityName}` :
+                    geoStatus === 'located' ? `Located in ${cityName}` :
                     'Use my current location'
                   }
                   className={`flex items-center justify-center w-9 h-9 rounded-[10px]
@@ -682,149 +638,16 @@ export default function HomePage() {
       {/* ══════════════════════════════════════════════
           CITY PICKER MODAL
       ══════════════════════════════════════════════ */}
-      <AnimatePresence>
-        {showCityPicker && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
-              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
-              onClick={() => setShowCityPicker(false)}
-            />
-
-            {/* Modal */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.96, y: 12 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.96, y: 12 }}
-              transition={{ duration: 0.18, ease: 'easeOut' }}
-              className="relative bg-white rounded-3xl w-full max-w-2xl max-h-[82vh] overflow-hidden
-                shadow-2xl shadow-slate-900/20 ring-1 ring-slate-900/[0.05]"
-            >
-              {/* Header */}
-              <div className="px-6 pt-6 pb-4 border-b border-slate-100">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-base font-bold text-slate-900">Select your city</h2>
-                  <button
-                    onClick={() => setShowCityPicker(false)}
-                    className="w-8 h-8 rounded-full flex items-center justify-center
-                      text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
-                  >
-                    <X className="w-4 h-4" strokeWidth={2} />
-                  </button>
-                </div>
-
-                {/* Search input */}
-                <div className="flex items-center gap-3 rounded-xl bg-slate-50 px-4 py-2.5
-                  border border-slate-200 transition-all duration-200
-                  focus-within:border-orange-400 focus-within:ring-2 focus-within:ring-orange-500/10">
-                  <Search className="w-4 h-4 text-slate-400 shrink-0" strokeWidth={2} />
-                  <input
-                    autoFocus
-                    value={citySearch}
-                    onChange={e => setCitySearch(e.target.value)}
-                    placeholder="Search city..."
-                    className="flex-1 bg-transparent text-sm text-slate-800 placeholder:text-slate-400 outline-none"
-                  />
-                </div>
-
-                {/* Use Current Location button */}
-                <motion.button
-                  type="button"
-                  onClick={handleGeoLocate}
-                  disabled={geoStatus === 'locating' || geoStatus === 'denied'}
-                  whileTap={geoStatus !== 'locating' && geoStatus !== 'denied' ? { scale: 0.98 } : {}}
-                  className={`mt-3 w-full flex items-center gap-3 px-4 py-2.5 rounded-xl
-                    text-sm font-semibold border transition-all duration-200 ${
-                      geoStatus === 'locating'
-                        ? 'border-orange-200 bg-orange-50 text-orange-500 cursor-wait'
-                        : geoStatus === 'denied'
-                        ? 'border-slate-100 bg-slate-50 text-slate-400 cursor-not-allowed'
-                        : geoStatus === 'located'
-                        ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
-                        : 'border-dashed border-orange-200 bg-orange-50/60 text-orange-600 hover:bg-orange-100 hover:border-orange-300'
-                    }`}
-                >
-                  <span className="shrink-0">
-                    {geoStatus === 'locating'
-                      ? <Loader2 className="w-4 h-4 animate-spin" />
-                      : geoStatus === 'located'
-                      ? <CheckCircle2 className="w-4 h-4" />
-                      : <LocateFixed className="w-4 h-4" />
-                    }
-                  </span>
-                  <span>
-                    {geoStatus === 'locating' ? 'Detecting your location...' :
-                     geoStatus === 'located'  ? `Located in ${selectedCityName}` :
-                     geoStatus === 'denied'   ? 'Location access denied' :
-                     'Use Current Location'}
-                  </span>
-                </motion.button>
-              </div>
-
-              {/* Body */}
-              <div className="overflow-y-auto max-h-[56vh] p-6 space-y-6">
-                {/* Recent cities */}
-                {recentCities.length > 0 && !citySearch && (
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">Recent</p>
-                    <div className="flex gap-2 flex-wrap">
-                      {recentCities.map(c => (
-                        <button
-                          key={c.slug}
-                          onClick={() => handleCitySelect(c)}
-                          className="px-4 py-2 rounded-full text-sm font-semibold
-                            border border-orange-200 bg-orange-50 text-orange-600
-                            hover:bg-orange-100 transition-colors"
-                        >
-                          {c.name}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Grouped cities */}
-                {loading ? (
-                  <div className="grid grid-cols-3 gap-2">
-                    {Array.from({ length: 12 }).map((_, i) => (
-                      <div key={i} className="h-10 bg-slate-100 rounded-xl animate-pulse" />
-                    ))}
-                  </div>
-                ) : (
-                  Object.entries(grouped).map(([state, stateCities]) => (
-                    <div key={state}>
-                      <div className="flex items-center gap-2 mb-3">
-                        <MapPin className="w-3.5 h-3.5 text-orange-500 shrink-0" strokeWidth={2} />
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{state}</p>
-                      </div>
-                      <div className="grid grid-cols-3 gap-2">
-                        {stateCities.map(c => (
-                          <motion.button
-                            key={c.slug}
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            onClick={() => handleCitySelect(c)}
-                            className="px-3 py-2.5 rounded-xl border border-slate-100
-                              text-sm font-medium text-slate-700 text-left
-                              hover:border-orange-300 hover:text-orange-600 hover:bg-orange-50
-                              transition-all duration-150"
-                          >
-                            {c.name}
-                          </motion.button>
-                        ))}
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+      {showCityPicker && (
+        <CityPickerModal
+          onClose={() => setShowCityPicker(false)}
+          onSelect={city => {
+            setShowCityPicker(false);
+            if (q.trim()) router.push(`/${city.slug}/search?q=${encodeURIComponent(q.trim())}`);
+            else router.push(`/${city.slug}`);
+          }}
+        />
+      )}
 
       {/* ══════════════════════════════════════════════
           TRUST BADGES
