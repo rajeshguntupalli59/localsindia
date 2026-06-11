@@ -60,3 +60,8 @@ class AuthResponse(BaseModel):
     token_type: str = "bearer"
     user: UserOut
     is_new_user: bool = False
+
+
+class AdminLoginRequest(BaseModel):
+    username: str
+    password: str

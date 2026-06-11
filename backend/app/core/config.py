@@ -24,6 +24,9 @@ class Settings(BaseSettings):
     FRONTEND_URL: str = "http://localhost:3000"
     OTP_DEBUG: bool = False  # Set to true on Azure to return OTP in response for testing
 
+    ADMIN_USERNAME: str = ""
+    ADMIN_PASSWORD_HASH: str = ""
+
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 
 

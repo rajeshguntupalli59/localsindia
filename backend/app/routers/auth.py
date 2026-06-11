@@ -22,7 +22,7 @@ from app.models.user import User
 from app.core.deps import get_current_user
 from app.schemas.auth import (
     OtpSendRequest, OtpVerifyRequest, AuthResponse,
-    RefreshRequest, TokenResponse, UserOut, ProfileUpdate,
+    RefreshRequest, TokenResponse, UserOut, ProfileUpdate, AdminLoginRequest,
 )
 from app.services import msg91
 
@@ -34,6 +34,22 @@ OTP_MAX_PER_WINDOW = 5
 OTP_MAX_ATTEMPTS = 3
 OTP_LOCKOUT_MINUTES = 15
 OTP_EXPIRE_MINUTES = 10
+
+
+@router.post("/admin-login")
+async def admin_login(body: AdminLoginRequest):
+    """Admin login with username + password — credentials stored as Azure env vars."""
+    if not settings.ADMIN_USERNAME or not settings.ADMIN_PASSWORD_HASH:
+        raise HTTPException(status_code=503, detail="Admin credentials not configured.")
+    if body.username != settings.ADMIN_USERNAME:
+        raise HTTPException(status_code=401, detail="Invalid credentials.")
+    if not verify_password(body.password, settings.ADMIN_PASSWORD_HASH):
+        raise HTTPException(status_code=401, detail="Invalid credentials.")
+    return {
+        "access_token": create_access_token("admin"),
+        "refresh_token": create_refresh_token("admin"),
+        "user": {"id": "admin", "role": "admin", "name": "Admin", "phone": ""},
+    }
 
 
 @router.post("/signin", response_model=AuthResponse)
