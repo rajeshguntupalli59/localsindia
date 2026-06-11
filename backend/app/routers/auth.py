@@ -36,6 +36,28 @@ OTP_LOCKOUT_MINUTES = 15
 OTP_EXPIRE_MINUTES = 10
 
 
+@router.post("/signin", response_model=AuthResponse)
+async def direct_signin(body: OtpSendRequest, db: AsyncSession = Depends(get_db)):
+    """Sign in an existing user directly — no OTP required (phone already verified at signup)."""
+    result = await db.execute(
+        select(User).where(User.phone == body.phone, User.deleted_at.is_(None))
+    )
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(
+            status_code=404,
+            detail="No account found for this number. Please create a new account.",
+        )
+    if not user.is_active:
+        raise HTTPException(status_code=403, detail="Your account has been deactivated. Contact support.")
+    return AuthResponse(
+        access_token=create_access_token(str(user.id)),
+        refresh_token=create_refresh_token(str(user.id)),
+        user=UserOut.model_validate(user),
+        is_new_user=False,
+    )
+
+
 @router.post("/otp/send", status_code=200)
 async def send_otp(body: OtpSendRequest, db: AsyncSession = Depends(get_db)):
     phone = body.phone

@@ -40,19 +40,35 @@ export default function LoginPage() {
 
   const oauthError = searchParams.get('error');
 
-  const sendOtp = async (e: React.FormEvent) => {
+  const handlePhoneSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await api.auth.sendOtp(phone);
-      setStep('otp');
-      if (res?.otp) {
-        toast.info(`OTP: ${res.otp}`, { duration: 60000 });
+      if (mode === 'signin') {
+        // Existing user — direct login, no OTP
+        const res = await api.auth.signin(phone);
+        localStorage.setItem('access_token', res.access_token);
+        localStorage.setItem('refresh_token', res.refresh_token);
+        localStorage.setItem('user', JSON.stringify(res.user));
+        toast.success(`Welcome back, ${(res.user as { name?: string }).name ?? 'back'}!`);
+        router.push('/');
       } else {
-        toast.success('OTP sent to your mobile!');
+        // New user — send OTP for phone verification
+        const res = await api.auth.sendOtp(phone);
+        setStep('otp');
+        if (res?.otp) {
+          toast.info(`OTP: ${res.otp}`, { duration: 60000 });
+        } else {
+          toast.success('OTP sent to your mobile!');
+        }
       }
     } catch (err) {
-      toast.error(err instanceof ApiError ? err.message : 'Failed to send OTP');
+      if (err instanceof ApiError && err.status === 404 && mode === 'signin') {
+        toast.error("No account found. Create a free account first!");
+        setMode('signup');
+      } else {
+        toast.error(err instanceof ApiError ? err.message : mode === 'signin' ? 'Login failed' : 'Failed to send OTP');
+      }
     } finally {
       setLoading(false);
     }
@@ -115,10 +131,14 @@ export default function LoginPage() {
               <SiteLogo variant="light" size="md" tagline={true} />
             </div>
             <h1 className="text-2xl font-bold text-white">
-              {step === 'name' ? 'Almost done!' : 'Welcome back'}
+              {step === 'name' ? 'Almost done!' : mode === 'signup' ? 'Create account' : 'Welcome back'}
             </h1>
             <p className="text-white/60 text-sm mt-1">
-              {step === 'name' ? 'Tell us your name to complete setup' : 'Buy, sell and discover in your city'}
+              {step === 'name'
+                ? 'Tell us your name to complete setup'
+                : mode === 'signup'
+                ? 'Verify your number to get started'
+                : 'Enter your number to sign in instantly'}
             </p>
 
             {/* Sign In / Sign Up tabs — only on phone step */}
@@ -205,7 +225,7 @@ export default function LoginPage() {
                     </div>
                   </>
                 )}
-                <form onSubmit={sendOtp} className="space-y-5">
+                <form onSubmit={handlePhoneSubmit} className="space-y-5">
                   <div className="space-y-2">
                     <Label htmlFor="phone">Mobile Number</Label>
                     <div className="flex rounded-lg border border-input overflow-hidden focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-0">
@@ -227,7 +247,9 @@ export default function LoginPage() {
                     <p className="text-xs text-muted-foreground">Enter your 10-digit mobile number</p>
                   </div>
                   <Button type="submit" className="w-full text-white" style={{ background: 'var(--li-primary)' }} disabled={loading}>
-                    {loading ? 'Sending...' : mode === 'signup' ? 'Create Free Account →' : 'Send OTP →'}
+                    {loading
+                      ? (mode === 'signin' ? 'Signing in...' : 'Sending OTP...')
+                      : mode === 'signin' ? 'Sign In →' : 'Send OTP →'}
                   </Button>
                   {mode === 'signup' ? (
                     <p className="text-xs text-center text-muted-foreground">

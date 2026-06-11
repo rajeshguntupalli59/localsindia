@@ -150,6 +150,11 @@ export const api = {
   auth: {
     devLogin: () =>
       req<AuthTokens>('/api/v1/auth/dev-login', { method: 'POST' }),
+    signin: (phone: string) =>
+      req<AuthTokens & { is_new_user: boolean }>('/api/v1/auth/signin', {
+        method: 'POST',
+        body: JSON.stringify({ phone }),
+      }),
     sendOtp: (phone: string) =>
       req<{ message: string; otp?: string }>('/api/v1/auth/otp/send', {
         method: 'POST',
