@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
+import { usePrefs } from '@/context/PrefsContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   MapPin, ArrowRight, ChevronLeft, ChevronRight,
@@ -91,7 +92,7 @@ function WaIcon({ className }: { className?: string }) {
 // ══════════════════════════════════════════════════════════════
 
 // ─── Listing badge (top-left of image zone) ───────────────────
-function ListingBadge({ type }: { type: MockListing['badge'] }) {
+function ListingBadge({ type, labelNew, labelVerified }: { type: MockListing['badge']; labelNew: string; labelVerified: string }) {
   if (type === 'Verified') {
     return (
       <div className="inline-flex items-center gap-[5px]
@@ -101,7 +102,7 @@ function ListingBadge({ type }: { type: MockListing['badge'] }) {
         <BadgeCheck className="w-[11px] h-[11px] text-sky-500 shrink-0" strokeWidth={2.5} />
         <span className="text-[9.5px] font-bold text-sky-600
           uppercase tracking-[0.07em] leading-none">
-          Verified
+          {labelVerified}
         </span>
       </div>
     );
@@ -114,7 +115,7 @@ function ListingBadge({ type }: { type: MockListing['badge'] }) {
       <span className="w-[5px] h-[5px] rounded-full bg-white/80 shrink-0 inline-block" />
       <span className="text-[9.5px] font-bold text-white
         uppercase tracking-[0.07em] leading-none">
-        New
+        {labelNew}
       </span>
     </div>
   );
@@ -135,7 +136,7 @@ function CategoryChip({ Icon, label }: { Icon: LucideIcon; label: string }) {
 }
 
 // ─── WhatsApp action tray (card footer) ───────────────────────
-function WaTray({ url }: { url: string }) {
+function WaTray({ url, waLabel }: { url: string; waLabel: string }) {
   return (
     <div className="px-3.5 pb-3.5">
       {/* Hairline separator */}
@@ -160,7 +161,7 @@ function WaTray({ url }: { url: string }) {
             <WaIcon className="w-[13px] h-[13px] text-[#16a34a]" />
           </div>
           <span className="text-[12.5px] font-semibold text-[#166534] leading-none">
-            Chat on WhatsApp
+            {waLabel}
           </span>
         </div>
         <ArrowRight
@@ -227,7 +228,7 @@ function CardSkeleton() {
 // ══════════════════════════════════════════════════════════════
 //  LISTING CARD
 // ══════════════════════════════════════════════════════════════
-function FreshListingCard({ listing, index }: { listing: MockListing; index: number }) {
+function FreshListingCard({ listing, index, labelNew, labelVerified, labelChatOnWA }: { listing: MockListing; index: number; labelNew: string; labelVerified: string; labelChatOnWA: string }) {
   const [from, to] = listing.gradient;
 
   return (
@@ -262,7 +263,7 @@ function FreshListingCard({ listing, index }: { listing: MockListing; index: num
 
         {/* Badge — top-left */}
         <div className="absolute top-3 left-3 z-10">
-          <ListingBadge type={listing.badge} />
+          <ListingBadge type={listing.badge} labelNew={labelNew} labelVerified={labelVerified} />
         </div>
 
         {/* Category chip — top-right */}
@@ -310,7 +311,7 @@ function FreshListingCard({ listing, index }: { listing: MockListing; index: num
       </div>
 
       {/* ── WhatsApp action tray ──────────────────────── */}
-      <WaTray url={listing.waUrl} />
+      <WaTray url={listing.waUrl} waLabel={labelChatOnWA} />
 
     </motion.article>
   );
@@ -328,6 +329,7 @@ export default function FreshListingsSection({
   onCityPickerOpen,
   isLoading = false,
 }: FreshListingsSectionProps) {
+  const { t } = usePrefs();
   const trackRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft,  setCanScrollLeft]  = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
@@ -381,15 +383,15 @@ export default function FreshListingsSection({
               </span>
               <span className="text-[10px] font-semibold uppercase tracking-[0.13em]
                 text-emerald-600">
-                Live · Updated just now
+                {t('fresh.live')}
               </span>
             </div>
             <h2 className="text-[1.625rem] sm:text-[1.75rem] font-bold text-slate-900
               tracking-[-0.025em] leading-tight">
-              Fresh Listings Near You
+              {t('fresh.title')}
             </h2>
             <p className="text-[13px] text-slate-500 mt-2 leading-none">
-              Real people, real prices — contact sellers directly via WhatsApp.
+              {t('fresh.sub')}
             </p>
           </div>
 
@@ -400,7 +402,7 @@ export default function FreshListingsSection({
               text-[13px] font-semibold text-[#F7921E] hover:text-[#E07B0A]
               transition-colors duration-150 group"
           >
-            View all
+            {t('fresh.viewAll')}
             <ArrowRight
               className="w-3.5 h-3.5 transition-transform duration-200
                 group-hover:translate-x-0.5"
@@ -447,7 +449,13 @@ export default function FreshListingsSection({
               : FRESH_LISTINGS.map((listing, i) => (
                   <div key={listing.id} className="min-w-[82vw] sm:min-w-[calc(50%-8px)]
                     lg:min-w-[calc(25%-12px)] shrink-0 snap-start">
-                    <FreshListingCard listing={listing} index={i} />
+                    <FreshListingCard
+                      listing={listing}
+                      index={i}
+                      labelNew={t('fresh.badgeNew')}
+                      labelVerified={t('fresh.badgeVerified')}
+                      labelChatOnWA={t('listing.chatOnWA')}
+                    />
                   </div>
                 ))
             }
@@ -493,7 +501,7 @@ export default function FreshListingsSection({
               hover:bg-[#E07B0A]
               active:scale-[0.97] transition-all duration-200 group"
           >
-            View all near you
+            {t('fresh.viewAllNear')}
             <ArrowRight
               className="w-3.5 h-3.5 transition-transform duration-200
                 group-hover:translate-x-0.5"
@@ -504,7 +512,7 @@ export default function FreshListingsSection({
 
         {/* ── Footnote ─────────────────────────────── */}
         <p className="mt-7 text-center text-[11px] text-slate-400/75 tracking-wide">
-          All sellers contactable directly via WhatsApp&nbsp;·&nbsp;No middlemen&nbsp;·&nbsp;No commissions
+          {t('fresh.footnote')}
         </p>
 
       </div>

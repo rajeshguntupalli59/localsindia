@@ -8,6 +8,7 @@ import type { LucideIcon } from 'lucide-react';
 import Link from 'next/link';
 import { api } from '@/lib/api';
 import type { City, Listing } from '@/lib/types';
+import { usePrefs } from '@/context/PrefsContext';
 import SiteHeader from '@/components/site-header/SiteHeader';
 import SiteFooter from '@/components/site-footer/SiteFooter';
 import ListingCard from '@/components/listing-card/ListingCard';
@@ -16,29 +17,30 @@ import EmptyState from '@/components/empty-state/EmptyState';
 
 interface CatDef { label: string; slug: string; icon: LucideIcon }
 
-const CATEGORIES: CatDef[] = [
-  { label: 'All',          slug: '',            icon: Tag },
-  { label: 'Tiffin',       slug: 'tiffin',      icon: UtensilsCrossed },
-  { label: 'PG / Rooms',   slug: 'pg-roommate', icon: Building2 },
-  { label: 'Jobs',          slug: 'jobs',        icon: Briefcase },
-  { label: 'Vehicles',      slug: 'vehicles',    icon: Car },
-  { label: 'Electronics',   slug: 'electronics', icon: Smartphone },
-  { label: 'Events',        slug: 'events',      icon: CalendarDays },
-  { label: 'Businesses',    slug: 'businesses',  icon: Store },
-  { label: 'Education',     slug: 'education',   icon: GraduationCap },
-];
-
-const SORT_OPTIONS = [
-  { label: 'Newest First', value: 'newest' },
-  { label: 'Price: Low to High', value: 'price_asc' },
-  { label: 'Price: High to Low', value: 'price_desc' },
-  { label: 'Featured First', value: 'featured' },
-];
-
 export default function CityHomePage() {
   const params = useParams();
   const citySlug = params.city as string;
   const router = useRouter();
+  const { t } = usePrefs();
+
+  const CATEGORIES: CatDef[] = [
+    { label: t('categories.all'),         slug: '',            icon: Tag },
+    { label: t('categories.tiffin'),      slug: 'tiffin',      icon: UtensilsCrossed },
+    { label: t('categories.pgRooms'),     slug: 'pg-roommate', icon: Building2 },
+    { label: t('categories.jobs'),        slug: 'jobs',        icon: Briefcase },
+    { label: t('categories.vehicles'),    slug: 'vehicles',    icon: Car },
+    { label: t('categories.electronics'), slug: 'electronics', icon: Smartphone },
+    { label: t('categories.events'),      slug: 'events',      icon: CalendarDays },
+    { label: t('categories.businesses'),  slug: 'businesses',  icon: Store },
+    { label: t('categories.education'),   slug: 'education',   icon: GraduationCap },
+  ];
+
+  const SORT_OPTIONS = [
+    { label: t('sort.newest'),       value: 'newest' },
+    { label: t('sort.priceAsc'),     value: 'price_asc' },
+    { label: t('sort.priceDesc'),    value: 'price_desc' },
+    { label: t('sort.featuredFirst'),value: 'featured' },
+  ];
 
   const [city, setCity] = useState<City | null>(null);
   const [featured, setFeatured] = useState<Listing[]>([]);
@@ -108,10 +110,10 @@ export default function CityHomePage() {
                   {city?.state}
                 </p>
                 <h1 className="text-3xl font-black text-white">
-                  Discover <span style={{ color: 'var(--li-primary)' }}>{city?.name}</span>
+                  {t('city2.discover')} <span style={{ color: 'var(--li-primary)' }}>{city?.name}</span>
                 </h1>
                 <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.45)' }}>
-                  {latest.length + featured.length} active listings · updated just now
+                  {t('city2.activeListings', { count: String(latest.length + featured.length) })}
                 </p>
               </motion.div>
             )}
@@ -154,14 +156,14 @@ export default function CityHomePage() {
               <div className="flex items-center justify-between mb-5">
                 <h2 className="section-title flex items-center gap-2">
                   <Star className="w-4 h-4 fill-current" style={{ color: 'var(--li-featured)' }} strokeWidth={0} />
-                  Featured Listings
+                  {t('city2.featuredListings')}
                 </h2>
                 <Link
                   href={`/${citySlug}/search?featured=true`}
                   className="text-sm font-semibold transition-colors hover:underline"
                   style={{ color: 'var(--li-primary)' }}
                 >
-                  View all →
+                  {t('listing.viewAll')}
                 </Link>
               </div>
 
@@ -186,7 +188,7 @@ export default function CityHomePage() {
         {/* ── LATEST LISTINGS ── */}
         <section>
           <div className="flex items-center justify-between mb-5">
-            <h2 className="section-title">Latest Listings</h2>
+            <h2 className="section-title">{t('city2.latestListings')}</h2>
 
             {/* Sort dropdown */}
             <div className="relative">
@@ -236,9 +238,9 @@ export default function CityHomePage() {
           ) : sortedLatest.length === 0 ? (
             <EmptyState
               icon={SearchX}
-              title="No listings yet"
-              description="Be the first to post in your city!"
-              action={{ label: '+ Post a Listing', href: `/${citySlug}/classifieds/post` }}
+              title={t('listing.noListings')}
+              description={t('listing.beFirst')}
+              action={{ label: t('listing.postListing'), href: `/${citySlug}/classifieds/post` }}
             />
           ) : (
             <div className="grid grid-cols-4 gap-5">
@@ -263,7 +265,7 @@ export default function CityHomePage() {
                 className="px-8 py-3 rounded-xl border-2 font-semibold text-sm transition-colors hover:border-orange-400 hover:text-orange-600"
                 style={{ borderColor: 'var(--li-border)', color: 'var(--li-text)' }}
               >
-                View all listings →
+                {t('listing.viewAllListings')}
               </Link>
             </div>
           )}

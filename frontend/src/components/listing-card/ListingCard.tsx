@@ -7,6 +7,7 @@ import { MapPin, Clock } from 'lucide-react';
 import { formatPrice, timeAgo } from '@/lib/utils';
 import { api } from '@/lib/api';
 import type { Listing } from '@/lib/types';
+import { usePrefs } from '@/context/PrefsContext';
 
 interface Props {
   listing: Listing;
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export default function ListingCard({ listing, citySlug = '' }: Props) {
+  const { t } = usePrefs();
   const image = listing.images?.[0];
   const waUrl =
     listing.whatsapp_url ??
@@ -60,7 +62,7 @@ export default function ListingCard({ listing, citySlug = '' }: Props) {
           {/* Featured badge */}
           {listing.is_featured && (
             <span className="badge-featured absolute top-2 left-2">
-              ⭐ Featured
+              ⭐ {t('listing.featured')}
             </span>
           )}
 
@@ -68,7 +70,7 @@ export default function ListingCard({ listing, citySlug = '' }: Props) {
           {listing.status === 'fulfilled' && (
             <div className="absolute inset-0 bg-black/55 flex items-center justify-center">
               <span className="text-white font-bold text-sm bg-black/60 px-4 py-1.5 rounded-full">
-                Sold
+                {t('listing.sold')}
               </span>
             </div>
           )}
@@ -82,7 +84,7 @@ export default function ListingCard({ listing, citySlug = '' }: Props) {
             className="text-xs font-bold uppercase tracking-wide mb-1"
             style={{ color: 'var(--li-primary)' }}
           >
-            {listing.category_id ? '🏷️' : ''} {listing.price === null ? 'Price on request' : ''}
+            {listing.category_id ? '🏷️' : ''} {listing.price === null ? t('listing.priceOnRequest') : ''}
           </p>
           <p
             className="font-700 text-sm leading-snug line-clamp-2 mb-2"
@@ -112,7 +114,7 @@ export default function ListingCard({ listing, citySlug = '' }: Props) {
               style={{ background: '#dcfce7', color: '#16a34a' }}
             >
               <span className="w-1.5 h-1.5 rounded-full bg-[#25D366] inline-block" />
-              Active on WA
+              {t('listing.activeOnWA')}
             </span>
           </div>
         )}
@@ -125,7 +127,7 @@ export default function ListingCard({ listing, citySlug = '' }: Props) {
           className="wa-btn mt-3 w-full py-2.5 text-sm"
           onClick={e => { e.stopPropagation(); api.listings.waClick(listing.id); }}
         >
-          💬 WhatsApp
+          💬 {t('listing.chatOnWA')}
         </a>
       </div>
     </motion.div>

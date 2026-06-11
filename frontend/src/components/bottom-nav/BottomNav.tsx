@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
+import { usePrefs } from '@/context/PrefsContext';
 
 interface Props {
   citySlug: string;
@@ -12,6 +13,7 @@ interface Props {
 
 export default function BottomNav({ citySlug }: Props) {
   const pathname = usePathname();
+  const { t } = usePrefs();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
@@ -19,13 +21,13 @@ export default function BottomNav({ citySlug }: Props) {
   }, []);
 
   const items = [
-    { icon: Home, label: 'Home', href: `/${citySlug}` },
-    { icon: Search, label: 'Search', href: `/${citySlug}/search` },
-    { icon: Plus, label: 'Post', href: `/${citySlug}/classifieds/post`, featured: true },
-    { icon: List, label: 'My Listings', href: '/profile/listings' },
+    { icon: Home, label: t('bottomNav.home'), href: `/${citySlug}` },
+    { icon: Search, label: t('bottomNav.search'), href: `/${citySlug}/search` },
+    { icon: Plus, label: t('bottomNav.post'), href: `/${citySlug}/classifieds/post`, featured: true },
+    { icon: List, label: t('bottomNav.myListings'), href: '/profile/listings' },
     isLoggedIn
-      ? { icon: User, label: 'Profile', href: '/profile' }
-      : { icon: LogIn, label: 'Sign Up', href: '/auth/login?mode=signup' },
+      ? { icon: User, label: t('bottomNav.profile'), href: '/profile' }
+      : { icon: LogIn, label: t('bottomNav.signUp'), href: '/auth/login?mode=signup' },
   ];
 
   return (
