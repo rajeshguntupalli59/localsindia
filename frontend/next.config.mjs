@@ -7,6 +7,10 @@ const nextConfig = {
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'res.cloudinary.com' },
+      { protocol: 'https', hostname: '*.azurewebsites.net' },
+      // Allow any http/https source so mock-image URLs from dev data don't 400
+      { protocol: 'https', hostname: '**' },
+      { protocol: 'http', hostname: '**' },
     ],
   },
 };
