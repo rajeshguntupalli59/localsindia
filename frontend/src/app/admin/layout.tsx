@@ -32,6 +32,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     router.replace('/');
   };
 
+  if (pathname === '/admin/login') return <>{children}</>;
   if (!role) return null;
 
   return (
