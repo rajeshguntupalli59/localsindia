@@ -214,14 +214,14 @@ export default function PostListingPage() {
 
       {/* ── STEP PROGRESS BAR ── */}
       <div className="bg-white border-b" style={{ borderColor: 'var(--li-border)' }}>
-        <div className="page-wrap py-6">
+        <div className="page-wrap py-4 sm:py-6">
           <div className="flex items-center gap-0">
             {STEPS.map((s, i) => (
               <div key={i} className="flex items-center flex-1">
                 {/* Step bubble */}
-                <div className="flex items-center gap-3 shrink-0">
+                <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                   <div
-                    className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-black transition-all"
+                    className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-sm font-black transition-all"
                     style={
                       i < step
                         ? { background: 'var(--li-primary)', color: 'white' }
@@ -234,18 +234,18 @@ export default function PostListingPage() {
                   </div>
                   <div>
                     <p
-                      className="text-sm font-bold"
+                      className="text-xs sm:text-sm font-bold"
                       style={{ color: i === step ? 'var(--li-primary)' : i < step ? 'var(--li-text)' : 'var(--li-muted)' }}
                     >
                       {s.label}
                     </p>
-                    <p className="text-xs" style={{ color: 'var(--li-muted)' }}>{s.desc}</p>
+                    <p className="hidden sm:block text-xs" style={{ color: 'var(--li-muted)' }}>{s.desc}</p>
                   </div>
                 </div>
                 {/* Connector */}
                 {i < STEPS.length - 1 && (
                   <div
-                    className="flex-1 h-0.5 mx-4 rounded-full"
+                    className="flex-1 h-0.5 mx-2 sm:mx-4 rounded-full"
                     style={{ background: i < step ? 'var(--li-primary)' : '#E5E7EB' }}
                   />
                 )}
@@ -265,7 +265,7 @@ export default function PostListingPage() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="grid grid-cols-[1fr_360px] gap-8 items-start"
+              className="grid grid-cols-1 md:grid-cols-[1fr_360px] gap-6 md:gap-8 items-start"
             >
               {/* Left: Title + Category + Description */}
               <div className="space-y-6" data-step1-form>
@@ -312,7 +312,7 @@ export default function PostListingPage() {
                   <h2 className="text-lg font-black mb-5" style={{ color: 'var(--li-text)' }}>
                     Pick a category <span style={{ color: '#EF4444' }}>*</span>
                   </h2>
-                  <div className="grid grid-cols-4 gap-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     {categories.map(cat => {
                       const Icon = CATEGORY_ICONS[cat.slug] ?? Tag;
                       const isActive = form.category_id === cat.id;
@@ -354,7 +354,7 @@ export default function PostListingPage() {
               </div>
 
               {/* Right: Price + preview tip */}
-              <div className="space-y-5 sticky top-24">
+              <div className="space-y-5 md:sticky md:top-24">
                 <div className="bg-white rounded-3xl p-6 border" style={{ borderColor: 'var(--li-border)' }}>
                   <h2 className="text-base font-bold mb-4" style={{ color: 'var(--li-text)' }}>Set a price</h2>
                   <label className="text-sm font-medium mb-2 block" style={{ color: 'var(--li-muted)' }}>
@@ -406,7 +406,7 @@ export default function PostListingPage() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="grid grid-cols-[1fr_360px] gap-8 items-start"
+              className="grid grid-cols-1 md:grid-cols-[1fr_360px] gap-6 md:gap-8 items-start"
             >
               <div className="bg-white rounded-3xl p-6 border" style={{ borderColor: 'var(--li-border)' }}>
                 <h2 className="text-lg font-black mb-2" style={{ color: 'var(--li-text)' }}>Add photos</h2>
@@ -417,7 +417,7 @@ export default function PostListingPage() {
                 {photos.length < 5 && (
                   <button
                     onClick={() => fileRef.current?.click()}
-                    className="w-full border-2 border-dashed rounded-3xl p-12 flex flex-col items-center gap-3 transition-colors hover:border-orange-400 hover:bg-orange-50 mb-5"
+                    className="w-full border-2 border-dashed rounded-3xl p-8 sm:p-12 flex flex-col items-center gap-3 transition-colors hover:border-orange-400 hover:bg-orange-50 mb-5"
                     style={{ borderColor: 'var(--li-border)' }}
                   >
                     <div
@@ -468,7 +468,7 @@ export default function PostListingPage() {
                 )}
               </div>
 
-              <div className="sticky top-24">
+              <div className="md:sticky md:top-24">
                 <div
                   className="rounded-3xl p-5 border"
                   style={{ background: '#FFFBEB', borderColor: '#FDE68A' }}
@@ -502,7 +502,7 @@ export default function PostListingPage() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="grid grid-cols-[1fr_360px] gap-8 items-start"
+              className="grid grid-cols-1 md:grid-cols-[1fr_360px] gap-6 md:gap-8 items-start"
             >
               <div className="bg-white rounded-3xl p-6 border space-y-6" style={{ borderColor: 'var(--li-border)' }}>
                 <h2 className="text-lg font-black" style={{ color: 'var(--li-text)' }}>Contact details</h2>
@@ -623,7 +623,7 @@ export default function PostListingPage() {
                 </div>
               </div>
 
-              <div className="space-y-5 sticky top-24">
+              <div className="space-y-5 md:sticky md:top-24">
                 {/* Listing preview summary */}
                 <div className="bg-white rounded-3xl p-5 border" style={{ borderColor: 'var(--li-border)' }}>
                   <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--li-muted)' }}>
