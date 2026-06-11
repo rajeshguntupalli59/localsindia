@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle, XCircle, Clock, CalendarDays, MapPin, Ticket } from 'lucide-react';
 import { timeAgo } from '@/lib/utils';
@@ -47,7 +47,7 @@ export default function AdminEventsPage() {
 
   const token = () => localStorage.getItem('access_token') ?? '';
 
-  const fetchEvents = async (status: string) => {
+  const fetchEvents = useCallback(async (status: string) => {
     setLoading(true);
     try {
       const endpoint = status === 'pending'
@@ -63,9 +63,9 @@ export default function AdminEventsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  useEffect(() => { fetchEvents(tab); }, [tab]);
+  useEffect(() => { fetchEvents(tab); }, [tab, fetchEvents]);
 
   const approve = async (id: string) => {
     setActionId(id);

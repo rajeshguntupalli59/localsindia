@@ -48,9 +48,20 @@ async def client():
 async def db():
     engine = _make_engine()
     TestSession = async_sessionmaker(engine, expire_on_commit=False)
-    async with TestSession() as session:
+    session = TestSession()
+    try:
         yield session
-    await engine.dispose()
+    finally:
+        # Explicit close before engine disposal prevents asyncpg proactor
+        # teardown errors on Python 3.14 + Windows ProactorEventLoop.
+        try:
+            await session.close()
+        except Exception:
+            pass
+    try:
+        await engine.dispose()
+    except Exception:
+        pass
 
 
 # ── Shared data fixtures ───────────────────────────────────────────────────────
@@ -127,5 +138,47 @@ async def auth_client(user_and_token):
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         ac.headers.update({"Authorization": f"Bearer {token}"})
         yield ac, _user
+    app.dependency_overrides.clear()
+    await engine.dispose()
+
+
+@pytest_asyncio.fixture
+async def admin_and_token():
+    """Returns (admin_user, access_token) for a fresh admin user."""
+    from app.models.user import User
+    from app.core.security import create_access_token
+    engine = _make_engine()
+    Session = async_sessionmaker(engine, expire_on_commit=False)
+    phone = f"+9199{uuid.uuid4().int % 10**9:09d}"
+    async with Session() as session:
+        admin = User(phone=phone, name="Admin User", role="admin")
+        session.add(admin)
+        await session.commit()
+        await session.refresh(admin)
+        uid = str(admin.id)
+        u = admin
+    await engine.dispose()
+    token = create_access_token(uid)
+    return u, token
+
+
+@pytest_asyncio.fixture
+async def admin_client(admin_and_token):
+    """AsyncClient pre-configured with an admin Bearer token."""
+    _admin, token = admin_and_token
+    engine = _make_engine()
+    TestSession = async_sessionmaker(engine, expire_on_commit=False)
+
+    async def override_get_db():
+        async with TestSession() as session:
+            try:
+                yield session
+            finally:
+                await session.close()
+
+    app.dependency_overrides[get_db] = override_get_db
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        ac.headers.update({"Authorization": f"Bearer {token}"})
+        yield ac, _admin
     app.dependency_overrides.clear()
     await engine.dispose()

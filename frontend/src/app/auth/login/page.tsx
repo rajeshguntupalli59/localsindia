@@ -98,13 +98,6 @@ export default function LoginPage() {
     }
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const stepLabels: Record<typeof step, string> = {
-    phone: 'Choose how you want to continue',
-    otp: `Enter the OTP sent to +91 ${digits}`,
-    name: 'One last thing…',
-  };
-
   return (
     <div className="min-h-screen flex flex-col items-center justify-center py-12 px-4" style={{ background: 'var(--li-page-bg)' }}>
       <div className="w-full max-w-sm">

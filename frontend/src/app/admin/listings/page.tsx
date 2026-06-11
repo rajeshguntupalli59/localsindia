@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle, XCircle, Clock, Trash2 } from 'lucide-react';
 import Image from 'next/image';
@@ -29,7 +29,7 @@ export default function AdminListingsPage() {
 
   const token = () => localStorage.getItem('access_token') ?? '';
 
-  const fetchListings = async (status: string) => {
+  const fetchListings = useCallback(async (status: string) => {
     setLoading(true);
     try {
       const endpoint = status === 'pending'
@@ -45,9 +45,9 @@ export default function AdminListingsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  useEffect(() => { fetchListings(tab); }, [tab]);
+  useEffect(() => { fetchListings(tab); }, [tab, fetchListings]);
 
   const approve = async (id: string) => {
     setActionId(id);

@@ -7,9 +7,10 @@ import { Upload, X, CheckCircle, ArrowLeft, ArrowRight, Sparkles, Lightbulb, Cam
 import type { LucideIcon } from 'lucide-react';
 import Link from 'next/link';
 import { api, ApiError } from '@/lib/api';
-import type { Category, City } from '@/lib/types';
+import type { Category } from '@/lib/types';
 import SiteHeader from '@/components/site-header/SiteHeader';
 import { toast } from 'sonner';
+import { usePrefs } from '@/context/PrefsContext';
 
 const STEPS = [
   { label: 'Details', desc: 'Title, category, description' },
@@ -50,7 +51,8 @@ export default function PostListingPage() {
   const [form, setForm] = useState<FormData>(EMPTY);
   const [errors, setErrors] = useState<Partial<FormData>>({});
   const [categories, setCategories] = useState<Category[]>([]);
-  const [city, setCity] = useState<City | null>(null);
+  const { cities } = usePrefs();
+  const city = cities.find(c => c.slug === citySlug) ?? null;
   const [photos, setPhotos] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
@@ -65,7 +67,6 @@ export default function PostListingPage() {
     const stored = localStorage.getItem('li_post_form');
     if (stored) { try { setForm(JSON.parse(stored)); } catch { /* */ } }
     api.categories.list().then(setCategories).catch(() => {});
-    api.cities.get(citySlug).then(setCity).catch(() => {});
     try {
       const u = JSON.parse(localStorage.getItem('user') ?? '{}');
       if (u.phone) setForm(f => ({ ...f, contact_phone: u.phone }));
