@@ -52,22 +52,32 @@ export default function SearchPage() {
   // live search box
   const [localQ, setLocalQ] = useState(q);
 
+  const isUUID = (s: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
+
   const doSearch = useCallback(async () => {
-    if (!q.trim()) {
-      setResult(null);
-      setLoading(false);
-      return;
-    }
     setLoading(true);
     try {
-      const res = await api.search.query({
-        q,
-        city_slug: citySlug,
-        category_id: catParam || undefined,
-        page: String(page),
-        page_size: String(PAGE_SIZE),
-      });
-      setResult(res);
+      if (!q.trim()) {
+        // Browse mode — no query. Use city listings endpoint (supports category_slug + category_id).
+        const params: Record<string, string> = { status: 'active' };
+        if (catParam) {
+          if (isUUID(catParam)) params.category_id = catParam;
+          else params.category_slug = catParam;
+        }
+        const items = await api.cities.listings(citySlug, params);
+        setResult({ items, total: items.length, page: 1, page_size: items.length });
+      } else {
+        const res = await api.search.query({
+          q,
+          city_slug: citySlug,
+          category_id: catParam || undefined,
+          page: String(page),
+          page_size: String(PAGE_SIZE),
+        });
+        setResult(res);
+      }
+    } catch {
+      setResult(null);
     } finally {
       setLoading(false);
     }
@@ -515,9 +525,9 @@ export default function SearchPage() {
           ) : (
             <EmptyState
               icon={SearchX}
-              title={q ? `No results for "${q}"` : 'No listings found'}
-              description="Try different keywords or remove filters"
-              action={{ label: 'Browse all listings', href: `/${citySlug}` }}
+              title={q ? `No results for "${q}"` : catParam ? 'No listings in this category yet' : 'No listings yet'}
+              description={q ? 'Try different keywords or remove filters' : 'Be the first to post in this city!'}
+              action={{ label: q ? 'Browse all listings' : 'Post free listing', href: q ? `/${citySlug}` : `/${citySlug}/classifieds/post` }}
             />
           )}
         </div>
