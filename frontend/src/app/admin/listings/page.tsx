@@ -155,8 +155,8 @@ export default function AdminListingsPage() {
             >
               <div className="flex gap-4 p-4">
                 <div className="relative w-20 h-20 rounded-lg overflow-hidden bg-muted shrink-0">
-                  {listing.images && listing.images[0] ? (
-                    <Image src={listing.images[0].url} alt={listing.title} fill className="object-cover" />
+                  {listing.images?.[0]?.url ? (
+                    <Image src={listing.images[0].url} alt={listing.title ?? ''} fill className="object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-3xl">🏷️</div>
                   )}
@@ -165,12 +165,12 @@ export default function AdminListingsPage() {
                   <p className="font-semibold truncate">{listing.title}</p>
                   <p className="text-sm text-muted-foreground line-clamp-1 mt-0.5">{listing.description}</p>
                   <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-foreground">
-                    {listing.price !== null && (
+                    {listing.price != null && (
                       <span className="font-semibold" style={{ color: 'var(--li-primary)' }}>
                         {formatPrice(listing.price)}
                       </span>
                     )}
-                    <span>{timeAgo(listing.created_at)}</span>
+                    <span>{listing.created_at ? timeAgo(listing.created_at) : ''}</span>
                     <span className="truncate">{listing.contact_phone}</span>
                   </div>
                 </div>

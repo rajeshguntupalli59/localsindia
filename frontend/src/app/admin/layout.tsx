@@ -15,7 +15,15 @@ const NAV = [
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [role, setRole] = useState<string | null>(null);
+
+  // Read synchronously so there's no blank-flash on first render
+  const [role, setRole] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null;
+    try {
+      const u = JSON.parse(localStorage.getItem('user') ?? '{}');
+      return u.role === 'admin' ? 'admin' : null;
+    } catch { return null; }
+  });
 
   useEffect(() => {
     const stored = localStorage.getItem('user');
