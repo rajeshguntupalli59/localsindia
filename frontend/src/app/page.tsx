@@ -262,7 +262,7 @@ export default function HomePage() {
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-7
               bg-orange-500/[0.12] border border-orange-500/[0.2] text-orange-300 text-xs font-medium tracking-wide">
               <Globe className="w-3.5 h-3.5 shrink-0" strokeWidth={2} />
-              South India&apos;s Hyperlocal Community Platform
+              India&apos;s Hyperlocal Community Platform
             </div>
 
             {/* ── Dynamic Headline ──────────────────────── */}
