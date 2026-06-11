@@ -1,0 +1,14 @@
+name: Keep Backend Alive
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'  # every 5 minutes
+  workflow_dispatch:        # manual trigger if needed
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping health endpoint
+        run: |
+          curl -sf https://localsindia-backend.azurewebsites.net/api/v1/health || echo "Backend warming up"
