@@ -10,6 +10,8 @@ venv/
 .env.local
 .env.production
 *.env
+.env.*
+agents/.env.agents
 
 # Agent output (generated content — don't commit)
 agents/output/*
