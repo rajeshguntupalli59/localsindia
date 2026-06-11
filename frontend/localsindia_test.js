@@ -263,27 +263,23 @@ async function run() {
         log('  ℹ Phone not prefilled — filled manually');
       }
 
-      // Submit — Azure API can take 4-6s on first request; use waitForSelector
+      // Submit — race success screen vs error toast (BL-02 toast lasts only 4s)
       await page.locator('button:has-text("Post Free Listing"), button:has-text("Submit"), button:has-text("Post Listing")').first().click();
-      let success = false;
-      try {
-        await page.waitForSelector(
-          'text=Listing submitted, text=under review',
-          { timeout: 8000 }
-        );
-        success = true;
-      } catch { /* timed out — check BL-02 toast below */ }
 
-      if (success) {
+      const [successResult, toastResult] = await Promise.all([
+        page.waitForSelector('text=Listing submitted, text=under review', { timeout: 8000 })
+          .then(() => true).catch(() => false),
+        page.waitForSelector('[data-sonner-toast]', { timeout: 5000 })
+          .then(() => page.locator('[data-sonner-toast]').first().textContent().catch(() => ''))
+          .catch(() => ''),
+      ]);
+
+      if (successResult) {
         pass('Listing submitted successfully — under review');
+      } else if (toastResult.toLowerCase().includes('maximum') || toastResult.includes('10')) {
+        pass(`Listing submission: BL-02 limit reached (expected in repeated test runs): "${toastResult}"`);
       } else {
-        // BL-02: dev user may already have 10 listings — 429 is expected after multiple runs
-        const toastErr = await page.locator('[data-sonner-toast]').first().textContent().catch(() => '');
-        if (toastErr.includes('maximum') || toastErr.includes('10')) {
-          pass(`Listing submission: BL-02 limit reached (expected in repeated test runs): "${toastErr}"`);
-        } else {
-          fail('Listing submission', `Success not shown. Toast: "${toastErr}". URL: ${page.url()}`);
-        }
+        fail('Listing submission', `Success not shown. Toast: "${toastResult}". URL: ${page.url()}`);
       }
     }
 
