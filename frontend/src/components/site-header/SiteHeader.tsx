@@ -10,6 +10,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import LanguageSelector from '@/components/language-selector/LanguageSelector';
 import SiteLogo from '@/components/site-logo/SiteLogo';
+import { usePrefs } from '@/context/PrefsContext';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface Props {
@@ -34,6 +35,7 @@ function getInitials(name: string): string {
 
 // ── Shared CTA — used in both authenticated and guest states ──────────────────
 function PostListingCta({ href }: { href: string }) {
+  const { t } = usePrefs();
   return (
     <Link
       href={href}
@@ -50,8 +52,8 @@ function PostListingCta({ href }: { href: string }) {
         transition-all duration-200 select-none"
     >
       <Plus className="w-[13px] h-[13px] shrink-0" strokeWidth={2.8} aria-hidden />
-      <span className="hidden sm:inline">Post Listing</span>
-      <span className="sm:hidden">Post</span>
+      <span className="hidden sm:inline">{t('nav.post')}</span>
+      <span className="sm:hidden">{t('nav.postShort')}</span>
     </Link>
   );
 }
@@ -69,6 +71,7 @@ const ghostLink =
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function SiteHeader({ citySlug, cityName }: Props) {
   const router = useRouter();
+  const { t } = usePrefs();
   const [q, setQ] = useState('');
   const [user, setUser] = useState<StoredUser | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -286,7 +289,7 @@ export default function SiteHeader({ citySlug, cityName }: Props) {
           ) : (
             /* Guest: Sign in ghost link */
             <Link href="/auth/login" className={`${ghostLink} ml-0.5`}>
-              Sign in
+              {t('nav.signIn')}
             </Link>
           )}
 

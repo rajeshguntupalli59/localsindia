@@ -58,7 +58,7 @@ const SPRING = { duration: 0.3, ease: [0.22, 1, 0.36, 1] } as const;
 // ─── component ───────────────────────────────────────────────
 export default function HomePage() {
   const router = useRouter();
-  const { citySlug, cityName, setCity, cities } = usePrefs();
+  const { citySlug, cityName, setCity, cities, t } = usePrefs();
   const [q, setQ] = useState('');
   const [showCityPicker, setShowCityPicker] = useState(false);
 
@@ -176,7 +176,7 @@ export default function HomePage() {
                 strokeWidth={2.5}
                 aria-hidden
               />
-              Cities
+              {t('nav.cities')}
             </button>
 
             {/* Hairline divider */}
@@ -193,7 +193,7 @@ export default function HomePage() {
                 hover:text-slate-900 hover:bg-slate-50
                 transition-all duration-150"
             >
-              Sign in
+              {t('nav.signIn')}
             </Link>
 
             {/* Post Listing — primary CTA */}
@@ -220,8 +220,8 @@ export default function HomePage() {
                 strokeWidth={2.8}
                 aria-hidden
               />
-              <span className="hidden sm:inline">Post Listing</span>
-              <span className="sm:hidden">Post</span>
+              <span className="hidden sm:inline">{t('nav.post')}</span>
+              <span className="sm:hidden">{t('nav.postShort')}</span>
             </button>
           </nav>
         </div>
@@ -268,7 +268,7 @@ export default function HomePage() {
             {/* ── Dynamic Headline ──────────────────────── */}
             <h1 className="text-4xl sm:text-5xl md:text-[3.75rem] font-extrabold text-white
               leading-[1.05] tracking-[-0.03em] mb-5">
-              Buy. Sell. Connect.<br />
+              {t('hero.headline1')}<br />
               <AnimatePresence mode="wait" initial={false}>
                 <motion.span
                   key={cityName || '__default'}
@@ -277,15 +277,14 @@ export default function HomePage() {
                   exit={{ opacity: 0, y: -10, transition: { duration: 0.16, ease: 'easeIn' } }}
                   className="text-orange-500 inline-block"
                 >
-                  {cityName ? `In ${cityName}.` : 'In Your City.'}
+                  {cityName ? t('hero.inCity', { city: cityName }) : t('hero.inYourCity')}
                 </motion.span>
               </AnimatePresence>
             </h1>
 
             {/* Sub-text */}
             <p className="text-base md:text-lg text-slate-400 max-w-lg leading-relaxed mb-10">
-              Post listings, find PGs, discover local services —<br className="hidden sm:block" />
-              in your language, in your neighbourhood.
+              {t('hero.sub')}
             </p>
 
             {/* ══ Search Capsule ═══════════════════════════ */}
@@ -407,7 +406,7 @@ export default function HomePage() {
               <input
                 value={q}
                 onChange={e => setQ(e.target.value)}
-                placeholder="Search tiffin, PG, jobs, vehicles…"
+                placeholder={t('search.placeholder')}
                 aria-label="Search listings"
                 className="flex-1 min-w-0 px-3 sm:px-5 h-[60px]
                   text-[14px] font-normal leading-none text-slate-800 tracking-[-0.01em]
