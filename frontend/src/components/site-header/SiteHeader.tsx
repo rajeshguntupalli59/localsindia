@@ -287,8 +287,14 @@ export default function SiteHeader({ citySlug, cityName }: Props) {
               </AnimatePresence>
             </div>
           ) : (
-            /* Guest: Sign in ghost link */
-            <Link href="/auth/login" className={`${ghostLink} ml-0.5`}>
+            /* Guest: Sign in ghost link — visible on all screen sizes */
+            <Link
+              href="/auth/login"
+              className="flex items-center h-8 px-2.5 md:px-3 rounded-xl ml-0.5
+                text-[12px] md:text-[12.5px] font-medium
+                text-slate-500 hover:text-slate-900 hover:bg-slate-50
+                transition-colors duration-150"
+            >
               {t('nav.signIn')}
             </Link>
           )}

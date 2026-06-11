@@ -185,11 +185,11 @@ export default function HomePage() {
             {/* Language selector */}
             <LanguageSelector />
 
-            {/* Sign in — ghost link */}
+            {/* Sign in — visible on all sizes */}
             <Link
               href="/auth/login"
-              className="hidden md:flex items-center h-8 px-3.5 rounded-xl ml-0.5
-                text-[12.5px] font-medium text-slate-500
+              className="flex items-center h-8 px-2.5 md:px-3.5 rounded-xl ml-0.5
+                text-[12px] md:text-[12.5px] font-medium text-slate-500
                 hover:text-slate-900 hover:bg-slate-50
                 transition-all duration-150"
             >

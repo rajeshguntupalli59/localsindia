@@ -149,22 +149,22 @@ function PanelContent({
         </button>
       </div>
 
-      {/* Language grid */}
-      <div className={`p-4 grid grid-cols-3 gap-2 ${isMobile ? 'pb-safe-bottom' : ''}`}>
-        {LANGUAGES.map(lang => (
-          <LangCard
-            key={lang.code}
-            lang={lang}
-            isActive={lang.code === currentLang}
-            onSelect={() => onSelect(lang.code)}
-          />
-        ))}
+      {/* Scrollable area — grid + footer */}
+      <div className="flex-1 overflow-y-auto overscroll-contain">
+        <div className="p-4 grid grid-cols-3 gap-2">
+          {LANGUAGES.map(lang => (
+            <LangCard
+              key={lang.code}
+              lang={lang}
+              isActive={lang.code === currentLang}
+              onSelect={() => onSelect(lang.code)}
+            />
+          ))}
+        </div>
+        <p className="px-5 pb-6 text-[10px] text-slate-300 text-center leading-snug">
+          More languages are added regularly.
+        </p>
       </div>
-
-      {/* Footer hint */}
-      <p className="px-5 pb-4 text-[10px] text-slate-300 text-center leading-snug">
-        More languages are added regularly.
-      </p>
     </>
   );
 }
@@ -299,14 +299,14 @@ export default function LanguageSelector() {
               aria-label="Language selection"
               {...(isMobile ? mobileMotion : desktopMotion)}
               transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
-              className={`overflow-hidden bg-white z-50
+              className={`bg-white z-50 flex flex-col
                 ${isMobile
-                  // Mobile: full-width bottom sheet
-                  ? 'fixed bottom-0 left-0 right-0 rounded-t-3xl shadow-[0_-8px_40px_rgba(0,0,0,0.15)]'
+                  // Mobile: bottom sheet capped at 85vh so it never pushes off-screen
+                  ? 'fixed bottom-0 left-0 right-0 rounded-t-3xl shadow-[0_-8px_40px_rgba(0,0,0,0.15)] max-h-[85vh] overflow-hidden'
                   // Desktop: anchored dropdown
-                  : 'absolute right-0 top-full mt-2.5 w-[376px] rounded-2xl shadow-xl border border-slate-100/80'
+                  : 'absolute right-0 top-full mt-2.5 w-[376px] rounded-2xl shadow-xl border border-slate-100/80 overflow-hidden'
                 }`}
-              style={{ transformOrigin: isMobile ? 'bottom' : 'top right' }}
+              style={{ transformOrigin: isMobile ? 'bottom center' : 'top right' }}
             >
               <PanelContent
                 currentLang={currentLang}
