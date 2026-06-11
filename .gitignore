@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Env files
+.env
+.env.local
+.env.production
+*.env
+
+# Agent output (generated content — don't commit)
+agents/output/*
+!agents/output/.gitkeep
+
+# Node
+node_modules/
+.next/
+out/
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# Test coverage
+.coverage
+htmlcov/
+coverage/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Docker
+pgdata/
+.railway/
