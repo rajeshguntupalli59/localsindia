@@ -36,8 +36,8 @@ OTP_LOCKOUT_MINUTES = 15
 OTP_EXPIRE_MINUTES = 10
 
 
-@router.post("/admin-login")
-async def admin_login(body: AdminLoginRequest):
+@router.post("/admin-login", response_model=AuthResponse)
+async def admin_login(body: AdminLoginRequest, db: AsyncSession = Depends(get_db)):
     """Admin login with username + password — credentials stored as Azure env vars."""
     if not settings.ADMIN_USERNAME or not settings.ADMIN_PASSWORD_HASH:
         raise HTTPException(status_code=503, detail="Admin credentials not configured.")
@@ -45,11 +45,26 @@ async def admin_login(body: AdminLoginRequest):
         raise HTTPException(status_code=401, detail="Invalid credentials.")
     if not verify_password(body.password, settings.ADMIN_PASSWORD_HASH):
         raise HTTPException(status_code=401, detail="Invalid credentials.")
-    return {
-        "access_token": create_access_token("admin"),
-        "refresh_token": create_refresh_token("admin"),
-        "user": {"id": "admin", "role": "admin", "name": "Admin", "phone": ""},
-    }
+
+    # +910000000001 is an internal marker — impossible for real Indian mobiles (+91[6-9]...)
+    ADMIN_PHONE = "+910000000001"
+    result = await db.execute(select(User).where(User.phone == ADMIN_PHONE))
+    admin_user = result.scalar_one_or_none()
+    if not admin_user:
+        admin_user = User(phone=ADMIN_PHONE, name=settings.ADMIN_USERNAME, role="admin")
+        db.add(admin_user)
+        await db.commit()
+        await db.refresh(admin_user)
+    elif admin_user.role != "admin":
+        admin_user.role = "admin"
+        await db.commit()
+        await db.refresh(admin_user)
+
+    return AuthResponse(
+        access_token=create_access_token(str(admin_user.id)),
+        refresh_token=create_refresh_token(str(admin_user.id)),
+        user=UserOut.model_validate(admin_user),
+    )
 
 
 @router.post("/signin", response_model=AuthResponse)
