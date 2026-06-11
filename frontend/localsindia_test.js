@@ -712,15 +712,14 @@ async function run() {
     section('15. PROFILE — view + my listings');
     // ──────────────────────────────────────────────────────────────────────────
     await page.goto(`${BASE}/profile`, { waitUntil: 'load', timeout: 20000 });
-    await page.waitForTimeout(2000);
+    // Wait for React hydration — profile page renders null until useEffect sets user
+    try { await page.waitForSelector('[style*="nav-bg"] p, a[href*="profile/listings"]', { timeout: 5000 }); } catch {}
     if (page.url().includes('/auth/login')) {
       fail('Profile', 'Not logged in');
     } else {
-      // Profile shows user name or "User" fallback; also shows the phone number
       const profileText = await page.locator('[style*="nav-bg"] p').first().textContent().catch(() => '');
       if (profileText) pass(`Profile shows user info: "${profileText.trim()}"`);
       else fail('Profile page shows user info', 'Name/phone not visible in profile header');
-      // My Listings menu card
       const mlLink = await page.locator('a[href*="profile/listings"]').first().isVisible().catch(() => false);
       if (mlLink) pass('My Listings link in profile');
       else fail('My Listings link', 'Not found in profile');
