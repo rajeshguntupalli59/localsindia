@@ -8,8 +8,9 @@ from app.models.business import Business
 from app.models.review import Review
 from app.models.report import Report
 from app.models.otp_request import OtpRequest
+from app.models.listing_review import ListingReview
 
 __all__ = [
     "City", "User", "Category", "Listing", "ListingImage",
-    "Event", "Business", "Review", "Report", "OtpRequest",
+    "Event", "Business", "Review", "Report", "OtpRequest", "ListingReview",
 ]
