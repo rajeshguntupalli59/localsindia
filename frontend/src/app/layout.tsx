@@ -47,6 +47,9 @@ export const metadata: Metadata = {
   title: 'LocalsIndia — Your City, Your Community',
   description: "India's hyperlocal classifieds and community platform. Buy, sell, and connect in your city — in your language.",
   manifest: '/manifest.json',
+  verification: {
+    google: 'GUgw72IJ4MpHA8grwFYxpNRTtEZA3sJyYGh0yXijL3A',
+  },
   appleWebApp: { capable: true, statusBarStyle: 'default', title: 'LocalsIndia' },
   openGraph: {
     title: 'LocalsIndia — Buy · Sell · Connect',
