@@ -6,7 +6,10 @@ import { Toaster } from '@/components/ui/sonner';
 import ServiceWorker from '@/components/pwa/ServiceWorker';
 import { PrefsProvider } from '@/context/PrefsContext';
 import { cn } from '@/lib/utils';
+import Script from 'next/script';
 import './globals.css';
+
+const ADSENSE_PUB_ID = process.env.NEXT_PUBLIC_ADSENSE_PUB_ID ?? '';
 
 const plusJakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -79,6 +82,14 @@ export default async function RootLayout({
       className={cn(plusJakarta.variable, notoSans.variable, notoDevanagari.variable, notoTelugu.variable)}
     >
       <body className="antialiased">
+        {ADSENSE_PUB_ID && (
+          <Script
+            async
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_PUB_ID}`}
+            crossOrigin="anonymous"
+            strategy="afterInteractive"
+          />
+        )}
         <NextIntlClientProvider messages={messages}>
           <PrefsProvider>
             {children}

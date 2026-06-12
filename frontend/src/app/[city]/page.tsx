@@ -11,6 +11,7 @@ import type { City, Listing } from '@/lib/types';
 import { usePrefs } from '@/context/PrefsContext';
 import SiteHeader from '@/components/site-header/SiteHeader';
 import SiteFooter from '@/components/site-footer/SiteFooter';
+import AdBanner from '@/components/ad-banner/AdBanner';
 import ListingCard from '@/components/listing-card/ListingCard';
 import ListingCardSkeleton from '@/components/listing-card/ListingCardSkeleton';
 import EmptyState from '@/components/empty-state/EmptyState';
@@ -270,6 +271,11 @@ export default function CityHomePage() {
             </div>
           )}
         </section>
+      </div>
+
+      {/* Ad banner above footer */}
+      <div className="page-wrap py-4">
+        <AdBanner slot="7291834056" format="horizontal" className="rounded-2xl overflow-hidden" />
       </div>
 
       <SiteFooter />

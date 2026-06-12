@@ -12,6 +12,7 @@ import { api, ApiError } from '@/lib/api';
 import type { Listing, ListingReview } from '@/lib/types';
 import SiteHeader from '@/components/site-header/SiteHeader';
 import SiteFooter from '@/components/site-footer/SiteFooter';
+import AdBanner from '@/components/ad-banner/AdBanner';
 import { toast } from 'sonner';
 
 const SAFETY_TIPS = [
@@ -310,6 +311,9 @@ export default function ListingDetailPage() {
                 )}
               </div>
             </div>
+
+            {/* Ad between description and reviews */}
+            <AdBanner slot="3847291056" format="rectangle" className="mt-5 rounded-2xl" />
 
             {/* Reviews */}
             <div className="bg-white rounded-3xl border mt-5" style={{ borderColor: 'var(--li-border)' }}>
