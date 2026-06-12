@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft, Flag, ChevronLeft, ChevronRight, MapPin, Clock, Shield, MessageCircle, Tag, Star, User, Globe, Share2, CheckCircle2, X, Zap } from 'lucide-react';
+import { ArrowLeft, Flag, ChevronLeft, ChevronRight, MapPin, Clock, Shield, MessageCircle, Tag, Star, User, Globe, Share2, CheckCircle2, X } from 'lucide-react';
 import { formatPrice, timeAgo } from '@/lib/utils';
 import { api, ApiError } from '@/lib/api';
 
@@ -28,7 +28,6 @@ export default function ListingDetailPage() {
 
   const [listing, setListing] = useState<Listing | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isOwner, setIsOwner] = useState(false);
   const [imgIdx, setImgIdx] = useState(0);
   const [showFull, setShowFull] = useState(false);
   const [activeTab, setActiveTab] = useState<'description' | 'details'>('description');
@@ -48,13 +47,6 @@ export default function ListingDetailPage() {
       .get(id)
       .then(l => {
         setListing(l);
-        const stored = localStorage.getItem('user');
-        if (stored) {
-          try {
-            const u = JSON.parse(stored);
-            if (u.id && l.user_id && u.id === l.user_id) setIsOwner(true);
-          } catch { /* ignore */ }
-        }
       })
       .catch(() => router.replace(`/${citySlug}`))
       .finally(() => setLoading(false));
@@ -102,6 +94,18 @@ export default function ListingDetailPage() {
       toast.success('Report submitted');
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : 'Failed to report');
+    }
+  };
+
+  const handleShare = () => {
+    if (!listing) return;
+    const url = window.location.href;
+    const priceStr = listing.price !== null ? ` — ₹${listing.price.toLocaleString('en-IN')}` : '';
+    const text = `${listing.title}${priceStr}\n\nFound on LocalsIndia — free classifieds in ${citySlug.charAt(0).toUpperCase() + citySlug.slice(1)}\n${url}`;
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      navigator.share({ title: listing.title, text, url }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(url).then(() => toast.success('Link copied!')).catch(() => {});
     }
   };
 
@@ -412,6 +416,16 @@ export default function ListingDetailPage() {
               <p className="text-center text-xs mt-3" style={{ color: 'var(--li-muted)' }}>
                 Opens WhatsApp • Reply usually within an hour
               </p>
+
+              {/* Share this listing */}
+              <button
+                onClick={handleShare}
+                className="w-full mt-3 flex items-center justify-center gap-2 py-2.5 rounded-2xl border-2 text-sm font-semibold transition-colors hover:border-orange-400"
+                style={{ borderColor: 'var(--li-border)', color: 'var(--li-text)', background: 'white' }}
+              >
+                <Share2 className="w-4 h-4" style={{ color: 'var(--li-primary)' }} />
+                Share this listing
+              </button>
 
               {/* Website / Social links */}
               {(listing.website_url || listing.social_url) && (

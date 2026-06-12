@@ -38,6 +38,7 @@ const FOOTER_LINKS: Record<string, { label: string; href: string }[]> = {
     { label: 'Browse Listings', href: '/' },
     { label: 'Post a Listing', href: '/auth/login?mode=signup' },
     { label: 'All Cities', href: '/' },
+    { label: 'Invite a Business', href: '/invite' },
   ],
   Company: [
     { label: 'About Us', href: '/' },
