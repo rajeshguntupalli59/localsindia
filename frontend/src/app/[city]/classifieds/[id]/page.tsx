@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft, Flag, ChevronLeft, ChevronRight, MapPin, Clock, Shield, MessageCircle, Tag, Star, User, Globe, Share2, CheckCircle2, X } from 'lucide-react';
+import { ArrowLeft, Flag, ChevronLeft, ChevronRight, MapPin, Clock, Shield, MessageCircle, Tag, Star, User, Globe, Share2, CheckCircle2, X, Zap } from 'lucide-react';
 import { formatPrice, timeAgo } from '@/lib/utils';
 import { api, ApiError } from '@/lib/api';
 
@@ -27,6 +27,7 @@ export default function ListingDetailPage() {
 
   const [listing, setListing] = useState<Listing | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isOwner, setIsOwner] = useState(false);
   const [imgIdx, setImgIdx] = useState(0);
   const [showFull, setShowFull] = useState(false);
   const [activeTab, setActiveTab] = useState<'description' | 'details'>('description');
@@ -44,7 +45,16 @@ export default function ListingDetailPage() {
   useEffect(() => {
     api.listings
       .get(id)
-      .then(setListing)
+      .then(l => {
+        setListing(l);
+        const stored = localStorage.getItem('user');
+        if (stored) {
+          try {
+            const u = JSON.parse(stored);
+            if (u.id && l.user_id && u.id === l.user_id) setIsOwner(true);
+          } catch { /* ignore */ }
+        }
+      })
       .catch(() => router.replace(`/${citySlug}`))
       .finally(() => setLoading(false));
     api.listings.reviews(id).then(setReviews).catch(() => {});
@@ -429,6 +439,23 @@ export default function ListingDetailPage() {
                 </div>
               )}
             </div>
+
+            {/* Promote button — only for listing owner */}
+            {isOwner && !listing.is_featured && listing.status === 'active' && (
+              <Link
+                href={`/${citySlug}/classifieds/${id}/promote`}
+                className="flex items-center justify-center gap-2 w-full h-11 rounded-2xl border-2 border-[#F7B731] text-[#92400E] bg-[#FFFBEB] text-sm font-semibold hover:bg-[#FEF3C7] transition-colors"
+              >
+                <Zap className="w-4 h-4 text-[#F7B731]" />
+                Boost this listing — from ₹99
+              </Link>
+            )}
+            {isOwner && listing.is_featured && (
+              <div className="flex items-center justify-center gap-2 w-full h-11 rounded-2xl border-2 border-amber-200 bg-amber-50 text-amber-700 text-sm font-semibold">
+                <Zap className="w-4 h-4 text-amber-500" fill="currentColor" />
+                Featured listing — active
+              </div>
+            )}
 
             {/* Safety tips */}
             <div

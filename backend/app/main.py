@@ -1,7 +1,7 @@
 ﻿from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
-from app.routers import auth, cities, categories, listings, uploads, search, admin, events, businesses
+from app.routers import auth, cities, categories, listings, uploads, search, admin, events, businesses, payments
 
 app = FastAPI(
     title="LocalIndia API",
@@ -33,6 +33,7 @@ app.include_router(search.router)
 app.include_router(admin.router)
 app.include_router(events.router)
 app.include_router(businesses.router)
+app.include_router(payments.router)
 
 
 @app.get("/api/v1/health")
