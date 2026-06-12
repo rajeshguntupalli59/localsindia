@@ -108,9 +108,17 @@ export default function SiteFooter() {
           <p className="text-xs text-slate-600">
             © 2026 LocalsIndia. All rights reserved.
           </p>
-          <p className="text-xs text-slate-600 sm:text-right">
-            Made with care for India &middot; localsindia.com
-          </p>
+          <div className="flex items-center gap-4 text-xs text-slate-600">
+            <Link href="/privacy" className="hover:text-slate-300 transition-colors duration-150">
+              Privacy Policy
+            </Link>
+            <span className="text-slate-700">·</span>
+            <Link href="/terms" className="hover:text-slate-300 transition-colors duration-150">
+              Terms of Service
+            </Link>
+            <span className="text-slate-700">·</span>
+            <span>localsindia.com</span>
+          </div>
         </div>
       </div>
     </footer>
