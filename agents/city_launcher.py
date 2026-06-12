@@ -26,6 +26,8 @@ import os
 import sys
 from pathlib import Path
 
+sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+
 import httpx
 from dotenv import load_dotenv
 
