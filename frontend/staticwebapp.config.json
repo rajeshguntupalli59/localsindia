@@ -1,4 +1,19 @@
 {
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": [
+      "/_next/*",
+      "/manifest.json",
+      "/robots.txt",
+      "/sw.js",
+      "/sitemap.xml",
+      "/icons/*",
+      "/google*.html",
+      "/*.png",
+      "/*.ico",
+      "/*.svg"
+    ]
+  },
   "routes": [
     {
       "route": "/api/*",
@@ -8,7 +23,8 @@
   "globalHeaders": {
     "X-Content-Type-Options": "nosniff",
     "X-Frame-Options": "DENY",
-    "X-XSS-Protection": "1; mode=block"
+    "X-XSS-Protection": "1; mode=block",
+    "Cache-Control": "public, max-age=0, must-revalidate"
   },
   "mimeTypes": {
     ".json": "text/json"
