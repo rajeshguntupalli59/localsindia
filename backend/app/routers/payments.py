@@ -3,7 +3,6 @@ import hmac
 import uuid
 from datetime import datetime, timezone, timedelta
 
-import razorpay
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy import select
@@ -24,9 +23,10 @@ PLANS = {
 }
 
 
-def _razorpay_client() -> razorpay.Client:
+def _razorpay_client():
     if not settings.RAZORPAY_KEY_ID or not settings.RAZORPAY_KEY_SECRET:
         raise HTTPException(status_code=503, detail="Payment gateway not configured.")
+    import razorpay  # noqa: PLC0415 — lazy import keeps startup free of setuptools dependency
     return razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
 
 
