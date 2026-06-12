@@ -82,7 +82,7 @@ async def create_listing(
     current_user: User = Depends(get_current_user),
 ):
     # BL-02: max 10 active listings per user per city (admins exempt)
-    if not current_user.is_admin:
+    if current_user.role != "admin":
         count_result = await db.execute(
             select(func.count()).select_from(Listing).where(
                 Listing.user_id == current_user.id,
