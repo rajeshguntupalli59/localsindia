@@ -11,6 +11,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import LanguageSelector from '@/components/language-selector/LanguageSelector';
 import SiteLogo from '@/components/site-logo/SiteLogo';
 import { usePrefs } from '@/context/PrefsContext';
+import CityPickerModal from '@/components/city-picker/CityPickerModal';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface Props {
@@ -75,6 +76,7 @@ export default function SiteHeader({ citySlug, cityName }: Props) {
   const [q, setQ] = useState('');
   const [user, setUser] = useState<StoredUser | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showCityPicker, setShowCityPicker] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Hydrate user from localStorage
@@ -122,6 +124,7 @@ export default function SiteHeader({ citySlug, cityName }: Props) {
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
+    <>
     <header className="sticky top-0 z-50 bg-white/[0.98] backdrop-blur-md border-b border-slate-200/60">
       <div className="page-wrap h-16 flex items-center gap-4">
 
@@ -163,10 +166,10 @@ export default function SiteHeader({ citySlug, cityName }: Props) {
         {/* ── Right nav ────────────────────────────────────── */}
         <nav className="flex items-center gap-0.5" aria-label="Site navigation">
 
-          {/* City chip — shows current city or "All India" */}
+          {/* City chip — opens city picker modal */}
           <button
             type="button"
-            onClick={() => router.push('/')}
+            onClick={() => setShowCityPicker(true)}
             title="Change city"
             className="hidden md:flex items-center gap-1.5 h-8 px-3.5 rounded-full shrink-0
               text-[12.5px] font-medium
@@ -306,5 +309,16 @@ export default function SiteHeader({ citySlug, cityName }: Props) {
         </nav>
       </div>
     </header>
+
+    {showCityPicker && (
+      <CityPickerModal
+        onClose={() => setShowCityPicker(false)}
+        onSelect={city => {
+          setShowCityPicker(false);
+          router.push(`/${city.slug}`);
+        }}
+      />
+    )}
+  </>
   );
 }
