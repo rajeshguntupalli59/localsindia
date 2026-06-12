@@ -322,6 +322,14 @@ export default function LoginPage() {
             )}
 
           </div>
+
+          {/* Privacy / Terms notice */}
+          <p className="text-[11px] text-center text-muted-foreground px-4 pb-2">
+            By continuing, you agree to our{' '}
+            <a href="/terms" className="underline hover:text-slate-700">Terms of Service</a>
+            {' '}and{' '}
+            <a href="/privacy" className="underline hover:text-slate-700">Privacy Policy</a>.
+          </p>
         </div>
       </div>
     </div>

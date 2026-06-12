@@ -48,7 +48,7 @@ async def fetch_city_listings(client: httpx.AsyncClient, city_slug: str) -> list
         params={"status": "active", "page_size": 100},
         timeout=30,
     )
-    if resp.status_code == 404:
+    if resp.status_code in (404, 422):
         return []
     resp.raise_for_status()
     data = resp.json()
