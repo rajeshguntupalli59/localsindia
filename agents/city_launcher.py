@@ -250,7 +250,7 @@ def parse_claude_response(raw: str) -> dict:
 
 # ─── Main ──────────────────────────────────────────────────────────────────────
 
-async def run(city: str, lang: str, dry_run: bool, password: str | None):
+async def run(city: str, lang: str, dry_run: bool, password: str | None, max_listings: int = 20):
     print(f"\n[CityLauncher] {city} ({LANG_NAMES.get(lang, lang)})")
     print("-" * 50)
 
@@ -269,7 +269,7 @@ async def run(city: str, lang: str, dry_run: bool, password: str | None):
         Path("agents/output/debug_raw.txt").write_text(raw, encoding="utf-8")
         sys.exit(1)
 
-    listings = data.get("listings", [])
+    listings = data.get("listings", [])[:max_listings]
     businesses = data.get("businesses", [])
     launch = data.get("launch_content", {})
     print(f"OK Generated {len(listings)} listings, {len(businesses)} businesses")
@@ -354,7 +354,7 @@ async def run(city: str, lang: str, dry_run: bool, password: str | None):
                 status = "FAIL"
             title_preview = listing['title'][:55]
             print(f"  [{status}] [{raw_cat}] {title_preview}")
-            await asyncio.sleep(4.0)  # Azure F1 rate limit — ~10 req/min, spread over 80s
+            await asyncio.sleep(1.0)
 
         print(f"\nOK {len(posted_listing_ids)}/{len(listings)} listings live")
 
@@ -378,7 +378,7 @@ async def run(city: str, lang: str, dry_run: bool, password: str | None):
             if biz_id:
                 posted_biz_ids.append(biz_id)
             print(f"  [{status}] {biz['name']}")
-            await asyncio.sleep(2.0)
+            await asyncio.sleep(1.0)
 
         print(f"\nOK {len(posted_biz_ids)}/{len(businesses)} businesses posted")
 
@@ -446,6 +446,7 @@ def main():
     parser.add_argument("--city", required=True, help="City name exactly as in the DB (e.g. 'Vijayawada')")
     parser.add_argument("--lang", required=True, help="Language code: te, hi, ta, kn, mr, bn, gu, pa, ml, or, en")
     parser.add_argument("--dry-run", action="store_true", help="Generate content only — skip API calls")
+    parser.add_argument("--max-listings", type=int, default=20, help="Max listings to post (default: 20)")
     parser.add_argument("--env-file", default=".env", help="Path to .env file (default: .env)")
     args = parser.parse_args()
 
@@ -463,6 +464,7 @@ def main():
         lang=args.lang,
         dry_run=args.dry_run,
         password=password,
+        max_listings=args.max_listings,
     ))
 
 

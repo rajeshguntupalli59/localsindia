@@ -81,20 +81,21 @@ async def create_listing(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    # BL-02: max 10 active listings per user per city
-    count_result = await db.execute(
-        select(func.count()).select_from(Listing).where(
-            Listing.user_id == current_user.id,
-            Listing.city_id == body.city_id,
-            Listing.status.in_(["active", "pending"]),
-            Listing.deleted_at.is_(None),
+    # BL-02: max 10 active listings per user per city (admins exempt)
+    if not current_user.is_admin:
+        count_result = await db.execute(
+            select(func.count()).select_from(Listing).where(
+                Listing.user_id == current_user.id,
+                Listing.city_id == body.city_id,
+                Listing.status.in_(["active", "pending"]),
+                Listing.deleted_at.is_(None),
+            )
         )
-    )
-    if count_result.scalar() >= MAX_ACTIVE_PER_USER_PER_CITY:
-        raise HTTPException(
-            status_code=429,
-            detail="Maximum 10 active listings per city reached.",
-        )
+        if count_result.scalar() >= MAX_ACTIVE_PER_USER_PER_CITY:
+            raise HTTPException(
+                status_code=429,
+                detail="Maximum 10 active listings per city reached.",
+            )
 
     listing = Listing(
         user_id=current_user.id,
