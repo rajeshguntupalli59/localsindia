@@ -1,4 +1,5 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://localsindia-backend.azurewebsites.net/api/v1';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend.azurewebsites.net';
+const API_URL = `${API_BASE}/api/v1`;
 
 export async function getAllCityParams(): Promise<{ city: string }[]> {
   try {

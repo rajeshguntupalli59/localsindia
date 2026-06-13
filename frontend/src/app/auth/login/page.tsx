@@ -51,7 +51,7 @@ function LoginInner() {
         localStorage.setItem('refresh_token', res.refresh_token);
         localStorage.setItem('user', JSON.stringify(res.user));
         toast.success(`Welcome back, ${(res.user as { name?: string }).name ?? 'back'}!`);
-        router.push('/');
+        router.push('/profile');
       } else {
         // New user — send OTP for phone verification
         const res = await api.auth.sendOtp(phone);
@@ -89,7 +89,7 @@ function LoginInner() {
         setStep('name');
       } else {
         toast.success(`Welcome back, ${res.user.name}!`);
-        router.push('/');
+        router.push('/profile');
       }
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : 'Invalid OTP');
@@ -106,7 +106,7 @@ function LoginInner() {
       const updated = await api.auth.updateProfile({ name: name.trim() }, tokens.access);
       localStorage.setItem('user', JSON.stringify(updated));
       toast.success(`Welcome to LocalsIndia, ${updated.name}!`);
-      router.push('/');
+      router.push('/profile');
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : 'Failed to save name');
     } finally {

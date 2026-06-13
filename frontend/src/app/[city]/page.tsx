@@ -168,7 +168,7 @@ export default function CityHomePage() {
                 </Link>
               </div>
 
-              <div className="grid grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {loading
                   ? Array.from({ length: 3 }).map((_, i) => <ListingCardSkeleton key={i} />)
                   : featured.map((l, i) => (
@@ -233,7 +233,7 @@ export default function CityHomePage() {
           </div>
 
           {loading ? (
-            <div className="grid grid-cols-4 gap-5">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
               {Array.from({ length: 8 }).map((_, i) => <ListingCardSkeleton key={i} />)}
             </div>
           ) : sortedLatest.length === 0 ? (
@@ -244,7 +244,7 @@ export default function CityHomePage() {
               action={{ label: t('listing.postListing'), href: `/${citySlug}/classifieds/post` }}
             />
           ) : (
-            <div className="grid grid-cols-4 gap-5">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
               {sortedLatest.map((l, i) => (
                 <motion.div
                   key={l.id}

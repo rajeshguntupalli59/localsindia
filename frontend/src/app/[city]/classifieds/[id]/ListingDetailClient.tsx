@@ -285,9 +285,9 @@ export default function ListingDetailPage() {
                   <>
                     <p
                       className={`text-sm leading-relaxed ${!showFull ? 'line-clamp-6' : ''}`}
-                      style={{ color: 'var(--li-text)', lineHeight: 1.8 }}
+                      style={{ color: 'var(--li-text)', lineHeight: 1.8, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
                     >
-                      {listing.description}
+                      {listing.description.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&nbsp;/g, ' ')}
                     </p>
                     {listing.description.length > 300 && (
                       <button
