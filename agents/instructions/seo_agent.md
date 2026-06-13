@@ -50,3 +50,7 @@ SEO-optimized but human-readable. The meta description should make someone want 
 - Duplicate title/OG title — make OG slightly more emotional
 - Invented neighborhoods in structured data
 - URLs without the city slug
+
+## Platform Reference
+- All pages and their exact URL patterns: read `ARCHITECTURE_INDEX.md` → Frontend File Index
+- What categories exist (for keyword generation): read `ARCHITECTURE_INDEX.md` → DB Table Index (`categories` row)

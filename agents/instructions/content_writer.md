@@ -44,3 +44,7 @@ Generate three types of content for a city:
 - Repeating the same neighborhood in every section
 - Making promises about features not yet built (no "real-time notifications" etc.)
 - Fabricating business names or phone numbers
+
+## Platform Reference
+- What features are ACTUALLY built (to avoid promising things that don't exist): read `ARCHITECTURE_INDEX.md` → Feature Map
+- What pages exist and their URLs: read `ARCHITECTURE_INDEX.md` → Frontend File Index

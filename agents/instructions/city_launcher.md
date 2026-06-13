@@ -41,3 +41,7 @@ Distribute across: 4 tiffin, 3 services, 4 pg-roommate, 3 jobs, 2 classifieds, 1
 - Hype or exclamation marks in marketing copy
 - Duplicate business types (don't post 3 salons)
 - Political or religious content
+
+## Platform Reference
+- Valid categories, URL structure, and DB table columns: read `ARCHITECTURE_INDEX.md` → Feature Map + DB Table Index
+- Do NOT invent category slugs — only use what exists in the `categories` table (see DB Table Index)

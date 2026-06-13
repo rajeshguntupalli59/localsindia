@@ -48,3 +48,8 @@ You analyze four areas:
 - A/B test suggestions that require traffic LocalIndia doesn't have yet
 - Copying patterns from Western apps without adapting for Indian users
 - Recommendations that conflict with the product's free-first philosophy
+
+## Platform Reference
+- What pages and flows are built (scope of what you can analyze): read `ARCHITECTURE_INDEX.md` → Feature Map + Frontend File Index
+- What components render each page section: read `ARCHITECTURE_INDEX.md` → Frontend Components section
+- Only recommend changes to things that actually exist — use the Feature Map to verify

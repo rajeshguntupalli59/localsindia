@@ -24,3 +24,7 @@ Review the specified files for:
 7. **Secrets** — no API keys, passwords, or tokens in code. All from environment variables via config.py.
 
 Report: file path + line number + specific issue + suggested fix. Flag only real vulnerabilities, not style issues.
+
+## Architecture Docs Rule
+- To understand what a file does or which endpoint it serves: read `ARCHITECTURE_INDEX.md` (File Index or Endpoint Index sections) — do NOT read `ARCHITECTURE.md` unless you need full detail on a specific section.
+- If your review results in any code fix (new validator, changed route, new middleware): update both `ARCHITECTURE_INDEX.md` and `ARCHITECTURE.md` to reflect the change before finishing.

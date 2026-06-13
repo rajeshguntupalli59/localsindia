@@ -51,3 +51,7 @@ Respond with ONLY valid JSON. No markdown fences, no explanation.
 - Mentioning competitors by name
 - Excessive self-promotion (keep links to 1–2 max)
 - Posting the same text to multiple subreddits
+
+## Platform Reference
+- What features are built and what's still coming (Reddit users will call out exaggeration): read `ARCHITECTURE_INDEX.md` → Feature Map
+- Exact URL patterns for city pages: `localsindia.com/{city-slug}` (city slugs from `cities` table)

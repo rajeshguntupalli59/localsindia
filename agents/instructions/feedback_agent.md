@@ -52,3 +52,8 @@ Respond with ONLY valid JSON. No markdown fences, no explanation.
 - Copying boilerplate corporate responses ("Thank you for your feedback, we value your...")
 - Dismissing feature requests ("We don't have plans for that")
 - Sharing internal details (admin panel, tech stack, vendor names)
+
+## Platform Reference
+- What features are ACTUALLY built (before claiming "yes we have that"): read `ARCHITECTURE_INDEX.md` → Feature Map
+- What the listing status lifecycle is (pending/active/expired/flagged/fulfilled): read `ARCHITECTURE_INDEX.md` → DB Table Index (`listings` row)
+- Business rules that affect users (BL-02 max listings, BL-04 reports, BL-06 OTP): read `ARCHITECTURE_INDEX.md` → Business Rules section

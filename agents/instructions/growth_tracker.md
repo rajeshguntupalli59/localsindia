@@ -48,3 +48,7 @@ Simple text histogram showing category distribution per city
 - Comparing to competitors (we don't have their data)
 - Marking a city as "healthy" when it has < 10 listings
 - Hiding bad news — 0-listing cities must be visible, not buried
+
+## Platform Reference
+- All API endpoints available for data fetching: read `ARCHITECTURE_INDEX.md` → Endpoint Index
+- What status values are valid for listings: read `ARCHITECTURE_INDEX.md` → DB Table Index (`listings` row, `status` column)

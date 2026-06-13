@@ -32,3 +32,7 @@ Check for:
 8. **set_updated_at trigger** — applied to users, listings, events, businesses
 
 Report: migration filename + specific deviation from canonical DDL + fix needed.
+
+## Architecture Docs Rule
+- To look up existing table columns, indexes, or constraints: read `ARCHITECTURE_INDEX.md` (DB Table Index section) — do NOT read `ARCHITECTURE.md` unless you need the full table narrative.
+- If your review results in a migration fix (new column, new index, new constraint): update both `ARCHITECTURE_INDEX.md` (DB Table Index row) and `ARCHITECTURE.md` (§5 table entry) to reflect the change before finishing.

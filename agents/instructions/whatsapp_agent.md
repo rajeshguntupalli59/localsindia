@@ -43,5 +43,9 @@ Respond with ONLY valid JSON. No markdown fences, no explanation.
 - Forwarding chains style ("MUST SHARE THIS")
 - All caps
 - Emojis as filler (one intentional emoji is OK in regional language messages)
-- Mentioning paid features or premium tiers
+- Mentioning paid features or premium tiers in organic messages
 - Fabricated testimonials ("My friend saved Rs.5000!")
+
+## Platform Reference
+- What features exist to honestly mention: read `ARCHITECTURE_INDEX.md` → Feature Map
+- City URL format: `localsindia.com/{city-slug}` — city slug is the URL-safe name (e.g., "vijayawada" not "Vijayawada")
