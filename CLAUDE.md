@@ -62,11 +62,18 @@ cd frontend && npm run build && npm run lint
 - Security review auth/search: use `.claude/agents/security-reviewer.md`
 - DB migration review: use `.claude/agents/db-reviewer.md`
 
+## Architecture Docs (MANDATORY on every feature addition)
+- **Find things fast**: read `ARCHITECTURE_INDEX.md` — never read `ARCHITECTURE.md` unless you need a specific section's full detail
+- **After adding any page, endpoint, table, or component**: update BOTH files
+  - `ARCHITECTURE_INDEX.md`: Feature Map row + File Index entry + Endpoint Index + DB Table Index
+  - `ARCHITECTURE.md`: the matching section (§5 for tables, §6 for endpoints, §7-§9 for pages/components, §18 for quick reference)
+- Both files must always be in sync — stale docs are treated as a build failure
+
 ## Verification Gate
 Every session ends only when BOTH pass:
 ```
 pytest tests/ -x -q       # exit 0
 npm run build && npm run lint # exit 0
 ```
-Show test output as evidence â€” never claim "it works" without proof.
+Show test output as evidence â€” never claim “it works” without proof.
 

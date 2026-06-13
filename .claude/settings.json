@@ -19,7 +19,27 @@
       "Bash(git diff*)",
       "Bash(git log*)",
       "Bash(git add*)",
-      "Bash(git commit*)"
+      "Bash(git commit*)",
+      "Bash(git push*)",
+      "Bash(python agents/city_launcher.py*)",
+      "Bash(python agents/growth_tracker.py*)",
+      "Bash(python agents/run_all.py*)",
+      "Bash(python agents/test_integration.py*)",
+      "Bash(.\\agents\\seed_ap_cities.ps1*)",
+      "PowerShell(cd C:\\Users\\rajes\\localindia*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"const i=JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));const f=i.tool_input&&(i.tool_input.file_path||i.tool_response&&i.tool_response.filePath)||'';const skip=/ARCHITECTURE|node_modules|\\.next|\\.git|messages\\/|migrations\\//.test(f);if(!skip&&(f.endsWith('.py')||f.endsWith('.tsx')||f.endsWith('.ts')||f.endsWith('.json'))){console.log(JSON.stringify({systemMessage:'ARCH DOCS: '+f.split('/').pop()+' was changed. If you added a new page, endpoint, table, or component — update ARCHITECTURE_INDEX.md + ARCHITECTURE.md before finishing.'}));}\" 2>/dev/null || true"
+          }
+        ]
+      }
     ]
   }
 }
