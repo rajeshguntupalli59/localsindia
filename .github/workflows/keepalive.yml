@@ -2,7 +2,7 @@ name: Keep Backend Alive
 
 on:
   schedule:
-    - cron: '*/5 * * * *'  # every 5 minutes
+    - cron: '*/25 * * * *'  # every 25 minutes (GitHub throttles sub-10-min schedules)
   workflow_dispatch:        # manual trigger if needed
 
 jobs:

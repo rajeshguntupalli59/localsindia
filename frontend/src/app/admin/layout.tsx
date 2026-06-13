@@ -32,6 +32,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       const u = JSON.parse(stored);
       if (u.role !== 'admin') { router.replace('/admin/login'); return; }
       setRole(u.role);
+      // Warm up the backend immediately so the page's data fetch hits a live server
+      const apiBase = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
+      fetch(`${apiBase}/api/v1/health`).catch(() => {});
     } catch { router.replace('/admin/login'); }
   }, [router]);
 
