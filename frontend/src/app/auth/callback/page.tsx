@@ -29,7 +29,7 @@ function AuthCallbackInner() {
       toast.success('Signed in successfully!');
     }
 
-    router.replace('/');
+    router.replace('/profile');
   }, [router, searchParams]);
 
   return (

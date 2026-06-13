@@ -181,7 +181,7 @@ function LoginInner() {
                     localStorage.setItem('refresh_token', res.refresh_token);
                     localStorage.setItem('user', JSON.stringify(res.user));
                     toast.success('Dev login — skipped OTP');
-                    router.push('/');
+                    router.push('/profile');
                   } catch { toast.error('Dev login failed'); }
                   finally { setLoading(false); }
                 }}
