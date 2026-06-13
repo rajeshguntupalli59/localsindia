@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 
-export default function AuthCallbackPage() {
+function AuthCallbackInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -35,10 +35,19 @@ export default function AuthCallbackPage() {
   return (
     <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--li-page-bg)' }}>
       <div className="flex flex-col items-center gap-4">
-        {/* Spinner */}
         <div className="w-10 h-10 rounded-full border-4 border-orange-500/20 border-t-orange-500 animate-spin" />
         <p className="text-sm font-medium text-slate-500">Signing you in…</p>
       </div>
     </div>
   );
+}
+
+const Spinner = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <div className="w-10 h-10 rounded-full border-4 border-orange-500/20 border-t-orange-500 animate-spin" />
+  </div>
+);
+
+export default function AuthCallbackPage() {
+  return <Suspense fallback={<Spinner />}><AuthCallbackInner /></Suspense>;
 }

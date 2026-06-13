@@ -1,4 +1,11 @@
 import BottomNav from '@/components/bottom-nav/BottomNav';
+import { getAllCityParams } from '@/lib/static-params';
+
+export async function generateStaticParams() {
+  return getAllCityParams();
+}
+
+export const dynamicParams = true;
 
 export default function CityLayout({
   children,

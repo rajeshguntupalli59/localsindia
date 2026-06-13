@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { Suspense, useEffect, useState, useCallback } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, SearchX, X, ChevronDown, ChevronUp, Tag, UtensilsCrossed, Building2, Briefcase, Car, Smartphone, CalendarDays, Store, GraduationCap, SlidersHorizontal } from 'lucide-react';
@@ -25,7 +25,7 @@ const DATE_OPTIONS = [
   { label: 'This month', value: 'month' },
 ];
 
-export default function SearchPage() {
+function SearchInner() {
   const { city: citySlug } = useParams<{ city: string }>();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -536,4 +536,8 @@ export default function SearchPage() {
       <SiteFooter />
     </div>
   );
+}
+
+export default function SearchPage() {
+  return <Suspense fallback={null}><SearchInner /></Suspense>;
 }
