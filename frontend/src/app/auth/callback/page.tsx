@@ -29,7 +29,8 @@ function AuthCallbackInner() {
       toast.success('Signed in successfully!');
     }
 
-    router.replace('/profile');
+    const city = localStorage.getItem('li_city');
+    router.replace(city ? `/${city}` : '/');
   }, [router, searchParams]);
 
   return (

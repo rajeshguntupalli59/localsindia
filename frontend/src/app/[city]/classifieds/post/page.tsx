@@ -675,7 +675,7 @@ export default function PostListingPage() {
             className="flex items-center gap-2 px-8 py-3 rounded-2xl font-bold text-sm text-white disabled:opacity-60 transition-opacity"
             style={{ background: 'var(--li-primary)' }}
           >
-            {submitting ? 'Posting...' : step === 2 ? <><Sparkles className="w-4 h-4" strokeWidth={2} /> Post Free Listing</> : <>Next <ArrowRight className="w-4 h-4" /></>}
+            {submitting ? 'Posting...' : step === 2 ? <><Sparkles className="w-4 h-4" strokeWidth={2} /> Post Listing</> : <>Next <ArrowRight className="w-4 h-4" /></>}
           </motion.button>
         </div>
       </div>

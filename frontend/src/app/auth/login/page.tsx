@@ -15,6 +15,11 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
 const GOOGLE_AUTH_ENABLED = process.env.NEXT_PUBLIC_GOOGLE_AUTH_ENABLED === 'true';
 const OTP_DEBUG = process.env.NEXT_PUBLIC_OTP_DEBUG === 'true';
 
+function getCityRedirect(): string {
+  const city = typeof window !== 'undefined' ? localStorage.getItem('li_city') : null;
+  return city ? `/${city}` : '/';
+}
+
 const GoogleIcon = () => (
   <svg viewBox="0 0 24 24" className="w-5 h-5" aria-hidden>
     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
@@ -51,7 +56,7 @@ function LoginInner() {
         localStorage.setItem('refresh_token', res.refresh_token);
         localStorage.setItem('user', JSON.stringify(res.user));
         toast.success(`Welcome back, ${(res.user as { name?: string }).name ?? 'back'}!`);
-        router.push('/profile');
+        router.push(getCityRedirect());
       } else {
         // New user — send OTP for phone verification
         const res = await api.auth.sendOtp(phone);
@@ -89,7 +94,7 @@ function LoginInner() {
         setStep('name');
       } else {
         toast.success(`Welcome back, ${res.user.name}!`);
-        router.push('/profile');
+        router.push(getCityRedirect());
       }
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : 'Invalid OTP');
@@ -106,7 +111,7 @@ function LoginInner() {
       const updated = await api.auth.updateProfile({ name: name.trim() }, tokens.access);
       localStorage.setItem('user', JSON.stringify(updated));
       toast.success(`Welcome to LocalsIndia, ${updated.name}!`);
-      router.push('/profile');
+      router.push(getCityRedirect());
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : 'Failed to save name');
     } finally {
@@ -181,7 +186,7 @@ function LoginInner() {
                     localStorage.setItem('refresh_token', res.refresh_token);
                     localStorage.setItem('user', JSON.stringify(res.user));
                     toast.success('Dev login — skipped OTP');
-                    router.push('/profile');
+                    router.push(getCityRedirect());
                   } catch { toast.error('Dev login failed'); }
                   finally { setLoading(false); }
                 }}

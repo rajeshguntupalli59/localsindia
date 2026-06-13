@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { SearchX, SlidersHorizontal, ChevronDown, Tag, UtensilsCrossed, Building2, Briefcase, Car, Smartphone, CalendarDays, Store, GraduationCap, Star } from 'lucide-react';
+import { SearchX, SlidersHorizontal, ChevronDown, Tag, UtensilsCrossed, Building2, Briefcase, Car, Smartphone, CalendarDays, Store, GraduationCap, Star, Plus } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import Link from 'next/link';
 import { api } from '@/lib/api';
@@ -47,11 +47,15 @@ export default function CityHomePage() {
   const [featured, setFeatured] = useState<Listing[]>([]);
   const [latest, setLatest] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [retryKey, setRetryKey] = useState(0);
   const [activeCategory, setActiveCategory] = useState('');
   const [sortBy, setSortBy] = useState('newest');
   const [showSortMenu, setShowSortMenu] = useState(false);
 
   useEffect(() => {
+    setLoadError(false);
+    setLoading(true);
     async function load() {
       try {
         const [cityData, listings] = await Promise.all([
@@ -62,13 +66,13 @@ export default function CityHomePage() {
         setFeatured(listings.filter(l => l.is_featured).slice(0, 3));
         setLatest(listings.filter(l => !l.is_featured).slice(0, 24));
       } catch {
-        router.replace('/');
+        setLoadError(true);
       } finally {
         setLoading(false);
       }
     }
     load();
-  }, [citySlug, router]);
+  }, [citySlug, retryKey]);
 
   const handleCategoryClick = (slug: string) => {
     setActiveCategory(slug);
@@ -85,6 +89,29 @@ export default function CityHomePage() {
   });
 
   const activeSortLabel = SORT_OPTIONS.find(o => o.value === sortBy)?.label ?? 'Newest First';
+
+  if (loadError) {
+    return (
+      <div style={{ background: 'var(--li-page-bg)', minHeight: '100vh' }}>
+        <SiteHeader citySlug={citySlug} />
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 px-4 text-center">
+          <p className="text-2xl">⚠️</p>
+          <h2 className="text-lg font-bold text-slate-800">Could not load listings</h2>
+          <p className="text-sm text-slate-500">The server took too long to respond. Please try again.</p>
+          <button
+            onClick={() => setRetryKey(k => k + 1)}
+            className="px-6 py-2.5 rounded-xl font-semibold text-sm text-white"
+            style={{ background: 'var(--li-primary)' }}
+          >
+            Retry
+          </button>
+          <button onClick={() => router.push('/')} className="text-sm text-slate-400 underline">
+            Change city
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ background: 'var(--li-page-bg)', minHeight: '100vh' }}>
@@ -185,6 +212,25 @@ export default function CityHomePage() {
             </motion.section>
           )}
         </AnimatePresence>
+
+        {/* ── POST CTA BANNER ── */}
+        {!loading && (
+          <Link
+            href={`/${citySlug}/classifieds/post`}
+            className="flex items-center justify-between gap-4 px-5 py-4 rounded-2xl border-2 border-dashed transition-all hover:border-orange-400 hover:bg-orange-50 group"
+            style={{ borderColor: 'var(--li-primary)', background: 'rgba(247,146,30,0.04)' }}
+          >
+            <div>
+              <p className="font-bold text-sm" style={{ color: 'var(--li-primary)' }}>
+                Have something to sell in {city?.name ?? citySlug}?
+              </p>
+              <p className="text-xs text-slate-500 mt-0.5">Post a listing — it&apos;s free and takes 2 minutes</p>
+            </div>
+            <span className="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold text-white group-hover:scale-105 transition-transform" style={{ background: 'var(--li-primary)' }}>
+              <Plus className="w-3.5 h-3.5" strokeWidth={2.8} /> Post Listing
+            </span>
+          </Link>
+        )}
 
         {/* ── LATEST LISTINGS ── */}
         <section>

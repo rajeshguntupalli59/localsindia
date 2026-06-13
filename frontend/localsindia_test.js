@@ -801,7 +801,75 @@ async function run() {
 
 
     // ──────────────────────────────────────────────────────────────────────────
-    section('20. MOBILE VIEWPORT (375×812)');
+    section('20. LOGIN → CITY REDIRECT (not /profile)');
+    // ──────────────────────────────────────────────────────────────────────────
+    await page.goto(`${BASE}/auth/login`, { waitUntil: 'load', timeout: 20000 });
+    await page.waitForTimeout(1000);
+    await page.evaluate(() => localStorage.setItem('li_city', 'hyderabad'));
+    const devLoginBtn20 = page.locator('button:has-text("Dev Login")');
+    if (await devLoginBtn20.isVisible().catch(() => false)) {
+      await devLoginBtn20.click();
+      await page.waitForTimeout(3000);
+      const loginRedirectUrl = page.url();
+      if (loginRedirectUrl.includes('/hyderabad')) pass(`Login redirects to city page: ${loginRedirectUrl}`);
+      else if (loginRedirectUrl.includes('/profile')) fail('Login redirect', `Still going to /profile — expected /hyderabad`);
+      else fail('Login redirect', `Unexpected URL: ${loginRedirectUrl}`);
+    } else {
+      skip('Login city redirect', 'Dev Login button not visible (OTP_DEBUG not enabled on prod)');
+    }
+
+
+    // ──────────────────────────────────────────────────────────────────────────
+    section('21. POST FORM — button says "Post Listing" not "Post Free Listing"');
+    // ──────────────────────────────────────────────────────────────────────────
+    await page.goto(`${BASE}/hyderabad/classifieds/post`, { waitUntil: 'load', timeout: 20000 });
+    await page.waitForTimeout(2000);
+    const postPageContent = await page.content();
+    if (!postPageContent.includes('Post Free Listing')) {
+      pass('Post form: "Post Free Listing" text not found — button correctly says "Post Listing"');
+    } else {
+      fail('Post form submit text', 'Page still contains "Post Free Listing" — not fixed');
+    }
+    const postListingBtn = await page.locator('button:has-text("Post Listing")').first().isVisible().catch(() => false);
+    if (postListingBtn) pass('Post form: "Post Listing" button visible on form page');
+    else log('  ℹ  "Post Listing" button not visible on step 1 (expected — appears on final step only)');
+
+
+    // ──────────────────────────────────────────────────────────────────────────
+    section('22. CITY PAGE — error state shows Retry button (not homepage redirect)');
+    // ──────────────────────────────────────────────────────────────────────────
+    await page.route('**/api/v1/cities/**', route => route.abort());
+    await page.goto(`${BASE}/hyderabad`, { waitUntil: 'load', timeout: 20000 });
+    await page.waitForTimeout(3500);
+    const errorRetryBtn = await page.locator('button:has-text("Retry")').isVisible().catch(() => false);
+    const stillOnCity = page.url().includes('hyderabad');
+    const redirectedHome = !page.url().includes('hyderabad') && page.url() === `${BASE}/`;
+    await page.unroute('**/api/v1/cities/**');
+    if (errorRetryBtn) pass('City page error state: Retry button shown (not homepage redirect)');
+    else if (redirectedHome) fail('City page error state', 'Redirected to homepage instead of showing retry');
+    else fail('City page error state', 'Neither retry button nor correct redirect — state unclear');
+    if (stillOnCity) pass('City page error state: URL stays on /hyderabad (no redirect)');
+    else log('  ⚠  URL changed from /hyderabad during error state');
+
+
+    // ──────────────────────────────────────────────────────────────────────────
+    section('23. CITY PAGE — inline "Post Listing" CTA above listings');
+    // ──────────────────────────────────────────────────────────────────────────
+    await page.goto(`${BASE}/hyderabad`, { waitUntil: 'load', timeout: 20000 });
+    await page.waitForTimeout(4000);
+    const inlinePostCta = await page.locator('a[href*="classifieds/post"]').filter({ hasText: 'Post Listing' }).isVisible().catch(() => false);
+    if (inlinePostCta) pass('City page: inline "Post Listing" CTA banner visible above listings');
+    else {
+      const anyPostLink = await page.locator('a[href*="classifieds/post"]').count().catch(() => 0);
+      if (anyPostLink > 0) fail('City page inline Post CTA', `Found ${anyPostLink} post link(s) but none with text "Post Listing"`);
+      else fail('City page inline Post CTA', 'No link to classifieds/post found on city page');
+    }
+    const ctaText = await page.locator('a[href*="classifieds/post"]').filter({ hasText: 'Post Listing' }).textContent().catch(() => '');
+    if (ctaText) log(`  ℹ  CTA text: "${ctaText.trim().replace(/\s+/g, ' ')}"`);
+
+
+    // ──────────────────────────────────────────────────────────────────────────
+    section('24. MOBILE VIEWPORT (375×812)');
     // ──────────────────────────────────────────────────────────────────────────
   } catch (e) {
     log(`\n💥 Desktop test crashed: ${e.message}\n${e.stack?.split('\n').slice(0, 4).join('\n')}`);
