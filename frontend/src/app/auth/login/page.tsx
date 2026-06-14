@@ -212,8 +212,9 @@ function LoginInner() {
               <>
                 {GOOGLE_AUTH_ENABLED && (
                   <>
-                    <a
-                      href={`${BACKEND_URL}/api/v1/auth/google`}
+                    <button
+                      type="button"
+                      onClick={() => { window.location.href = `${BACKEND_URL}/api/v1/auth/google`; }}
                       className="flex items-center justify-center gap-3 w-full h-12 px-4
                         bg-white rounded-xl border border-slate-200
                         text-sm font-semibold text-slate-700
@@ -222,7 +223,7 @@ function LoginInner() {
                     >
                       <GoogleIcon />
                       Continue with Google
-                    </a>
+                    </button>
                     <div className="flex items-center gap-3 my-5">
                       <div className="flex-1 h-px bg-slate-200" />
                       <span className="text-xs font-medium text-slate-400">or use your phone</span>

@@ -15,6 +15,7 @@
     ]
   },
   "routes": [
+    { "route": "/listing/*", "rewrite": "/listing/placeholder/index.html" },
     { "route": "/auth/login", "rewrite": "/auth/login/index.html" },
     { "route": "/auth/callback", "rewrite": "/auth/callback/index.html" },
     { "route": "/profile", "rewrite": "/profile/index.html" },

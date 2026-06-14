@@ -26,14 +26,14 @@ type GeoStatus = 'idle' | 'locating' | 'located' | 'denied' | 'failed';
 
 // ─── static data ─────────────────────────────────────────────
 const CATEGORIES: CategoryDef[] = [
-  { icon: Utensils,      name: 'Tiffin & Food', slug: 'tiffin',       color: 'text-amber-500 bg-amber-500/10',     accent: 'bg-amber-400/60',   count: '2,840' },
-  { icon: Home,          name: 'PG / Rooms',    slug: 'pg-roommate',  color: 'text-blue-500 bg-blue-500/10',       accent: 'bg-blue-400/60',    count: '5,120' },
-  { icon: Briefcase,     name: 'Jobs',          slug: 'jobs',         color: 'text-emerald-500 bg-emerald-500/10', accent: 'bg-emerald-400/60', count: '3,460' },
-  { icon: Car,           name: 'Vehicles',      slug: 'vehicles',     color: 'text-orange-500 bg-orange-500/10',   accent: 'bg-orange-400/60',  count: '4,780' },
-  { icon: Smartphone,    name: 'Electronics',   slug: 'electronics',  color: 'text-purple-500 bg-purple-500/10',   accent: 'bg-purple-400/60',  count: '6,910' },
-  { icon: Calendar,      name: 'Events',        slug: 'events',       color: 'text-rose-500 bg-rose-500/10',       accent: 'bg-rose-400/60',    count: '890'   },
-  { icon: Store,         name: 'Businesses',    slug: 'businesses',   color: 'text-cyan-500 bg-cyan-500/10',       accent: 'bg-cyan-400/60',    count: '1,230' },
-  { icon: GraduationCap, name: 'Education',     slug: 'education',    color: 'text-indigo-500 bg-indigo-500/10',   accent: 'bg-indigo-400/60',  count: '2,100' },
+  { icon: Utensils,      name: 'Tiffin & Food', slug: 'tiffin',       color: 'text-amber-500 bg-amber-500/10',     accent: 'bg-amber-400/60',   count: '2,800+' },
+  { icon: Home,          name: 'PG / Rooms',    slug: 'pg-roommate',  color: 'text-blue-500 bg-blue-500/10',       accent: 'bg-blue-400/60',    count: '5,000+' },
+  { icon: Briefcase,     name: 'Jobs',          slug: 'jobs',         color: 'text-emerald-500 bg-emerald-500/10', accent: 'bg-emerald-400/60', count: '3,400+' },
+  { icon: Car,           name: 'Vehicles',      slug: 'vehicles',     color: 'text-orange-500 bg-orange-500/10',   accent: 'bg-orange-400/60',  count: '4,700+' },
+  { icon: Smartphone,    name: 'Electronics',   slug: 'electronics',  color: 'text-purple-500 bg-purple-500/10',   accent: 'bg-purple-400/60',  count: '6,900+' },
+  { icon: Calendar,      name: 'Events',        slug: 'events',       color: 'text-rose-500 bg-rose-500/10',       accent: 'bg-rose-400/60',    count: '800+'   },
+  { icon: Store,         name: 'Businesses',    slug: 'businesses',   color: 'text-cyan-500 bg-cyan-500/10',       accent: 'bg-cyan-400/60',    count: '1,200+' },
+  { icon: GraduationCap, name: 'Education',     slug: 'education',    color: 'text-indigo-500 bg-indigo-500/10',   accent: 'bg-indigo-400/60',  count: '2,000+' },
 ];
 
 const POPULAR_TAGS = ['Tiffin Service', 'PG for Boys', 'Used Laptop', 'Honda Activa', 'Home Tutor', '2BHK Flat'];
@@ -532,7 +532,7 @@ export default function HomePage() {
                   Browse by Category
                 </h2>
                 <p className="text-[13px] text-slate-400 mt-2 font-normal leading-none">
-                  27,330+ active listings across all categories
+                  25,000+ active listings across all categories
                 </p>
               </div>
 

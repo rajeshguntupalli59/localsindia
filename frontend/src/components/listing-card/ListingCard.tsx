@@ -14,15 +14,13 @@ interface Props {
   citySlug?: string;
 }
 
-export default function ListingCard({ listing, citySlug = '' }: Props) {
+export default function ListingCard({ listing }: Props) {
   const { t } = usePrefs();
   const image = listing.images?.[0];
   const waUrl =
     listing.whatsapp_url ??
     `https://wa.me/${listing.contact_phone.replace('+', '')}`;
-  const href = citySlug
-    ? `/${citySlug}/classifieds/${listing.id}`
-    : `/classifieds/${listing.id}`;
+  const href = `/listing/${listing.id}`;
 
   return (
     <motion.div
