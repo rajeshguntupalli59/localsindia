@@ -11,13 +11,25 @@ import ListingCardSkeleton from '@/components/listing-card/ListingCardSkeleton';
 import CityPickerModal from '@/components/city-picker/CityPickerModal';
 import { usePrefs } from '@/context/PrefsContext';
 
+const CITY_ALIASES: Record<string, string> = {
+  bangalore: 'bengaluru', bombay: 'mumbai', madras: 'chennai',
+  calcutta: 'kolkata', mysore: 'mysuru', mangalore: 'mangaluru',
+  hubli: 'hubballi', trivandrum: 'thiruvananthapuram', calicut: 'kozhikode',
+  trichur: 'thrissur', cochin: 'kochi', gauhati: 'guwahati',
+};
+function normaliseCity(city: string): string {
+  const lc = city.toLowerCase().trim();
+  return CITY_ALIASES[lc] ?? lc;
+}
+
 function SearchInner() {
   const router = useRouter();
   const sp = useSearchParams();
   const { citySlug: prefCity, cityName: prefCityName, setCity } = usePrefs();
 
   const q            = sp.get('q') ?? '';
-  const cityParam    = sp.get('city') ?? prefCity ?? '';
+  const rawCity      = sp.get('city') ?? prefCity ?? '';
+  const cityParam    = normaliseCity(rawCity);
   const categorySlug = sp.get('category') ?? '';
 
   const [inputQ, setInputQ]         = useState(q);
@@ -26,6 +38,12 @@ function SearchInner() {
   const [cityName, setCityName]     = useState(prefCityName ?? '');
   const [categories, setCategories] = useState<Category[]>([]);
   const [showPicker, setShowPicker] = useState(false);
+
+  // Auto-open city picker on mount if no city in URL
+  useEffect(() => {
+    if (!cityParam) setShowPicker(true);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Keep input in sync when URL q changes
   useEffect(() => { setInputQ(q); }, [q]);

@@ -30,6 +30,19 @@ function SearchInner() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
+  // When SWA serves /placeholder/... for an unmatched city URL, redirect to /search
+  useEffect(() => {
+    if (citySlug === 'placeholder') {
+      const q = searchParams.get('q') ?? '';
+      const cat = searchParams.get('category') ?? '';
+      const p = new URLSearchParams();
+      if (q) p.set('q', q);
+      if (cat) p.set('category', cat);
+      router.replace(`/search${p.toString() ? `?${p.toString()}` : ''}`);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [citySlug]);
+
   const q = searchParams.get('q') ?? '';
   const catParam = searchParams.get('category') ?? '';
   const pageStr = searchParams.get('page') ?? '1';

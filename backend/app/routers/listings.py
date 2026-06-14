@@ -37,6 +37,7 @@ async def _get_active_listing(listing_id: uuid.UUID, db: AsyncSession) -> Listin
 @router.get("/cities/{slug}/listings", response_model=list[ListingOut])
 async def list_city_listings(
     slug: str,
+    q: str | None = Query(default=None),
     category_id: uuid.UUID | None = Query(default=None),
     category_slug: str | None = Query(default=None),
     status: str = Query(default="active"),
@@ -57,7 +58,7 @@ async def list_city_listings(
         if cat:
             category_id = cat.id
 
-    q = (
+    stmt = (
         select(Listing)
         .where(
             Listing.city_id == city.id,
@@ -69,9 +70,13 @@ async def list_city_listings(
         .limit(page_size)
     )
     if category_id:
-        q = q.where(Listing.category_id == category_id)
+        stmt = stmt.where(Listing.category_id == category_id)
+    if q:
+        stmt = stmt.where(
+            Listing.title.ilike(f"%{q}%") | Listing.description.ilike(f"%{q}%")
+        )
 
-    result = await db.execute(q)
+    result = await db.execute(stmt)
     return result.scalars().all()
 
 

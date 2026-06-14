@@ -139,9 +139,10 @@ export default function HomePage() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!citySlug) { setShowCityPicker(true); return; }
-    if (q.trim()) router.push(`/search?q=${encodeURIComponent(q.trim())}&city=${citySlug}`);
-    else router.push(`/${citySlug}`);
+    if (!q.trim()) return;
+    const p = new URLSearchParams({ q: q.trim() });
+    if (citySlug) p.set('city', citySlug);
+    router.push(`/search?${p.toString()}`);
   };
 
   // ─────────────────────────────────────────────────────────────
@@ -474,8 +475,9 @@ export default function HomePage() {
                   key={tag}
                   type="button"
                   onClick={() => {
-                    if (citySlug) router.push(`/search?q=${encodeURIComponent(tag)}&city=${citySlug}`);
-                    else { setQ(tag); setShowCityPicker(true); }
+                    const p = new URLSearchParams({ q: tag });
+                    if (citySlug) p.set('city', citySlug);
+                    router.push(`/search?${p.toString()}`);
                   }}
                   initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -559,8 +561,9 @@ export default function HomePage() {
               <motion.div
                 key={name}
                 onClick={() => {
-                  if (citySlug) router.push(`/search?category=${slug}&city=${citySlug}`);
-                  else { setPendingCategory(slug); setShowCityPicker(true); }
+                  const p = new URLSearchParams({ category: slug });
+                  if (citySlug) p.set('city', citySlug);
+                  router.push(`/search?${p.toString()}`);
                 }}
                 initial={{ opacity: 0, y: 14 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -660,7 +663,7 @@ export default function HomePage() {
             } else if (q.trim()) {
               router.push(`/search?q=${encodeURIComponent(q.trim())}&city=${city.slug}`);
             } else {
-              router.push(`/${city.slug}`);
+              router.push(`/search?city=${city.slug}`);
             }
           }}
         />

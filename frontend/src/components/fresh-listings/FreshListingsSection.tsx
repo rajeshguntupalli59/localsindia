@@ -138,7 +138,9 @@ function CategoryChip({ Icon, label }: { Icon: LucideIcon; label: string }) {
 // ─── WhatsApp action tray (card footer) ───────────────────────
 function WaTray({ url, waLabel }: { url: string; waLabel: string }) {
   const isRealWaLink = url.startsWith('https://wa.me');
-  const href = isRealWaLink ? url : '/auth/login';
+  const href = isRealWaLink
+    ? url
+    : `/auth/login?redirect=${encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname : '/')}`;
   return (
     <div className="px-3.5 pb-3.5">
       {/* Hairline separator */}

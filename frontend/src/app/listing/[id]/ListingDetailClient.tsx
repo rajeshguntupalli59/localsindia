@@ -16,12 +16,25 @@ function Skeleton({ className }: { className?: string }) {
 export default function ListingDetailClient() {
   const params = useParams();
   const router = useRouter();
-  const id = typeof params?.id === 'string' ? params.id : '';
+  const paramsId = typeof params?.id === 'string' ? params.id : '';
+  const [id, setId] = useState(paramsId);
 
   const [listing, setListing] = useState<Listing | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [expanded, setExpanded] = useState(false);
+
+  // In static export, useParams() may return 'placeholder' when SWA serves
+  // /listing/placeholder/index.html for /listing/{real-id}. Fall back to URL.
+  useEffect(() => {
+    if (id && id !== 'placeholder') return;
+    if (typeof window !== 'undefined') {
+      const parts = window.location.pathname.split('/').filter(Boolean);
+      const urlId = parts[parts.length - 1];
+      if (urlId && urlId !== 'placeholder') setId(urlId);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (!id || id === 'placeholder') return;
