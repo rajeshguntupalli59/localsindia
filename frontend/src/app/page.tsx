@@ -20,20 +20,20 @@ import FreshListingsSection from '@/components/fresh-listings/FreshListingsSecti
 import SiteLogo from '@/components/site-logo/SiteLogo';
 
 // ─── types ───────────────────────────────────────────────────
-interface CategoryDef { icon: LucideIcon; name: string; color: string; accent: string; count: string }
+interface CategoryDef { icon: LucideIcon; name: string; slug: string; color: string; accent: string; count: string }
 interface TrustDef { icon: LucideIcon; title: string; subtitle: string; iconBg: string; iconColor: string; isWhatsApp?: true }
 type GeoStatus = 'idle' | 'locating' | 'located' | 'denied' | 'failed';
 
 // ─── static data ─────────────────────────────────────────────
 const CATEGORIES: CategoryDef[] = [
-  { icon: Utensils,      name: 'Tiffin & Food', color: 'text-amber-500 bg-amber-500/10',     accent: 'bg-amber-400/60',   count: '2,840' },
-  { icon: Home,          name: 'PG / Rooms',    color: 'text-blue-500 bg-blue-500/10',       accent: 'bg-blue-400/60',    count: '5,120' },
-  { icon: Briefcase,     name: 'Jobs',          color: 'text-emerald-500 bg-emerald-500/10', accent: 'bg-emerald-400/60', count: '3,460' },
-  { icon: Car,           name: 'Vehicles',      color: 'text-orange-500 bg-orange-500/10',   accent: 'bg-orange-400/60',  count: '4,780' },
-  { icon: Smartphone,    name: 'Electronics',   color: 'text-purple-500 bg-purple-500/10',   accent: 'bg-purple-400/60',  count: '6,910' },
-  { icon: Calendar,      name: 'Events',        color: 'text-rose-500 bg-rose-500/10',       accent: 'bg-rose-400/60',    count: '890'   },
-  { icon: Store,         name: 'Businesses',    color: 'text-cyan-500 bg-cyan-500/10',       accent: 'bg-cyan-400/60',    count: '1,230' },
-  { icon: GraduationCap, name: 'Education',     color: 'text-indigo-500 bg-indigo-500/10',   accent: 'bg-indigo-400/60',  count: '2,100' },
+  { icon: Utensils,      name: 'Tiffin & Food', slug: 'tiffin',       color: 'text-amber-500 bg-amber-500/10',     accent: 'bg-amber-400/60',   count: '2,840' },
+  { icon: Home,          name: 'PG / Rooms',    slug: 'pg-roommate',  color: 'text-blue-500 bg-blue-500/10',       accent: 'bg-blue-400/60',    count: '5,120' },
+  { icon: Briefcase,     name: 'Jobs',          slug: 'jobs',         color: 'text-emerald-500 bg-emerald-500/10', accent: 'bg-emerald-400/60', count: '3,460' },
+  { icon: Car,           name: 'Vehicles',      slug: 'vehicles',     color: 'text-orange-500 bg-orange-500/10',   accent: 'bg-orange-400/60',  count: '4,780' },
+  { icon: Smartphone,    name: 'Electronics',   slug: 'electronics',  color: 'text-purple-500 bg-purple-500/10',   accent: 'bg-purple-400/60',  count: '6,910' },
+  { icon: Calendar,      name: 'Events',        slug: 'events',       color: 'text-rose-500 bg-rose-500/10',       accent: 'bg-rose-400/60',    count: '890'   },
+  { icon: Store,         name: 'Businesses',    slug: 'businesses',   color: 'text-cyan-500 bg-cyan-500/10',       accent: 'bg-cyan-400/60',    count: '1,230' },
+  { icon: GraduationCap, name: 'Education',     slug: 'education',    color: 'text-indigo-500 bg-indigo-500/10',   accent: 'bg-indigo-400/60',  count: '2,100' },
 ];
 
 const POPULAR_TAGS = ['Tiffin Service', 'PG for Boys', 'Used Laptop', 'Honda Activa', 'Home Tutor', '2BHK Flat'];
@@ -61,6 +61,7 @@ export default function HomePage() {
   const { citySlug, cityName, setCity, cities, t } = usePrefs();
   const [q, setQ] = useState('');
   const [showCityPicker, setShowCityPicker] = useState(false);
+  const [pendingCategory, setPendingCategory] = useState<string | null>(null);
 
   // geolocation
   const [geoStatus, setGeoStatus] = useState<GeoStatus>('idle');
@@ -472,7 +473,11 @@ export default function HomePage() {
                 <motion.button
                   key={tag}
                   type="button"
-                  onClick={() => setQ(tag)}
+                  onClick={() => {
+                    setQ(tag);
+                    if (citySlug) router.push(`/${citySlug}/search?q=${encodeURIComponent(tag)}`);
+                    else setShowCityPicker(true);
+                  }}
                   initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.32 + i * 0.05, duration: 0.28, ease: 'easeOut' }}
@@ -551,10 +556,13 @@ export default function HomePage() {
 
           {/* ─── Grid ───────────────────────────────────────── */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-5">
-            {CATEGORIES.map(({ icon: Icon, name, color, accent, count }, i) => (
+            {CATEGORIES.map(({ icon: Icon, name, slug, color, accent, count }, i) => (
               <motion.div
                 key={name}
-                onClick={() => setShowCityPicker(true)}
+                onClick={() => {
+                  if (citySlug) router.push(`/${citySlug}/search?category=${slug}`);
+                  else { setPendingCategory(slug); setShowCityPicker(true); }
+                }}
                 initial={{ opacity: 0, y: 14 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-30px' }}
@@ -632,7 +640,12 @@ export default function HomePage() {
       {/* ══════════════════════════════════════════════
           FRESH LISTINGS
       ══════════════════════════════════════════════ */}
-      <FreshListingsSection onCityPickerOpen={() => setShowCityPicker(true)} />
+      <FreshListingsSection
+        onCityPickerOpen={() => {
+          if (citySlug) router.push(`/${citySlug}`);
+          else setShowCityPicker(true);
+        }}
+      />
 
       {/* ══════════════════════════════════════════════
           CITY PICKER MODAL
@@ -642,8 +655,14 @@ export default function HomePage() {
           onClose={() => setShowCityPicker(false)}
           onSelect={city => {
             setShowCityPicker(false);
-            if (q.trim()) router.push(`/${city.slug}/search?q=${encodeURIComponent(q.trim())}`);
-            else router.push(`/${city.slug}`);
+            if (pendingCategory) {
+              router.push(`/${city.slug}/search?category=${pendingCategory}`);
+              setPendingCategory(null);
+            } else if (q.trim()) {
+              router.push(`/${city.slug}/search?q=${encodeURIComponent(q.trim())}`);
+            } else {
+              router.push(`/${city.slug}`);
+            }
           }}
         />
       )}

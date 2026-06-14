@@ -13,7 +13,7 @@ import SiteLogo from '@/components/site-logo/SiteLogo';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
 const GOOGLE_AUTH_ENABLED = process.env.NEXT_PUBLIC_GOOGLE_AUTH_ENABLED === 'true';
-const OTP_DEBUG = process.env.NEXT_PUBLIC_OTP_DEBUG === 'true';
+const OTP_DEBUG = process.env.NEXT_PUBLIC_OTP_DEBUG === 'true' && process.env.NODE_ENV !== 'production';
 
 function getCityRedirect(): string {
   const city = typeof window !== 'undefined' ? localStorage.getItem('li_city') : null;
@@ -241,7 +241,7 @@ function LoginInner() {
                       <input
                         id="phone"
                         className="flex-1 px-3 py-2 text-sm bg-white outline-none"
-                        placeholder="9876543210"
+                        placeholder="Enter 10-digit mobile number"
                         value={digits}
                         onChange={e => setDigits(e.target.value.replace(/\D/g, '').slice(0, 10))}
                         inputMode="numeric"

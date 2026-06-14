@@ -27,21 +27,21 @@ const IconYouTube = () => (
 );
 
 const SOCIALS = [
-  { label: 'X (Twitter)',  Icon: IconX,         hover: 'hover:text-slate-200 hover:bg-white/[0.12]' },
-  { label: 'Instagram',   Icon: IconInstagram,  hover: 'hover:text-pink-400  hover:bg-pink-500/[0.12]' },
-  { label: 'Facebook',    Icon: IconFacebook,   hover: 'hover:text-blue-400  hover:bg-blue-500/[0.12]' },
-  { label: 'YouTube',     Icon: IconYouTube,    hover: 'hover:text-red-400   hover:bg-red-500/[0.12]'  },
+  { label: 'X (Twitter)',  Icon: IconX,         href: 'https://x.com/localsindia',         hover: 'hover:text-slate-200 hover:bg-white/[0.12]' },
+  { label: 'Instagram',   Icon: IconInstagram,  href: 'https://instagram.com/localsindia',  hover: 'hover:text-pink-400  hover:bg-pink-500/[0.12]' },
+  { label: 'Facebook',    Icon: IconFacebook,   href: 'https://facebook.com/localsindia',   hover: 'hover:text-blue-400  hover:bg-blue-500/[0.12]' },
+  { label: 'YouTube',     Icon: IconYouTube,    href: 'https://youtube.com/@localsindia',   hover: 'hover:text-red-400   hover:bg-red-500/[0.12]'  },
 ];
 
 const FOOTER_LINKS: Record<string, { label: string; href: string }[]> = {
   Platform: [
     { label: 'Browse Listings', href: '/' },
     { label: 'Post a Listing', href: '/auth/login?mode=signup' },
-    { label: 'All Cities', href: '/' },
+    { label: 'All Cities', href: '/cities' },
     { label: 'Invite a Business', href: '/invite' },
   ],
   Company: [
-    { label: 'About Us', href: '/' },
+    { label: 'About Us', href: '/about' },
     { label: 'Contact', href: 'mailto:rajeshguntupalli59@gmail.com' },
   ],
   Legal: [
@@ -67,10 +67,12 @@ export default function SiteFooter() {
 
             {/* Social icons */}
             <div className="flex gap-2 mt-6">
-              {SOCIALS.map(({ label, Icon, hover }) => (
+              {SOCIALS.map(({ label, Icon, href, hover }) => (
                 <a
                   key={label}
-                  href="/"
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   aria-label={label}
                   className={`w-9 h-9 rounded-xl flex items-center justify-center
                     bg-white/[0.06] text-slate-500

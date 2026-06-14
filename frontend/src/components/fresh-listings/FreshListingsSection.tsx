@@ -137,14 +137,16 @@ function CategoryChip({ Icon, label }: { Icon: LucideIcon; label: string }) {
 
 // ─── WhatsApp action tray (card footer) ───────────────────────
 function WaTray({ url, waLabel }: { url: string; waLabel: string }) {
+  const isRealWaLink = url.startsWith('https://wa.me');
+  const href = isRealWaLink ? url : '/auth/login';
   return (
     <div className="px-3.5 pb-3.5">
       {/* Hairline separator */}
       <div className="h-px bg-slate-100 mb-3" />
       <a
-        href={url}
-        target="_blank"
-        rel="noopener noreferrer"
+        href={href}
+        target={isRealWaLink ? '_blank' : '_self'}
+        rel={isRealWaLink ? 'noopener noreferrer' : undefined}
         onClick={e => e.stopPropagation()}
         className="group/tray flex items-center justify-between w-full
           px-3 py-2.5 rounded-[11px]
