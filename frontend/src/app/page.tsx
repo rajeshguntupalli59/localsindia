@@ -140,7 +140,7 @@ export default function HomePage() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (!citySlug) { setShowCityPicker(true); return; }
-    if (q.trim()) router.push(`/${citySlug}/search?q=${encodeURIComponent(q.trim())}`);
+    if (q.trim()) router.push(`/search?q=${encodeURIComponent(q.trim())}&city=${citySlug}`);
     else router.push(`/${citySlug}`);
   };
 
@@ -474,9 +474,8 @@ export default function HomePage() {
                   key={tag}
                   type="button"
                   onClick={() => {
-                    setQ(tag);
-                    if (citySlug) router.push(`/${citySlug}/search?q=${encodeURIComponent(tag)}`);
-                    else setShowCityPicker(true);
+                    if (citySlug) router.push(`/search?q=${encodeURIComponent(tag)}&city=${citySlug}`);
+                    else { setQ(tag); setShowCityPicker(true); }
                   }}
                   initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -560,7 +559,7 @@ export default function HomePage() {
               <motion.div
                 key={name}
                 onClick={() => {
-                  if (citySlug) router.push(`/${citySlug}/search?category=${slug}`);
+                  if (citySlug) router.push(`/search?category=${slug}&city=${citySlug}`);
                   else { setPendingCategory(slug); setShowCityPicker(true); }
                 }}
                 initial={{ opacity: 0, y: 14 }}
@@ -642,7 +641,7 @@ export default function HomePage() {
       ══════════════════════════════════════════════ */}
       <FreshListingsSection
         onCityPickerOpen={() => {
-          if (citySlug) router.push(`/${citySlug}`);
+          if (citySlug) router.push(`/search?city=${citySlug}`);
           else setShowCityPicker(true);
         }}
       />
@@ -656,10 +655,10 @@ export default function HomePage() {
           onSelect={city => {
             setShowCityPicker(false);
             if (pendingCategory) {
-              router.push(`/${city.slug}/search?category=${pendingCategory}`);
+              router.push(`/search?category=${pendingCategory}&city=${city.slug}`);
               setPendingCategory(null);
             } else if (q.trim()) {
-              router.push(`/${city.slug}/search?q=${encodeURIComponent(q.trim())}`);
+              router.push(`/search?q=${encodeURIComponent(q.trim())}&city=${city.slug}`);
             } else {
               router.push(`/${city.slug}`);
             }
