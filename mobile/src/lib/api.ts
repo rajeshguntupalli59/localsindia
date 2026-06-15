@@ -66,6 +66,10 @@ export const authApi = {
   getMe: () =>
     api.get('/auth/me').then(r => r.data),
 
+  // Fetch full profile using an explicit token (before it's stored in SecureStore)
+  getMeWithToken: (token: string) =>
+    api.get('/auth/me', { headers: { Authorization: `Bearer ${token}` } }).then(r => r.data),
+
   updateName: (name: string) =>
     api.patch('/auth/me', { name }).then(r => r.data),
 };

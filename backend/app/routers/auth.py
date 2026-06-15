@@ -267,8 +267,9 @@ async def get_me(current_user: User = Depends(get_current_user)):
 # ─── Google OAuth ─────────────────────────────────────────────
 
 @router.get("/google")
-async def google_oauth_start():
-    """Redirect user to Google's OAuth consent screen."""
+async def google_oauth_start(mobile: bool = False):
+    """Redirect user to Google's OAuth consent screen.
+    Pass ?mobile=1 from the mobile app to get a deep-link callback instead of web."""
     if not settings.GOOGLE_CLIENT_ID:
         raise HTTPException(status_code=503, detail="Google OAuth not configured — add GOOGLE_CLIENT_ID to .env")
     params = {
@@ -278,6 +279,7 @@ async def google_oauth_start():
         "scope": "openid email profile",
         "access_type": "offline",
         "prompt": "select_account",
+        "state": "mobile" if mobile else "web",
     }
     url = "https://accounts.google.com/o/oauth2/v2/auth?" + urllib.parse.urlencode(params)
     return RedirectResponse(url)
@@ -287,11 +289,20 @@ async def google_oauth_start():
 async def google_oauth_callback(
     code: str | None = None,
     error: str | None = None,
+    state: str = "web",
     db: AsyncSession = Depends(get_db),
 ):
-    """Exchange Google code for user profile, upsert user, redirect to frontend with JWT."""
+    """Exchange Google code for user profile, upsert user, redirect to frontend with JWT.
+    When state='mobile', redirects to localsindia:// deep link for the mobile app."""
+    is_mobile = state == "mobile"
+    error_redirect = (
+        "localsindia://auth/callback?error=google_denied"
+        if is_mobile
+        else f"{settings.FRONTEND_URL}/auth/login?error=google_denied"
+    )
+
     if error or not code:
-        return RedirectResponse(f"{settings.FRONTEND_URL}/auth/login?error=google_denied")
+        return RedirectResponse(error_redirect)
 
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
@@ -307,7 +318,7 @@ async def google_oauth_callback(
             )
             token_data = token_res.json()
             if "error" in token_data:
-                return RedirectResponse(f"{settings.FRONTEND_URL}/auth/login?error=token_exchange")
+                return RedirectResponse(error_redirect)
 
             profile_res = await client.get(
                 "https://www.googleapis.com/oauth2/v2/userinfo",
@@ -315,14 +326,14 @@ async def google_oauth_callback(
             )
             g_user = profile_res.json()
     except Exception:
-        return RedirectResponse(f"{settings.FRONTEND_URL}/auth/login?error=google_error")
+        return RedirectResponse(error_redirect)
 
     email = g_user.get("email")
     name = g_user.get("name") or email or "User"
     avatar_url = g_user.get("picture")
 
     if not email:
-        return RedirectResponse(f"{settings.FRONTEND_URL}/auth/login?error=no_email")
+        return RedirectResponse(error_redirect)
 
     # Upsert user by email
     result = await db.execute(select(User).where(User.email == email, User.deleted_at.is_(None)))
@@ -333,7 +344,12 @@ async def google_oauth_callback(
         db.add(user)
     else:
         if not user.is_active:
-            return RedirectResponse(f"{settings.FRONTEND_URL}/auth/login?error=account_deactivated")
+            redirect = (
+                "localsindia://auth/callback?error=account_deactivated"
+                if is_mobile
+                else f"{settings.FRONTEND_URL}/auth/login?error=account_deactivated"
+            )
+            return RedirectResponse(redirect)
         if avatar_url:
             user.avatar_url = avatar_url
         if name and user.name == user.email:
@@ -345,6 +361,11 @@ async def google_oauth_callback(
     access_token = create_access_token(str(user.id))
     refresh = create_refresh_token(str(user.id))
     name_enc = urllib.parse.quote(user.name or "")
+
+    if is_mobile:
+        return RedirectResponse(
+            f"localsindia://auth/callback?token={access_token}&refresh={refresh}&name={name_enc}"
+        )
     return RedirectResponse(
         f"{settings.FRONTEND_URL}/auth/callback?token={access_token}&refresh={refresh}&name={name_enc}"
     )
