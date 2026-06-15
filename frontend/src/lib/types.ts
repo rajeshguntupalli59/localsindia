@@ -126,6 +126,15 @@ export interface Business {
   reviews?: Review[];
 }
 
+export interface SellerProfile {
+  id: string;
+  name: string | null;
+  avatar_url: string | null;
+  member_since: string;
+  active_listings_count: number;
+  listings: Listing[];
+}
+
 export interface CreateListingInput {
   title: string;
   description: string;

@@ -3,11 +3,12 @@
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import { MapPin, Clock } from 'lucide-react';
+import { MapPin, Clock, Heart } from 'lucide-react';
 import { formatPrice, timeAgo } from '@/lib/utils';
 import { api } from '@/lib/api';
 import type { Listing } from '@/lib/types';
 import { usePrefs } from '@/context/PrefsContext';
+import { useSaved } from '@/hooks/useSaved';
 
 const CATEGORY_EMOJI: Record<string, string> = {
   'tiffin': '🍱',
@@ -27,6 +28,7 @@ interface Props {
 
 export default function ListingCard({ listing }: Props) {
   const { t } = usePrefs();
+  const { toggle, isSaved } = useSaved();
   const image = listing.images?.[0];
   const waUrl =
     listing.whatsapp_url ??
@@ -67,6 +69,20 @@ export default function ListingCard({ listing }: Props) {
               {formatPrice(listing.price)}
             </span>
           )}
+
+          {/* Bookmark heart */}
+          <button
+            type="button"
+            onClick={e => { e.preventDefault(); e.stopPropagation(); toggle(listing); }}
+            aria-label={isSaved(listing.id) ? 'Remove bookmark' : 'Save listing'}
+            className="absolute top-2 right-2 z-10 w-7 h-7 rounded-full bg-white/90 flex items-center justify-center shadow-sm
+              hover:bg-white transition-all duration-150 active:scale-90"
+          >
+            <Heart
+              className={`w-3.5 h-3.5 transition-colors ${isSaved(listing.id) ? 'fill-red-500 text-red-500' : 'text-slate-400'}`}
+              strokeWidth={2}
+            />
+          </button>
 
           {/* Featured badge */}
           {listing.is_featured && (

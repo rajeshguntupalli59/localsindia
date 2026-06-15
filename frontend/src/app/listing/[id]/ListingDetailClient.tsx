@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft, MapPin, Clock, ChevronDown, ChevronUp, Flag, Tag, User } from 'lucide-react';
+import { ArrowLeft, MapPin, Clock, ChevronDown, ChevronUp, Flag, Tag, User, ExternalLink } from 'lucide-react';
 import { api } from '@/lib/api';
 import type { Listing } from '@/lib/types';
 import { formatPrice, timeAgo } from '@/lib/utils';
@@ -186,12 +186,14 @@ export default function ListingDetailClient({ id }: { id: string }) {
 
             {/* Seller name */}
             {listing.seller_name && (
-              <div className="flex items-center gap-2 text-sm text-slate-600">
+              <Link href={`/seller/${listing.user_id}`}
+                className="flex items-center gap-2 text-sm text-slate-600 hover:text-[#F7921E] transition-colors group">
                 <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
-                  <User className="w-3.5 h-3.5 text-slate-400" strokeWidth={2} />
+                  <User className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#F7921E]" strokeWidth={2} />
                 </div>
                 <span>Listed by <span className="font-semibold">{listing.seller_name}</span></span>
-              </div>
+                <ExternalLink className="w-3 h-3 opacity-40 group-hover:opacity-70" strokeWidth={2} />
+              </Link>
             )}
 
             {/* WA verified */}

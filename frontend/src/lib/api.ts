@@ -12,6 +12,7 @@ import type {
   Event,
   Business,
   Review,
+  SellerProfile,
 } from './types';
 
 export type { User, Event, Business, Review };
@@ -195,6 +196,10 @@ export const api = {
       req<Business>(`/api/v1/businesses/${id}/claim`, { method: 'POST', token }),
     addReview: (id: string, data: { rating: number; body?: string }, token: string) =>
       req<Review>(`/api/v1/businesses/${id}/reviews`, { method: 'POST', body: JSON.stringify(data), token }),
+  },
+  users: {
+    publicProfile: (userId: string) =>
+      req<SellerProfile>(`/api/v1/users/${userId}/public-profile`),
   },
   upload: {
     image: (listingId: string, file: File, token: string) => {
