@@ -7,16 +7,20 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   MapPin, ArrowRight, ChevronLeft, ChevronRight,
   Utensils, Home, Smartphone, Car, GraduationCap, Building2,
+  ShoppingBag, Briefcase, Calendar,
   BadgeCheck, type LucideIcon,
 } from 'lucide-react';
+import { api } from '@/lib/api';
+import { timeAgo } from '@/lib/utils';
+import type { Listing } from '@/lib/types';
 
-// ─── Types ────────────────────────────────────────────────────
-interface MockListing {
+// ─── Types ────────────────────────────────────────────────
+interface DisplayListing {
   id: string;
   title: string;
   category: string;
   categorySlug: string;
-  price: number;
+  price: number | null;
   priceUnit: string;
   location: string;
   postedAt: string;
@@ -24,62 +28,100 @@ interface MockListing {
   gradient: [string, string];
   Icon: LucideIcon;
   waUrl: string;
+  isReal: boolean;
 }
 
-// ─── Mock data ─────────────────────────────────────────────────
-const FRESH_LISTINGS: MockListing[] = [
+// ─── Category → visual mapping ────────────────────────────
+const CATEGORY_VISUALS: Record<string, { gradient: [string, string]; Icon: LucideIcon; label: string }> = {
+  'tiffin':      { gradient: ['#FF9A3C', '#FF6B35'], Icon: Utensils,    label: 'Tiffin & Food' },
+  'pg-roommate': { gradient: ['#4F8EF7', '#1D4ED8'], Icon: Home,        label: 'PG / Rooms' },
+  'electronics': { gradient: ['#8B5CF6', '#4F46E5'], Icon: Smartphone,  label: 'Electronics' },
+  'vehicles':    { gradient: ['#F97316', '#DC2626'], Icon: Car,         label: 'Vehicles' },
+  'education':   { gradient: ['#10B981', '#047857'], Icon: GraduationCap, label: 'Education' },
+  'businesses':  { gradient: ['#06B6D4', '#0284C7'], Icon: Building2,   label: 'Businesses' },
+  'jobs':        { gradient: ['#6366F1', '#4338CA'], Icon: Briefcase,   label: 'Jobs' },
+  'events':      { gradient: ['#EC4899', '#BE185D'], Icon: Calendar,    label: 'Events' },
+  'classifieds': { gradient: ['#84CC16', '#4D7C0F'], Icon: ShoppingBag, label: 'Classifieds' },
+  'services':    { gradient: ['#F59E0B', '#D97706'], Icon: Building2,   label: 'Services' },
+};
+
+const DEFAULT_VISUAL = { gradient: ['#94A3B8', '#64748B'] as [string, string], Icon: ShoppingBag, label: 'Listing' };
+
+function realListingToDisplay(l: Listing): DisplayListing {
+  const slug = l.category_slug ?? '';
+  const vis = CATEGORY_VISUALS[slug] ?? DEFAULT_VISUAL;
+  return {
+    id: l.id,
+    title: l.title,
+    category: l.category_name ?? vis.label,
+    categorySlug: slug,
+    price: l.price,
+    priceUnit: '',
+    location: l.area ?? '',
+    postedAt: timeAgo(l.created_at),
+    badge: l.wa_verified ? 'Verified' : 'New',
+    gradient: vis.gradient,
+    Icon: vis.Icon,
+    waUrl: l.whatsapp_url ?? `https://wa.me/${l.contact_phone.replace('+', '')}`,
+    isReal: true,
+  };
+}
+
+// ─── Mock data (fallback when no city selected) ───────────
+const FRESH_LISTINGS: DisplayListing[] = [
   {
     id: 'mock-1', title: 'Home-style South Indian Tiffin — Monthly Plan',
     category: 'Tiffin & Food', categorySlug: 'tiffin',
     price: 1800, priceUnit: '/mo', location: 'Koramangala, Bangalore',
     postedAt: '2h ago', badge: 'New',
-    gradient: ['#FF9A3C', '#FF6B35'], Icon: Utensils, waUrl: '#',
+    gradient: ['#FF9A3C', '#FF6B35'], Icon: Utensils, waUrl: '#', isReal: false,
   },
   {
     id: 'mock-2', title: 'PG for Girls — AC Furnished, All-Inclusive',
     category: 'PG / Rooms', categorySlug: 'pg-roommate',
     price: 8500, priceUnit: '/mo', location: 'HSR Layout, Bangalore',
     postedAt: '5h ago', badge: 'Verified',
-    gradient: ['#4F8EF7', '#1D4ED8'], Icon: Home, waUrl: '#',
+    gradient: ['#4F8EF7', '#1D4ED8'], Icon: Home, waUrl: '#', isReal: false,
   },
   {
     id: 'mock-3', title: 'iPhone 14 · 256 GB · Midnight · Box Open',
     category: 'Electronics', categorySlug: 'electronics',
     price: 54000, priceUnit: '', location: 'Jubilee Hills, Hyderabad',
     postedAt: '1h ago', badge: 'New',
-    gradient: ['#8B5CF6', '#4F46E5'], Icon: Smartphone, waUrl: '#',
+    gradient: ['#8B5CF6', '#4F46E5'], Icon: Smartphone, waUrl: '#', isReal: false,
   },
   {
     id: 'mock-4', title: 'Honda Activa 6G · 2022 · 12,000 km Only',
     category: 'Vehicles', categorySlug: 'vehicles',
     price: 68000, priceUnit: '', location: 'Madhapur, Hyderabad',
     postedAt: '3h ago', badge: 'Verified',
-    gradient: ['#F97316', '#DC2626'], Icon: Car, waUrl: '#',
+    gradient: ['#F97316', '#DC2626'], Icon: Car, waUrl: '#', isReal: false,
   },
   {
     id: 'mock-5', title: 'CBSE Maths + Science Tutor (Grades 8–12)',
     category: 'Education', categorySlug: 'education',
     price: 2500, priceUnit: '/mo', location: 'Anna Nagar, Chennai',
     postedAt: '6h ago', badge: 'New',
-    gradient: ['#10B981', '#047857'], Icon: GraduationCap, waUrl: '#',
+    gradient: ['#10B981', '#047857'], Icon: GraduationCap, waUrl: '#', isReal: false,
   },
   {
     id: 'mock-6', title: '2 BHK Semi-Furnished · Ready to Move In',
     category: 'PG / Rooms', categorySlug: 'pg-roommate',
     price: 22000, priceUnit: '/mo', location: 'Banjara Hills, Hyderabad',
     postedAt: '4h ago', badge: 'Verified',
-    gradient: ['#06B6D4', '#0284C7'], Icon: Building2, waUrl: '#',
+    gradient: ['#06B6D4', '#0284C7'], Icon: Building2, waUrl: '#', isReal: false,
   },
 ];
 
-// ─── Helpers ──────────────────────────────────────────────────
-function formatINR(n: number): string {
+// ─── Helpers ──────────────────────────────────────────────
+function formatINR(n: number | null): string {
+  if (n === null) return 'On request';
   if (n >= 100_000) return `₹${(n / 100_000).toFixed(1).replace(/\.0$/, '')}L`;
   if (n >= 1_000)   return `₹${(n / 1_000).toFixed(1).replace(/\.0$/, '')}k`;
   return `₹${n}`;
 }
 
-// ─── WhatsApp SVG (official mark) ─────────────────────────────
+// ─── WhatsApp SVG (official mark) ─────────────────────────
 function WaIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className} fill="currentColor" aria-hidden>
@@ -92,8 +134,7 @@ function WaIcon({ className }: { className?: string }) {
 //  CARD SUB-COMPONENTS
 // ══════════════════════════════════════════════════════════════
 
-// ─── Listing badge (top-left of image zone) ───────────────────
-function ListingBadge({ type, labelNew, labelVerified }: { type: MockListing['badge']; labelNew: string; labelVerified: string }) {
+function ListingBadge({ type, labelNew, labelVerified }: { type: DisplayListing['badge']; labelNew: string; labelVerified: string }) {
   if (type === 'Verified') {
     return (
       <div className="inline-flex items-center gap-[5px]
@@ -101,8 +142,7 @@ function ListingBadge({ type, labelNew, labelVerified }: { type: MockListing['ba
         bg-white/95 backdrop-blur-sm
         shadow-[0_1px_4px_rgba(0,0,0,0.12),0_0_0_1px_rgba(186,230,253,0.50)]">
         <BadgeCheck className="w-[11px] h-[11px] text-sky-500 shrink-0" strokeWidth={2.5} />
-        <span className="text-[9.5px] font-bold text-sky-600
-          uppercase tracking-[0.07em] leading-none">
+        <span className="text-[9.5px] font-bold text-sky-600 uppercase tracking-[0.07em] leading-none">
           {labelVerified}
         </span>
       </div>
@@ -114,15 +154,13 @@ function ListingBadge({ type, labelNew, labelVerified }: { type: MockListing['ba
       bg-emerald-500/90 backdrop-blur-sm
       shadow-[0_1px_4px_rgba(0,0,0,0.18)]">
       <span className="w-[5px] h-[5px] rounded-full bg-white/80 shrink-0 inline-block" />
-      <span className="text-[9.5px] font-bold text-white
-        uppercase tracking-[0.07em] leading-none">
+      <span className="text-[9.5px] font-bold text-white uppercase tracking-[0.07em] leading-none">
         {labelNew}
       </span>
     </div>
   );
 }
 
-// ─── Category chip (top-right of image zone) ──────────────────
 function CategoryChip({ Icon, label }: { Icon: LucideIcon; label: string }) {
   return (
     <div className="inline-flex items-center gap-1.5
@@ -136,16 +174,13 @@ function CategoryChip({ Icon, label }: { Icon: LucideIcon; label: string }) {
   );
 }
 
-// ─── WhatsApp action tray (card footer) ───────────────────────
-function WaTray({ url, waLabel, listingId }: { url: string; waLabel: string; listingId: string }) {
+function WaTray({ url, waLabel, listingId, isReal }: { url: string; waLabel: string; listingId: string; isReal: boolean }) {
   const isRealWaLink = url.startsWith('https://wa.me');
-  const redirectTarget = listingId.startsWith('mock-') ? '/search' : `/listing/${listingId}`;
   const href = isRealWaLink
     ? url
-    : `/auth/login?redirect=${encodeURIComponent(redirectTarget)}`;
+    : (isReal ? `/listing/${listingId}` : '/search');
   return (
     <div className="px-3.5 pb-3.5">
-      {/* Hairline separator */}
       <div className="h-px bg-slate-100 mb-3" />
       <a
         href={href}
@@ -161,7 +196,6 @@ function WaTray({ url, waLabel, listingId }: { url: string; waLabel: string; lis
         aria-label="Contact seller on WhatsApp"
       >
         <div className="flex items-center gap-2.5">
-          {/* Icon badge */}
           <div className="w-[26px] h-[26px] rounded-[7px]
             bg-[#25D366]/15 flex items-center justify-center shrink-0">
             <WaIcon className="w-[13px] h-[13px] text-[#16a34a]" />
@@ -182,7 +216,6 @@ function WaTray({ url, waLabel, listingId }: { url: string; waLabel: string; lis
   );
 }
 
-// ─── Skeleton shimmer line ─────────────────────────────────────
 function SkLine({ className }: { className: string }) {
   return (
     <div className={`relative overflow-hidden rounded bg-slate-100 ${className}`}>
@@ -193,26 +226,17 @@ function SkLine({ className }: { className: string }) {
   );
 }
 
-// ─── Loading skeleton — mirrors exact card anatomy ────────────
 function CardSkeleton() {
   return (
     <div className="bg-white rounded-[20px] border border-slate-100/80
       shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden flex flex-col">
-
-      {/* Image zone skeleton */}
       <div className="relative h-[152px] bg-slate-100 overflow-hidden">
         <div className="absolute inset-0 -translate-x-full
           animate-[shimmer_1.6s_ease-in-out_infinite]
           bg-gradient-to-r from-transparent via-white/55 to-transparent" />
-        {/* Badge placeholder */}
-        <div className="absolute top-3 left-3 h-[22px] w-[62px] rounded-full
-          bg-white/35" />
-        {/* Category chip placeholder */}
-        <div className="absolute top-3 right-3 h-[22px] w-[76px] rounded-full
-          bg-white/20" />
+        <div className="absolute top-3 left-3 h-[22px] w-[62px] rounded-full bg-white/35" />
+        <div className="absolute top-3 right-3 h-[22px] w-[76px] rounded-full bg-white/20" />
       </div>
-
-      {/* Body skeleton */}
       <div className="flex-1 px-3.5 pt-3.5 pb-2.5 flex flex-col gap-3">
         <SkLine className="h-[20px] w-[80px] rounded-lg" />
         <div className="space-y-[7px]">
@@ -221,8 +245,6 @@ function CardSkeleton() {
         </div>
         <SkLine className="h-[11px] w-[45%]" />
       </div>
-
-      {/* WA tray skeleton */}
       <div className="px-3.5 pb-3.5">
         <div className="h-px bg-slate-100 mb-3" />
         <SkLine className="h-[42px] w-full rounded-[11px]" />
@@ -234,14 +256,23 @@ function CardSkeleton() {
 // ══════════════════════════════════════════════════════════════
 //  LISTING CARD
 // ══════════════════════════════════════════════════════════════
-function FreshListingCard({ listing, index, labelNew, labelVerified, labelChatOnWA, citySlug }: { listing: MockListing; index: number; labelNew: string; labelVerified: string; labelChatOnWA: string; citySlug: string }) {
+function FreshListingCard({
+  listing, index, labelNew, labelVerified, labelChatOnWA, citySlug,
+}: {
+  listing: DisplayListing; index: number; labelNew: string; labelVerified: string;
+  labelChatOnWA: string; citySlug: string;
+}) {
   const [from, to] = listing.gradient;
   const router = useRouter();
 
   const handleCardClick = () => {
-    const params = new URLSearchParams({ category: listing.categorySlug });
-    if (citySlug) params.set('city', citySlug);
-    router.push(`/search?${params.toString()}`);
+    if (listing.isReal) {
+      router.push(`/listing/${listing.id}`);
+    } else {
+      const params = new URLSearchParams({ category: listing.categorySlug });
+      if (citySlug) params.set('city', citySlug);
+      router.push(`/search?${params.toString()}`);
+    }
   };
 
   return (
@@ -264,7 +295,6 @@ function FreshListingCard({ listing, index, labelNew, labelVerified, labelChatOn
         className="relative h-[152px] shrink-0 overflow-hidden"
         style={{ background: `linear-gradient(135deg, ${from} 0%, ${to} 100%)` }}
       >
-        {/* Oversized decorative icon */}
         <listing.Icon
           className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2
             text-white opacity-[0.11]
@@ -274,13 +304,9 @@ function FreshListingCard({ listing, index, labelNew, labelVerified, labelChatOn
           strokeWidth={0.75}
           aria-hidden
         />
-
-        {/* Badge — top-left */}
         <div className="absolute top-3 left-3 z-10">
           <ListingBadge type={listing.badge} labelNew={labelNew} labelVerified={labelVerified} />
         </div>
-
-        {/* Category chip — top-right */}
         <div className="absolute top-3 right-3 z-10">
           <CategoryChip Icon={listing.Icon} label={listing.category} />
         </div>
@@ -288,8 +314,6 @@ function FreshListingCard({ listing, index, labelNew, labelVerified, labelChatOn
 
       {/* ── Card body ────────────────────────────────── */}
       <div className="flex-1 px-3.5 pt-3.5 pb-0 flex flex-col gap-2">
-
-        {/* Price */}
         <div className="flex items-baseline gap-[5px]">
           <span className="text-[18px] font-black text-slate-900
             tabular-nums tracking-tight leading-none">
@@ -301,32 +325,22 @@ function FreshListingCard({ listing, index, labelNew, labelVerified, labelChatOn
             </span>
           )}
         </div>
-
-        {/* Title */}
         <h3 className="text-[13px] font-semibold text-slate-700 leading-[1.45]
           line-clamp-2 tracking-[-0.005em]
           group-hover:text-slate-900 transition-colors duration-200">
           {listing.title}
         </h3>
-
-        {/* Location · time — single row */}
         <div className="flex items-center gap-1.5 mt-auto pb-3.5
           text-[11px] text-slate-400">
-          <MapPin
-            className="w-[11px] h-[11px] text-slate-300 shrink-0"
-            strokeWidth={2}
-            aria-hidden
-          />
+          <MapPin className="w-[11px] h-[11px] text-slate-300 shrink-0" strokeWidth={2} aria-hidden />
           <span className="truncate">{listing.location}</span>
           <span className="text-slate-200 shrink-0" aria-hidden>·</span>
           <span className="shrink-0">{listing.postedAt}</span>
         </div>
-
       </div>
 
       {/* ── WhatsApp action tray ──────────────────────── */}
-      <WaTray url={listing.waUrl} waLabel={labelChatOnWA} listingId={listing.id} />
-
+      <WaTray url={listing.waUrl} waLabel={labelChatOnWA} listingId={listing.id} isReal={listing.isReal} />
     </motion.article>
   );
 }
@@ -348,6 +362,27 @@ export default function FreshListingsSection({
   const trackRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft,  setCanScrollLeft]  = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
+  const [listings, setListings] = useState<DisplayListing[]>(FRESH_LISTINGS);
+  const [fetchingReal, setFetchingReal] = useState(false);
+
+  // ── Fetch real listings when city is selected ─────────────
+  useEffect(() => {
+    if (!citySlug) {
+      setListings(FRESH_LISTINGS);
+      return;
+    }
+    setFetchingReal(true);
+    api.cities.listings(citySlug, { page_size: '6', sort: 'newest' })
+      .then(data => {
+        if (data && data.length > 0) {
+          setListings(data.map(realListingToDisplay));
+        } else {
+          setListings(FRESH_LISTINGS);
+        }
+      })
+      .catch(() => setListings(FRESH_LISTINGS))
+      .finally(() => setFetchingReal(false));
+  }, [citySlug]);
 
   const syncArrows = () => {
     const el = trackRef.current;
@@ -362,18 +397,19 @@ export default function FreshListingsSection({
     el.addEventListener('scroll', syncArrows, { passive: true });
     syncArrows();
     return () => el.removeEventListener('scroll', syncArrows);
-  }, []);
+  }, [listings]);
 
   const scroll = (dir: 'left' | 'right') =>
     trackRef.current?.scrollBy({ left: dir === 'right' ? 320 : -320, behavior: 'smooth' });
 
-  // ── Scroll arrow button (shared styles) ────────────────────
   const arrowBtn =
     'absolute top-[40%] -translate-y-1/2 z-10 hidden md:flex w-10 h-10 rounded-full ' +
     'bg-white border border-slate-200/80 items-center justify-center ' +
     'shadow-[0_2px_12px_rgba(0,0,0,0.07),0_1px_3px_rgba(0,0,0,0.04)] ' +
     'text-slate-400 hover:text-slate-700 hover:border-slate-300/60 ' +
     'hover:shadow-[0_4px_18px_rgba(0,0,0,0.09)] transition-all duration-200';
+
+  const showSkeleton = isLoading || fetchingReal;
 
   return (
     <section className="bg-[#F8F9FC] py-16 sm:py-20 border-b border-slate-100/80">
@@ -388,7 +424,6 @@ export default function FreshListingsSection({
           className="flex items-end justify-between mb-10 gap-4"
         >
           <div>
-            {/* Live indicator */}
             <div className="flex items-center gap-2 mb-3">
               <span className="relative flex h-[7px] w-[7px]">
                 <span className="animate-ping absolute inline-flex h-full w-full
@@ -429,9 +464,8 @@ export default function FreshListingsSection({
         {/* ── Carousel ─────────────────────────────── */}
         <div className="relative">
 
-          {/* Left arrow */}
           <AnimatePresence>
-            {canScrollLeft && !isLoading && (
+            {canScrollLeft && !showSkeleton && (
               <motion.button
                 key="left"
                 type="button"
@@ -448,20 +482,19 @@ export default function FreshListingsSection({
             )}
           </AnimatePresence>
 
-          {/* Scrollable track */}
           <div
             ref={trackRef}
             className="flex gap-4 overflow-x-auto scrollbar-none snap-x snap-mandatory
               -mx-4 px-4 sm:-mx-6 sm:px-6 md:-mx-8 md:px-8 lg:mx-0 lg:px-0 pb-1"
           >
-            {isLoading
+            {showSkeleton
               ? Array.from({ length: 4 }).map((_, i) => (
                   <div key={i} className="min-w-[82vw] sm:min-w-[calc(50%-8px)]
                     lg:min-w-[calc(25%-12px)] shrink-0 snap-start">
                     <CardSkeleton />
                   </div>
                 ))
-              : FRESH_LISTINGS.map((listing, i) => (
+              : listings.map((listing, i) => (
                   <div key={listing.id} className="min-w-[82vw] sm:min-w-[calc(50%-8px)]
                     lg:min-w-[calc(25%-12px)] shrink-0 snap-start">
                     <FreshListingCard
@@ -477,9 +510,8 @@ export default function FreshListingsSection({
             }
           </div>
 
-          {/* Right arrow */}
           <AnimatePresence>
-            {canScrollRight && !isLoading && (
+            {canScrollRight && !showSkeleton && (
               <motion.button
                 key="right"
                 type="button"
@@ -498,9 +530,9 @@ export default function FreshListingsSection({
         </div>
 
         {/* ── Progress dots — mobile ────────────────── */}
-        {!isLoading && (
+        {!showSkeleton && (
           <div className="flex justify-center gap-[5px] mt-5 sm:hidden" aria-hidden>
-            {FRESH_LISTINGS.map((_, i) => (
+            {listings.map((_, i) => (
               <div key={i} className="w-[5px] h-[5px] rounded-full bg-slate-300/80" />
             ))}
           </div>
