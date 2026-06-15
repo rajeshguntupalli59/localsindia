@@ -243,6 +243,7 @@ function LoginInner() {
                       </div>
                       <input
                         id="phone"
+                        type="tel"
                         className="flex-1 px-3 py-2 text-sm bg-white outline-none"
                         placeholder="Enter 10-digit mobile number"
                         value={digits}

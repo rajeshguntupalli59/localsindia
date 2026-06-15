@@ -349,12 +349,10 @@ function FreshListingCard({
 //  SECTION
 // ══════════════════════════════════════════════════════════════
 interface FreshListingsSectionProps {
-  onCityPickerOpen?: () => void;
   isLoading?: boolean;
 }
 
 export default function FreshListingsSection({
-  onCityPickerOpen,
   isLoading = false,
 }: FreshListingsSectionProps) {
   const { t, citySlug } = usePrefs();
@@ -447,7 +445,7 @@ export default function FreshListingsSection({
 
           <button
             type="button"
-            onClick={onCityPickerOpen}
+            onClick={() => router.push(citySlug ? `/search?city=${citySlug}` : '/search')}
             className="hidden sm:flex items-center gap-1.5 shrink-0 pb-0.5
               text-[13px] font-semibold text-[#F7921E] hover:text-[#E07B0A]
               transition-colors duration-150 group"
@@ -538,8 +536,8 @@ export default function FreshListingsSection({
           </div>
         )}
 
-        {/* ── Mobile CTA ───────────────────────────── */}
-        <div className="flex sm:hidden justify-center mt-6">
+        {/* ── View all CTA ─────────────────────────── */}
+        <div className="flex justify-center mt-6">
           <button
             type="button"
             onClick={() => router.push(citySlug ? `/search?city=${citySlug}` : '/search')}

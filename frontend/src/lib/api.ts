@@ -17,7 +17,7 @@ import type {
 
 export type { User, Event, Business, Review };
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend.azurewebsites.net';
 
 export class ApiError extends Error {
   constructor(public status: number, message: string) {

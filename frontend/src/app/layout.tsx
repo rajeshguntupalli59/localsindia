@@ -73,8 +73,14 @@ export const metadata: Metadata = {
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const locale = await getLocale();
-  const messages = await getMessages();
+  let locale = 'en';
+  let messages: Record<string, unknown> = {};
+  try {
+    locale = await getLocale();
+    messages = await getMessages() as Record<string, unknown>;
+  } catch {
+    // SSR fallback — use English defaults
+  }
 
   return (
     <html

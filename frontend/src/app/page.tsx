@@ -642,12 +642,7 @@ export default function HomePage() {
       {/* ══════════════════════════════════════════════
           FRESH LISTINGS
       ══════════════════════════════════════════════ */}
-      <FreshListingsSection
-        onCityPickerOpen={() => {
-          if (citySlug) router.push(`/search?city=${citySlug}`);
-          else setShowCityPicker(true);
-        }}
-      />
+      <FreshListingsSection />
 
       {/* ══════════════════════════════════════════════
           CITY PICKER MODAL

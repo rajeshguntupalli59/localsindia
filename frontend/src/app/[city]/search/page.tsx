@@ -54,6 +54,18 @@ function SearchInner() {
 
   const isUUID = (s: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
 
+  // Resolve catParam slug → UUID once categories load so tabs highlight correctly
+  useEffect(() => {
+    if (catParam && !isUUID(catParam) && categories.length > 0) {
+      const match = categories.find(c =>
+        c.slug === catParam ||
+        c.name.toLowerCase().replace(/[\s/]+/g, '-') === catParam
+      );
+      if (match) setLocalCat(match.id);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [categories, catParam]);
+
   const doSearch = useCallback(async () => {
     setLoading(true);
     try {

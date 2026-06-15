@@ -23,18 +23,34 @@ class SellerProfileOut(BaseModel):
 
 
 @router.get("/users/{user_id}/public-profile", response_model=SellerProfileOut)
-async def get_public_profile(user_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(
-        select(User).where(User.id == user_id, User.is_active == True)
-    )
-    user = result.scalar_one_or_none()
+async def get_public_profile(user_id: str, db: AsyncSession = Depends(get_db)):
+    # Try UUID lookup first, fall back to name-based lookup for dev/test slugs
+    user = None
+    try:
+        uid = uuid.UUID(user_id)
+        result = await db.execute(
+            select(User).where(User.id == uid, User.is_active == True)
+        )
+        user = result.scalar_one_or_none()
+    except ValueError:
+        pass
+
+    if user is None:
+        # Fall back to case-insensitive name lookup (for dev/test users)
+        result = await db.execute(
+            select(User).where(
+                User.name.ilike(user_id),
+                User.is_active == True,
+            )
+        )
+        user = result.scalar_one_or_none()
     if not user:
         raise HTTPException(status_code=404, detail="User not found.")
 
     listings_result = await db.execute(
         select(Listing)
         .where(
-            Listing.user_id == user_id,
+            Listing.user_id == user.id,
             Listing.status == "active",
             Listing.deleted_at.is_(None),
             ~Listing.contact_phone.like("+91630000%"),
@@ -46,7 +62,7 @@ async def get_public_profile(user_id: uuid.UUID, db: AsyncSession = Depends(get_
 
     count_result = await db.execute(
         select(func.count()).select_from(Listing).where(
-            Listing.user_id == user_id,
+            Listing.user_id == user.id,
             Listing.status == "active",
             Listing.deleted_at.is_(None),
         )
