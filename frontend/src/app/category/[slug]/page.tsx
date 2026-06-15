@@ -8,10 +8,12 @@ export default function CategoryRedirectPage() {
   const router = useRouter();
 
   useEffect(() => {
+    const city = typeof window !== 'undefined' ? localStorage.getItem('li_city') : '';
+    const cityParam = city ? `&city=${encodeURIComponent(city)}` : '';
     if (slug) {
-      router.replace(`/search?category=${encodeURIComponent(slug)}`);
+      router.replace(`/search?category=${encodeURIComponent(slug)}${cityParam}`);
     } else {
-      router.replace('/search');
+      router.replace(`/search${city ? `?city=${encodeURIComponent(city)}` : ''}`);
     }
   }, [slug, router]);
 
