@@ -38,7 +38,6 @@ function SearchInner() {
   const [cityName, setCityName]     = useState(prefCityName ?? '');
   const [categories, setCategories] = useState<Category[]>([]);
   const [showPicker, setShowPicker] = useState(false);
-  const [showFilters, setShowFilters] = useState(false);
 
   // Filter state
   const [minPrice, setMinPrice]       = useState('');
@@ -178,7 +177,9 @@ function SearchInner() {
                 {categories.map(cat => (
                   <button
                     key={cat.id}
+                    role="tab"
                     onClick={() => navigate({ category: cat.slug })}
+                    aria-selected={activeCat?.id === cat.id}
                     className={`flex-shrink-0 px-3.5 py-1.5 rounded-full text-[12px] font-semibold transition-all ${
                       activeCat?.id === cat.id ? 'bg-[#F7921E] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                     }`}
@@ -191,24 +192,69 @@ function SearchInner() {
           </div>
         )}
 
-        {/* Filter bar toggle */}
+        {/* Filter bar — always visible */}
         <div className="border-t border-slate-100 bg-white">
-          <div className="page-wrap py-2 flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setShowFilters(f => !f)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[12px] font-semibold transition-all ${
-                showFilters || hasActiveFilters
-                  ? 'border-[#F7921E] text-[#F7921E] bg-orange-50'
-                  : 'border-slate-200 text-slate-600 hover:border-slate-300'
-              }`}
+          <div className="page-wrap py-2 flex flex-wrap items-center gap-2">
+            <SlidersHorizontal className="w-3.5 h-3.5 text-slate-400 shrink-0" strokeWidth={2} />
+
+            {/* Sort */}
+            <select
+              value={sortBy}
+              onChange={e => setSortBy(e.target.value)}
+              className="border border-slate-200 rounded-lg px-2 py-1.5 text-[12px] outline-none focus:border-[#F7921E] transition-colors bg-white"
+              aria-label="Sort order"
             >
-              <SlidersHorizontal className="w-3.5 h-3.5" strokeWidth={2} />
-              Filters
-              {hasActiveFilters && (
-                <span className="w-1.5 h-1.5 rounded-full bg-[#F7921E] inline-block" />
-              )}
-            </button>
+              <option value="newest">Newest first</option>
+              <option value="price_asc">Price: low to high</option>
+              <option value="price_desc">Price: high to low</option>
+            </select>
+
+            {/* Price range */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-[11px] font-semibold text-slate-400">₹</span>
+              <input
+                type="number"
+                placeholder="Min price"
+                value={minPrice}
+                onChange={e => setMinPrice(e.target.value)}
+                className="w-24 border border-slate-200 rounded-lg px-2 py-1.5 text-[12px] outline-none focus:border-[#F7921E] transition-colors"
+                aria-label="Minimum price"
+              />
+              <span className="text-slate-400 text-[12px]">–</span>
+              <input
+                type="number"
+                placeholder="Max price"
+                value={maxPrice}
+                onChange={e => setMaxPrice(e.target.value)}
+                className="w-24 border border-slate-200 rounded-lg px-2 py-1.5 text-[12px] outline-none focus:border-[#F7921E] transition-colors"
+                aria-label="Maximum price"
+              />
+            </div>
+
+            {/* Posted within */}
+            <select
+              value={postedWithin}
+              onChange={e => setPostedWithin(e.target.value)}
+              className="border border-slate-200 rounded-lg px-2 py-1.5 text-[12px] outline-none focus:border-[#F7921E] transition-colors bg-white"
+              aria-label="Posted within"
+            >
+              <option value="">Any time</option>
+              <option value="24h">Last 24 hours</option>
+              <option value="7d">Last 7 days</option>
+              <option value="30d">Last 30 days</option>
+            </select>
+
+            {/* Verified only */}
+            <label className="flex items-center gap-1.5 cursor-pointer text-[12px] font-semibold text-slate-600">
+              <input
+                type="checkbox"
+                checked={verifiedOnly}
+                onChange={e => setVerifiedOnly(e.target.checked)}
+                className="accent-[#F7921E]"
+              />
+              Verified only
+            </label>
+
             {hasActiveFilters && (
               <button
                 type="button"
@@ -219,64 +265,6 @@ function SearchInner() {
               </button>
             )}
           </div>
-
-          {showFilters && (
-            <div className="page-wrap pb-3 flex flex-wrap gap-3 items-end">
-              {/* Price range */}
-              <div className="flex items-center gap-1.5">
-                <span className="text-[11px] font-semibold text-slate-500">₹</span>
-                <input
-                  type="number"
-                  placeholder="Min"
-                  value={minPrice}
-                  onChange={e => setMinPrice(e.target.value)}
-                  className="w-20 border border-slate-200 rounded-lg px-2 py-1.5 text-[12px] outline-none focus:border-[#F7921E] transition-colors"
-                />
-                <span className="text-slate-400 text-[12px]">–</span>
-                <input
-                  type="number"
-                  placeholder="Max"
-                  value={maxPrice}
-                  onChange={e => setMaxPrice(e.target.value)}
-                  className="w-20 border border-slate-200 rounded-lg px-2 py-1.5 text-[12px] outline-none focus:border-[#F7921E] transition-colors"
-                />
-              </div>
-
-              {/* Sort */}
-              <select
-                value={sortBy}
-                onChange={e => setSortBy(e.target.value)}
-                className="border border-slate-200 rounded-lg px-2 py-1.5 text-[12px] outline-none focus:border-[#F7921E] transition-colors bg-white"
-              >
-                <option value="newest">Newest first</option>
-                <option value="price_asc">Price: low to high</option>
-                <option value="price_desc">Price: high to low</option>
-              </select>
-
-              {/* Posted within */}
-              <select
-                value={postedWithin}
-                onChange={e => setPostedWithin(e.target.value)}
-                className="border border-slate-200 rounded-lg px-2 py-1.5 text-[12px] outline-none focus:border-[#F7921E] transition-colors bg-white"
-              >
-                <option value="">Any time</option>
-                <option value="24h">Last 24 hours</option>
-                <option value="7d">Last 7 days</option>
-                <option value="30d">Last 30 days</option>
-              </select>
-
-              {/* Verified only */}
-              <label className="flex items-center gap-1.5 cursor-pointer text-[12px] font-semibold text-slate-600">
-                <input
-                  type="checkbox"
-                  checked={verifiedOnly}
-                  onChange={e => setVerifiedOnly(e.target.checked)}
-                  className="accent-[#F7921E]"
-                />
-                Verified only
-              </label>
-            </div>
-          )}
         </div>
       </div>
 

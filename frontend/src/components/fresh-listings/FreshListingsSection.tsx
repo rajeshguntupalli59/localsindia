@@ -269,9 +269,8 @@ function FreshListingCard({
     if (listing.isReal) {
       router.push(`/listing/${listing.id}`);
     } else {
-      const params = new URLSearchParams({ category: listing.categorySlug });
-      if (citySlug) params.set('city', citySlug);
-      router.push(`/search?${params.toString()}`);
+      const city = citySlug || (typeof window !== 'undefined' ? (localStorage.getItem('li_city') || 'hyderabad') : 'hyderabad');
+      router.push(`/${city}/search?category=${encodeURIComponent(listing.categorySlug)}`);
     }
   };
 
@@ -363,14 +362,12 @@ export default function FreshListingsSection({
   const [listings, setListings] = useState<DisplayListing[]>(FRESH_LISTINGS);
   const [fetchingReal, setFetchingReal] = useState(false);
 
-  // ── Fetch real listings when city is selected ─────────────
+  // ── Fetch real listings — default to hyderabad for new visitors ──────────────
   useEffect(() => {
-    if (!citySlug) {
-      setListings(FRESH_LISTINGS);
-      return;
-    }
+    const effectiveCity = citySlug ||
+      (typeof window !== 'undefined' ? (localStorage.getItem('li_city') || 'hyderabad') : 'hyderabad');
     setFetchingReal(true);
-    api.cities.listings(citySlug, { page_size: '6', sort: 'newest' })
+    api.cities.listings(effectiveCity, { page_size: '6', sort: 'newest' })
       .then(data => {
         if (data && data.length > 0) {
           setListings(data.map(realListingToDisplay));
@@ -445,7 +442,10 @@ export default function FreshListingsSection({
 
           <button
             type="button"
-            onClick={() => router.push(citySlug ? `/search?city=${citySlug}` : '/search')}
+            onClick={() => {
+              const city = citySlug || (typeof window !== 'undefined' ? (localStorage.getItem('li_city') || 'hyderabad') : 'hyderabad');
+              router.push(`/${city}/search`);
+            }}
             className="hidden sm:flex items-center gap-1.5 shrink-0 pb-0.5
               text-[13px] font-semibold text-[#F7921E] hover:text-[#E07B0A]
               transition-colors duration-150 group"
@@ -540,7 +540,10 @@ export default function FreshListingsSection({
         <div className="flex justify-center mt-6">
           <button
             type="button"
-            onClick={() => router.push(citySlug ? `/search?city=${citySlug}` : '/search')}
+            onClick={() => {
+              const city = citySlug || (typeof window !== 'undefined' ? (localStorage.getItem('li_city') || 'hyderabad') : 'hyderabad');
+              router.push(`/${city}/search`);
+            }}
             className="flex items-center gap-1.5 px-5 py-[10px] rounded-2xl
               bg-[#F7921E] text-white text-[13px] font-semibold
               shadow-[0_2px_12px_rgba(247,146,30,0.30)]

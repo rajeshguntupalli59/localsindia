@@ -258,7 +258,9 @@ function SearchInner() {
                   >
                     <div className="px-4 pb-4 space-y-1">
                       <button
+                        role="tab"
                         onClick={() => applyCategory('')}
+                        aria-selected={!localCat && !catParam}
                         className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium text-left transition-colors"
                         style={!localCat ? { background: 'var(--li-primary-light)', color: 'var(--li-primary)', fontWeight: 700 } : { color: 'var(--li-text)' }}
                       >
@@ -267,12 +269,15 @@ function SearchInner() {
                       </button>
                       {categories.map(cat => {
                         const Icon = CATEGORY_ICONS[cat.slug] ?? Tag;
+                        const isActive = localCat === cat.id || (!localCat && catParam === cat.slug);
                         return (
                           <button
                             key={cat.id}
+                            role="tab"
                             onClick={() => applyCategory(cat.id)}
+                            aria-selected={isActive}
                             className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-left transition-colors"
-                            style={localCat === cat.id || (!localCat && catParam === cat.slug) ? { background: 'var(--li-primary-light)', color: 'var(--li-primary)', fontWeight: 700 } : { color: 'var(--li-text)' }}
+                            style={isActive ? { background: 'var(--li-primary-light)', color: 'var(--li-primary)', fontWeight: 700 } : { color: 'var(--li-text)' }}
                           >
                             <Icon className="w-3.5 h-3.5 shrink-0" strokeWidth={2} />
                             {cat.name}
@@ -371,22 +376,29 @@ function SearchInner() {
             {/* Category chips horizontal scroll */}
             <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none -mx-4 px-4">
               <button
+                role="tab"
                 onClick={() => applyCategory('')}
+                aria-selected={!localCat && !catParam}
                 className="shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-colors"
                 style={!localCat ? { background: 'var(--li-primary)', color: 'white', borderColor: 'var(--li-primary)' } : { borderColor: 'var(--li-border)', color: 'var(--li-text)' }}
               >
                 All
               </button>
-              {categories.map(cat => (
-                <button
-                  key={cat.id}
-                  onClick={() => applyCategory(cat.id)}
-                  className="shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-colors"
-                  style={localCat === cat.id || (!localCat && catParam === cat.slug) ? { background: 'var(--li-primary)', color: 'white', borderColor: 'var(--li-primary)' } : { borderColor: 'var(--li-border)', color: 'var(--li-text)' }}
-                >
-                  {cat.name}
-                </button>
-              ))}
+              {categories.map(cat => {
+                const isActive = localCat === cat.id || (!localCat && catParam === cat.slug);
+                return (
+                  <button
+                    key={cat.id}
+                    role="tab"
+                    onClick={() => applyCategory(cat.id)}
+                    aria-selected={isActive}
+                    className="shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-colors"
+                    style={isActive ? { background: 'var(--li-primary)', color: 'white', borderColor: 'var(--li-primary)' } : { borderColor: 'var(--li-border)', color: 'var(--li-text)' }}
+                  >
+                    {cat.name}
+                  </button>
+                );
+              })}
             </div>
 
             {/* More filters toggle */}

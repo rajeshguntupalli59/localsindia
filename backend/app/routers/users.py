@@ -53,7 +53,6 @@ async def get_public_profile(user_id: str, db: AsyncSession = Depends(get_db)):
             Listing.user_id == user.id,
             Listing.status == "active",
             Listing.deleted_at.is_(None),
-            ~Listing.contact_phone.like("+91630000%"),
         )
         .order_by(Listing.is_featured.desc(), Listing.created_at.desc())
         .limit(12)
@@ -65,7 +64,6 @@ async def get_public_profile(user_id: str, db: AsyncSession = Depends(get_db)):
             Listing.user_id == user.id,
             Listing.status == "active",
             Listing.deleted_at.is_(None),
-            ~Listing.contact_phone.like("+91630000%"),
         )
     )
     active_count = count_result.scalar() or 0
