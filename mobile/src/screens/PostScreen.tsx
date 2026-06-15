@@ -2,7 +2,7 @@ import {
   View, Text, TextInput, ScrollView, TouchableOpacity,
   StyleSheet, Alert, Image, ActivityIndicator
 } from 'react-native';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { listingsApi } from '../lib/api';
@@ -20,6 +20,7 @@ const CATEGORIES = [
 ];
 
 export default function PostScreen({ navigation }: any) {
+  const [user, setUser] = useState<any>(undefined);
   const [step, setStep] = useState(1);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -30,6 +31,10 @@ export default function PostScreen({ navigation }: any) {
   const [images, setImages] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    storage.getUser().then(u => setUser(u));
+  }, []);
 
   const pickImage = async () => {
     if (images.length >= 5) { Alert.alert('Max 5 photos allowed'); return; }
@@ -78,6 +83,21 @@ export default function PostScreen({ navigation }: any) {
       setLoading(false);
     }
   };
+
+  if (user === undefined) return null; // still loading
+
+  if (!user) {
+    return (
+      <View style={styles.gateContainer}>
+        <Ionicons name="lock-closed-outline" size={56} color="#e5e7eb" />
+        <Text style={styles.gateTitle}>Sign in to post</Text>
+        <Text style={styles.gateText}>Create a free account to post listings and reach thousands of local buyers.</Text>
+        <TouchableOpacity style={styles.gateBtn} onPress={() => navigation.navigate('Login')}>
+          <Text style={styles.gateBtnText}>Sign in with Phone OTP</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   if (success) {
     return (
@@ -324,6 +344,11 @@ const styles = StyleSheet.create({
   nextBtn: { backgroundColor: '#f97316', borderRadius: 12, padding: 16, alignItems: 'center' },
   btnDisabled: { backgroundColor: '#fdba74' },
   nextBtnText: { color: 'white', fontSize: 16, fontWeight: '700' },
+  gateContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: 'white', padding: 32 },
+  gateTitle: { fontSize: 22, fontWeight: 'bold', color: '#111827', marginTop: 16, marginBottom: 8 },
+  gateText: { fontSize: 14, color: '#9ca3af', textAlign: 'center', lineHeight: 20, marginBottom: 28 },
+  gateBtn: { backgroundColor: '#f97316', borderRadius: 12, paddingHorizontal: 28, paddingVertical: 14 },
+  gateBtnText: { color: 'white', fontWeight: '700', fontSize: 16 },
   successContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: 'white', padding: 32 },
   successEmoji: { fontSize: 56 },
   successTitle: { fontSize: 24, fontWeight: 'bold', color: '#111827', marginTop: 16, marginBottom: 8 },

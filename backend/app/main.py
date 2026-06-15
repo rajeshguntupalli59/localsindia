@@ -14,6 +14,8 @@ _cors_origins = list({
     settings.FRONTEND_URL.replace("https://www.", "https://"),
     settings.FRONTEND_URL.replace("https://", "https://www."),
     "http://localhost:3000",
+    "http://localhost:8081",
+    "http://localhost:19006",
 })
 
 app.add_middleware(

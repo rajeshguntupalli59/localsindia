@@ -98,7 +98,7 @@ export default function ProfileScreen({ navigation }: any) {
             style={styles.loginBtn}
             onPress={() => navigation.navigate('Login')}
           >
-            <Text style={styles.loginBtnText}>Log in with WhatsApp</Text>
+            <Text style={styles.loginBtnText}>Sign in with Phone OTP</Text>
           </TouchableOpacity>
         </View>
       )}
