@@ -94,9 +94,6 @@ async def list_city_listings(
             cutoff = datetime.now(timezone.utc) - timedelta(days=days)
             stmt = stmt.where(Listing.created_at >= cutoff)
 
-    # Exclude obviously fake seed/test phone numbers
-    stmt = stmt.where(~Listing.contact_phone.like("+91630000%"))
-
     # Sort
     if sort == "price_asc":
         stmt = stmt.order_by(Listing.is_featured.desc(), asc(Listing.price).nulls_last())
