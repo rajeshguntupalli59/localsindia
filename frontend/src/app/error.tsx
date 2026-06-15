@@ -4,7 +4,11 @@ import { useEffect } from 'react';
 
 export default function GlobalError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   useEffect(() => {
-    if (error?.name === 'ChunkLoadError' || error?.message?.includes('Loading chunk')) {
+    if (
+      error?.name === 'ChunkLoadError' ||
+      error?.message?.includes('Loading chunk') ||
+      error?.message?.includes('Cannot find module')
+    ) {
       window.location.reload();
     }
   }, [error]);
