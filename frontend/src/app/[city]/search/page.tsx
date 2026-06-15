@@ -272,7 +272,7 @@ function SearchInner() {
                             key={cat.id}
                             onClick={() => applyCategory(cat.id)}
                             className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-left transition-colors"
-                            style={localCat === cat.id ? { background: 'var(--li-primary-light)', color: 'var(--li-primary)', fontWeight: 700 } : { color: 'var(--li-text)' }}
+                            style={localCat === cat.id || (!localCat && catParam === cat.slug) ? { background: 'var(--li-primary-light)', color: 'var(--li-primary)', fontWeight: 700 } : { color: 'var(--li-text)' }}
                           >
                             <Icon className="w-3.5 h-3.5 shrink-0" strokeWidth={2} />
                             {cat.name}
@@ -382,7 +382,7 @@ function SearchInner() {
                   key={cat.id}
                   onClick={() => applyCategory(cat.id)}
                   className="shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-colors"
-                  style={localCat === cat.id ? { background: 'var(--li-primary)', color: 'white', borderColor: 'var(--li-primary)' } : { borderColor: 'var(--li-border)', color: 'var(--li-text)' }}
+                  style={localCat === cat.id || (!localCat && catParam === cat.slug) ? { background: 'var(--li-primary)', color: 'white', borderColor: 'var(--li-primary)' } : { borderColor: 'var(--li-border)', color: 'var(--li-text)' }}
                 >
                   {cat.name}
                 </button>
