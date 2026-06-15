@@ -33,7 +33,7 @@ export default function PostScreen({ navigation }: any) {
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    storage.getUser().then(u => setUser(u));
+    storage.getUser().then(u => setUser(u)).catch(() => setUser(null));
   }, []);
 
   const pickImage = async () => {
