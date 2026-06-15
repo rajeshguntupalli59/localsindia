@@ -39,6 +39,9 @@
 | Photo delete | §13 | `routers/uploads.py`, `services/cloudinary_svc.py` | `[city]/classifieds/[id]/edit/EditListingClient.tsx` | `listing_images` | DELETE /upload/image/{image_id} |
 | Full-text search | §14 | `routers/search.py`, `services/search_svc.py` | `[city]/search/page.tsx` | `listings` (search_vector) | GET /search?q=&city_slug= |
 | Featured listings (paid) | §12 | `routers/payments.py` | `[city]/classifieds/[id]/promote/page.tsx`, `PromoteClient.tsx`, `lib/razorpay.ts` | `listings` (is_featured) | POST /payments/featured/create-order, POST /payments/featured/verify |
+| Public seller profile | §8-SellerProfile, §6-Users | `routers/users.py` | `seller/[id]/page.tsx` | `users`, `listings` | GET /users/{user_id}/public-profile |
+| Bookmarks (saved listings) | §9-useSaved | — | `hooks/useSaved.ts`, `saved/page.tsx`, `listing-card/ListingCard.tsx` | — (localStorage) | — |
+| Listing search filters | §6-Listings | `routers/listings.py` | `search/page.tsx` | `listings` | GET /cities/{slug}/listings?min_price=&max_price=&sort=&verified_only=&within= |
 | Business directory | §8-Businesses | `routers/businesses.py` | `[city]/businesses/page.tsx`, `BusinessDetailClient.tsx` | `businesses`, `reviews` | GET /businesses, POST /businesses |
 | Business profile | §8-BusinessProfile | `routers/businesses.py` | `[city]/businesses/[id]/page.tsx`, `BusinessDetailClient.tsx` | `businesses`, `reviews` | GET /businesses/{id} |
 | Claim business | §8-BusinessProfile | `routers/businesses.py` | `BusinessDetailClient.tsx` | `businesses` (owner_id) | POST /businesses/{id}/claim |
@@ -66,7 +69,7 @@
 
 | File | What it does |
 |------|-------------|
-| `backend/app/main.py` | FastAPI app entry point; mounts all 10 routers under /api/v1; CORS; /health endpoint |
+| `backend/app/main.py` | FastAPI app entry point; mounts all 11 routers under /api/v1; CORS; /health endpoint |
 | `backend/app/core/config.py` | All env vars (DATABASE_URL, SECRET_KEY, MSG91, Cloudinary, Razorpay, Google OAuth) |
 | `backend/app/core/database.py` | Async PostgreSQL engine + `get_db()` session dependency |
 | `backend/app/core/security.py` | bcrypt hash/verify, JWT create/decode, 6-digit OTP generator |
@@ -102,6 +105,7 @@
 | `routers/events.py` | `/api/v1` | Events calendar CRUD |
 | `routers/admin.py` | `/api/v1/admin` | Moderation queues, approve/reject, user management |
 | `routers/payments.py` | `/api/v1/payments` | Razorpay featured listing orders + verification |
+| `routers/users.py` | `/api/v1/users` | Public seller profiles (name, member since, active listings) |
 
 ### Backend — Services
 
@@ -159,6 +163,8 @@
 | `app/terms/page.tsx` | `/terms` | Terms of service (static) |
 | `app/offline/page.tsx` | `/offline` | PWA offline fallback |
 | `app/invite/page.tsx` | `/invite` | Invite friends page |
+| `app/seller/[id]/page.tsx` | `/seller/[id]` | Public seller profile: avatar, member since, active listings grid |
+| `app/saved/page.tsx` | `/saved` | Saved/bookmarked listings from localStorage |
 
 ### Frontend — Components
 
@@ -191,6 +197,7 @@
 | `lib/razorpay.ts` | Razorpay checkout open/close helper |
 | `lib/translations.ts` | i18n key type definitions |
 | `context/PrefsContext.tsx` | Global state: citySlug, language, user, tokens (localStorage-backed) |
+| `hooks/useSaved.ts` | localStorage bookmark hook — toggle/isSaved/saved list; used in ListingCard + /saved page |
 | `i18n/request.ts` | next-intl locale resolver — defaults to 'en' in static export |
 | `messages/en.json` | English translations |
 | `messages/hi.json` | Hindi translations |
@@ -312,6 +319,16 @@ POST   /api/v1/payments/featured/create-order  Razorpay order (Rs.99 week / Rs.1
 POST   /api/v1/payments/featured/verify        Verify signature -> is_featured=true [AUTH]
 ```
 
+### Users
+```
+GET    /api/v1/users/{user_id}/public-profile  Public seller profile (name, avatar, member_since, listings[12])
+```
+
+### Listings (filter params added)
+```
+GET    /api/v1/cities/{slug}/listings?min_price=&max_price=&sort=price_asc|price_desc|newest&verified_only=true&within=24h|7d|30d
+```
+
 ### Health
 ```
 GET    /api/v1/health                     {"status":"ok"} — keepalive probe
@@ -416,4 +433,31 @@ Every new feature (page, endpoint, table, component) requires updates to both fi
 
 ---
 
-*Last updated: 2026-06-12 | Matches ARCHITECTURE.md written same date*
+---
+
+## Mobile App — React Native (Expo 56)
+
+**Directory:** `mobile/`
+
+| File | What it does |
+|------|-------------|
+| `mobile/App.tsx` | Root: bottom tab navigator (Home/Search/Post/Saved/Profile) + stack (ListingDetail/SellerProfile/Login/CityPicker) |
+| `mobile/src/lib/api.ts` | FastAPI-adapted axios layer — `/cities/{slug}/listings`, `contact_phone`, `access_token`/`refresh_token` |
+| `mobile/src/lib/storage.ts` | expo-secure-store wrapper for JWT tokens + user object |
+| `mobile/src/hooks/useSaved.ts` | AsyncStorage bookmark hook (same pattern as web, different storage layer) |
+| `mobile/src/components/ListingCard.tsx` | React Native listing card: gradient image placeholder, price, WA button |
+| `mobile/src/screens/HomeScreen.tsx` | Dark hero, city picker, trending chips, category grid, fresh listings |
+| `mobile/src/screens/SearchScreen.tsx` | Debounced search (350ms), category tabs, city chip, FlatList results |
+| `mobile/src/screens/ListingDetailScreen.tsx` | Photo gallery, thumbnail strip, sticky WhatsApp button, seller → SellerProfile |
+| `mobile/src/screens/SellerProfileScreen.tsx` | Avatar/initials, member since, active listings count, listings list |
+| `mobile/src/screens/LoginScreen.tsx` | OTP phone → code flow; stores access_token/refresh_token in SecureStore |
+| `mobile/src/screens/PostScreen.tsx` | 3-step wizard: details → photos (expo-image-picker) → contact |
+| `mobile/src/screens/SavedScreen.tsx` | AsyncStorage bookmark list with empty state |
+| `mobile/src/screens/ProfileScreen.tsx` | User avatar, name, phone, menu (My Listings, Saved, Edit, City), logout |
+| `mobile/src/screens/CityPickerScreen.tsx` | Searchable modal pulling cities from `/api/v1/cities` |
+
+**To run:** `cd mobile && npm install && npx expo start`
+
+---
+
+*Last updated: 2026-06-14 | Matches ARCHITECTURE.md*

@@ -532,6 +532,24 @@ One report per user per listing (unique constraint prevents vote-bombing). When 
 | POST | `/featured/create-order` | Create Razorpay order (Rs.99/week or Rs.199/month) | Yes |
 | POST | `/featured/verify` | Verify payment signature -> set is_featured=true | Yes |
 
+### Users: `/api/v1/users`
+
+| Method | Path | What it does | Auth? |
+|--------|------|-------------|-------|
+| GET | `/users/{user_id}/public-profile` | Public seller profile: name, avatar_url, member_since, active_listings_count, listings (top 12, featured first, seed phones excluded) | No |
+
+### Listing Filter Params (added Phase 2 Part B)
+
+`GET /cities/{slug}/listings` now accepts:
+
+| Param | Type | Effect |
+|-------|------|--------|
+| `min_price` | int | Filter listings with price >= min_price |
+| `max_price` | int | Filter listings with price <= max_price |
+| `sort` | str | `newest` (default), `price_asc` (nulls last), `price_desc` (nulls first) |
+| `verified_only` | bool | Only return wa_verified=true listings |
+| `within` | str | `24h`, `7d`, or `30d` — filters by created_at cutoff |
+
 ---
 
 ## 7. Frontend Architecture
@@ -875,6 +893,34 @@ Share the platform with friends via WhatsApp/SMS.
 
 ---
 
+### `/seller/[id]` — Public Seller Profile
+
+**File:** `app/seller/[id]/page.tsx`
+
+Shows a seller's public profile. Accessible by clicking the "Listed by" link on any listing detail page.
+
+- Avatar: orange gradient with initials (falls back from avatar_url)
+- Member since date
+- Active listings count badge
+- Grid of up to 12 active listings using `ListingCard`
+- Skeleton loading + error state
+- Calls `GET /api/v1/users/{id}/public-profile`
+
+---
+
+### `/saved` — Saved Listings
+
+**File:** `app/saved/page.tsx`
+
+Displays listings the user has bookmarked locally. No backend — purely localStorage.
+
+- Uses `useSaved()` hook
+- Empty state with CTA to browse
+- Same `ListingCard` grid as other pages
+- Data persists across browser sessions (localStorage key: `localsindia_saved`)
+
+---
+
 ## 9. Every Component Explained
 
 ### `ListingCard` — The Core Display Unit
@@ -886,6 +932,8 @@ Used everywhere listings appear (city home, search, category browse, profile).
 - Image: 4:3 aspect ratio, next/image, blur placeholder while loading
 - Price badge: top-right corner, "Price on request" if null
 - Category chip: bottom-left on image, semi-transparent dark
+- Category emoji fallback: shown when no photo (tiffin🍱, PG🏠, jobs💼, vehicles🚗, etc.)
+- Heart bookmark button: absolute top-right on image, filled red when saved via `useSaved()`
 - Hover animation: `scale(1.02)` via Framer Motion `whileHover`
 - WhatsApp button: full-width green at card bottom
 - Time ago: "2 hours ago", not raw dates
@@ -985,6 +1033,18 @@ Responsive banner slot above category chips on city page. Phase 3 monetization f
 **File:** `components/fresh-listings/FreshListingsSection.tsx`
 
 Carousel of latest listings on the homepage. Auto-scrolls. Shows listings from popular cities.
+
+### `useSaved` — Bookmark Hook
+
+**File:** `hooks/useSaved.ts`
+
+localStorage-based bookmark system. No backend required.
+
+- `toggle(listing)` — adds or removes a listing from saved list
+- `isSaved(id)` — returns boolean for heart button fill state
+- `saved` — full array of saved `Listing` objects for `/saved` page
+- Storage key: `localsindia_saved` (JSON array of full Listing objects)
+- Initializes from localStorage on mount; writes back on every toggle
 
 ### `ServiceWorker`
 
@@ -1289,7 +1349,7 @@ Side services (called from backend):
 
 | File | What it does |
 |------|-------------|
-| `app/main.py` | FastAPI app, mounts 10 routers, CORS, health endpoint |
+| `app/main.py` | FastAPI app, mounts 11 routers, CORS, health endpoint |
 | `core/config.py` | Reads all env vars (DATABASE_URL, SECRET_KEY, etc.) |
 | `core/database.py` | Creates async PostgreSQL connection pool |
 | `core/security.py` | bcrypt hash/verify, JWT create/decode, OTP generator |
@@ -1315,6 +1375,7 @@ Side services (called from backend):
 | `routers/events.py` | Events calendar CRUD |
 | `routers/admin.py` | Admin moderation: approve/reject listings+events, user management |
 | `routers/payments.py` | Razorpay featured listing payments |
+| `routers/users.py` | Public seller profiles (name, avatar, member_since, listings) |
 | `services/msg91.py` | Send OTP via MSG91 SMS gateway (mock in dev) |
 | `services/cloudinary_svc.py` | Upload/delete images on Cloudinary CDN |
 | `services/search_svc.py` | PostgreSQL full-text search query builder |
@@ -1362,6 +1423,9 @@ Side services (called from backend):
 | `app/terms/page.tsx` | Terms of service |
 | `app/offline/page.tsx` | PWA offline fallback |
 | `app/invite/page.tsx` | Invite friends |
+| `app/seller/[id]/page.tsx` | Public seller profile — avatar, member since, listings grid |
+| `app/saved/page.tsx` | Saved/bookmarked listings (localStorage, no backend) |
+| `hooks/useSaved.ts` | localStorage bookmark hook (toggle, isSaved, saved list) |
 | `components/listing-card/ListingCard.tsx` | Listing display card (photo, price, WhatsApp button) |
 | `components/listing-card/ListingCardSkeleton.tsx` | Loading placeholder (same size as ListingCard) |
 | `components/site-header/SiteHeader.tsx` | Top navigation bar |
@@ -1406,6 +1470,25 @@ Side services (called from backend):
 | `backend/scripts/seed_cities.py` | Populate cities table (run once after first deploy) |
 | `backend/scripts/seed_categories.py` | Populate categories table (run once) |
 
+### Mobile App (React Native)
+
+| File | What it does |
+|------|-------------|
+| `mobile/App.tsx` | Navigation root: bottom tabs (Home/Search/Post/Saved/Profile) + stack navigator |
+| `mobile/src/lib/api.ts` | FastAPI-adapted axios layer; JWT auto-refresh; field names match backend (`contact_phone`, `access_token`) |
+| `mobile/src/lib/storage.ts` | expo-secure-store wrapper for tokens + user; `clear()` for logout |
+| `mobile/src/hooks/useSaved.ts` | AsyncStorage bookmark hook (same API as web `useSaved`) |
+| `mobile/src/components/ListingCard.tsx` | RN listing card with gradient emoji placeholder, price, WA button |
+| `mobile/src/screens/HomeScreen.tsx` | Dark hero, city switcher, trending chips, category grid (2×4), fresh listings |
+| `mobile/src/screens/SearchScreen.tsx` | Debounced search, category tabs, city chip, FlatList with results |
+| `mobile/src/screens/ListingDetailScreen.tsx` | Photo gallery + thumbnail strip, sticky WA button, seller → SellerProfile |
+| `mobile/src/screens/SellerProfileScreen.tsx` | Seller avatar/initials, member since, listing count, listings list |
+| `mobile/src/screens/LoginScreen.tsx` | OTP flow: phone → code → tokens stored in SecureStore; debug OTP shown |
+| `mobile/src/screens/PostScreen.tsx` | 3-step wizard: details + category grid → photos (expo-image-picker) → contact |
+| `mobile/src/screens/SavedScreen.tsx` | AsyncStorage bookmarks with empty state CTA |
+| `mobile/src/screens/ProfileScreen.tsx` | User info + menu (My Listings, Saved, City, Edit) + logout with confirmation |
+| `mobile/src/screens/CityPickerScreen.tsx` | Searchable modal; pulls from `/api/v1/cities`; callback pattern for city selection |
+
 ---
 
-*Generated: 2026-06-12 | LocalIndia v1 -- Azure Static Web Apps + Azure App Service*
+*Updated: 2026-06-14 | LocalIndia v2 -- Phase 2 complete (seller profiles, bookmarks, React Native app)*
