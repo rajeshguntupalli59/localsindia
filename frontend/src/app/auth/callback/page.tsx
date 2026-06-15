@@ -4,6 +4,8 @@ import { Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend.azurewebsites.net';
+
 function AuthCallbackInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -21,16 +23,30 @@ function AuthCallbackInner() {
 
     localStorage.setItem('access_token', token);
     if (refresh) localStorage.setItem('refresh_token', refresh);
-    if (name) {
-      const decoded = decodeURIComponent(name);
-      localStorage.setItem('user', JSON.stringify({ name: decoded }));
-      toast.success(`Welcome, ${decoded}!`);
-    } else {
-      toast.success('Signed in successfully!');
-    }
 
-    const city = localStorage.getItem('li_city');
-    router.replace(city ? `/${city}` : '/');
+    // Fetch full user profile so Google users have the same complete object as phone users
+    fetch(`${API_BASE}/api/v1/auth/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(r => r.ok ? r.json() : null)
+      .then(user => {
+        if (user) {
+          localStorage.setItem('user', JSON.stringify(user));
+          toast.success(`Welcome, ${user.name ?? (name ? decodeURIComponent(name) : 'back')}!`);
+        } else {
+          // Fallback: store partial user from URL params
+          if (name) localStorage.setItem('user', JSON.stringify({ name: decodeURIComponent(name) }));
+          toast.success(`Welcome, ${name ? decodeURIComponent(name) : 'back'}!`);
+        }
+        const city = localStorage.getItem('li_city');
+        router.replace(city ? `/${city}` : '/');
+      })
+      .catch(() => {
+        if (name) localStorage.setItem('user', JSON.stringify({ name: decodeURIComponent(name) }));
+        toast.success('Signed in successfully!');
+        const city = localStorage.getItem('li_city');
+        router.replace(city ? `/${city}` : '/');
+      });
   }, [router, searchParams]);
 
   return (
