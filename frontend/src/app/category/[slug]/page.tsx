@@ -8,12 +8,11 @@ export default function CategoryRedirectPage() {
   const router = useRouter();
 
   useEffect(() => {
-    const city = typeof window !== 'undefined' ? localStorage.getItem('li_city') : '';
-    const cityParam = city ? `&city=${encodeURIComponent(city)}` : '';
+    const city = (typeof window !== 'undefined' ? localStorage.getItem('li_city') : '') || 'hyderabad';
     if (slug) {
-      router.replace(`/search?category=${encodeURIComponent(slug)}${cityParam}`);
+      router.replace(`/${city}/search?category=${encodeURIComponent(slug)}`);
     } else {
-      router.replace(`/search${city ? `?city=${encodeURIComponent(city)}` : ''}`);
+      router.replace(`/${city}/search`);
     }
   }, [slug, router]);
 

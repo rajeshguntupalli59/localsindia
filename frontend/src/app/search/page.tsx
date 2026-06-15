@@ -54,11 +54,12 @@ function SearchInner() {
     setVerifiedOnly(false); setSortBy('newest');
   };
 
-  // Auto-open city picker on mount if no city in URL or saved prefs
+  // Auto-open city picker on mount only if no city anywhere and no category active
   useEffect(() => {
     const urlCity = sp.get('city');
+    const urlCat = sp.get('category');
     const savedCity = typeof window !== 'undefined' ? localStorage.getItem('li_city') : '';
-    if (!urlCity && !savedCity) setShowPicker(true);
+    if (!urlCity && !savedCity && !urlCat) setShowPicker(true);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
