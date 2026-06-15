@@ -75,6 +75,8 @@ async def list_city_listings(
         stmt = stmt.where(
             Listing.title.ilike(f"%{q}%") | Listing.description.ilike(f"%{q}%")
         )
+    # Exclude obviously fake seed/test phone numbers
+    stmt = stmt.where(~Listing.contact_phone.like("+91630000%"))
 
     result = await db.execute(stmt)
     return result.scalars().all()
@@ -137,7 +139,16 @@ async def my_listings(
 
 @router.get("/listings/{listing_id}", response_model=ListingOut)
 async def get_listing(listing_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
-    return await _get_active_listing(listing_id, db)
+    from app.models.category import Category
+    listing = await _get_active_listing(listing_id, db)
+    out = ListingOut.model_validate(listing)
+    cat_result = await db.execute(select(Category).where(Category.id == listing.category_id))
+    cat = cat_result.scalar_one_or_none()
+    user_result = await db.execute(select(User).where(User.id == listing.user_id))
+    user = user_result.scalar_one_or_none()
+    out.category_name = cat.name if cat else None
+    out.seller_name = (user.name or '').split('+91')[0].strip() or None if user else None
+    return out
 
 
 @router.patch("/listings/{listing_id}", response_model=ListingOut)

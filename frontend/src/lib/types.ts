@@ -49,6 +49,8 @@ export interface Listing {
   category_id: string;
   user_id: string;
   images?: ListingImage[];
+  category_name?: string | null;
+  seller_name?: string | null;
 }
 
 export interface User {

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft, MapPin, Clock, ChevronDown, ChevronUp, Flag } from 'lucide-react';
+import { ArrowLeft, MapPin, Clock, ChevronDown, ChevronUp, Flag, Tag, User } from 'lucide-react';
 import { api } from '@/lib/api';
 import type { Listing } from '@/lib/types';
 import { formatPrice, timeAgo } from '@/lib/utils';
@@ -137,6 +137,25 @@ export default function ListingDetailClient({ id }: { id: string }) {
 
           <div className="page-wrap py-5 space-y-5">
 
+            {/* Breadcrumb */}
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="flex items-center gap-1 text-xs font-medium text-slate-400 hover:text-[#F7921E] transition-colors"
+            >
+              <ArrowLeft className="w-3 h-3" strokeWidth={2} />
+              Back to results
+            </button>
+
+            {/* Category badge */}
+            {listing.category_name && (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold"
+                style={{ background: 'rgba(247,146,30,0.10)', color: 'var(--li-primary)' }}>
+                <Tag className="w-3 h-3 shrink-0" strokeWidth={2} />
+                {listing.category_name}
+              </span>
+            )}
+
             {/* Title + Price */}
             <div>
               <h1 className="text-xl font-bold text-slate-900 leading-snug mb-2">
@@ -164,6 +183,16 @@ export default function ListingDetailClient({ id }: { id: string }) {
                 Posted {timeAgo(listing.created_at)}
               </span>
             </div>
+
+            {/* Seller name */}
+            {listing.seller_name && (
+              <div className="flex items-center gap-2 text-sm text-slate-600">
+                <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
+                  <User className="w-3.5 h-3.5 text-slate-400" strokeWidth={2} />
+                </div>
+                <span>Listed by <span className="font-semibold">{listing.seller_name}</span></span>
+              </div>
+            )}
 
             {/* WA verified */}
             {listing.wa_verified && (

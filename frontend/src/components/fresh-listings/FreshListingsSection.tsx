@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { usePrefs } from '@/context/PrefsContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -136,11 +137,12 @@ function CategoryChip({ Icon, label }: { Icon: LucideIcon; label: string }) {
 }
 
 // ─── WhatsApp action tray (card footer) ───────────────────────
-function WaTray({ url, waLabel }: { url: string; waLabel: string }) {
+function WaTray({ url, waLabel, listingId }: { url: string; waLabel: string; listingId: string }) {
   const isRealWaLink = url.startsWith('https://wa.me');
+  const redirectTarget = listingId.startsWith('mock-') ? '/search' : `/listing/${listingId}`;
   const href = isRealWaLink
     ? url
-    : `/auth/login?redirect=${encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname : '/')}`;
+    : `/auth/login?redirect=${encodeURIComponent(redirectTarget)}`;
   return (
     <div className="px-3.5 pb-3.5">
       {/* Hairline separator */}
@@ -315,7 +317,7 @@ function FreshListingCard({ listing, index, labelNew, labelVerified, labelChatOn
       </div>
 
       {/* ── WhatsApp action tray ──────────────────────── */}
-      <WaTray url={listing.waUrl} waLabel={labelChatOnWA} />
+      <WaTray url={listing.waUrl} waLabel={labelChatOnWA} listingId={listing.id} />
 
     </motion.article>
   );
@@ -333,7 +335,8 @@ export default function FreshListingsSection({
   onCityPickerOpen,
   isLoading = false,
 }: FreshListingsSectionProps) {
-  const { t } = usePrefs();
+  const { t, citySlug } = usePrefs();
+  const router = useRouter();
   const trackRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft,  setCanScrollLeft]  = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
@@ -498,7 +501,7 @@ export default function FreshListingsSection({
         <div className="flex sm:hidden justify-center mt-6">
           <button
             type="button"
-            onClick={onCityPickerOpen}
+            onClick={() => router.push(citySlug ? `/search?city=${citySlug}` : '/search')}
             className="flex items-center gap-1.5 px-5 py-[10px] rounded-2xl
               bg-[#F7921E] text-white text-[13px] font-semibold
               shadow-[0_2px_12px_rgba(247,146,30,0.30)]
