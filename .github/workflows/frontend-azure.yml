@@ -24,7 +24,7 @@ jobs:
           action: upload
           app_location: /frontend
           api_location: ''
-          output_location: 'out'
+          output_location: ''
         env:
           NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
           NEXT_PUBLIC_OTP_DEBUG: ${{ secrets.NEXT_PUBLIC_OTP_DEBUG }}

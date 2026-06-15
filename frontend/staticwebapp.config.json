@@ -1,26 +1,8 @@
 {
-  "navigationFallback": {
-    "rewrite": "/placeholder/index.html",
-    "exclude": [
-      "/_next/*",
-      "/manifest.json",
-      "/robots.txt",
-      "/sw.js",
-      "/sitemap.xml",
-      "/icons/*",
-      "/google*.html",
-      "/*.png",
-      "/*.ico",
-      "/*.svg"
-    ]
+  "platform": {
+    "apiRuntime": "node:18"
   },
   "routes": [
-    { "route": "/listing/*", "rewrite": "/listing/placeholder/index.html" },
-    { "route": "/auth/login", "rewrite": "/auth/login/index.html" },
-    { "route": "/auth/callback", "rewrite": "/auth/callback/index.html" },
-    { "route": "/profile", "rewrite": "/profile/index.html" },
-    { "route": "/invite", "rewrite": "/invite/index.html" },
-    { "route": "/admin/login", "rewrite": "/admin/login/index.html" },
     { "route": "/api/*", "allowedRoles": ["anonymous"] }
   ],
   "globalHeaders": {

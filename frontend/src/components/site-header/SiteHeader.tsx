@@ -101,7 +101,7 @@ export default function SiteHeader({ citySlug, cityName }: Props) {
     e.preventDefault();
     if (!q.trim()) return;
     const p = new URLSearchParams({ q: q.trim() });
-    if (citySlug && citySlug !== 'placeholder') p.set('city', citySlug);
+    if (citySlug) p.set('city', citySlug);
     router.push(`/search?${p.toString()}`);
   };
 
@@ -118,8 +118,7 @@ export default function SiteHeader({ citySlug, cityName }: Props) {
 
   const postHref = citySlug ? `/${citySlug}/classifieds/post` : '/';
 
-  const cityLabel = cityName
-    ?? (citySlug && citySlug !== 'placeholder' ? titleCase(citySlug) : 'All India');
+  const cityLabel = cityName ?? (citySlug ? titleCase(citySlug) : 'All India');
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (

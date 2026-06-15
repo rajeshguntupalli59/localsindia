@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowLeft, MapPin, Clock, ChevronDown, ChevronUp, Flag } from 'lucide-react';
@@ -13,31 +13,16 @@ function Skeleton({ className }: { className?: string }) {
   return <div className={`animate-pulse bg-slate-100 rounded-lg ${className ?? ''}`} />;
 }
 
-export default function ListingDetailClient() {
-  const params = useParams();
+export default function ListingDetailClient({ id }: { id: string }) {
   const router = useRouter();
-  const paramsId = typeof params?.id === 'string' ? params.id : '';
-  const [id, setId] = useState(paramsId);
 
   const [listing, setListing] = useState<Listing | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [expanded, setExpanded] = useState(false);
 
-  // In static export, useParams() may return 'placeholder' when SWA serves
-  // /listing/placeholder/index.html for /listing/{real-id}. Fall back to URL.
   useEffect(() => {
-    if (id && id !== 'placeholder') return;
-    if (typeof window !== 'undefined') {
-      const parts = window.location.pathname.split('/').filter(Boolean);
-      const urlId = parts[parts.length - 1];
-      if (urlId && urlId !== 'placeholder') setId(urlId);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    if (!id || id === 'placeholder') return;
+    if (!id) return;
     setLoading(true);
     api.listings.get(id)
       .then(data => { setListing(data); setLoading(false); })
