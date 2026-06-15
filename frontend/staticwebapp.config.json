@@ -3,8 +3,7 @@
     "apiRuntime": "node:18"
   },
   "routes": [
-    { "route": "/api/*", "allowedRoles": ["anonymous"] },
-    { "route": "/category/*", "redirect": "/search", "statusCode": 301 }
+    { "route": "/api/*", "allowedRoles": ["anonymous"] }
   ],
   "globalHeaders": {
     "X-Content-Type-Options": "nosniff",

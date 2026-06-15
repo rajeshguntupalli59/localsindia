@@ -234,8 +234,15 @@ function CardSkeleton() {
 // ══════════════════════════════════════════════════════════════
 //  LISTING CARD
 // ══════════════════════════════════════════════════════════════
-function FreshListingCard({ listing, index, labelNew, labelVerified, labelChatOnWA }: { listing: MockListing; index: number; labelNew: string; labelVerified: string; labelChatOnWA: string }) {
+function FreshListingCard({ listing, index, labelNew, labelVerified, labelChatOnWA, citySlug }: { listing: MockListing; index: number; labelNew: string; labelVerified: string; labelChatOnWA: string; citySlug: string }) {
   const [from, to] = listing.gradient;
+  const router = useRouter();
+
+  const handleCardClick = () => {
+    const params = new URLSearchParams({ category: listing.categorySlug });
+    if (citySlug) params.set('city', citySlug);
+    router.push(`/search?${params.toString()}`);
+  };
 
   return (
     <motion.article
@@ -244,6 +251,7 @@ function FreshListingCard({ listing, index, labelNew, labelVerified, labelChatOn
       viewport={{ once: true, margin: '-30px' }}
       transition={{ delay: index * 0.06, duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
       whileHover={{ y: -3, transition: { duration: 0.2, ease: 'easeOut' } }}
+      onClick={handleCardClick}
       className="group bg-white rounded-[20px] border border-slate-100/80
         overflow-hidden cursor-pointer flex flex-col
         shadow-[0_1px_3px_rgba(0,0,0,0.05),0_1px_2px_rgba(0,0,0,0.03)]
@@ -462,6 +470,7 @@ export default function FreshListingsSection({
                       labelNew={t('fresh.badgeNew')}
                       labelVerified={t('fresh.badgeVerified')}
                       labelChatOnWA={t('listing.chatOnWA')}
+                      citySlug={citySlug}
                     />
                   </div>
                 ))

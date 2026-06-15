@@ -4,22 +4,30 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft, MapPin, Clock, ChevronDown, ChevronUp, Flag, Tag, User, ExternalLink } from 'lucide-react';
+import { ArrowLeft, MapPin, Clock, ChevronDown, ChevronUp, Flag, Tag, User, ExternalLink, Heart, Star } from 'lucide-react';
 import { api } from '@/lib/api';
-import type { Listing } from '@/lib/types';
+import type { Listing, ListingReview } from '@/lib/types';
 import { formatPrice, timeAgo } from '@/lib/utils';
+import { useSaved } from '@/hooks/useSaved';
 
 function Skeleton({ className }: { className?: string }) {
   return <div className={`animate-pulse bg-slate-100 rounded-lg ${className ?? ''}`} />;
 }
 
+const CATEGORY_EMOJI: Record<string, string> = {
+  'tiffin': '🍱', 'pg-roommate': '🏠', 'jobs': '💼', 'vehicles': '🚗',
+  'electronics': '📱', 'events': '🎉', 'businesses': '🏪', 'education': '📚',
+};
+
 export default function ListingDetailClient({ id }: { id: string }) {
   const router = useRouter();
+  const { toggle, isSaved } = useSaved();
 
   const [listing, setListing] = useState<Listing | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [reviews, setReviews] = useState<ListingReview[]>([]);
 
   useEffect(() => {
     if (!id) return;
@@ -27,6 +35,7 @@ export default function ListingDetailClient({ id }: { id: string }) {
     api.listings.get(id)
       .then(data => { setListing(data); setLoading(false); })
       .catch(() => { setError(true); setLoading(false); });
+    api.listings.reviews(id).then(setReviews).catch(() => {});
   }, [id]);
 
   const waUrl = listing
@@ -55,14 +64,27 @@ export default function ListingDetailClient({ id }: { id: string }) {
             {loading ? 'Loading…' : listing?.title ?? 'Listing'}
           </span>
           {listing && (
-            <Link
-              href={`/auth/login`}
-              className="shrink-0 p-1.5 text-slate-300 hover:text-red-400 transition-colors"
-              title="Report this listing"
-              aria-label="Report listing"
-            >
-              <Flag className="w-4 h-4" strokeWidth={1.8} />
-            </Link>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => toggle(listing)}
+                aria-label={isSaved(listing.id) ? 'Remove bookmark' : 'Save listing'}
+                className="shrink-0 p-1.5 transition-colors"
+              >
+                <Heart
+                  className={`w-4.5 h-4.5 transition-colors ${isSaved(listing.id) ? 'fill-red-500 text-red-500' : 'text-slate-300 hover:text-red-400'}`}
+                  strokeWidth={2}
+                />
+              </button>
+              <Link
+                href={`/auth/login`}
+                className="shrink-0 p-1.5 text-slate-300 hover:text-red-400 transition-colors"
+                title="Report this listing"
+                aria-label="Report listing"
+              >
+                <Flag className="w-4 h-4" strokeWidth={1.8} />
+              </Link>
+            </div>
           )}
         </div>
       </div>
@@ -108,7 +130,7 @@ export default function ListingDetailClient({ id }: { id: string }) {
               />
             ) : (
               <div className="absolute inset-0 flex items-center justify-center text-7xl opacity-10 select-none">
-                🏷️
+                {CATEGORY_EMOJI[listing.category_slug ?? ''] ?? '🏷️'}
               </div>
             )}
 
@@ -222,6 +244,32 @@ export default function ListingDetailClient({ id }: { id: string }) {
                     {expanded ? <><ChevronUp className="w-3.5 h-3.5" /> Show less</> : <><ChevronDown className="w-3.5 h-3.5" /> Read more</>}
                   </button>
                 )}
+              </div>
+            )}
+
+            {/* Reviews */}
+            {reviews.length > 0 && (
+              <div>
+                <h2 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+                  <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" strokeWidth={2} />
+                  {reviews.length} Review{reviews.length !== 1 ? 's' : ''}
+                </h2>
+                <div className="space-y-3">
+                  {reviews.map(r => (
+                    <div key={r.id} className="bg-slate-50 rounded-xl p-3">
+                      <div className="flex items-center gap-0.5 mb-1">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`w-3 h-3 ${i < r.rating ? 'fill-amber-400 text-amber-400' : 'text-slate-200 fill-slate-200'}`}
+                            strokeWidth={1.5}
+                          />
+                        ))}
+                      </div>
+                      {r.body && <p className="text-xs text-slate-600 leading-relaxed">{r.body}</p>}
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
 
