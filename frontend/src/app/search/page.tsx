@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useState, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Search, MapPin, ArrowLeft, X } from 'lucide-react';
+import { Search, MapPin, ArrowLeft, X, SlidersHorizontal } from 'lucide-react';
 import { api } from '@/lib/api';
 import type { Listing, Category } from '@/lib/types';
 import ListingCard from '@/components/listing-card/ListingCard';
@@ -38,6 +38,21 @@ function SearchInner() {
   const [cityName, setCityName]     = useState(prefCityName ?? '');
   const [categories, setCategories] = useState<Category[]>([]);
   const [showPicker, setShowPicker] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+
+  // Filter state
+  const [minPrice, setMinPrice]       = useState('');
+  const [maxPrice, setMaxPrice]       = useState('');
+  const [sortBy, setSortBy]           = useState('newest');
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [postedWithin, setPostedWithin] = useState('');
+
+  const hasActiveFilters = !!(minPrice || maxPrice || postedWithin || verifiedOnly || sortBy !== 'newest');
+
+  const clearFilters = () => {
+    setMinPrice(''); setMaxPrice(''); setPostedWithin('');
+    setVerifiedOnly(false); setSortBy('newest');
+  };
 
   // Auto-open city picker on mount if no city in URL
   useEffect(() => {
@@ -57,7 +72,7 @@ function SearchInner() {
     api.cities.get(cityParam).then(c => setCityName(c.name)).catch(() => {});
   }, [cityParam]);
 
-  // Fetch listings whenever query params change
+  // Fetch listings whenever query params or filters change
   useEffect(() => {
     if (!cityParam) { setResults([]); return; }
     setLoading(true);
@@ -71,12 +86,18 @@ function SearchInner() {
       if (cat) params.category_id = cat.id;
     }
 
+    if (minPrice) params.min_price = minPrice;
+    if (maxPrice) params.max_price = maxPrice;
+    if (sortBy !== 'newest') params.sort = sortBy;
+    if (verifiedOnly) params.verified_only = 'true';
+    if (postedWithin) params.within = postedWithin;
+
     api.cities.listings(cityParam, params)
       .then(data => setResults(data))
       .catch(() => setResults([]))
       .finally(() => setLoading(false));
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [q, cityParam, categorySlug, categories.length]);
+  }, [q, cityParam, categorySlug, categories.length, minPrice, maxPrice, sortBy, verifiedOnly, postedWithin]);
 
   const navigate = useCallback((overrides: { q?: string; city?: string; category?: string }) => {
     const p = new URLSearchParams();
@@ -166,6 +187,94 @@ function SearchInner() {
             </div>
           </div>
         )}
+
+        {/* Filter bar toggle */}
+        <div className="border-t border-slate-100 bg-white">
+          <div className="page-wrap py-2 flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setShowFilters(f => !f)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[12px] font-semibold transition-all ${
+                showFilters || hasActiveFilters
+                  ? 'border-[#F7921E] text-[#F7921E] bg-orange-50'
+                  : 'border-slate-200 text-slate-600 hover:border-slate-300'
+              }`}
+            >
+              <SlidersHorizontal className="w-3.5 h-3.5" strokeWidth={2} />
+              Filters
+              {hasActiveFilters && (
+                <span className="w-1.5 h-1.5 rounded-full bg-[#F7921E] inline-block" />
+              )}
+            </button>
+            {hasActiveFilters && (
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="text-[11px] text-[#F7921E] font-semibold hover:underline"
+              >
+                Clear all
+              </button>
+            )}
+          </div>
+
+          {showFilters && (
+            <div className="page-wrap pb-3 flex flex-wrap gap-3 items-end">
+              {/* Price range */}
+              <div className="flex items-center gap-1.5">
+                <span className="text-[11px] font-semibold text-slate-500">₹</span>
+                <input
+                  type="number"
+                  placeholder="Min"
+                  value={minPrice}
+                  onChange={e => setMinPrice(e.target.value)}
+                  className="w-20 border border-slate-200 rounded-lg px-2 py-1.5 text-[12px] outline-none focus:border-[#F7921E] transition-colors"
+                />
+                <span className="text-slate-400 text-[12px]">–</span>
+                <input
+                  type="number"
+                  placeholder="Max"
+                  value={maxPrice}
+                  onChange={e => setMaxPrice(e.target.value)}
+                  className="w-20 border border-slate-200 rounded-lg px-2 py-1.5 text-[12px] outline-none focus:border-[#F7921E] transition-colors"
+                />
+              </div>
+
+              {/* Sort */}
+              <select
+                value={sortBy}
+                onChange={e => setSortBy(e.target.value)}
+                className="border border-slate-200 rounded-lg px-2 py-1.5 text-[12px] outline-none focus:border-[#F7921E] transition-colors bg-white"
+              >
+                <option value="newest">Newest first</option>
+                <option value="price_asc">Price: low to high</option>
+                <option value="price_desc">Price: high to low</option>
+              </select>
+
+              {/* Posted within */}
+              <select
+                value={postedWithin}
+                onChange={e => setPostedWithin(e.target.value)}
+                className="border border-slate-200 rounded-lg px-2 py-1.5 text-[12px] outline-none focus:border-[#F7921E] transition-colors bg-white"
+              >
+                <option value="">Any time</option>
+                <option value="24h">Last 24 hours</option>
+                <option value="7d">Last 7 days</option>
+                <option value="30d">Last 30 days</option>
+              </select>
+
+              {/* Verified only */}
+              <label className="flex items-center gap-1.5 cursor-pointer text-[12px] font-semibold text-slate-600">
+                <input
+                  type="checkbox"
+                  checked={verifiedOnly}
+                  onChange={e => setVerifiedOnly(e.target.checked)}
+                  className="accent-[#F7921E]"
+                />
+                Verified only
+              </label>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="page-wrap py-6">

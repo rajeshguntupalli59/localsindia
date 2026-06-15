@@ -9,6 +9,17 @@ import { api } from '@/lib/api';
 import type { Listing } from '@/lib/types';
 import { usePrefs } from '@/context/PrefsContext';
 
+const CATEGORY_EMOJI: Record<string, string> = {
+  'tiffin': '🍱',
+  'pg-roommate': '🏠',
+  'jobs': '💼',
+  'vehicles': '🚗',
+  'electronics': '📱',
+  'events': '🎉',
+  'businesses': '🏪',
+  'education': '📚',
+};
+
 interface Props {
   listing: Listing;
   citySlug?: string;
@@ -42,8 +53,8 @@ export default function ListingCard({ listing }: Props) {
               sizes="(max-width: 768px) 50vw, 25vw"
             />
           ) : (
-            <div className="absolute inset-0 flex items-center justify-center text-5xl opacity-15">
-              🏷️
+            <div className="absolute inset-0 flex items-center justify-center text-5xl opacity-20">
+              {CATEGORY_EMOJI[listing.category_slug ?? ''] ?? '🏷️'}
             </div>
           )}
 

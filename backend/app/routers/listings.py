@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime, timezone, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import select, func
+from sqlalchemy import select, func, asc, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
@@ -43,8 +43,15 @@ async def list_city_listings(
     status: str = Query(default="active"),
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, le=50),
+    min_price: float | None = Query(default=None),
+    max_price: float | None = Query(default=None),
+    sort: str = Query(default="newest"),
+    verified_only: bool = Query(default=False),
+    within: str | None = Query(default=None),
     db: AsyncSession = Depends(get_db),
 ):
+    from app.models.category import Category
+
     city_result = await db.execute(select(City).where(City.slug == slug, City.active == True))
     city = city_result.scalar_one_or_none()
     if not city:
@@ -52,7 +59,6 @@ async def list_city_listings(
 
     # Resolve category_slug → category_id if slug provided
     if not category_id and category_slug:
-        from app.models.category import Category
         cat_result = await db.execute(select(Category).where(Category.slug == category_slug))
         cat = cat_result.scalar_one_or_none()
         if cat:
@@ -65,21 +71,60 @@ async def list_city_listings(
             Listing.status == status,
             Listing.deleted_at.is_(None),
         )
-        .order_by(Listing.is_featured.desc(), Listing.created_at.desc())
         .offset((page - 1) * page_size)
         .limit(page_size)
     )
+
     if category_id:
         stmt = stmt.where(Listing.category_id == category_id)
     if q:
         stmt = stmt.where(
             Listing.title.ilike(f"%{q}%") | Listing.description.ilike(f"%{q}%")
         )
+    if min_price is not None:
+        stmt = stmt.where(Listing.price >= min_price)
+    if max_price is not None:
+        stmt = stmt.where(Listing.price <= max_price)
+    if verified_only:
+        stmt = stmt.where(Listing.wa_verified == True)
+    if within:
+        days_map = {"24h": 1, "7d": 7, "30d": 30}
+        days = days_map.get(within)
+        if days:
+            cutoff = datetime.now(timezone.utc) - timedelta(days=days)
+            stmt = stmt.where(Listing.created_at >= cutoff)
+
     # Exclude obviously fake seed/test phone numbers
     stmt = stmt.where(~Listing.contact_phone.like("+91630000%"))
 
+    # Sort
+    if sort == "price_asc":
+        stmt = stmt.order_by(Listing.is_featured.desc(), asc(Listing.price).nulls_last())
+    elif sort == "price_desc":
+        stmt = stmt.order_by(Listing.is_featured.desc(), desc(Listing.price).nulls_first())
+    else:
+        stmt = stmt.order_by(Listing.is_featured.desc(), Listing.created_at.desc())
+
     result = await db.execute(stmt)
-    return result.scalars().all()
+    listings = result.scalars().all()
+
+    # Batch-fetch categories to populate category_name and category_slug
+    cat_ids = {l.category_id for l in listings}
+    cat_map: dict[uuid.UUID, Category] = {}
+    if cat_ids:
+        cat_result = await db.execute(select(Category).where(Category.id.in_(cat_ids)))
+        cat_map = {c.id: c for c in cat_result.scalars().all()}
+
+    out_list = []
+    for l in listings:
+        out = ListingOut.model_validate(l)
+        cat = cat_map.get(l.category_id)
+        if cat:
+            out.category_name = cat.name
+            out.category_slug = cat.slug
+        out_list.append(out)
+
+    return out_list
 
 
 @router.post("/listings", response_model=ListingOut, status_code=201)
@@ -147,6 +192,7 @@ async def get_listing(listing_id: uuid.UUID, db: AsyncSession = Depends(get_db))
     user_result = await db.execute(select(User).where(User.id == listing.user_id))
     user = user_result.scalar_one_or_none()
     out.category_name = cat.name if cat else None
+    out.category_slug = cat.slug if cat else None
     out.seller_name = (user.name or '').split('+91')[0].strip() or None if user else None
     return out
 

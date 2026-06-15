@@ -79,6 +79,7 @@ class ListingOut(BaseModel):
     user_id: uuid.UUID
     images: list[ListingImageOut] = []
     category_name: str | None = None
+    category_slug: str | None = None
     seller_name: str | None = None
 
     model_config = {"from_attributes": True}

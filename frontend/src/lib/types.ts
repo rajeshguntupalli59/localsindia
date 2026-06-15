@@ -50,6 +50,7 @@ export interface Listing {
   user_id: string;
   images?: ListingImage[];
   category_name?: string | null;
+  category_slug?: string | null;
   seller_name?: string | null;
 }
 
