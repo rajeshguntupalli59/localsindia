@@ -118,7 +118,10 @@ export default function ListingDetailClient({ id }: { id: string }) {
       {listing && !loading && (
         <>
           {/* Image */}
-          <div className="relative w-full bg-slate-100" style={{ aspectRatio: '16/9', maxHeight: '380px' }}>
+          <div
+            className="relative w-full bg-slate-100"
+            style={listing.images?.[0] ? { aspectRatio: '16/9', maxHeight: '380px' } : { height: '96px' }}
+          >
             {listing.images?.[0] ? (
               <Image
                 src={listing.images[0].url}
@@ -129,7 +132,7 @@ export default function ListingDetailClient({ id }: { id: string }) {
                 priority
               />
             ) : (
-              <div className="absolute inset-0 flex items-center justify-center text-7xl opacity-10 select-none">
+              <div className="absolute inset-0 flex items-center justify-center text-4xl opacity-20 select-none">
                 {CATEGORY_EMOJI[listing.category_slug ?? ''] ?? '🏷️'}
               </div>
             )}

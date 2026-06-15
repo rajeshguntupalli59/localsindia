@@ -84,7 +84,11 @@ export default function PostScreen({ navigation }: any) {
     }
   };
 
-  if (user === undefined) return null; // still loading
+  if (user === undefined) return (
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: 'white' }}>
+      <ActivityIndicator size="large" color="#f97316" />
+    </View>
+  );
 
   if (!user) {
     return (

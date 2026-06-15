@@ -6,8 +6,12 @@ const API_BASE = 'https://localsindia-backend.azurewebsites.net/api/v1';
 const api = axios.create({ baseURL: API_BASE });
 
 api.interceptors.request.use(async config => {
-  const token = await SecureStore.getItemAsync('access_token');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
+  try {
+    const token = await SecureStore.getItemAsync('access_token');
+    if (token) config.headers.Authorization = `Bearer ${token}`;
+  } catch {
+    // SecureStore unavailable (web sandbox) — proceed without auth header
+  }
   return config;
 });
 
@@ -25,8 +29,10 @@ api.interceptors.response.use(
         error.config.headers.Authorization = `Bearer ${data.access_token}`;
         return api(error.config);
       } catch {
-        await SecureStore.deleteItemAsync('access_token');
-        await SecureStore.deleteItemAsync('refresh_token');
+        try {
+          await SecureStore.deleteItemAsync('access_token');
+          await SecureStore.deleteItemAsync('refresh_token');
+        } catch {}
       }
     }
     return Promise.reject(error);

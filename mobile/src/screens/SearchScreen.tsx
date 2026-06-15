@@ -4,12 +4,17 @@ import { Ionicons } from '@expo/vector-icons';
 import { listingsApi } from '../lib/api';
 import ListingCard from '../components/ListingCard';
 
-const CATS = ['All', 'Tiffin', 'PG / Rooms', 'Jobs', 'Vehicles', 'Electronics', 'Education', 'Events', 'Businesses'];
-const SLUG_MAP: Record<string, string> = {
-  'Tiffin': 'tiffin', 'PG / Rooms': 'pg-roommate', 'Jobs': 'jobs',
-  'Vehicles': 'vehicles', 'Electronics': 'electronics', 'Education': 'education',
-  'Events': 'events', 'Businesses': 'businesses',
-};
+const CATS = [
+  { label: 'All', emoji: '🔍', slug: '' },
+  { label: 'Tiffin', emoji: '🍱', slug: 'tiffin' },
+  { label: 'PG / Rooms', emoji: '🏠', slug: 'pg-roommate' },
+  { label: 'Jobs', emoji: '💼', slug: 'jobs' },
+  { label: 'Vehicles', emoji: '🚗', slug: 'vehicles' },
+  { label: 'Electronics', emoji: '📱', slug: 'electronics' },
+  { label: 'Education', emoji: '📚', slug: 'education' },
+  { label: 'Events', emoji: '🎉', slug: 'events' },
+  { label: 'Businesses', emoji: '🏪', slug: 'businesses' },
+];
 
 export default function SearchScreen({ navigation, route }: any) {
   const { citySlug = 'hyderabad', cityName = 'Hyderabad', q: initQ = '', categorySlug: initCat = '' } = route.params ?? {};
@@ -17,7 +22,7 @@ export default function SearchScreen({ navigation, route }: any) {
   const [activeCity, setActiveCity] = useState(citySlug);
   const [activeCityName, setActiveCityName] = useState(cityName);
   const [catLabel, setCatLabel] = useState(
-    Object.entries(SLUG_MAP).find(([, s]) => s === initCat)?.[0] ?? 'All'
+    CATS.find(c => c.slug === initCat)?.label ?? 'All'
   );
   const [listings, setListings] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -30,7 +35,8 @@ export default function SearchScreen({ navigation, route }: any) {
       try {
         const params: Record<string, string> = { page_size: '20' };
         if (q) params.q = q;
-        if (cat && cat !== 'All') params.category_slug = SLUG_MAP[cat] ?? cat;
+        const catSlug = CATS.find(c => c.label === cat)?.slug;
+        if (catSlug) params.category_slug = catSlug;
         const data = await listingsApi.byCitySlug(city, params);
         setListings(data);
       } catch {
@@ -77,14 +83,15 @@ export default function SearchScreen({ navigation, route }: any) {
         horizontal
         showsHorizontalScrollIndicator={false}
         data={CATS}
-        keyExtractor={i => i}
+        keyExtractor={c => c.label}
         style={styles.tabs}
         renderItem={({ item }) => (
           <TouchableOpacity
-            style={[styles.tab, item === catLabel && styles.activeTab]}
-            onPress={() => setCatLabel(item)}
+            style={[styles.tab, item.label === catLabel && styles.activeTab]}
+            onPress={() => setCatLabel(item.label)}
           >
-            <Text style={[styles.tabText, item === catLabel && styles.activeTabText]}>{item}</Text>
+            <Text style={styles.tabEmoji}>{item.emoji}</Text>
+            <Text style={[styles.tabText, item.label === catLabel && styles.activeTabText]}>{item.label}</Text>
           </TouchableOpacity>
         )}
       />
@@ -141,8 +148,9 @@ const styles = StyleSheet.create({
   },
   cityChipText: { color: '#f97316', fontWeight: '600', fontSize: 12 },
   tabs: { paddingLeft: 12, marginBottom: 4 },
-  tab: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20, marginRight: 6, backgroundColor: '#f3f4f6' },
+  tab: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 7, borderRadius: 20, marginRight: 6, backgroundColor: '#f3f4f6' },
   activeTab: { backgroundColor: '#f97316' },
+  tabEmoji: { fontSize: 13, marginRight: 4 },
   tabText: { fontSize: 13, color: '#374151' },
   activeTabText: { color: 'white', fontWeight: '600' },
   count: { paddingBottom: 8, fontSize: 12, color: '#9ca3af' },

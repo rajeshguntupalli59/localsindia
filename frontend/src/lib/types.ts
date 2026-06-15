@@ -83,6 +83,7 @@ export interface SearchParams {
   category_id?: string;
   page?: string;
   page_size?: string;
+  sort?: string;
 }
 
 export interface Event {

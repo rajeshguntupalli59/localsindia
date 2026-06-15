@@ -32,6 +32,7 @@ function SearchInner() {
 
   const q = searchParams.get('q') ?? '';
   const catParam = searchParams.get('category') ?? '';
+  const sortParam = searchParams.get('sort') ?? 'newest';
   const pageStr = searchParams.get('page') ?? '1';
   const page = parseInt(pageStr, 10) || 1;
 
@@ -41,6 +42,7 @@ function SearchInner() {
 
   // sidebar filter state
   const [localCat, setLocalCat] = useState(catParam);
+  const [sortBy, setSortBy] = useState(sortParam);
   const [priceMin, setPriceMin] = useState('');
   const [priceMax, setPriceMax] = useState('');
   const [dateRange, setDateRange] = useState('');
@@ -71,7 +73,7 @@ function SearchInner() {
     try {
       if (!q.trim()) {
         // Browse mode — no query. Use city listings endpoint (supports category_slug + category_id).
-        const params: Record<string, string> = { status: 'active' };
+        const params: Record<string, string> = { status: 'active', sort: sortBy };
         if (catParam) {
           if (isUUID(catParam)) params.category_id = catParam;
           else params.category_slug = catParam;
@@ -85,6 +87,7 @@ function SearchInner() {
           category_id: catParam || undefined,
           page: String(page),
           page_size: String(PAGE_SIZE),
+          sort: sortBy,
         });
         setResult(res);
       }
@@ -93,7 +96,7 @@ function SearchInner() {
     } finally {
       setLoading(false);
     }
-  }, [q, citySlug, catParam, page]);
+  }, [q, citySlug, catParam, page, sortBy]);
 
   useEffect(() => {
     api.categories.list().then(setCategories).catch(() => {});
@@ -119,11 +122,20 @@ function SearchInner() {
     router.replace(`/${citySlug}/search?${params.toString()}`);
   };
 
+  const applySort = (sort: string) => {
+    setSortBy(sort);
+    const params = new URLSearchParams(searchParams.toString());
+    if (sort && sort !== 'newest') params.set('sort', sort); else params.delete('sort');
+    params.set('page', '1');
+    router.replace(`/${citySlug}/search?${params.toString()}`);
+  };
+
   const clearAllFilters = () => {
     setLocalCat('');
     setPriceMin('');
     setPriceMax('');
     setDateRange('');
+    setSortBy('newest');
     const params = new URLSearchParams();
     if (q) params.set('q', q);
     router.replace(`/${citySlug}/search?${params.toString()}`);
@@ -474,6 +486,22 @@ function SearchInner() {
                 </motion.div>
               )}
             </AnimatePresence>
+          </div>
+
+          {/* Sort bar — always visible */}
+          <div className="flex items-center gap-2 mb-4">
+            <SlidersHorizontal className="w-3.5 h-3.5 shrink-0" style={{ color: 'var(--li-muted)' }} strokeWidth={2} />
+            <select
+              value={sortBy}
+              onChange={e => applySort(e.target.value)}
+              aria-label="Sort order"
+              className="text-xs font-semibold border rounded-xl px-3 py-1.5 outline-none focus:border-orange-400 bg-white"
+              style={{ borderColor: 'var(--li-border)', color: 'var(--li-text)' }}
+            >
+              <option value="newest">Newest first</option>
+              <option value="price_asc">Price: low to high</option>
+              <option value="price_desc">Price: high to low</option>
+            </select>
           </div>
 
           {loading ? (
