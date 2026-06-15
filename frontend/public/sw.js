@@ -1,4 +1,4 @@
-const CACHE = 'localsindia-v1';
+const CACHE = 'localsindia-v2';
 
 // Assets to pre-cache on install
 const PRECACHE = ['/', '/offline'];
@@ -32,17 +32,20 @@ self.addEventListener('fetch', e => {
     url.pathname.startsWith('/auth/')
   ) return;
 
-  // Stale-while-revalidate for HTML pages (city home, search, listing detail)
+  // Network-first for HTML pages — never serve stale HTML (breaks JS chunk refs after deploy)
   if (request.destination === 'document' || request.headers.get('accept')?.includes('text/html')) {
     e.respondWith(
-      caches.open(CACHE).then(async cache => {
-        const cached = await cache.match(request);
-        const fetchPromise = fetch(request).then(res => {
-          if (res.ok) cache.put(request, res.clone());
+      fetch(request)
+        .then(res => {
+          if (res.ok) {
+            const clone = res.clone();
+            caches.open(CACHE).then(c => c.put(request, clone));
+          }
           return res;
-        }).catch(() => cached || caches.match('/offline'));
-        return cached || fetchPromise;
-      })
+        })
+        .catch(() =>
+          caches.match(request).then(cached => cached || caches.match('/offline'))
+        )
     );
     return;
   }
