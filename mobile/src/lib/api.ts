@@ -1,17 +1,13 @@
 import axios from 'axios';
-import * as SecureStore from 'expo-secure-store';
+import { storage } from './storage';
 
 const API_BASE = 'https://localsindia-backend.azurewebsites.net/api/v1';
 
 const api = axios.create({ baseURL: API_BASE });
 
 api.interceptors.request.use(async config => {
-  try {
-    const token = await SecureStore.getItemAsync('access_token');
-    if (token) config.headers.Authorization = `Bearer ${token}`;
-  } catch {
-    // SecureStore unavailable (web sandbox) — proceed without auth header
-  }
+  const token = await storage.getAccessToken();
+  if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
@@ -22,17 +18,14 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && !error.config._retry) {
       error.config._retry = true;
       try {
-        const refresh = await SecureStore.getItemAsync('refresh_token');
+        const refresh = await storage.getRefreshToken();
         if (!refresh) throw new Error('no refresh token');
         const { data } = await axios.post(`${API_BASE}/auth/refresh`, { refresh_token: refresh });
-        await SecureStore.setItemAsync('access_token', data.access_token);
+        await storage.setTokens(data.access_token, data.refresh_token ?? refresh);
         error.config.headers.Authorization = `Bearer ${data.access_token}`;
         return api(error.config);
       } catch {
-        try {
-          await SecureStore.deleteItemAsync('access_token');
-          await SecureStore.deleteItemAsync('refresh_token');
-        } catch {}
+        await storage.clear();
       }
     }
     return Promise.reject(error);
@@ -86,6 +79,20 @@ export const categoriesApi = {
 export const usersApi = {
   publicProfile: (userId: string) =>
     api.get(`/users/${userId}/public-profile`).then(r => r.data),
+};
+
+export const adminApi = {
+  pendingListings: () =>
+    api.get('/admin/listings/pending').then(r => r.data),
+
+  listingsByStatus: (status: string) =>
+    api.get('/admin/listings', { params: { status } }).then(r => r.data),
+
+  approveListing: (id: string) =>
+    api.patch(`/admin/listings/${id}/approve`).then(r => r.data),
+
+  rejectListing: (id: string) =>
+    api.patch(`/admin/listings/${id}/reject`).then(r => r.data),
 };
 
 export default api;

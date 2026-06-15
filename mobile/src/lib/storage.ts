@@ -22,6 +22,7 @@ export const storage = {
     await setItem('refresh_token', refresh);
   },
   getAccessToken: () => getItem('access_token'),
+  getRefreshToken: () => getItem('refresh_token'),
   clear: async () => {
     await deleteItem('access_token');
     await deleteItem('refresh_token');

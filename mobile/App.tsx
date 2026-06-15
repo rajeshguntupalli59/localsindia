@@ -13,6 +13,7 @@ import ListingDetailScreen from './src/screens/ListingDetailScreen';
 import SellerProfileScreen from './src/screens/SellerProfileScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import CityPickerScreen from './src/screens/CityPickerScreen';
+import AdminScreen from './src/screens/AdminScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -75,6 +76,7 @@ export default function App() {
           component={CityPickerScreen}
           options={{ presentation: 'modal' }}
         />
+        <Stack.Screen name="Admin" component={AdminScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

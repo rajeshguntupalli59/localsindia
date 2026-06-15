@@ -80,6 +80,16 @@ export default function ProfileScreen({ navigation }: any) {
             />
           </View>
 
+          {user?.role === 'admin' && (
+            <View style={[styles.menuSection, { marginTop: 8 }]}>
+              <MenuItem
+                icon="shield-checkmark-outline"
+                label="Admin Panel"
+                onPress={() => navigation.navigate('Admin')}
+              />
+            </View>
+          )}
+
           <View style={[styles.menuSection, { marginTop: 8 }]}>
             <MenuItem
               icon="log-out-outline"
