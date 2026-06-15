@@ -2,6 +2,7 @@ import uuid
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -13,6 +14,10 @@ from app.models.report import Report
 from app.models.user import User
 from app.schemas.event import EventOut
 from app.schemas.listing import ListingOut
+
+
+class RoleUpdate(BaseModel):
+    role: str
 
 router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
 
@@ -186,6 +191,27 @@ async def list_users(
         }
         for u in users
     ]
+
+
+@router.patch("/users/{user_id}/role")
+async def update_user_role(
+    user_id: uuid.UUID,
+    body: RoleUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_admin: User = Depends(get_current_admin),
+):
+    if body.role not in ("admin", "user"):
+        raise HTTPException(status_code=400, detail="Role must be 'admin' or 'user'.")
+    if user_id == current_admin.id:
+        raise HTTPException(status_code=400, detail="Cannot change your own role.")
+    result = await db.execute(select(User).where(User.id == user_id, User.deleted_at.is_(None)))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found.")
+    user.role = body.role
+    await db.commit()
+    await db.refresh(user)
+    return {"id": str(user.id), "name": user.name, "role": user.role}
 
 
 @router.get("/reports")

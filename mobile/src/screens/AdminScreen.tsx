@@ -7,9 +7,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { adminApi } from '../lib/api';
 
 const TABS = [
-  { key: 'pending', label: 'Pending' },
-  { key: 'flagged', label: 'Flagged' },
-  { key: 'active',  label: 'Active'  },
+  { key: 'pending',  label: 'Pending'  },
+  { key: 'flagged',  label: 'Flagged'  },
+  { key: 'active',   label: 'Active'   },
   { key: 'rejected', label: 'Rejected' },
 ];
 
@@ -161,7 +161,6 @@ export default function AdminScreen({ navigation }: any) {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={22} color="#111827" />
@@ -172,7 +171,6 @@ export default function AdminScreen({ navigation }: any) {
         </TouchableOpacity>
       </View>
 
-      {/* Tabs */}
       <View style={styles.tabRow}>
         {TABS.map(t => (
           <TouchableOpacity
@@ -187,8 +185,9 @@ export default function AdminScreen({ navigation }: any) {
         ))}
       </View>
 
-      {/* Count */}
-      <Text style={styles.countText}>{listings.length} {tab} listing{listings.length !== 1 ? 's' : ''}</Text>
+      <Text style={styles.countText}>
+        {listings.length} {tab} listing{listings.length !== 1 ? 's' : ''}
+      </Text>
 
       {loading ? (
         <View style={styles.center}>
@@ -239,12 +238,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#f3f4f6',
     gap: 4,
   },
-  tab: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: 7,
-    borderRadius: 8,
-  },
+  tab: { flex: 1, alignItems: 'center', paddingVertical: 7, borderRadius: 8 },
   tabActive: { backgroundColor: '#fff7ed' },
   tabText: { fontSize: 12, fontWeight: '600', color: '#9ca3af' },
   tabTextActive: { color: '#f97316' },
