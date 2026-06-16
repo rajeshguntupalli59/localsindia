@@ -45,7 +45,7 @@ export default function MyListingsPage() {
     if (!t) return;
     setLoading(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'}/api/v1/listings/mine`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend.azurewebsites.net'}/api/v1/listings/mine`, {
         headers: { Authorization: `Bearer ${t}` },
       });
       if (!res.ok) throw new Error('Failed');

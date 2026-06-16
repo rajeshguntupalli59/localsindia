@@ -12,9 +12,8 @@ def _is_configured() -> bool:
 
 async def upload_image(file_bytes: bytes, filename: str) -> dict:
     if not _is_configured():
-        # Mock mode — save to /tmp for local development
         mock_id = f"mock/{uuid.uuid4()}"
-        mock_url = f"http://localhost:8000/mock-images/{mock_id}"
+        mock_url = f"https://placehold.co/400x300/f97316/white?text=LocalIndia"
         logger.warning(f"[MOCK UPLOAD] {filename} → {mock_url}")
         return {"url": mock_url, "cloudinary_id": mock_id}
 

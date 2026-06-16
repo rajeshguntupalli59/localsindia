@@ -69,6 +69,11 @@ export default function HomePage() {
   const geoTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
+    const savedCity = localStorage.getItem('li_city');
+    if (savedCity) { router.replace(`/${savedCity}`); }
+  }, [router]);
+
+  useEffect(() => {
     return () => clearTimeout(geoTimer.current);
   }, []);
 

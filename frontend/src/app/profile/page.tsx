@@ -67,7 +67,7 @@ export default function ProfilePage() {
         <div className="bg-white rounded-xl p-4 space-y-3 shadow-sm">
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Account</p>
           <div className="space-y-1 text-sm">
-            <p className="flex justify-between"><span className="text-muted-foreground">Phone</span><span className="font-medium">{user.phone}</span></p>
+            {user.phone && <p className="flex justify-between"><span className="text-muted-foreground">Phone</span><span className="font-medium">{user.phone}</span></p>}
             {user.email && <p className="flex justify-between"><span className="text-muted-foreground">Email</span><span className="font-medium truncate max-w-[60%]">{user.email}</span></p>}
           </div>
         </div>
