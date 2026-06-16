@@ -112,12 +112,30 @@ export default function AdminListingsPage() {
           <h1 className="text-xl font-bold">Listings</h1>
           <p className="text-sm text-muted-foreground">{listings.length} {tab} listings</p>
         </div>
-        <button
-          onClick={() => fetchListings(tab)}
-          className="text-sm px-4 py-2 rounded-lg border hover:bg-muted transition-colors"
-        >
-          Refresh
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={async () => {
+              if (!confirm('Add placeholder images to all listings with no photos?')) return;
+              try {
+                const res = await fetch(`${API_BASE}/api/v1/admin/seed-placeholder-images`, {
+                  method: 'POST',
+                  headers: { Authorization: `Bearer ${token()}` },
+                });
+                const data = await res.json();
+                toast.success(data.message ?? 'Done');
+              } catch { toast.error('Failed to seed images'); }
+            }}
+            className="text-sm px-4 py-2 rounded-lg border border-blue-200 text-blue-700 hover:bg-blue-50 transition-colors"
+          >
+            Seed Images
+          </button>
+          <button
+            onClick={() => fetchListings(tab)}
+            className="text-sm px-4 py-2 rounded-lg border hover:bg-muted transition-colors"
+          >
+            Refresh
+          </button>
+        </div>
       </div>
 
       {/* Status tabs */}

@@ -6,6 +6,14 @@ from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+PLACEHOLDER_URLS = [
+    "https://placehold.co/400x300/f97316/white?text=LocalIndia",
+    "https://placehold.co/400x300/3b82f6/white?text=LocalIndia",
+    "https://placehold.co/400x300/10b981/white?text=LocalIndia",
+    "https://placehold.co/400x300/8b5cf6/white?text=LocalIndia",
+    "https://placehold.co/400x300/ef4444/white?text=LocalIndia",
+]
+
 from app.core.database import get_db
 from app.core.deps import get_current_admin
 from app.models.event import Event
@@ -212,6 +220,36 @@ async def update_user_role(
     await db.commit()
     await db.refresh(user)
     return {"id": str(user.id), "name": user.name, "role": user.role}
+
+
+@router.post("/seed-placeholder-images")
+async def seed_placeholder_images(
+    db: AsyncSession = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+):
+    """Add placeholder images to all listings that have no photos."""
+    from app.models.listing_image import ListingImage
+    result = await db.execute(select(Listing).where(Listing.deleted_at.is_(None)))
+    listings = result.scalars().all()
+
+    added = 0
+    for i, listing in enumerate(listings):
+        img_result = await db.execute(
+            select(ListingImage).where(ListingImage.listing_id == listing.id)
+        )
+        if img_result.scalars().first():
+            continue
+        img = ListingImage(
+            listing_id=listing.id,
+            url=PLACEHOLDER_URLS[i % len(PLACEHOLDER_URLS)],
+            cloudinary_id=f"placeholder/{uuid.uuid4()}",
+            display_order=0,
+        )
+        db.add(img)
+        added += 1
+
+    await db.commit()
+    return {"seeded": added, "message": f"Added placeholder images to {added} listings."}
 
 
 @router.get("/reports")
