@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import {
   Search, MapPin, LogOut, List, User,
   ChevronDown, Plus,
@@ -72,6 +72,7 @@ const ghostLink =
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function SiteHeader({ citySlug, cityName }: Props) {
   const router = useRouter();
+  const pathname = usePathname();
   const { t } = usePrefs();
   const [q, setQ] = useState('');
   const [user, setUser] = useState<StoredUser | null>(null);
@@ -79,11 +80,18 @@ export default function SiteHeader({ citySlug, cityName }: Props) {
   const [showCityPicker, setShowCityPicker] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // Hydrate user from localStorage
+  // Re-hydrate user from localStorage on every route change.
+  // Login flows redirect via router.push/replace (client-side nav), which
+  // does NOT remount this layout-level header, so a mount-only effect would
+  // never see the freshly-stored user after login.
   useEffect(() => {
     const stored = localStorage.getItem('user');
-    if (stored) try { setUser(JSON.parse(stored)); } catch { /* ignore */ }
-  }, []);
+    if (stored) {
+      try { setUser(JSON.parse(stored)); } catch { setUser(null); }
+    } else {
+      setUser(null);
+    }
+  }, [pathname]);
 
   // Close user menu on outside click
   useEffect(() => {

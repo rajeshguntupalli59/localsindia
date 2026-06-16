@@ -16,9 +16,12 @@ export default function BottomNav({ citySlug }: Props) {
   const { t } = usePrefs();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  // Re-check on every route change — login redirects via router.push/replace,
+  // which doesn't remount this layout-level nav, so a mount-only check would
+  // miss the freshly-stored token after login.
   useEffect(() => {
     setIsLoggedIn(!!localStorage.getItem('access_token'));
-  }, []);
+  }, [pathname]);
 
   const items = [
     { icon: Home, label: t('bottomNav.home'), href: `/${citySlug}` },

@@ -108,6 +108,8 @@ export const api = {
       req<Listing[]>(`/api/v1/cities/${slug}/listings${params ? qs(params) : ''}`),
   },
   listings: {
+    mine: (token: string) =>
+      req<Listing[]>('/api/v1/listings/mine', { token }),
     create: (data: CreateListingInput, token: string) =>
       req<Listing>('/api/v1/listings', {
         method: 'POST',

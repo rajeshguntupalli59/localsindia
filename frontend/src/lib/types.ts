@@ -56,7 +56,7 @@ export interface Listing {
 
 export interface User {
   id: string;
-  phone: string;
+  phone: string | null;
   name: string | null;
   email: string | null;
   avatar_url: string | null;

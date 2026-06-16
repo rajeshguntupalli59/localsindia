@@ -15,11 +15,11 @@ from app.models.listing import Listing
 from app.models.listing_image import ListingImage
 
 PLACEHOLDERS = [
-    "https://placehold.co/400x300/f97316/white?text=LocalIndia",
-    "https://placehold.co/400x300/3b82f6/white?text=LocalIndia",
-    "https://placehold.co/400x300/10b981/white?text=LocalIndia",
-    "https://placehold.co/400x300/8b5cf6/white?text=LocalIndia",
-    "https://placehold.co/400x300/ef4444/white?text=LocalIndia",
+    "https://placehold.co/400x300/f97316/white?text=LocalsIndia",
+    "https://placehold.co/400x300/3b82f6/white?text=LocalsIndia",
+    "https://placehold.co/400x300/10b981/white?text=LocalsIndia",
+    "https://placehold.co/400x300/8b5cf6/white?text=LocalsIndia",
+    "https://placehold.co/400x300/ef4444/white?text=LocalsIndia",
 ]
 
 

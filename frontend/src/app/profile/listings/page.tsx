@@ -45,14 +45,10 @@ export default function MyListingsPage() {
     if (!t) return;
     setLoading(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend.azurewebsites.net'}/api/v1/listings/mine`, {
-        headers: { Authorization: `Bearer ${t}` },
-      });
-      if (!res.ok) throw new Error('Failed');
-      const data: Listing[] = await res.json();
+      const data = await api.listings.mine(t);
       setListings(data);
-    } catch {
-      toast.error('Could not load listings');
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : 'Could not load listings');
     } finally {
       setLoading(false);
     }

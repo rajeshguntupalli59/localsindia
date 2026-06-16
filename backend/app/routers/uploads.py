@@ -1,5 +1,6 @@
 import uuid
 
+import cloudinary.exceptions
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -50,7 +51,10 @@ async def upload_image(
     if len(count_result.scalars().all()) >= MAX_IMAGES_PER_LISTING:
         raise HTTPException(status_code=400, detail="Maximum 5 images per listing.")
 
-    uploaded = await cloudinary_svc.upload_image(file_bytes, file.filename or "image")
+    try:
+        uploaded = await cloudinary_svc.upload_image(file_bytes, file.filename or "image")
+    except cloudinary.exceptions.Error:
+        raise HTTPException(status_code=400, detail="Could not process image. Please try a different photo.")
 
     img = ListingImage(
         listing_id=listing_id,

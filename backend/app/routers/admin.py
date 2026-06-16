@@ -7,11 +7,11 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 PLACEHOLDER_URLS = [
-    "https://placehold.co/400x300/f97316/white?text=LocalIndia",
-    "https://placehold.co/400x300/3b82f6/white?text=LocalIndia",
-    "https://placehold.co/400x300/10b981/white?text=LocalIndia",
-    "https://placehold.co/400x300/8b5cf6/white?text=LocalIndia",
-    "https://placehold.co/400x300/ef4444/white?text=LocalIndia",
+    "https://placehold.co/400x300/f97316/white?text=LocalsIndia",
+    "https://placehold.co/400x300/3b82f6/white?text=LocalsIndia",
+    "https://placehold.co/400x300/10b981/white?text=LocalsIndia",
+    "https://placehold.co/400x300/8b5cf6/white?text=LocalsIndia",
+    "https://placehold.co/400x300/ef4444/white?text=LocalsIndia",
 ]
 
 from app.core.database import get_db
@@ -227,8 +227,19 @@ async def seed_placeholder_images(
     db: AsyncSession = Depends(get_db),
     _admin: User = Depends(get_current_admin),
 ):
-    """Add placeholder images to all listings that have no photos."""
+    """Add placeholder images to all listings that have no photos.
+    Also corrects any previously-seeded placeholders with the old "LocalIndia" typo.
+    """
     from app.models.listing_image import ListingImage
+
+    fixed = 0
+    typo_result = await db.execute(
+        select(ListingImage).where(ListingImage.url.like("%text=LocalIndia%"))
+    )
+    for img in typo_result.scalars().all():
+        img.url = img.url.replace("text=LocalIndia", "text=LocalsIndia")
+        fixed += 1
+
     result = await db.execute(select(Listing).where(Listing.deleted_at.is_(None)))
     listings = result.scalars().all()
 
@@ -249,7 +260,11 @@ async def seed_placeholder_images(
         added += 1
 
     await db.commit()
-    return {"seeded": added, "message": f"Added placeholder images to {added} listings."}
+    return {
+        "seeded": added,
+        "fixed_typo": fixed,
+        "message": f"Added placeholder images to {added} listings; fixed typo on {fixed} existing images.",
+    }
 
 
 @router.get("/reports")

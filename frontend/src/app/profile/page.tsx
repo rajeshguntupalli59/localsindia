@@ -30,7 +30,7 @@ export default function ProfilePage() {
 
   const initials = user.name
     ? user.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
-    : user.phone.slice(-4);
+    : user.phone?.slice(-4) ?? '??';
 
   return (
     <div className="min-h-screen pb-20" style={{ background: 'var(--li-page-bg)' }}>
@@ -46,7 +46,7 @@ export default function ProfilePage() {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-white font-bold text-lg truncate">{user.name ?? 'User'}</p>
-            <p className="text-white/60 text-sm">{user.phone}</p>
+            {user.phone && <p className="text-white/60 text-sm">{user.phone}</p>}
             {user.role === 'admin' && (
               <span className="text-xs bg-[var(--li-featured)] text-black font-semibold px-2 py-0.5 rounded-full mt-1 inline-block">
                 Admin
@@ -67,7 +67,7 @@ export default function ProfilePage() {
         <div className="bg-white rounded-xl p-4 space-y-3 shadow-sm">
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Account</p>
           <div className="space-y-1 text-sm">
-            {user.phone && <p className="flex justify-between"><span className="text-muted-foreground">Phone</span><span className="font-medium">{user.phone}</span></p>}
+            <p className="flex justify-between"><span className="text-muted-foreground">Phone</span><span className="font-medium">{user.phone ?? 'Not set'}</span></p>
             {user.email && <p className="flex justify-between"><span className="text-muted-foreground">Email</span><span className="font-medium truncate max-w-[60%]">{user.email}</span></p>}
           </div>
         </div>
