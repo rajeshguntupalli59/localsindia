@@ -3,13 +3,19 @@ name: Deploy Frontend to Azure Static Web Apps
 on:
   workflow_dispatch:
   push:
-    branches: [master, develop]
+    branches: [master]
     paths:
       - 'frontend/**'
       - '.github/workflows/frontend-azure.yml'
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    branches: [master]
+    paths:
+      - 'frontend/**'
 
 jobs:
   build-and-deploy:
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
     name: Build and Deploy
 
@@ -25,8 +31,19 @@ jobs:
           app_location: /frontend
           api_location: ''
           output_location: ''
-          deployment_environment: ${{ github.ref_name == 'master' && 'production' || github.ref_name }}
         env:
           NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
           NEXT_PUBLIC_OTP_DEBUG: ${{ secrets.NEXT_PUBLIC_OTP_DEBUG }}
           NEXT_PUBLIC_GOOGLE_AUTH_ENABLED: ${{ secrets.NEXT_PUBLIC_GOOGLE_AUTH_ENABLED }}
+
+  close-staging:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    name: Close Staging Environment
+
+    steps:
+      - uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          action: close
+          app_location: /frontend
