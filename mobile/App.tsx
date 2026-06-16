@@ -15,6 +15,7 @@ import SellerProfileScreen from './src/screens/SellerProfileScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import CityPickerScreen from './src/screens/CityPickerScreen';
 import AdminScreen from './src/screens/AdminScreen';
+import ChatScreen from './src/screens/ChatScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -80,6 +81,7 @@ export default function App() {
             options={{ presentation: 'modal' }}
           />
           <Stack.Screen name="Admin" component={AdminScreen} />
+          <Stack.Screen name="Chat" component={ChatScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>

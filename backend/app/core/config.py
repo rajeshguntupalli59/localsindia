@@ -27,6 +27,8 @@ class Settings(BaseSettings):
     ADMIN_USERNAME: str = ""
     ADMIN_PASSWORD_HASH: str = ""
 
+    ANTHROPIC_API_KEY: str = ""
+
     RAZORPAY_KEY_ID: str = ""
     RAZORPAY_KEY_SECRET: str = ""
 

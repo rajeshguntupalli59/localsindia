@@ -95,4 +95,9 @@ export const adminApi = {
     api.patch(`/admin/listings/${id}/reject`).then(r => r.data),
 };
 
+export const chatApi = {
+  send: (message: string, citySlug?: string, history: {role: string; content: string}[] = []) =>
+    api.post('/chat', { message, city_slug: citySlug, history }).then(r => r.data),
+};
+
 export default api;

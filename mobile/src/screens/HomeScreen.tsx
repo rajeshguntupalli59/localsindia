@@ -48,6 +48,7 @@ export default function HomeScreen({ navigation }: any) {
   };
 
   return (
+    <View style={{ flex: 1 }}>
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
 
       {/* Hero */}
@@ -127,6 +128,16 @@ export default function HomeScreen({ navigation }: any) {
 
       <View style={{ height: 32 }} />
     </ScrollView>
+
+    {/* Floating chat button */}
+    <TouchableOpacity
+      style={styles.chatFab}
+      onPress={() => navigation.navigate('Chat')}
+      activeOpacity={0.85}
+    >
+      <Ionicons name="chatbubble-ellipses" size={22} color="white" />
+    </TouchableOpacity>
+    </View>
   );
 }
 
@@ -183,4 +194,20 @@ const styles = StyleSheet.create({
   },
   categoryEmoji: { fontSize: 34, marginBottom: 6 },
   categoryLabel: { fontSize: 11, textAlign: 'center', color: '#374151', fontWeight: '500' },
+  chatFab: {
+    position: 'absolute',
+    bottom: 16,
+    right: 16,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: '#f97316',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#f97316',
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 8,
+  },
 });
