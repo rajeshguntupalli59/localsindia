@@ -56,9 +56,18 @@
 | Category browse | §5-categories | `routers/categories.py` | `[city]/[category]/page.tsx` | `categories` | GET /categories |
 | 11-language i18n | §15 | `i18n/request.ts` | `messages/*.json`, `components/language-selector/` | — | — (client-side only) |
 | PWA / offline | §9-ServiceWorker | — | `components/pwa/ServiceWorker.tsx`, `app/offline/page.tsx` | — | — |
-| Static export (Azure SWA) | §7, §16 | — | `next.config.mjs`, `staticwebapp.config.json` | — | — |
-| Auto-deploy CI/CD | §16 | `.github/workflows/backend-azure.yml` | `.github/workflows/frontend-azure.yml` | — | — |
+| Hybrid SSR (Azure SWA) | §7, §16 | — | `next.config.mjs`, `staticwebapp.config.json`, `lib/static-params.ts` | — | — |
+| Auto-deploy CI/CD + PR staging | §16 | `.github/workflows/backend-azure.yml` | `.github/workflows/frontend-azure.yml` | — | — |
 | City seeding | §18-Scripts | `scripts/seed_cities.py`, `scripts/seed_categories.py` | — | `cities`, `categories` | — |
+| Admin role management | §6-Admin | `routers/admin.py` | `admin/users/page.tsx`, mobile `AdminScreen.tsx` | `users` | PATCH /admin/users/{id}/role |
+| Seed placeholder images | §6-Admin | `routers/admin.py` | `admin/listings/page.tsx` (button) | `listing_images` | POST /admin/seed-placeholder-images |
+| Business soft-delete | §6-Businesses | `routers/businesses.py` | — | `businesses` | DELETE /businesses/{id} |
+| Google Sign-In (mobile deep link) | §11 | `routers/auth.py` | `mobile/src/screens/LoginScreen.tsx` | `users` | GET /auth/google?mobile=1, GET /auth/google/callback |
+| Global listing/category/post redirects | §8 | — | `app/listing/[id]/`, `app/category/[slug]/page.tsx`, `app/post/page.tsx` | — | — |
+| Global error boundary | §8-ErrorBoundary | — | `app/error.tsx` | — | — |
+| Mobile admin panel | §18-Mobile | `routers/admin.py` | `mobile/src/screens/AdminScreen.tsx` | `listings`, `users` | (same as web admin) |
+| EAS Play Store build pipeline | §18-Mobile | — | `mobile/eas.json`, `mobile/app.json` | — | — |
+| AI chatbot assistant | §6-Chat | `routers/chat.py`, `core/limiter.py` | `components/chat-widget/ChatWidget.tsx`, `mobile/src/screens/ChatScreen.tsx` | — | POST /chat |
 
 ---
 
@@ -70,10 +79,11 @@
 | File | What it does |
 |------|-------------|
 | `backend/app/main.py` | FastAPI app entry point; mounts all 11 routers under /api/v1; CORS; /health endpoint |
-| `backend/app/core/config.py` | All env vars (DATABASE_URL, SECRET_KEY, MSG91, Cloudinary, Razorpay, Google OAuth) |
+| `backend/app/core/config.py` | All env vars (DATABASE_URL, SECRET_KEY, MSG91, Cloudinary, Razorpay, Google OAuth, ANTHROPIC_API_KEY) |
 | `backend/app/core/database.py` | Async PostgreSQL engine + `get_db()` session dependency |
 | `backend/app/core/security.py` | bcrypt hash/verify, JWT create/decode, 6-digit OTP generator |
 | `backend/app/core/deps.py` | `get_current_user()` and `get_current_admin()` FastAPI dependencies |
+| `backend/app/core/limiter.py` | slowapi rate limiter (key by IP); shared across routers; chat: 5/min + 20/hr |
 
 ### Backend — Models (DB tables)
 
@@ -165,6 +175,10 @@
 | `app/invite/page.tsx` | `/invite` | Invite friends page |
 | `app/seller/[id]/page.tsx` | `/seller/[id]` | Public seller profile: avatar, member since, active listings grid |
 | `app/saved/page.tsx` | `/saved` | Saved/bookmarked listings from localStorage |
+| `app/listing/[id]/page.tsx` + `ListingDetailClient.tsx` | `/listing/[id]` | Global (city-agnostic) listing detail for deep links/shares |
+| `app/category/[slug]/page.tsx` | `/category/[slug]` | Client redirect → `/{city}/search?category={slug}` |
+| `app/post/page.tsx` | `/post` | Client redirect → `/{city}/classifieds/post` |
+| `app/error.tsx` | (root error boundary) | Auto-reload on ChunkLoadError; friendly "Try again" otherwise |
 
 ### Frontend — Components
 
@@ -198,7 +212,7 @@
 | `lib/translations.ts` | i18n key type definitions |
 | `context/PrefsContext.tsx` | Global state: citySlug, language, user, tokens (localStorage-backed) |
 | `hooks/useSaved.ts` | localStorage bookmark hook — toggle/isSaved/saved list; used in ListingCard + /saved page |
-| `i18n/request.ts` | next-intl locale resolver — defaults to 'en' in static export |
+| `i18n/request.ts` | next-intl locale resolver — defaults to 'en' if no locale resolvable |
 | `messages/en.json` | English translations |
 | `messages/hi.json` | Hindi translations |
 | `messages/te.json` | Telugu translations |
@@ -218,8 +232,8 @@
 | `.github/workflows/backend-azure.yml` | Auto-deploy backend to Azure App Service on master push |
 | `.github/workflows/frontend-azure.yml` | Auto-deploy frontend to Azure Static Web Apps on master push |
 | `.github/workflows/keepalive.yml` | Pings /api/v1/health every 15 min — prevents Azure cold start |
-| `staticwebapp.config.json` | SPA fallback routing — unknown paths serve index.html |
-| `next.config.mjs` | Static export, trailing slash, unoptimized images, webpack cache disabled |
+| `staticwebapp.config.json` | Minimal hybrid-SSR config — `apiRuntime: node:18`, security headers, anonymous `/api/*` (no more SPA fallback rules) |
+| `next.config.mjs` | Hybrid SSR (no `output: 'export'`), unoptimized images, webpack cache disabled |
 | `tailwind.config.ts` | Tailwind theme extension |
 | `app/globals.css` | CSS variables: --primary #FF6B35, --wa-green #25D366, --nav-bg #1A1A2E |
 | `backend/Dockerfile` | Python 3.12-slim container; exposes port 8000 |
@@ -241,8 +255,8 @@ POST   /api/v1/auth/refresh               Exchange refresh token for new access 
 DELETE /api/v1/auth/logout                Client-side only (stateless)
 GET    /api/v1/auth/me                    Get current user [AUTH]
 PATCH  /api/v1/auth/me                    Update name/lang_pref [AUTH]
-GET    /api/v1/auth/google                Redirect to Google OAuth
-GET    /api/v1/auth/google/callback       Handle OAuth code -> JWT -> redirect frontend
+GET    /api/v1/auth/google?mobile=1        Redirect to Google OAuth (mobile=1 -> deep-link callback for RN app)
+GET    /api/v1/auth/google/callback       Handle OAuth code -> JWT -> redirect frontend or localsindia:// deep link
 POST   /api/v1/auth/dev-login             Skip OTP (OTP_DEBUG=true only)
 ```
 
@@ -286,6 +300,7 @@ GET    /api/v1/businesses                 List businesses (filter: city_slug, ca
 POST   /api/v1/businesses                 Create business [AUTH]
 GET    /api/v1/businesses/{id}            Business detail + reviews
 PATCH  /api/v1/businesses/{id}            Update [AUTH, owner/admin]
+DELETE /api/v1/businesses/{id}            Soft-delete [AUTH, owner/admin]
 POST   /api/v1/businesses/{id}/claim      Claim ownership [AUTH]
 POST   /api/v1/businesses/{id}/reviews    Add review (recalcs avg_rating) [AUTH]
 ```
@@ -310,6 +325,8 @@ GET    /api/v1/admin/events               All events
 PATCH  /api/v1/admin/events/{id}/approve
 PATCH  /api/v1/admin/events/{id}/reject
 GET    /api/v1/admin/users               All users
+PATCH  /api/v1/admin/users/{id}/role     Set role to admin|user (cannot change own role)
+POST   /api/v1/admin/seed-placeholder-images  Backfill placeholder images on photo-less listings; fixes old typo'd placeholders
 GET    /api/v1/admin/reports             All abuse reports
 ```
 
@@ -327,6 +344,15 @@ GET    /api/v1/users/{user_id}/public-profile  Public seller profile (name, avat
 ### Listings (filter params added)
 ```
 GET    /api/v1/cities/{slug}/listings?min_price=&max_price=&sort=price_asc|price_desc|newest&verified_only=true&within=24h|7d|30d
+```
+
+### Chat (AI Assistant)
+```
+POST   /api/v1/chat                       AI chatbot: natural language search + FAQ (Claude Haiku 4.5)
+                                          Rate limits: 5 req/min + 20 req/hr per IP  ← TO CHANGE: edit @limiter.limit in routers/chat.py
+                                          Body: { message, city_slug?, history? }
+                                          Returns: { reply, listings[]? }
+                                          No auth required. Needs ANTHROPIC_API_KEY Azure env var.
 ```
 
 ### Health
@@ -441,23 +467,29 @@ Every new feature (page, endpoint, table, component) requires updates to both fi
 
 | File | What it does |
 |------|-------------|
-| `mobile/App.tsx` | Root: bottom tab navigator (Home/Search/Post/Saved/Profile) + stack (ListingDetail/SellerProfile/Login/CityPicker) |
+| `mobile/App.tsx` | Root: bottom tab navigator (Home/Search/Post/Saved/Profile) + stack (ListingDetail/SellerProfile/Login/CityPicker). Wrapped in `SafeAreaProvider`; tab bar height/padding derived from `useSafeAreaInsets().bottom` so it isn't covered by the Android gesture-nav bar or iOS home indicator |
 | `mobile/src/lib/api.ts` | FastAPI-adapted axios layer — `/cities/{slug}/listings`, `contact_phone`, `access_token`/`refresh_token` |
 | `mobile/src/lib/storage.ts` | expo-secure-store wrapper for JWT tokens + user object |
 | `mobile/src/hooks/useSaved.ts` | AsyncStorage bookmark hook (same pattern as web, different storage layer) |
 | `mobile/src/components/ListingCard.tsx` | React Native listing card: gradient image placeholder, price, WA button |
-| `mobile/src/screens/HomeScreen.tsx` | Dark hero, city picker, trending chips, category grid, fresh listings |
-| `mobile/src/screens/SearchScreen.tsx` | Debounced search (350ms), category tabs, city chip, FlatList results |
+| `mobile/src/screens/HomeScreen.tsx` | Dark hero with real logo mark next to headline, city picker, trending chips, category grid (emoji `fontSize: 34`), fresh listings |
+| `mobile/src/screens/SearchScreen.tsx` | Debounced search (350ms), category tabs (horizontal FlatList — `height:44`/`flexGrow:0`/centered `contentContainerStyle` to stop pills stretching to the list's full height), city chip, FlatList results |
 | `mobile/src/screens/ListingDetailScreen.tsx` | Photo gallery, thumbnail strip, sticky WhatsApp button, seller → SellerProfile |
 | `mobile/src/screens/SellerProfileScreen.tsx` | Avatar/initials, member since, active listings count, listings list |
-| `mobile/src/screens/LoginScreen.tsx` | OTP phone → code flow; stores access_token/refresh_token in SecureStore |
+| `mobile/src/screens/LoginScreen.tsx` | OTP phone → code flow; stores access_token/refresh_token in SecureStore; real logo image above the wordmark |
 | `mobile/src/screens/PostScreen.tsx` | 3-step wizard: details → photos (expo-image-picker) → contact |
 | `mobile/src/screens/SavedScreen.tsx` | AsyncStorage bookmark list with empty state |
 | `mobile/src/screens/ProfileScreen.tsx` | User avatar, name, phone, menu (My Listings, Saved, Edit, City), logout |
 | `mobile/src/screens/CityPickerScreen.tsx` | Searchable modal pulling cities from `/api/v1/cities` |
+| `mobile/src/screens/AdminScreen.tsx` | Admin panel: listing moderation, approve/reject, role management |
+| `mobile/eas.json` | EAS Build profiles: development (debug APK), preview (internal APK), production (AAB) |
+| `mobile/app.json` | Expo config + EAS project link (`@rajeshguntupalli59/localsindia`) + splash/permission config for store builds |
+| `mobile/assets/icon.png`, `android-icon-foreground.png`, `favicon.png`, `splash-icon.png` | Real LocalsIndia logo (mark-only for icon sizes, full mark+wordmark for splash) |
+| `mobile/assets/logo-mark-transparent.png` | Logo mark, white chroma-keyed transparent, for in-app use on colored/dark backgrounds |
 
 **To run:** `cd mobile && npm install && npx expo start`
+**To build for Play Store:** `cd mobile && eas build --platform android --profile preview|production`
 
 ---
 
-*Last updated: 2026-06-14 | Matches ARCHITECTURE.md*
+*Last updated: 2026-06-16 | Matches ARCHITECTURE.md*

@@ -1,14 +1,19 @@
-"""AI chat assistant — natural language listing search + FAQ via Claude Haiku."""
+"""AI chat assistant — natural language listing search + FAQ via Claude Haiku.
+
+Rate limits (per IP): 5 requests/minute · 20 requests/hour
+To change: update the @limiter.limit decorators on the chat() function below.
+"""
 from typing import Any
 
 import anthropic
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.database import get_db
+from app.core.limiter import limiter
 from app.models.city import City
 from app.services import search_svc
 
@@ -80,7 +85,9 @@ class ChatResponse(BaseModel):
 
 
 @router.post("", response_model=ChatResponse)
-async def chat(req: ChatRequest, db: AsyncSession = Depends(get_db)):
+@limiter.limit("5/minute")
+@limiter.limit("20/hour")
+async def chat(request: Request, req: ChatRequest, db: AsyncSession = Depends(get_db)):
     if not settings.ANTHROPIC_API_KEY:
         return ChatResponse(reply="Chat assistant is not configured yet. Please check back soon!")
 
