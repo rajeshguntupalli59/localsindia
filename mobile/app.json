@@ -8,6 +8,8 @@
     "scheme": "localsindia",
     "userInterfaceStyle": "light",
     "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
       "backgroundColor": "#F7921E"
     },
     "ios": {
@@ -25,6 +27,15 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      "expo-web-browser",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow LocalsIndia to access your photos so you can add pictures to your listings."
+        }
+      ]
+    ]
   }
 }
