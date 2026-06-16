@@ -59,16 +59,6 @@ function PostListingCta({ href }: { href: string }) {
   );
 }
 
-// ── Vertical hairline divider ─────────────────────────────────────────────────
-function NavDivider() {
-  return <div className="hidden md:block w-px h-[14px] bg-slate-200/70 mx-2 shrink-0" />;
-}
-
-// ── Ghost nav button/link base classes ─────────────────────────────────────────
-const ghostLink =
-  'hidden md:flex items-center h-8 px-3 rounded-xl text-[12.5px] font-medium ' +
-  'text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-colors duration-150';
-
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function SiteHeader({ citySlug, cityName }: Props) {
   const router = useRouter();
@@ -195,13 +185,6 @@ export default function SiteHeader({ citySlug, cityName }: Props) {
               aria-hidden
             />
           </button>
-
-          {/* Browse link */}
-          <Link href={citySlug ? `/${citySlug}` : '/'} className={ghostLink}>
-            Browse
-          </Link>
-
-          <NavDivider />
 
           {/* Language selector */}
           <LanguageSelector />
