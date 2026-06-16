@@ -85,6 +85,7 @@ export default function SearchScreen({ navigation, route }: any) {
         data={CATS}
         keyExtractor={c => c.label}
         style={styles.tabs}
+        contentContainerStyle={styles.tabsContent}
         renderItem={({ item }) => (
           <TouchableOpacity
             style={[styles.tab, item.label === catLabel && styles.activeTab]}
@@ -147,7 +148,8 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   cityChipText: { color: '#f97316', fontWeight: '600', fontSize: 12 },
-  tabs: { paddingLeft: 12, marginBottom: 4 },
+  tabs: { flexGrow: 0, flexShrink: 0, height: 44, marginBottom: 4 },
+  tabsContent: { alignItems: 'center', paddingLeft: 12 },
   tab: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 7, borderRadius: 20, marginRight: 6, backgroundColor: '#f3f4f6' },
   activeTab: { backgroundColor: '#f97316' },
   tabEmoji: { fontSize: 13, marginRight: 4 },

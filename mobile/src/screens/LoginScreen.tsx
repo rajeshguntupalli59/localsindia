@@ -1,9 +1,11 @@
-import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet, KeyboardAvoidingView, Platform, Image } from 'react-native';
 import { useState } from 'react';
 import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
 import { authApi } from '../lib/api';
 import { storage } from '../lib/storage';
+
+const LOGO = require('../../assets/logo-mark-transparent.png');
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -89,6 +91,7 @@ export default function LoginScreen({ navigation }: any) {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
+      <Image source={LOGO} style={styles.logoImage} resizeMode="contain" />
       <Text style={styles.logo}>LocalsIndia</Text>
       <Text style={styles.tagline}>Buy. Sell. Connect.</Text>
 
@@ -172,6 +175,7 @@ export default function LoginScreen({ navigation }: any) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: 'white', paddingHorizontal: 24, justifyContent: 'center' },
+  logoImage: { width: 64, height: 64, alignSelf: 'center', marginBottom: 8 },
   logo: { fontSize: 30, fontWeight: 'bold', color: '#f97316', textAlign: 'center', marginBottom: 4 },
   tagline: { fontSize: 14, color: '#9ca3af', textAlign: 'center', marginBottom: 40 },
   heading: { fontSize: 20, fontWeight: 'bold', color: '#111827', marginBottom: 6 },

@@ -1,9 +1,11 @@
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, TextInput, FlatList } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, TextInput, FlatList, Image } from 'react-native';
 import { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { listingsApi, citiesApi } from '../lib/api';
 import { storage } from '../lib/storage';
 import ListingCard from '../components/ListingCard';
+
+const LOGO = require('../../assets/logo-mark-transparent.png');
 
 const TRENDING = ['Tiffin Service', 'PG for Boys', 'Used Laptop', 'Honda Activa', 'Home Tutor'];
 const CATEGORIES = [
@@ -51,9 +53,12 @@ export default function HomeScreen({ navigation }: any) {
       {/* Hero */}
       <View style={styles.hero}>
         <View style={styles.heroHeader}>
-          <View>
-            <Text style={styles.heroTitle}>Buy. Sell. Connect.</Text>
-            <Text style={styles.heroCity}>In {cityName}.</Text>
+          <View style={styles.brandRow}>
+            <Image source={LOGO} style={styles.logo} resizeMode="contain" />
+            <View>
+              <Text style={styles.heroTitle}>Buy. Sell. Connect.</Text>
+              <Text style={styles.heroCity}>In {cityName}.</Text>
+            </View>
           </View>
           <TouchableOpacity
             style={styles.cityBtn}
@@ -129,6 +134,8 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f9fafb' },
   hero: { backgroundColor: '#111827', padding: 20, paddingTop: 60, paddingBottom: 24 },
   heroHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 },
+  brandRow: { flexDirection: 'row', alignItems: 'center', flex: 1 },
+  logo: { width: 38, height: 38, marginRight: 10 },
   heroTitle: { color: 'white', fontSize: 26, fontWeight: 'bold' },
   heroCity: { color: '#f97316', fontSize: 26, fontWeight: 'bold' },
   cityBtn: {
@@ -167,13 +174,13 @@ const styles = StyleSheet.create({
     margin: '1.5%',
     backgroundColor: 'white',
     borderRadius: 14,
-    padding: 12,
+    padding: 14,
     alignItems: 'center',
     shadowColor: '#000',
     shadowOpacity: 0.04,
     shadowRadius: 4,
     elevation: 1,
   },
-  categoryEmoji: { fontSize: 26, marginBottom: 5 },
+  categoryEmoji: { fontSize: 34, marginBottom: 6 },
   categoryLabel: { fontSize: 11, textAlign: 'center', color: '#374151', fontWeight: '500' },
 });
