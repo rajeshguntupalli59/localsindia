@@ -112,6 +112,19 @@ async def update_business(
     return await _get_active_business(business.id, db)
 
 
+@router.delete("/businesses/{business_id}", status_code=204)
+async def delete_business(
+    business_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    business = await _get_active_business(business_id, db)
+    if business.owner_id != current_user.id and current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Not authorised.")
+    business.deleted_at = datetime.now(timezone.utc)
+    await db.commit()
+
+
 @router.post("/businesses/{business_id}/claim", response_model=BusinessOut)
 async def claim_business(
     business_id: uuid.UUID,
