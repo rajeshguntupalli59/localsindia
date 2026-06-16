@@ -3,7 +3,7 @@ name: Deploy Frontend to Azure Static Web Apps
 on:
   workflow_dispatch:
   push:
-    branches: [master]
+    branches: [master, develop]
     paths:
       - 'frontend/**'
       - '.github/workflows/frontend-azure.yml'
@@ -25,6 +25,7 @@ jobs:
           app_location: /frontend
           api_location: ''
           output_location: ''
+          deployment_environment: ${{ github.ref_name == 'master' && 'production' || github.ref_name }}
         env:
           NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
           NEXT_PUBLIC_OTP_DEBUG: ${{ secrets.NEXT_PUBLIC_OTP_DEBUG }}
