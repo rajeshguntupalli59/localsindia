@@ -38,7 +38,8 @@
         {
           "photosPermission": "Allow LocalsIndia to access your photos so you can add pictures to your listings."
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "extra": {
       "eas": {
