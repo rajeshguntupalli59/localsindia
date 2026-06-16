@@ -130,12 +130,45 @@ async def create_listing(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    from app.models.category import Category
+
+    # Resolve city: accept either city_id UUID or city_slug string
+    city_id = body.city_id
+    if city_id is None:
+        if not body.city_slug:
+            raise HTTPException(status_code=422, detail="city_id or city_slug is required.")
+        city_result = await db.execute(
+            select(City).where(City.slug == body.city_slug.lower(), City.active == True)
+        )
+        city = city_result.scalar_one_or_none()
+        if not city:
+            raise HTTPException(status_code=404, detail=f"City '{body.city_slug}' not found.")
+        city_id = city.id
+
+    # Resolve category: accept either category_id UUID or category_slug string
+    category_id = body.category_id
+    if category_id is None:
+        if not body.category_slug:
+            raise HTTPException(status_code=422, detail="category_id or category_slug is required.")
+        cat_result = await db.execute(
+            select(Category).where(Category.slug == body.category_slug.lower())
+        )
+        cat = cat_result.scalar_one_or_none()
+        if not cat:
+            raise HTTPException(status_code=404, detail=f"Category '{body.category_slug}' not found.")
+        category_id = cat.id
+
+    # Auto-generate whatsapp_url from contact_phone if not provided
+    whatsapp_url = body.whatsapp_url
+    if not whatsapp_url and body.contact_phone.startswith("+91"):
+        whatsapp_url = f"https://wa.me/{body.contact_phone[1:]}"
+
     # BL-02: max 10 active listings per user per city (admins exempt)
     if current_user.role != "admin":
         count_result = await db.execute(
             select(func.count()).select_from(Listing).where(
                 Listing.user_id == current_user.id,
-                Listing.city_id == body.city_id,
+                Listing.city_id == city_id,
                 Listing.status.in_(["active", "pending"]),
                 Listing.deleted_at.is_(None),
             )
@@ -148,13 +181,13 @@ async def create_listing(
 
     listing = Listing(
         user_id=current_user.id,
-        city_id=body.city_id,
-        category_id=body.category_id,
+        city_id=city_id,
+        category_id=category_id,
         title=body.title,
         description=body.description,
         price=body.price,
         contact_phone=body.contact_phone,
-        whatsapp_url=body.whatsapp_url,
+        whatsapp_url=whatsapp_url,
         website_url=body.website_url,
         social_url=body.social_url,
         area=body.area,

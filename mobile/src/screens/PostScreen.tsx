@@ -1,6 +1,7 @@
 import {
   View, Text, TextInput, ScrollView, TouchableOpacity,
-  StyleSheet, Alert, Image, ActivityIndicator
+  StyleSheet, Alert, Image, ActivityIndicator,
+  KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { useState, useEffect } from 'react';
 import * as ImagePicker from 'expo-image-picker';
@@ -46,13 +47,15 @@ export default function PostScreen({ navigation }: any) {
 
   const pickImage = async () => {
     if (images.length >= 5) { Alert.alert('Max 5 photos allowed'); return; }
+    const remaining = 5 - images.length;
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
-      allowsEditing: true,
+      allowsMultipleSelection: true,
+      selectionLimit: remaining,
       quality: 0.7,
     });
-    if (!result.canceled && result.assets[0]) {
-      setImages(prev => [...prev, result.assets[0].uri]);
+    if (!result.canceled && result.assets.length > 0) {
+      setImages(prev => [...prev, ...result.assets.map(a => a.uri)].slice(0, 5));
     }
   };
 
@@ -150,7 +153,10 @@ export default function PostScreen({ navigation }: any) {
   }
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => step === 1 ? navigation.goBack() : setStep(s => s - 1)}>
@@ -165,7 +171,11 @@ export default function PostScreen({ navigation }: any) {
         <View style={[styles.progressBar, { width: `${(step / 3) * 100}%` }]} />
       </View>
 
-      <ScrollView contentContainerStyle={styles.body}>
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={styles.body}
+        keyboardShouldPersistTaps="handled"
+      >
 
         {step === 1 && (
           <>
@@ -293,7 +303,7 @@ export default function PostScreen({ navigation }: any) {
           </TouchableOpacity>
         )}
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -314,7 +324,7 @@ const styles = StyleSheet.create({
   stepIndicator: { fontSize: 13, color: '#9ca3af' },
   progressBg: { height: 3, backgroundColor: '#f3f4f6' },
   progressBar: { height: 3, backgroundColor: '#f97316' },
-  body: { padding: 16, paddingBottom: 100 },
+  body: { padding: 16, paddingBottom: 24 },
   stepTitle: { fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 4 },
   stepHint: { fontSize: 13, color: '#9ca3af', marginBottom: 20 },
   label: { fontSize: 13, fontWeight: '600', color: '#374151', marginTop: 16, marginBottom: 6 },
@@ -372,11 +382,8 @@ const styles = StyleSheet.create({
   countryCode: { fontSize: 15, marginRight: 6, color: '#374151' },
   phoneInput: { flex: 1, fontSize: 16, paddingVertical: 11, letterSpacing: 0.5 },
   footer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
     padding: 16,
+    paddingBottom: Platform.OS === 'ios' ? 28 : 16,
     backgroundColor: 'white',
     borderTopWidth: 1,
     borderTopColor: '#f3f4f6',

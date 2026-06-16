@@ -10,8 +10,10 @@ WA_RE = re.compile(r"^https://wa\.me/91\d{10}$")
 class ListingCreate(BaseModel):
     title: str
     description: str
-    category_id: uuid.UUID
-    city_id: uuid.UUID
+    category_id: uuid.UUID | None = None
+    city_id: uuid.UUID | None = None
+    category_slug: str | None = None
+    city_slug: str | None = None
     contact_phone: str
     price: float | None = None
     whatsapp_url: str | None = None
