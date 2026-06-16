@@ -19,8 +19,12 @@ const CATEGORIES = [
   { slug: 'businesses', label: 'Businesses', emoji: '🏪' },
 ];
 
+const API_BASE = 'https://localsindia-backend.azurewebsites.net/api/v1';
+
 export default function PostScreen({ navigation }: any) {
   const [user, setUser] = useState<any>(undefined);
+  const [citySlug, setCitySlug] = useState('hyderabad');
+  const [cityName, setCityName] = useState('Hyderabad');
   const [step, setStep] = useState(1);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -30,10 +34,14 @@ export default function PostScreen({ navigation }: any) {
   const [phone, setPhone] = useState('');
   const [images, setImages] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState('');
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
     storage.getUser().then(u => setUser(u)).catch(() => setUser(null));
+    storage.getCity().then(c => {
+      if (c) { setCitySlug(c.slug); setCityName(c.name); }
+    });
   }, []);
 
   const pickImage = async () => {
@@ -63,24 +71,49 @@ export default function PostScreen({ navigation }: any) {
     return true;
   };
 
+  const uploadPhoto = async (listingId: string, uri: string, index: number) => {
+    const token = await storage.getAccessToken();
+    const formData = new FormData();
+    formData.append('file', {
+      uri,
+      type: 'image/jpeg',
+      name: `photo_${index}.jpg`,
+    } as any);
+    await fetch(`${API_BASE}/upload/image/${listingId}`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token ?? ''}` },
+      body: formData,
+    });
+  };
+
   const submit = async () => {
     if (!validateStep3()) return;
     setLoading(true);
     try {
-      await listingsApi.create({
+      const listing = await listingsApi.create({
         title: title.trim(),
         description: description.trim(),
         price: price ? parseInt(price, 10) : null,
         area: area.trim() || null,
         category_slug: categorySlug,
         contact_phone: `+91${phone}`,
-        city_slug: 'hyderabad',
+        city_slug: citySlug,
       });
+
+      if (images.length > 0) {
+        for (let i = 0; i < images.length; i++) {
+          setUploadProgress(`Uploading photo ${i + 1}/${images.length}...`);
+          await uploadPhoto(listing.id, images[i], i);
+        }
+        setUploadProgress('');
+      }
+
       setSuccess(true);
     } catch {
       Alert.alert('Error', 'Failed to post listing. Please try again.');
     } finally {
       setLoading(false);
+      setUploadProgress('');
     }
   };
 
@@ -221,6 +254,7 @@ export default function PostScreen({ navigation }: any) {
         {step === 3 && (
           <>
             <Text style={styles.stepTitle}>Step 3 — Contact</Text>
+            <Text style={styles.stepHint}>Posting in {cityName}</Text>
 
             <Text style={styles.label}>WhatsApp Number *</Text>
             <View style={styles.phoneRow}>
@@ -253,7 +287,9 @@ export default function PostScreen({ navigation }: any) {
           </TouchableOpacity>
         ) : (
           <TouchableOpacity style={[styles.nextBtn, loading && styles.btnDisabled]} onPress={submit} disabled={loading}>
-            {loading ? <ActivityIndicator color="white" /> : <Text style={styles.nextBtnText}>Post Listing</Text>}
+            {loading
+              ? <Text style={styles.nextBtnText}>{uploadProgress || 'Posting...'}</Text>
+              : <Text style={styles.nextBtnText}>Post Listing</Text>}
           </TouchableOpacity>
         )}
       </View>

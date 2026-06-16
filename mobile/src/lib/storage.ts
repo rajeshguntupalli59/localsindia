@@ -33,4 +33,9 @@ export const storage = {
     const raw = await getItem('user');
     return raw ? JSON.parse(raw) : null;
   },
+  setCity: (slug: string, name: string) => setItem('city', JSON.stringify({ slug, name })),
+  getCity: async (): Promise<{ slug: string; name: string } | null> => {
+    const raw = await getItem('city');
+    return raw ? JSON.parse(raw) : null;
+  },
 };

@@ -2,6 +2,7 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet, TextInput, FlatLi
 import { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { listingsApi, citiesApi } from '../lib/api';
+import { storage } from '../lib/storage';
 import ListingCard from '../components/ListingCard';
 
 const TRENDING = ['Tiffin Service', 'PG for Boys', 'Used Laptop', 'Honda Activa', 'Home Tutor'];
@@ -25,12 +26,24 @@ export default function HomeScreen({ navigation }: any) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    storage.getCity().then(saved => {
+      if (saved) { setCitySlug(saved.slug); setCityName(saved.name); }
+    });
+  }, []);
+
+  useEffect(() => {
     setLoading(true);
     listingsApi.byCitySlug(citySlug, { page_size: '8' })
       .then(data => setListings(data))
       .catch(() => setListings([]))
       .finally(() => setLoading(false));
   }, [citySlug]);
+
+  const handleCitySelect = (c: any) => {
+    setCitySlug(c.slug);
+    setCityName(c.name);
+    storage.setCity(c.slug, c.name);
+  };
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
@@ -44,7 +57,7 @@ export default function HomeScreen({ navigation }: any) {
           </View>
           <TouchableOpacity
             style={styles.cityBtn}
-            onPress={() => navigation.navigate('CityPicker', { onSelect: (c: any) => { setCitySlug(c.slug); setCityName(c.name); } })}
+            onPress={() => navigation.navigate('CityPicker', { onSelect: handleCitySelect })}
           >
             <Ionicons name="location-outline" size={14} color="#f97316" />
             <Text style={styles.cityBtnText}>{cityName}</Text>
