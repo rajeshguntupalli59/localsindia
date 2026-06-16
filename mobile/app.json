@@ -23,7 +23,10 @@
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -36,6 +39,12 @@
           "photosPermission": "Allow LocalsIndia to access your photos so you can add pictures to your listings."
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "28f874d0-a40c-4089-90b9-34cf2bf0a83a"
+      }
+    },
+    "owner": "rajeshguntupalli59"
   }
 }
