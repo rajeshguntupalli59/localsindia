@@ -1,32 +1,25 @@
 import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { useState, useEffect, useRef } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { listingsApi } from '../lib/api';
+import { listingsApi, categoriesApi } from '../lib/api';
 import ListingCard from '../components/ListingCard';
 
-const CATS = [
-  { label: 'All', emoji: '🔍', slug: '' },
-  { label: 'Tiffin', emoji: '🍱', slug: 'tiffin' },
-  { label: 'PG / Rooms', emoji: '🏠', slug: 'pg-roommate' },
-  { label: 'Jobs', emoji: '💼', slug: 'jobs' },
-  { label: 'Vehicles', emoji: '🚗', slug: 'vehicles' },
-  { label: 'Electronics', emoji: '📱', slug: 'electronics' },
-  { label: 'Education', emoji: '📚', slug: 'education' },
-  { label: 'Events', emoji: '🎉', slug: 'events' },
-  { label: 'Businesses', emoji: '🏪', slug: 'businesses' },
-];
+type Category = { id: string; name: string; slug: string; icon: string };
 
 export default function SearchScreen({ navigation, route }: any) {
   const { citySlug = 'hyderabad', cityName = 'Hyderabad', q: initQ = '', categorySlug: initCat = '' } = route.params ?? {};
   const [query, setQuery] = useState(initQ);
   const [activeCity, setActiveCity] = useState(citySlug);
   const [activeCityName, setActiveCityName] = useState(cityName);
-  const [catLabel, setCatLabel] = useState(
-    CATS.find(c => c.slug === initCat)?.label ?? 'All'
-  );
+  const [activeCat, setActiveCat] = useState(initCat);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [listings, setListings] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    categoriesApi.list().then(setCategories).catch(() => {});
+  }, []);
 
   const doSearch = (q: string, cat: string, city: string) => {
     if (timer.current) clearTimeout(timer.current);
@@ -35,8 +28,7 @@ export default function SearchScreen({ navigation, route }: any) {
       try {
         const params: Record<string, string> = { page_size: '20' };
         if (q) params.q = q;
-        const catSlug = CATS.find(c => c.label === cat)?.slug;
-        if (catSlug) params.category_slug = catSlug;
+        if (cat) params.category_slug = cat;
         const data = await listingsApi.byCitySlug(city, params);
         setListings(data);
       } catch {
@@ -48,8 +40,10 @@ export default function SearchScreen({ navigation, route }: any) {
   };
 
   useEffect(() => {
-    doSearch(query, catLabel, activeCity);
-  }, [query, catLabel, activeCity]);
+    doSearch(query, activeCat, activeCity);
+  }, [query, activeCat, activeCity]);
+
+  const allCats: Category[] = [{ id: '', name: 'All', slug: '', icon: '🔍' }, ...categories];
 
   return (
     <View style={styles.container}>
@@ -78,21 +72,21 @@ export default function SearchScreen({ navigation, route }: any) {
         </TouchableOpacity>
       </View>
 
-      {/* Category tabs */}
+      {/* Category tabs — loaded from API */}
       <FlatList
         horizontal
         showsHorizontalScrollIndicator={false}
-        data={CATS}
-        keyExtractor={c => c.label}
+        data={allCats}
+        keyExtractor={c => c.slug}
         style={styles.tabs}
         contentContainerStyle={styles.tabsContent}
         renderItem={({ item }) => (
           <TouchableOpacity
-            style={[styles.tab, item.label === catLabel && styles.activeTab]}
-            onPress={() => setCatLabel(item.label)}
+            style={[styles.tab, item.slug === activeCat && styles.activeTab]}
+            onPress={() => setActiveCat(item.slug)}
           >
-            <Text style={styles.tabEmoji}>{item.emoji}</Text>
-            <Text style={[styles.tabText, item.label === catLabel && styles.activeTabText]}>{item.label}</Text>
+            <Text style={styles.tabEmoji}>{item.icon}</Text>
+            <Text style={[styles.tabText, item.slug === activeCat && styles.activeTabText]}>{item.name}</Text>
           </TouchableOpacity>
         )}
       />
