@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Plus, RefreshCw, CheckCircle, Trash2, Pencil } from 'lucide-react';
+import { ArrowLeft, Plus, RefreshCw, CheckCircle, Trash2, Pencil, Eye, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { api, ApiError } from '@/lib/api';
@@ -153,9 +153,17 @@ export default function MyListingsPage() {
                     {listing.price !== null ? formatPrice(listing.price) : 'Price on request'}
                   </p>
                   <p className="text-xs text-muted-foreground mt-0.5">{timeAgo(listing.created_at)}</p>
-                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full mt-1 inline-block ${STATUS_STYLES[listing.status] ?? ''}`}>
-                    {STATUS_LABELS[listing.status] ?? listing.status}
-                  </span>
+                  <div className="flex items-center gap-3 mt-1 flex-wrap">
+                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${STATUS_STYLES[listing.status] ?? ''}`}>
+                      {STATUS_LABELS[listing.status] ?? listing.status}
+                    </span>
+                    {listing.status === 'active' && (
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Eye className="w-3 h-3" /> {listing.view_count ?? 0}
+                        <MessageCircle className="w-3 h-3 ml-1.5" /> {listing.contact_click_count ?? 0}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -177,15 +185,22 @@ export default function MyListingsPage() {
                     color="text-green-600"
                   />
                 )}
-                {(listing.status === 'active' || listing.status === 'expired') && (
-                  <ActionBtn
-                    icon={<RefreshCw className="w-4 h-4" />}
-                    label="Renew"
-                    disabled={actionId === listing.id}
-                    onClick={() => handleRenew(listing.id)}
-                    color="text-slate-600"
-                  />
-                )}
+                {(listing.status === 'active' || listing.status === 'expired') && (() => {
+                  const renewedAt = listing.last_renewed_at ? new Date(listing.last_renewed_at) : null;
+                  const hoursLeft = renewedAt && listing.status === 'active'
+                    ? Math.max(0, 24 - (Date.now() - renewedAt.getTime()) / 3600000)
+                    : 0;
+                  const onCooldown = hoursLeft > 0.1;
+                  return (
+                    <ActionBtn
+                      icon={<RefreshCw className="w-4 h-4" />}
+                      label={onCooldown ? `${Math.ceil(hoursLeft)}h` : 'Renew'}
+                      disabled={actionId === listing.id || onCooldown}
+                      onClick={() => handleRenew(listing.id)}
+                      color={onCooldown ? 'text-muted-foreground' : 'text-slate-600'}
+                    />
+                  );
+                })()}
                 <ActionBtn
                   icon={<Trash2 className="w-4 h-4" />}
                   label="Delete"

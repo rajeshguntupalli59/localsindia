@@ -47,6 +47,7 @@ export default function ListingDetailPage() {
       .get(id)
       .then(l => {
         setListing(l);
+        api.listings.view(id); // fire-and-forget view count
       })
       .catch(() => router.replace(`/${citySlug}`))
       .finally(() => setLoading(false));

@@ -41,6 +41,9 @@ export interface Listing {
   social_url: string | null;
   area: string | null;
   wa_verified: boolean;
+  view_count?: number;
+  contact_click_count?: number;
+  last_renewed_at?: string | null;
   status: 'active' | 'pending' | 'flagged' | 'fulfilled' | 'expired';
   is_featured: boolean;
   expires_at: string;

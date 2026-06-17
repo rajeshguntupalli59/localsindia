@@ -16,6 +16,7 @@ import LoginScreen from './src/screens/LoginScreen';
 import CityPickerScreen from './src/screens/CityPickerScreen';
 import AdminScreen from './src/screens/AdminScreen';
 import ChatScreen from './src/screens/ChatScreen';
+import MyListingsScreen from './src/screens/MyListingsScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -82,6 +83,7 @@ export default function App() {
           />
           <Stack.Screen name="Admin" component={AdminScreen} />
           <Stack.Screen name="Chat" component={ChatScreen} />
+          <Stack.Screen name="MyListings" component={MyListingsScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>

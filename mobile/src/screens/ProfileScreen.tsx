@@ -61,7 +61,7 @@ export default function ProfileScreen({ navigation }: any) {
             <MenuItem
               icon="list-outline"
               label="My Listings"
-              onPress={() => navigation.navigate('Search', { citySlug: 'hyderabad', cityName: 'Hyderabad' })}
+              onPress={() => navigation.navigate('MyListings')}
             />
             <MenuItem
               icon="heart-outline"

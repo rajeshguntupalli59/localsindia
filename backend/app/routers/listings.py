@@ -303,27 +303,59 @@ async def renew_listing(
     listing = await _get_active_listing(listing_id, db)
     if listing.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not authorised.")
-    listing.expires_at = datetime.now(timezone.utc) + timedelta(days=RENEW_DAYS)
-    listing.status = "pending"  # needs re-approval after renew
+
+    now = datetime.now(timezone.utc)
+
+    # 24h cooldown on renew for active listings (expired listings can always renew)
+    if listing.status == "active" and listing.last_renewed_at:
+        hours_since = (now - listing.last_renewed_at).total_seconds() / 3600
+        if hours_since < 24:
+            hours_left = round(24 - hours_since, 1)
+            raise HTTPException(
+                status_code=429,
+                detail=f"Renew available in {hours_left}h",
+            )
+
+    listing.expires_at = now + timedelta(days=RENEW_DAYS)
+    listing.last_renewed_at = now
+    # Only require re-approval for expired/rejected listings, not active ones
+    if listing.status != "active":
+        listing.status = "pending"
     await db.commit()
     await db.refresh(listing)
     return listing
 
 
-@router.post("/listings/{listing_id}/wa-click", status_code=204)
-async def wa_click(listing_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
-    """Fire-and-forget: marks listing wa_verified=true on first WhatsApp tap."""
+@router.post("/listings/{listing_id}/view", status_code=204)
+async def record_view(listing_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
+    """Fire-and-forget: increments view_count on active listing."""
     result = await db.execute(
         select(Listing).where(
             Listing.id == listing_id,
             Listing.status == "active",
             Listing.deleted_at.is_(None),
-            Listing.wa_verified == False,
+        )
+    )
+    listing = result.scalar_one_or_none()
+    if listing:
+        listing.view_count = (listing.view_count or 0) + 1
+        await db.commit()
+
+
+@router.post("/listings/{listing_id}/wa-click", status_code=204)
+async def wa_click(listing_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
+    """Fire-and-forget: marks wa_verified=true + increments contact_click_count."""
+    result = await db.execute(
+        select(Listing).where(
+            Listing.id == listing_id,
+            Listing.status == "active",
+            Listing.deleted_at.is_(None),
         )
     )
     listing = result.scalar_one_or_none()
     if listing:
         listing.wa_verified = True
+        listing.contact_click_count = (listing.contact_click_count or 0) + 1
         await db.commit()
 
 

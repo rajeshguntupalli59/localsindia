@@ -85,24 +85,21 @@ export default function HomeScreen({ navigation }: any) {
         </ScrollView>
       </View>
 
-      {/* Categories */}
-      <Text style={styles.sectionTitle}>Browse by Category</Text>
-      <View style={styles.categoryGrid}>
-        {categories.map(cat => (
-          <TouchableOpacity
-            key={cat.slug}
-            style={styles.categoryCard}
-            onPress={() => navigation.navigate('Search', { citySlug, cityName, categorySlug: cat.slug })}
-          >
-            <Text style={styles.categoryEmoji}>{cat.icon}</Text>
-            <Text style={styles.categoryLabel}>{cat.name}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      {/* Fresh listings */}
+      {/* Fresh Near You — first for freshness */}
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Fresh Near You</Text>
+        <View>
+          <Text style={styles.sectionTitle}>Fresh Near You</Text>
+          {(() => {
+            const newToday = listings.filter(l =>
+              Date.now() - new Date(l.created_at).getTime() < 86400000
+            ).length;
+            return newToday > 0 ? (
+              <Text style={{ fontSize: 11, color: '#f97316', fontWeight: '600', marginTop: 1 }}>
+                {newToday} new today in {cityName}
+              </Text>
+            ) : null;
+          })()}
+        </View>
         <TouchableOpacity onPress={() => navigation.navigate('Search', { citySlug, cityName })}>
           <Text style={styles.viewAll}>View all →</Text>
         </TouchableOpacity>
@@ -115,6 +112,21 @@ export default function HomeScreen({ navigation }: any) {
             listing={l}
             onPress={() => navigation.navigate('ListingDetail', { id: l.id })}
           />
+        ))}
+      </View>
+
+      {/* Browse by Category */}
+      <Text style={[styles.sectionTitle, { paddingHorizontal: 16 }]}>Browse by Category</Text>
+      <View style={styles.categoryGrid}>
+        {categories.map(cat => (
+          <TouchableOpacity
+            key={cat.slug}
+            style={styles.categoryCard}
+            onPress={() => navigation.navigate('Search', { citySlug, cityName, categorySlug: cat.slug })}
+          >
+            <Text style={styles.categoryEmoji}>{cat.icon}</Text>
+            <Text style={styles.categoryLabel}>{cat.name}</Text>
+          </TouchableOpacity>
         ))}
       </View>
 

@@ -47,6 +47,21 @@ export const listingsApi = {
 
   waClick: (id: string) =>
     api.post(`/listings/${id}/wa-click`).catch(() => {}),
+
+  view: (id: string) =>
+    api.post(`/listings/${id}/view`).catch(() => {}),
+
+  mine: () =>
+    api.get('/listings/mine').then(r => r.data),
+
+  renew: (id: string) =>
+    api.post(`/listings/${id}/renew`).then(r => r.data),
+
+  fulfill: (id: string) =>
+    api.post(`/listings/${id}/fulfill`).then(r => r.data),
+
+  delete: (id: string) =>
+    api.delete(`/listings/${id}`).then(r => r.data),
 };
 
 export const authApi = {

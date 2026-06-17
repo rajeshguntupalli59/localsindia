@@ -131,6 +131,8 @@ export const api = {
         body: JSON.stringify({ reason }),
         token,
       }),
+    view: (id: string) =>
+      req<void>(`/api/v1/listings/${id}/view`, { method: 'POST' }).catch(() => {}),
     waClick: (id: string) =>
       req<void>(`/api/v1/listings/${id}/wa-click`, { method: 'POST' }).catch(() => {}),
     reviews: (id: string) =>
@@ -202,6 +204,14 @@ export const api = {
   users: {
     publicProfile: (userId: string) =>
       req<SellerProfile>(`/api/v1/users/${userId}/public-profile`),
+  },
+  savedSearches: {
+    list: (token: string) =>
+      req<{ id: string; city_slug: string; query_text: string | null; category_slug: string | null; created_at: string }[]>('/api/v1/saved-searches', { token }),
+    create: (data: { city_slug: string; query_text?: string; category_slug?: string }, token: string) =>
+      req<{ id: string }>('/api/v1/saved-searches', { method: 'POST', body: JSON.stringify(data), token }),
+    delete: (id: string, token: string) =>
+      req<void>(`/api/v1/saved-searches/${id}`, { method: 'DELETE', token }),
   },
   upload: {
     image: (listingId: string, file: File, token: string) => {

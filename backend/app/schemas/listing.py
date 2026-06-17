@@ -74,6 +74,9 @@ class ListingOut(BaseModel):
     status: str
     is_featured: bool
     wa_verified: bool = False
+    view_count: int = 0
+    contact_click_count: int = 0
+    last_renewed_at: datetime | None = None
     expires_at: datetime
     created_at: datetime
     city_id: uuid.UUID

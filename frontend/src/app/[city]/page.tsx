@@ -173,69 +173,22 @@ export default function CityHomePage() {
 
       <div className="page-wrap py-8 space-y-10">
 
-        {/* ── FEATURED SECTION ── */}
-        <AnimatePresence>
-          {(loading || featured.length > 0) && (
-            <motion.section
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.35 }}
-            >
-              <div className="flex items-center justify-between mb-5">
-                <h2 className="section-title flex items-center gap-2">
-                  <Star className="w-4 h-4 fill-current" style={{ color: 'var(--li-featured)' }} strokeWidth={0} />
-                  {t('city2.featuredListings')}
-                </h2>
-                <Link
-                  href={`/${citySlug}/search?featured=true`}
-                  className="text-sm font-semibold transition-colors hover:underline"
-                  style={{ color: 'var(--li-primary)' }}
-                >
-                  {t('listing.viewAll')}
-                </Link>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {loading
-                  ? Array.from({ length: 3 }).map((_, i) => <ListingCardSkeleton key={i} />)
-                  : featured.map((l, i) => (
-                      <motion.div
-                        key={l.id}
-                        initial={{ opacity: 0, y: 12 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.07 }}
-                      >
-                        <ListingCard listing={l} citySlug={citySlug} />
-                      </motion.div>
-                    ))}
-              </div>
-            </motion.section>
-          )}
-        </AnimatePresence>
-
-        {/* ── POST CTA BANNER ── */}
-        {!loading && (
-          <Link
-            href={`/${citySlug}/classifieds/post`}
-            className="flex items-center justify-between gap-4 px-5 py-4 rounded-2xl border-2 border-dashed transition-all hover:border-orange-400 hover:bg-orange-50 group"
-            style={{ borderColor: 'var(--li-primary)', background: 'rgba(247,146,30,0.04)' }}
-          >
-            <div>
-              <p className="font-bold text-sm" style={{ color: 'var(--li-primary)' }}>
-                Have something to sell in {city?.name ?? citySlug}?
-              </p>
-              <p className="text-xs text-slate-500 mt-0.5">Post a listing — it&apos;s free and takes 2 minutes</p>
-            </div>
-            <span className="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold text-white group-hover:scale-105 transition-transform" style={{ background: 'var(--li-primary)' }}>
-              <Plus className="w-3.5 h-3.5" strokeWidth={2.8} /> Post Listing
-            </span>
-          </Link>
-        )}
-
-        {/* ── LATEST LISTINGS ── */}
+        {/* ── LATEST LISTINGS — first section for freshness ── */}
         <section>
           <div className="flex items-center justify-between mb-5">
-            <h2 className="section-title">{t('city2.latestListings')}</h2>
+            <div>
+              <h2 className="section-title">{t('city2.latestListings')}</h2>
+              {!loading && (() => {
+                const newToday = [...featured, ...latest].filter(l =>
+                  Date.now() - new Date(l.created_at).getTime() < 86400000
+                ).length;
+                return newToday > 0 ? (
+                  <p className="text-xs mt-0.5 font-semibold" style={{ color: 'var(--li-primary)' }}>
+                    {newToday} new today in {city?.name}
+                  </p>
+                ) : null;
+              })()}
+            </div>
 
             {/* Sort dropdown */}
             <div className="relative">
@@ -317,6 +270,65 @@ export default function CityHomePage() {
             </div>
           )}
         </section>
+
+        {/* ── POST CTA BANNER ── */}
+        {!loading && (
+          <Link
+            href={`/${citySlug}/classifieds/post`}
+            className="flex items-center justify-between gap-4 px-5 py-4 rounded-2xl border-2 border-dashed transition-all hover:border-orange-400 hover:bg-orange-50 group"
+            style={{ borderColor: 'var(--li-primary)', background: 'rgba(247,146,30,0.04)' }}
+          >
+            <div>
+              <p className="font-bold text-sm" style={{ color: 'var(--li-primary)' }}>
+                Have something to sell in {city?.name ?? citySlug}?
+              </p>
+              <p className="text-xs text-slate-500 mt-0.5">Post a listing — it&apos;s free and takes 2 minutes</p>
+            </div>
+            <span className="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold text-white group-hover:scale-105 transition-transform" style={{ background: 'var(--li-primary)' }}>
+              <Plus className="w-3.5 h-3.5" strokeWidth={2.8} /> Post Listing
+            </span>
+          </Link>
+        )}
+
+        {/* ── FEATURED SECTION ── */}
+        <AnimatePresence>
+          {(loading || featured.length > 0) && (
+            <motion.section
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.35 }}
+            >
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="section-title flex items-center gap-2">
+                  <Star className="w-4 h-4 fill-current" style={{ color: 'var(--li-featured)' }} strokeWidth={0} />
+                  {t('city2.featuredListings')}
+                </h2>
+                <Link
+                  href={`/${citySlug}/search?featured=true`}
+                  className="text-sm font-semibold transition-colors hover:underline"
+                  style={{ color: 'var(--li-primary)' }}
+                >
+                  {t('listing.viewAll')}
+                </Link>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                {loading
+                  ? Array.from({ length: 3 }).map((_, i) => <ListingCardSkeleton key={i} />)
+                  : featured.map((l, i) => (
+                      <motion.div
+                        key={l.id}
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.07 }}
+                      >
+                        <ListingCard listing={l} citySlug={citySlug} />
+                      </motion.div>
+                    ))}
+              </div>
+            </motion.section>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Ad banner above footer */}
