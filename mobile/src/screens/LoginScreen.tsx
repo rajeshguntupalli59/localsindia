@@ -1,6 +1,6 @@
 import {
   View, Text, TextInput, TouchableOpacity, Alert, StyleSheet,
-  KeyboardAvoidingView, Platform, Image, ActivityIndicator,
+  KeyboardAvoidingView, Platform, Image, ActivityIndicator, ScrollView,
 } from 'react-native';
 import { useState } from 'react';
 import * as WebBrowser from 'expo-web-browser';
@@ -134,8 +134,14 @@ export default function LoginScreen({ navigation }: any) {
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
     >
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
       {/* Header band */}
       <View style={styles.header}>
         <Image source={LOGO} style={styles.logo} resizeMode="contain" />
@@ -289,12 +295,14 @@ export default function LoginScreen({ navigation }: any) {
           <Text style={styles.privacyLink}>Privacy Policy</Text>.
         </Text>
       </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: 'white' },
+  scrollContent: { flexGrow: 1 },
 
   // Header band (dark, like website)
   header: { backgroundColor: '#111827', paddingHorizontal: 24, paddingTop: 72, paddingBottom: 24 },
