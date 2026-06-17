@@ -94,7 +94,7 @@ class ChatResponse(BaseModel):
 @limiter.limit("20/hour")
 async def chat(request: Request, req: ChatRequest, db: AsyncSession = Depends(get_db)):
     if not settings.GOOGLE_AI_KEY:
-        return ChatResponse(reply="Chat assistant is not configured yet. Please check back soon!")
+        return ChatResponse(reply="Our AI assistant is temporarily unavailable while we upgrade to a higher usage plan. As LocalsIndia grows, we're scaling our AI capacity — check back soon! In the meantime, use the search bar to find listings in your city.")
 
     client = genai.Client(api_key=settings.GOOGLE_AI_KEY)
 
@@ -164,7 +164,7 @@ async def chat(request: Request, req: ChatRequest, db: AsyncSession = Depends(ge
 
     except Exception as e:
         logger.error("Gemini API error: %s %s", type(e).__name__, str(e))
-        return ChatResponse(reply="Chat assistant is temporarily unavailable. Please try again later.")
+        return ChatResponse(reply="Our AI assistant is temporarily unavailable while we upgrade to a higher usage plan. As LocalsIndia grows, we're scaling our AI capacity — check back soon! In the meantime, use the search bar to find listings in your city.")
 
     listing_snippets = [
         ListingSnippet(
