@@ -1,12 +1,11 @@
-"""AI chat assistant — natural language listing search + FAQ via Google Gemini Flash.
+"""AI chat assistant — natural language listing search + FAQ via Claude Haiku.
 
 Rate limits (per IP): 5 requests/minute · 20 requests/hour
 To change: update the @limiter.limit decorators on the chat() function below.
 """
 import logging
 
-from google import genai
-from google.genai import types
+import anthropic
 from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel
 from sqlalchemy import select
@@ -41,28 +40,26 @@ When a user wants to FIND, SEARCH, or LOOK FOR listings (e.g. "PG in Hyderabad u
 If no city is mentioned, ask which city they are in before searching.
 Keep replies short, friendly, and in the same language the user writes in."""
 
-_SEARCH_TOOL = types.Tool(
-    function_declarations=[
-        types.FunctionDeclaration(
-            name="search_listings",
-            description="Search active listings on LocalsIndia matching the user's intent",
-            parameters=types.Schema(
-                type=types.Type.OBJECT,
-                properties={
-                    "query": types.Schema(
-                        type=types.Type.STRING,
-                        description="Search terms extracted from the user message (e.g. 'PG under 7000', 'iPhone 13')",
-                    ),
-                    "city_slug": types.Schema(
-                        type=types.Type.STRING,
-                        description="City slug such as 'hyderabad', 'chennai', 'bengaluru', 'mumbai'",
-                    ),
+_TOOLS = [
+    {
+        "name": "search_listings",
+        "description": "Search active listings on LocalsIndia matching the user's intent",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "Search terms extracted from the user message (e.g. 'PG under 7000', 'iPhone 13')",
                 },
-                required=["query", "city_slug"],
-            ),
-        )
-    ]
-)
+                "city_slug": {
+                    "type": "string",
+                    "description": "City slug such as 'hyderabad', 'chennai', 'bengaluru', 'mumbai'",
+                },
+            },
+            "required": ["query", "city_slug"],
+        },
+    }
+]
 
 
 class ChatMessage(BaseModel):
@@ -93,45 +90,37 @@ class ChatResponse(BaseModel):
 @limiter.limit("5/minute")
 @limiter.limit("20/hour")
 async def chat(request: Request, req: ChatRequest, db: AsyncSession = Depends(get_db)):
-    if not settings.GOOGLE_AI_KEY:
+    if not settings.ANTHROPIC_API_KEY:
         return ChatResponse(reply="Chat assistant is not configured yet. Please check back soon!")
 
-    client = genai.Client(api_key=settings.GOOGLE_AI_KEY)
+    client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
 
-    # Build history for Gemini (alternating user/model)
-    history = []
+    # Build message history
+    messages = []
     for m in req.history[-10:]:
-        role = "user" if m.role == "user" else "model"
-        history.append(types.Content(role=role, parts=[types.Part(text=m.content)]))
+        role = "user" if m.role == "user" else "assistant"
+        messages.append({"role": role, "content": m.content})
 
     user_text = req.message
     if req.city_slug:
         user_text = f"[User's current city: {req.city_slug}] {req.message}"
+    messages.append({"role": "user", "content": user_text})
 
     found_listings: list[dict] = []
     resolved_city_slug: str | None = None
 
     try:
-        chat_session = client.chats.create(
-            model="gemini-2.0-flash",
-            config=types.GenerateContentConfig(
-                system_instruction=_SYSTEM,
-                tools=[_SEARCH_TOOL],
-            ),
-            history=history,
+        response = client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=1024,
+            system=_SYSTEM,
+            tools=_TOOLS,
+            messages=messages,
         )
 
-        response = chat_session.send_message(user_text)
-
-        # Check if Gemini wants to call the search function
-        fn_call = None
-        for part in response.candidates[0].content.parts:
-            if part.function_call and part.function_call.name == "search_listings":
-                fn_call = part.function_call
-                break
-
-        if fn_call:
-            args = dict(fn_call.args)
+        if response.stop_reason == "tool_use":
+            tool_block = next(b for b in response.content if b.type == "tool_use")
+            args = tool_block.input
             resolved_city_slug = args.get("city_slug") or req.city_slug or "hyderabad"
             query = args.get("query", "")
 
@@ -154,19 +143,36 @@ async def chat(request: Request, req: ChatRequest, db: AsyncSession = Depends(ge
             else:
                 tool_result = f"City '{resolved_city_slug}' not found on LocalsIndia."
 
-            # Send tool result back to Gemini
-            final = chat_session.send_message(
-                types.Part.from_function_response(
-                    name="search_listings",
-                    response={"result": tool_result},
-                )
+            # Send tool result back to Claude
+            messages.append({"role": "assistant", "content": response.content})
+            messages.append({
+                "role": "user",
+                "content": [{
+                    "type": "tool_result",
+                    "tool_use_id": tool_block.id,
+                    "content": tool_result,
+                }],
+            })
+
+            final = client.messages.create(
+                model="claude-haiku-4-5-20251001",
+                max_tokens=1024,
+                system=_SYSTEM,
+                tools=_TOOLS,
+                messages=messages,
             )
-            reply_text = final.text or "Here are the results!"
+            reply_text = next(
+                (b.text for b in final.content if hasattr(b, "text")),
+                "Here are the results!"
+            )
         else:
-            reply_text = response.text or "How can I help you?"
+            reply_text = next(
+                (b.text for b in response.content if hasattr(b, "text")),
+                "How can I help you?"
+            )
 
     except Exception as e:
-        logger.error("Gemini API error: %s %s", type(e).__name__, str(e))
+        logger.error("Claude API error: %s %s", type(e).__name__, str(e))
         return ChatResponse(reply="Chat assistant is temporarily unavailable. Please try again later.")
 
     listing_snippets = [

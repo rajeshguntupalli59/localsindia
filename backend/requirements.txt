@@ -16,7 +16,6 @@ aiofiles==25.1.0
 setuptools>=70.0.0
 razorpay==1.4.2
 anthropic>=0.40.0
-google-genai>=1.0.0
 slowapi==0.1.9
 pytest==9.0.3
 pytest-asyncio==1.4.0
