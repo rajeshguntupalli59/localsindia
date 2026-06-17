@@ -7,6 +7,7 @@ from typing import Any
 
 import anthropic
 from fastapi import APIRouter, Depends, Request
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -104,13 +105,18 @@ async def chat(request: Request, req: ChatRequest, db: AsyncSession = Depends(ge
     found_listings: list[dict] = []
     resolved_city_slug: str | None = None
 
-    resp = await client.messages.create(
-        model="claude-haiku-4-5-20251001",
-        max_tokens=512,
-        system=_SYSTEM,
-        tools=_TOOLS,
-        messages=messages,
-    )
+    try:
+        resp = await client.messages.create(
+            model="claude-3-5-haiku-20241022",
+            max_tokens=512,
+            system=_SYSTEM,
+            tools=_TOOLS,
+            messages=messages,
+        )
+    except anthropic.PermissionDeniedError:
+        return ChatResponse(reply="Chat assistant is temporarily unavailable. Please try again later.")
+    except anthropic.AuthenticationError:
+        return ChatResponse(reply="Chat assistant is not configured correctly. Please contact support.")
 
     if resp.stop_reason == "tool_use":
         tool_block = next(b for b in resp.content if b.type == "tool_use")
@@ -144,7 +150,7 @@ async def chat(request: Request, req: ChatRequest, db: AsyncSession = Depends(ge
         })
 
         final = await client.messages.create(
-            model="claude-haiku-4-5-20251001",
+            model="claude-3-5-haiku-20241022",
             max_tokens=512,
             system=_SYSTEM,
             tools=_TOOLS,
