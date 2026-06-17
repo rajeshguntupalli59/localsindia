@@ -579,13 +579,14 @@ export default function PostListingPage() {
                     </p>
                   </div>
                   <button
+                    type="button"
                     onClick={() => save({ whatsapp_toggle: !form.whatsapp_toggle })}
-                    className="w-12 h-7 rounded-full relative shrink-0 transition-colors"
+                    className="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors duration-200 focus:outline-none"
                     style={{ background: form.whatsapp_toggle ? 'var(--li-wa-green)' : '#D1D5DB' }}
                   >
                     <span
-                      className="absolute top-0.5 w-6 h-6 bg-white rounded-full shadow-md transition-transform"
-                      style={{ transform: form.whatsapp_toggle ? 'translateX(20px)' : 'translateX(2px)' }}
+                      className="inline-block h-5 w-5 rounded-full bg-white shadow-md transition-transform duration-200"
+                      style={{ transform: form.whatsapp_toggle ? 'translateX(22px)' : 'translateX(2px)' }}
                     />
                   </button>
                 </div>

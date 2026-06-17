@@ -579,7 +579,7 @@ function SearchInner() {
               icon={SearchX}
               title={q ? `No results for "${q}"` : catParam ? 'No listings in this category yet' : 'No listings yet'}
               description={q ? 'Try different keywords or remove filters' : 'Be the first to post in this city!'}
-              action={{ label: q ? 'Browse all listings' : 'Post free listing', href: q ? `/${citySlug}` : `/${citySlug}/classifieds/post` }}
+              action={{ label: q ? 'Browse all listings' : 'Post Listing', href: q ? `/${citySlug}` : `/${citySlug}/classifieds/post` }}
             />
           )}
         </div>

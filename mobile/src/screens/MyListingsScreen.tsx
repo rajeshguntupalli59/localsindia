@@ -144,7 +144,7 @@ export default function MyListingsScreen({ navigation }: any) {
             <Text style={styles.emptyTitle}>No listings yet</Text>
             <Text style={styles.emptyText}>Post your first listing — it's free!</Text>
             <TouchableOpacity style={styles.postBtn} onPress={() => navigation.navigate('Post')}>
-              <Text style={styles.postBtnText}>Post Free Listing</Text>
+              <Text style={styles.postBtnText}>Post Listing</Text>
             </TouchableOpacity>
           </View>
         ) : (

@@ -36,7 +36,7 @@ const SOCIALS = [
 const FOOTER_LINKS: Record<string, { label: string; href: string }[]> = {
   Platform: [
     { label: 'Browse Listings', href: '/search' },
-    { label: '📢 Post Free Listing', href: '/auth/login?mode=signup' },
+    { label: '📢 Post Listing', href: '/auth/login?mode=signup' },
     { label: 'All Cities', href: '/cities' },
     { label: 'Invite a Business', href: '/invite' },
   ],

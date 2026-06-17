@@ -90,7 +90,7 @@ export default function CityLaunchPage() {
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl font-bold text-white text-base shadow-lg transition-transform hover:scale-[1.02]"
                 style={{ background: 'var(--li-primary)', boxShadow: '0 8px 24px -6px rgba(255,107,53,0.5)' }}
               >
-                Post Free Listing <ArrowRight className="w-4 h-4" />
+                Post Listing <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
                 href={`/${citySlug}`}

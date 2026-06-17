@@ -226,7 +226,7 @@ export default async function SeoCategoryPage({
                 className="shrink-0 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-opacity hover:opacity-90"
                 style={{ background: 'var(--li-primary)' }}
               >
-                + Post Free
+                + Post Listing
               </Link>
             </div>
           </div>
@@ -247,7 +247,7 @@ export default async function SeoCategoryPage({
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-white font-bold text-sm transition-opacity hover:opacity-90"
                 style={{ background: 'var(--li-primary)' }}
               >
-                Post Free Listing
+                Post Listing
               </Link>
             </div>
           ) : (

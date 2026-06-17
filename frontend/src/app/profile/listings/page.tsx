@@ -128,7 +128,7 @@ export default function MyListingsPage() {
             icon={Plus}
             title="No listings yet"
             description="Post your first free listing and reach thousands of buyers in your city"
-            action={{ label: 'Post Free', href: '/' }}
+            action={{ label: 'Post Listing', href: '/' }}
           />
         ) : (
           listings.map((listing, i) => (
