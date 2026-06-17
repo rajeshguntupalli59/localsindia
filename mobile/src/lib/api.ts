@@ -50,6 +50,9 @@ export const listingsApi = {
 };
 
 export const authApi = {
+  signin: (phone: string) =>
+    api.post('/auth/signin', { phone }).then(r => r.data),
+
   sendOtp: (phone: string) =>
     api.post('/auth/otp/send', { phone }).then(r => r.data),
 
@@ -59,7 +62,6 @@ export const authApi = {
   getMe: () =>
     api.get('/auth/me').then(r => r.data),
 
-  // Fetch full profile using an explicit token (before it's stored in SecureStore)
   getMeWithToken: (token: string) =>
     api.get('/auth/me', { headers: { Authorization: `Bearer ${token}` } }).then(r => r.data),
 

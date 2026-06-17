@@ -1,49 +1,98 @@
-import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet, KeyboardAvoidingView, Platform, Image } from 'react-native';
+import {
+  View, Text, TextInput, TouchableOpacity, Alert, StyleSheet,
+  KeyboardAvoidingView, Platform, Image, ActivityIndicator,
+} from 'react-native';
 import { useState } from 'react';
 import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
 import { authApi } from '../lib/api';
 import { storage } from '../lib/storage';
+import { Ionicons } from '@expo/vector-icons';
 
 const LOGO = require('../../assets/logo-mark-transparent.png');
+const API_BASE = 'https://localsindia-backend.azurewebsites.net/api/v1';
 
 WebBrowser.maybeCompleteAuthSession();
 
-const API_BASE = 'https://localsindia-backend.azurewebsites.net/api/v1';
+type Step = 'phone' | 'otp' | 'name';
+type Mode = 'signin' | 'signup';
 
 export default function LoginScreen({ navigation }: any) {
+  const [mode, setMode] = useState<Mode>('signin');
+  const [step, setStep] = useState<Step>('phone');
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
-  const [step, setStep] = useState<'phone' | 'otp'>('phone');
+  const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
   const [debugOtp, setDebugOtp] = useState<string | undefined>(undefined);
+  const [pendingTokens, setPendingTokens] = useState<{ access: string; refresh: string } | null>(null);
 
-  const sendOtp = async () => {
+  const finish = async (data: any) => {
+    await storage.setTokens(data.access_token, data.refresh_token ?? '');
+    await storage.setUser(data.user);
+    navigation.replace('Main');
+  };
+
+  const handlePhoneSubmit = async () => {
     if (!/^[6-9]\d{9}$/.test(phone)) {
-      Alert.alert('Invalid number', 'Enter a valid 10-digit Indian mobile number starting with 6-9.');
+      Alert.alert('Invalid number', 'Enter a valid 10-digit Indian mobile number.');
       return;
     }
     setLoading(true);
     try {
-      const data = await authApi.sendOtp(`+91${phone}`);
-      if (data.otp) setDebugOtp(data.otp); // debug mode OTP shown on screen
-      setStep('otp');
-    } catch {
-      Alert.alert('Error', 'Could not send OTP. Please try again.');
+      if (mode === 'signin') {
+        const data = await authApi.signin(`+91${phone}`);
+        await finish(data);
+      } else {
+        const data = await authApi.sendOtp(`+91${phone}`);
+        if (data.otp) setDebugOtp(data.otp);
+        setStep('otp');
+      }
+    } catch (err: any) {
+      const status = err?.response?.status;
+      if (status === 404 && mode === 'signin') {
+        Alert.alert('No account found', 'Create a free account first.', [
+          { text: 'Create Account', onPress: () => setMode('signup') },
+          { text: 'Cancel', style: 'cancel' },
+        ]);
+      } else {
+        Alert.alert('Error', mode === 'signin' ? 'Sign in failed. Please try again.' : 'Could not send OTP. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const verifyOtp = async () => {
+  const handleOtpSubmit = async () => {
+    if (otp.length < 6) { Alert.alert('Invalid OTP', 'Enter the 6-digit code.'); return; }
     setLoading(true);
     try {
       const data = await authApi.verifyOtp(`+91${phone}`, otp);
-      await storage.setTokens(data.access_token, data.refresh_token);
-      await storage.setUser(data.user);
+      if (data.is_new_user) {
+        setPendingTokens({ access: data.access_token, refresh: data.refresh_token ?? '' });
+        await storage.setUser(data.user);
+        setStep('name');
+      } else {
+        await finish(data);
+      }
+    } catch {
+      Alert.alert('Invalid OTP', 'The code is incorrect. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleNameSubmit = async () => {
+    if (name.trim().length < 2) { Alert.alert('Name required', 'Enter at least 2 characters.'); return; }
+    if (!pendingTokens) return;
+    setLoading(true);
+    try {
+      await storage.setTokens(pendingTokens.access, pendingTokens.refresh);
+      const updated = await authApi.updateName(name.trim());
+      await storage.setUser(updated);
       navigation.replace('Main');
     } catch {
-      Alert.alert('Invalid OTP', 'The code you entered is incorrect. Please try again.');
+      Alert.alert('Error', 'Could not save your name. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -54,30 +103,19 @@ export default function LoginScreen({ navigation }: any) {
     try {
       const googleUrl = `${API_BASE}/auth/google?mobile=1`;
       const callbackScheme = Linking.createURL('auth/callback');
-
       const result = await WebBrowser.openAuthSessionAsync(googleUrl, callbackScheme);
-
-      if (result.type !== 'success') return; // user cancelled
-
+      if (result.type !== 'success') return;
       const parsed = Linking.parse(result.url);
       const params = parsed.queryParams as Record<string, string> ?? {};
-
       if (params.error) {
-        Alert.alert('Google sign-in failed', params.error === 'google_denied'
-          ? 'Sign-in was cancelled.'
-          : 'Google sign-in failed. Please try again.');
+        Alert.alert('Google sign-in failed', params.error === 'google_denied' ? 'Sign-in was cancelled.' : 'Please try again.');
         return;
       }
-
-      const { token, refresh, name } = params;
+      const { token, refresh } = params;
       if (!token) { Alert.alert('Error', 'No token received.'); return; }
-
       await storage.setTokens(token, refresh ?? '');
-
-      // Fetch full profile so user object has id/phone/role
       const user = await authApi.getMe();
       await storage.setUser(user);
-
       navigation.replace('Main');
     } catch {
       Alert.alert('Error', 'Google sign-in failed. Please try again.');
@@ -86,100 +124,227 @@ export default function LoginScreen({ navigation }: any) {
     }
   };
 
+  const headingText = step === 'name' ? 'Almost done!' : mode === 'signup' ? 'Create account' : 'Welcome back';
+  const subtextMap = {
+    phone: mode === 'signup' ? 'Verify your number to get started' : 'Enter your number to sign in instantly',
+    otp: `Code sent to +91 ${phone}`,
+    name: 'Tell us your name to complete setup',
+  };
+
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <Image source={LOGO} style={styles.logoImage} resizeMode="contain" />
-      <Text style={styles.logo}>LocalsIndia</Text>
-      <Text style={styles.tagline}>Buy. Sell. Connect.</Text>
+      {/* Header band */}
+      <View style={styles.header}>
+        <Image source={LOGO} style={styles.logo} resizeMode="contain" />
+        <Text style={styles.brandName}>LocalsIndia</Text>
+        <Text style={styles.tagline}>Buy. Sell. Connect.</Text>
 
-      <Text style={styles.heading}>
-        {step === 'phone' ? 'Enter your WhatsApp number' : 'Enter OTP'}
-      </Text>
-      <Text style={styles.subtext}>
-        {step === 'phone'
-          ? "We'll send a verification code to your number."
-          : `Code sent to +91 ${phone}`}
-      </Text>
+        <Text style={styles.heading}>{headingText}</Text>
+        <Text style={styles.subtext}>{subtextMap[step]}</Text>
 
-      {step === 'phone' ? (
-        <>
-          {/* Google sign-in */}
-          <TouchableOpacity
-            style={[styles.googleBtn, loading && styles.btnDisabled]}
-            onPress={signInWithGoogle}
-            disabled={loading}
-          >
-            <Text style={styles.googleIcon}>G</Text>
-            <Text style={styles.googleBtnText}>Continue with Google</Text>
-          </TouchableOpacity>
-
-          <View style={styles.dividerRow}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>or use your phone</Text>
-            <View style={styles.dividerLine} />
+        {/* Sign In / Sign Up tabs — only on phone step */}
+        {step === 'phone' && (
+          <View style={styles.tabRow}>
+            <TouchableOpacity
+              style={[styles.tab, mode === 'signin' && styles.tabActive]}
+              onPress={() => setMode('signin')}
+            >
+              <Text style={[styles.tabText, mode === 'signin' && styles.tabTextActive]}>Sign In</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.tab, mode === 'signup' && styles.tabActive]}
+              onPress={() => setMode('signup')}
+            >
+              <Text style={[styles.tabText, mode === 'signup' && styles.tabTextActive]}>Create Account</Text>
+            </TouchableOpacity>
           </View>
+        )}
+      </View>
 
-          <View style={styles.phoneRow}>
-            <Text style={styles.countryCode}>🇮🇳 +91</Text>
-            <TextInput
-              style={styles.phoneInput}
-              value={phone}
-              onChangeText={setPhone}
-              placeholder="98765 43210"
-              keyboardType="phone-pad"
-              maxLength={10}
-            />
-          </View>
-          <TouchableOpacity
-            style={[styles.btn, loading && styles.btnDisabled]}
-            onPress={sendOtp}
-            disabled={loading}
-          >
-            <Text style={styles.btnText}>{loading ? 'Sending…' : 'Send OTP →'}</Text>
-          </TouchableOpacity>
-        </>
-      ) : (
-        <>
-          {debugOtp && (
-            <View style={styles.debugBox}>
-              <Text style={styles.debugText}>Debug OTP: {debugOtp}</Text>
+      <View style={styles.body}>
+
+        {/* ── Step 1: Phone ── */}
+        {step === 'phone' && (
+          <>
+            <TouchableOpacity
+              style={[styles.googleBtn, loading && styles.btnDisabled]}
+              onPress={signInWithGoogle}
+              disabled={loading}
+            >
+              <Text style={styles.googleIcon}>G</Text>
+              <Text style={styles.googleBtnText}>Continue with Google</Text>
+            </TouchableOpacity>
+
+            <View style={styles.dividerRow}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>or use your phone</Text>
+              <View style={styles.dividerLine} />
             </View>
-          )}
-          <TextInput
-            style={styles.otpInput}
-            value={otp}
-            onChangeText={setOtp}
-            placeholder="6-digit code"
-            keyboardType="number-pad"
-            maxLength={6}
-            autoFocus
-          />
-          <TouchableOpacity
-            style={[styles.btn, loading && styles.btnDisabled]}
-            onPress={verifyOtp}
-            disabled={loading}
-          >
-            <Text style={styles.btnText}>{loading ? 'Verifying…' : 'Verify & Continue →'}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => setStep('phone')} style={styles.backLink}>
-            <Text style={styles.backLinkText}>← Change number</Text>
-          </TouchableOpacity>
-        </>
-      )}
+
+            <Text style={styles.label}>Mobile Number</Text>
+            <View style={styles.phoneRow}>
+              <Text style={styles.countryCode}>🇮🇳 +91</Text>
+              <TextInput
+                style={styles.phoneInput}
+                value={phone}
+                onChangeText={setPhone}
+                placeholder="98765 43210"
+                keyboardType="phone-pad"
+                maxLength={10}
+              />
+            </View>
+
+            <TouchableOpacity
+              style={[styles.btn, loading && styles.btnDisabled]}
+              onPress={handlePhoneSubmit}
+              disabled={loading}
+            >
+              {loading
+                ? <ActivityIndicator color="white" />
+                : <Text style={styles.btnText}>{mode === 'signin' ? 'Sign In →' : 'Send OTP →'}</Text>}
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => setMode(mode === 'signin' ? 'signup' : 'signin')} style={styles.switchLink}>
+              <Text style={styles.switchLinkText}>
+                {mode === 'signin' ? 'New to LocalsIndia? ' : 'Already have an account? '}
+                <Text style={styles.switchLinkAction}>{mode === 'signin' ? 'Create free account' : 'Sign in'}</Text>
+              </Text>
+            </TouchableOpacity>
+          </>
+        )}
+
+        {/* ── Step 2: OTP ── */}
+        {step === 'otp' && (
+          <>
+            {debugOtp && (
+              <View style={styles.debugBox}>
+                <Text style={styles.debugText}>Debug OTP: {debugOtp}</Text>
+              </View>
+            )}
+
+            <Text style={styles.label}>6-digit OTP</Text>
+            <TextInput
+              style={styles.otpInput}
+              value={otp}
+              onChangeText={t => setOtp(t.replace(/\D/g, '').slice(0, 6))}
+              placeholder="------"
+              keyboardType="number-pad"
+              maxLength={6}
+              autoFocus
+            />
+
+            <TouchableOpacity
+              style={[styles.btn, (loading || otp.length < 6) && styles.btnDisabled]}
+              onPress={handleOtpSubmit}
+              disabled={loading || otp.length < 6}
+            >
+              {loading
+                ? <ActivityIndicator color="white" />
+                : <Text style={styles.btnText}>Verify OTP</Text>}
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => { setStep('phone'); setOtp(''); setDebugOtp(undefined); }} style={styles.switchLink}>
+              <Text style={styles.switchLinkAction}>← Change number</Text>
+            </TouchableOpacity>
+          </>
+        )}
+
+        {/* ── Step 3: Name (new users only) ── */}
+        {step === 'name' && (
+          <>
+            <Text style={styles.label}>Your Name</Text>
+            <View style={styles.nameRow}>
+              <Ionicons name="person-outline" size={18} color="#9ca3af" style={styles.nameIcon} />
+              <TextInput
+                style={styles.nameInput}
+                value={name}
+                onChangeText={setName}
+                placeholder="e.g. Rajesh Kumar"
+                autoFocus
+                maxLength={60}
+              />
+            </View>
+            <Text style={styles.hint}>This is shown to other users on your listings</Text>
+
+            <TouchableOpacity
+              style={[styles.btn, (loading || name.trim().length < 2) && styles.btnDisabled]}
+              onPress={handleNameSubmit}
+              disabled={loading || name.trim().length < 2}
+            >
+              {loading
+                ? <ActivityIndicator color="white" />
+                : <Text style={styles.btnText}>Continue →</Text>}
+            </TouchableOpacity>
+          </>
+        )}
+
+        {/* Privacy notice */}
+        <Text style={styles.privacy}>
+          By continuing, you agree to our{' '}
+          <Text style={styles.privacyLink}>Terms of Service</Text>
+          {' '}and{' '}
+          <Text style={styles.privacyLink}>Privacy Policy</Text>.
+        </Text>
+      </View>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: 'white', paddingHorizontal: 24, justifyContent: 'center' },
-  logoImage: { width: 64, height: 64, alignSelf: 'center', marginBottom: 8 },
-  logo: { fontSize: 30, fontWeight: 'bold', color: '#f97316', textAlign: 'center', marginBottom: 4 },
-  tagline: { fontSize: 14, color: '#9ca3af', textAlign: 'center', marginBottom: 40 },
-  heading: { fontSize: 20, fontWeight: 'bold', color: '#111827', marginBottom: 6 },
-  subtext: { fontSize: 13, color: '#6b7280', marginBottom: 24 },
+  container: { flex: 1, backgroundColor: 'white' },
+
+  // Header band (dark, like website)
+  header: { backgroundColor: '#111827', paddingHorizontal: 24, paddingTop: 72, paddingBottom: 24 },
+  logo: { width: 48, height: 48, marginBottom: 6 },
+  brandName: { fontSize: 26, fontWeight: 'bold', color: '#f97316', marginBottom: 2 },
+  tagline: { fontSize: 13, color: 'rgba(255,255,255,0.5)', marginBottom: 20 },
+  heading: { fontSize: 22, fontWeight: 'bold', color: 'white', marginBottom: 4 },
+  subtext: { fontSize: 13, color: 'rgba(255,255,255,0.6)', marginBottom: 16 },
+
+  // Tabs
+  tabRow: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 12,
+    padding: 4,
+    marginTop: 4,
+  },
+  tab: { flex: 1, paddingVertical: 8, borderRadius: 10, alignItems: 'center' },
+  tabActive: { backgroundColor: 'white' },
+  tabText: { fontSize: 13, fontWeight: '600', color: 'rgba(255,255,255,0.7)' },
+  tabTextActive: { color: '#111827' },
+
+  // Body
+  body: { flex: 1, paddingHorizontal: 24, paddingTop: 28 },
+
+  // Google button
+  googleBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    borderWidth: 1.5,
+    borderColor: '#e5e7eb',
+    borderRadius: 12,
+    padding: 14,
+    backgroundColor: 'white',
+    marginBottom: 8,
+  },
+  googleIcon: { fontSize: 18, fontWeight: '700', color: '#4285F4' },
+  googleBtnText: { fontSize: 15, fontWeight: '600', color: '#374151' },
+
+  // Divider
+  dividerRow: { flexDirection: 'row', alignItems: 'center', marginVertical: 16, gap: 10 },
+  dividerLine: { flex: 1, height: 1, backgroundColor: '#e5e7eb' },
+  dividerText: { fontSize: 12, color: '#9ca3af', fontWeight: '500' },
+
+  // Form
+  label: { fontSize: 13, fontWeight: '600', color: '#374151', marginBottom: 8 },
+  hint: { fontSize: 11, color: '#9ca3af', marginTop: 4, marginBottom: 16 },
+
   phoneRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -191,39 +356,43 @@ const styles = StyleSheet.create({
   },
   countryCode: { fontSize: 16, marginRight: 8, color: '#374151' },
   phoneInput: { flex: 1, fontSize: 18, paddingVertical: 14, letterSpacing: 1 },
-  debugBox: { backgroundColor: '#fef3c7', borderRadius: 8, padding: 10, marginBottom: 12 },
-  debugText: { color: '#92400e', fontWeight: '700', textAlign: 'center' },
+
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    marginBottom: 4,
+  },
+  nameIcon: { marginRight: 8 },
+  nameInput: { flex: 1, fontSize: 16, paddingVertical: 14 },
+
   otpInput: {
     borderWidth: 1,
     borderColor: '#d1d5db',
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 14,
-    fontSize: 24,
-    letterSpacing: 8,
+    fontSize: 28,
+    letterSpacing: 12,
     textAlign: 'center',
     marginBottom: 16,
   },
-  btn: { backgroundColor: '#f97316', borderRadius: 12, padding: 16, alignItems: 'center' },
+
+  debugBox: { backgroundColor: '#fef3c7', borderRadius: 8, padding: 10, marginBottom: 12 },
+  debugText: { color: '#92400e', fontWeight: '700', textAlign: 'center' },
+
+  // Buttons
+  btn: { backgroundColor: '#f97316', borderRadius: 12, padding: 16, alignItems: 'center', marginBottom: 16 },
   btnDisabled: { backgroundColor: '#fdba74' },
   btnText: { color: 'white', fontSize: 17, fontWeight: '700' },
-  backLink: { marginTop: 16, alignItems: 'center' },
-  backLinkText: { color: '#f97316', fontSize: 14 },
-  googleBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    borderWidth: 1.5,
-    borderColor: '#e5e7eb',
-    borderRadius: 12,
-    padding: 14,
-    backgroundColor: 'white',
-    marginBottom: 4,
-  },
-  googleIcon: { fontSize: 18, fontWeight: '700', color: '#4285F4' },
-  googleBtnText: { fontSize: 15, fontWeight: '600', color: '#374151' },
-  dividerRow: { flexDirection: 'row', alignItems: 'center', marginVertical: 16, gap: 10 },
-  dividerLine: { flex: 1, height: 1, backgroundColor: '#e5e7eb' },
-  dividerText: { fontSize: 12, color: '#9ca3af', fontWeight: '500' },
+
+  switchLink: { alignItems: 'center', marginBottom: 8 },
+  switchLinkText: { fontSize: 13, color: '#6b7280', textAlign: 'center' },
+  switchLinkAction: { color: '#f97316', fontWeight: '600' },
+
+  privacy: { fontSize: 11, color: '#9ca3af', textAlign: 'center', marginTop: 24, lineHeight: 16 },
+  privacyLink: { color: '#6b7280', textDecorationLine: 'underline' },
 });
