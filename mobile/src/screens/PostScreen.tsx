@@ -112,8 +112,9 @@ export default function PostScreen({ navigation }: any) {
       }
 
       setSuccess(true);
-    } catch {
-      Alert.alert('Error', 'Failed to post listing. Please try again.');
+    } catch (err: any) {
+      const detail = err?.response?.data?.detail || err?.message || 'Please try again.';
+      Alert.alert('Error', `Failed to post listing: ${detail}`);
     } finally {
       setLoading(false);
       setUploadProgress('');
