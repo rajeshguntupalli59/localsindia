@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { useState, useEffect } from 'react';
 import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system';
 import { Ionicons } from '@expo/vector-icons';
 import { listingsApi, categoriesApi } from '../lib/api';
 import { storage } from '../lib/storage';
@@ -93,13 +94,19 @@ export default function PostScreen({ navigation }: any) {
 
   const uploadPhoto = async (listingId: string, uri: string, index: number) => {
     const token = await storage.getAccessToken();
-    const formData = new FormData();
-    formData.append('file', { uri, type: 'image/jpeg', name: `photo_${index}.jpg` } as any);
-    await fetch(`${API_BASE}/upload/image/${listingId}`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token ?? ''}` },
-      body: formData,
-    });
+    const result = await FileSystem.uploadAsync(
+      `${API_BASE}/upload/image/${listingId}`,
+      uri,
+      {
+        fieldName: 'file',
+        httpMethod: 'POST',
+        uploadType: FileSystem.FileSystemUploadType.MULTIPART,
+        headers: { Authorization: `Bearer ${token ?? ''}` },
+      }
+    );
+    if (result.status >= 400) {
+      throw new Error(`Photo upload failed (${result.status})`);
+    }
   };
 
   const submit = async () => {
