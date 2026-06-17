@@ -104,6 +104,14 @@ export default function PostScreen({ navigation }: any) {
 
       setSuccess(true);
     } catch (err: any) {
+      const status = err?.response?.status;
+      if (status === 401) {
+        await storage.clear();
+        Alert.alert('Session expired', 'Please sign in again.', [
+          { text: 'Sign In', onPress: () => navigation.replace('Login') },
+        ]);
+        return;
+      }
       const detail = err?.response?.data?.detail || err?.message || 'Please try again.';
       Alert.alert('Error', `Failed to post listing: ${detail}`);
     } finally {
