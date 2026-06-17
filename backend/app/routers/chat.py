@@ -3,10 +3,13 @@
 Rate limits (per IP): 5 requests/minute · 20 requests/hour
 To change: update the @limiter.limit decorators on the chat() function below.
 """
+import logging
 from typing import Any
 
 import anthropic
 from fastapi import APIRouter, Depends, Request
+
+logger = logging.getLogger(__name__)
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from sqlalchemy import select
@@ -113,10 +116,15 @@ async def chat(request: Request, req: ChatRequest, db: AsyncSession = Depends(ge
             tools=_TOOLS,
             messages=messages,
         )
-    except (anthropic.PermissionDeniedError, anthropic.NotFoundError):
+    except (anthropic.PermissionDeniedError, anthropic.NotFoundError) as e:
+        logger.error("Anthropic API error (permission/not found): %s %s", type(e).__name__, str(e))
         return ChatResponse(reply="Chat assistant is temporarily unavailable. Please try again later.")
-    except anthropic.AuthenticationError:
+    except anthropic.AuthenticationError as e:
+        logger.error("Anthropic API auth error: %s", str(e))
         return ChatResponse(reply="Chat assistant is not configured correctly. Please contact support.")
+    except Exception as e:
+        logger.error("Anthropic API unexpected error: %s %s", type(e).__name__, str(e))
+        return ChatResponse(reply=f"Chat error: {type(e).__name__}: {str(e)[:200]}")
 
     if resp.stop_reason == "tool_use":
         tool_block = next(b for b in resp.content if b.type == "tool_use")
