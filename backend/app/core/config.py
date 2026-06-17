@@ -28,6 +28,7 @@ class Settings(BaseSettings):
     ADMIN_PASSWORD_HASH: str = ""
 
     ANTHROPIC_API_KEY: str = ""
+    GOOGLE_AI_KEY: str = ""
 
     RAZORPAY_KEY_ID: str = ""
     RAZORPAY_KEY_SECRET: str = ""
