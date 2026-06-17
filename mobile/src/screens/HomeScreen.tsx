@@ -1,24 +1,13 @@
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, TextInput, FlatList, Image } from 'react-native';
 import { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { listingsApi, citiesApi } from '../lib/api';
+import { listingsApi, citiesApi, categoriesApi } from '../lib/api';
 import { storage } from '../lib/storage';
 import ListingCard from '../components/ListingCard';
 
 const LOGO = require('../../assets/logo-mark-transparent.png');
 
 const TRENDING = ['Tiffin Service', 'PG for Boys', 'Used Laptop', 'Honda Activa', 'Home Tutor'];
-const CATEGORIES = [
-  { label: 'Tiffin', slug: 'tiffin', emoji: '🍱' },
-  { label: 'PG / Rooms', slug: 'pg-roommate', emoji: '🏠' },
-  { label: 'Jobs', slug: 'jobs', emoji: '💼' },
-  { label: 'Vehicles', slug: 'vehicles', emoji: '🚗' },
-  { label: 'Electronics', slug: 'electronics', emoji: '📱' },
-  { label: 'Education', slug: 'education', emoji: '📚' },
-  { label: 'Events', slug: 'events', emoji: '🎉' },
-  { label: 'Businesses', slug: 'businesses', emoji: '🏪' },
-  { label: 'Doctors', slug: 'doctors', emoji: '🩺' },
-];
 
 type Listing = any;
 
@@ -26,12 +15,14 @@ export default function HomeScreen({ navigation }: any) {
   const [citySlug, setCitySlug] = useState('hyderabad');
   const [cityName, setCityName] = useState('Hyderabad');
   const [listings, setListings] = useState<Listing[]>([]);
+  const [categories, setCategories] = useState<{id: string; name: string; slug: string; icon: string}[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     storage.getCity().then(saved => {
       if (saved) { setCitySlug(saved.slug); setCityName(saved.name); }
     });
+    categoriesApi.list().then(setCategories).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -97,14 +88,14 @@ export default function HomeScreen({ navigation }: any) {
       {/* Categories */}
       <Text style={styles.sectionTitle}>Browse by Category</Text>
       <View style={styles.categoryGrid}>
-        {CATEGORIES.map(cat => (
+        {categories.map(cat => (
           <TouchableOpacity
             key={cat.slug}
             style={styles.categoryCard}
             onPress={() => navigation.navigate('Search', { citySlug, cityName, categorySlug: cat.slug })}
           >
-            <Text style={styles.categoryEmoji}>{cat.emoji}</Text>
-            <Text style={styles.categoryLabel}>{cat.label}</Text>
+            <Text style={styles.categoryEmoji}>{cat.icon}</Text>
+            <Text style={styles.categoryLabel}>{cat.name}</Text>
           </TouchableOpacity>
         ))}
       </View>

@@ -6,20 +6,8 @@ import {
 import { useState, useEffect } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
-import { listingsApi } from '../lib/api';
+import { listingsApi, categoriesApi } from '../lib/api';
 import { storage } from '../lib/storage';
-
-const CATEGORIES = [
-  { slug: 'tiffin', label: 'Tiffin', emoji: '🍱' },
-  { slug: 'pg-roommate', label: 'PG / Rooms', emoji: '🏠' },
-  { slug: 'jobs', label: 'Jobs', emoji: '💼' },
-  { slug: 'vehicles', label: 'Vehicles', emoji: '🚗' },
-  { slug: 'electronics', label: 'Electronics', emoji: '📱' },
-  { slug: 'education', label: 'Education', emoji: '📚' },
-  { slug: 'events', label: 'Events', emoji: '🎉' },
-  { slug: 'businesses', label: 'Businesses', emoji: '🏪' },
-  { slug: 'doctors', label: 'Doctors', emoji: '🩺' },
-];
 
 const API_BASE = 'https://localsindia-backend.azurewebsites.net/api/v1';
 
@@ -27,6 +15,7 @@ export default function PostScreen({ navigation }: any) {
   const [user, setUser] = useState<any>(undefined);
   const [citySlug, setCitySlug] = useState('hyderabad');
   const [cityName, setCityName] = useState('Hyderabad');
+  const [categories, setCategories] = useState<{id: string; name: string; slug: string; icon: string}[]>([]);
   const [step, setStep] = useState(1);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -44,6 +33,7 @@ export default function PostScreen({ navigation }: any) {
     storage.getCity().then(c => {
       if (c) { setCitySlug(c.slug); setCityName(c.name); }
     });
+    categoriesApi.list().then(setCategories).catch(() => {});
   }, []);
 
   const pickImage = async () => {
@@ -194,14 +184,14 @@ export default function PostScreen({ navigation }: any) {
 
             <Text style={styles.label}>Category *</Text>
             <View style={styles.catGrid}>
-              {CATEGORIES.map(c => (
+              {categories.map(c => (
                 <TouchableOpacity
                   key={c.slug}
                   style={[styles.catCard, categorySlug === c.slug && styles.catCardActive]}
                   onPress={() => setCategorySlug(c.slug)}
                 >
-                  <Text style={styles.catEmoji}>{c.emoji}</Text>
-                  <Text style={[styles.catLabel, categorySlug === c.slug && styles.catLabelActive]}>{c.label}</Text>
+                  <Text style={styles.catEmoji}>{c.icon}</Text>
+                  <Text style={[styles.catLabel, categorySlug === c.slug && styles.catLabelActive]}>{c.name}</Text>
                 </TouchableOpacity>
               ))}
             </View>

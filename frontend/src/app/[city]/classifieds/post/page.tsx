@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, X, CheckCircle, ArrowLeft, ArrowRight, Sparkles, Lightbulb, Camera, MapPin, Tag, UtensilsCrossed, Building2, Briefcase, Car, Smartphone, CalendarDays, Store, GraduationCap, Globe, Share2 } from 'lucide-react';
+import { Upload, X, CheckCircle, ArrowLeft, ArrowRight, Sparkles, Lightbulb, Camera, MapPin, Tag, UtensilsCrossed, Building2, Briefcase, Car, Smartphone, CalendarDays, Store, GraduationCap, Globe, Share2, Stethoscope, Wrench, Home, Package, ShoppingBag } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import Link from 'next/link';
 import { api, ApiError } from '@/lib/api';
@@ -19,8 +19,20 @@ const STEPS = [
 ];
 
 const CATEGORY_ICONS: Record<string, LucideIcon> = {
-  tiffin: UtensilsCrossed, 'pg-roommate': Building2, jobs: Briefcase, vehicles: Car,
-  electronics: Smartphone, events: CalendarDays, businesses: Store, education: GraduationCap,
+  tiffin: UtensilsCrossed,
+  'pg-roommate': Building2,
+  jobs: Briefcase,
+  vehicles: Car,
+  electronics: Smartphone,
+  events: CalendarDays,
+  businesses: Store,
+  education: GraduationCap,
+  doctors: Stethoscope,
+  services: Wrench,
+  classifieds: Tag,
+  'real-estate': Home,
+  furniture: Package,
+  fashion: ShoppingBag,
 };
 
 interface FormData {
