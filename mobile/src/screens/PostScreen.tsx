@@ -18,6 +18,7 @@ const CATEGORIES = [
   { slug: 'education', label: 'Education', emoji: '📚' },
   { slug: 'events', label: 'Events', emoji: '🎉' },
   { slug: 'businesses', label: 'Businesses', emoji: '🏪' },
+  { slug: 'doctors', label: 'Doctors', emoji: '🩺' },
 ];
 
 const API_BASE = 'https://localsindia-backend.azurewebsites.net/api/v1';

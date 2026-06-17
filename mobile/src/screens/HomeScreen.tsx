@@ -17,6 +17,7 @@ const CATEGORIES = [
   { label: 'Education', slug: 'education', emoji: '📚' },
   { label: 'Events', slug: 'events', emoji: '🎉' },
   { label: 'Businesses', slug: 'businesses', emoji: '🏪' },
+  { label: 'Doctors', slug: 'doctors', emoji: '🩺' },
 ];
 
 type Listing = any;
