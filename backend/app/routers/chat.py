@@ -107,13 +107,13 @@ async def chat(request: Request, req: ChatRequest, db: AsyncSession = Depends(ge
 
     try:
         resp = await client.messages.create(
-            model="claude-3-5-haiku-20241022",
+            model="claude-haiku-4-5-20251001",
             max_tokens=512,
             system=_SYSTEM,
             tools=_TOOLS,
             messages=messages,
         )
-    except anthropic.PermissionDeniedError:
+    except (anthropic.PermissionDeniedError, anthropic.NotFoundError):
         return ChatResponse(reply="Chat assistant is temporarily unavailable. Please try again later.")
     except anthropic.AuthenticationError:
         return ChatResponse(reply="Chat assistant is not configured correctly. Please contact support.")
@@ -150,7 +150,7 @@ async def chat(request: Request, req: ChatRequest, db: AsyncSession = Depends(ge
         })
 
         final = await client.messages.create(
-            model="claude-3-5-haiku-20241022",
+            model="claude-haiku-4-5-20251001",
             max_tokens=512,
             system=_SYSTEM,
             tools=_TOOLS,
