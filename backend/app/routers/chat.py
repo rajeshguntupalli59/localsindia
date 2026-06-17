@@ -4,12 +4,10 @@ Rate limits (per IP): 5 requests/minute · 20 requests/hour
 To change: update the @limiter.limit decorators on the chat() function below.
 """
 import logging
-import json
-from typing import Any
 
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 from fastapi import APIRouter, Depends, Request
-from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -43,20 +41,20 @@ When a user wants to FIND, SEARCH, or LOOK FOR listings (e.g. "PG in Hyderabad u
 If no city is mentioned, ask which city they are in before searching.
 Keep replies short, friendly, and in the same language the user writes in."""
 
-_SEARCH_TOOL = genai.protos.Tool(
+_SEARCH_TOOL = types.Tool(
     function_declarations=[
-        genai.protos.FunctionDeclaration(
+        types.FunctionDeclaration(
             name="search_listings",
             description="Search active listings on LocalsIndia matching the user's intent",
-            parameters=genai.protos.Schema(
-                type=genai.protos.Type.OBJECT,
+            parameters=types.Schema(
+                type=types.Type.OBJECT,
                 properties={
-                    "query": genai.protos.Schema(
-                        type=genai.protos.Type.STRING,
+                    "query": types.Schema(
+                        type=types.Type.STRING,
                         description="Search terms extracted from the user message (e.g. 'PG under 7000', 'iPhone 13')",
                     ),
-                    "city_slug": genai.protos.Schema(
-                        type=genai.protos.Type.STRING,
+                    "city_slug": types.Schema(
+                        type=types.Type.STRING,
                         description="City slug such as 'hyderabad', 'chennai', 'bengaluru', 'mumbai'",
                     ),
                 },
@@ -98,18 +96,13 @@ async def chat(request: Request, req: ChatRequest, db: AsyncSession = Depends(ge
     if not settings.GOOGLE_AI_KEY:
         return ChatResponse(reply="Chat assistant is not configured yet. Please check back soon!")
 
-    genai.configure(api_key=settings.GOOGLE_AI_KEY)
-    model = genai.GenerativeModel(
-        model_name="gemini-1.5-flash",
-        system_instruction=_SYSTEM,
-        tools=[_SEARCH_TOOL],
-    )
+    client = genai.Client(api_key=settings.GOOGLE_AI_KEY)
 
     # Build history for Gemini (alternating user/model)
     history = []
     for m in req.history[-10:]:
         role = "user" if m.role == "user" else "model"
-        history.append({"role": role, "parts": [m.content]})
+        history.append(types.Content(role=role, parts=[types.Part(text=m.content)]))
 
     user_text = req.message
     if req.city_slug:
@@ -119,13 +112,21 @@ async def chat(request: Request, req: ChatRequest, db: AsyncSession = Depends(ge
     resolved_city_slug: str | None = None
 
     try:
-        chat_session = model.start_chat(history=history)
+        chat_session = client.chats.create(
+            model="gemini-2.0-flash",
+            config=types.GenerateContentConfig(
+                system_instruction=_SYSTEM,
+                tools=[_SEARCH_TOOL],
+            ),
+            history=history,
+        )
+
         response = chat_session.send_message(user_text)
 
         # Check if Gemini wants to call the search function
         fn_call = None
-        for part in response.parts:
-            if hasattr(part, "function_call") and part.function_call.name == "search_listings":
+        for part in response.candidates[0].content.parts:
+            if part.function_call and part.function_call.name == "search_listings":
                 fn_call = part.function_call
                 break
 
@@ -155,13 +156,9 @@ async def chat(request: Request, req: ChatRequest, db: AsyncSession = Depends(ge
 
             # Send tool result back to Gemini
             final = chat_session.send_message(
-                genai.protos.Content(
-                    parts=[genai.protos.Part(
-                        function_response=genai.protos.FunctionResponse(
-                            name="search_listings",
-                            response={"result": tool_result},
-                        )
-                    )]
+                types.Part.from_function_response(
+                    name="search_listings",
+                    response={"result": tool_result},
                 )
             )
             reply_text = final.text or "Here are the results!"
