@@ -116,15 +116,9 @@ async def chat(request: Request, req: ChatRequest, db: AsyncSession = Depends(ge
             tools=_TOOLS,
             messages=messages,
         )
-    except (anthropic.PermissionDeniedError, anthropic.NotFoundError) as e:
-        logger.error("Anthropic API error (permission/not found): %s %s", type(e).__name__, str(e))
-        return ChatResponse(reply="Chat assistant is temporarily unavailable. Please try again later.")
-    except anthropic.AuthenticationError as e:
-        logger.error("Anthropic API auth error: %s", str(e))
-        return ChatResponse(reply="Chat assistant is not configured correctly. Please contact support.")
     except Exception as e:
-        logger.error("Anthropic API unexpected error: %s %s", type(e).__name__, str(e))
-        return ChatResponse(reply=f"Chat error: {type(e).__name__}: {str(e)[:200]}")
+        logger.error("Anthropic API error: %s %s", type(e).__name__, str(e))
+        return ChatResponse(reply=f"[DEBUG] {type(e).__name__}: {str(e)[:300]}")
 
     if resp.stop_reason == "tool_use":
         tool_block = next(b for b in resp.content if b.type == "tool_use")
