@@ -42,7 +42,7 @@ const FOOTER_LINKS: Record<string, { label: string; href: string }[]> = {
   ],
   Company: [
     { label: 'About Us', href: '/about' },
-    { label: 'Contact', href: 'mailto:rajeshguntupalli59@gmail.com' },
+    { label: 'Contact', href: '/contact' },
   ],
   Legal: [
     { label: 'Privacy Policy', href: '/privacy' },
