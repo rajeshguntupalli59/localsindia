@@ -49,3 +49,22 @@ app.include_router(chat.router)
 @app.get("/api/v1/health")
 async def health():
     return {"status": "ok", "service": "localindia-api"}
+
+
+@app.get("/api/v1/chat-ping")
+async def chat_ping():
+    """Debug: test Anthropic connectivity from Azure without tools."""
+    import anthropic
+    key = settings.ANTHROPIC_API_KEY
+    if not key:
+        return {"error": "no key"}
+    client = anthropic.Anthropic(api_key=key)
+    try:
+        resp = client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=20,
+            messages=[{"role": "user", "content": "say hi"}],
+        )
+        return {"status": "ok", "reply": resp.content[0].text}
+    except Exception as e:
+        return {"status": "error", "type": type(e).__name__, "detail": str(e)[:300]}
