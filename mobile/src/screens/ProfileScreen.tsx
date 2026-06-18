@@ -1,5 +1,6 @@
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Image } from 'react-native';
-import { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { authApi } from '../lib/api';
 import { storage } from '../lib/storage';
@@ -7,9 +8,15 @@ import { storage } from '../lib/storage';
 export default function ProfileScreen({ navigation }: any) {
   const [user, setUser] = useState<any>(null);
 
-  useEffect(() => {
-    storage.getUser().then(u => setUser(u));
-  }, []);
+  useFocusEffect(useCallback(() => {
+    storage.getUser().then(u => {
+      if (!u) {
+        navigation.replace('Login');
+      } else {
+        setUser(u);
+      }
+    });
+  }, [navigation]));
 
   const handleLogout = () => {
     Alert.alert('Log out', 'Are you sure you want to log out?', [
@@ -99,19 +106,7 @@ export default function ProfileScreen({ navigation }: any) {
             />
           </View>
         </>
-      ) : (
-        <View style={styles.loggedOut}>
-          <Ionicons name="person-circle-outline" size={80} color="#e5e7eb" />
-          <Text style={styles.loggedOutTitle}>You're not logged in</Text>
-          <Text style={styles.loggedOutText}>Log in to post listings, save items, and more.</Text>
-          <TouchableOpacity
-            style={styles.loginBtn}
-            onPress={() => navigation.navigate('Login')}
-          >
-            <Text style={styles.loginBtnText}>Sign in with Phone OTP</Text>
-          </TouchableOpacity>
-        </View>
-      )}
+      ) : null}
 
       <View style={{ height: 40 }} />
     </ScrollView>
@@ -155,9 +150,4 @@ const styles = StyleSheet.create({
   },
   menuLabel: { flex: 1, fontSize: 15, color: '#374151' },
   menuLabelDanger: { color: '#ef4444' },
-  loggedOut: { alignItems: 'center', paddingTop: 80, paddingHorizontal: 32 },
-  loggedOutTitle: { fontSize: 20, fontWeight: 'bold', color: '#374151', marginTop: 16, marginBottom: 8 },
-  loggedOutText: { fontSize: 14, color: '#9ca3af', textAlign: 'center', lineHeight: 20, marginBottom: 28 },
-  loginBtn: { backgroundColor: '#25d366', borderRadius: 12, paddingHorizontal: 28, paddingVertical: 14 },
-  loginBtnText: { color: 'white', fontWeight: '700', fontSize: 16 },
 });

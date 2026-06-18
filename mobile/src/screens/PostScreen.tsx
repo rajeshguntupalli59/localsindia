@@ -100,7 +100,7 @@ export default function PostScreen({ navigation }: any) {
       {
         fieldName: 'file',
         httpMethod: 'POST',
-        uploadType: FileSystem.FileSystemUploadType.MULTIPART,
+        uploadType: (FileSystem.FileSystemUploadType?.MULTIPART ?? 1) as any,
         headers: { Authorization: `Bearer ${token ?? ''}` },
       }
     );

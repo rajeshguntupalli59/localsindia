@@ -3,16 +3,11 @@ import {
   KeyboardAvoidingView, Platform, Image, ActivityIndicator, ScrollView,
 } from 'react-native';
 import { useState } from 'react';
-import * as WebBrowser from 'expo-web-browser';
-import * as Linking from 'expo-linking';
 import { authApi } from '../lib/api';
 import { storage } from '../lib/storage';
 import { Ionicons } from '@expo/vector-icons';
 
 import LOGO from '../../assets/logo-mark-transparent.png';
-const API_BASE = 'https://localsindia-backend.azurewebsites.net/api/v1';
-
-WebBrowser.maybeCompleteAuthSession();
 
 type Step = 'phone' | 'otp' | 'name';
 
@@ -115,32 +110,6 @@ export default function LoginScreen({ navigation }: any) {
     }
   };
 
-  const signInWithGoogle = async () => {
-    setLoading(true);
-    try {
-      const googleUrl = `${API_BASE}/auth/google?mobile=1`;
-      const callbackScheme = Linking.createURL('auth/callback');
-      const result = await WebBrowser.openAuthSessionAsync(googleUrl, callbackScheme);
-      if (result.type !== 'success') return;
-      const parsed = Linking.parse(result.url);
-      const params = parsed.queryParams as Record<string, string> ?? {};
-      if (params.error) {
-        Alert.alert('Google sign-in failed', params.error === 'google_denied' ? 'Sign-in was cancelled.' : 'Please try again.');
-        return;
-      }
-      const { token, refresh } = params;
-      if (!token) { Alert.alert('Error', 'No token received.'); return; }
-      await storage.setTokens(token, refresh ?? '');
-      const user = await authApi.getMe();
-      await storage.setUser(user);
-      navigation.replace('Main');
-    } catch {
-      Alert.alert('Error', 'Google sign-in failed. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const subtextMap: Record<Step, string> = {
     phone: 'Sign in or create a free account',
     otp: `OTP sent to +91 ${phone}`,
@@ -177,22 +146,6 @@ export default function LoginScreen({ navigation }: any) {
           {/* ── Phone screen ── */}
           {step === 'phone' && (
             <>
-              {/* Google */}
-              <TouchableOpacity
-                style={[styles.googleBtn, loading && styles.btnDisabled]}
-                onPress={signInWithGoogle}
-                disabled={loading}
-              >
-                <Text style={styles.googleIcon}>G</Text>
-                <Text style={styles.googleBtnText}>Continue with Google</Text>
-              </TouchableOpacity>
-
-              <View style={styles.dividerRow}>
-                <View style={styles.dividerLine} />
-                <Text style={styles.dividerText}>or use your phone</Text>
-                <View style={styles.dividerLine} />
-              </View>
-
               <Text style={styles.label}>Mobile Number</Text>
               <View style={styles.phoneRow}>
                 <Text style={styles.countryCode}>🇮🇳 +91</Text>
@@ -229,10 +182,6 @@ export default function LoginScreen({ navigation }: any) {
                 </TouchableOpacity>
               </View>
 
-              <Text style={styles.hint}>
-                Sign In = existing account (no OTP){'\n'}
-                Sign Up = new account (OTP required)
-              </Text>
             </>
           )}
 
@@ -328,25 +277,6 @@ const styles = StyleSheet.create({
   subtext: { fontSize: 13, color: 'rgba(255,255,255,0.6)' },
 
   body: { flex: 1, paddingHorizontal: 24, paddingTop: 28 },
-
-  googleBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    borderWidth: 1.5,
-    borderColor: '#e5e7eb',
-    borderRadius: 12,
-    padding: 14,
-    backgroundColor: 'white',
-    marginBottom: 8,
-  },
-  googleIcon: { fontSize: 18, fontWeight: '700', color: '#4285F4' },
-  googleBtnText: { fontSize: 15, fontWeight: '600', color: '#374151' },
-
-  dividerRow: { flexDirection: 'row', alignItems: 'center', marginVertical: 20, gap: 10 },
-  dividerLine: { flex: 1, height: 1, backgroundColor: '#e5e7eb' },
-  dividerText: { fontSize: 12, color: '#9ca3af', fontWeight: '500' },
 
   label: { fontSize: 13, fontWeight: '600', color: '#374151', marginBottom: 8 },
   hint: { fontSize: 11, color: '#9ca3af', textAlign: 'center', lineHeight: 16, marginTop: 8 },
