@@ -65,6 +65,9 @@ export const listingsApi = {
 };
 
 export const authApi = {
+  adminLogin: (username: string, password: string) =>
+    api.post('/auth/admin-login', { username, password }).then(r => r.data),
+
   signin: (phone: string) =>
     api.post('/auth/signin', { phone }).then(r => r.data),
 

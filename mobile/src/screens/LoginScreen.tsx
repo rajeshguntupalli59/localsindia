@@ -2,14 +2,14 @@ import {
   View, Text, TextInput, TouchableOpacity, Alert, StyleSheet,
   KeyboardAvoidingView, Platform, Image, ActivityIndicator, ScrollView,
 } from 'react-native';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { authApi } from '../lib/api';
 import { storage } from '../lib/storage';
 import { Ionicons } from '@expo/vector-icons';
 
 import LOGO from '../../assets/logo-mark-transparent.png';
 
-type Step = 'phone' | 'otp' | 'name';
+type Step = 'phone' | 'otp' | 'name' | 'admin';
 
 export default function LoginScreen({ navigation }: any) {
   const [step, setStep] = useState<Step>('phone');
@@ -19,6 +19,20 @@ export default function LoginScreen({ navigation }: any) {
   const [loading, setLoading] = useState(false);
   const [debugOtp, setDebugOtp] = useState<string | undefined>(undefined);
   const [pendingTokens, setPendingTokens] = useState<{ access: string; refresh: string } | null>(null);
+  const [adminUser, setAdminUser] = useState('');
+  const [adminPass, setAdminPass] = useState('');
+  const logoTapCount = useRef(0);
+  const logoTapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleLogoTap = () => {
+    logoTapCount.current += 1;
+    if (logoTapTimer.current) clearTimeout(logoTapTimer.current);
+    logoTapTimer.current = setTimeout(() => { logoTapCount.current = 0; }, 2000);
+    if (logoTapCount.current >= 5) {
+      logoTapCount.current = 0;
+      setStep('admin');
+    }
+  };
 
   const finish = async (data: any) => {
     await storage.setTokens(data.access_token, data.refresh_token ?? '');
@@ -110,16 +124,34 @@ export default function LoginScreen({ navigation }: any) {
     }
   };
 
+  const handleAdminLogin = async () => {
+    if (!adminUser.trim() || !adminPass.trim()) {
+      Alert.alert('Required', 'Enter username and password.');
+      return;
+    }
+    setLoading(true);
+    try {
+      const data = await authApi.adminLogin(adminUser.trim(), adminPass.trim());
+      await finish(data);
+    } catch (err: any) {
+      Alert.alert('Admin Login Failed', err?.response?.data?.detail || 'Invalid credentials.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const subtextMap: Record<Step, string> = {
     phone: 'Sign in or create a free account',
     otp: `OTP sent to +91 ${phone}`,
     name: 'One last step — tell us your name',
+    admin: 'Admin access only',
   };
 
   const headingMap: Record<Step, string> = {
     phone: 'Welcome to LocalsIndia',
     otp: 'Enter OTP',
     name: 'Almost done!',
+    admin: 'Admin Login',
   };
 
   return (
@@ -134,7 +166,9 @@ export default function LoginScreen({ navigation }: any) {
       >
         {/* Header */}
         <View style={styles.header}>
-          <Image source={LOGO} style={styles.logo} resizeMode="contain" />
+          <TouchableOpacity onPress={handleLogoTap} activeOpacity={1}>
+            <Image source={LOGO} style={styles.logo} resizeMode="contain" />
+          </TouchableOpacity>
           <Text style={styles.brandName}>LocalsIndia</Text>
           <Text style={styles.tagline}>Buy. Sell. Connect.</Text>
           <Text style={styles.heading}>{headingMap[step]}</Text>
@@ -249,6 +283,53 @@ export default function LoginScreen({ navigation }: any) {
                 {loading
                   ? <ActivityIndicator color="white" />
                   : <Text style={styles.btnText}>Get Started →</Text>}
+              </TouchableOpacity>
+            </>
+          )}
+
+          {/* ── Admin screen ── */}
+          {step === 'admin' && (
+            <>
+              <Text style={styles.label}>Username</Text>
+              <View style={styles.nameRow}>
+                <Ionicons name="shield-outline" size={18} color="#9ca3af" style={styles.nameIcon} />
+                <TextInput
+                  style={styles.nameInput}
+                  value={adminUser}
+                  onChangeText={setAdminUser}
+                  placeholder="admin username"
+                  autoCapitalize="none"
+                  autoFocus
+                />
+              </View>
+
+              <Text style={[styles.label, { marginTop: 12 }]}>Password</Text>
+              <View style={styles.nameRow}>
+                <Ionicons name="lock-closed-outline" size={18} color="#9ca3af" style={styles.nameIcon} />
+                <TextInput
+                  style={styles.nameInput}
+                  value={adminPass}
+                  onChangeText={setAdminPass}
+                  placeholder="password"
+                  secureTextEntry
+                />
+              </View>
+
+              <TouchableOpacity
+                style={[styles.btn, { marginTop: 20 }, loading && styles.btnDisabled]}
+                onPress={handleAdminLogin}
+                disabled={loading}
+              >
+                {loading
+                  ? <ActivityIndicator color="white" />
+                  : <Text style={styles.btnText}>Login as Admin</Text>}
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => { setStep('phone'); setAdminUser(''); setAdminPass(''); }}
+                style={styles.switchLink}
+              >
+                <Text style={styles.switchLinkAction}>← Back to regular login</Text>
               </TouchableOpacity>
             </>
           )}
