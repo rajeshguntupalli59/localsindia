@@ -9,16 +9,14 @@ import { authApi } from '../lib/api';
 import { storage } from '../lib/storage';
 import { Ionicons } from '@expo/vector-icons';
 
-const LOGO = require('../../assets/logo-mark-transparent.png');
+import LOGO from '../../assets/logo-mark-transparent.png';
 const API_BASE = 'https://localsindia-backend.azurewebsites.net/api/v1';
 
 WebBrowser.maybeCompleteAuthSession();
 
 type Step = 'phone' | 'otp' | 'name';
-type Mode = 'signin' | 'signup';
 
 export default function LoginScreen({ navigation }: any) {
-  const [mode, setMode] = useState<Mode>('signin');
   const [step, setStep] = useState<Step>('phone');
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
@@ -33,30 +31,49 @@ export default function LoginScreen({ navigation }: any) {
     navigation.replace('Main');
   };
 
-  const handlePhoneSubmit = async () => {
+  const handleSignIn = async () => {
     if (!/^[6-9]\d{9}$/.test(phone)) {
       Alert.alert('Invalid number', 'Enter a valid 10-digit Indian mobile number.');
       return;
     }
     setLoading(true);
     try {
-      if (mode === 'signin') {
-        const data = await authApi.signin(`+91${phone}`);
-        await finish(data);
-      } else {
-        const data = await authApi.sendOtp(`+91${phone}`);
-        if (data.otp) setDebugOtp(data.otp);
-        setStep('otp');
-      }
+      const data = await authApi.signin(`+91${phone}`);
+      await finish(data);
     } catch (err: any) {
       const status = err?.response?.status;
-      if (status === 404 && mode === 'signin') {
-        Alert.alert('No account found', 'Create a free account first.', [
-          { text: 'Create Account', onPress: () => setMode('signup') },
+      if (status === 404) {
+        Alert.alert('No account found', 'No account with this number. Sign up first.', [
+          { text: 'Sign Up', onPress: handleSignUp },
           { text: 'Cancel', style: 'cancel' },
         ]);
       } else {
-        Alert.alert('Error', mode === 'signin' ? 'Sign in failed. Please try again.' : 'Could not send OTP. Please try again.');
+        Alert.alert('Error', err?.response?.data?.detail || 'Sign in failed. Please try again.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSignUp = async () => {
+    if (!/^[6-9]\d{9}$/.test(phone)) {
+      Alert.alert('Invalid number', 'Enter a valid 10-digit Indian mobile number.');
+      return;
+    }
+    setLoading(true);
+    try {
+      const data = await authApi.sendOtp(`+91${phone}`);
+      if (data.otp) setDebugOtp(data.otp);
+      setStep('otp');
+    } catch (err: any) {
+      const status = err?.response?.status;
+      if (status === 409) {
+        Alert.alert('Already registered', 'This number already has an account.', [
+          { text: 'Sign In', onPress: handleSignIn },
+          { text: 'Cancel', style: 'cancel' },
+        ]);
+      } else {
+        Alert.alert('Error', 'Could not send OTP. Please try again.');
       }
     } finally {
       setLoading(false);
@@ -124,177 +141,176 @@ export default function LoginScreen({ navigation }: any) {
     }
   };
 
-  const headingText = step === 'name' ? 'Almost done!' : mode === 'signup' ? 'Create account' : 'Welcome back';
-  const subtextMap = {
-    phone: mode === 'signup' ? 'Verify your number to get started' : 'Enter your number to sign in instantly',
-    otp: `Code sent to +91 ${phone}`,
-    name: 'Tell us your name to complete setup',
+  const subtextMap: Record<Step, string> = {
+    phone: 'Sign in or create a free account',
+    otp: `OTP sent to +91 ${phone}`,
+    name: 'One last step — tell us your name',
+  };
+
+  const headingMap: Record<Step, string> = {
+    phone: 'Welcome to LocalsIndia',
+    otp: 'Enter OTP',
+    name: 'Almost done!',
   };
 
   return (
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
     >
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-      {/* Header band */}
-      <View style={styles.header}>
-        <Image source={LOGO} style={styles.logo} resizeMode="contain" />
-        <Text style={styles.brandName}>LocalsIndia</Text>
-        <Text style={styles.tagline}>Buy. Sell. Connect.</Text>
+        {/* Header */}
+        <View style={styles.header}>
+          <Image source={LOGO} style={styles.logo} resizeMode="contain" />
+          <Text style={styles.brandName}>LocalsIndia</Text>
+          <Text style={styles.tagline}>Buy. Sell. Connect.</Text>
+          <Text style={styles.heading}>{headingMap[step]}</Text>
+          <Text style={styles.subtext}>{subtextMap[step]}</Text>
+        </View>
 
-        <Text style={styles.heading}>{headingText}</Text>
-        <Text style={styles.subtext}>{subtextMap[step]}</Text>
+        <View style={styles.body}>
 
-        {/* Sign In / Sign Up tabs — only on phone step */}
-        {step === 'phone' && (
-          <View style={styles.tabRow}>
-            <TouchableOpacity
-              style={[styles.tab, mode === 'signin' && styles.tabActive]}
-              onPress={() => setMode('signin')}
-            >
-              <Text style={[styles.tabText, mode === 'signin' && styles.tabTextActive]}>Sign In</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.tab, mode === 'signup' && styles.tabActive]}
-              onPress={() => setMode('signup')}
-            >
-              <Text style={[styles.tabText, mode === 'signup' && styles.tabTextActive]}>Create Account</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      </View>
+          {/* ── Phone screen ── */}
+          {step === 'phone' && (
+            <>
+              {/* Google */}
+              <TouchableOpacity
+                style={[styles.googleBtn, loading && styles.btnDisabled]}
+                onPress={signInWithGoogle}
+                disabled={loading}
+              >
+                <Text style={styles.googleIcon}>G</Text>
+                <Text style={styles.googleBtnText}>Continue with Google</Text>
+              </TouchableOpacity>
 
-      <View style={styles.body}>
-
-        {/* ── Step 1: Phone ── */}
-        {step === 'phone' && (
-          <>
-            <TouchableOpacity
-              style={[styles.googleBtn, loading && styles.btnDisabled]}
-              onPress={signInWithGoogle}
-              disabled={loading}
-            >
-              <Text style={styles.googleIcon}>G</Text>
-              <Text style={styles.googleBtnText}>Continue with Google</Text>
-            </TouchableOpacity>
-
-            <View style={styles.dividerRow}>
-              <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>or use your phone</Text>
-              <View style={styles.dividerLine} />
-            </View>
-
-            <Text style={styles.label}>Mobile Number</Text>
-            <View style={styles.phoneRow}>
-              <Text style={styles.countryCode}>🇮🇳 +91</Text>
-              <TextInput
-                style={styles.phoneInput}
-                value={phone}
-                onChangeText={setPhone}
-                placeholder="98765 43210"
-                keyboardType="phone-pad"
-                maxLength={10}
-              />
-            </View>
-
-            <TouchableOpacity
-              style={[styles.btn, loading && styles.btnDisabled]}
-              onPress={handlePhoneSubmit}
-              disabled={loading}
-            >
-              {loading
-                ? <ActivityIndicator color="white" />
-                : <Text style={styles.btnText}>{mode === 'signin' ? 'Sign In →' : 'Send OTP →'}</Text>}
-            </TouchableOpacity>
-
-            <TouchableOpacity onPress={() => setMode(mode === 'signin' ? 'signup' : 'signin')} style={styles.switchLink}>
-              <Text style={styles.switchLinkText}>
-                {mode === 'signin' ? 'New to LocalsIndia? ' : 'Already have an account? '}
-                <Text style={styles.switchLinkAction}>{mode === 'signin' ? 'Create free account' : 'Sign in'}</Text>
-              </Text>
-            </TouchableOpacity>
-          </>
-        )}
-
-        {/* ── Step 2: OTP ── */}
-        {step === 'otp' && (
-          <>
-            {debugOtp && (
-              <View style={styles.debugBox}>
-                <Text style={styles.debugText}>Debug OTP: {debugOtp}</Text>
+              <View style={styles.dividerRow}>
+                <View style={styles.dividerLine} />
+                <Text style={styles.dividerText}>or use your phone</Text>
+                <View style={styles.dividerLine} />
               </View>
-            )}
 
-            <Text style={styles.label}>6-digit OTP</Text>
-            <TextInput
-              style={styles.otpInput}
-              value={otp}
-              onChangeText={t => setOtp(t.replace(/\D/g, '').slice(0, 6))}
-              placeholder="------"
-              keyboardType="number-pad"
-              maxLength={6}
-              autoFocus
-            />
+              <Text style={styles.label}>Mobile Number</Text>
+              <View style={styles.phoneRow}>
+                <Text style={styles.countryCode}>🇮🇳 +91</Text>
+                <TextInput
+                  style={styles.phoneInput}
+                  value={phone}
+                  onChangeText={setPhone}
+                  placeholder="98765 43210"
+                  keyboardType="phone-pad"
+                  maxLength={10}
+                />
+              </View>
 
-            <TouchableOpacity
-              style={[styles.btn, (loading || otp.length < 6) && styles.btnDisabled]}
-              onPress={handleOtpSubmit}
-              disabled={loading || otp.length < 6}
-            >
-              {loading
-                ? <ActivityIndicator color="white" />
-                : <Text style={styles.btnText}>Verify OTP</Text>}
-            </TouchableOpacity>
+              {/* Sign In + Sign Up side by side */}
+              <View style={styles.btnRow}>
+                <TouchableOpacity
+                  style={[styles.btnOutline, loading && styles.btnDisabled]}
+                  onPress={handleSignIn}
+                  disabled={loading}
+                >
+                  {loading
+                    ? <ActivityIndicator color="#f97316" />
+                    : <Text style={styles.btnOutlineText}>Sign In</Text>}
+                </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => { setStep('phone'); setOtp(''); setDebugOtp(undefined); }} style={styles.switchLink}>
-              <Text style={styles.switchLinkAction}>← Change number</Text>
-            </TouchableOpacity>
-          </>
-        )}
+                <TouchableOpacity
+                  style={[styles.btn, loading && styles.btnDisabled]}
+                  onPress={handleSignUp}
+                  disabled={loading}
+                >
+                  {loading
+                    ? <ActivityIndicator color="white" />
+                    : <Text style={styles.btnText}>Sign Up →</Text>}
+                </TouchableOpacity>
+              </View>
 
-        {/* ── Step 3: Name (new users only) ── */}
-        {step === 'name' && (
-          <>
-            <Text style={styles.label}>Your Name</Text>
-            <View style={styles.nameRow}>
-              <Ionicons name="person-outline" size={18} color="#9ca3af" style={styles.nameIcon} />
+              <Text style={styles.hint}>
+                Sign In = existing account (no OTP){'\n'}
+                Sign Up = new account (OTP required)
+              </Text>
+            </>
+          )}
+
+          {/* ── OTP screen ── */}
+          {step === 'otp' && (
+            <>
+              {debugOtp && (
+                <View style={styles.debugBox}>
+                  <Text style={styles.debugText}>Debug OTP: {debugOtp}</Text>
+                </View>
+              )}
+
+              <Text style={styles.label}>6-digit OTP</Text>
               <TextInput
-                style={styles.nameInput}
-                value={name}
-                onChangeText={setName}
-                placeholder="e.g. Rajesh Kumar"
+                style={styles.otpInput}
+                value={otp}
+                onChangeText={t => setOtp(t.replace(/\D/g, '').slice(0, 6))}
+                placeholder="------"
+                keyboardType="number-pad"
+                maxLength={6}
                 autoFocus
-                maxLength={60}
               />
-            </View>
-            <Text style={styles.hint}>This is shown to other users on your listings</Text>
 
-            <TouchableOpacity
-              style={[styles.btn, (loading || name.trim().length < 2) && styles.btnDisabled]}
-              onPress={handleNameSubmit}
-              disabled={loading || name.trim().length < 2}
-            >
-              {loading
-                ? <ActivityIndicator color="white" />
-                : <Text style={styles.btnText}>Continue →</Text>}
-            </TouchableOpacity>
-          </>
-        )}
+              <TouchableOpacity
+                style={[styles.btn, (loading || otp.length < 6) && styles.btnDisabled]}
+                onPress={handleOtpSubmit}
+                disabled={loading || otp.length < 6}
+              >
+                {loading
+                  ? <ActivityIndicator color="white" />
+                  : <Text style={styles.btnText}>Verify OTP</Text>}
+              </TouchableOpacity>
 
-        {/* Privacy notice */}
-        <Text style={styles.privacy}>
-          By continuing, you agree to our{' '}
-          <Text style={styles.privacyLink}>Terms of Service</Text>
-          {' '}and{' '}
-          <Text style={styles.privacyLink}>Privacy Policy</Text>.
-        </Text>
-      </View>
+              <TouchableOpacity
+                onPress={() => { setStep('phone'); setOtp(''); setDebugOtp(undefined); }}
+                style={styles.switchLink}
+              >
+                <Text style={styles.switchLinkAction}>← Change number</Text>
+              </TouchableOpacity>
+            </>
+          )}
+
+          {/* ── Name screen ── */}
+          {step === 'name' && (
+            <>
+              <Text style={styles.label}>Your Name</Text>
+              <View style={styles.nameRow}>
+                <Ionicons name="person-outline" size={18} color="#9ca3af" style={styles.nameIcon} />
+                <TextInput
+                  style={styles.nameInput}
+                  value={name}
+                  onChangeText={setName}
+                  placeholder="e.g. Rajesh Kumar"
+                  autoFocus
+                  maxLength={60}
+                />
+              </View>
+              <Text style={styles.hintSmall}>Shown to other users on your listings</Text>
+
+              <TouchableOpacity
+                style={[styles.btn, (loading || name.trim().length < 2) && styles.btnDisabled]}
+                onPress={handleNameSubmit}
+                disabled={loading || name.trim().length < 2}
+              >
+                {loading
+                  ? <ActivityIndicator color="white" />
+                  : <Text style={styles.btnText}>Get Started →</Text>}
+              </TouchableOpacity>
+            </>
+          )}
+
+          <Text style={styles.privacy}>
+            By continuing, you agree to our{' '}
+            <Text style={styles.privacyLink}>Terms of Service</Text>
+            {' '}and{' '}
+            <Text style={styles.privacyLink}>Privacy Policy</Text>.
+          </Text>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -304,31 +320,15 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: 'white' },
   scrollContent: { flexGrow: 1 },
 
-  // Header band (dark, like website)
-  header: { backgroundColor: '#111827', paddingHorizontal: 24, paddingTop: 72, paddingBottom: 24 },
+  header: { backgroundColor: '#111827', paddingHorizontal: 24, paddingTop: 72, paddingBottom: 28 },
   logo: { width: 48, height: 48, marginBottom: 6 },
   brandName: { fontSize: 26, fontWeight: 'bold', color: '#f97316', marginBottom: 2 },
   tagline: { fontSize: 13, color: 'rgba(255,255,255,0.5)', marginBottom: 20 },
   heading: { fontSize: 22, fontWeight: 'bold', color: 'white', marginBottom: 4 },
-  subtext: { fontSize: 13, color: 'rgba(255,255,255,0.6)', marginBottom: 16 },
+  subtext: { fontSize: 13, color: 'rgba(255,255,255,0.6)' },
 
-  // Tabs
-  tabRow: {
-    flexDirection: 'row',
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    borderRadius: 12,
-    padding: 4,
-    marginTop: 4,
-  },
-  tab: { flex: 1, paddingVertical: 8, borderRadius: 10, alignItems: 'center' },
-  tabActive: { backgroundColor: 'white' },
-  tabText: { fontSize: 13, fontWeight: '600', color: 'rgba(255,255,255,0.7)' },
-  tabTextActive: { color: '#111827' },
-
-  // Body
   body: { flex: 1, paddingHorizontal: 24, paddingTop: 28 },
 
-  // Google button
   googleBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -344,14 +344,13 @@ const styles = StyleSheet.create({
   googleIcon: { fontSize: 18, fontWeight: '700', color: '#4285F4' },
   googleBtnText: { fontSize: 15, fontWeight: '600', color: '#374151' },
 
-  // Divider
-  dividerRow: { flexDirection: 'row', alignItems: 'center', marginVertical: 16, gap: 10 },
+  dividerRow: { flexDirection: 'row', alignItems: 'center', marginVertical: 20, gap: 10 },
   dividerLine: { flex: 1, height: 1, backgroundColor: '#e5e7eb' },
   dividerText: { fontSize: 12, color: '#9ca3af', fontWeight: '500' },
 
-  // Form
   label: { fontSize: 13, fontWeight: '600', color: '#374151', marginBottom: 8 },
-  hint: { fontSize: 11, color: '#9ca3af', marginTop: 4, marginBottom: 16 },
+  hint: { fontSize: 11, color: '#9ca3af', textAlign: 'center', lineHeight: 16, marginTop: 8 },
+  hintSmall: { fontSize: 11, color: '#9ca3af', marginTop: 4, marginBottom: 16 },
 
   phoneRow: {
     flexDirection: 'row',
@@ -364,6 +363,23 @@ const styles = StyleSheet.create({
   },
   countryCode: { fontSize: 16, marginRight: 8, color: '#374151' },
   phoneInput: { flex: 1, fontSize: 18, paddingVertical: 14, letterSpacing: 1 },
+
+  btnRow: { flexDirection: 'row', gap: 10, marginBottom: 4 },
+
+  btn: { flex: 1, backgroundColor: '#f97316', borderRadius: 12, padding: 16, alignItems: 'center' },
+  btnDisabled: { opacity: 0.5 },
+  btnText: { color: 'white', fontSize: 16, fontWeight: '700' },
+
+  btnOutline: {
+    flex: 1,
+    borderWidth: 1.5,
+    borderColor: '#f97316',
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+    backgroundColor: 'white',
+  },
+  btnOutlineText: { color: '#f97316', fontSize: 16, fontWeight: '700' },
 
   nameRow: {
     flexDirection: 'row',
@@ -392,15 +408,9 @@ const styles = StyleSheet.create({
   debugBox: { backgroundColor: '#fef3c7', borderRadius: 8, padding: 10, marginBottom: 12 },
   debugText: { color: '#92400e', fontWeight: '700', textAlign: 'center' },
 
-  // Buttons
-  btn: { backgroundColor: '#f97316', borderRadius: 12, padding: 16, alignItems: 'center', marginBottom: 16 },
-  btnDisabled: { backgroundColor: '#fdba74' },
-  btnText: { color: 'white', fontSize: 17, fontWeight: '700' },
+  switchLink: { alignItems: 'center', marginTop: 12 },
+  switchLinkAction: { color: '#f97316', fontWeight: '600', fontSize: 14 },
 
-  switchLink: { alignItems: 'center', marginBottom: 8 },
-  switchLinkText: { fontSize: 13, color: '#6b7280', textAlign: 'center' },
-  switchLinkAction: { color: '#f97316', fontWeight: '600' },
-
-  privacy: { fontSize: 11, color: '#9ca3af', textAlign: 'center', marginTop: 24, lineHeight: 16 },
+  privacy: { fontSize: 11, color: '#9ca3af', textAlign: 'center', marginTop: 28, lineHeight: 16 },
   privacyLink: { color: '#6b7280', textDecorationLine: 'underline' },
 });
