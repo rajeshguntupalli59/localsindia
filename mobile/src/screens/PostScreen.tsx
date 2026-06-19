@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import { useState, useEffect } from 'react';
 import * as ImagePicker from 'expo-image-picker';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import { Ionicons } from '@expo/vector-icons';
 import { listingsApi, categoriesApi } from '../lib/api';
 import { storage } from '../lib/storage';
@@ -105,7 +105,9 @@ export default function PostScreen({ navigation }: any) {
       }
     );
     if (result.status >= 400) {
-      throw new Error(`Photo upload failed (${result.status})`);
+      let detail = `HTTP ${result.status}`;
+      try { detail = JSON.parse(result.body)?.detail ?? detail; } catch {}
+      throw new Error(`Photo ${index + 1} upload failed: ${detail}`);
     }
   };
 
