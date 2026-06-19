@@ -44,4 +44,21 @@ jobs:
             --resource-group localsindia-rg \
             --name localsindia-backend \
             --src-path backend.zip \
-            --type zip
+            --type zip \
+            --restart false
+
+      - name: Restart app and wait for health
+        run: |
+          az webapp restart --name localsindia-backend --resource-group localsindia-rg
+          echo "Waiting for app to start..."
+          for i in $(seq 1 12); do
+            sleep 10
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://localsindia-backend.azurewebsites.net/api/v1/health --max-time 10 || echo "000")
+            echo "Attempt $i: $STATUS"
+            if [ "$STATUS" = "200" ]; then
+              echo "Backend is up!"
+              exit 0
+            fi
+          done
+          echo "Backend did not respond in time — check Azure logs"
+          exit 1
