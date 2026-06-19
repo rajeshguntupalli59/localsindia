@@ -153,3 +153,18 @@ export interface CreateListingInput {
   area?: string;
   attributes?: Record<string, string>;
 }
+
+export interface BuyerRequestOut {
+  id: string;
+  description: string;
+  budget: number | null;
+  contact_phone: string;
+  status: string;
+  created_at: string;
+  city_id: string;
+  category_id: string;
+  user_id: string;
+  category_name: string | null;
+  category_slug: string | null;
+  category_icon: string | null;
+}

@@ -17,6 +17,7 @@ import AdBanner from '@/components/ad-banner/AdBanner';
 import ListingCard from '@/components/listing-card/ListingCard';
 import ListingCardSkeleton from '@/components/listing-card/ListingCardSkeleton';
 import EmptyState from '@/components/empty-state/EmptyState';
+import BuyerRequestsSection from '@/components/buyer-requests/BuyerRequestsSection';
 
 interface CatDef { label: string; slug: string; icon: LucideIcon }
 
@@ -301,6 +302,9 @@ export default function CityHomePage() {
             })}
           </div>
         </section>
+
+        {/* Buyer requests — wanted section */}
+        <BuyerRequestsSection citySlug={citySlug} />
 
         {/* Empty state — only if not loading and all rows empty */}
         {!loading && trendingListings.length === 0 && freshListings.length === 0 && (

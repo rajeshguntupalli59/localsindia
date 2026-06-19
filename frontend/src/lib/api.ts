@@ -13,6 +13,7 @@ import type {
   Business,
   Review,
   SellerProfile,
+  BuyerRequestOut,
 } from './types';
 
 export type { User, Event, Business, Review };
@@ -216,6 +217,16 @@ export const api = {
       req<{ id: string }>('/api/v1/saved-searches', { method: 'POST', body: JSON.stringify(data), token }),
     delete: (id: string, token: string) =>
       req<void>(`/api/v1/saved-searches/${id}`, { method: 'DELETE', token }),
+  },
+  buyerRequests: {
+    list: (citySlug: string) =>
+      req<BuyerRequestOut[]>(`/api/v1/buyer-requests/cities/${citySlug}`),
+    create: (data: { city_slug: string; category_slug: string; description: string; budget?: number; contact_phone: string }, token: string) =>
+      req<BuyerRequestOut>('/api/v1/buyer-requests', { method: 'POST', body: JSON.stringify(data), token }),
+    fulfill: (id: string, token: string) =>
+      req<BuyerRequestOut>(`/api/v1/buyer-requests/${id}/fulfill`, { method: 'PATCH', token }),
+    delete: (id: string, token: string) =>
+      req<void>(`/api/v1/buyer-requests/${id}`, { method: 'DELETE', token }),
   },
   upload: {
     image: (listingId: string, file: File, token: string) => {
