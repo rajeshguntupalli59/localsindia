@@ -67,7 +67,7 @@ Not corporate. Not cold. Feels like it was built for India.
 | MSG91 (OTP SMS) | NOT SET UP â€” see SETUP_GUIDE.md | Week 1-2 (mock works) |
 | Cloudinary (images) | NOT SET UP â€” see SETUP_GUIDE.md | Week 2-3 (mock works) |
 | Google OAuth | NOT SET UP â€” see SETUP_GUIDE.md | Week 1-2 (mock works) |
-| Railway (deploy) | NOT SET UP | Week 5-6 only |
+| Azure (deploy) | LIVE — App Service + SWA + PostgreSQL | Already configured |
 | GitHub repo | NOT SET UP | Week 5-6 only |
 
 ---

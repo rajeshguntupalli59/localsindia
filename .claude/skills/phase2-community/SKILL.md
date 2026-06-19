@@ -6,7 +6,7 @@ description: LocalIndia Phase 2 — Events module, Business directory + reviews,
 # Phase 2 — Community Build Guide
 
 ## Prerequisites
-- Phase 1 deployed and live on Railway
+- Phase 1 deployed and live on Azure (App Service + SWA)
 - All Phase 1 tests passing
 - 50 cities seeded in production
 
@@ -105,6 +105,6 @@ Test each font renders correctly: verify Noto Sans loaded for each script.
    - Source: Wikipedia list of Indian cities (CSV included in scripts/data/)
    - Assign lang_default based on state (te for AP/Telangana, ta for TN, etc.)
    - Generate slug: lowercase, hyphen-separated, unique
-2. Run on Railway: `python scripts/seed_cities_full.py`
+2. Run via Azure App Service SSH: `python scripts/seed_cities_full.py`
 
 Verification: Language switcher shows all 11 languages, each renders correct script. PWA installs on Android Chrome.

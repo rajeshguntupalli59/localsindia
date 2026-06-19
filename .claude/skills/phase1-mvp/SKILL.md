@@ -1,12 +1,12 @@
 ﻿---
 name: phase1-mvp
-description: LocalIndia Phase 1 MVP â€” scaffold + backend auth/listings/search + beautiful Next.js frontend + admin + Railway deploy. Weeks 1-6. Load this skill at the start of every Phase 1 session.
+description: LocalIndia Phase 1 MVP — scaffold + backend auth/listings/search + beautiful Next.js frontend + admin + Azure deploy. Weeks 1-6. Load this skill at the start of every Phase 1 session.
 ---
 
 # Phase 1 â€” MVP Build Guide
 
 ## Goal
-A live, beautiful, fast website on Railway where an Indian user can:
+A live, beautiful, fast website on Azure where an Indian user can:
 1. Pick their city
 2. Browse classifieds in their language
 3. Post a listing with photos
@@ -373,13 +373,12 @@ Admin sidebar design:
 
 ### Deploy checklist
 ```
-1. GitHub repo created, code pushed
-2. Railway project: Postgres + backend + frontend services added
-3. All env vars set in Railway (see ARCHITECTURE.md)
-4. alembic upgrade head on Railway Postgres
-5. seed_cities.py run on Railway
-6. /api/v1/health returns 200
-7. localsindia.com DNS pointed to Railway
+1. Push to master → GitHub Actions deploys backend to Azure App Service + frontend to Azure SWA automatically
+2. All env vars set in Azure App Service → Configuration → Application settings
+3. Run DB migration: az webapp ssh -n localsindia-backend -g localsindia-rg → alembic upgrade head
+4. Seed cities: same SSH session → python scripts/seed_cities.py
+5. /api/v1/health returns 200 at https://localsindia-backend.azurewebsites.net/api/v1/health
+6. localsindia.com DNS (GoDaddy) CNAME www → Azure SWA
 ```
 
 **Gate:** Live URL loads, post + approve + WhatsApp flow works end-to-end.

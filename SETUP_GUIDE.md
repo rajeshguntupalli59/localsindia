@@ -103,25 +103,27 @@ GOOGLE_CLIENT_SECRET=<client secret from step 11>
 
 ---
 
-## 4. Railway â€” Deployment
+## 4. Azure — Deployment
 
-**Cost:** Free hobby plan (512MB RAM, 1GB disk). Upgrade to $5/month Pro when you need more.
+**Already live.** Resource group: `localsindia-rg` (East Asia region).
 
-### Steps
-1. Go to **railway.app** â†’ "Login with GitHub"
-2. Click **"New Project"** â†’ "Empty Project"
-3. Name it `localindia`
-4. Add services (do this when ready to deploy, not now):
-   - **Add Service** â†’ "Database" â†’ PostgreSQL (Railway manages it)
-   - **Add Service** â†’ "GitHub Repo" â†’ select your localindia repo â†’ service name: `backend`
-   - **Add Service** â†’ "GitHub Repo" â†’ same repo â†’ service name: `frontend`
-5. For each service â†’ **Variables** tab â†’ add all env vars from ARCHITECTURE.md
-6. Railway auto-generates domain: `localindia-backend.up.railway.app`
+| Resource | Name | Purpose |
+|---|---|---|
+| App Service | `localsindia-backend` | FastAPI backend (B1 plan) |
+| Static Web App | `localsindia-web` | Next.js frontend (Free tier) |
+| PostgreSQL Flexible Server | `localsindia-db` | Database (Standard_B1ms) |
 
-### Custom domain (after deploy)
-1. Frontend service â†’ Settings â†’ Domains â†’ "Add Custom Domain"
-2. Enter: `localsindia.com`
-3. Railway gives you DNS records â†’ add them in your domain registrar
+### CI/CD (automatic)
+Push to `master` → GitHub Actions triggers two workflows:
+- Backend → Azure App Service via zip deploy
+- Frontend → Azure SWA via `azure/static-web-apps-deploy`
+
+### Env vars
+Azure Portal → App Service `localsindia-backend` → Configuration → Application settings.
+
+### Domain
+- `www.localsindia.com` → CNAME → Azure SWA (GoDaddy DNS) ✅
+- Apex `localsindia.com` → forwarded to `www` ✅
 
 ---
 
@@ -155,7 +157,7 @@ The backend builds mock modes for all three:
 | MSG91 | Week 1-2 auth tests | Yes â€” OTP printed to console |
 | Cloudinary | Week 2-3 image upload | Yes â€” saves to local /tmp instead |
 | Google OAuth | Week 1-2 auth tests | Yes â€” skip OAuth in test env |
-| Railway | Week 5-6 deploy | N/A â€” local docker-compose works |
+| Azure | LIVE — App Service + SWA + PostgreSQL | Already configured |
 
 **Start building today** with `docker-compose up -d` â€” zero accounts needed for Week 1-2.
 
