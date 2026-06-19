@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft, MapPin, Clock, ChevronDown, ChevronUp, Flag, Tag, User, ExternalLink, Heart, Star } from 'lucide-react';
+import { ArrowLeft, MapPin, Clock, ChevronDown, ChevronUp, Flag, Tag, User, ExternalLink, Heart, Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import { api } from '@/lib/api';
 import type { Listing, ListingReview } from '@/lib/types';
 import { formatPrice, timeAgo } from '@/lib/utils';
@@ -28,6 +28,7 @@ export default function ListingDetailClient({ id }: { id: string }) {
   const [error, setError] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [reviews, setReviews] = useState<ListingReview[]>([]);
+  const [activeImg, setActiveImg] = useState(0);
 
   useEffect(() => {
     if (!id) return;
@@ -127,17 +128,17 @@ export default function ListingDetailClient({ id }: { id: string }) {
       {/* ── Content ── */}
       {listing && !loading && (
         <>
-          {/* Image */}
+          {/* Image carousel */}
           <div
             className="relative w-full bg-slate-100"
             style={listing.images?.[0] ? { aspectRatio: '16/9', maxHeight: '380px' } : { height: '96px' }}
           >
             {listing.images?.[0] ? (
               <Image
-                src={listing.images[0].url}
+                src={listing.images[activeImg]?.url ?? listing.images[0].url}
                 alt={listing.title}
                 fill
-                className="object-cover"
+                className="object-cover transition-opacity duration-200"
                 sizes="100vw"
                 priority
               />
@@ -145,6 +146,42 @@ export default function ListingDetailClient({ id }: { id: string }) {
               <div className="absolute inset-0 flex items-center justify-center text-4xl opacity-20 select-none">
                 {CATEGORY_EMOJI[listing.category_slug ?? ''] ?? '🏷️'}
               </div>
+            )}
+
+            {/* Prev / Next arrows — only when multiple images */}
+            {(listing.images?.length ?? 0) > 1 && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setActiveImg(i => Math.max(0, i - 1))}
+                  disabled={activeImg === 0}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center disabled:opacity-0 transition-all"
+                  aria-label="Previous image"
+                >
+                  <ChevronLeft className="w-4 h-4 text-white" strokeWidth={2.5} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveImg(i => Math.min((listing.images!.length - 1), i + 1))}
+                  disabled={activeImg === (listing.images!.length - 1)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center disabled:opacity-0 transition-all"
+                  aria-label="Next image"
+                >
+                  <ChevronRight className="w-4 h-4 text-white" strokeWidth={2.5} />
+                </button>
+                {/* Dot indicators */}
+                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
+                  {listing.images!.map((_, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => setActiveImg(i)}
+                      className={`w-1.5 h-1.5 rounded-full transition-all ${i === activeImg ? 'bg-white scale-125' : 'bg-white/50'}`}
+                      aria-label={`Go to image ${i + 1}`}
+                    />
+                  ))}
+                </div>
+              </>
             )}
 
             {listing.is_featured && (
@@ -159,13 +196,21 @@ export default function ListingDetailClient({ id }: { id: string }) {
             )}
           </div>
 
-          {/* Thumbnail strip (multiple images) */}
+          {/* Thumbnail strip — clickable, active highlighted */}
           {(listing.images?.length ?? 0) > 1 && (
             <div className="flex gap-2 px-4 py-2 overflow-x-auto bg-white border-b border-slate-100">
               {listing.images!.map((img, i) => (
-                <div key={img.id} className="relative shrink-0 w-16 h-12 rounded-lg overflow-hidden border-2 border-slate-100">
+                <button
+                  key={img.id}
+                  type="button"
+                  onClick={() => setActiveImg(i)}
+                  className={`relative shrink-0 w-16 h-12 rounded-lg overflow-hidden border-2 transition-all ${
+                    i === activeImg ? 'border-orange-400 ring-1 ring-orange-300' : 'border-slate-100 opacity-60 hover:opacity-100'
+                  }`}
+                  aria-label={`View image ${i + 1}`}
+                >
                   <Image src={img.url} alt={`Image ${i + 1}`} fill className="object-cover" sizes="64px" />
-                </div>
+                </button>
               ))}
             </div>
           )}
