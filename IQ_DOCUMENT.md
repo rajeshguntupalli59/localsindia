@@ -124,11 +124,13 @@ LocalIndia (at **localsindia.com**) is India's hyperlocal community platform. Th
 | Infrastructure | **Azure** | Hosting | Free tiers available, globally available |
 | AI agents | **Claude Haiku (Anthropic)** | Marketing content generation | Fast, cheap, good at Indian context |
 
-### How the static export works (important to understand)
-Azure Static Web Apps Free tier does NOT support Next.js server-side rendering. So the entire frontend is **pre-built at deploy time** into 5,638 static HTML files. This means:
-- All pages are generated at build time, not when a user visits
-- Pages with dynamic data (like listing detail) load the HTML shell instantly, then fetch data from the backend API using JavaScript
-- No server is running for the frontend — it's just files on a CDN
+### How the frontend actually runs (updated 2026-06-16 — was static export, now hybrid SSR)
+We tried pure static export first (`output: 'export'`), but pre-building all 496+ cities × sub-pages produced a 200 MB / 11,355-file export that timed out Azure's CDN distribution step every single deploy. We migrated off it (commit `3a60dd1`) onto Azure Static Web Apps' **hybrid SSR mode** instead:
+- `next.config.mjs` no longer sets `output: 'export'` — it's a normal Next.js build
+- Azure SWA's build system detects the Next.js app and runs it on a managed Node.js runtime behind the scenes (you never see or write this server)
+- City and listing pages render **server-side on demand**, the first time anyone requests them — not pre-built at deploy time
+- Pages with dynamic/auth-dependent data still fetch from the backend API client-side after the initial render
+- `staticwebapp.config.json` is now minimal (just security headers + `apiRuntime: node:18`) — the old SPA-fallback routing rules are gone because Next.js handles routing itself now
 
 ---
 
@@ -148,7 +150,7 @@ localsindia/
 │   ├── scripts/             ← One-time admin scripts (seed cities, categories)
 │   └── tests/               ← Pytest test suite (54 tests, all passing)
 │
-├── frontend/                ← Next.js 14 static export frontend
+├── frontend/                ← Next.js 14 frontend (hybrid SSR on Azure SWA)
 │   └── src/
 │       ├── app/             ← Pages (file = URL route)
 │       ├── components/      ← Reusable UI pieces
@@ -436,7 +438,7 @@ All endpoints require JWT with `role=admin`. Raj's management interface.
 ### Listing Detail — `app/[city]/classifieds/[id]/page.tsx` → URL: `/hyderabad/classifieds/{uuid}`
 **What it shows:** Full listing detail — photos, description, seller info, WhatsApp button
 **What it does:**
-- Server Component wrapper (for static export compatibility) that renders `ListingDetailClient.tsx`
+- Server Component wrapper (kept from the static-export era; still a clean split under hybrid SSR) that renders `ListingDetailClient.tsx`
 - Photo carousel: swipeable on mobile, click to fullscreen
 - WhatsApp button: fixed at the bottom of mobile screen — ALWAYS visible
 - Share button: uses `navigator.share()` (mobile native share sheet) with clipboard fallback
@@ -500,7 +502,7 @@ All endpoints require JWT with `role=admin`. Raj's management interface.
 - Existing users: enter phone → direct signin (no OTP needed)
 - New users: enter phone → OTP sent via MSG91 → enter OTP → enter name → account created
 - Google button: redirect to Google OAuth → comes back as logged in
-- Wrapped in React Suspense (required for static export with `useSearchParams`)
+- Wrapped in React Suspense (Next.js requires this for `useSearchParams` regardless of rendering mode)
 
 ### Admin Login — `app/admin/login/page.tsx` → URL: `/admin/login`
 **What it shows:** Dark navy login screen for Raj
@@ -716,11 +718,11 @@ Not visible — pure functionality
 ### Azure Resources (all in resource group `localsindia-rg`)
 
 **Azure Static Web Apps (SWA) Free:**
-- Hosts the Next.js static export (5,638 HTML/CSS/JS files)
-- Auto-deploys from GitHub Actions on master push
-- Global CDN — pages load fast anywhere
-- `staticwebapp.config.json` — tells SWA to serve `index.html` for unknown routes (SPA routing)
-- `next.config.mjs` — `output: 'export'` tells Next.js to build static files to `out/` folder
+- Hosts the Next.js frontend in **hybrid SSR mode** (no more pure static export — migrated off it because pre-building all cities timed out the CDN distribution step on every deploy)
+- Auto-deploys from GitHub Actions on master push; `develop` → `master` PRs also get a temporary staging preview environment (auto-created on PR open, auto-torn-down on merge/close)
+- Global CDN at the edge + on-demand server rendering for city/listing pages
+- `staticwebapp.config.json` — now minimal: `apiRuntime: node:18` (tells Azure to provision the managed SSR runtime) + security headers
+- `next.config.mjs` — no `output: 'export'`; normal Next.js build, image optimization disabled, webpack cache disabled
 
 **Azure App Service F1 (Free):**
 - Hosts the Python FastAPI backend
@@ -736,11 +738,12 @@ Not visible — pure functionality
 
 ### GitHub Actions Workflows
 
-**`frontend-azure.yml`** — triggers on push to `master`:
+**`frontend-azure.yml`** — triggers on push to `master`, and on PRs into `master`:
 1. Checks out code
-2. Installs Node.js dependencies
-3. Runs `npm run build` (generates 5,638 static pages in `out/` folder)
-4. Deploys `out/` folder to Azure SWA via `azure/static-web-apps-deploy` action
+2. `azure/static-web-apps-deploy` action builds the Next.js app and deploys it to Azure SWA's managed hybrid SSR runtime (no manual `out/` folder step — Azure's Oryx build system handles the Next.js-specific build)
+3. On `push`/`workflow_dispatch`: deploys straight to production
+4. On `pull_request` opened/updated: deploys to a temporary staging environment, posts the preview URL as a PR comment
+5. On `pull_request` closed: tears the staging environment down (`close-staging` job)
 
 **`backend-azure.yml`** — triggers on push to `master`:
 1. Checks out code
@@ -751,8 +754,8 @@ Not visible — pure functionality
 1. Sends `GET` request to `/api/v1/health`
 2. Azure keeps the backend warm (prevents 20-second cold start for first user)
 
-### Why static export instead of SSR?
-Azure SWA Free tier does not support Next.js Server-Side Rendering. Static export is the only option on free tier. All pages are pre-built at deploy time. Dynamic data (listings, search results) is loaded client-side via JavaScript after the page HTML loads.
+### Why hybrid SSR instead of static export?
+We started on static export because Azure SWA Free tier doesn't run a custom Next.js server. But static export meant pre-building every city page at deploy time — at 496+ cities that ballooned to a 200 MB / 11,355-file export that timed out Azure's CDN distribution step on every single deploy. Azure SWA's hybrid SSR support (a managed Node.js runtime it provisions automatically) solved this: city/listing pages now render on demand, server-side, the first time anyone visits them — no pre-build explosion, same free tier.
 
 ---
 
@@ -945,9 +948,9 @@ Will enable:
 
 | Metric | Value |
 |--------|-------|
-| Static pages built | 5,638 |
-| Cities in database | 496 |
-| Cities seeded with content | 18 (AP: 10, Telangana: 8) |
+| Rendering mode | Hybrid SSR (Azure SWA managed runtime) — not pre-built static pages |
+| Cities in database | 496+ |
+| Cities seeded with content | 51 (AP: 10, Telangana: 8, Tamil Nadu: 10, Karnataka: 9, Kerala: 8, Maharashtra: 6) |
 | Languages supported | 11 |
 | Backend tests | 54 passing |
 | E2E Playwright tests | 87 passing |

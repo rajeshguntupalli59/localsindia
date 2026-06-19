@@ -32,23 +32,25 @@
 ```
 User's Phone (375px)
       |
-Azure Static Web Apps  <--- Next.js static HTML/JS (5,638 pre-built pages)
+Azure Static Web Apps  <--- Next.js 14 hybrid SSR (Azure-managed Node functions; city pages render on demand)
       | (API calls)
-Azure App Service       <--- FastAPI Python server (10 routers, 50+ endpoints)
+Azure App Service       <--- FastAPI Python server (11 routers, 60+ endpoints)
       | (SQL)
 Azure PostgreSQL         <--- 11 tables, full-text search, soft-delete everywhere
       | (side effects)
 Cloudinary              <--- listing photos (upload/delete)
 MSG91                   <--- OTP SMS to Indian phones
 Razorpay                <--- featured listing payments
-Google OAuth            <--- social sign-in
+Google OAuth            <--- social sign-in (web + mobile deep-link)
 ```
 
 **One-line summary of each tier:**
-- **Frontend**: Pre-built static HTML + React client — loads fast on 4G, works in 11 Indian languages
+- **Frontend**: Next.js hybrid SSR via Azure SWA's managed Node runtime — city/listing pages render on demand server-side, no pre-build explosion; works in 11 Indian languages
 - **Backend**: FastAPI REST API — validates requests, enforces business rules, talks to DB
 - **Database**: PostgreSQL — stores everything, full-text search built-in via tsvector
-- **Infrastructure**: Azure — auto-deploys on every git push to master
+- **Infrastructure**: Azure — auto-deploys on every git push to master; `develop` branch gets a PR-preview staging environment
+
+> **Architecture change (commit `3a60dd1`):** the frontend was migrated OFF `output: 'export'` static export and onto Azure SWA's hybrid SSR support. The old "5,638 pre-built pages" static-export model is gone — see §7 for what replaced it. This single fact invalidates anything written before this section that assumes pure static HTML.
 
 ---
 
@@ -443,8 +445,8 @@ One report per user per listing (unique constraint prevents vote-bombing). When 
 | POST | `/dev-login` | Skip OTP (only when OTP_DEBUG=true) | No |
 | GET | `/me` | Get current user profile | Yes |
 | PATCH | `/me` | Update name or language preference | Yes |
-| GET | `/google` | Redirect to Google OAuth consent | No |
-| GET | `/google/callback` | Exchange code -> tokens -> redirect frontend | No |
+| GET | `/google?mobile=1` | Redirect to Google OAuth consent; `mobile=1` requests a deep-link callback for the React Native app instead of a web redirect | No |
+| GET | `/google/callback` | Exchange code -> tokens -> redirect frontend (`state=web`) or `localsindia://auth/callback` deep link (`state=mobile`) | No |
 
 ### Cities: `/api/v1/cities`
 
@@ -497,6 +499,7 @@ One report per user per listing (unique constraint prevents vote-bombing). When 
 | POST | `/businesses` | Create business listing | Yes |
 | GET | `/businesses/{id}` | Business detail + reviews | No |
 | PATCH | `/businesses/{id}` | Update business (owner/admin) | Yes |
+| DELETE | `/businesses/{id}` | Soft-delete business (admin or owner only) | Yes |
 | POST | `/businesses/{id}/claim` | Claim ownership of unclaimed business | Yes |
 | POST | `/businesses/{id}/reviews` | Add review (recalculates avg_rating) | Yes |
 
@@ -523,6 +526,8 @@ One report per user per listing (unique constraint prevents vote-bombing). When 
 | PATCH | `/events/{id}/approve` | Approve event |
 | PATCH | `/events/{id}/reject` | Reject event |
 | GET | `/users` | All users list |
+| PATCH | `/users/{user_id}/role` | Set role to `admin` or `user` (cannot change own role) |
+| POST | `/seed-placeholder-images` | Backfills a placeholder image onto every listing with zero photos; also fixes a previously-seeded "LocalIndia" → "LocalsIndia" text typo on old placeholders |
 | GET | `/reports` | All abuse reports |
 
 ### Payments: `/api/v1/payments`
@@ -554,19 +559,18 @@ One report per user per listing (unique constraint prevents vote-bombing). When 
 
 ## 7. Frontend Architecture
 
-### How Static Export Works
+### How Hybrid SSR Works (replaced static export — commit `3a60dd1`)
 
-The frontend is built with Next.js `output: 'export'` -- this means at build time, all pages are converted to static HTML files. There is no server. Azure Static Web Apps just serves these HTML files from a CDN.
+The frontend used to be built with Next.js `output: 'export'` (pure static HTML, no server). That broke down at scale: pre-building 496 cities × 6 sub-pages produced a 200 MB / 11,355-file export that timed out Azure's CDN distribution step at exactly 306s on every deploy (see bug #16 in project memory). The fix was to drop `output: 'export'` entirely and let Azure Static Web Apps run Next.js in its supported **hybrid SSR mode**:
 
-**Why this matters:** Pages that need real-time data (listing detail, search) use a trick:
-1. The HTML shell is pre-built and served instantly
-2. React mounts (hydrates) in the browser
-3. `useEffect` fires an API call to fetch real data
-4. React re-renders with the real data
+1. `next.config.mjs` no longer sets `output: 'export'` — it's a normal Next.js build (`images.unoptimized: true`, `cleanDistDir: true`, webpack cache disabled to avoid stale-chunk corruption)
+2. `.github/workflows/frontend-azure.yml` deploys with `output_location: ''` — Azure SWA's build system (Oryx) detects the Next.js app and provisions its own managed Node.js Azure Functions runtime behind the scenes; you don't write or see this function app
+3. `app/[city]/layout.tsx` has **no `generateStaticParams()`** — every city route renders server-side, on demand, the first time it's requested (this is what fixed the "all `/[city]/*` routes 500" bug — `generateStaticParams() { return [] }` always crashed the managed function)
+4. `frontend/src/lib/static-params.ts` → `getAllCityParams()` now just returns `[]` with a comment confirming this: *"In SSR (hybrid) mode, city pages render on demand — no pre-building needed."*
 
-This gives you fast first paint (static HTML) + dynamic content (API fetch).
+**Why this still feels fast:** city/listing pages are real server renders (not a client-only fetch-after-mount trick) — the HTML that comes back already has the shell; data-heavy bits still hydrate client-side via `useEffect` + `lib/api.ts` calls for content that depends on auth state or changes per-request.
 
-**The `generateStaticParams` pattern:** For routes like `/[city]/classifieds/[id]`, we can't pre-build every possible listing ID. So we pre-build one placeholder (`/hyderabad/classifieds/placeholder`) and use `navigationFallback` in `staticwebapp.config.json` to serve the same HTML for any real listing URL.
+**Remaining client-only routes** (`error.tsx`, `/category/[slug]`, `/post`) are thin redirect/error shells — see §8.
 
 ### Directory Structure
 
@@ -678,7 +682,7 @@ Shows one listing in full detail:
 - Report button
 - Reviews section
 
-`page.tsx` is a thin Server Component wrapper (for static export compatibility).
+`page.tsx` is a thin Server Component wrapper (pattern kept from the static-export era; still useful for clean code-splitting under SSR).
 `ListingDetailClient.tsx` is the actual component with all state and API calls.
 
 ---
@@ -729,7 +733,9 @@ URL format: `/hyderabad/search?q=tiffin&category=services`
 - Empty state: "No results for 'tiffin' in Hyderabad" + suggested actions
 - Loading: 8 skeleton cards while API responds
 
-Wrapped in Suspense because it uses `useSearchParams()` (required for static export).
+Wrapped in Suspense because it uses `useSearchParams()` (a Next.js requirement regardless of rendering mode).
+
+Filter bar is always visible (no toggle) — sort (newest/price asc/price desc), min/max price, posted-within (24h/7d/30d), verified-only checkbox. Category tabs use `role="tab"` + `aria-selected` and resolve the URL slug → category UUID after categories load so the active tab highlights instantly.
 
 ---
 
@@ -921,6 +927,38 @@ Displays listings the user has bookmarked locally. No backend — purely localSt
 
 ---
 
+### `/listing/[id]` — Global (city-agnostic) Listing Detail
+
+**Files:** `app/listing/[id]/page.tsx` + `ListingDetailClient.tsx`
+
+A second listing-detail route that doesn't require a city in the URL — used by deep links (mobile app, shares, QR codes) where the city isn't known up front. Renders the same listing UI as `/[city]/classifieds/[id]` (gallery, price, WhatsApp CTA, reviews, category emoji fallback) but fetches purely by listing ID.
+
+---
+
+### `/category/[slug]` — Global Category Redirect
+
+**File:** `app/category/[slug]/page.tsx`
+
+Client-only redirect shell: reads `li_city` from localStorage (falls back to `hyderabad`) and immediately `router.replace()`s to `/{city}/search?category={slug}`. Exists so old/external links to `/category/jobs` style URLs land somewhere useful instead of a 404. Shows a spinner during the redirect.
+
+---
+
+### `/post` — Global Post Redirect
+
+**File:** `app/post/page.tsx`
+
+Same pattern as `/category/[slug]`: reads `li_city` from localStorage and redirects to `/{city}/classifieds/post`, or to `/?openPost=1` if no city is set yet. Gives the marketing/social copy a single stable "post a listing" URL that doesn't need to know the city.
+
+---
+
+### Global Error Boundary
+
+**File:** `app/error.tsx`
+
+Next.js root error boundary (not a route, fires on any uncaught render error). Special-cased for `ChunkLoadError` / "Loading chunk" / "Cannot find module" — these mean a stale browser tab is referencing JS chunk hashes from a previous deploy, so it force-reloads the page instead of showing a dead error screen. Other errors show a friendly "Something went wrong" message with a "Try again" button that calls Next's `reset()`.
+
+---
+
 ## 9. Every Component Explained
 
 ### `ListingCard` — The Core Display Unit
@@ -1032,7 +1070,7 @@ Responsive banner slot above category chips on city page. Phase 3 monetization f
 
 **File:** `components/fresh-listings/FreshListingsSection.tsx`
 
-Carousel of latest listings on the homepage. Auto-scrolls. Shows listings from popular cities.
+Carousel of latest listings on the homepage. Auto-scrolls. Fetches real listings from the API for the visitor's city (`li_city` localStorage, falls back to `hyderabad` for first-time visitors) — no longer static mock cards. Card click navigates to `/{city}/search?category={slug}` so results stay city-scoped.
 
 ### `useSaved` — Bookmark Hook
 
@@ -1129,8 +1167,24 @@ Backend only accepts requests from:
 - `https://localsindia.com`
 - `https://www.localsindia.com`
 - `http://localhost:3000` (dev)
+- `http://localhost:8081`, `http://localhost:19006` (Expo web dev server)
 
 Browser blocks any other origin from calling the API.
+
+### Google Sign-In — Mobile Deep Link (added — commit `f8327b3`)
+
+The mobile app can't receive a normal HTTP redirect after OAuth, so it uses Expo's `WebBrowser` + a custom URL scheme:
+
+```
+1. Mobile app opens GET /api/v1/auth/google?mobile=1 in an in-app browser (expo-web-browser)
+2. Backend sets state=mobile, redirects to Google consent screen as usual
+3. User approves -> Google redirects to GET /api/v1/auth/google/callback?code=...&state=mobile
+4. Backend exchanges code for tokens, upserts user, then redirects to:
+     localsindia://auth/callback?token=...&refresh=...&name=...
+5. expo-web-browser detects the custom scheme, closes the in-app browser,
+   hands the URL back to LoginScreen.tsx, which parses the tokens and stores them
+```
+On error (`state=mobile` + Google denies): redirects to `localsindia://auth/callback?error=google_denied` instead of the web's `/auth/login?error=google_denied`.
 
 ---
 
@@ -1303,6 +1357,14 @@ Azure/static-web-apps-deploy@v1 action:
 
 Deploy completes in ~5 minutes. Zero-downtime (CDN swap).
 
+### Staging — PR Preview Environments (added — commits `f1893a1`, `a6514f4`)
+
+`frontend-azure.yml` now also runs on pull requests targeting `master`:
+- `pull_request` opened/synchronize/reopened (not yet merged) → Azure SWA builds a **temporary staging environment** for that PR and posts the preview URL as a PR comment. Hits the same production backend, so you can test real flows before merging.
+- `pull_request` closed (merged or abandoned) → `close-staging` job tears the preview environment down automatically.
+
+All day-to-day work happens on `develop`; opening a `develop` → `master` PR is how you get a throwaway test URL before going live (matches the workflow already documented in project memory's branch strategy).
+
 ### Keep-Alive (`.github/workflows/keepalive.yml`)
 
 Azure App Service on Free/Basic tier spins down after 20 minutes of inactivity. The keepalive workflow pings `GET /api/v1/health` every 15 minutes to prevent cold starts.
@@ -1318,8 +1380,8 @@ GitHub Repository (master branch)
                     |                    |
                     v                    v
          Azure App Service      Azure Static Web Apps
-         (FastAPI Python 3.12)  (Next.js static HTML/JS)
-         Port 8000               5,638 pre-built pages
+         (FastAPI Python 3.12)  (Next.js 14 hybrid SSR,
+         Port 8000               Azure-managed Node runtime)
               |                       |
               | API calls (HTTPS)     |
               +<----------------------+
@@ -1339,7 +1401,7 @@ Side services (called from backend):
 
 - `localsindia.com` -> Azure Static Web Apps (frontend)
 - `api.localsindia.com` -> Azure App Service (backend)
-- `staticwebapp.config.json` handles SPA routing: any unknown path -> serves `index.html` (client-side router takes over)
+- `staticwebapp.config.json` is now minimal: declares `platform.apiRuntime: node:18` (so Azure provisions the hybrid SSR runtime), allows anonymous on `/api/*`, sets security headers. The old `navigationFallback`/SPA-fallback rules from the static-export era were removed — routing is handled by Next.js itself now, not by SWA config.
 
 ---
 
@@ -1425,6 +1487,10 @@ Side services (called from backend):
 | `app/invite/page.tsx` | Invite friends |
 | `app/seller/[id]/page.tsx` | Public seller profile — avatar, member since, listings grid |
 | `app/saved/page.tsx` | Saved/bookmarked listings (localStorage, no backend) |
+| `app/listing/[id]/page.tsx` + `ListingDetailClient.tsx` | Global city-agnostic listing detail (deep links, mobile, shares) |
+| `app/category/[slug]/page.tsx` | Client redirect: `/category/{slug}` → `/{city}/search?category={slug}` |
+| `app/post/page.tsx` | Client redirect: `/post` → `/{city}/classifieds/post` |
+| `app/error.tsx` | Global error boundary — auto-reloads on ChunkLoadError, else friendly "Try again" screen |
 | `hooks/useSaved.ts` | localStorage bookmark hook (toggle, isSaved, saved list) |
 | `components/listing-card/ListingCard.tsx` | Listing display card (photo, price, WhatsApp button) |
 | `components/listing-card/ListingCardSkeleton.tsx` | Loading placeholder (same size as ListingCard) |
@@ -1452,7 +1518,7 @@ Side services (called from backend):
 | `messages/hi.json` | Hindi translations |
 | `messages/te.json` | Telugu translations |
 | `messages/*.json` | + 8 more languages (ta, kn, mr, bn, gu, pa, ml, or) |
-| `next.config.mjs` | Static export config, image domains, webpack settings |
+| `next.config.mjs` | Hybrid SSR config (no `output: 'export'`), image domains, webpack cache disabled |
 | `tailwind.config.ts` | Tailwind CSS theme |
 | `app/globals.css` | CSS variables (brand colors), Tailwind base styles |
 
@@ -1463,7 +1529,7 @@ Side services (called from backend):
 | `.github/workflows/backend-azure.yml` | Auto-deploy backend to Azure on push |
 | `.github/workflows/frontend-azure.yml` | Auto-deploy frontend to Azure on push |
 | `.github/workflows/keepalive.yml` | Ping API every 15 min to prevent cold starts |
-| `staticwebapp.config.json` | Azure SWA routing rules (SPA fallback -> index.html) |
+| `staticwebapp.config.json` | Minimal SWA config: `apiRuntime: node:18` (hybrid SSR), security headers, anonymous `/api/*` |
 | `backend/Dockerfile` | Python 3.12 container for backend |
 | `backend/requirements.txt` | All Python dependencies pinned to exact versions |
 | `backend/migrations/` | Alembic database schema versions (run: alembic upgrade head) |
@@ -1474,21 +1540,30 @@ Side services (called from backend):
 
 | File | What it does |
 |------|-------------|
-| `mobile/App.tsx` | Navigation root: bottom tabs (Home/Search/Post/Saved/Profile) + stack navigator |
+| `mobile/App.tsx` | Navigation root: bottom tabs (Home/Search/Post/Saved/Profile) + stack navigator. Wrapped in `SafeAreaProvider`; tab bar height/padding driven by `useSafeAreaInsets().bottom` so it clears the Android gesture-nav pill / iOS home indicator instead of sitting under it |
 | `mobile/src/lib/api.ts` | FastAPI-adapted axios layer; JWT auto-refresh; field names match backend (`contact_phone`, `access_token`) |
 | `mobile/src/lib/storage.ts` | expo-secure-store wrapper for tokens + user; `clear()` for logout |
 | `mobile/src/hooks/useSaved.ts` | AsyncStorage bookmark hook (same API as web `useSaved`) |
 | `mobile/src/components/ListingCard.tsx` | RN listing card with gradient emoji placeholder, price, WA button |
-| `mobile/src/screens/HomeScreen.tsx` | Dark hero, city switcher, trending chips, category grid (2×4), fresh listings |
-| `mobile/src/screens/SearchScreen.tsx` | Debounced search, category tabs, city chip, FlatList with results |
+| `mobile/src/screens/HomeScreen.tsx` | Dark hero with real `logo-mark-transparent.png` brand mark next to the headline, city switcher, trending chips, category grid (2×4, emoji `fontSize: 34` for legibility), fresh listings |
+| `mobile/src/screens/SearchScreen.tsx` | Debounced search, category tabs (horizontal `FlatList`; `contentContainerStyle={{alignItems:'center'}}` + fixed `height:44` + `flexGrow:0` — without this the pills stretch to fill the list's full height, a classic horizontal-FlatList `alignItems:'stretch'` cross-axis gotcha), city chip, FlatList with results |
 | `mobile/src/screens/ListingDetailScreen.tsx` | Photo gallery + thumbnail strip, sticky WA button, seller → SellerProfile |
 | `mobile/src/screens/SellerProfileScreen.tsx` | Seller avatar/initials, member since, listing count, listings list |
-| `mobile/src/screens/LoginScreen.tsx` | OTP flow: phone → code → tokens stored in SecureStore; debug OTP shown |
+| `mobile/src/screens/LoginScreen.tsx` | OTP flow: phone → code → tokens stored in SecureStore; debug OTP shown; real logo image above the wordmark text |
 | `mobile/src/screens/PostScreen.tsx` | 3-step wizard: details + category grid → photos (expo-image-picker) → contact |
 | `mobile/src/screens/SavedScreen.tsx` | AsyncStorage bookmarks with empty state CTA |
 | `mobile/src/screens/ProfileScreen.tsx` | User info + menu (My Listings, Saved, City, Edit) + logout with confirmation |
 | `mobile/src/screens/CityPickerScreen.tsx` | Searchable modal; pulls from `/api/v1/cities`; callback pattern for city selection |
+| `mobile/src/screens/AdminScreen.tsx` | Admin panel ported to mobile: listing moderation queue, approve/reject, role management |
+| `mobile/src/screens/LoginScreen.tsx` (Google) | Also handles Google Sign-In via `expo-web-browser` deep-link flow — see §11 |
+| `mobile/eas.json` | EAS Build profiles: `development` (debug APK), `preview` (internal APK), `production` (AAB for Play Store, autoIncrement) |
+| `mobile/app.json` | Expo config; `extra.eas.projectId` links to EAS project `@rajeshguntupalli59/localsindia`; splash image + image-picker permission text configured for store builds |
+| `mobile/assets/icon.png`, `android-icon-foreground.png`, `favicon.png` | Real LocalsIndia logo — mark-only crop (turtle+pin symbol, no wordmark text since it'd be illegible at icon sizes) |
+| `mobile/assets/splash-icon.png` | Real logo — full mark + "LocalsIndia" wordmark + tagline, shown on the orange splash background |
+| `mobile/assets/logo-mark-transparent.png` | Logo mark with white chroma-keyed to transparent — used inside app UI (HomeScreen hero, LoginScreen) so it sits cleanly on colored/dark backgrounds |
+
+**EAS Build (Play Store pipeline, added 2026-06-16):** `eas build --platform android --profile preview|production` from `mobile/`. Build dashboard: `https://expo.dev/accounts/rajeshguntupalli59/projects/localsindia/builds/`. Not yet submitted to Play Console — `eas submit` is the remaining step once a production AAB is verified.
 
 ---
 
-*Updated: 2026-06-14 | LocalIndia v2 -- Phase 2 complete (seller profiles, bookmarks, React Native app)*
+*Updated: 2026-06-16 | LocalIndia v3 -- hybrid SSR migration, admin role management, business soft-delete, mobile Google Sign-In + admin panel + EAS Play Store pipeline + real logo assets + safe-area bottom nav fix*

@@ -265,7 +265,6 @@ async def create_listing(
         website_url=body.website_url,
         social_url=body.social_url,
         area=body.area,
-        attributes=body.attributes or {},
         status="pending",  # BL-11: always pending on create
     )
     db.add(listing)
