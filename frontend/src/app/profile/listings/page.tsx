@@ -8,7 +8,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { api, ApiError } from '@/lib/api';
 import type { Listing } from '@/lib/types';
-import { formatPrice, timeAgo } from '@/lib/utils';
+import { formatPrice, timeAgo, isSaleCategory } from '@/lib/utils';
 import EmptyState from '@/components/empty-state/EmptyState';
 import { toast } from 'sonner';
 
@@ -24,9 +24,12 @@ const STATUS_LABELS: Record<string, string> = {
   active: 'Active',
   pending: 'Under Review',
   flagged: 'Flagged',
-  fulfilled: 'Sold',
   expired: 'Expired',
 };
+
+function fulfilledLabel(categorySlug?: string | null) {
+  return isSaleCategory(categorySlug) ? 'Sold' : 'Closed';
+}
 
 export default function MyListingsPage() {
   const router = useRouter();
@@ -59,8 +62,9 @@ export default function MyListingsPage() {
     if (!token) return;
     setActionId(id);
     try {
+      const listing = listings.find(l => l.id === id);
       await api.listings.fulfill(id, token);
-      toast.success('Marked as sold!');
+      toast.success(isSaleCategory(listing?.category_slug) ? 'Marked as sold!' : 'Listing closed');
       fetchMyListings();
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : 'Failed');
@@ -155,7 +159,7 @@ export default function MyListingsPage() {
                   <p className="text-xs text-muted-foreground mt-0.5">{timeAgo(listing.created_at)}</p>
                   <div className="flex items-center gap-3 mt-1 flex-wrap">
                     <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${STATUS_STYLES[listing.status] ?? ''}`}>
-                      {STATUS_LABELS[listing.status] ?? listing.status}
+                      {listing.status === 'fulfilled' ? fulfilledLabel(listing.category_slug) : (STATUS_LABELS[listing.status] ?? listing.status)}
                     </span>
                     {listing.status === 'active' && (
                       <span className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -179,7 +183,7 @@ export default function MyListingsPage() {
                 {listing.status === 'active' && (
                   <ActionBtn
                     icon={<CheckCircle className="w-4 h-4" />}
-                    label="Mark Sold"
+                    label={isSaleCategory(listing.category_slug) ? 'Mark Sold' : 'Close'}
                     disabled={actionId === listing.id}
                     onClick={() => handleFulfill(listing.id)}
                     color="text-green-600"

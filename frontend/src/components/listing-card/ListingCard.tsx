@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import { MapPin, Clock, Heart, Eye } from 'lucide-react';
-import { formatPrice, timeAgo } from '@/lib/utils';
+import { formatPrice, timeAgo, fulfillLabel } from '@/lib/utils';
 import { api } from '@/lib/api';
 import type { Listing } from '@/lib/types';
 import { usePrefs } from '@/context/PrefsContext';
@@ -104,11 +104,11 @@ export default function ListingCard({ listing }: Props) {
             </span>
           )}
 
-          {/* Sold overlay */}
+          {/* Fulfilled overlay — "Sold" for items, "Closed" for services */}
           {listing.status === 'fulfilled' && (
             <div className="absolute inset-0 bg-black/55 flex items-center justify-center">
               <span className="text-white font-bold text-sm bg-black/60 px-4 py-1.5 rounded-full">
-                {t('listing.sold')}
+                {fulfillLabel(listing.category_slug)}
               </span>
             </div>
           )}

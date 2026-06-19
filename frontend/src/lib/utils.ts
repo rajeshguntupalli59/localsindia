@@ -10,6 +10,19 @@ export function formatPrice(price: number | null): string {
   return `₹${price.toLocaleString('en-IN')}`;
 }
 
+// Categories where physical items change hands — "Sold" label applies
+export const SALE_CATEGORIES = new Set([
+  'classifieds', 'vehicles', 'electronics', 'furniture', 'fashion', 'real-estate',
+]);
+
+export function isSaleCategory(slug?: string | null): boolean {
+  return SALE_CATEGORIES.has(slug ?? '');
+}
+
+export function fulfillLabel(categorySlug?: string | null): string {
+  return isSaleCategory(categorySlug) ? 'Sold' : 'Closed';
+}
+
 export function timeAgo(dateStr: string): string {
   const diffMs = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diffMs / 60_000);
