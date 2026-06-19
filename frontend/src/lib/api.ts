@@ -106,6 +106,10 @@ export const api = {
     get: (slug: string) => req<City>(`/api/v1/cities/${slug}`),
     listings: (slug: string, params?: Record<string, string>) =>
       req<Listing[]>(`/api/v1/cities/${slug}/listings${params ? qs(params) : ''}`),
+    todayCount: (slug: string) =>
+      req<{ count: number }>(`/api/v1/cities/${slug}/listings/today-count`),
+    trending: (slug: string) =>
+      req<Listing[]>(`/api/v1/cities/${slug}/listings/trending`),
   },
   listings: {
     mine: (token: string) =>

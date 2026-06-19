@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone, timedelta, date as date_type
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select, func, asc, desc
@@ -32,6 +32,80 @@ async def _get_active_listing(listing_id: uuid.UUID, db: AsyncSession) -> Listin
     if not listing:
         raise HTTPException(status_code=404, detail="Listing not found.")
     return listing
+
+
+@router.get("/cities/{slug}/listings/today-count")
+async def today_listing_count(slug: str, db: AsyncSession = Depends(get_db)):
+    city_result = await db.execute(select(City).where(City.slug == slug, City.active == True))
+    city = city_result.scalar_one_or_none()
+    if not city:
+        raise HTTPException(status_code=404, detail="City not found.")
+    today_start = datetime.combine(date_type.today(), datetime.min.time()).replace(tzinfo=timezone.utc)
+    count_result = await db.execute(
+        select(func.count()).select_from(Listing).where(
+            Listing.city_id == city.id,
+            Listing.status == "active",
+            Listing.deleted_at.is_(None),
+            Listing.created_at >= today_start,
+        )
+    )
+    return {"count": count_result.scalar() or 0}
+
+
+@router.get("/cities/{slug}/listings/trending", response_model=list[ListingOut])
+async def trending_listings(slug: str, db: AsyncSession = Depends(get_db)):
+    from app.models.category import Category
+
+    city_result = await db.execute(select(City).where(City.slug == slug, City.active == True))
+    city = city_result.scalar_one_or_none()
+    if not city:
+        raise HTTPException(status_code=404, detail="City not found.")
+
+    cutoff = datetime.now(timezone.utc) - timedelta(hours=48)
+    stmt = (
+        select(Listing)
+        .where(
+            Listing.city_id == city.id,
+            Listing.status == "active",
+            Listing.deleted_at.is_(None),
+            Listing.created_at >= cutoff,
+        )
+        .order_by(Listing.view_count.desc(), Listing.created_at.desc())
+        .limit(10)
+    )
+    result = await db.execute(stmt)
+    listings = result.scalars().all()
+
+    if len(listings) < 3:
+        stmt = (
+            select(Listing)
+            .where(
+                Listing.city_id == city.id,
+                Listing.status == "active",
+                Listing.deleted_at.is_(None),
+            )
+            .order_by(Listing.view_count.desc(), Listing.created_at.desc())
+            .limit(10)
+        )
+        result = await db.execute(stmt)
+        listings = result.scalars().all()
+
+    cat_ids = {l.category_id for l in listings}
+    cat_map: dict[uuid.UUID, Category] = {}
+    if cat_ids:
+        cat_result = await db.execute(select(Category).where(Category.id.in_(cat_ids)))
+        cat_map = {c.id: c for c in cat_result.scalars().all()}
+
+    out_list = []
+    for l in listings:
+        out = ListingOut.model_validate(l)
+        cat = cat_map.get(l.category_id)
+        if cat:
+            out.category_name = cat.name
+            out.category_slug = cat.slug
+        out_list.append(out)
+
+    return out_list
 
 
 @router.get("/cities/{slug}/listings", response_model=list[ListingOut])

@@ -90,6 +90,10 @@ export const authApi = {
 export const citiesApi = {
   list: () => api.get('/cities').then(r => r.data),
   get: (slug: string) => api.get(`/cities/${slug}`).then(r => r.data),
+  todayCount: (slug: string) =>
+    api.get(`/cities/${slug}/listings/today-count`).then(r => r.data as { count: number }),
+  trending: (slug: string) =>
+    api.get(`/cities/${slug}/listings/trending`).then(r => r.data as any[]),
 };
 
 export const categoriesApi = {

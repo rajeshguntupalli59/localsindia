@@ -1,4 +1,5 @@
-import { View, Text, TouchableOpacity, Image, StyleSheet, Linking } from 'react-native';
+import { useState, useRef } from 'react';
+import { View, Text, TouchableOpacity, Image, StyleSheet, Linking, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { listingsApi } from '../lib/api';
 
@@ -13,6 +14,17 @@ const CATEGORY_COLORS: Record<string, string> = {
   businesses: '#06b6d4',
 };
 
+function timeAgo(dateStr: string): string {
+  const d = Date.now() - new Date(dateStr).getTime();
+  const m = Math.floor(d / 60000);
+  const h = Math.floor(d / 3600000);
+  const day = Math.floor(d / 86400000);
+  if (m < 1) return 'just now';
+  if (m < 60) return `${m}m ago`;
+  if (h < 24) return `${h}h ago`;
+  return `${day}d ago`;
+}
+
 interface Listing {
   id: string;
   title: string;
@@ -26,6 +38,8 @@ interface Listing {
   category_slug?: string | null;
   category_name?: string | null;
   seller_name?: string | null;
+  created_at?: string;
+  view_count?: number;
   images?: { id: string; url: string; display_order: number }[];
 }
 
@@ -37,6 +51,16 @@ interface Props {
 export default function ListingCard({ listing, onPress }: Props) {
   const image = listing.images?.[0];
   const bgColor = CATEGORY_COLORS[listing.category_slug ?? ''] ?? '#6b7280';
+  const [saved, setSaved] = useState(false);
+  const heartScale = useRef(new Animated.Value(1)).current;
+
+  const handleSave = () => {
+    Animated.sequence([
+      Animated.timing(heartScale, { toValue: 1.4, duration: 100, useNativeDriver: true }),
+      Animated.spring(heartScale, { toValue: 1, useNativeDriver: true, bounciness: 10 }),
+    ]).start();
+    setSaved(s => !s);
+  };
 
   const handleWhatsApp = () => {
     listingsApi.waClick(listing.id);
@@ -54,55 +78,88 @@ export default function ListingCard({ listing, onPress }: Props) {
   };
 
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.9}>
-      {image ? (
-        <Image source={{ uri: image.url }} style={styles.image} resizeMode="cover" />
-      ) : (
-        <View style={[styles.imagePlaceholder, { backgroundColor: bgColor }]}>
-          <Text style={styles.emoji}>
-            {listing.category_slug === 'tiffin' ? '🍱'
-              : listing.category_slug === 'pg-roommate' ? '🏠'
-              : listing.category_slug === 'jobs' ? '💼'
-              : listing.category_slug === 'vehicles' ? '🚗'
-              : listing.category_slug === 'electronics' ? '📱'
-              : listing.category_slug === 'education' ? '📚'
-              : '🏷️'}
-          </Text>
+    <View style={styles.card}>
+      <TouchableOpacity onPress={onPress} activeOpacity={0.9}>
+        <View style={{ position: 'relative' }}>
+          {image ? (
+            <Image source={{ uri: image.url }} style={styles.image} resizeMode="cover" />
+          ) : (
+            <View style={[styles.imagePlaceholder, { backgroundColor: bgColor }]}>
+              <Text style={styles.emoji}>
+                {listing.category_slug === 'tiffin' ? '🍱'
+                  : listing.category_slug === 'pg-roommate' ? '🏠'
+                  : listing.category_slug === 'jobs' ? '💼'
+                  : listing.category_slug === 'vehicles' ? '🚗'
+                  : listing.category_slug === 'electronics' ? '📱'
+                  : listing.category_slug === 'education' ? '📚'
+                  : '🏷️'}
+              </Text>
+            </View>
+          )}
         </View>
-      )}
 
-      <View style={styles.body}>
-        {listing.is_featured && (
-          <View style={styles.featuredBadge}>
-            <Text style={styles.featuredText}>⭐ Featured</Text>
+        <View style={styles.body}>
+          {listing.is_featured && (
+            <View style={styles.featuredBadge}>
+              <Text style={styles.featuredText}>⭐ Featured</Text>
+            </View>
+          )}
+          {listing.wa_verified && (
+            <View style={styles.verifiedBadge}>
+              <Text style={styles.verifiedText}>✓ Active on WhatsApp</Text>
+            </View>
+          )}
+
+          {listing.price !== null ? (
+            <Text style={styles.price}>{formatPrice(listing.price)}</Text>
+          ) : (
+            <Text style={styles.priceOnRequest}>Price on request</Text>
+          )}
+
+          <Text style={styles.title} numberOfLines={2}>{listing.title}</Text>
+
+          {/* Social proof line */}
+          <View style={styles.metaRow}>
+            {listing.area ? (
+              <View style={styles.metaItem}>
+                <Ionicons name="location-outline" size={11} color="#9ca3af" />
+                <Text style={styles.metaText} numberOfLines={1}>{listing.area}</Text>
+              </View>
+            ) : null}
+            {listing.created_at ? (
+              <Text style={[styles.metaText, { marginLeft: 'auto' }]}>
+                Posted {timeAgo(listing.created_at)}
+              </Text>
+            ) : null}
+            {(listing.view_count ?? 0) > 0 ? (
+              <View style={styles.metaItem}>
+                <Ionicons name="eye-outline" size={11} color="#9ca3af" />
+                <Text style={styles.metaText}>{listing.view_count}</Text>
+              </View>
+            ) : null}
           </View>
-        )}
-        {listing.wa_verified && (
-          <View style={styles.verifiedBadge}>
-            <Text style={styles.verifiedText}>✓ Active on WhatsApp</Text>
-          </View>
-        )}
 
-        {listing.price !== null ? (
-          <Text style={styles.price}>{formatPrice(listing.price)}</Text>
-        ) : (
-          <Text style={styles.priceOnRequest}>Price on request</Text>
-        )}
+          <TouchableOpacity style={styles.waBtn} onPress={handleWhatsApp}>
+            <Text style={styles.waBtnText}>💬 Chat on WhatsApp</Text>
+          </TouchableOpacity>
+        </View>
+      </TouchableOpacity>
 
-        <Text style={styles.title} numberOfLines={2}>{listing.title}</Text>
-
-        {listing.area && (
-          <View style={styles.locationRow}>
-            <Ionicons name="location-outline" size={11} color="#9ca3af" />
-            <Text style={styles.location}>{listing.area}</Text>
-          </View>
-        )}
-
-        <TouchableOpacity style={styles.waBtn} onPress={handleWhatsApp}>
-          <Text style={styles.waBtnText}>💬 Chat on WhatsApp</Text>
-        </TouchableOpacity>
-      </View>
-    </TouchableOpacity>
+      {/* Heart save button — positioned outside main touchable to avoid tap conflict */}
+      <TouchableOpacity
+        style={styles.heartBtn}
+        onPress={handleSave}
+        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+      >
+        <Animated.View style={{ transform: [{ scale: heartScale }] }}>
+          <Ionicons
+            name={saved ? 'heart' : 'heart-outline'}
+            size={18}
+            color={saved ? '#ef4444' : '#9ca3af'}
+          />
+        </Animated.View>
+      </TouchableOpacity>
+    </View>
   );
 }
 
@@ -147,8 +204,9 @@ const styles = StyleSheet.create({
   price: { fontSize: 20, fontWeight: '800', color: '#f97316', marginBottom: 4 },
   priceOnRequest: { fontSize: 12, color: '#9ca3af', marginBottom: 4 },
   title: { fontSize: 14, fontWeight: '600', color: '#111827', lineHeight: 20, marginBottom: 6 },
-  locationRow: { flexDirection: 'row', alignItems: 'center', gap: 3, marginBottom: 10 },
-  location: { fontSize: 11, color: '#9ca3af' },
+  metaRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 10 },
+  metaItem: { flexDirection: 'row', alignItems: 'center', gap: 3 },
+  metaText: { fontSize: 11, color: '#9ca3af' },
   waBtn: {
     backgroundColor: '#25d366',
     borderRadius: 10,
@@ -156,4 +214,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   waBtnText: { color: 'white', fontWeight: '700', fontSize: 14 },
+  heartBtn: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255,255,255,0.92)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.12,
+    shadowRadius: 4,
+    elevation: 3,
+  },
 });

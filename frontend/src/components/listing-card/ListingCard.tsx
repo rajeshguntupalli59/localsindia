@@ -1,9 +1,10 @@
 'use client';
 
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import { MapPin, Clock, Heart } from 'lucide-react';
+import { MapPin, Clock, Heart, Eye } from 'lucide-react';
 import { formatPrice, timeAgo } from '@/lib/utils';
 import { api } from '@/lib/api';
 import type { Listing } from '@/lib/types';
@@ -29,11 +30,21 @@ interface Props {
 export default function ListingCard({ listing }: Props) {
   const { t } = usePrefs();
   const { toggle, isSaved } = useSaved();
+  const [heartBounce, setHeartBounce] = useState(false);
+
   const image = listing.images?.[0];
   const waUrl =
     listing.whatsapp_url ??
     `https://wa.me/${listing.contact_phone.replace('+', '')}`;
   const href = `/listing/${listing.id}`;
+  const saved = isSaved(listing.id);
+
+  const handleHeartClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setHeartBounce(true);
+    toggle(listing);
+  };
 
   return (
     <motion.div
@@ -60,7 +71,7 @@ export default function ListingCard({ listing }: Props) {
             </div>
           )}
 
-          {/* Price badge — bottom left overlay */}
+          {/* Price badge */}
           {listing.price !== null && (
             <span
               className="absolute bottom-2 left-2 text-white text-xs font-bold px-2.5 py-1.5 rounded-lg"
@@ -70,19 +81,21 @@ export default function ListingCard({ listing }: Props) {
             </span>
           )}
 
-          {/* Bookmark heart */}
-          <button
+          {/* Bookmark heart — scale bounce on toggle */}
+          <motion.button
             type="button"
-            onClick={e => { e.preventDefault(); e.stopPropagation(); toggle(listing); }}
-            aria-label={isSaved(listing.id) ? 'Remove bookmark' : 'Save listing'}
-            className="absolute top-2 right-2 z-10 w-7 h-7 rounded-full bg-white/90 flex items-center justify-center shadow-sm
-              hover:bg-white transition-all duration-150 active:scale-90"
+            onClick={handleHeartClick}
+            aria-label={saved ? 'Remove bookmark' : 'Save listing'}
+            animate={heartBounce ? { scale: [1, 1.35, 1] } : { scale: 1 }}
+            transition={{ duration: 0.2 }}
+            onAnimationComplete={() => setHeartBounce(false)}
+            className="absolute top-2 right-2 z-10 w-7 h-7 rounded-full bg-white/90 flex items-center justify-center shadow-sm hover:bg-white"
           >
             <Heart
-              className={`w-3.5 h-3.5 transition-colors ${isSaved(listing.id) ? 'fill-red-500 text-red-500' : 'text-slate-400'}`}
+              className={`w-3.5 h-3.5 transition-colors duration-150 ${saved ? 'fill-red-500 text-red-500' : 'text-slate-400'}`}
               strokeWidth={2}
             />
-          </button>
+          </motion.button>
 
           {/* Featured badge */}
           {listing.is_featured && (
@@ -106,18 +119,14 @@ export default function ListingCard({ listing }: Props) {
       <div className="p-3">
         <Link href={href}>
           <p
-            className="text-xs font-bold uppercase tracking-wide mb-1"
-            style={{ color: 'var(--li-primary)' }}
-          >
-            {listing.category_id ? '🏷️' : ''} {listing.price === null ? t('listing.priceOnRequest') : ''}
-          </p>
-          <p
-            className="font-700 text-sm leading-snug line-clamp-2 mb-2"
+            className="font-700 text-sm leading-snug line-clamp-2 mb-1.5"
             style={{ color: 'var(--li-text)', fontWeight: 700 }}
           >
             {listing.title}
           </p>
-          <div className="flex items-center gap-3 text-xs" style={{ color: 'var(--li-muted)' }}>
+
+          {/* Social proof line: Posted X ago + view count */}
+          <div className="flex items-center gap-3 text-xs mb-2" style={{ color: 'var(--li-muted)' }}>
             {listing.area && (
               <span className="flex items-center gap-1 truncate">
                 <MapPin className="w-3 h-3 shrink-0" />
@@ -126,14 +135,20 @@ export default function ListingCard({ listing }: Props) {
             )}
             <span className="flex items-center gap-1 ml-auto shrink-0">
               <Clock className="w-3 h-3" />
-              {timeAgo(listing.created_at)}
+              Posted {timeAgo(listing.created_at)}
             </span>
+            {(listing.view_count ?? 0) > 0 && (
+              <span className="flex items-center gap-1 shrink-0">
+                <Eye className="w-3 h-3" />
+                {listing.view_count}
+              </span>
+            )}
           </div>
         </Link>
 
         {/* WA Verified badge */}
         {listing.wa_verified && (
-          <div className="flex items-center gap-1 mt-2">
+          <div className="flex items-center gap-1 mb-2">
             <span
               className="flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full"
               style={{ background: '#dcfce7', color: '#16a34a' }}
@@ -149,7 +164,7 @@ export default function ListingCard({ listing }: Props) {
           href={waUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="wa-btn mt-3 w-full py-2.5 text-sm"
+          className="wa-btn mt-1 w-full py-2.5 text-sm"
           onClick={e => { e.stopPropagation(); api.listings.waClick(listing.id); }}
         >
           💬 {t('listing.chatOnWA')}

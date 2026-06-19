@@ -33,7 +33,17 @@ export default function ListingDetailClient({ id }: { id: string }) {
     if (!id) return;
     setLoading(true);
     api.listings.get(id)
-      .then(data => { setListing(data); setLoading(false); })
+      .then(data => {
+        setListing(data);
+        setLoading(false);
+        api.listings.view(id);
+        // Track recently viewed in localStorage for home-screen row
+        try {
+          const rv: any[] = JSON.parse(localStorage.getItem('li_rv') ?? '[]');
+          const updated = [data, ...rv.filter(l => l.id !== data.id)].slice(0, 30);
+          localStorage.setItem('li_rv', JSON.stringify(updated));
+        } catch {}
+      })
       .catch(() => { setError(true); setLoading(false); });
     api.listings.reviews(id).then(setReviews).catch(() => {});
   }, [id]);
