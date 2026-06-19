@@ -40,6 +40,7 @@ export interface Listing {
   website_url: string | null;
   social_url: string | null;
   area: string | null;
+  attributes?: Record<string, string> | null;
   wa_verified: boolean;
   view_count?: number;
   contact_click_count?: number;
@@ -150,4 +151,5 @@ export interface CreateListingInput {
   website_url?: string;
   social_url?: string;
   area?: string;
+  attributes?: Record<string, string>;
 }

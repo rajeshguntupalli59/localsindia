@@ -35,6 +35,20 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
   fashion: ShoppingBag,
 };
 
+// Category-specific chip options shown after picking a category
+const CATEGORY_CHIPS: Record<string, { key: string; label: string; options: string[] }[]> = {
+  'tiffin':      [{ key: 'diet', label: 'Diet', options: ['Veg', 'Non-Veg', 'Both'] }, { key: 'plan', label: 'Plan', options: ['Daily', 'Monthly', 'Weekly'] }],
+  'pg-roommate': [{ key: 'gender', label: 'For', options: ['Male', 'Female', 'Any'] }, { key: 'furnishing', label: 'Furnishing', options: ['Furnished', 'Unfurnished', 'Semi-furnished'] }],
+  'jobs':        [{ key: 'type', label: 'Job Type', options: ['Full-time', 'Part-time', 'Freelance'] }, { key: 'mode', label: 'Work Mode', options: ['Office', 'WFH', 'Hybrid'] }],
+  'vehicles':    [{ key: 'fuel', label: 'Fuel', options: ['Petrol', 'Diesel', 'Electric', 'CNG'] }, { key: 'condition', label: 'Condition', options: ['Excellent', 'Good', 'Needs repair'] }],
+  'electronics': [{ key: 'condition', label: 'Condition', options: ['Like new', 'Good', 'Fair'] }, { key: 'warranty', label: 'Warranty', options: ['In warranty', 'Out of warranty'] }],
+  'real-estate': [{ key: 'type', label: 'Type', options: ['Rent', 'Sale'] }, { key: 'bhk', label: 'Size', options: ['1BHK', '2BHK', '3BHK', '4BHK+'] }],
+  'education':   [{ key: 'mode', label: 'Mode', options: ['Online', 'Offline', 'Both'] }, { key: 'level', label: 'Level', options: ['School', 'College', 'Competitive', 'Skills'] }],
+  'services':    [{ key: 'availability', label: 'Available', options: ['Weekdays', 'Weekends', 'Anytime'] }],
+  'furniture':   [{ key: 'condition', label: 'Condition', options: ['Like new', 'Good', 'Fair'] }],
+  'fashion':     [{ key: 'condition', label: 'Condition', options: ['New with tag', 'Like new', 'Used'] }],
+};
+
 interface FormData {
   title: string;
   description: string;
@@ -45,12 +59,13 @@ interface FormData {
   website_url: string;
   social_url: string;
   area: string;
+  attributes: Record<string, string>;
 }
 
 const EMPTY: FormData = {
   title: '', description: '', category_id: '', price: '',
   contact_phone: '', whatsapp_toggle: true,
-  website_url: '', social_url: '', area: '',
+  website_url: '', social_url: '', area: '', attributes: {},
 };
 
 const PHONE_RE = /^\+91[6-9]\d{9}$/;
@@ -163,6 +178,7 @@ export default function PostListingPage() {
         website_url: form.website_url.trim() || undefined,
         social_url: form.social_url.trim() || undefined,
         area: form.area.trim() || undefined,
+        attributes: Object.keys(form.attributes).length > 0 ? form.attributes : undefined,
       }, token);
 
       for (const photo of photos) {
@@ -363,6 +379,54 @@ export default function PostListingPage() {
                   </div>
                   {errors.category_id && <p className="text-xs mt-3" style={{ color: '#EF4444' }}>{errors.category_id}</p>}
                 </div>
+
+                {/* Category smart chips — slide in after picking a category */}
+                {(() => {
+                  const selectedCat = categories.find(c => c.id === form.category_id);
+                  const chips = selectedCat ? CATEGORY_CHIPS[selectedCat.slug] : null;
+                  if (!chips) return null;
+                  return (
+                    <motion.div
+                      initial={{ opacity: 0, y: -8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="bg-white rounded-3xl p-6 border"
+                      style={{ borderColor: 'var(--li-border)' }}
+                    >
+                      <h2 className="text-base font-bold mb-4" style={{ color: 'var(--li-text)' }}>
+                        Quick details <span className="font-normal text-xs" style={{ color: 'var(--li-muted)' }}>(optional)</span>
+                      </h2>
+                      <div className="space-y-4">
+                        {chips.map(({ key, label, options }) => (
+                          <div key={key}>
+                            <p className="text-xs font-semibold mb-2" style={{ color: 'var(--li-muted)' }}>{label}</p>
+                            <div className="flex flex-wrap gap-2">
+                              {options.map(opt => {
+                                const active = form.attributes[key] === opt;
+                                return (
+                                  <button
+                                    key={opt}
+                                    type="button"
+                                    onClick={() => {
+                                      const next = { ...form.attributes };
+                                      if (active) delete next[key]; else next[key] = opt;
+                                      save({ attributes: next });
+                                    }}
+                                    className="px-3 py-1.5 rounded-full text-sm font-semibold border-2 transition-all"
+                                    style={active
+                                      ? { borderColor: 'var(--li-primary)', background: 'var(--li-primary-light)', color: 'var(--li-primary)' }
+                                      : { borderColor: 'var(--li-border)', color: 'var(--li-muted)' }}
+                                  >
+                                    {opt}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  );
+                })()}
               </div>
 
               {/* Right: Price + preview tip */}

@@ -146,6 +146,17 @@ export default function ListingCard({ listing }: Props) {
           </div>
         </Link>
 
+        {/* Category attribute chips */}
+        {listing.attributes && Object.keys(listing.attributes).length > 0 && (
+          <div className="flex flex-wrap gap-1 mb-2">
+            {Object.values(listing.attributes).map((val, i) => (
+              <span key={i} className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-orange-50 text-orange-600 border border-orange-100">
+                {val}
+              </span>
+            ))}
+          </div>
+        )}
+
         {/* WA Verified badge */}
         {listing.wa_verified && (
           <div className="flex items-center gap-1 mb-2">

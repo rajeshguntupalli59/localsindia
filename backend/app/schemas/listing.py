@@ -20,6 +20,7 @@ class ListingCreate(BaseModel):
     website_url: str | None = None
     social_url: str | None = None
     area: str | None = None
+    attributes: dict | None = None
 
     @field_validator("contact_phone")
     @classmethod
@@ -71,6 +72,7 @@ class ListingOut(BaseModel):
     website_url: str | None = None
     social_url: str | None = None
     area: str | None = None
+    attributes: dict | None = None
     status: str
     is_featured: bool
     wa_verified: bool = False

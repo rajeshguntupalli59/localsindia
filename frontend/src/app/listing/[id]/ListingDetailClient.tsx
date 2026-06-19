@@ -231,6 +231,18 @@ export default function ListingDetailClient({ id }: { id: string }) {
               </Link>
             )}
 
+            {/* Category attribute chips */}
+            {listing.attributes && Object.keys(listing.attributes).length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {Object.entries(listing.attributes).map(([key, val]) => (
+                  <span key={key} className="px-3 py-1 rounded-full text-xs font-semibold border"
+                    style={{ background: 'var(--li-primary-light)', color: 'var(--li-primary)', borderColor: 'rgba(249,115,22,0.2)' }}>
+                    {val}
+                  </span>
+                ))}
+              </div>
+            )}
+
             {/* WA verified */}
             {listing.wa_verified && (
               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold"
