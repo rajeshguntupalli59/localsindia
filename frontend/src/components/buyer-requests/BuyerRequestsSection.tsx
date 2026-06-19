@@ -71,7 +71,7 @@ export default function BuyerRequestsSection({ citySlug }: Props) {
           className="text-xs font-bold px-3 py-1.5 rounded-full text-white"
           style={{ background: 'var(--li-primary)' }}
         >
-          + I'm looking for...
+          + I&apos;m looking for...
         </button>
       </div>
 
@@ -111,7 +111,7 @@ export default function BuyerRequestsSection({ citySlug }: Props) {
         </div>
       ) : (
         <p className="px-4 text-sm" style={{ color: 'var(--li-muted)' }}>
-          No requests yet — be the first to post what you're looking for.
+          No requests yet — be the first to post what you&apos;re looking for.
         </p>
       )}
 

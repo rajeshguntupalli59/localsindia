@@ -39,7 +39,7 @@ export default function ListingDetailClient({ id }: { id: string }) {
         api.listings.view(id);
         // Track recently viewed in localStorage for home-screen row
         try {
-          const rv: any[] = JSON.parse(localStorage.getItem('li_rv') ?? '[]');
+          const rv: Listing[] = JSON.parse(localStorage.getItem('li_rv') ?? '[]');
           const updated = [data, ...rv.filter(l => l.id !== data.id)].slice(0, 30);
           localStorage.setItem('li_rv', JSON.stringify(updated));
         } catch {}
