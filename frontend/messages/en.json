@@ -2,7 +2,7 @@
   "nav": {
     "home": "Home",
     "search": "Search",
-    "post": "Post Free",
+    "post": "Post Listing",
     "myListings": "My Listings",
     "profile": "Profile"
   },
@@ -12,7 +12,7 @@
     "recentCities": "Recent"
   },
   "listing": {
-    "post": "Post Free Listing",
+    "post": "Post Listing",
     "whatsapp": "Chat on WhatsApp",
     "priceOnRequest": "Price on request",
     "pending": "Under Review",

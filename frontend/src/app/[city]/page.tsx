@@ -272,12 +272,12 @@ export default function CityHomePage() {
           >
             <div>
               <p className="font-bold text-sm" style={{ color: 'var(--li-primary)' }}>
-                Have something to sell in {city?.name ?? citySlug}?
+                Sell, rent, or offer services in {city?.name ?? citySlug}?
               </p>
               <p className="text-xs text-slate-500 mt-0.5">Post a listing — it&apos;s free and takes 2 minutes</p>
             </div>
             <span className="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold text-white group-hover:scale-105 transition-transform" style={{ background: 'var(--li-primary)' }}>
-              <Plus className="w-3.5 h-3.5" strokeWidth={2.8} /> Post Free
+              <Plus className="w-3.5 h-3.5" strokeWidth={2.8} /> Post Listing
             </span>
           </Link>
         )}
