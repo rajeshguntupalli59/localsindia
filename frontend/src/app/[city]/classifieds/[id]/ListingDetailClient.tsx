@@ -28,6 +28,7 @@ export default function ListingDetailPage() {
 
   const [listing, setListing] = useState<Listing | null>(null);
   const [loading, setLoading] = useState(true);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [imgIdx, setImgIdx] = useState(0);
   const [showFull, setShowFull] = useState(false);
   const [activeTab, setActiveTab] = useState<'description' | 'details'>('description');
@@ -43,6 +44,10 @@ export default function ListingDetailPage() {
   const waTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
+    try {
+      const u = JSON.parse(localStorage.getItem('user') ?? 'null');
+      if (u?.id) setCurrentUserId(u.id);
+    } catch {}
     api.listings
       .get(id)
       .then(l => {
@@ -459,7 +464,18 @@ export default function ListingDetailPage() {
               )}
             </div>
 
-            {/* Promote button — hidden until monetization is enabled (1k-5k users) */}
+            {/* Promote button — visible to listing owner only */}
+            {currentUserId && listing.user_id === currentUserId && !listing.is_featured && (
+              <div className="mt-4">
+                <Link
+                  href={`/${citySlug}/classifieds/${id}/promote`}
+                  className="flex items-center justify-center gap-2 w-full h-12 rounded-2xl border-2 border-dashed font-semibold text-sm transition-all hover:border-[#F7921E] hover:bg-[#FEF3E2]/60"
+                  style={{ borderColor: 'var(--li-primary)', color: 'var(--li-primary)' }}
+                >
+                  ⭐ Promote this listing — from ₹99
+                </Link>
+              </div>
+            )}
 
             {/* Safety tips */}
             <div
