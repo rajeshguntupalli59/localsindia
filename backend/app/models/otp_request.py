@@ -21,5 +21,11 @@ class OtpRequest(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     __table_args__ = (
-        Index("idx_otp_phone", "phone", "created_at"),
+        # Partial: only unverified (pending) OTP rows. Old rows accumulate fast;
+        # this index stays tiny because it excludes everything already verified.
+        Index(
+            "idx_otp_active",
+            "phone", "expires_at",
+            postgresql_where="verified = false",
+        ),
     )

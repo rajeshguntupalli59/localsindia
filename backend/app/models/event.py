@@ -39,6 +39,11 @@ class Event(Base):
             "status IN ('pending','active','cancelled','completed')",
             name="ck_events_status",
         ),
-        Index("idx_events_city_date", "city_id", "event_date"),
+        # Partial: only active non-deleted events; much smaller than full index.
+        Index(
+            "idx_events_active",
+            "city_id", "event_date",
+            postgresql_where="status = 'active' AND deleted_at IS NULL",
+        ),
         Index("idx_events_user", "user_id"),
     )

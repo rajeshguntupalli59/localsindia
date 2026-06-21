@@ -67,8 +67,16 @@ class Listing(Base):
             "status IN ('pending','active','expired','rejected','flagged','fulfilled')",
             name="ck_listings_status",
         ),
-        Index("idx_listings_city", "city_id", "status", "created_at"),
-        Index("idx_listings_category", "category_id"),
+        # Partial index: active non-deleted listings only — covers city home + category filter.
+        # Includes category_id so city+category queries use a single index.
+        # Column order matches ORDER BY is_featured DESC, created_at DESC.
+        Index(
+            "idx_listings_active",
+            "city_id", "category_id", "is_featured", "created_at",
+            postgresql_where="status = 'active' AND deleted_at IS NULL",
+        ),
+        # GIN index for full-text search via search_vector @@ plainto_tsquery(...)
+        Index("idx_listings_search", "search_vector", postgresql_using="gin"),
+        # Kept: user's own listings (/listings/mine, BL-02 cap check)
         Index("idx_listings_user", "user_id"),
-        Index("idx_listings_status", "status"),
     )
