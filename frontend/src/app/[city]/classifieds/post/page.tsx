@@ -92,7 +92,18 @@ export default function PostListingPage() {
       return;
     }
     const stored = localStorage.getItem('li_post_form');
-    if (stored) { try { setForm(JSON.parse(stored)); } catch { /* */ } }
+    if (stored) {
+      try {
+        const draft = JSON.parse(stored);
+        // Merge with EMPTY so any field missing from an older draft version gets a safe default.
+        // attributes must always be an object — if absent from the stored draft, accessing
+        // attributes[key] in the chip renderer throws "Cannot read properties of undefined".
+        setForm({ ...EMPTY, ...draft, attributes: draft.attributes ?? {} });
+      } catch {
+        // Corrupted JSON — discard the draft rather than crash on every page load
+        localStorage.removeItem('li_post_form');
+      }
+    }
     api.categories.list().then(setCategories).catch(() => {});
     try {
       const u = JSON.parse(localStorage.getItem('user') ?? '{}');
@@ -401,7 +412,7 @@ export default function PostListingPage() {
                             <p className="text-xs font-semibold mb-2" style={{ color: 'var(--li-muted)' }}>{label}</p>
                             <div className="flex flex-wrap gap-2">
                               {options.map(opt => {
-                                const active = form.attributes[key] === opt;
+                                const active = (form.attributes ?? {})[key] === opt;
                                 return (
                                   <button
                                     key={opt}

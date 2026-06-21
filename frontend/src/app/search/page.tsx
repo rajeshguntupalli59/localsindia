@@ -177,9 +177,7 @@ function SearchInner() {
                 {categories.map(cat => (
                   <button
                     key={cat.id}
-                    role="tab"
                     onClick={() => navigate({ category: cat.slug })}
-                    aria-selected={activeCat?.id === cat.id}
                     className={`flex-shrink-0 px-3.5 py-1.5 rounded-full text-[12px] font-semibold transition-all ${
                       activeCat?.id === cat.id ? 'bg-[#F7921E] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                     }`}
