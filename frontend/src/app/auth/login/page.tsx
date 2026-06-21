@@ -18,7 +18,7 @@ const OTP_DEBUG = process.env.NEXT_PUBLIC_OTP_DEBUG === 'true' && process.env.NO
 function getPostLoginRedirect(redirectParam: string | null): string {
   if (redirectParam && redirectParam.startsWith('/')) return redirectParam;
   const city = typeof window !== 'undefined' ? localStorage.getItem('li_city') : null;
-  return city ? `/${city}` : '/';
+  return city ? `/${city}` : '/profile';
 }
 
 const GoogleIcon = () => (

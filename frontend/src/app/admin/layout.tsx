@@ -44,7 +44,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   };
 
   if (pathname === '/admin/login') return <>{children}</>;
-  if (!role) return null;
+  if (!role) return (
+    <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--li-page-bg)' }}>
+      <div className="w-6 h-6 rounded-full border-2 border-amber-400 border-t-transparent animate-spin" />
+    </div>
+  );
 
   return (
     <div className="min-h-screen flex">

@@ -222,6 +222,24 @@ async def update_user_role(
     return {"id": str(user.id), "name": user.name, "role": user.role}
 
 
+@router.delete("/users/{user_id}")
+async def delete_user(
+    user_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    current_admin: User = Depends(get_current_admin),
+):
+    if user_id == current_admin.id:
+        raise HTTPException(status_code=400, detail="Cannot delete your own account.")
+    result = await db.execute(select(User).where(User.id == user_id, User.deleted_at.is_(None)))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found.")
+    user.deleted_at = datetime.now(timezone.utc)
+    user.is_active = False
+    await db.commit()
+    return {"success": True, "message": f"User {user_id} deleted."}
+
+
 @router.post("/seed-placeholder-images")
 async def seed_placeholder_images(
     db: AsyncSession = Depends(get_db),

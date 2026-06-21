@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { Users, ShieldCheck, ShieldOff } from 'lucide-react';
+import { Users, ShieldCheck, ShieldOff, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import EmptyState from '@/components/empty-state/EmptyState';
 
@@ -79,6 +79,28 @@ export default function AdminUsersPage() {
     }
   };
 
+  const deleteUser = async (u: UserRow) => {
+    const confirmed = window.confirm(
+      `Delete user ${u.name ?? u.phone ?? u.email}? This cannot be undone.`
+    );
+    if (!confirmed) return;
+    setActionId(u.id);
+    try {
+      const token = localStorage.getItem('access_token');
+      const res = await fetch(`${API_BASE}/api/v1/admin/users/${u.id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error();
+      setUsers(us => us.filter(x => x.id !== u.id));
+      toast.success(`${u.name ?? 'User'} deleted.`);
+    } catch {
+      toast.error('Failed to delete user');
+    } finally {
+      setActionId(null);
+    }
+  };
+
   const adminCount = users.filter(u => u.role === 'admin').length;
 
   return (
@@ -145,20 +167,29 @@ export default function AdminUsersPage() {
                     </td>
                     <td className="px-4 py-3 text-right">
                       {!isMe && (
-                        <button
-                          onClick={() => changeRole(u)}
-                          disabled={busy}
-                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors disabled:opacity-50 ${
-                            isAdmin
-                              ? 'bg-red-50 text-red-700 hover:bg-red-100'
-                              : 'bg-green-50 text-green-700 hover:bg-green-100'
-                          }`}
-                        >
-                          {isAdmin
-                            ? <><ShieldOff className="w-3.5 h-3.5" /> Remove Admin</>
-                            : <><ShieldCheck className="w-3.5 h-3.5" /> Make Admin</>
-                          }
-                        </button>
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => changeRole(u)}
+                            disabled={busy}
+                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors disabled:opacity-50 ${
+                              isAdmin
+                                ? 'bg-red-50 text-red-700 hover:bg-red-100'
+                                : 'bg-green-50 text-green-700 hover:bg-green-100'
+                            }`}
+                          >
+                            {isAdmin
+                              ? <><ShieldOff className="w-3.5 h-3.5" /> Remove Admin</>
+                              : <><ShieldCheck className="w-3.5 h-3.5" /> Make Admin</>
+                            }
+                          </button>
+                          <button
+                            onClick={() => deleteUser(u)}
+                            disabled={busy}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-red-50 hover:text-red-700 transition-colors disabled:opacity-50"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" /> Delete
+                          </button>
+                        </div>
                       )}
                     </td>
                   </tr>
