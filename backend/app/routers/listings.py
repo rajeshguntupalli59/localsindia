@@ -70,7 +70,7 @@ async def trending_listings(slug: str, db: AsyncSession = Depends(get_db)):
             Listing.deleted_at.is_(None),
             Listing.created_at >= cutoff,
         )
-        .order_by(Listing.view_count.desc(), Listing.created_at.desc())
+        .order_by(Listing.is_featured.desc(), Listing.view_count.desc(), Listing.created_at.desc())
         .limit(10)
     )
     result = await db.execute(stmt)
@@ -84,7 +84,7 @@ async def trending_listings(slug: str, db: AsyncSession = Depends(get_db)):
                 Listing.status == "active",
                 Listing.deleted_at.is_(None),
             )
-            .order_by(Listing.view_count.desc(), Listing.created_at.desc())
+            .order_by(Listing.is_featured.desc(), Listing.view_count.desc(), Listing.created_at.desc())
             .limit(10)
         )
         result = await db.execute(stmt)
