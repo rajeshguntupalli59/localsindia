@@ -4,14 +4,25 @@ import { Ionicons } from '@expo/vector-icons';
 import { listingsApi } from '../lib/api';
 
 const CATEGORY_COLORS: Record<string, string> = {
-  tiffin: '#f97316',
+  tiffin:        '#f97316',
   'pg-roommate': '#3b82f6',
-  jobs: '#10b981',
-  vehicles: '#ef4444',
-  electronics: '#8b5cf6',
-  education: '#f59e0b',
-  events: '#ec4899',
-  businesses: '#06b6d4',
+  jobs:          '#10b981',
+  vehicles:      '#ef4444',
+  electronics:   '#8b5cf6',
+  education:     '#f59e0b',
+  events:        '#ec4899',
+  businesses:    '#06b6d4',
+};
+
+const CATEGORY_EMOJI: Record<string, string> = {
+  tiffin:        '🍱',
+  'pg-roommate': '🏠',
+  jobs:          '💼',
+  vehicles:      '🚗',
+  electronics:   '📱',
+  education:     '📚',
+  events:        '🎉',
+  businesses:    '🏪',
 };
 
 function timeAgo(dateStr: string): string {
@@ -48,16 +59,23 @@ interface Props {
   onPress?: () => void;
 }
 
+function formatPrice(p: number): string {
+  if (p >= 100000) return `₹${(p / 100000).toFixed(1)}L`;
+  if (p >= 1000) return `₹${(p / 1000).toFixed(0)}k`;
+  return `₹${p}`;
+}
+
 export default function ListingCard({ listing, onPress }: Props) {
-  const image = listing.images?.[0];
-  const bgColor = CATEGORY_COLORS[listing.category_slug ?? ''] ?? '#6b7280';
+  const image     = listing.images?.[0];
+  const catColor  = CATEGORY_COLORS[listing.category_slug ?? ''] ?? '#94a3b8';
+  const catEmoji  = CATEGORY_EMOJI[listing.category_slug ?? ''] ?? '🏷️';
   const [saved, setSaved] = useState(false);
   const heartScale = useRef(new Animated.Value(1)).current;
 
   const handleSave = () => {
     Animated.sequence([
-      Animated.timing(heartScale, { toValue: 1.4, duration: 100, useNativeDriver: true }),
-      Animated.spring(heartScale, { toValue: 1, useNativeDriver: true, bounciness: 10 }),
+      Animated.timing(heartScale, { toValue: 1.45, duration: 100, useNativeDriver: true }),
+      Animated.spring(heartScale, { toValue: 1, useNativeDriver: true, bounciness: 12 }),
     ]).start();
     setSaved(s => !s);
   };
@@ -71,54 +89,76 @@ export default function ListingCard({ listing, onPress }: Props) {
     Linking.openURL(`https://wa.me/${phone}?text=${msg}`);
   };
 
-  const formatPrice = (p: number) => {
-    if (p >= 100000) return `₹${(p / 100000).toFixed(1)}L`;
-    if (p >= 1000) return `₹${(p / 1000).toFixed(0)}k`;
-    return `₹${p}`;
-  };
-
   return (
-    <View style={styles.card}>
-      <TouchableOpacity onPress={onPress} activeOpacity={0.9}>
-        <View style={{ position: 'relative' }}>
+    <View style={[styles.card, { shadowColor: catColor }]}>
+      {/* Category color accent strip at top */}
+      <View style={[styles.catStrip, { backgroundColor: catColor }]} />
+
+      <TouchableOpacity onPress={onPress} activeOpacity={0.92}>
+        {/* ── Image area ── */}
+        <View style={styles.imageContainer}>
           {image ? (
-            <Image source={{ uri: image.url }} style={styles.image} resizeMode="cover" />
+            <View style={styles.imageWrapper}>
+              <Image source={{ uri: image.url }} style={styles.image} resizeMode="cover" />
+
+              {/* Gradient overlay — 5-layer approximation */}
+              <View style={styles.gradientOverlay} pointerEvents="none">
+                {[0, 0.06, 0.16, 0.32, 0.52].map((opacity, i) => (
+                  <View key={i} style={{ flex: 1, backgroundColor: `rgba(0,0,0,${opacity})` }} />
+                ))}
+              </View>
+
+              {/* Price badge on image */}
+              <View style={styles.priceBadgeRow}>
+                {listing.price !== null ? (
+                  <View style={styles.priceTag}>
+                    <Text style={styles.priceTagText}>{formatPrice(listing.price)}</Text>
+                  </View>
+                ) : (
+                  <View style={styles.priceTagDim}>
+                    <Text style={styles.priceTagDimText}>Price on request</Text>
+                  </View>
+                )}
+              </View>
+            </View>
           ) : (
-            <View style={[styles.imagePlaceholder, { backgroundColor: bgColor }]}>
-              <Text style={styles.emoji}>
-                {listing.category_slug === 'tiffin' ? '🍱'
-                  : listing.category_slug === 'pg-roommate' ? '🏠'
-                  : listing.category_slug === 'jobs' ? '💼'
-                  : listing.category_slug === 'vehicles' ? '🚗'
-                  : listing.category_slug === 'electronics' ? '📱'
-                  : listing.category_slug === 'education' ? '📚'
-                  : '🏷️'}
-              </Text>
+            /* No image — colored placeholder */
+            <View style={[styles.imagePlaceholder, { backgroundColor: catColor + '18' }]}>
+              <Text style={styles.emoji}>{catEmoji}</Text>
             </View>
           )}
         </View>
 
+        {/* ── Body ── */}
         <View style={styles.body}>
-          {listing.is_featured && (
-            <View style={styles.featuredBadge}>
-              <Text style={styles.featuredText}>⭐ Featured</Text>
-            </View>
-          )}
-          {listing.wa_verified && (
-            <View style={styles.verifiedBadge}>
-              <Text style={styles.verifiedText}>✓ Active on WhatsApp</Text>
-            </View>
+          {/* Badges */}
+          <View style={styles.badgeRow}>
+            {listing.is_featured && (
+              <View style={styles.featuredBadge}>
+                <Text style={styles.featuredText}>⭐ Featured</Text>
+              </View>
+            )}
+            {listing.wa_verified && (
+              <View style={styles.verifiedBadge}>
+                <View style={styles.verifiedDot} />
+                <Text style={styles.verifiedText}>Active on WA</Text>
+              </View>
+            )}
+          </View>
+
+          {/* Price in body — only when no image */}
+          {!image && (
+            listing.price !== null ? (
+              <Text style={styles.price}>{formatPrice(listing.price)}</Text>
+            ) : (
+              <Text style={styles.priceOnRequest}>Price on request</Text>
+            )
           )}
 
-          {listing.price !== null ? (
-            <Text style={styles.price}>{formatPrice(listing.price)}</Text>
-          ) : (
-            <Text style={styles.priceOnRequest}>Price on request</Text>
-          )}
-
+          {/* Title */}
           <Text style={styles.title} numberOfLines={2}>{listing.title}</Text>
 
-          {/* Social proof line */}
+          {/* Meta row */}
           <View style={styles.metaRow}>
             {listing.area ? (
               <View style={styles.metaItem}>
@@ -128,7 +168,7 @@ export default function ListingCard({ listing, onPress }: Props) {
             ) : null}
             {listing.created_at ? (
               <Text style={[styles.metaText, { marginLeft: 'auto' }]}>
-                Posted {timeAgo(listing.created_at)}
+                {timeAgo(listing.created_at)}
               </Text>
             ) : null}
             {(listing.view_count ?? 0) > 0 ? (
@@ -139,13 +179,14 @@ export default function ListingCard({ listing, onPress }: Props) {
             ) : null}
           </View>
 
-          <TouchableOpacity style={styles.waBtn} onPress={handleWhatsApp}>
-            <Text style={styles.waBtnText}>💬 Chat on WhatsApp</Text>
+          {/* WhatsApp button */}
+          <TouchableOpacity style={styles.waBtn} onPress={handleWhatsApp} activeOpacity={0.85}>
+            <Text style={styles.waBtnText}>💬  Chat on WhatsApp</Text>
           </TouchableOpacity>
         </View>
       </TouchableOpacity>
 
-      {/* Heart save button — positioned outside main touchable to avoid tap conflict */}
+      {/* Heart save — outside main touchable */}
       <TouchableOpacity
         style={styles.heartBtn}
         onPress={handleSave}
@@ -166,67 +207,185 @@ export default function ListingCard({ listing, onPress }: Props) {
 const styles = StyleSheet.create({
   card: {
     backgroundColor: 'white',
-    borderRadius: 16,
+    borderRadius: 18,
     marginBottom: 12,
     overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
+    shadowOpacity: 0.18,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 4,
   },
-  image: { width: '100%', height: 160 },
+  catStrip: {
+    height: 3,
+  },
+  imageContainer: {
+    width: '100%',
+  },
+  imageWrapper: {
+    position: 'relative',
+  },
+  image: {
+    width: '100%',
+    height: 166,
+  },
+  gradientOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 72,
+    flexDirection: 'column',
+  },
+  priceBadgeRow: {
+    position: 'absolute',
+    bottom: 10,
+    left: 10,
+    flexDirection: 'row',
+  },
+  priceTag: {
+    backgroundColor: 'rgba(247,146,30,0.95)',
+    borderRadius: 9,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    shadowColor: '#f97316',
+    shadowOpacity: 0.45,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
+  },
+  priceTagText: {
+    color: 'white',
+    fontWeight: '900',
+    fontSize: 13,
+    letterSpacing: -0.3,
+  },
+  priceTagDim: {
+    backgroundColor: 'rgba(0,0,0,0.36)',
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  priceTagDimText: {
+    color: 'rgba(255,255,255,0.75)',
+    fontWeight: '600',
+    fontSize: 11,
+  },
   imagePlaceholder: {
     width: '100%',
-    height: 120,
+    height: 128,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  emoji: { fontSize: 40, opacity: 0.4 },
-  body: { padding: 12 },
+  emoji: {
+    fontSize: 42,
+    opacity: 0.35,
+  },
+  body: {
+    padding: 12,
+  },
+  badgeRow: {
+    flexDirection: 'row',
+    gap: 6,
+    marginBottom: 6,
+    flexWrap: 'wrap',
+  },
   featuredBadge: {
-    alignSelf: 'flex-start',
     backgroundColor: '#fef3c7',
     borderRadius: 20,
     paddingHorizontal: 8,
     paddingVertical: 3,
-    marginBottom: 6,
   },
-  featuredText: { color: '#92400e', fontSize: 11, fontWeight: '700' },
+  featuredText: {
+    color: '#92400e',
+    fontSize: 10,
+    fontWeight: '700',
+  },
   verifiedBadge: {
-    alignSelf: 'flex-start',
     backgroundColor: '#dcfce7',
     borderRadius: 20,
     paddingHorizontal: 8,
     paddingVertical: 3,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  verifiedDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#25d366',
+  },
+  verifiedText: {
+    color: '#16a34a',
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  price: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: '#f97316',
+    marginBottom: 4,
+    letterSpacing: -0.5,
+  },
+  priceOnRequest: {
+    fontSize: 11,
+    color: '#9ca3af',
+    marginBottom: 4,
+  },
+  title: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#111827',
+    lineHeight: 20,
     marginBottom: 6,
   },
-  verifiedText: { color: '#16a34a', fontSize: 11, fontWeight: '700' },
-  price: { fontSize: 20, fontWeight: '800', color: '#f97316', marginBottom: 4 },
-  priceOnRequest: { fontSize: 12, color: '#9ca3af', marginBottom: 4 },
-  title: { fontSize: 14, fontWeight: '600', color: '#111827', lineHeight: 20, marginBottom: 6 },
-  metaRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 10 },
-  metaItem: { flexDirection: 'row', alignItems: 'center', gap: 3 },
-  metaText: { fontSize: 11, color: '#9ca3af' },
+  metaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 10,
+    flexWrap: 'wrap',
+  },
+  metaItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+  },
+  metaText: {
+    fontSize: 11,
+    color: '#9ca3af',
+  },
   waBtn: {
     backgroundColor: '#25d366',
-    borderRadius: 10,
-    padding: 11,
+    borderRadius: 11,
+    paddingVertical: 12,
     alignItems: 'center',
+    shadowColor: '#25d366',
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 3,
   },
-  waBtnText: { color: 'white', fontWeight: '700', fontSize: 14 },
+  waBtnText: {
+    color: 'white',
+    fontWeight: '700',
+    fontSize: 14,
+    letterSpacing: 0.1,
+  },
   heartBtn: {
     position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: 'rgba(255,255,255,0.92)',
+    top: 12,
+    right: 10,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: 'rgba(255,255,255,0.93)',
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
-    shadowOpacity: 0.12,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOpacity: 0.14,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 4,
   },
 });

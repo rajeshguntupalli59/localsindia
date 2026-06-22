@@ -32,31 +32,69 @@ function TabNavigator() {
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarActiveTintColor: '#f97316',
-        tabBarInactiveTintColor: '#9ca3af',
+        tabBarInactiveTintColor: '#94a3b8',
         tabBarStyle: {
-          backgroundColor: 'white',
-          borderTopColor: '#f3f4f6',
-          paddingBottom: Math.max(insets.bottom, 6),
-          paddingTop: 4,
-          height: 60 + insets.bottom,
+          backgroundColor: 'rgba(255,255,255,0.97)',
+          borderTopColor: 'rgba(0,0,0,0.07)',
+          borderTopWidth: 0.5,
+          paddingBottom: Math.max(insets.bottom, 8),
+          paddingTop: 6,
+          height: 64 + insets.bottom,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -6 },
+          shadowOpacity: 0.08,
+          shadowRadius: 20,
+          elevation: 24,
         },
-        tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
+        tabBarLabelStyle: { fontSize: 11, fontWeight: '600', marginTop: -2 },
         tabBarIcon: ({ color, size, focused }) => {
           const icons: Record<string, { on: string; off: string }> = {
-            Home: { on: 'home', off: 'home-outline' },
-            Search: { on: 'search', off: 'search-outline' },
-            Post: { on: 'add-circle', off: 'add-circle-outline' },
-            Saved: { on: 'heart', off: 'heart-outline' },
-            Profile: { on: 'person', off: 'person-outline' },
+            Home:    { on: 'home',            off: 'home-outline'    },
+            Search:  { on: 'search',          off: 'search-outline'  },
+            Post:    { on: 'add',             off: 'add'             },
+            Saved:   { on: 'heart',           off: 'heart-outline'   },
+            Profile: { on: 'person',          off: 'person-outline'  },
           };
           const name = route.name as keyof typeof icons;
           const iconName = focused ? icons[name]?.on : icons[name]?.off;
+
+          if (name === 'Post') {
+            return (
+              <View style={{
+                width: 50, height: 50,
+                borderRadius: 25,
+                backgroundColor: '#f97316',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: 6,
+                shadowColor: '#f97316',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.55,
+                shadowRadius: 12,
+                elevation: 8,
+              }}>
+                <Ionicons name="add" size={28} color="white" />
+              </View>
+            );
+          }
+
           return (
-            <Ionicons
-              name={(iconName as any) ?? 'ellipse-outline'}
-              size={name === 'Post' ? 30 : size}
-              color={name === 'Post' ? '#f97316' : color}
-            />
+            <View style={{ alignItems: 'center' }}>
+              {focused && (
+                <View style={{
+                  position: 'absolute',
+                  top: -8,
+                  width: 20, height: 3,
+                  borderRadius: 2,
+                  backgroundColor: '#f97316',
+                }} />
+              )}
+              <Ionicons
+                name={(iconName as any) ?? 'ellipse-outline'}
+                size={size}
+                color={color}
+              />
+            </View>
           );
         },
       })}

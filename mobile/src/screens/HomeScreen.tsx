@@ -10,6 +10,17 @@ import ListingCard from '../components/ListingCard';
 
 const LOGO = require('../../assets/logo-mark-transparent.png');
 
+const CAT_COLORS: Record<string, string> = {
+  tiffin:        '#f97316',
+  'pg-roommate': '#3b82f6',
+  jobs:          '#10b981',
+  vehicles:      '#ef4444',
+  electronics:   '#8b5cf6',
+  education:     '#f59e0b',
+  events:        '#ec4899',
+  businesses:    '#06b6d4',
+};
+
 type Listing = any;
 
 function getGreeting(): string {
@@ -144,6 +155,10 @@ export default function HomeScreen({ navigation }: any) {
       >
         {/* ── HERO ── */}
         <View style={styles.hero}>
+          {/* Atmospheric glow blobs */}
+          <View style={styles.glowTopRight} pointerEvents="none" />
+          <View style={styles.glowBottomLeft} pointerEvents="none" />
+
           <View style={styles.heroHeader}>
             <View style={styles.brandRow}>
               <Image source={LOGO} style={styles.logo} resizeMode="contain" />
@@ -156,18 +171,23 @@ export default function HomeScreen({ navigation }: any) {
               style={styles.cityBtn}
               onPress={() => navigation.navigate('CityPicker', { onSelect: handleCitySelect })}
             >
-              <Ionicons name="location-outline" size={14} color="#f97316" />
+              <Ionicons name="location-outline" size={13} color="#f97316" />
               <Text style={styles.cityBtnText}>{cityName}</Text>
+              <Ionicons name="chevron-down" size={11} color="rgba(255,255,255,0.5)" />
             </TouchableOpacity>
           </View>
 
-          {/* Search bar */}
+          {/* Premium search bar */}
           <TouchableOpacity
             style={styles.searchBar}
             onPress={() => navigation.navigate('Search', { citySlug, cityName })}
+            activeOpacity={0.9}
           >
-            <Ionicons name="search-outline" size={16} color="#9ca3af" />
+            <Ionicons name="search-outline" size={18} color="#f97316" />
             <Text style={styles.searchPlaceholder}>Search tiffin, PG, tutor...</Text>
+            <View style={styles.searchPill}>
+              <Text style={styles.searchPillText}>Go</Text>
+            </View>
           </TouchableOpacity>
         </View>
 
@@ -229,24 +249,32 @@ export default function HomeScreen({ navigation }: any) {
           </View>
         )}
 
-        {/* ── ROW 4: Browse by category (horizontal at bottom) ── */}
-        <Text style={[styles.sectionTitle, { paddingHorizontal: 16, marginTop: 12 }]}>Browse by category</Text>
+        {/* ── ROW 4: Browse by category ── */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Browse by category</Text>
+        </View>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 8 }}
           style={{ marginBottom: 8 }}
         >
-          {categories.map(cat => (
-            <TouchableOpacity
-              key={cat.slug}
-              style={styles.catChip}
-              onPress={() => navigation.navigate('Search', { citySlug, cityName, categorySlug: cat.slug })}
-            >
-              <Text style={styles.catEmoji}>{cat.icon}</Text>
-              <Text style={styles.catLabel}>{cat.name}</Text>
-            </TouchableOpacity>
-          ))}
+          {categories.map(cat => {
+            const bgColor = CAT_COLORS[cat.slug] ?? '#94a3b8';
+            return (
+              <TouchableOpacity
+                key={cat.slug}
+                style={[styles.catChip, { borderColor: bgColor + '28' }]}
+                onPress={() => navigation.navigate('Search', { citySlug, cityName, categorySlug: cat.slug })}
+                activeOpacity={0.8}
+              >
+                <View style={[styles.catIconCircle, { backgroundColor: bgColor + '18' }]}>
+                  <Text style={styles.catEmoji}>{cat.icon}</Text>
+                </View>
+                <Text style={styles.catLabel}>{cat.name}</Text>
+              </TouchableOpacity>
+            );
+          })}
         </ScrollView>
 
         <View style={{ height: 32 }} />
@@ -265,34 +293,121 @@ export default function HomeScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f9fafb' },
-  hero: { backgroundColor: '#111827', padding: 20, paddingTop: 60, paddingBottom: 24 },
-  heroHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16, gap: 8 },
-  brandRow: { flexDirection: 'row', alignItems: 'flex-start', flex: 1, gap: 10 },
+  container: { flex: 1, backgroundColor: '#f4f5f9' },
+
+  /* ── Hero ── */
+  hero: {
+    backgroundColor: '#0D0F1C',
+    padding: 20,
+    paddingTop: 60,
+    paddingBottom: 24,
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  glowTopRight: {
+    position: 'absolute',
+    top: -60,
+    right: -50,
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    backgroundColor: '#f97316',
+    opacity: 0.08,
+  },
+  glowBottomLeft: {
+    position: 'absolute',
+    bottom: -40,
+    left: -40,
+    width: 160,
+    height: 160,
+    borderRadius: 80,
+    backgroundColor: '#6366f1',
+    opacity: 0.07,
+  },
+  heroHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 18,
+    gap: 8,
+  },
+  brandRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    flex: 1,
+    gap: 10,
+  },
   logo: { width: 36, height: 36, marginTop: 2 },
-  greetingText: { color: 'white', fontSize: 16, fontWeight: '700', lineHeight: 22 },
-  countText: { color: 'rgba(255,255,255,0.55)', fontSize: 12, marginTop: 2, lineHeight: 17 },
+  greetingText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '700',
+    lineHeight: 22,
+  },
+  countText: {
+    color: 'rgba(255,255,255,0.5)',
+    fontSize: 12,
+    marginTop: 2,
+    lineHeight: 17,
+  },
   cityBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
     backgroundColor: 'rgba(255,255,255,0.10)',
     borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.12)',
     paddingHorizontal: 10,
-    paddingVertical: 6,
+    paddingVertical: 7,
     flexShrink: 0,
   },
-  cityBtnText: { color: 'white', fontSize: 13, fontWeight: '600' },
+  cityBtnText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: '600',
+    maxWidth: 80,
+  },
+
+  /* ── Search bar ── */
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 10,
     backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 13,
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 13,
+    shadowColor: '#000',
+    shadowOpacity: 0.18,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 6,
   },
-  searchPlaceholder: { color: '#9ca3af', fontSize: 15 },
-  sectionTitle: { fontSize: 17, fontWeight: '800', color: '#111827', paddingTop: 20, paddingBottom: 10 },
+  searchPlaceholder: {
+    color: '#9ca3af',
+    fontSize: 15,
+    flex: 1,
+  },
+  searchPill: {
+    backgroundColor: '#f97316',
+    borderRadius: 9,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+  },
+  searchPillText: {
+    color: 'white',
+    fontWeight: '700',
+    fontSize: 12,
+  },
+
+  /* ── Section headers ── */
+  sectionTitle: {
+    fontSize: 17,
+    fontWeight: '800',
+    color: '#111827',
+    letterSpacing: -0.3,
+  },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -302,22 +417,35 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
   },
   viewAll: { color: '#f97316', fontWeight: '600', fontSize: 13 },
+
+  /* ── Category chips ── */
   catChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
     backgroundColor: 'white',
     borderRadius: 24,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    marginRight: 10,
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    marginRight: 8,
     shadowColor: '#000',
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 1,
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
   },
-  catEmoji: { fontSize: 18 },
+  catIconCircle: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  catEmoji: { fontSize: 15 },
   catLabel: { fontSize: 13, color: '#374151', fontWeight: '600' },
+
+  /* ── Chat FAB ── */
   chatFab: {
     position: 'absolute',
     bottom: 16,
@@ -329,9 +457,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#f97316',
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 8,
+    shadowOpacity: 0.5,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 10,
   },
 });
