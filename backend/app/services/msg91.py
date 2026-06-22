@@ -18,10 +18,15 @@ async def send_otp(phone: str, otp: str) -> tuple[bool, dict]:
         "content-type": "application/json",
     }
     payload = {
-        "flow_id": settings.MSG91_TEMPLATE_ID,
-        "sender": "LCLIND",
-        "mobiles": phone.replace("+", ""),
-        "var": otp,
+        "template_id": settings.MSG91_TEMPLATE_ID,
+        "short_url": 0,
+        "realTimeResponse": 1,
+        "recipients": [
+            {
+                "mobiles": phone.replace("+", ""),
+                "var": otp,
+            }
+        ],
     }
     try:
         async with httpx.AsyncClient(timeout=10) as client:
