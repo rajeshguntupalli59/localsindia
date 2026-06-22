@@ -17,6 +17,7 @@ async def send_otp(phone: str, otp: str) -> bool:
         "mobile": phone.replace("+", ""),
         "authkey": settings.MSG91_AUTH_KEY,
         "otp": otp,
+        "DLT_TE_ID": settings.MSG91_DLT_TEMPLATE_ID,
     }
     try:
         async with httpx.AsyncClient(timeout=10) as client:

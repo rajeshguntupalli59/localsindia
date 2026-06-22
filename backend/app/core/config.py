@@ -11,6 +11,7 @@ class Settings(BaseSettings):
 
     MSG91_AUTH_KEY: str = ""
     MSG91_TEMPLATE_ID: str = ""
+    MSG91_DLT_TEMPLATE_ID: str = ""  # DLT template ID from Jio Connect portal
 
     GOOGLE_CLIENT_ID: str = ""
     GOOGLE_CLIENT_SECRET: str = ""
