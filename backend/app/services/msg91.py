@@ -25,8 +25,8 @@ async def send_otp(phone: str, otp: str) -> bool:
             data = resp.json()
             logger.info(f"MSG91 response for {phone}: {data}")
             if data.get("type") != "success":
-                logger.error(f"MSG91 error: {data}")
-            return data.get("type") == "success"
+                logger.error(f"MSG91 error code={data.get('code')} msg={data.get('message')} data={data}")
+            return data.get("type") == "success", data
     except Exception as exc:
         logger.error(f"MSG91 send failed: {exc}")
-        return False
+        return False, {"message": str(exc)}

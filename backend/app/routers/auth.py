@@ -130,9 +130,10 @@ async def send_otp(body: OtpSendRequest, db: AsyncSession = Depends(get_db)):
         logger.warning(f"[OTP_DEBUG] OTP for {phone}: {otp}")
         return {"message": "OTP sent successfully", "expires_in": OTP_EXPIRE_MINUTES * 60, "otp": otp}
 
-    sent = await msg91.send_otp(phone, otp)
+    sent, msg91_data = await msg91.send_otp(phone, otp)
     if not sent:
-        raise HTTPException(status_code=500, detail="Failed to send OTP. Try again.")
+        err = msg91_data.get("message") or str(msg91_data)
+        raise HTTPException(status_code=500, detail=f"SMS failed: {err}")
 
     return {"message": "OTP sent successfully", "expires_in": OTP_EXPIRE_MINUTES * 60}
 
