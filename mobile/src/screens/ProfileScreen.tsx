@@ -1,12 +1,15 @@
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Image } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Image, Switch } from 'react-native';
 import { useState, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { authApi } from '../lib/api';
 import { storage } from '../lib/storage';
+import { isBiometricAvailable } from '../hooks/useBiometric';
 
 export default function ProfileScreen({ navigation }: any) {
   const [user, setUser] = useState<any>(null);
+  const [biometricEnabled, setBiometricEnabled] = useState(false);
+  const [biometricAvailable, setBiometricAvailable] = useState(false);
 
   useFocusEffect(useCallback(() => {
     storage.getUser().then(u => {
@@ -16,7 +19,14 @@ export default function ProfileScreen({ navigation }: any) {
         setUser(u);
       }
     });
+    storage.getBiometricEnabled().then(setBiometricEnabled);
+    isBiometricAvailable().then(setBiometricAvailable);
   }, [navigation]));
+
+  const toggleBiometric = async (value: boolean) => {
+    await storage.setBiometricEnabled(value);
+    setBiometricEnabled(value);
+  };
 
   const handleLogout = () => {
     Alert.alert('Log out', 'Are you sure you want to log out?', [
@@ -86,6 +96,21 @@ export default function ProfileScreen({ navigation }: any) {
               onPress={() => navigation.navigate('CityPicker', { onSelect: () => {} })}
             />
           </View>
+
+          {biometricAvailable && (
+            <View style={[styles.menuSection, { marginTop: 8 }]}>
+              <View style={styles.menuItem}>
+                <Ionicons name="finger-print-outline" size={20} color="#374151" />
+                <Text style={[styles.menuLabel, { flex: 1 }]}>Biometric Login</Text>
+                <Switch
+                  value={biometricEnabled}
+                  onValueChange={toggleBiometric}
+                  trackColor={{ false: '#d1d5db', true: '#f97316' }}
+                  thumbColor="white"
+                />
+              </View>
+            </View>
+          )}
 
           {user?.role === 'admin' && (
             <View style={[styles.menuSection, { marginTop: 8 }]}>

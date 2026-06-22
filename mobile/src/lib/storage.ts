@@ -28,12 +28,18 @@ export const storage = {
     await deleteItem('access_token');
     await deleteItem('refresh_token');
     await deleteItem('user');
+    await deleteItem('biometric_enabled');
   },
   setUser: (user: object) => setItem('user', JSON.stringify(user)),
   getUser: async () => {
     const raw = await getItem('user');
     return raw ? JSON.parse(raw) : null;
   },
+  getBiometricEnabled: async (): Promise<boolean> => {
+    const val = await getItem('biometric_enabled');
+    return val === 'true';
+  },
+  setBiometricEnabled: (enabled: boolean) => setItem('biometric_enabled', String(enabled)),
   setCity: (slug: string, name: string) => setItem('city', JSON.stringify({ slug, name })),
   getCity: async (): Promise<{ slug: string; name: string } | null> => {
     const raw = await getItem('city');

@@ -5,6 +5,7 @@ import {
 import { useState, useRef } from 'react';
 import { authApi } from '../lib/api';
 import { storage } from '../lib/storage';
+import { isBiometricAvailable } from '../hooks/useBiometric';
 import { Ionicons } from '@expo/vector-icons';
 
 import LOGO from '../../assets/logo-mark-transparent.png';
@@ -37,6 +38,33 @@ export default function LoginScreen({ navigation }: any) {
   const finish = async (data: any) => {
     await storage.setTokens(data.access_token, data.refresh_token ?? '');
     await storage.setUser(data.user);
+
+    const biometricEnabled = await storage.getBiometricEnabled();
+    if (!biometricEnabled) {
+      const available = await isBiometricAvailable();
+      if (available) {
+        Alert.alert(
+          'Enable Biometric Login?',
+          'Sign in faster next time using your fingerprint or Face ID.',
+          [
+            {
+              text: 'Enable',
+              onPress: async () => {
+                await storage.setBiometricEnabled(true);
+                navigation.replace('Main');
+              },
+            },
+            {
+              text: 'Not now',
+              style: 'cancel',
+              onPress: () => navigation.replace('Main'),
+            },
+          ]
+        );
+        return;
+      }
+    }
+
     navigation.replace('Main');
   };
 

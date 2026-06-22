@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+import { View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -17,6 +19,8 @@ import CityPickerScreen from './src/screens/CityPickerScreen';
 import AdminScreen from './src/screens/AdminScreen';
 import ChatScreen from './src/screens/ChatScreen';
 import MyListingsScreen from './src/screens/MyListingsScreen';
+import { storage } from './src/lib/storage';
+import { isBiometricAvailable, authenticateWithBiometric } from './src/hooks/useBiometric';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -67,11 +71,42 @@ function TabNavigator() {
 }
 
 export default function App() {
+  const [initialRoute, setInitialRoute] = useState<'Main' | 'Login' | null>(null);
+
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  const checkAuth = async () => {
+    const token = await storage.getAccessToken();
+    if (!token) {
+      setInitialRoute('Login');
+      return;
+    }
+    const biometricEnabled = await storage.getBiometricEnabled();
+    if (biometricEnabled) {
+      const available = await isBiometricAvailable();
+      if (available) {
+        const ok = await authenticateWithBiometric();
+        if (!ok) {
+          await storage.clear();
+          setInitialRoute('Login');
+          return;
+        }
+      }
+    }
+    setInitialRoute('Main');
+  };
+
+  if (!initialRoute) {
+    return <View style={{ flex: 1, backgroundColor: '#111827' }} />;
+  }
+
   return (
     <SafeAreaProvider>
       <NavigationContainer>
         <StatusBar style="dark" />
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Navigator initialRouteName={initialRoute} screenOptions={{ headerShown: false }}>
           <Stack.Screen name="Main" component={TabNavigator} />
           <Stack.Screen name="ListingDetail" component={ListingDetailScreen} />
           <Stack.Screen name="SellerProfile" component={SellerProfileScreen} />

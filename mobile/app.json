@@ -14,7 +14,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.localsindia.app"
+      "bundleIdentifier": "com.localsindia.app",
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "Use Face ID to sign in to LocalsIndia quickly and securely."
+      }
     },
     "android": {
       "package": "com.localsindia.app",
@@ -25,13 +28,16 @@
       },
       "predictiveBackGestureEnabled": false,
       "permissions": [
-        "android.permission.RECORD_AUDIO"
+        "android.permission.RECORD_AUDIO",
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT"
       ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
+      "expo-local-authentication",
       "expo-web-browser",
       [
         "expo-image-picker",
