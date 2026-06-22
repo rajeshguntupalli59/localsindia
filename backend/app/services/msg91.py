@@ -19,6 +19,8 @@ async def send_otp(phone: str, otp: str) -> tuple[bool, dict]:
     }
     payload = {
         "template_id": settings.MSG91_TEMPLATE_ID,
+        "sender": "LCLIND",
+        "DLT_TE_ID": settings.MSG91_DLT_TEMPLATE_ID,
         "short_url": 0,
         "realTimeResponse": 1,
         "recipients": [
