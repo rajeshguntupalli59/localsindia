@@ -278,12 +278,27 @@ async def my_listings(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    from app.models.city import City as CityModel
+    from app.models.category import Category
     result = await db.execute(
         select(Listing)
         .where(Listing.user_id == current_user.id, Listing.deleted_at.is_(None))
         .order_by(Listing.created_at.desc())
     )
-    return result.scalars().all()
+    listings = result.scalars().all()
+    out = []
+    for listing in listings:
+        item = ListingOut.model_validate(listing)
+        city_res = await db.execute(select(CityModel).where(CityModel.id == listing.city_id))
+        city = city_res.scalar_one_or_none()
+        if city:
+            item.city_slug = city.slug
+        cat_res = await db.execute(select(Category).where(Category.id == listing.category_id))
+        cat = cat_res.scalar_one_or_none()
+        if cat:
+            item.category_slug = cat.slug
+        out.append(item)
+    return out
 
 
 @router.get("/listings/{listing_id}", response_model=ListingOut)
