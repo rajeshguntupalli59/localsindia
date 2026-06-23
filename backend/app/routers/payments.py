@@ -16,10 +16,12 @@ from app.models.user import User
 
 router = APIRouter(prefix="/api/v1/payments", tags=["payments"])
 
-# Pricing tiers
+# Pricing tiers — accept both "week"/"weekly" and "month"/"monthly" (mobile compat)
 PLANS = {
-    "week":  {"amount": 9900,  "label": "1 Week",  "days": 7},   # Rs.99 in paise
-    "month": {"amount": 19900, "label": "1 Month", "days": 30},  # Rs.199 in paise
+    "week":    {"amount": 9900,  "label": "1 Week",  "days": 7},   # Rs.99 in paise
+    "weekly":  {"amount": 9900,  "label": "1 Week",  "days": 7},
+    "month":   {"amount": 19900, "label": "1 Month", "days": 30},  # Rs.199 in paise
+    "monthly": {"amount": 19900, "label": "1 Month", "days": 30},
 }
 
 
