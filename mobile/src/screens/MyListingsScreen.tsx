@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Image, Alert, Linking } from 'react-native';
 import { useState, useEffect, useCallback } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
@@ -208,6 +208,16 @@ export default function MyListingsScreen({ navigation }: any) {
                       <Text style={[styles.actionText, { color: onCooldown ? '#9ca3af' : '#6366f1' }]}>
                         {onCooldown ? `${Math.ceil(hoursLeft)}h` : 'Renew'}
                       </Text>
+                    </TouchableOpacity>
+                  )}
+                  {listing.status === 'active' && !listing.is_featured && listing.city_slug && (
+                    <TouchableOpacity
+                      style={styles.actionBtn}
+                      disabled={actionId === listing.id}
+                      onPress={() => Linking.openURL(`https://localsindia.com/${listing.city_slug}/classifieds/${listing.id}/promote`)}
+                    >
+                      <Ionicons name="star-outline" size={16} color="#f59e0b" />
+                      <Text style={[styles.actionText, { color: '#f59e0b' }]}>Promote</Text>
                     </TouchableOpacity>
                   )}
                   <TouchableOpacity
