@@ -1,6 +1,6 @@
 from typing import Optional
 from fastapi import APIRouter, Depends
-from pydantic import BaseModel
+from pydantic import BaseModel, model_validator
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
@@ -18,11 +18,29 @@ class PreferenceIn(BaseModel):
     city_prefs: Optional[list[str]] = None
     timeline: Optional[str] = None
     alert_frequency: str = "never"
+    email_frequency: Optional[str] = None  # mobile alias for alert_frequency
+    push_enabled: bool = True
     onboarding_done: bool = False
+    city_slug: Optional[str] = None  # informational only, not persisted
+
+    @model_validator(mode="after")
+    def map_email_frequency(self):
+        # mobile sends email_frequency; backend stores as alert_frequency
+        if self.email_frequency and self.alert_frequency == "never":
+            self.alert_frequency = self.email_frequency
+        return self
 
 
-class PreferenceOut(PreferenceIn):
-    onboarding_done: bool
+class PreferenceOut(BaseModel):
+    interests: Optional[list[str]] = None
+    budget_min: Optional[int] = None
+    budget_max: Optional[int] = None
+    city_prefs: Optional[list[str]] = None
+    timeline: Optional[str] = None
+    alert_frequency: str = "never"
+    email_frequency: Optional[str] = None
+    push_enabled: bool = True
+    onboarding_done: bool = False
     model_config = {"from_attributes": True}
 
 
@@ -44,6 +62,8 @@ async def get_preferences(
         city_prefs=pref.city_prefs,
         timeline=pref.timeline,
         alert_frequency=pref.alert_frequency,
+        email_frequency=pref.alert_frequency,
+        push_enabled=pref.push_enabled,
         onboarding_done=pref.onboarding_done,
     )
 
@@ -65,6 +85,7 @@ async def save_preferences(
         pref.city_prefs = body.city_prefs
         pref.timeline = body.timeline
         pref.alert_frequency = body.alert_frequency
+        pref.push_enabled = body.push_enabled
         pref.onboarding_done = body.onboarding_done
     else:
         pref = UserPreference(
@@ -75,6 +96,7 @@ async def save_preferences(
             city_prefs=body.city_prefs,
             timeline=body.timeline,
             alert_frequency=body.alert_frequency,
+            push_enabled=body.push_enabled,
             onboarding_done=body.onboarding_done,
         )
         db.add(pref)
@@ -87,5 +109,7 @@ async def save_preferences(
         city_prefs=pref.city_prefs,
         timeline=pref.timeline,
         alert_frequency=pref.alert_frequency,
+        email_frequency=pref.alert_frequency,
+        push_enabled=pref.push_enabled,
         onboarding_done=pref.onboarding_done,
     )

@@ -17,6 +17,7 @@ class UserPreference(Base):
     city_prefs: Mapped[list[str] | None] = mapped_column(ARRAY(String(100)), nullable=True)
     timeline: Mapped[str | None] = mapped_column(String(30), nullable=True)
     alert_frequency: Mapped[str] = mapped_column(String(20), nullable=False, default="never")
+    push_enabled: Mapped[bool] = mapped_column(nullable=False, default=True)
     onboarding_done: Mapped[bool] = mapped_column(nullable=False, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updated_at: Mapped[datetime] = mapped_column(
