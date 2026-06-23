@@ -16,8 +16,8 @@ async def lifespan(app: FastAPI):
         from alembic.config import Config
         from alembic import command
         import os
-        alembic_cfg = Config(os.path.join(os.path.dirname(__file__), "../../alembic.ini"))
-        alembic_cfg.set_main_option("script_location", os.path.join(os.path.dirname(__file__), "../../migrations"))
+        alembic_cfg = Config(os.path.join(os.path.dirname(__file__), "../alembic.ini"))
+        alembic_cfg.set_main_option("script_location", os.path.join(os.path.dirname(__file__), "../migrations"))
         command.upgrade(alembic_cfg, "head")
     except Exception as e:
         import logging

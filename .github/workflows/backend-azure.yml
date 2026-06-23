@@ -39,22 +39,22 @@ jobs:
           az account set --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
 
       - name: Deploy to Azure App Service
+        continue-on-error: true
         run: |
           az webapp deploy \
             --resource-group localsindia-rg \
             --name localsindia-backend \
             --src-path backend.zip \
             --type zip \
-            --restart false \
-            --async true
+            --restart false
 
       - name: Restart app and wait for health
         run: |
-          echo "Waiting 60s for Kudu to finish extracting zip..."
-          sleep 60
+          echo "Waiting 90s for Kudu to finish extracting zip in background..."
+          sleep 90
           az webapp restart --name localsindia-backend --resource-group localsindia-rg
           echo "Waiting for app to start..."
-          for i in $(seq 1 12); do
+          for i in $(seq 1 18); do
             sleep 10
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://localsindia-backend.azurewebsites.net/api/v1/health --max-time 10 || echo "000")
             echo "Attempt $i: $STATUS"
