@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { usePrefs } from '@/context/PrefsContext';
+import { setCitySlug } from '@/lib/prefs';
 
 interface Props {
   citySlug: string;
@@ -18,7 +19,9 @@ export default function BottomNav({ citySlug }: Props) {
 
   useEffect(() => {
     setIsLoggedIn(!!localStorage.getItem('access_token'));
-  }, [pathname]);
+    // Auto-save city so login redirect always comes back here
+    if (citySlug) setCitySlug(citySlug);
+  }, [pathname, citySlug]);
 
   const items = [
     { icon: Home,   label: t('bottomNav.home'),       href: `/${citySlug}` },

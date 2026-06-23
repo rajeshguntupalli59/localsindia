@@ -12,6 +12,7 @@ import LanguageSelector from '@/components/language-selector/LanguageSelector';
 import SiteLogo from '@/components/site-logo/SiteLogo';
 import { usePrefs } from '@/context/PrefsContext';
 import CityPickerModal from '@/components/city-picker/CityPickerModal';
+import { setCitySlug } from '@/lib/prefs';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface Props {
@@ -81,7 +82,9 @@ export default function SiteHeader({ citySlug, cityName }: Props) {
     } else {
       setUser(null);
     }
-  }, [pathname]);
+    // Auto-save city so login redirect always returns to current city
+    if (citySlug) setCitySlug(citySlug);
+  }, [pathname, citySlug]);
 
   // Close user menu on outside click
   useEffect(() => {
