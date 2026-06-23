@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Image, Alert, Linking } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
 import { useState, useEffect, useCallback } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
@@ -210,11 +210,11 @@ export default function MyListingsScreen({ navigation }: any) {
                       </Text>
                     </TouchableOpacity>
                   )}
-                  {listing.status === 'active' && !listing.is_featured && listing.city_slug && (
+                  {listing.status === 'active' && !listing.is_featured && (
                     <TouchableOpacity
                       style={styles.actionBtn}
                       disabled={actionId === listing.id}
-                      onPress={() => Linking.openURL(`https://localsindia.com/${listing.city_slug}/classifieds/${listing.id}/promote`)}
+                      onPress={() => navigation.navigate('Promote', { listingId: listing.id, listingTitle: listing.title })}
                     >
                       <Ionicons name="star-outline" size={16} color="#f59e0b" />
                       <Text style={[styles.actionText, { color: '#f59e0b' }]}>Promote</Text>

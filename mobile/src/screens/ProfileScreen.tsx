@@ -4,12 +4,15 @@ import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { authApi } from '../lib/api';
 import { storage } from '../lib/storage';
+import { useSavedContext } from '../context/SavedContext';
 import { isBiometricAvailable } from '../hooks/useBiometric';
 
 export default function ProfileScreen({ navigation }: any) {
   const [user, setUser] = useState<any>(null);
   const [biometricEnabled, setBiometricEnabled] = useState(false);
   const [biometricAvailable, setBiometricAvailable] = useState(false);
+  const [listingCount, setListingCount] = useState(0);
+  const { savedCount } = useSavedContext();
 
   useFocusEffect(useCallback(() => {
     storage.getUser().then(u => {
@@ -21,6 +24,9 @@ export default function ProfileScreen({ navigation }: any) {
     });
     storage.getBiometricEnabled().then(setBiometricEnabled);
     isBiometricAvailable().then(setBiometricAvailable);
+    authApi.getMe().then(me => {
+      if (me?.listing_count != null) setListingCount(me.listing_count);
+    }).catch(() => {});
   }, [navigation]));
 
   const toggleBiometric = async (value: boolean) => {
@@ -60,7 +66,7 @@ export default function ProfileScreen({ navigation }: any) {
 
       {user ? (
         <>
-          {/* Avatar */}
+          {/* Avatar + stats */}
           <View style={styles.avatarSection}>
             {user.avatar_url ? (
               <Image source={{ uri: user.avatar_url }} style={styles.avatar} />
@@ -71,6 +77,19 @@ export default function ProfileScreen({ navigation }: any) {
             )}
             <Text style={styles.name}>{user.name ?? 'LocalsIndia User'}</Text>
             <Text style={styles.phone}>{user.phone}</Text>
+
+            {/* Stats row */}
+            <View style={styles.statsRow}>
+              <TouchableOpacity style={styles.stat} onPress={() => navigation.navigate('Saved')}>
+                <Text style={styles.statValue}>{savedCount}</Text>
+                <Text style={styles.statLabel}>Saved</Text>
+              </TouchableOpacity>
+              <View style={styles.statDivider} />
+              <TouchableOpacity style={styles.stat} onPress={() => navigation.navigate('MyListings')}>
+                <Text style={styles.statValue}>{listingCount}</Text>
+                <Text style={styles.statLabel}>Listed</Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
           {/* Menu */}
@@ -89,6 +108,11 @@ export default function ProfileScreen({ navigation }: any) {
               icon="person-outline"
               label="Edit Profile"
               onPress={() => Alert.alert('Coming soon', 'Profile editing coming soon.')}
+            />
+            <MenuItem
+              icon="notifications-outline"
+              label="Alerts & Preferences"
+              onPress={() => navigation.navigate('AlertsPrefs')}
             />
             <MenuItem
               icon="location-outline"
@@ -149,7 +173,16 @@ const styles = StyleSheet.create({
     borderBottomColor: '#f3f4f6',
   },
   headerTitle: { fontSize: 20, fontWeight: 'bold', color: '#111827' },
-  avatarSection: { alignItems: 'center', backgroundColor: 'white', paddingVertical: 24 },
+  avatarSection: { alignItems: 'center', backgroundColor: 'white', paddingVertical: 24, paddingHorizontal: 16 },
+  statsRow: {
+    flexDirection: 'row', marginTop: 16, paddingTop: 16,
+    borderTopWidth: 1, borderTopColor: '#f3f4f6',
+    width: '80%', justifyContent: 'center', alignItems: 'center',
+  },
+  stat: { flex: 1, alignItems: 'center', paddingVertical: 4 },
+  statValue: { fontSize: 22, fontWeight: '800', color: '#f97316' },
+  statLabel: { fontSize: 12, color: '#9ca3af', marginTop: 2, fontWeight: '600' },
+  statDivider: { width: 1, height: 36, backgroundColor: '#e5e7eb' },
   avatar: { width: 72, height: 72, borderRadius: 36, marginBottom: 10 },
   avatarPlaceholder: {
     width: 72,

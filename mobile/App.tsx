@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View } from 'react-native';
+import { View, Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -19,14 +19,19 @@ import CityPickerScreen from './src/screens/CityPickerScreen';
 import AdminScreen from './src/screens/AdminScreen';
 import ChatScreen from './src/screens/ChatScreen';
 import MyListingsScreen from './src/screens/MyListingsScreen';
+import PromoteScreen from './src/screens/PromoteScreen';
+import AlertsPrefsScreen from './src/screens/AlertsPrefsScreen';
 import { storage } from './src/lib/storage';
 import { isBiometricAvailable, authenticateWithBiometric } from './src/hooks/useBiometric';
+import { SavedProvider, useSavedContext } from './src/context/SavedContext';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 function TabNavigator() {
   const insets = useSafeAreaInsets();
+  const { savedCount } = useSavedContext();
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -94,6 +99,19 @@ function TabNavigator() {
                 size={size}
                 color={color}
               />
+              {name === 'Saved' && savedCount > 0 && (
+                <View style={{
+                  position: 'absolute', top: -4, right: -8,
+                  minWidth: 14, height: 14, borderRadius: 7,
+                  backgroundColor: '#ef4444',
+                  alignItems: 'center', justifyContent: 'center',
+                  paddingHorizontal: 3,
+                }}>
+                  <Text style={{ color: 'white', fontSize: 8, fontWeight: '800' }}>
+                    {savedCount > 9 ? '9+' : savedCount}
+                  </Text>
+                </View>
+              )}
             </View>
           );
         },
@@ -142,23 +160,27 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <NavigationContainer>
-        <StatusBar style="dark" />
-        <Stack.Navigator initialRouteName={initialRoute} screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="Main" component={TabNavigator} />
-          <Stack.Screen name="ListingDetail" component={ListingDetailScreen} />
-          <Stack.Screen name="SellerProfile" component={SellerProfileScreen} />
-          <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen
-            name="CityPicker"
-            component={CityPickerScreen}
-            options={{ presentation: 'modal' }}
-          />
-          <Stack.Screen name="Admin" component={AdminScreen} />
-          <Stack.Screen name="Chat" component={ChatScreen} />
-          <Stack.Screen name="MyListings" component={MyListingsScreen} />
-        </Stack.Navigator>
-      </NavigationContainer>
+      <SavedProvider>
+        <NavigationContainer>
+          <StatusBar style="dark" />
+          <Stack.Navigator initialRouteName={initialRoute} screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="Main" component={TabNavigator} />
+            <Stack.Screen name="ListingDetail" component={ListingDetailScreen} />
+            <Stack.Screen name="SellerProfile" component={SellerProfileScreen} />
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen
+              name="CityPicker"
+              component={CityPickerScreen}
+              options={{ presentation: 'modal' }}
+            />
+            <Stack.Screen name="Admin" component={AdminScreen} />
+            <Stack.Screen name="Chat" component={ChatScreen} />
+            <Stack.Screen name="MyListings" component={MyListingsScreen} />
+            <Stack.Screen name="Promote" component={PromoteScreen} />
+            <Stack.Screen name="AlertsPrefs" component={AlertsPrefsScreen} />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </SavedProvider>
     </SafeAreaProvider>
   );
 }

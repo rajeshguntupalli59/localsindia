@@ -1,7 +1,8 @@
-import { useState, useRef } from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet, Linking, Animated } from 'react-native';
+import { useRef } from 'react';
+import { View, Text, TouchableOpacity, Image, StyleSheet, Linking, Animated, Share } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { listingsApi } from '../lib/api';
+import { useSavedContext } from '../context/SavedContext';
 
 const CATEGORY_COLORS: Record<string, string> = {
   tiffin:        '#f97316',
@@ -69,15 +70,25 @@ export default function ListingCard({ listing, onPress }: Props) {
   const image     = listing.images?.[0];
   const catColor  = CATEGORY_COLORS[listing.category_slug ?? ''] ?? '#94a3b8';
   const catEmoji  = CATEGORY_EMOJI[listing.category_slug ?? ''] ?? '🏷️';
-  const [saved, setSaved] = useState(false);
   const heartScale = useRef(new Animated.Value(1)).current;
+  const { isSaved, toggle } = useSavedContext();
+  const saved = isSaved(listing.id);
 
   const handleSave = () => {
     Animated.sequence([
       Animated.timing(heartScale, { toValue: 1.45, duration: 100, useNativeDriver: true }),
       Animated.spring(heartScale, { toValue: 1, useNativeDriver: true, bounciness: 12 }),
     ]).start();
-    setSaved(s => !s);
+    toggle(listing);
+  };
+
+  const handleShare = () => {
+    const url = `https://localsindia.com/listing/${listing.id}`;
+    const price = listing.price != null ? ` — ${formatPrice(listing.price)}` : '';
+    Share.share({
+      message: `Check out: ${listing.title}${price}\n${url}`,
+      title: listing.title,
+    }).catch(() => {});
   };
 
   const handleWhatsApp = () => {
@@ -179,10 +190,15 @@ export default function ListingCard({ listing, onPress }: Props) {
             ) : null}
           </View>
 
-          {/* WhatsApp button */}
-          <TouchableOpacity style={styles.waBtn} onPress={handleWhatsApp} activeOpacity={0.85}>
-            <Text style={styles.waBtnText}>💬  Chat on WhatsApp</Text>
-          </TouchableOpacity>
+          {/* Action row: WhatsApp + Share */}
+          <View style={styles.actionRow}>
+            <TouchableOpacity style={styles.waBtn} onPress={handleWhatsApp} activeOpacity={0.85}>
+              <Text style={styles.waBtnText}>💬 WhatsApp</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.shareBtn} onPress={handleShare} activeOpacity={0.85}>
+              <Ionicons name="share-social-outline" size={18} color="#6b7280" />
+            </TouchableOpacity>
+          </View>
         </View>
       </TouchableOpacity>
 
@@ -355,7 +371,9 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: '#9ca3af',
   },
+  actionRow: { flexDirection: 'row', gap: 8, alignItems: 'center' },
   waBtn: {
+    flex: 1,
     backgroundColor: '#25d366',
     borderRadius: 11,
     paddingVertical: 12,
@@ -369,8 +387,13 @@ const styles = StyleSheet.create({
   waBtnText: {
     color: 'white',
     fontWeight: '700',
-    fontSize: 14,
+    fontSize: 13,
     letterSpacing: 0.1,
+  },
+  shareBtn: {
+    width: 44, height: 44, borderRadius: 11,
+    backgroundColor: '#f3f4f6',
+    alignItems: 'center', justifyContent: 'center',
   },
   heartBtn: {
     position: 'absolute',

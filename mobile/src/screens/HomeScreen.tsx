@@ -7,6 +7,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { listingsApi, citiesApi, categoriesApi } from '../lib/api';
 import { storage } from '../lib/storage';
 import ListingCard from '../components/ListingCard';
+import NotificationBell from '../components/NotificationBell';
+import AlertOnboardingSheet from '../components/AlertOnboardingSheet';
 
 const LOGO = require('../../assets/logo-mark-transparent.png');
 
@@ -167,14 +169,17 @@ export default function HomeScreen({ navigation }: any) {
                 <Text style={styles.countText}>{countLine}</Text>
               </View>
             </View>
-            <TouchableOpacity
-              style={styles.cityBtn}
-              onPress={() => navigation.navigate('CityPicker', { onSelect: handleCitySelect })}
-            >
-              <Ionicons name="location-outline" size={13} color="#f97316" />
-              <Text style={styles.cityBtnText}>{cityName}</Text>
-              <Ionicons name="chevron-down" size={11} color="rgba(255,255,255,0.5)" />
-            </TouchableOpacity>
+            <View style={styles.headerActions}>
+              <NotificationBell />
+              <TouchableOpacity
+                style={styles.cityBtn}
+                onPress={() => navigation.navigate('CityPicker', { onSelect: handleCitySelect })}
+              >
+                <Ionicons name="location-outline" size={13} color="#f97316" />
+                <Text style={styles.cityBtnText}>{cityName}</Text>
+                <Ionicons name="chevron-down" size={11} color="rgba(255,255,255,0.5)" />
+              </TouchableOpacity>
+            </View>
           </View>
 
           {/* Premium search bar */}
@@ -288,6 +293,9 @@ export default function HomeScreen({ navigation }: any) {
       >
         <Ionicons name="chatbubble-ellipses" size={22} color="white" />
       </TouchableOpacity>
+
+      {/* Onboarding sheet — auto-shows once after first login */}
+      <AlertOnboardingSheet />
     </View>
   );
 }
@@ -329,6 +337,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     marginBottom: 18,
+    gap: 8,
+  },
+  headerActions: {
+    flexDirection: 'column',
+    alignItems: 'flex-end',
     gap: 8,
   },
   brandRow: {

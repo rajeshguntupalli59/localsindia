@@ -124,4 +124,40 @@ export const chatApi = {
     api.post('/chat', { message, city_slug: citySlug, history }).then(r => r.data),
 };
 
+export const notificationsApi = {
+  list: (limit = 20) =>
+    api.get(`/notifications?limit=${limit}`).then(r => r.data),
+  unreadCount: () =>
+    api.get('/notifications/unread-count').then(r => r.data as { count: number }),
+  markRead: (id: string) =>
+    api.post(`/notifications/read/${id}`).then(r => r.data),
+  markAllRead: () =>
+    api.post('/notifications/read-all').then(r => r.data),
+};
+
+export const favoritesApi = {
+  toggle: (listingId: string) =>
+    api.post(`/favorites/${listingId}`).then(r => r.data as { saved: boolean }),
+  ids: () =>
+    api.get('/favorites/ids').then(r => r.data as string[]),
+  list: () =>
+    api.get('/favorites').then(r => r.data),
+  count: (listingId: string) =>
+    api.get(`/favorites/count/${listingId}`).then(r => r.data as { count: number }),
+};
+
+export const preferencesApi = {
+  get: () =>
+    api.get('/preferences').then(r => r.data),
+  upsert: (data: Record<string, unknown>) =>
+    api.post('/preferences', data).then(r => r.data),
+};
+
+export const paymentsApi = {
+  createOrder: (listingId: string) =>
+    api.post('/payments/featured/create-order', { listing_id: listingId }).then(r => r.data),
+  verify: (data: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string; listing_id: string }) =>
+    api.post('/payments/featured/verify', data).then(r => r.data),
+};
+
 export default api;
