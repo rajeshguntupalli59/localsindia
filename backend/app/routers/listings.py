@@ -70,7 +70,7 @@ async def trending_listings(slug: str, db: AsyncSession = Depends(get_db)):
             Listing.deleted_at.is_(None),
             Listing.created_at >= cutoff,
         )
-        .order_by(Listing.is_featured.desc(), Listing.view_count.desc(), Listing.created_at.desc())
+        .order_by(Listing.is_featured.desc(), Listing.featured_at.desc().nulls_last(), Listing.created_at.desc())
         .limit(10)
     )
     result = await db.execute(stmt)
@@ -84,7 +84,7 @@ async def trending_listings(slug: str, db: AsyncSession = Depends(get_db)):
                 Listing.status == "active",
                 Listing.deleted_at.is_(None),
             )
-            .order_by(Listing.is_featured.desc(), Listing.view_count.desc(), Listing.created_at.desc())
+            .order_by(Listing.is_featured.desc(), Listing.featured_at.desc().nulls_last(), Listing.created_at.desc())
             .limit(10)
         )
         result = await db.execute(stmt)
@@ -170,11 +170,11 @@ async def list_city_listings(
 
     # Sort
     if sort == "price_asc":
-        stmt = stmt.order_by(Listing.is_featured.desc(), asc(Listing.price).nulls_last())
+        stmt = stmt.order_by(Listing.is_featured.desc(), Listing.featured_at.desc().nulls_last(), asc(Listing.price).nulls_last())
     elif sort == "price_desc":
-        stmt = stmt.order_by(Listing.is_featured.desc(), desc(Listing.price).nulls_first())
+        stmt = stmt.order_by(Listing.is_featured.desc(), Listing.featured_at.desc().nulls_last(), desc(Listing.price).nulls_first())
     else:
-        stmt = stmt.order_by(Listing.is_featured.desc(), Listing.created_at.desc())
+        stmt = stmt.order_by(Listing.is_featured.desc(), Listing.featured_at.desc().nulls_last(), Listing.created_at.desc())
 
     result = await db.execute(stmt)
     listings = result.scalars().all()

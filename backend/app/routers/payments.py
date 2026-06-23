@@ -136,6 +136,7 @@ async def verify_featured_payment(
         raise HTTPException(status_code=403, detail="Not your listing.")
 
     listing.is_featured = True
+    listing.featured_at = datetime.now(timezone.utc)
     listing.expires_at = datetime.now(timezone.utc) + timedelta(days=plan["days"])
     await db.commit()
 

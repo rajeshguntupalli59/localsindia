@@ -54,7 +54,7 @@ async def get_public_profile(user_id: str, db: AsyncSession = Depends(get_db)):
             Listing.status == "active",
             Listing.deleted_at.is_(None),
         )
-        .order_by(Listing.is_featured.desc(), Listing.created_at.desc())
+        .order_by(Listing.is_featured.desc(), Listing.featured_at.desc().nulls_last(), Listing.created_at.desc())
         .limit(12)
     )
     listings = listings_result.scalars().all()
