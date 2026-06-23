@@ -34,6 +34,10 @@ class Settings(BaseSettings):
     RAZORPAY_KEY_ID: str = ""
     RAZORPAY_KEY_SECRET: str = ""
 
+    SENDGRID_API_KEY: str = ""
+    EMAIL_FROM: str = "noreply@localsindia.com"
+    EMAIL_FROM_NAME: str = "LocalsIndia"
+
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 
 

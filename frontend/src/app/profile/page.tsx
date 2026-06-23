@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { LogOut, ListOrdered, ChevronRight, User } from 'lucide-react';
+import { LogOut, ListOrdered, ChevronRight, User, Heart, Search } from 'lucide-react';
 import Link from 'next/link';
 import type { User as UserType } from '@/lib/types';
 import { toast } from 'sonner';
@@ -59,6 +59,8 @@ export default function ProfilePage() {
       {/* Menu */}
       <div className="p-4 space-y-3">
         <MenuCard href="/profile/listings" icon={<ListOrdered className="w-5 h-5" />} label="My Listings" description="Manage your active and pending listings" />
+        <MenuCard href="/saved" icon={<Heart className="w-5 h-5" />} label="Saved Listings" description="Listings you've hearted" />
+        <MenuCard href="/profile/saved-searches" icon={<Search className="w-5 h-5" />} label="Saved Searches" description="Search alerts and quick re-runs" />
 
         {user.role === 'admin' && (
           <MenuCard href="/admin/listings" icon={<User className="w-5 h-5" />} label="Admin Panel" description="Review pending listings and reports" />

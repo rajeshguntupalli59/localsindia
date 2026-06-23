@@ -1,27 +1,53 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Heart, Search } from 'lucide-react';
 import { useSaved } from '@/hooks/useSaved';
 import ListingCard from '@/components/listing-card/ListingCard';
+import type { Listing } from '@/lib/types';
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend.azurewebsites.net';
 
 function SavedInner() {
-  const { saved } = useSaved();
+  const { saved: localSaved } = useSaved();
+  const [backendSaved, setBackendSaved] = useState<Listing[] | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const token = localStorage.getItem('access_token');
+    if (!token) { setLoading(false); return; }
+    fetch(`${API_BASE}/api/v1/favorites`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data) setBackendSaved(data); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  const listings = backendSaved ?? localSaved;
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--li-page-bg)' }}>
-
-      {/* Header */}
       <div className="bg-white border-b border-slate-200/70 shadow-sm">
         <div className="page-wrap h-14 flex items-center gap-2">
           <Heart className="w-4 h-4 text-red-400 shrink-0" strokeWidth={2} fill="currentColor" />
           <h1 className="text-sm font-semibold text-slate-800">Saved Listings</h1>
+          {!loading && listings.length > 0 && (
+            <span className="ml-auto text-xs text-slate-400">{listings.length} saved</span>
+          )}
         </div>
       </div>
 
       <div className="page-wrap py-6">
-        {saved.length === 0 ? (
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="h-56 bg-white rounded-2xl animate-pulse" />
+            ))}
+          </div>
+        ) : listings.length === 0 ? (
           <div className="text-center py-24">
             <Heart className="w-12 h-12 mx-auto mb-4 text-slate-200" strokeWidth={1.5} />
             <p className="font-semibold text-slate-700 mb-1">No saved listings yet</p>
@@ -38,16 +64,11 @@ function SavedInner() {
             </Link>
           </div>
         ) : (
-          <>
-            <p className="text-sm text-slate-500 mb-5">
-              <span className="font-semibold text-slate-800">{saved.length}</span> saved listing{saved.length !== 1 ? 's' : ''}
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {saved.map(l => (
-                <ListingCard key={l.id} listing={l} />
-              ))}
-            </div>
-          </>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {listings.map(l => (
+              <ListingCard key={l.id} listing={l} />
+            ))}
+          </div>
         )}
       </div>
     </div>

@@ -5,7 +5,7 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from app.core.config import settings
 from app.core.limiter import limiter
-from app.routers import auth, cities, categories, listings, uploads, search, admin, events, businesses, payments, users, chat, saved_searches
+from app.routers import auth, cities, categories, listings, uploads, search, admin, events, businesses, payments, users, chat, saved_searches, favorites, notifications, preferences
 
 app = FastAPI(
     title="LocalIndia API",
@@ -46,6 +46,9 @@ app.include_router(payments.router)
 app.include_router(users.router)
 app.include_router(chat.router)
 app.include_router(saved_searches.router)
+app.include_router(favorites.router)
+app.include_router(notifications.router)
+app.include_router(preferences.router)
 
 
 @app.get("/api/v1/health")

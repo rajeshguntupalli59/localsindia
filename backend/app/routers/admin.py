@@ -80,6 +80,25 @@ async def approve_listing(
     listing.status = "active"
     await db.commit()
     await db.refresh(listing)
+
+    # In-app notification + email to listing owner
+    try:
+        from app.services.notification_svc import notify
+        from app.services.email_svc import send_listing_approved_email
+        owner = await db.execute(select(User).where(User.id == listing.user_id))
+        owner_user = owner.scalar_one_or_none()
+        listing_url = f"https://localsindia.com/listing/{listing.id}"
+        await notify(
+            db, listing.user_id, "listing_approved",
+            f"Your listing is live — {listing.title[:60]}",
+            "It's now visible to buyers in your city.",
+            listing_url, listing.id,
+        )
+        if owner_user and owner_user.email:
+            await send_listing_approved_email(owner_user.email, listing.title, listing_url)
+    except Exception:
+        pass  # never block the admin action
+
     return listing
 
 

@@ -13,6 +13,7 @@ import SiteLogo from '@/components/site-logo/SiteLogo';
 import { usePrefs } from '@/context/PrefsContext';
 import CityPickerModal from '@/components/city-picker/CityPickerModal';
 import { setCitySlug } from '@/lib/prefs';
+import NotificationBell from '@/components/notification-bell/NotificationBell';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface Props {
@@ -191,6 +192,9 @@ export default function SiteHeader({ citySlug, cityName }: Props) {
 
           {/* Language selector */}
           <LanguageSelector />
+
+          {/* Notification bell — logged-in only */}
+          <NotificationBell />
 
           {/* ── Auth ─────────────────────────────────────── */}
           {user ? (

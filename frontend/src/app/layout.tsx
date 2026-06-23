@@ -5,6 +5,8 @@ import { getLocale, getMessages } from 'next-intl/server';
 import { Toaster } from '@/components/ui/sonner';
 import ServiceWorker from '@/components/pwa/ServiceWorker';
 import ChatWidget from '@/components/chat-widget/ChatWidget';
+import OnboardingGate from '@/components/onboarding-quiz/OnboardingGate';
+import ContextualPrompt from '@/components/contextual-prompt/ContextualPrompt';
 import { PrefsProvider } from '@/context/PrefsContext';
 import { cn } from '@/lib/utils';
 import Script from 'next/script';
@@ -104,6 +106,8 @@ export default async function RootLayout({
           <Toaster richColors position="top-center" />
           <ServiceWorker />
           <ChatWidget />
+          <OnboardingGate />
+          <ContextualPrompt />
         </NextIntlClientProvider>
       </body>
     </html>

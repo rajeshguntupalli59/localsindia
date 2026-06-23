@@ -4,11 +4,14 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft, MapPin, Clock, ChevronDown, ChevronUp, Flag, Tag, User, ExternalLink, Heart, Star, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, MapPin, Clock, ChevronDown, ChevronUp, Flag, Tag, User, ExternalLink, Heart, Star, ChevronLeft, ChevronRight, Eye, AlertCircle } from 'lucide-react';
 import { api } from '@/lib/api';
 import type { Listing, ListingReview } from '@/lib/types';
 import { formatPrice, timeAgo } from '@/lib/utils';
 import { useSaved } from '@/hooks/useSaved';
+import { toast } from 'sonner';
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend.azurewebsites.net';
 
 function Skeleton({ className }: { className?: string }) {
   return <div className={`animate-pulse bg-slate-100 rounded-lg ${className ?? ''}`} />;
@@ -30,6 +33,10 @@ export default function ListingDetailClient({ id }: { id: string }) {
   const [reviews, setReviews] = useState<ListingReview[]>([]);
   const [activeImg, setActiveImg] = useState(0);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [saveCount, setSaveCount] = useState<number | null>(null);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewBody, setReviewBody] = useState('');
+  const [submittingReview, setSubmittingReview] = useState(false);
 
   useEffect(() => {
     try {
@@ -55,6 +62,10 @@ export default function ListingDetailClient({ id }: { id: string }) {
       })
       .catch(() => { setError(true); setLoading(false); });
     api.listings.reviews(id).then(setReviews).catch(() => {});
+    fetch(`${API_BASE}/api/v1/favorites/count/${id}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d) setSaveCount(d.count); })
+      .catch(() => {});
   }, [id]);
 
   const waUrl = listing
@@ -272,6 +283,42 @@ export default function ListingDetailClient({ id }: { id: string }) {
               </span>
             </div>
 
+            {/* Social proof */}
+            {(saveCount !== null || (listing.view_count ?? 0) > 0) && (
+              <div className="flex items-center gap-4 text-xs text-slate-400">
+                {(listing.view_count ?? 0) > 0 && (
+                  <span className="flex items-center gap-1">
+                    <Eye className="w-3.5 h-3.5" strokeWidth={2} />
+                    {listing.view_count} views
+                  </span>
+                )}
+                {saveCount !== null && saveCount > 0 && (
+                  <span className="flex items-center gap-1">
+                    <Heart className="w-3.5 h-3.5 fill-red-400 text-red-400" strokeWidth={2} />
+                    {saveCount} saved
+                  </span>
+                )}
+              </div>
+            )}
+
+            {/* Expiry banner — shows to owner when < 7 days left */}
+            {currentUserId && listing.user_id === currentUserId && listing.expires_at && (() => {
+              const daysLeft = Math.ceil((new Date(listing.expires_at).getTime() - Date.now()) / 86400000);
+              if (daysLeft > 7) return null;
+              return (
+                <div className={`flex items-start gap-2 px-4 py-3 rounded-xl text-sm
+                  ${daysLeft <= 0 ? 'bg-red-50 text-red-700' : daysLeft <= 3 ? 'bg-orange-50 text-orange-700' : 'bg-yellow-50 text-yellow-700'}`}>
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" strokeWidth={2} />
+                  <div>
+                    <p className="font-semibold">
+                      {daysLeft <= 0 ? 'Listing expired' : `Expires in ${daysLeft} day${daysLeft !== 1 ? 's' : ''}`}
+                    </p>
+                    <p className="text-xs mt-0.5 opacity-80">Renew it from My Listings to stay visible.</p>
+                  </div>
+                </div>
+              );
+            })()}
+
             {/* Seller name */}
             {listing.seller_name && (
               <Link href={`/seller/${listing.user_id}`}
@@ -326,30 +373,90 @@ export default function ListingDetailClient({ id }: { id: string }) {
             )}
 
             {/* Reviews */}
-            {reviews.length > 0 && (
-              <div>
-                <h2 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
-                  <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" strokeWidth={2} />
-                  {reviews.length} Review{reviews.length !== 1 ? 's' : ''}
-                </h2>
-                <div className="space-y-3">
-                  {reviews.map(r => (
-                    <div key={r.id} className="bg-slate-50 rounded-xl p-3">
-                      <div className="flex items-center gap-0.5 mb-1">
-                        {Array.from({ length: 5 }).map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`w-3 h-3 ${i < r.rating ? 'fill-amber-400 text-amber-400' : 'text-slate-200 fill-slate-200'}`}
-                            strokeWidth={1.5}
-                          />
-                        ))}
+            <div>
+              {reviews.length > 0 && (
+                <>
+                  <h2 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+                    <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" strokeWidth={2} />
+                    {reviews.length} Review{reviews.length !== 1 ? 's' : ''}
+                  </h2>
+                  <div className="space-y-3 mb-4">
+                    {reviews.map(r => (
+                      <div key={r.id} className="bg-slate-50 rounded-xl p-3">
+                        <div className="flex items-center gap-0.5 mb-1">
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`w-3 h-3 ${i < r.rating ? 'fill-amber-400 text-amber-400' : 'text-slate-200 fill-slate-200'}`}
+                              strokeWidth={1.5}
+                            />
+                          ))}
+                        </div>
+                        {r.body && <p className="text-xs text-slate-600 leading-relaxed">{r.body}</p>}
                       </div>
-                      {r.body && <p className="text-xs text-slate-600 leading-relaxed">{r.body}</p>}
-                    </div>
-                  ))}
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {/* Review form — non-owners only, when logged in */}
+              {currentUserId && currentUserId !== listing.user_id && (
+                <div className="border border-slate-200 rounded-xl p-4">
+                  <p className="text-xs font-semibold text-slate-600 mb-3">Rate this listing</p>
+                  <div className="flex gap-1 mb-3">
+                    {[1, 2, 3, 4, 5].map(n => (
+                      <button
+                        key={n}
+                        type="button"
+                        onClick={() => setReviewRating(n)}
+                        className="transition-transform active:scale-110"
+                      >
+                        <Star
+                          className={`w-6 h-6 ${n <= reviewRating ? 'fill-amber-400 text-amber-400' : 'text-slate-200 fill-slate-200'}`}
+                          strokeWidth={1.5}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                  <textarea
+                    value={reviewBody}
+                    onChange={e => setReviewBody(e.target.value)}
+                    placeholder="Optional — share your experience..."
+                    rows={2}
+                    className="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 resize-none outline-none focus:border-orange-300"
+                  />
+                  <button
+                    type="button"
+                    disabled={reviewRating === 0 || submittingReview}
+                    onClick={async () => {
+                      if (!reviewRating) return;
+                      const token = localStorage.getItem('access_token');
+                      if (!token) { toast.error('Sign in to rate'); return; }
+                      setSubmittingReview(true);
+                      try {
+                        const r = await fetch(`${API_BASE}/api/v1/listings/${id}/reviews`, {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                          body: JSON.stringify({ rating: reviewRating, body: reviewBody.trim() || null }),
+                        });
+                        if (!r.ok) { const e = await r.json(); throw new Error(e.detail ?? 'Failed'); }
+                        const newReview: ListingReview = await r.json();
+                        setReviews(prev => [newReview, ...prev]);
+                        setReviewRating(0);
+                        setReviewBody('');
+                        toast.success('Review submitted!');
+                      } catch (e: unknown) {
+                        toast.error(e instanceof Error ? e.message : 'Failed to submit review');
+                      } finally { setSubmittingReview(false); }
+                    }}
+                    className="mt-2 px-4 py-1.5 rounded-lg text-xs font-semibold text-white disabled:opacity-40 transition-opacity"
+                    style={{ background: reviewRating > 0 ? 'var(--li-primary)' : '#94a3b8' }}
+                  >
+                    {submittingReview ? 'Submitting…' : 'Submit review'}
+                  </button>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
 
             {/* Divider */}
             <div className="h-px bg-slate-100" />
