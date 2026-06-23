@@ -45,10 +45,13 @@ jobs:
             --name localsindia-backend \
             --src-path backend.zip \
             --type zip \
-            --restart false
+            --restart false \
+            --async true
 
       - name: Restart app and wait for health
         run: |
+          echo "Waiting 60s for Kudu to finish extracting zip..."
+          sleep 60
           az webapp restart --name localsindia-backend --resource-group localsindia-rg
           echo "Waiting for app to start..."
           for i in $(seq 1 12); do
