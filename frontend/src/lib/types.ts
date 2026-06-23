@@ -50,6 +50,7 @@ export interface Listing {
   expires_at: string;
   created_at: string;
   city_id: string;
+  city_slug?: string | null;
   category_id: string;
   user_id: string;
   images?: ListingImage[];

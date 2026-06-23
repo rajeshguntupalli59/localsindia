@@ -29,6 +29,14 @@ export default function ListingDetailClient({ id }: { id: string }) {
   const [expanded, setExpanded] = useState(false);
   const [reviews, setReviews] = useState<ListingReview[]>([]);
   const [activeImg, setActiveImg] = useState(0);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    try {
+      const u = JSON.parse(localStorage.getItem('user') ?? 'null');
+      if (u?.id) setCurrentUserId(u.id);
+    } catch {}
+  }, []);
 
   useEffect(() => {
     if (!id) return;
@@ -358,6 +366,19 @@ export default function ListingDetailClient({ id }: { id: string }) {
                 💬 Chat on WhatsApp
               </a>
             </div>
+
+            {/* Promote button — visible to listing owner only */}
+            {currentUserId && listing.user_id === currentUserId && !listing.is_featured && listing.city_slug && (
+              <div className="mt-4">
+                <Link
+                  href={`/${listing.city_slug}/classifieds/${id}/promote`}
+                  className="flex items-center justify-center gap-2 w-full h-12 rounded-2xl border-2 border-dashed font-semibold text-sm transition-all hover:bg-[#FEF3E2]/60"
+                  style={{ borderColor: 'var(--li-primary)', color: 'var(--li-primary)' }}
+                >
+                  ⭐ Promote this listing — from ₹99
+                </Link>
+              </div>
+            )}
 
           </div>
         </>
