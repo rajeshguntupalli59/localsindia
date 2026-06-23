@@ -1,4 +1,5 @@
 # LocalIndia API — localsindia.com
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import _rate_limit_exceeded_handler
@@ -7,10 +8,28 @@ from app.core.config import settings
 from app.core.limiter import limiter
 from app.routers import auth, cities, categories, listings, uploads, search, admin, events, businesses, payments, users, chat, saved_searches, favorites, notifications, preferences
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Auto-run DB migrations on startup (idempotent — safe on every restart)
+    try:
+        from alembic.config import Config
+        from alembic import command
+        import os
+        alembic_cfg = Config(os.path.join(os.path.dirname(__file__), "../../alembic.ini"))
+        alembic_cfg.set_main_option("script_location", os.path.join(os.path.dirname(__file__), "../../migrations"))
+        command.upgrade(alembic_cfg, "head")
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).warning(f"Migration skipped: {e}")
+    yield
+
+
 app = FastAPI(
     title="LocalIndia API",
     description="India hyperlocal community platform - localsindia.com",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 app.state.limiter = limiter
