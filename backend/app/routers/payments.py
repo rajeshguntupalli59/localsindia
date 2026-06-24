@@ -1,8 +1,10 @@
+import base64
 import hashlib
 import hmac
 import uuid
 from datetime import datetime, timezone, timedelta
 
+import httpx
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy import select
@@ -16,32 +18,36 @@ from app.models.user import User
 
 router = APIRouter(prefix="/api/v1/payments", tags=["payments"])
 
+RAZORPAY_API = "https://api.razorpay.com/v1"
+
 # Pricing tiers — accept both "week"/"weekly" and "month"/"monthly" (mobile compat)
 PLANS = {
-    "week":    {"amount": 9900,  "label": "1 Week",  "days": 7},   # Rs.99 in paise
+    "week":    {"amount": 9900,  "label": "1 Week",  "days": 7},
     "weekly":  {"amount": 9900,  "label": "1 Week",  "days": 7},
-    "month":   {"amount": 19900, "label": "1 Month", "days": 30},  # Rs.199 in paise
+    "month":   {"amount": 19900, "label": "1 Month", "days": 30},
     "monthly": {"amount": 19900, "label": "1 Month", "days": 30},
 }
 
 
-def _razorpay_client():
+def _razorpay_auth() -> str:
     if not settings.RAZORPAY_KEY_ID or not settings.RAZORPAY_KEY_SECRET:
         raise HTTPException(status_code=503, detail="Payment gateway not configured.")
-    import razorpay  # noqa: PLC0415 — lazy import keeps startup free of setuptools dependency
-    return razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+    token = base64.b64encode(
+        f"{settings.RAZORPAY_KEY_ID}:{settings.RAZORPAY_KEY_SECRET}".encode()
+    ).decode()
+    return f"Basic {token}"
 
 
 # ── Schemas ──────────────────────────────────────────────────────────────────
 
 class CreateOrderRequest(BaseModel):
     listing_id: uuid.UUID
-    plan: str  # "week" | "month"
+    plan: str
 
 
 class CreateOrderResponse(BaseModel):
     order_id: str
-    amount: int       # paise
+    amount: int
     currency: str
     key_id: str
     listing_id: str
@@ -68,7 +74,6 @@ async def create_featured_order(
     if not plan:
         raise HTTPException(status_code=400, detail="Invalid plan. Choose 'week' or 'month'.")
 
-    # Verify the listing belongs to this user
     result = await db.execute(
         select(Listing).where(
             Listing.id == body.listing_id,
@@ -83,27 +88,28 @@ async def create_featured_order(
     if listing.status != "active":
         raise HTTPException(status_code=400, detail="Only active listings can be featured.")
 
-    client = _razorpay_client()
-
-    import asyncio
-    from concurrent.futures import ThreadPoolExecutor
-
-    def _create_order():
-        return client.order.create({
-            "amount": plan["amount"],
-            "currency": "INR",
-            "receipt": str(body.listing_id)[:40],
-            "notes": {
-                "listing_id": str(body.listing_id),
-                "plan": body.plan,
-                "user_id": str(current_user.id),
-            },
-        })
-
+    auth = _razorpay_auth()
     try:
-        loop = asyncio.get_running_loop()
-        with ThreadPoolExecutor(max_workers=1) as pool:
-            order = await loop.run_in_executor(pool, _create_order)
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            resp = await client.post(
+                f"{RAZORPAY_API}/orders",
+                headers={"Authorization": auth, "Content-Type": "application/json"},
+                json={
+                    "amount": plan["amount"],
+                    "currency": "INR",
+                    "receipt": str(body.listing_id)[:40],
+                    "notes": {
+                        "listing_id": str(body.listing_id),
+                        "plan": body.plan,
+                        "user_id": str(current_user.id),
+                    },
+                },
+            )
+        if resp.status_code != 200:
+            raise HTTPException(status_code=502, detail=f"Razorpay error: {resp.text}")
+        order = resp.json()
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(status_code=502, detail=f"Payment gateway error: {exc}") from exc
 
@@ -123,7 +129,6 @@ async def verify_featured_payment(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    # Verify HMAC signature
     expected = hmac.new(
         key=settings.RAZORPAY_KEY_SECRET.encode(),
         msg=f"{body.razorpay_order_id}|{body.razorpay_payment_id}".encode(),
