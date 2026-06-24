@@ -11,26 +11,6 @@ from app.routers import auth, cities, categories, listings, uploads, search, adm
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Run alembic in a thread so asyncio.run() inside env.py doesn't conflict
-    # with FastAPI's already-running event loop.
-    try:
-        import asyncio
-        import os
-        from concurrent.futures import ThreadPoolExecutor
-        from alembic.config import Config
-        from alembic import command
-
-        def _run_migrations():
-            alembic_cfg = Config(os.path.join(os.path.dirname(__file__), "../alembic.ini"))
-            alembic_cfg.set_main_option("script_location", os.path.join(os.path.dirname(__file__), "../migrations"))
-            command.upgrade(alembic_cfg, "head")
-
-        loop = asyncio.get_event_loop()
-        with ThreadPoolExecutor(max_workers=1) as pool:
-            await loop.run_in_executor(pool, _run_migrations)
-    except Exception as e:
-        import logging
-        logging.getLogger(__name__).warning(f"Migration skipped: {e}")
     yield
 
 
