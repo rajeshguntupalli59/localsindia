@@ -84,16 +84,25 @@ async def create_featured_order(
         raise HTTPException(status_code=400, detail="Only active listings can be featured.")
 
     client = _razorpay_client()
-    order = client.order.create({
-        "amount": plan["amount"],
-        "currency": "INR",
-        "receipt": str(body.listing_id)[:40],
-        "notes": {
-            "listing_id": str(body.listing_id),
-            "plan": body.plan,
-            "user_id": str(current_user.id),
-        },
-    })
+
+    import asyncio
+    from concurrent.futures import ThreadPoolExecutor
+
+    def _create_order():
+        return client.order.create({
+            "amount": plan["amount"],
+            "currency": "INR",
+            "receipt": str(body.listing_id)[:40],
+            "notes": {
+                "listing_id": str(body.listing_id),
+                "plan": body.plan,
+                "user_id": str(current_user.id),
+            },
+        })
+
+    loop = asyncio.get_event_loop()
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        order = await loop.run_in_executor(pool, _create_order)
 
     return CreateOrderResponse(
         order_id=order["id"],
