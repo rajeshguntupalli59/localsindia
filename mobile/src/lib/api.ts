@@ -154,9 +154,9 @@ export const preferencesApi = {
 };
 
 export const paymentsApi = {
-  createOrder: (listingId: string) =>
-    api.post('/payments/featured/create-order', { listing_id: listingId }).then(r => r.data),
-  verify: (data: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string; listing_id: string }) =>
+  createOrder: (listingId: string, plan: 'week' | 'month') =>
+    api.post('/payments/featured/create-order', { listing_id: listingId, plan }).then(r => r.data),
+  verify: (data: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string; listing_id: string; plan: string }) =>
     api.post('/payments/featured/verify', data).then(r => r.data),
 };
 

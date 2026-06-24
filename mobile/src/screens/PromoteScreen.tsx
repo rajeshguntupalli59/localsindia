@@ -25,7 +25,7 @@ export default function PromoteScreen({ route, navigation }: any) {
     setPaying(true);
     try {
       const user = await storage.getUser();
-      const orderData = await paymentsApi.createOrder(listingId);
+      const orderData = await paymentsApi.createOrder(listingId, selected);
 
       const options = {
         key: RAZORPAY_KEY,
@@ -49,6 +49,7 @@ export default function PromoteScreen({ route, navigation }: any) {
         razorpay_payment_id: paymentData.razorpay_payment_id,
         razorpay_signature: paymentData.razorpay_signature,
         listing_id: listingId,
+        plan: selected,
       });
 
       Alert.alert(
