@@ -100,9 +100,12 @@ async def create_featured_order(
             },
         })
 
-    loop = asyncio.get_event_loop()
-    with ThreadPoolExecutor(max_workers=1) as pool:
-        order = await loop.run_in_executor(pool, _create_order)
+    try:
+        loop = asyncio.get_running_loop()
+        with ThreadPoolExecutor(max_workers=1) as pool:
+            order = await loop.run_in_executor(pool, _create_order)
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Payment gateway error: {exc}") from exc
 
     return CreateOrderResponse(
         order_id=order["id"],
