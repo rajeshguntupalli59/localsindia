@@ -38,6 +38,15 @@ jobs:
             --tenant "${{ secrets.AZURE_TENANT_ID }}"
           az account set --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
 
+      - name: Run database migrations
+        run: |
+          cd backend
+          DB_URL=$(az webapp config appsettings list \
+            --name localsindia-backend \
+            --resource-group localsindia-rg \
+            --query "[?name=='DATABASE_URL'].value" -o tsv)
+          DATABASE_URL="$DB_URL" alembic upgrade head
+
       - name: Deploy to Azure App Service
         continue-on-error: true
         run: |
