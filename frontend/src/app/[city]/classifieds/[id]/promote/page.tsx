@@ -1,8 +1,6 @@
 import PromoteClient from './PromoteClient';
 
-export async function generateStaticParams() {
-  return [{ id: 'placeholder' }];
-}
+export const dynamic = 'force-dynamic';
 
 export default function Page() {
   return <PromoteClient />;

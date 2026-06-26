@@ -1,8 +1,6 @@
 import ListingDetailClient from './ListingDetailClient';
 
-export async function generateStaticParams() {
-  return [{ id: 'placeholder' }];
-}
+export const dynamic = 'force-dynamic';
 
 export default function Page() {
   return <ListingDetailClient />;
