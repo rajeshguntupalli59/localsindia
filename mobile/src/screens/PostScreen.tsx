@@ -175,6 +175,20 @@ export default function PostScreen({ navigation }: any) {
     );
   }
 
+  const resetForm = () => {
+    setTitle('');
+    setDescription('');
+    setPrice('');
+    setArea('');
+    setCategorySlug('');
+    setImages([]);
+    setWebsiteUrl('');
+    setSocialUrl('');
+    setErrors({});
+    setStep(0);
+    setSuccess(false);
+  };
+
   // ── SUCCESS SCREEN ──
   if (success) {
     return (
@@ -186,8 +200,11 @@ export default function PostScreen({ navigation }: any) {
         <Text style={styles.successText}>
           Your listing is under review. We'll activate it shortly — usually within an hour.
         </Text>
-        <TouchableOpacity style={styles.doneBtn} onPress={() => navigation.navigate('Home')}>
-          <Text style={styles.doneBtnText}>Back to Home</Text>
+        <TouchableOpacity style={styles.doneBtn} onPress={resetForm}>
+          <Text style={styles.doneBtnText}>+ Post Another Listing</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.homeLink} onPress={() => navigation.navigate('Home')}>
+          <Text style={styles.homeLinkText}>Back to Home</Text>
         </TouchableOpacity>
       </View>
     );
@@ -748,6 +765,8 @@ const styles = StyleSheet.create({
   },
   successTitle: { fontSize: 26, fontWeight: 'bold', color: '#111827', marginBottom: 10 },
   successText: { fontSize: 14, color: '#9ca3af', textAlign: 'center', lineHeight: 22, marginBottom: 32 },
-  doneBtn: { backgroundColor: '#f97316', borderRadius: 14, paddingHorizontal: 36, paddingVertical: 16 },
+  doneBtn: { backgroundColor: '#f97316', borderRadius: 14, paddingHorizontal: 36, paddingVertical: 16, marginBottom: 14 },
   doneBtnText: { color: 'white', fontWeight: '700', fontSize: 16 },
+  homeLink: { paddingVertical: 8 },
+  homeLinkText: { color: '#9ca3af', fontSize: 14, fontWeight: '500' },
 });

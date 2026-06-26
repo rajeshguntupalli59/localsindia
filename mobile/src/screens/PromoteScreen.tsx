@@ -1,23 +1,81 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import {
-  View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, ScrollView,
+  View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator,
+  ScrollView, Modal,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { WebView } from 'react-native-webview';
 import { Ionicons } from '@expo/vector-icons';
-import RazorpayCheckout from 'react-native-razorpay';
 import { paymentsApi } from '../lib/api';
 import { storage } from '../lib/storage';
 
-const RAZORPAY_KEY = process.env.EXPO_PUBLIC_RAZORPAY_KEY_ID ?? 'rzp_test_placeholder';
+const RAZORPAY_KEY = process.env.EXPO_PUBLIC_RAZORPAY_KEY_ID ?? '';
 
 const PLANS = [
-  { id: 'week', label: '1 Week Boost', price: 99, desc: 'Top placement for 7 days' },
+  { id: 'week',  label: '1 Week Boost',  price: 99,  desc: 'Top placement for 7 days' },
   { id: 'month', label: '1 Month Boost', price: 199, desc: 'Top placement for 30 days', popular: true },
 ];
+
+function buildRazorpayHTML(options: {
+  key: string; amount: number; currency: string; order_id: string;
+  name: string; description: string; contact: string; email: string; userName: string;
+}) {
+  return `<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <style>
+    body { margin:0; background:#0d0f1c; display:flex; align-items:center; justify-content:center; min-height:100vh; }
+    .loading { color:white; font-family:sans-serif; font-size:16px; }
+  </style>
+</head>
+<body>
+  <div class="loading">Opening payment...</div>
+  <script>
+    var options = {
+      key: "${options.key}",
+      amount: ${options.amount},
+      currency: "${options.currency}",
+      order_id: "${options.order_id}",
+      name: "${options.name}",
+      description: "${options.description}",
+      prefill: {
+        contact: "${options.contact}",
+        email: "${options.email}",
+        name: "${options.userName}"
+      },
+      theme: { color: "#f97316" },
+      modal: { ondismiss: function() { window.ReactNativeWebView.postMessage(JSON.stringify({ type: "CANCELLED" })); } },
+      handler: function(response) {
+        window.ReactNativeWebView.postMessage(JSON.stringify({
+          type: "SUCCESS",
+          razorpay_payment_id: response.razorpay_payment_id,
+          razorpay_order_id: response.razorpay_order_id,
+          razorpay_signature: response.razorpay_signature
+        }));
+      }
+    };
+    var rzp = new Razorpay(options);
+    rzp.on('payment.failed', function(response) {
+      window.ReactNativeWebView.postMessage(JSON.stringify({
+        type: "FAILED",
+        description: response.error.description
+      }));
+    });
+    setTimeout(function() { rzp.open(); }, 300);
+  </script>
+</body>
+</html>`;
+}
 
 export default function PromoteScreen({ route, navigation }: any) {
   const { listingId, listingTitle } = route.params ?? {};
   const [selected, setSelected] = useState<'week' | 'month'>('month');
   const [paying, setPaying] = useState(false);
+  const [webviewVisible, setWebviewVisible] = useState(false);
+  const [webviewHtml, setWebviewHtml] = useState('');
+  const orderRef = useRef<{ order_id: string; amount: number; currency: string } | null>(null);
 
   const plan = PLANS.find(p => p.id === selected)!;
 
@@ -26,43 +84,71 @@ export default function PromoteScreen({ route, navigation }: any) {
     try {
       const user = await storage.getUser();
       const orderData = await paymentsApi.createOrder(listingId, selected);
+      orderRef.current = {
+        order_id: orderData.order_id,
+        amount: orderData.amount,
+        currency: orderData.currency ?? 'INR',
+      };
 
-      const options = {
+      const html = buildRazorpayHTML({
         key: RAZORPAY_KEY,
         amount: orderData.amount,
         currency: orderData.currency ?? 'INR',
         order_id: orderData.order_id,
         name: 'LocalsIndia',
         description: `Promote: ${listingTitle ?? 'Listing'}`,
-        prefill: {
-          contact: user?.phone ?? '',
-          email: user?.email ?? '',
-          name: user?.name ?? '',
-        },
-        theme: { color: '#f97316' },
-      };
-
-      const paymentData: any = await RazorpayCheckout.open(options);
-
-      await paymentsApi.verify({
-        razorpay_order_id: paymentData.razorpay_order_id,
-        razorpay_payment_id: paymentData.razorpay_payment_id,
-        razorpay_signature: paymentData.razorpay_signature,
-        listing_id: listingId,
-        plan: selected,
+        contact: user?.phone ?? '',
+        email: user?.email ?? '',
+        userName: user?.name ?? '',
       });
 
-      Alert.alert(
-        'Listing Promoted! ⭐',
-        'Your listing is now featured at the top of search results.',
-        [{ text: 'Great!', onPress: () => navigation.goBack() }]
-      );
+      setWebviewHtml(html);
+      setWebviewVisible(true);
     } catch (err: any) {
-      if (err?.code !== 'PAYMENT_CANCELLED') {
-        Alert.alert('Payment failed', err?.description ?? 'Something went wrong. Please try again.');
-      }
+      const msg = err?.response?.data?.detail ?? err?.message ?? 'Could not start payment. Try again.';
+      Alert.alert('Error', msg);
     } finally {
       setPaying(false);
+    }
+  };
+
+  const handleWebViewMessage = async (event: any) => {
+    let data: any;
+    try { data = JSON.parse(event.nativeEvent.data); } catch { return; }
+
+    if (data.type === 'CANCELLED') {
+      setWebviewVisible(false);
+      return;
+    }
+
+    if (data.type === 'FAILED') {
+      setWebviewVisible(false);
+      Alert.alert('Payment Failed', data.description ?? 'The payment was not completed.');
+      return;
+    }
+
+    if (data.type === 'SUCCESS') {
+      setWebviewVisible(false);
+      setPaying(true);
+      try {
+        await paymentsApi.verify({
+          razorpay_order_id: data.razorpay_order_id,
+          razorpay_payment_id: data.razorpay_payment_id,
+          razorpay_signature: data.razorpay_signature,
+          listing_id: listingId,
+          plan: selected,
+        });
+        Alert.alert(
+          'Listing Promoted! ⭐',
+          'Your listing is now featured at the top of search results.',
+          [{ text: 'Great!', onPress: () => navigation.goBack() }]
+        );
+      } catch (err: any) {
+        const msg = err?.response?.data?.detail ?? 'Verification failed. Contact support.';
+        Alert.alert('Verification Error', msg);
+      } finally {
+        setPaying(false);
+      }
     }
   };
 
@@ -151,6 +237,32 @@ export default function PromoteScreen({ route, navigation }: any) {
         </TouchableOpacity>
         <Text style={styles.secureNote}>🔒 Powered by Razorpay · Secure payment</Text>
       </View>
+
+      {/* Razorpay WebView Modal */}
+      <Modal visible={webviewVisible} animationType="slide" onRequestClose={() => setWebviewVisible(false)}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#0d0f1c' }}>
+          <View style={styles.webviewHeader}>
+            <TouchableOpacity onPress={() => setWebviewVisible(false)} style={styles.webviewClose}>
+              <Ionicons name="close" size={22} color="white" />
+            </TouchableOpacity>
+            <Text style={styles.webviewTitle}>Secure Payment</Text>
+            <View style={{ width: 36 }} />
+          </View>
+          <WebView
+            source={{ html: webviewHtml }}
+            onMessage={handleWebViewMessage}
+            javaScriptEnabled
+            domStorageEnabled
+            startInLoadingState
+            renderLoading={() => (
+              <View style={styles.webviewLoading}>
+                <ActivityIndicator color="#f97316" size="large" />
+                <Text style={styles.webviewLoadingText}>Loading payment...</Text>
+              </View>
+            )}
+          />
+        </SafeAreaView>
+      </Modal>
     </View>
   );
 }
@@ -220,4 +332,21 @@ const styles = StyleSheet.create({
   },
   payBtnText: { color: 'white', fontWeight: '800', fontSize: 16 },
   secureNote: { textAlign: 'center', color: '#9ca3af', fontSize: 12, marginTop: 10 },
+
+  webviewHeader: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 16, paddingVertical: 12,
+    borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.1)',
+  },
+  webviewClose: {
+    width: 36, height: 36, borderRadius: 18,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    alignItems: 'center', justifyContent: 'center',
+  },
+  webviewTitle: { color: 'white', fontSize: 16, fontWeight: '700' },
+  webviewLoading: {
+    position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+    alignItems: 'center', justifyContent: 'center', backgroundColor: '#0d0f1c', gap: 12,
+  },
+  webviewLoadingText: { color: 'rgba(255,255,255,0.6)', fontSize: 14 },
 });

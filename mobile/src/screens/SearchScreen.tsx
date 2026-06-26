@@ -1,13 +1,21 @@
-import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import {
+  View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet,
+  ActivityIndicator,
+} from 'react-native';
 import { useState, useEffect, useRef } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { listingsApi, categoriesApi } from '../lib/api';
 import ListingCard from '../components/ListingCard';
+import { C, RADIUS, SHADOW } from '../lib/theme';
 
 type Category = { id: string; name: string; slug: string; icon: string };
 
 export default function SearchScreen({ navigation, route }: any) {
-  const { citySlug = 'hyderabad', cityName = 'Hyderabad', q: initQ = '', categorySlug: initCat = '' } = route.params ?? {};
+  const {
+    citySlug = 'hyderabad', cityName = 'Hyderabad',
+    q: initQ = '', categorySlug: initCat = '',
+  } = route.params ?? {};
+
   const [query, setQuery] = useState(initQ);
   const [activeCity, setActiveCity] = useState(citySlug);
   const [activeCityName, setActiveCityName] = useState(cityName);
@@ -15,6 +23,7 @@ export default function SearchScreen({ navigation, route }: any) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [listings, setListings] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const inputRef = useRef<TextInput>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -31,11 +40,8 @@ export default function SearchScreen({ navigation, route }: any) {
         if (cat) params.category_slug = cat;
         const data = await listingsApi.byCitySlug(city, params);
         setListings(data);
-      } catch {
-        setListings([]);
-      } finally {
-        setLoading(false);
-      }
+      } catch { setListings([]); }
+      finally { setLoading(false); }
     }, 350);
   };
 
@@ -48,70 +54,109 @@ export default function SearchScreen({ navigation, route }: any) {
   return (
     <View style={styles.container}>
 
-      {/* Search bar */}
+      {/* ── Header ── */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={20} color="#374151" />
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+          <Ionicons name="arrow-back" size={22} color={C.textOnDark} />
         </TouchableOpacity>
-        <TextInput
-          style={styles.input}
-          placeholder="Search listings..."
-          value={query}
-          onChangeText={setQuery}
-          autoFocus={!!initQ}
-          returnKeyType="search"
-        />
+
+        <TouchableOpacity
+          style={styles.searchBox}
+          onPress={() => inputRef.current?.focus()}
+          activeOpacity={1}
+        >
+          <Ionicons name="search-outline" size={17} color={C.textOnDarkSub} />
+          <TextInput
+            ref={inputRef}
+            style={styles.searchInput}
+            placeholder="Search listings..."
+            placeholderTextColor={C.textOnDarkSub}
+            value={query}
+            onChangeText={setQuery}
+            autoFocus={!!initQ}
+            returnKeyType="search"
+          />
+          {query.length > 0 && (
+            <TouchableOpacity onPress={() => setQuery('')} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+              <Ionicons name="close-circle" size={18} color={C.textOnDarkSub} />
+            </TouchableOpacity>
+          )}
+        </TouchableOpacity>
+
         <TouchableOpacity
           style={styles.cityChip}
           onPress={() => navigation.navigate('CityPicker', {
             onSelect: (c: any) => { setActiveCity(c.slug); setActiveCityName(c.name); }
           })}
         >
-          <Ionicons name="location-outline" size={12} color="#f97316" />
-          <Text style={styles.cityChipText}>{activeCityName}</Text>
+          <Ionicons name="location-sharp" size={12} color={C.orange} />
+          <Text style={styles.cityChipText} numberOfLines={1}>{activeCityName}</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Category tabs — loaded from API */}
-      <FlatList
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        data={allCats}
-        keyExtractor={c => c.slug}
-        style={styles.tabs}
-        contentContainerStyle={styles.tabsContent}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={[styles.tab, item.slug === activeCat && styles.activeTab]}
-            onPress={() => setActiveCat(item.slug)}
-          >
-            <Text style={styles.tabEmoji}>{item.icon}</Text>
-            <Text style={[styles.tabText, item.slug === activeCat && styles.activeTabText]}>{item.name}</Text>
-          </TouchableOpacity>
-        )}
-      />
+      {/* ── Category chips ── */}
+      <View style={styles.catsContainer}>
+        <FlatList
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          data={allCats}
+          keyExtractor={c => c.slug}
+          contentContainerStyle={styles.catsContent}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={[styles.catChip, item.slug === activeCat && styles.catChipActive]}
+              onPress={() => setActiveCat(item.slug)}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.catEmoji}>{item.icon}</Text>
+              <Text style={[styles.catText, item.slug === activeCat && styles.catTextActive]}>
+                {item.name}
+              </Text>
+            </TouchableOpacity>
+          )}
+        />
+      </View>
 
+      {/* ── Results ── */}
       {loading ? (
-        <ActivityIndicator color="#f97316" style={{ marginTop: 40 }} />
+        <View style={styles.loadingWrap}>
+          <ActivityIndicator color={C.orange} size="large" />
+          <Text style={styles.loadingText}>Finding listings...</Text>
+        </View>
       ) : (
         <FlatList
           data={listings}
           keyExtractor={l => l.id}
-          contentContainerStyle={{ padding: 16 }}
-          renderItem={({ item }) => (
-            <ListingCard listing={item} onPress={() => navigation.navigate('ListingDetail', { id: item.id })} />
-          )}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
           ListHeaderComponent={
-            <Text style={styles.count}>{listings.length} listing{listings.length !== 1 ? 's' : ''} · {activeCityName}</Text>
+            listings.length > 0 ? (
+              <Text style={styles.countText}>
+                {listings.length} listing{listings.length !== 1 ? 's' : ''} in{' '}
+                <Text style={{ color: C.orange, fontWeight: '700' }}>{activeCityName}</Text>
+                {activeCat ? ` · ${allCats.find(c => c.slug === activeCat)?.name ?? ''}` : ''}
+              </Text>
+            ) : null
           }
           ListEmptyComponent={
-            <View style={styles.empty}>
-              <Text style={styles.emptyText}>No listings found</Text>
+            <View style={styles.emptyWrap}>
+              <Text style={styles.emptyEmoji}>🔍</Text>
+              <Text style={styles.emptyTitle}>No listings found</Text>
+              <Text style={styles.emptyText}>
+                {query ? `Nothing for "${query}" in ${activeCityName}.` : `No listings in ${activeCityName} yet.`}
+              </Text>
               <TouchableOpacity style={styles.postBtn} onPress={() => navigation.navigate('Post')}>
-                <Text style={styles.postBtnText}>+ Post the first listing</Text>
+                <Ionicons name="add" size={18} color="white" />
+                <Text style={styles.postBtnText}>Post the first listing</Text>
               </TouchableOpacity>
             </View>
           }
+          renderItem={({ item }) => (
+            <ListingCard
+              listing={item}
+              onPress={() => navigation.navigate('ListingDetail', { id: item.id })}
+            />
+          )}
         />
       )}
     </View>
@@ -119,39 +164,78 @@ export default function SearchScreen({ navigation, route }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f9fafb', paddingTop: 48 },
-  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, gap: 8, marginBottom: 8 },
-  backBtn: { padding: 4 },
-  input: {
-    flex: 1,
-    backgroundColor: 'white',
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 9,
-    fontSize: 15,
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
+  container: { flex: 1, backgroundColor: C.pageBg },
+
+  // Header
+  header: {
+    flexDirection: 'row', alignItems: 'center',
+    backgroundColor: C.navBg,
+    paddingTop: 52, paddingBottom: 14,
+    paddingHorizontal: 14, gap: 10,
+  },
+  backBtn: {
+    width: 38, height: 38, borderRadius: 19,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    alignItems: 'center', justifyContent: 'center',
+    flexShrink: 0,
+  },
+  searchBox: {
+    flex: 1, flexDirection: 'row', alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderRadius: RADIUS.md, paddingHorizontal: 12,
+    paddingVertical: 10, gap: 8,
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)',
+  },
+  searchInput: {
+    flex: 1, fontSize: 15, color: C.textOnDark, padding: 0,
   },
   cityChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
-    backgroundColor: '#fff7ed',
-    borderRadius: 20,
-    paddingHorizontal: 8,
-    paddingVertical: 6,
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    backgroundColor: C.orangeGlow, borderRadius: RADIUS.pill,
+    paddingHorizontal: 10, paddingVertical: 8,
+    borderWidth: 1, borderColor: 'rgba(247,146,30,0.25)',
+    maxWidth: 90, flexShrink: 0,
   },
-  cityChipText: { color: '#f97316', fontWeight: '600', fontSize: 12 },
-  tabs: { flexGrow: 0, flexShrink: 0, height: 44, marginBottom: 4 },
-  tabsContent: { alignItems: 'center', paddingLeft: 12 },
-  tab: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 7, borderRadius: 20, marginRight: 6, backgroundColor: '#f3f4f6' },
-  activeTab: { backgroundColor: '#f97316' },
-  tabEmoji: { fontSize: 13, marginRight: 4 },
-  tabText: { fontSize: 13, color: '#374151' },
-  activeTabText: { color: 'white', fontWeight: '600' },
-  count: { paddingBottom: 8, fontSize: 12, color: '#9ca3af' },
-  empty: { alignItems: 'center', paddingTop: 60 },
-  emptyText: { color: '#9ca3af', marginBottom: 16 },
-  postBtn: { backgroundColor: '#f97316', borderRadius: 10, paddingHorizontal: 20, paddingVertical: 12 },
-  postBtnText: { color: 'white', fontWeight: '700' },
+  cityChipText: { color: C.orange, fontWeight: '700', fontSize: 11 },
+
+  // Categories
+  catsContainer: {
+    backgroundColor: C.navBg,
+    borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.06)',
+    paddingBottom: 12,
+  },
+  catsContent: { paddingHorizontal: 14, gap: 8, flexDirection: 'row' },
+  catChip: {
+    flexDirection: 'row', alignItems: 'center', gap: 5,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderRadius: RADIUS.pill, paddingHorizontal: 13, paddingVertical: 7,
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)',
+  },
+  catChipActive: {
+    backgroundColor: C.orange, borderColor: C.orange,
+  },
+  catEmoji: { fontSize: 13 },
+  catText: { fontSize: 13, color: 'rgba(255,255,255,0.65)', fontWeight: '600' },
+  catTextActive: { color: 'white', fontWeight: '700' },
+
+  // Content
+  listContent: { padding: 16, paddingBottom: 40 },
+  countText: { fontSize: 12, color: C.textMuted, marginBottom: 12, fontWeight: '500' },
+
+  // Loading
+  loadingWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, paddingTop: 60 },
+  loadingText: { fontSize: 14, color: C.textMuted, fontWeight: '500' },
+
+  // Empty state
+  emptyWrap: { alignItems: 'center', paddingTop: 60, paddingHorizontal: 24 },
+  emptyEmoji: { fontSize: 48, marginBottom: 16 },
+  emptyTitle: { fontSize: 18, fontWeight: '800', color: C.text, marginBottom: 8 },
+  emptyText: { fontSize: 14, color: C.textMuted, textAlign: 'center', lineHeight: 20, marginBottom: 24 },
+  postBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    backgroundColor: C.orange, borderRadius: RADIUS.md,
+    paddingHorizontal: 20, paddingVertical: 13,
+    ...SHADOW.orange,
+  },
+  postBtnText: { color: 'white', fontWeight: '700', fontSize: 14 },
 });

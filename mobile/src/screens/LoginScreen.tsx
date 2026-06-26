@@ -7,8 +7,9 @@ import { authApi } from '../lib/api';
 import { storage } from '../lib/storage';
 import { isBiometricAvailable } from '../hooks/useBiometric';
 import { Ionicons } from '@expo/vector-icons';
+import { C, RADIUS, SHADOW } from '../lib/theme';
 
-import LOGO from '../../assets/logo-mark-transparent.png';
+const LOGO = require('../../assets/logo-mark-transparent.png');
 
 type Step = 'phone' | 'otp' | 'name' | 'admin';
 
@@ -29,57 +30,38 @@ export default function LoginScreen({ navigation }: any) {
     logoTapCount.current += 1;
     if (logoTapTimer.current) clearTimeout(logoTapTimer.current);
     logoTapTimer.current = setTimeout(() => { logoTapCount.current = 0; }, 2000);
-    if (logoTapCount.current >= 5) {
-      logoTapCount.current = 0;
-      setStep('admin');
-    }
+    if (logoTapCount.current >= 5) { logoTapCount.current = 0; setStep('admin'); }
   };
 
   const finish = async (data: any) => {
     await storage.setTokens(data.access_token, data.refresh_token ?? '');
     await storage.setUser(data.user);
-
     const biometricEnabled = await storage.getBiometricEnabled();
     if (!biometricEnabled) {
       const available = await isBiometricAvailable();
       if (available) {
         Alert.alert(
           'Enable Biometric Login?',
-          'Sign in faster next time using your fingerprint or Face ID.',
+          'Sign in faster next time using your fingerprint.',
           [
-            {
-              text: 'Enable',
-              onPress: async () => {
-                await storage.setBiometricEnabled(true);
-                navigation.replace('Main');
-              },
-            },
-            {
-              text: 'Not now',
-              style: 'cancel',
-              onPress: () => navigation.replace('Main'),
-            },
+            { text: 'Enable', onPress: async () => { await storage.setBiometricEnabled(true); navigation.replace('Main'); } },
+            { text: 'Not now', style: 'cancel', onPress: () => navigation.replace('Main') },
           ]
         );
         return;
       }
     }
-
     navigation.replace('Main');
   };
 
   const handleSignIn = async () => {
-    if (!/^[6-9]\d{9}$/.test(phone)) {
-      Alert.alert('Invalid number', 'Enter a valid 10-digit Indian mobile number.');
-      return;
-    }
+    if (!/^[6-9]\d{9}$/.test(phone)) { Alert.alert('Invalid number', 'Enter a valid 10-digit Indian mobile number.'); return; }
     setLoading(true);
     try {
       const data = await authApi.signin(`+91${phone}`);
       await finish(data);
     } catch (err: any) {
-      const status = err?.response?.status;
-      if (status === 404) {
+      if (err?.response?.status === 404) {
         Alert.alert('No account found', 'No account with this number. Sign up first.', [
           { text: 'Sign Up', onPress: handleSignUp },
           { text: 'Cancel', style: 'cancel' },
@@ -87,24 +69,18 @@ export default function LoginScreen({ navigation }: any) {
       } else {
         Alert.alert('Error', err?.response?.data?.detail || 'Sign in failed. Please try again.');
       }
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
   const handleSignUp = async () => {
-    if (!/^[6-9]\d{9}$/.test(phone)) {
-      Alert.alert('Invalid number', 'Enter a valid 10-digit Indian mobile number.');
-      return;
-    }
+    if (!/^[6-9]\d{9}$/.test(phone)) { Alert.alert('Invalid number', 'Enter a valid 10-digit Indian mobile number.'); return; }
     setLoading(true);
     try {
       const data = await authApi.sendOtp(`+91${phone}`);
       if (data.otp) setDebugOtp(data.otp);
       setStep('otp');
     } catch (err: any) {
-      const status = err?.response?.status;
-      if (status === 409) {
+      if (err?.response?.status === 409) {
         Alert.alert('Already registered', 'This number already has an account.', [
           { text: 'Sign In', onPress: handleSignIn },
           { text: 'Cancel', style: 'cancel' },
@@ -112,9 +88,7 @@ export default function LoginScreen({ navigation }: any) {
       } else {
         Alert.alert('Error', 'Could not send OTP. Please try again.');
       }
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
   const handleOtpSubmit = async () => {
@@ -129,11 +103,8 @@ export default function LoginScreen({ navigation }: any) {
       } else {
         await finish(data);
       }
-    } catch {
-      Alert.alert('Invalid OTP', 'The code is incorrect. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+    } catch { Alert.alert('Invalid OTP', 'The code is incorrect. Please try again.'); }
+    finally { setLoading(false); }
   };
 
   const handleNameSubmit = async () => {
@@ -145,109 +116,110 @@ export default function LoginScreen({ navigation }: any) {
       const updated = await authApi.updateName(name.trim());
       await storage.setUser(updated);
       navigation.replace('Main');
-    } catch {
-      Alert.alert('Error', 'Could not save your name. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+    } catch { Alert.alert('Error', 'Could not save your name. Please try again.'); }
+    finally { setLoading(false); }
   };
 
   const handleAdminLogin = async () => {
-    if (!adminUser.trim() || !adminPass.trim()) {
-      Alert.alert('Required', 'Enter username and password.');
-      return;
-    }
+    if (!adminUser.trim() || !adminPass.trim()) { Alert.alert('Required', 'Enter username and password.'); return; }
     setLoading(true);
     try {
       const data = await authApi.adminLogin(adminUser.trim(), adminPass.trim());
       await finish(data);
     } catch (err: any) {
       Alert.alert('Admin Login Failed', err?.response?.data?.detail || 'Invalid credentials.');
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
-  const subtextMap: Record<Step, string> = {
-    phone: 'Sign in or create a free account',
-    otp: `OTP sent to +91 ${phone}`,
-    name: 'One last step — tell us your name',
-    admin: 'Admin access only',
-  };
-
-  const headingMap: Record<Step, string> = {
-    phone: 'Welcome to LocalsIndia',
-    otp: 'Enter OTP',
-    name: 'Almost done!',
-    admin: 'Admin Login',
-  };
+  const stepProgress = { phone: 1, otp: 2, name: 3, admin: 1 };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
-    >
+    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}>
+
+      {/* Atmospheric glow blobs */}
+      <View style={styles.glowTR} pointerEvents="none" />
+      <View style={styles.glowBL} pointerEvents="none" />
+
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={handleLogoTap} activeOpacity={1}>
+        {/* ── Brand hero ── */}
+        <View style={styles.hero}>
+          <TouchableOpacity onPress={handleLogoTap} activeOpacity={1} style={styles.logoWrap}>
             <Image source={LOGO} style={styles.logo} resizeMode="contain" />
           </TouchableOpacity>
           <Text style={styles.brandName}>LocalsIndia</Text>
-          <Text style={styles.tagline}>Buy. Sell. Connect.</Text>
-          <Text style={styles.heading}>{headingMap[step]}</Text>
-          <Text style={styles.subtext}>{subtextMap[step]}</Text>
+          <Text style={styles.tagline}>Buy. Sell. Connect locally.</Text>
         </View>
 
-        <View style={styles.body}>
+        {/* ── Glass card ── */}
+        <View style={styles.card}>
 
-          {/* ── Phone screen ── */}
+          {/* Progress dots */}
+          {step !== 'admin' && (
+            <View style={styles.progressRow}>
+              {[1, 2, 3].map(n => (
+                <View key={n} style={[styles.progressDot, n <= stepProgress[step] && styles.progressDotActive]} />
+              ))}
+            </View>
+          )}
+
+          {/* Step heading */}
+          <Text style={styles.cardHeading}>
+            {step === 'phone' ? 'Enter your number' :
+             step === 'otp' ? 'Verify OTP' :
+             step === 'name' ? 'Almost done!' : 'Admin Access'}
+          </Text>
+          <Text style={styles.cardSub}>
+            {step === 'phone' ? 'We\'ll send a 6-digit OTP to verify' :
+             step === 'otp' ? `Code sent to +91 ${phone}` :
+             step === 'name' ? 'What should we call you?' : 'Admin login only'}
+          </Text>
+
+          {/* ── Phone step ── */}
           {step === 'phone' && (
             <>
-              <Text style={styles.label}>Mobile Number</Text>
               <View style={styles.phoneRow}>
-                <Text style={styles.countryCode}>🇮🇳 +91</Text>
+                <View style={styles.countryCodeBox}>
+                  <Text style={styles.flag}>🇮🇳</Text>
+                  <Text style={styles.countryCode}>+91</Text>
+                </View>
                 <TextInput
                   style={styles.phoneInput}
                   value={phone}
                   onChangeText={setPhone}
-                  placeholder="98765 43210"
+                  placeholder="Enter 10-digit number"
+                  placeholderTextColor={C.textMuted}
                   keyboardType="phone-pad"
                   maxLength={10}
                 />
               </View>
 
-              {/* Sign In + Sign Up side by side */}
-              <View style={styles.btnRow}>
-                <TouchableOpacity
-                  style={[styles.btnOutline, loading && styles.btnDisabled]}
-                  onPress={handleSignIn}
-                  disabled={loading}
-                >
-                  {loading
-                    ? <ActivityIndicator color="#f97316" />
-                    : <Text style={styles.btnOutlineText}>Sign In</Text>}
-                </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.primaryBtn, loading && styles.btnDisabled]}
+                onPress={handleSignIn}
+                disabled={loading}
+              >
+                {loading
+                  ? <ActivityIndicator color="white" />
+                  : <Text style={styles.primaryBtnText}>Sign In</Text>}
+              </TouchableOpacity>
 
-                <TouchableOpacity
-                  style={[styles.btn, loading && styles.btnDisabled]}
-                  onPress={handleSignUp}
-                  disabled={loading}
-                >
-                  {loading
-                    ? <ActivityIndicator color="white" />
-                    : <Text style={styles.btnText}>Sign Up →</Text>}
-                </TouchableOpacity>
-              </View>
-
+              <TouchableOpacity
+                style={[styles.outlineBtn, loading && styles.btnDisabled]}
+                onPress={handleSignUp}
+                disabled={loading}
+              >
+                {loading
+                  ? <ActivityIndicator color={C.orange} />
+                  : <Text style={styles.outlineBtnText}>Create Account →</Text>}
+              </TouchableOpacity>
             </>
           )}
 
-          {/* ── OTP screen ── */}
+          {/* ── OTP step ── */}
           {step === 'otp' && (
             <>
               {debugOtp && (
@@ -255,201 +227,217 @@ export default function LoginScreen({ navigation }: any) {
                   <Text style={styles.debugText}>Debug OTP: {debugOtp}</Text>
                 </View>
               )}
-
-              <Text style={styles.label}>6-digit OTP</Text>
               <TextInput
                 style={styles.otpInput}
                 value={otp}
                 onChangeText={t => setOtp(t.replace(/\D/g, '').slice(0, 6))}
-                placeholder="------"
+                placeholder="• • • • • •"
+                placeholderTextColor={C.textMuted}
                 keyboardType="number-pad"
                 maxLength={6}
                 autoFocus
               />
-
               <TouchableOpacity
-                style={[styles.btn, (loading || otp.length < 6) && styles.btnDisabled]}
+                style={[styles.primaryBtn, (loading || otp.length < 6) && styles.btnDisabled]}
                 onPress={handleOtpSubmit}
                 disabled={loading || otp.length < 6}
               >
-                {loading
-                  ? <ActivityIndicator color="white" />
-                  : <Text style={styles.btnText}>Verify OTP</Text>}
+                {loading ? <ActivityIndicator color="white" /> : <Text style={styles.primaryBtnText}>Verify & Continue</Text>}
               </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={() => { setStep('phone'); setOtp(''); setDebugOtp(undefined); }}
-                style={styles.switchLink}
-              >
-                <Text style={styles.switchLinkAction}>← Change number</Text>
+              <TouchableOpacity onPress={() => { setStep('phone'); setOtp(''); setDebugOtp(undefined); }} style={styles.linkBtn}>
+                <Text style={styles.linkBtnText}>← Change number</Text>
               </TouchableOpacity>
             </>
           )}
 
-          {/* ── Name screen ── */}
+          {/* ── Name step ── */}
           {step === 'name' && (
             <>
-              <Text style={styles.label}>Your Name</Text>
               <View style={styles.nameRow}>
-                <Ionicons name="person-outline" size={18} color="#9ca3af" style={styles.nameIcon} />
+                <Ionicons name="person-outline" size={18} color={C.textMuted} style={styles.nameIcon} />
                 <TextInput
                   style={styles.nameInput}
                   value={name}
                   onChangeText={setName}
                   placeholder="e.g. Rajesh Kumar"
+                  placeholderTextColor={C.textMuted}
                   autoFocus
                   maxLength={60}
                 />
               </View>
-              <Text style={styles.hintSmall}>Shown to other users on your listings</Text>
-
+              <Text style={styles.fieldHint}>Shown to buyers on your listings</Text>
               <TouchableOpacity
-                style={[styles.btn, (loading || name.trim().length < 2) && styles.btnDisabled]}
+                style={[styles.primaryBtn, (loading || name.trim().length < 2) && styles.btnDisabled]}
                 onPress={handleNameSubmit}
                 disabled={loading || name.trim().length < 2}
               >
-                {loading
-                  ? <ActivityIndicator color="white" />
-                  : <Text style={styles.btnText}>Get Started →</Text>}
+                {loading ? <ActivityIndicator color="white" /> : <Text style={styles.primaryBtnText}>Get Started →</Text>}
               </TouchableOpacity>
             </>
           )}
 
-          {/* ── Admin screen ── */}
+          {/* ── Admin step ── */}
           {step === 'admin' && (
             <>
-              <Text style={styles.label}>Username</Text>
               <View style={styles.nameRow}>
-                <Ionicons name="shield-outline" size={18} color="#9ca3af" style={styles.nameIcon} />
-                <TextInput
-                  style={styles.nameInput}
-                  value={adminUser}
-                  onChangeText={setAdminUser}
-                  placeholder="admin username"
-                  autoCapitalize="none"
-                  autoFocus
-                />
+                <Ionicons name="shield-outline" size={18} color={C.textMuted} style={styles.nameIcon} />
+                <TextInput style={styles.nameInput} value={adminUser} onChangeText={setAdminUser}
+                  placeholder="Username" placeholderTextColor={C.textMuted} autoCapitalize="none" autoFocus />
               </View>
-
-              <Text style={[styles.label, { marginTop: 12 }]}>Password</Text>
-              <View style={styles.nameRow}>
-                <Ionicons name="lock-closed-outline" size={18} color="#9ca3af" style={styles.nameIcon} />
-                <TextInput
-                  style={styles.nameInput}
-                  value={adminPass}
-                  onChangeText={setAdminPass}
-                  placeholder="password"
-                  secureTextEntry
-                />
+              <View style={[styles.nameRow, { marginTop: 10 }]}>
+                <Ionicons name="lock-closed-outline" size={18} color={C.textMuted} style={styles.nameIcon} />
+                <TextInput style={styles.nameInput} value={adminPass} onChangeText={setAdminPass}
+                  placeholder="Password" placeholderTextColor={C.textMuted} secureTextEntry />
               </View>
-
-              <TouchableOpacity
-                style={[styles.btn, { marginTop: 20 }, loading && styles.btnDisabled]}
-                onPress={handleAdminLogin}
-                disabled={loading}
-              >
-                {loading
-                  ? <ActivityIndicator color="white" />
-                  : <Text style={styles.btnText}>Login as Admin</Text>}
+              <TouchableOpacity style={[styles.primaryBtn, { marginTop: 20 }, loading && styles.btnDisabled]}
+                onPress={handleAdminLogin} disabled={loading}>
+                {loading ? <ActivityIndicator color="white" /> : <Text style={styles.primaryBtnText}>Login as Admin</Text>}
               </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={() => { setStep('phone'); setAdminUser(''); setAdminPass(''); }}
-                style={styles.switchLink}
-              >
-                <Text style={styles.switchLinkAction}>← Back to regular login</Text>
+              <TouchableOpacity onPress={() => { setStep('phone'); setAdminUser(''); setAdminPass(''); }} style={styles.linkBtn}>
+                <Text style={styles.linkBtnText}>← Back to regular login</Text>
               </TouchableOpacity>
             </>
           )}
-
-          <Text style={styles.privacy}>
-            By continuing, you agree to our{' '}
-            <Text style={styles.privacyLink}>Terms of Service</Text>
-            {' '}and{' '}
-            <Text style={styles.privacyLink}>Privacy Policy</Text>.
-          </Text>
         </View>
+
+        {/* Legal */}
+        <Text style={styles.legal}>
+          By continuing, you agree to our{' '}
+          <Text style={styles.legalLink}>Terms of Service</Text>
+          {' '}and{' '}
+          <Text style={styles.legalLink}>Privacy Policy</Text>
+        </Text>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: 'white' },
-  scrollContent: { flexGrow: 1 },
+  container: { flex: 1, backgroundColor: C.navBg },
 
-  header: { backgroundColor: '#111827', paddingHorizontal: 24, paddingTop: 72, paddingBottom: 28 },
-  logo: { width: 48, height: 48, marginBottom: 6 },
-  brandName: { fontSize: 26, fontWeight: 'bold', color: '#f97316', marginBottom: 2 },
-  tagline: { fontSize: 13, color: 'rgba(255,255,255,0.5)', marginBottom: 20 },
-  heading: { fontSize: 22, fontWeight: 'bold', color: 'white', marginBottom: 4 },
-  subtext: { fontSize: 13, color: 'rgba(255,255,255,0.6)' },
+  glowTR: {
+    position: 'absolute', top: -80, right: -60,
+    width: 260, height: 260, borderRadius: 130,
+    backgroundColor: C.orange, opacity: 0.09,
+  },
+  glowBL: {
+    position: 'absolute', bottom: 80, left: -80,
+    width: 200, height: 200, borderRadius: 100,
+    backgroundColor: '#6366f1', opacity: 0.07,
+  },
 
-  body: { flex: 1, paddingHorizontal: 24, paddingTop: 28 },
+  scrollContent: { flexGrow: 1, paddingHorizontal: 24 },
 
-  label: { fontSize: 13, fontWeight: '600', color: '#374151', marginBottom: 8 },
-  hint: { fontSize: 11, color: '#9ca3af', textAlign: 'center', lineHeight: 16, marginTop: 8 },
-  hintSmall: { fontSize: 11, color: '#9ca3af', marginTop: 4, marginBottom: 16 },
+  // Hero
+  hero: { alignItems: 'center', paddingTop: 80, paddingBottom: 36 },
+  logoWrap: { marginBottom: 14 },
+  logo: { width: 72, height: 72 },
+  brandName: {
+    fontSize: 32, fontWeight: '900', color: C.orange,
+    letterSpacing: -0.5, marginBottom: 6,
+  },
+  tagline: { fontSize: 14, color: C.textOnDarkSub, letterSpacing: 0.2 },
 
+  // Glass card
+  card: {
+    backgroundColor: 'rgba(255,255,255,0.04)',
+    borderRadius: RADIUS.xl,
+    borderWidth: 1,
+    borderColor: C.glassBorder,
+    padding: 24,
+    marginBottom: 20,
+  },
+
+  progressRow: {
+    flexDirection: 'row',
+    gap: 8,
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  progressDot: {
+    width: 6, height: 6, borderRadius: 3,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+  },
+  progressDotActive: { backgroundColor: C.orange, width: 20 },
+
+  cardHeading: {
+    fontSize: 22, fontWeight: '800', color: C.textOnDark,
+    marginBottom: 6, letterSpacing: -0.3,
+  },
+  cardSub: { fontSize: 13, color: C.textOnDarkSub, marginBottom: 24 },
+
+  // Phone input
   phoneRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.07)',
+    borderRadius: RADIUS.md,
     borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 12,
-    paddingHorizontal: 14,
+    borderColor: C.glassBorder,
     marginBottom: 16,
+    overflow: 'hidden',
   },
-  countryCode: { fontSize: 16, marginRight: 8, color: '#374151' },
-  phoneInput: { flex: 1, fontSize: 18, paddingVertical: 14, letterSpacing: 1 },
-
-  btnRow: { flexDirection: 'row', gap: 10, marginBottom: 4 },
-
-  btn: { flex: 1, backgroundColor: '#f97316', borderRadius: 12, padding: 16, alignItems: 'center' },
-  btnDisabled: { opacity: 0.5 },
-  btnText: { color: 'white', fontSize: 16, fontWeight: '700' },
-
-  btnOutline: {
-    flex: 1,
-    borderWidth: 1.5,
-    borderColor: '#f97316',
-    borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
-    backgroundColor: 'white',
+  countryCodeBox: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    paddingHorizontal: 14, paddingVertical: 16,
+    borderRightWidth: 1, borderRightColor: C.glassBorder,
   },
-  btnOutlineText: { color: '#f97316', fontSize: 16, fontWeight: '700' },
-
-  nameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    marginBottom: 4,
+  flag: { fontSize: 18 },
+  countryCode: { fontSize: 15, fontWeight: '700', color: C.textOnDark },
+  phoneInput: {
+    flex: 1, fontSize: 19, paddingHorizontal: 14, paddingVertical: 16,
+    color: C.textOnDark, letterSpacing: 1.5,
   },
-  nameIcon: { marginRight: 8 },
-  nameInput: { flex: 1, fontSize: 16, paddingVertical: 14 },
 
+  // OTP input
   otpInput: {
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 14,
-    fontSize: 28,
-    letterSpacing: 12,
-    textAlign: 'center',
-    marginBottom: 16,
+    borderWidth: 1, borderColor: C.glassBorder,
+    borderRadius: RADIUS.md,
+    backgroundColor: 'rgba(255,255,255,0.07)',
+    paddingHorizontal: 14, paddingVertical: 18,
+    fontSize: 32, letterSpacing: 16, textAlign: 'center',
+    color: C.textOnDark, marginBottom: 16,
   },
 
-  debugBox: { backgroundColor: '#fef3c7', borderRadius: 8, padding: 10, marginBottom: 12 },
-  debugText: { color: '#92400e', fontWeight: '700', textAlign: 'center' },
+  // Name input
+  nameRow: {
+    flexDirection: 'row', alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.07)',
+    borderRadius: RADIUS.md, borderWidth: 1, borderColor: C.glassBorder,
+    paddingHorizontal: 14, marginBottom: 4,
+  },
+  nameIcon: { marginRight: 10 },
+  nameInput: { flex: 1, fontSize: 16, paddingVertical: 16, color: C.textOnDark },
+  fieldHint: { fontSize: 12, color: C.textOnDarkSub, marginBottom: 20 },
 
-  switchLink: { alignItems: 'center', marginTop: 12 },
-  switchLinkAction: { color: '#f97316', fontWeight: '600', fontSize: 14 },
+  // Buttons
+  primaryBtn: {
+    backgroundColor: C.orange, borderRadius: RADIUS.md,
+    paddingVertical: 17, alignItems: 'center', marginBottom: 12,
+    ...SHADOW.orange,
+  },
+  primaryBtnText: { color: 'white', fontSize: 16, fontWeight: '800', letterSpacing: 0.2 },
+  outlineBtn: {
+    borderWidth: 1.5, borderColor: C.orange,
+    borderRadius: RADIUS.md, paddingVertical: 16, alignItems: 'center', marginBottom: 4,
+    backgroundColor: 'rgba(247,146,30,0.06)',
+  },
+  outlineBtnText: { color: C.orange, fontSize: 15, fontWeight: '700' },
+  btnDisabled: { opacity: 0.45 },
 
-  privacy: { fontSize: 11, color: '#9ca3af', textAlign: 'center', marginTop: 28, lineHeight: 16 },
-  privacyLink: { color: '#6b7280', textDecorationLine: 'underline' },
+  linkBtn: { alignItems: 'center', marginTop: 14 },
+  linkBtnText: { color: C.orange, fontWeight: '700', fontSize: 14 },
+
+  debugBox: {
+    backgroundColor: 'rgba(254,243,199,0.15)', borderRadius: RADIUS.sm,
+    padding: 10, marginBottom: 14,
+    borderWidth: 1, borderColor: 'rgba(254,243,199,0.2)',
+  },
+  debugText: { color: '#FDE68A', fontWeight: '700', textAlign: 'center' },
+
+  legal: {
+    fontSize: 12, color: C.textOnDarkMuted, textAlign: 'center',
+    marginBottom: 32, lineHeight: 18,
+  },
+  legalLink: { color: 'rgba(255,255,255,0.35)', textDecorationLine: 'underline' },
 });

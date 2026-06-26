@@ -162,7 +162,7 @@ export default function App() {
     <SafeAreaProvider>
       <SavedProvider>
         <NavigationContainer>
-          <StatusBar style="dark" />
+          <StatusBar style="light" />
           <Stack.Navigator initialRouteName={initialRoute} screenOptions={{ headerShown: false }}>
             <Stack.Screen name="Main" component={TabNavigator} />
             <Stack.Screen name="ListingDetail" component={ListingDetailScreen} />
