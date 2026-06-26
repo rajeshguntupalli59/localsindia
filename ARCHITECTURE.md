@@ -46,9 +46,9 @@ Google OAuth            <--- social sign-in (web + mobile deep-link)
 
 **One-line summary of each tier:**
 - **Frontend**: Next.js hybrid SSR via Azure SWA's managed Node runtime — city/listing pages render on demand server-side, no pre-build explosion; works in 11 Indian languages
-- **Backend**: FastAPI REST API — validates requests, enforces business rules, talks to DB
-- **Database**: PostgreSQL — stores everything, full-text search built-in via tsvector
-- **Infrastructure**: Azure — auto-deploys on every git push to master; `develop` branch gets a PR-preview staging environment
+- **Backend**: FastAPI REST API with 13 routers — validates requests, enforces business rules, talks to DB; rate-limiting via slowapi
+- **Database**: PostgreSQL — stores everything, full-text search built-in via tsvector; 12 tables
+- **Infrastructure**: Azure — auto-deploys on every git push to master; `develop` branch gets a PR-preview staging environment; NOTE: `az webapp deploy` step times out after ~13 min consistently even when deploy succeeds — app starts correctly on its own restart
 
 > **Architecture change (commit `3a60dd1`):** the frontend was migrated OFF `output: 'export'` static export and onto Azure SWA's hybrid SSR support. The old "5,638 pre-built pages" static-export model is gone — see §7 for what replaced it. This single fact invalidates anything written before this section that assumes pure static HTML.
 
@@ -155,20 +155,25 @@ app/
 
 ### `main.py` — The Entry Point
 
-FastAPI creates the app here. All 10 routers are registered under `/api/v1/`:
+FastAPI creates the app here. All 13 routers are registered under `/api/v1/`:
 
 ```python
-app.include_router(auth_router,       prefix="/api/v1/auth")
-app.include_router(cities_router,     prefix="/api/v1/cities")
-app.include_router(categories_router, prefix="/api/v1/categories")
-app.include_router(listings_router,   prefix="/api/v1")
-app.include_router(uploads_router,    prefix="/api/v1/upload")
-app.include_router(search_router,     prefix="/api/v1/search")
-app.include_router(businesses_router, prefix="/api/v1")
-app.include_router(events_router,     prefix="/api/v1")
-app.include_router(admin_router,      prefix="/api/v1/admin")
-app.include_router(payments_router,   prefix="/api/v1/payments")
+app.include_router(auth_router,          prefix="/api/v1/auth")
+app.include_router(cities_router,        prefix="/api/v1/cities")
+app.include_router(categories_router,    prefix="/api/v1/categories")
+app.include_router(listings_router,      prefix="/api/v1")
+app.include_router(uploads_router,       prefix="/api/v1/upload")
+app.include_router(search_router,        prefix="/api/v1/search")
+app.include_router(admin_router,         prefix="/api/v1/admin")
+app.include_router(events_router,        prefix="/api/v1")
+app.include_router(businesses_router,    prefix="/api/v1")
+app.include_router(payments_router,      prefix="/api/v1/payments")
+app.include_router(users_router,         prefix="/api/v1/users")
+app.include_router(chat_router,          prefix="/api/v1")
+app.include_router(saved_searches_router,prefix="/api/v1")
 ```
+
+Also has slowapi rate-limit exception handler (`_rate_limit_exceeded_handler`) and keepalive/debug endpoints at `/api/v1/health`.
 
 CORS is configured to allow requests from `localsindia.com`, `www.localsindia.com`, and `localhost:3000`. This means only the frontend can call the backend (browser security).
 
@@ -306,6 +311,9 @@ Every classified ad posted on the platform. This is the most important table.
 | `report_count` | Integer | Auto-increments on reports; at 3 -> auto-flagged (BL-04) |
 | `expires_at` | DateTime | 30 days from posting; can be renewed |
 | `wa_verified` | Boolean | WhatsApp button was clicked at least once |
+| `view_count` | Integer | Incremented by POST /listings/{id}/view on every detail page open |
+| `contact_click_count` | Integer | Incremented by POST /listings/{id}/wa-click on every WhatsApp tap |
+| `last_renewed_at` | DateTime | Timestamp of last renewal; enforces 24h cooldown |
 | `search_vector` | TSVECTOR | Auto-computed from title+description for full-text search |
 | `deleted_at` | DateTime | Soft-delete |
 
@@ -430,6 +438,23 @@ One report per user per listing (unique constraint prevents vote-bombing). When 
 
 ---
 
+### `saved_searches` — Search alert subscriptions
+
+Added via Alembic migration `f6a7b8c9d0e1` (same migration as view_count columns).
+
+| Column | Type | What it stores |
+|--------|------|----------------|
+| `id` | UUID | |
+| `user_id` | FK->users | Who saved the search |
+| `city_slug` | String | Which city |
+| `query` | String | The search term |
+| `category_slug` | String, nullable | Optional category filter |
+| `created_at` | DateTime | When alert was saved |
+
+Frontend "🔔 Notify me" button on `/search` page is **pending** — backend endpoint lives but frontend button not yet built.
+
+---
+
 ## 6. API Endpoints — Every Route
 
 ### Auth: `/api/v1/auth`
@@ -542,6 +567,26 @@ One report per user per listing (unique constraint prevents vote-bombing). When 
 | Method | Path | What it does | Auth? |
 |--------|------|-------------|-------|
 | GET | `/users/{user_id}/public-profile` | Public seller profile: name, avatar_url, member_since, active_listings_count, listings (top 12, featured first, seed phones excluded) | No |
+
+### Chat (AI Assistant): `/api/v1/chat`
+
+| Method | Path | What it does | Auth? |
+|--------|------|-------------|-------|
+| POST | `/chat` | AI chatbot via **Gemini 2.0 Flash** (`google-genai` SDK). Body: `{message, city_slug?, history?}`. Returns `{reply, listings[]?}`. Rate-limited: 5/min + 20/hr per IP via slowapi. Needs `GOOGLE_AI_KEY` Azure env var. Anthropic permanently blocked from Azure East Asia (403 on all calls). | No |
+
+### Saved Searches / Alerts: `/api/v1/saved-searches`
+
+| Method | Path | What it does | Auth? |
+|--------|------|-------------|-------|
+| POST | `/saved-searches` | Save a search alert (`city_slug`, `query`, optional `category_slug`) | Yes |
+| GET | `/saved-searches` | List current user's saved searches | Yes |
+
+### Listing Engagement (added Alembic migration `f6a7b8c9d0e1`)
+
+| Method | Path | What it does | Auth? |
+|--------|------|-------------|-------|
+| POST | `/listings/{id}/view` | Increment `view_count` on listing (called on detail page mount) | No |
+| PUT | `/listings/{id}/renew` | Extend expiry 30 days; enforces 24h cooldown via `last_renewed_at` | Yes |
 
 ### Listing Filter Params (added Phase 2 Part B)
 
@@ -674,16 +719,16 @@ Wraps all city pages. Provides:
 **Files:** `app/[city]/classifieds/[id]/page.tsx` + `ListingDetailClient.tsx`
 
 Shows one listing in full detail:
-- Image carousel (swipeable on mobile, tap to fullscreen)
+- **Interactive image carousel** (`activeImg` state, commit `574bb4f`): main image controlled by `activeImg`; `ChevronLeft`/`ChevronRight` arrow buttons on image (disabled/hidden at first/last); white dot indicators at bottom of image for direct navigation; thumbnail strip below main image — clicking a thumbnail updates `activeImg` and shows active border (`border-orange-400 ring-1 ring-orange-300`); inactive thumbnails at 60% opacity. Global `/listing/[id]/ListingDetailClient.tsx` has the same implementation.
 - Title, price, category, time posted, area/location
 - Full description (expandable "Show more")
 - Seller card (name, member since)
-- WhatsApp button (full-width, fixed at bottom) -> opens `wa.me/91XXXXXXXXXX`
-- Report button
-- Reviews section
+- WhatsApp button (full-width, fixed at bottom on mobile) -> opens `wa.me/91XXXXXXXXXX`
+- Report button, Save (bookmark) button
+- Reviews section with star ratings
 
 `page.tsx` is a thin Server Component wrapper (pattern kept from the static-export era; still useful for clean code-splitting under SSR).
-`ListingDetailClient.tsx` is the actual component with all state and API calls.
+`ListingDetailClient.tsx` is the actual component with all state and API calls. On mount: calls `POST /listings/{id}/view` to increment view_count.
 
 ---
 

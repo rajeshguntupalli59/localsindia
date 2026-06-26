@@ -68,6 +68,8 @@
 | Mobile admin panel | §18-Mobile | `routers/admin.py` | `mobile/src/screens/AdminScreen.tsx` | `listings`, `users` | (same as web admin) |
 | EAS Play Store build pipeline | §18-Mobile | — | `mobile/eas.json`, `mobile/app.json` | — | — |
 | AI chatbot assistant | §6-Chat | `routers/chat.py`, `core/limiter.py` | `components/chat-widget/ChatWidget.tsx`, `mobile/src/screens/ChatScreen.tsx` | — | POST /chat |
+| Listing view tracking | §6-Listings | `routers/listings.py` | `listing/[id]/ListingDetailClient.tsx` | `listings` (view_count) | POST /listings/{id}/view |
+| Saved searches / alerts | §6-SavedSearches | `routers/saved_searches.py` | `/search` page (frontend button pending) | `saved_searches` | POST /api/v1/saved-searches, GET /api/v1/saved-searches |
 
 ---
 
@@ -78,7 +80,7 @@
 
 | File | What it does |
 |------|-------------|
-| `backend/app/main.py` | FastAPI app entry point; mounts all 11 routers under /api/v1; CORS; /health endpoint |
+| `backend/app/main.py` | FastAPI app entry point; mounts 13 routers under /api/v1; CORS; /health endpoint; rate-limit exception handler |
 | `backend/app/core/config.py` | All env vars (DATABASE_URL, SECRET_KEY, MSG91, Cloudinary, Razorpay, Google OAuth, ANTHROPIC_API_KEY) |
 | `backend/app/core/database.py` | Async PostgreSQL engine + `get_db()` session dependency |
 | `backend/app/core/security.py` | bcrypt hash/verify, JWT create/decode, 6-digit OTP generator |
@@ -116,6 +118,8 @@
 | `routers/admin.py` | `/api/v1/admin` | Moderation queues, approve/reject, user management |
 | `routers/payments.py` | `/api/v1/payments` | Razorpay featured listing orders + verification |
 | `routers/users.py` | `/api/v1/users` | Public seller profiles (name, member since, active listings) |
+| `routers/chat.py` | `/api/v1/chat` | AI chatbot (Gemini 2.0 Flash); rate-limited 5/min + 20/hr per IP; needs GOOGLE_AI_KEY |
+| `routers/saved_searches.py` | `/api/v1/saved-searches` | Save/list search alerts for a user |
 
 ### Backend — Services
 
@@ -143,7 +147,7 @@
 | `app/[city]/page.tsx` | `/[city]` | City home: featured + latest listings by category |
 | `app/[city]/[category]/page.tsx` | `/[city]/jobs` | All listings in a category for the city |
 | `app/[city]/classifieds/[id]/page.tsx` | `/[city]/classifieds/[id]` | Listing detail (Server Component wrapper) |
-| `app/[city]/classifieds/[id]/ListingDetailClient.tsx` | (client) | Listing detail UI: carousel, WhatsApp, reviews |
+| `app/[city]/classifieds/[id]/ListingDetailClient.tsx` | (client) | Listing detail UI: interactive image carousel (activeImg state, prev/next arrows, dot indicators, clickable thumbnails with active orange border), WhatsApp, reviews |
 | `app/[city]/classifieds/[id]/edit/page.tsx` | `/[city]/classifieds/[id]/edit` | Edit listing form (owner only) |
 | `app/[city]/classifieds/[id]/edit/EditListingClient.tsx` | (client) | Edit form state and API calls |
 | `app/[city]/classifieds/[id]/promote/page.tsx` | `/[city]/classifieds/[id]/promote` | Featured listing payment (wrapper) |
@@ -175,7 +179,7 @@
 | `app/invite/page.tsx` | `/invite` | Invite friends page |
 | `app/seller/[id]/page.tsx` | `/seller/[id]` | Public seller profile: avatar, member since, active listings grid |
 | `app/saved/page.tsx` | `/saved` | Saved/bookmarked listings from localStorage |
-| `app/listing/[id]/page.tsx` + `ListingDetailClient.tsx` | `/listing/[id]` | Global (city-agnostic) listing detail for deep links/shares |
+| `app/listing/[id]/page.tsx` + `ListingDetailClient.tsx` | `/listing/[id]` | Global (city-agnostic) listing detail — same interactive carousel as city-scoped version |
 | `app/category/[slug]/page.tsx` | `/category/[slug]` | Client redirect → `/{city}/search?category={slug}` |
 | `app/post/page.tsx` | `/post` | Client redirect → `/{city}/classifieds/post` |
 | `app/error.tsx` | (root error boundary) | Auto-reload on ChunkLoadError; friendly "Try again" otherwise |
@@ -348,11 +352,24 @@ GET    /api/v1/cities/{slug}/listings?min_price=&max_price=&sort=price_asc|price
 
 ### Chat (AI Assistant)
 ```
-POST   /api/v1/chat                       AI chatbot: natural language search + FAQ (Claude Haiku 4.5)
-                                          Rate limits: 5 req/min + 20 req/hr per IP  ← TO CHANGE: edit @limiter.limit in routers/chat.py
+POST   /api/v1/chat                       AI chatbot: natural language search + FAQ
+                                          Model: Gemini 2.0 Flash (google-genai SDK)
+                                          Rate limits: 5 req/min + 20 req/hr per IP  ← edit @limiter.limit in routers/chat.py
                                           Body: { message, city_slug?, history? }
                                           Returns: { reply, listings[]? }
-                                          No auth required. Needs ANTHROPIC_API_KEY Azure env var.
+                                          No auth required. Needs GOOGLE_AI_KEY Azure env var (NOT Anthropic).
+                                          Note: Anthropic API blocked from Azure East Asia region (403 on all calls).
+```
+
+### Listings — Engagement Tracking
+```
+POST   /api/v1/listings/{id}/view         Increment view_count; no auth required
+```
+
+### Saved Searches / Alerts
+```
+POST   /api/v1/saved-searches             Save a search alert [AUTH]
+GET    /api/v1/saved-searches             List user's saved searches [AUTH]
 ```
 
 ### Health
@@ -370,7 +387,7 @@ GET    /api/v1/health                     {"status":"ok"} — keepalive probe
 | `users` | id, phone, email, name, role, city_id, lang_pref, is_active, deleted_at | Soft-delete; PDPB |
 | `cities` | id, name, state, slug, lang_default, active | slug = URL segment |
 | `categories` | id, name, slug, icon, parent_id, sort_order | Self-join for sub-cats |
-| `listings` | id, user_id, city_id, category_id, title, description, price, contact_phone, whatsapp_url, status, is_featured, report_count, expires_at, search_vector, deleted_at | Core product; tsvector search |
+| `listings` | id, user_id, city_id, category_id, title, description, price, contact_phone, whatsapp_url, status, is_featured, report_count, expires_at, view_count, contact_click_count, last_renewed_at, search_vector, deleted_at | Core product; tsvector search; view/click counters added migration `f6a7b8c9d0e1` |
 | `listing_images` | id, listing_id, url, cloudinary_id, display_order | Max 5; Cloudinary CDN |
 | `listing_reviews` | id, listing_id, user_id, rating, body | Unique(listing_id, user_id) |
 | `businesses` | id, city_id, owner_id, name, address, phone, whatsapp_url, verified, avg_rating, review_count, deleted_at | avg_rating recalculated on review |
@@ -378,6 +395,7 @@ GET    /api/v1/health                     {"status":"ok"} — keepalive probe
 | `events` | id, city_id, user_id, title, venue, event_date, is_free, ticket_url, status, deleted_at | status: pending/active/cancelled/completed |
 | `reports` | id, listing_id, user_id, reason, notes | Unique(listing_id, user_id); 3 = auto-flag |
 | `otp_requests` | id, phone, otp_hash, attempts, verified, expires_at | bcrypt hash; 3-attempt max; 10-min expiry |
+| `saved_searches` | id, user_id, city_slug, query, category_slug, created_at | Search alerts; user notified when matching listings appear; migration `f6a7b8c9d0e1` |
 
 ---
 
@@ -492,4 +510,4 @@ Every new feature (page, endpoint, table, component) requires updates to both fi
 
 ---
 
-*Last updated: 2026-06-16 | Matches ARCHITECTURE.md*
+*Last updated: 2026-06-19 | Matches ARCHITECTURE.md*

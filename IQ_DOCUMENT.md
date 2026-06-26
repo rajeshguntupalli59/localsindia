@@ -1,7 +1,7 @@
 # LocalIndia — Full IQ Document
 > Everything about this app: what it does, what each file does, how to manage it, and where it's going.
 > **Start here if you're new to this project or returning after a long break.**
-> Last updated: 2026-06-12
+> Last updated: 2026-06-19
 
 ---
 
@@ -95,7 +95,7 @@ LocalIndia (at **localsindia.com**) is India's hyperlocal community platform. Th
 - GitHub Action → builds Docker container → deploys backend to Azure App Service
 - GitHub Action (keepalive) → pings health endpoint every 15 minutes to prevent cold start
 
-**Last deployed commit:** `13251e5`
+**Last deployed commit:** `574bb4f` (2026-06-19)
 **GitHub repo:** https://github.com/rajeshguntupalli59/localsindia.git (branch: `master`)
 
 ---
@@ -229,7 +229,7 @@ List of all Indian cities. Key fields:
 - `lang_default` — which language to use by default for this city (e.g., Hyderabad → 'te', Chennai → 'ta')
 - `active` — whether to show this city in the city picker
 
-Currently: 496 cities in the database. 18 cities seeded with content.
+Currently: 496 cities in the database. 64 cities seeded with content (AP, Telangana, Tamil Nadu, Karnataka, Kerala, Maharashtra, Delhi+NCR, Gujarat, Rajasthan — ~1,279 listings).
 
 ### `categories`
 Types of listings (tiffin, PG/roommate, jobs, vehicles, electronics, events, businesses, services, education).
@@ -254,6 +254,9 @@ The core table — every classified ad ever posted.
 - `report_count` — how many people reported this listing (3 = auto-flagged)
 - `expires_at` — listings auto-expire after 30 days (can be renewed)
 - `search_vector` — PostgreSQL tsvector column for full-text search (auto-updated by trigger)
+- `view_count` — incremented by `POST /listings/{id}/view` every time someone opens the detail page
+- `contact_click_count` — incremented by `POST /listings/{id}/wa-click` every time WhatsApp button is tapped
+- `last_renewed_at` — timestamp of last renewal; enforces 24h cooldown via `PUT /listings/{id}/renew`
 - `deleted_at` — soft-delete (never actually deleted — PDPB compliance)
 
 ### `listing_images`
@@ -295,6 +298,14 @@ Stores OTP verification attempts.
 - `attempts` — how many wrong guesses (max 3 before lockout)
 - `expires_at` — OTPs expire after 10 minutes
 - `verified` — set to true when user enters correct OTP
+
+### `saved_searches`
+Search alerts — when a user clicks "🔔 Notify me" on a search, the query is saved here.
+- `user_id` — FK to users
+- `city_slug` — which city the alert is for
+- `query` — the search term
+- `category_slug` — optional category filter
+- Added via migration `f6a7b8c9d0e1` (same migration as view_count/contact_click_count)
 
 ---
 
@@ -394,6 +405,23 @@ All endpoints require JWT with `role=admin`. Raj's management interface.
 | `POST /payments/featured/create-order` | Creates a Razorpay payment order for featuring a listing. Returns order_id, amount (Rs.99 or Rs.199), currency. |
 | `POST /payments/featured/verify` | After user pays, Razorpay sends back a signature. This endpoint verifies the HMAC signature → if valid, sets `listing.is_featured = true`. |
 
+### Router: `chat.py` — `/api/v1/chat`
+| Endpoint | What it does |
+|----------|-------------|
+| `POST /chat` | AI chatbot: accepts `{ message, city_slug?, history? }` → queries Gemini 2.0 Flash → returns `{ reply, listings[]? }`. Rate-limited: 5 req/min + 20 req/hr per IP. No auth required. Uses `GOOGLE_AI_KEY` Azure env var. **Note:** Anthropic API is permanently blocked from Azure East Asia region (403 on all calls) — Gemini is the only viable AI from this Azure deployment. Free-tier quota exhausted as of 2026-06-17 — chatbot shows graceful fallback message until new key is set. |
+
+### Router: `saved_searches.py` — `/api/v1/saved-searches`
+| Endpoint | What it does |
+|----------|-------------|
+| `POST /saved-searches` | Save a search alert (city_slug + query + optional category_slug). Requires auth. |
+| `GET /saved-searches` | List all saved searches for the current user. Requires auth. |
+
+### Listing Engagement — new in listings router
+| Endpoint | What it does |
+|----------|-------------|
+| `POST /listings/{id}/view` | Increment `view_count` on the listing. No auth. Called by `ListingDetailClient.tsx` on mount. |
+| `PUT /listings/{id}/renew` | Renew listing with 24h cooldown enforced via `last_renewed_at`. |
+
 ---
 
 ## 8. The Frontend Pages
@@ -439,7 +467,7 @@ All endpoints require JWT with `role=admin`. Raj's management interface.
 **What it shows:** Full listing detail — photos, description, seller info, WhatsApp button
 **What it does:**
 - Server Component wrapper (kept from the static-export era; still a clean split under hybrid SSR) that renders `ListingDetailClient.tsx`
-- Photo carousel: swipeable on mobile, click to fullscreen
+- **Interactive image carousel** (`activeImg` state): prev/next `ChevronLeft`/`ChevronRight` arrow buttons on main image (hidden at boundaries); dot indicators at bottom; thumbnail strip — clicking a thumbnail sets `activeImg` and highlights with orange border (`border-orange-400 ring-1 ring-orange-300`); inactive thumbnails dimmed at 60% opacity. Global `/listing/[id]/ListingDetailClient.tsx` has the same carousel.
 - WhatsApp button: fixed at the bottom of mobile screen — ALWAYS visible
 - Share button: uses `navigator.share()` (mobile native share sheet) with clipboard fallback
 - Reviews section: star rating average + all reviews + "Write a Review" form
@@ -950,7 +978,7 @@ Will enable:
 |--------|-------|
 | Rendering mode | Hybrid SSR (Azure SWA managed runtime) — not pre-built static pages |
 | Cities in database | 496+ |
-| Cities seeded with content | 51 (AP: 10, Telangana: 8, Tamil Nadu: 10, Karnataka: 9, Kerala: 8, Maharashtra: 6) |
+| Cities seeded with content | 64 (AP: 10, Telangana: 8, Tamil Nadu: 10, Karnataka: 9, Kerala: 8, Maharashtra: 6, Delhi+NCR: 6, Gujarat: 4, Rajasthan: 3) — ~1,279 listings |
 | Languages supported | 11 |
 | Backend tests | 54 passing |
 | E2E Playwright tests | 87 passing |
@@ -986,6 +1014,7 @@ Will enable:
 | `GOOGLE_REDIRECT_URI` | .../auth/google/callback | ✅ Live |
 | `ADMIN_USERNAME` | localsindia_admin | ✅ Live |
 | `ADMIN_PASSWORD_HASH` | bcrypt hash | ✅ Live |
+| `GOOGLE_AI_KEY` | Google AI Studio key for Gemini chatbot | ❌ Quota exhausted — get new key at aistudio.google.com |
 
 ### GitHub Actions secrets
 | Secret | What it is |
