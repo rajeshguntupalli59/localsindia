@@ -385,8 +385,8 @@ const styles = StyleSheet.create({
   flag: { fontSize: 18 },
   countryCode: { fontSize: 15, fontWeight: '700', color: C.textOnDark },
   phoneInput: {
-    flex: 1, fontSize: 19, paddingHorizontal: 14, paddingVertical: 16,
-    color: C.textOnDark, letterSpacing: 1.5,
+    flex: 1, fontSize: 16, paddingHorizontal: 12, paddingVertical: 16,
+    color: C.textOnDark, letterSpacing: 0.5,
   },
 
   // OTP input
