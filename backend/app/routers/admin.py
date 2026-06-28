@@ -16,10 +16,12 @@ PLACEHOLDER_URLS = [
 
 from app.core.database import get_db
 from app.core.deps import get_current_admin
+from app.models.business import Business
 from app.models.event import Event
 from app.models.listing import Listing
 from app.models.report import Report
 from app.models.user import User
+from app.schemas.business import BusinessOut
 from app.schemas.event import EventOut
 from app.schemas.listing import ListingOut
 
@@ -445,6 +447,79 @@ async def get_platform_stats(
             "sendgrid_configured": bool(settings.SENDGRID_API_KEY),
         },
     }
+
+
+@router.get("/businesses")
+async def list_businesses_admin(
+    page: int = 1,
+    page_size: int = 50,
+    verified_only: bool = False,
+    db: AsyncSession = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+):
+    from sqlalchemy.orm import selectinload
+    q = (
+        select(Business)
+        .options(selectinload(Business.reviews))
+        .where(Business.deleted_at.is_(None))
+        .order_by(Business.created_at.desc())
+        .offset((page - 1) * page_size)
+        .limit(page_size)
+    )
+    if verified_only:
+        q = q.where(Business.verified.is_(True))
+    result = await db.execute(q)
+    businesses = result.scalars().all()
+    return [
+        {
+            "id": str(b.id),
+            "name": b.name,
+            "city_id": str(b.city_id),
+            "owner_id": str(b.owner_id) if b.owner_id else None,
+            "verified": b.verified,
+            "badge_plan": b.badge_plan,
+            "badge_expires_at": b.badge_expires_at.isoformat() if b.badge_expires_at else None,
+            "avg_rating": float(b.avg_rating) if b.avg_rating else None,
+            "review_count": b.review_count,
+            "created_at": b.created_at.isoformat(),
+        }
+        for b in businesses
+    ]
+
+
+@router.patch("/businesses/{business_id}/verify")
+async def admin_verify_business(
+    business_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+):
+    result = await db.execute(select(Business).where(Business.id == business_id, Business.deleted_at.is_(None)))
+    business = result.scalar_one_or_none()
+    if not business:
+        raise HTTPException(status_code=404, detail="Business not found.")
+    business.verified = True
+    if not business.badge_expires_at or business.badge_expires_at < datetime.now(timezone.utc):
+        business.badge_expires_at = datetime.now(timezone.utc) + timedelta(days=30)
+        business.badge_plan = "admin_grant"
+    await db.commit()
+    return {"id": str(business.id), "verified": True, "badge_expires_at": business.badge_expires_at.isoformat()}
+
+
+@router.delete("/businesses/{business_id}/verify")
+async def admin_unverify_business(
+    business_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+):
+    result = await db.execute(select(Business).where(Business.id == business_id, Business.deleted_at.is_(None)))
+    business = result.scalar_one_or_none()
+    if not business:
+        raise HTTPException(status_code=404, detail="Business not found.")
+    business.verified = False
+    business.badge_plan = None
+    business.badge_expires_at = None
+    await db.commit()
+    return {"id": str(business.id), "verified": False}
 
 
 @router.get("/reports")

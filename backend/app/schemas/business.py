@@ -55,6 +55,8 @@ class BusinessOut(BaseModel):
     whatsapp_url: str | None
     website_url: str | None
     verified: bool
+    badge_plan: str | None = None
+    badge_expires_at: datetime | None = None
     avg_rating: float | None
     review_count: int
     city_id: uuid.UUID

@@ -2,13 +2,23 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, MapPin, Phone, Globe, Star, BadgeCheck, MessageCircle } from 'lucide-react';
+import { ArrowLeft, MapPin, Phone, Globe, Star, BadgeCheck, MessageCircle, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { api, ApiError } from '@/lib/api';
 import type { Business } from '@/lib/types';
+
+import { loadRazorpay, openRazorpay } from '@/lib/razorpay';
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
+const RZP_KEY = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ?? '';
+
+const BADGE_PLANS: { key: string; label: string; price: string; days: number }[] = [
+  { key: 'monthly',   label: '1 Month',   price: '₹499', days: 30 },
+  { key: 'quarterly', label: '3 Months',  price: '₹1,299', days: 90 },
+];
 
 function StarPicker({ value, onChange }: { value: number; onChange: (v: number) => void }) {
   return (
@@ -43,6 +53,8 @@ export default function BusinessDetailPage() {
   const [reviewBody, setReviewBody] = useState('');
   const [submittingReview, setSubmittingReview] = useState(false);
   const [claiming, setClaiming] = useState(false);
+  const [badgeModal, setBadgeModal] = useState(false);
+  const [badgePaying, setBadgePaying] = useState<string | null>(null);
 
   useEffect(() => {
     api.businesses.get(businessId)
@@ -82,6 +94,64 @@ export default function BusinessDetailPage() {
       toast.error(err instanceof ApiError ? err.message : 'Failed to claim business');
     } finally {
       setClaiming(false);
+    }
+  };
+
+  const startBadgePayment = async (planKey: string) => {
+    const token = localStorage.getItem('access_token');
+    if (!token) { router.push('/auth/login'); return; }
+    setBadgePaying(planKey);
+    try {
+      const loaded = await loadRazorpay();
+      if (!loaded) { toast.error('Payment gateway failed to load'); return; }
+
+      const res = await fetch(`${API_BASE}/api/v1/payments/business-badge/create-order`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ business_id: businessId, plan: planKey }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.detail ?? 'Order creation failed');
+      }
+      const order = await res.json();
+
+      openRazorpay({
+        key: RZP_KEY || order.key_id,
+        amount: order.amount,
+        currency: order.currency,
+        order_id: order.order_id,
+        name: 'LocalsIndia',
+        description: `Verified Business Badge — ${planKey === 'monthly' ? '1 Month' : '3 Months'}`,
+        theme: { color: '#1A1A2E' },
+        handler: async (response) => {
+          try {
+            const verifyRes = await fetch(`${API_BASE}/api/v1/payments/business-badge/verify`, {
+              method: 'POST',
+              headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                business_id: businessId,
+                plan: planKey,
+              }),
+            });
+            if (!verifyRes.ok) throw new Error('Verification failed');
+            toast.success('Verified badge activated! Blue checkmark now shows on your business.');
+            const updated = await api.businesses.get(businessId);
+            setBusiness(updated);
+            setBadgeModal(false);
+          } catch {
+            toast.error('Payment received but verification failed. Contact support.');
+          }
+        },
+        modal: { ondismiss: () => setBadgePaying(null) },
+      });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Payment failed');
+    } finally {
+      setBadgePaying(null);
     }
   };
 
@@ -161,7 +231,7 @@ export default function BusinessDetailPage() {
           </div>
 
           {/* Actions */}
-          <div className="flex gap-3 mt-5">
+          <div className="flex gap-3 mt-5 flex-wrap">
             {business.whatsapp_url && (
               <a
                 href={business.whatsapp_url}
@@ -185,6 +255,32 @@ export default function BusinessDetailPage() {
               </Button>
             )}
           </div>
+
+          {/* Get Verified CTA — shown to owner if not yet verified */}
+          {business.owner_id && !business.verified && (
+            <div className="mt-4 p-4 rounded-xl border-2 border-blue-100 bg-blue-50 flex items-start gap-3">
+              <ShieldCheck className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-blue-900">Get Verified</p>
+                <p className="text-xs text-blue-700 mt-0.5">Show the blue ✓ badge and rank higher in search. Starts at ₹499/month.</p>
+              </div>
+              <button
+                onClick={() => setBadgeModal(true)}
+                className="shrink-0 px-3 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-bold hover:bg-blue-700 transition-colors"
+              >
+                Get Verified
+              </button>
+            </div>
+          )}
+
+          {/* Badge expiry info for verified businesses */}
+          {business.verified && business.badge_expires_at && (
+            <div className="mt-3 flex items-center gap-2 text-xs text-green-700">
+              <BadgeCheck className="w-4 h-4 text-blue-500" />
+              Verified badge active · expires {new Date(business.badge_expires_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+              <button onClick={() => setBadgeModal(true)} className="underline text-blue-600 ml-1">Renew</button>
+            </div>
+          )}
         </div>
 
         {/* Reviews */}
@@ -242,6 +338,45 @@ export default function BusinessDetailPage() {
           </form>
         </div>
       </div>
+
+      {/* Badge plan selection modal */}
+      {badgeModal && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setBadgeModal(false)} />
+          <div className="relative bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-sm p-6 shadow-xl">
+            <div className="flex items-center gap-2 mb-1">
+              <ShieldCheck className="w-5 h-5 text-blue-600" />
+              <h3 className="text-lg font-black text-slate-900">Get Verified</h3>
+            </div>
+            <p className="text-sm text-slate-500 mb-5">Blue ✓ badge on your profile, priority ranking in search.</p>
+
+            <div className="space-y-3 mb-5">
+              {BADGE_PLANS.map(plan => (
+                <div key={plan.key} className="flex items-center justify-between p-4 rounded-xl border-2 border-slate-100 hover:border-blue-200 transition-colors">
+                  <div>
+                    <p className="font-bold text-slate-900">{plan.label}</p>
+                    <p className="text-xs text-slate-500">{plan.days} days · auto-renew anytime</p>
+                  </div>
+                  <button
+                    onClick={() => startBadgePayment(plan.key)}
+                    disabled={badgePaying !== null}
+                    className="px-4 py-2 rounded-xl bg-blue-600 text-white text-sm font-bold hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                  >
+                    {badgePaying === plan.key ? 'Opening...' : plan.price}
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <button
+              onClick={() => setBadgeModal(false)}
+              className="w-full py-2.5 rounded-xl border border-slate-200 text-sm text-slate-600 hover:bg-slate-50 transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

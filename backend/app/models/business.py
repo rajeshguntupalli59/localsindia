@@ -26,6 +26,8 @@ class Business(Base):
     whatsapp_url: Mapped[str | None] = mapped_column(Text, nullable=True)
     website_url: Mapped[str | None] = mapped_column(Text, nullable=True)
     verified: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    badge_plan: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    badge_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     avg_rating: Mapped[float | None] = mapped_column(Numeric(3, 2), default=0)
     review_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

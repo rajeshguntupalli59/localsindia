@@ -123,6 +123,8 @@ export interface Business {
   whatsapp_url: string | null;
   website_url: string | null;
   verified: boolean;
+  badge_plan: string | null;
+  badge_expires_at: string | null;
   avg_rating: number | null;
   review_count: number;
   city_id: string;

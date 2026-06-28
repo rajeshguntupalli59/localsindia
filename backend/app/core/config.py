@@ -38,6 +38,8 @@ class Settings(BaseSettings):
     EMAIL_FROM: str = "noreply@localsindia.com"
     EMAIL_FROM_NAME: str = "LocalsIndia"
 
+    CRON_SECRET: str = ""  # shared secret for /cron/* endpoints called by GitHub Actions
+
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 
 
