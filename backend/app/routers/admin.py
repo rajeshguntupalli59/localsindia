@@ -1,9 +1,9 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
-from sqlalchemy import select
+from sqlalchemy import select, func, distinct, cast, Date
 from sqlalchemy.ext.asyncio import AsyncSession
 
 PLACEHOLDER_URLS = [
@@ -301,6 +301,149 @@ async def seed_placeholder_images(
         "seeded": added,
         "fixed_typo": fixed,
         "message": f"Added placeholder images to {added} listings; fixed typo on {fixed} existing images.",
+    }
+
+
+@router.get("/stats")
+async def get_platform_stats(
+    db: AsyncSession = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+):
+    from app.models.city import City
+    from app.models.otp_request import OtpRequest
+    from app.models.saved_listing import SavedListing
+    from app.models.listing_review import ListingReview
+    from app.core.config import settings
+
+    now = datetime.now(timezone.utc)
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    week_start = now - timedelta(days=7)
+
+    # Users
+    users_total = await db.scalar(
+        select(func.count()).select_from(User).where(User.deleted_at.is_(None))
+    )
+    users_new_today = await db.scalar(
+        select(func.count()).select_from(User)
+        .where(User.created_at >= today_start, User.deleted_at.is_(None))
+    )
+    users_new_7d = await db.scalar(
+        select(func.count()).select_from(User)
+        .where(User.created_at >= week_start, User.deleted_at.is_(None))
+    )
+    new_users_by_day_result = await db.execute(
+        select(cast(User.created_at, Date).label("day"), func.count().label("count"))
+        .where(User.created_at >= week_start, User.deleted_at.is_(None))
+        .group_by(cast(User.created_at, Date))
+        .order_by(cast(User.created_at, Date))
+    )
+    new_users_by_day = [{"date": str(row.day), "count": row.count} for row in new_users_by_day_result]
+
+    # Listings by status
+    listing_counts_result = await db.execute(
+        select(Listing.status, func.count()).select_from(Listing)
+        .where(Listing.deleted_at.is_(None))
+        .group_by(Listing.status)
+    )
+    listing_by_status = {row[0]: row[1] for row in listing_counts_result}
+
+    featured_count = await db.scalar(
+        select(func.count()).select_from(Listing)
+        .where(Listing.is_featured.is_(True), Listing.deleted_at.is_(None), Listing.expires_at > now)
+    )
+    view_total = await db.scalar(
+        select(func.coalesce(func.sum(Listing.view_count), 0)).select_from(Listing)
+        .where(Listing.deleted_at.is_(None))
+    )
+    contact_total = await db.scalar(
+        select(func.coalesce(func.sum(Listing.contact_click_count), 0)).select_from(Listing)
+        .where(Listing.deleted_at.is_(None))
+    )
+
+    # Events
+    events_pending = await db.scalar(
+        select(func.count()).select_from(Event)
+        .where(Event.status == "pending", Event.deleted_at.is_(None))
+    )
+    events_active = await db.scalar(
+        select(func.count()).select_from(Event)
+        .where(Event.status == "active", Event.deleted_at.is_(None))
+    )
+
+    # Cities
+    cities_total = await db.scalar(
+        select(func.count()).select_from(City).where(City.active.is_(True))
+    )
+    cities_with_listings = await db.scalar(
+        select(func.count(distinct(Listing.city_id))).select_from(Listing)
+        .where(Listing.deleted_at.is_(None), Listing.status == "active")
+    )
+    top_cities_result = await db.execute(
+        select(City.name, City.state, func.count(Listing.id).label("listing_count"))
+        .join(Listing, Listing.city_id == City.id)
+        .where(Listing.deleted_at.is_(None), Listing.status == "active")
+        .group_by(City.id, City.name, City.state)
+        .order_by(func.count(Listing.id).desc())
+        .limit(15)
+    )
+    top_cities = [{"name": r.name, "state": r.state, "count": r.listing_count} for r in top_cities_result]
+
+    # OTP
+    otp_today_total = await db.scalar(
+        select(func.count()).select_from(OtpRequest).where(OtpRequest.created_at >= today_start)
+    )
+    otp_today_verified = await db.scalar(
+        select(func.count()).select_from(OtpRequest)
+        .where(OtpRequest.created_at >= today_start, OtpRequest.verified.is_(True))
+    )
+
+    # Content
+    reports_total = await db.scalar(select(func.count()).select_from(Report))
+    saves_total = await db.scalar(select(func.count()).select_from(SavedListing))
+    reviews_total = await db.scalar(select(func.count()).select_from(ListingReview))
+
+    return {
+        "users": {
+            "total": users_total or 0,
+            "new_today": users_new_today or 0,
+            "new_7d": users_new_7d or 0,
+            "new_by_day": new_users_by_day,
+        },
+        "listings": {
+            "total": sum(listing_by_status.values()),
+            "pending": listing_by_status.get("pending", 0),
+            "active": listing_by_status.get("active", 0),
+            "flagged": listing_by_status.get("flagged", 0),
+            "rejected": listing_by_status.get("rejected", 0),
+            "expired": listing_by_status.get("expired", 0),
+            "fulfilled": listing_by_status.get("fulfilled", 0),
+            "featured": featured_count or 0,
+            "total_views": int(view_total or 0),
+            "total_contacts": int(contact_total or 0),
+        },
+        "events": {
+            "pending": events_pending or 0,
+            "active": events_active or 0,
+        },
+        "cities": {
+            "total": cities_total or 0,
+            "with_listings": cities_with_listings or 0,
+            "top": top_cities,
+        },
+        "otp": {
+            "today_total": otp_today_total or 0,
+            "today_verified": otp_today_verified or 0,
+        },
+        "content": {
+            "reports": reports_total or 0,
+            "saves": saves_total or 0,
+            "reviews": reviews_total or 0,
+        },
+        "system": {
+            "chatbot_key_set": bool(settings.GOOGLE_AI_KEY),
+            "razorpay_configured": bool(settings.RAZORPAY_KEY_ID and settings.RAZORPAY_KEY_SECRET),
+            "sendgrid_configured": bool(settings.SENDGRID_API_KEY),
+        },
     }
 
 
