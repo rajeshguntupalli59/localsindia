@@ -1,15 +1,15 @@
 """add badge fields to businesses for verified badge monetization
 
-Revision ID: a1b2c3d4e5f6
-Revises: f6a7b8c9d0e1
-Create Date: 2026-06-28 10:00:00.000000
+Revision ID: c4d5e6f7a8b9
+Revises: e8f9a0b1c2d3
+Create Date: 2026-06-28 12:00:00.000000
 
 """
 from alembic import op
 import sqlalchemy as sa
 
-revision = 'a1b2c3d4e5f6'
-down_revision = 'f6a7b8c9d0e1'
+revision = 'c4d5e6f7a8b9'
+down_revision = 'e8f9a0b1c2d3'
 branch_labels = None
 depends_on = None
 
