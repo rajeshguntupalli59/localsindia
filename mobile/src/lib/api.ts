@@ -160,4 +160,23 @@ export const paymentsApi = {
     api.post('/payments/featured/verify', data).then(r => r.data),
 };
 
+export const businessesApi = {
+  getById: (id: string) =>
+    api.get(`/businesses/${id}`).then(r => r.data),
+
+  createBadgeOrder: (businessId: string, plan: 'monthly' | 'quarterly') =>
+    api.post('/payments/business-badge/create-order', { business_id: businessId, plan }).then(r => r.data),
+
+  verifyBadge: (data: {
+    razorpay_order_id: string;
+    razorpay_payment_id: string;
+    razorpay_signature: string;
+    business_id: string;
+    plan: string;
+  }) => api.post('/payments/business-badge/verify', data).then(r => r.data),
+
+  submitReview: (businessId: string, data: { rating: number; body: string }) =>
+    api.post(`/businesses/${businessId}/reviews`, data).then(r => r.data),
+};
+
 export default api;

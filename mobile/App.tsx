@@ -21,6 +21,7 @@ import ChatScreen from './src/screens/ChatScreen';
 import MyListingsScreen from './src/screens/MyListingsScreen';
 import PromoteScreen from './src/screens/PromoteScreen';
 import AlertsPrefsScreen from './src/screens/AlertsPrefsScreen';
+import BusinessDetailScreen from './src/screens/BusinessDetailScreen';
 import { storage } from './src/lib/storage';
 import { isBiometricAvailable, authenticateWithBiometric } from './src/hooks/useBiometric';
 import { SavedProvider, useSavedContext } from './src/context/SavedContext';
@@ -178,6 +179,7 @@ export default function App() {
             <Stack.Screen name="MyListings" component={MyListingsScreen} />
             <Stack.Screen name="Promote" component={PromoteScreen} />
             <Stack.Screen name="AlertsPrefs" component={AlertsPrefsScreen} />
+            <Stack.Screen name="BusinessDetail" component={BusinessDetailScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </SavedProvider>
