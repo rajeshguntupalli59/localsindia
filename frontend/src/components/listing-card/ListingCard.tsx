@@ -188,14 +188,23 @@ export default function ListingCard({ listing }: Props) {
       {/* ── Body ─────────────────────────────────────── */}
       <div className="px-4 pt-4 pb-5">
         <Link href={href}>
-          {/* Price in body — only when NO image */}
+          {/* Price pill — only when NO image */}
           {!image && (
             listing.price !== null ? (
-              <p className="text-[18px] font-black mb-2 leading-none" style={{ color: 'var(--li-primary)' }}>
-                {formatPrice(listing.price)}
+              <p className="mb-3">
+                <span className="inline-flex items-center px-3 py-[6px] rounded-full
+                  text-[13px] font-black tabular-nums leading-none
+                  bg-orange-50 text-[#E07B0A]">
+                  {formatPrice(listing.price)}
+                </span>
               </p>
             ) : (
-              <p className="text-[11px] text-slate-400 mb-2">Price on request</p>
+              <p className="mb-2">
+                <span className="inline-flex items-center px-2.5 py-[5px] rounded-full
+                  text-[10.5px] font-medium bg-slate-100 text-slate-500">
+                  Price on request
+                </span>
+              </p>
             )
           )}
 
@@ -207,21 +216,24 @@ export default function ListingCard({ listing }: Props) {
             {listing.title}
           </p>
 
-          {/* Meta row */}
-          <div className="flex items-center gap-2 text-[11px] mb-4" style={{ color: 'var(--li-muted)' }}>
+          {/* Meta row — pill tags */}
+          <div className="flex items-center gap-1.5 mb-4 flex-wrap">
             {listing.area && (
-              <span className="flex items-center gap-1 min-w-0 truncate">
-                <MapPin className="w-3 h-3 shrink-0" strokeWidth={2} />
-                <span className="truncate">{listing.area}</span>
+              <span className="inline-flex items-center gap-1 px-2.5 py-[5px] rounded-full
+                text-[10.5px] font-medium bg-slate-100 text-slate-500">
+                <MapPin className="w-[9px] h-[9px] shrink-0" strokeWidth={2} />
+                <span className="truncate max-w-[110px]">{listing.area}</span>
               </span>
             )}
-            <span className="flex items-center gap-1 ml-auto shrink-0">
-              <Clock className="w-3 h-3" strokeWidth={2} />
+            <span className="inline-flex items-center gap-1 px-2.5 py-[5px] rounded-full
+              text-[10.5px] font-medium bg-slate-100 text-slate-500 ml-auto shrink-0">
+              <Clock className="w-[9px] h-[9px]" strokeWidth={2} />
               {timeAgo(listing.created_at)}
             </span>
             {(listing.view_count ?? 0) > 0 && (
-              <span className="flex items-center gap-1 shrink-0">
-                <Eye className="w-3 h-3" strokeWidth={2} />
+              <span className="inline-flex items-center gap-1 px-2.5 py-[5px] rounded-full
+                text-[10.5px] font-medium bg-slate-100 text-slate-500 shrink-0">
+                <Eye className="w-[9px] h-[9px]" strokeWidth={2} />
                 {listing.view_count}
               </span>
             )}
@@ -260,7 +272,7 @@ export default function ListingCard({ listing }: Props) {
           href={waUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="wa-btn w-full py-3 text-[13.5px]"
+          className="wa-btn w-full py-3 text-[13.5px] active:scale-[0.97] transition-all duration-150"
           onClick={e => { e.stopPropagation(); api.listings.waClick(listing.id); }}
         >
           💬 {t('listing.chatOnWA')}

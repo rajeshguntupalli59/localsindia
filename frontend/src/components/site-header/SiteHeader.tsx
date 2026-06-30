@@ -43,14 +43,14 @@ function PostListingCta({ href }: { href: string }) {
     <Link
       href={href}
       className="flex items-center gap-1.5 shrink-0
-        pl-[14px] pr-[18px] py-[9px] rounded-[10px]
+        pl-5 pr-6 py-[10px] rounded-full
         text-[13px] font-semibold tracking-tight text-white
         bg-[#F7921E]
-        shadow-[0_2px_12px_rgba(247,146,30,0.28),inset_0_1px_0_rgba(255,255,255,0.14)]
+        shadow-[0_2px_12px_rgba(247,146,30,0.30),inset_0_1px_0_rgba(255,255,255,0.14)]
         hover:bg-[#E07B0A]
-        hover:shadow-[0_4px_20px_rgba(247,146,30,0.44),inset_0_1px_0_rgba(255,255,255,0.10)]
+        hover:shadow-[0_4px_20px_rgba(247,146,30,0.46),inset_0_1px_0_rgba(255,255,255,0.10)]
         hover:-translate-y-px
-        active:translate-y-0 active:scale-[0.985]
+        active:translate-y-0 active:scale-[0.94]
         active:shadow-[0_1px_6px_rgba(247,146,30,0.22)]
         transition-all duration-200 select-none"
     >

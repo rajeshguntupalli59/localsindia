@@ -211,14 +211,14 @@ export default function HomePage() {
                 : setShowCityPicker(true)
               }
               className="ml-2 flex items-center gap-1.5 shrink-0
-                pl-[14px] pr-[18px] py-[9px] rounded-[10px]
+                pl-5 pr-6 py-[10px] rounded-full
                 text-[13px] font-semibold tracking-tight text-white
                 bg-[#F7921E]
-                shadow-[0_2px_12px_rgba(247,146,30,0.28),inset_0_1px_0_rgba(255,255,255,0.14)]
+                shadow-[0_2px_12px_rgba(247,146,30,0.30),inset_0_1px_0_rgba(255,255,255,0.14)]
                 hover:bg-[#E07B0A]
-                hover:shadow-[0_4px_20px_rgba(247,146,30,0.44),inset_0_1px_0_rgba(255,255,255,0.10)]
+                hover:shadow-[0_4px_20px_rgba(247,146,30,0.46),inset_0_1px_0_rgba(255,255,255,0.10)]
                 hover:-translate-y-px
-                active:translate-y-0 active:scale-[0.985]
+                active:translate-y-0 active:scale-[0.94]
                 active:shadow-[0_1px_6px_rgba(247,146,30,0.22)]
                 transition-all duration-200 select-none"
             >
@@ -305,9 +305,9 @@ export default function HomePage() {
                 ],
               } : {}}
               transition={{ duration: 1.1, ease: 'easeOut' }}
-              className="flex max-w-2xl w-full overflow-hidden rounded-[20px] bg-white
-                shadow-[0_24px_64px_-12px_rgba(0,0,0,0.55),0_0_0_1px_rgba(0,0,0,0.07)]
-                focus-within:shadow-[0_24px_64px_-12px_rgba(247,146,30,0.20),0_0_0_2px_rgba(247,146,30,0.22)]
+              className="flex max-w-2xl w-full overflow-hidden rounded-full bg-white
+                shadow-[inset_0_2px_6px_rgba(0,0,0,0.06),0_24px_64px_-12px_rgba(0,0,0,0.50),0_0_0_1px_rgba(0,0,0,0.06)]
+                focus-within:shadow-[inset_0_2px_6px_rgba(0,0,0,0.05),0_24px_64px_-12px_rgba(247,146,30,0.18),0_0_0_2px_rgba(247,146,30,0.22)]
                 transition-shadow duration-300"
             >
               {/* ── Segment 1: City trigger ─────────────────── */}
@@ -426,11 +426,11 @@ export default function HomePage() {
                 <button
                   type="submit"
                   className="flex items-center gap-2 h-[42px]
-                    px-4 sm:px-6 rounded-[11px]
-                    bg-[#F7921E]
-                    shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]
+                    px-6 sm:px-8 rounded-full
+                    bg-[#F7921E] font-semibold
+                    shadow-[inset_0_1px_0_rgba(255,255,255,0.18)]
                     hover:bg-[#E07B0A]
-                    active:scale-[0.97] active:bg-[#D16E05]
+                    active:scale-[0.96] active:bg-[#D16E05]
                     transition-all duration-200 shrink-0 select-none"
                 >
                   <Search
@@ -534,11 +534,11 @@ export default function HomePage() {
                   text-[#F7921E] mb-3 leading-none">
                   Explore
                 </p>
-                <h2 className="text-[1.625rem] sm:text-[2rem] font-bold text-slate-900
-                  tracking-[-0.03em] leading-tight">
+                <h2 className="text-[2rem] sm:text-[2.5rem] font-extrabold text-slate-900
+                  tracking-[-0.04em] leading-tight">
                   Browse by Category
                 </h2>
-                <p className="text-[13px] text-slate-400 mt-2 font-normal leading-none">
+                <p className="text-[14px] text-slate-400 mt-3 font-normal leading-relaxed">
                   25,000+ active listings across all categories
                 </p>
               </div>

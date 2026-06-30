@@ -188,11 +188,11 @@ function WaTray({ url, waLabel, listingId, isReal }: { url: string; waLabel: str
         rel={isRealWaLink ? 'noopener noreferrer' : undefined}
         onClick={e => e.stopPropagation()}
         className="group/tray flex items-center justify-between w-full
-          px-3 py-2.5 rounded-[11px]
-          bg-[#F0FDF4] border border-emerald-100/80
-          hover:bg-[#DCFCE7] hover:border-emerald-200/80
-          active:scale-[0.99]
-          transition-all duration-200 select-none"
+          px-3 py-2.5 rounded-full
+          bg-[#F0FDF4]
+          hover:bg-[#DCFCE7]
+          active:scale-[0.96]
+          transition-all duration-150 select-none"
         aria-label="Contact seller on WhatsApp"
       >
         <div className="flex items-center gap-2.5">
@@ -315,9 +315,11 @@ function FreshListingCard({
 
       {/* ── Card body ────────────────────────────────── */}
       <div className="flex-1 px-4 pt-4 pb-0 flex flex-col gap-2.5">
-        <div className="flex items-baseline gap-[5px]">
-          <span className="text-[18px] font-black text-slate-900
-            tabular-nums tracking-tight leading-none">
+        {/* Price pill */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="inline-flex items-center px-3 py-[6px] rounded-full
+            text-[13px] font-black tabular-nums tracking-tight leading-none
+            bg-orange-50 text-[#E07B0A]">
             {formatINR(listing.price)}
           </span>
           {listing.priceUnit && (
@@ -326,17 +328,26 @@ function FreshListingCard({
             </span>
           )}
         </div>
-        <h3 className="text-[13px] font-semibold text-slate-700 leading-[1.45]
+
+        <h3 className="text-[13.5px] font-semibold text-slate-700 leading-[1.5]
           line-clamp-2 tracking-[-0.005em]
           group-hover:text-slate-900 transition-colors duration-200">
           {listing.title}
         </h3>
-        <div className="flex items-center gap-1.5 mt-auto pb-3.5
-          text-[11px] text-slate-400">
-          <MapPin className="w-[11px] h-[11px] text-slate-300 shrink-0" strokeWidth={2} aria-hidden />
-          <span className="truncate">{listing.location}</span>
-          <span className="text-slate-200 shrink-0" aria-hidden>·</span>
-          <span className="shrink-0">{listing.postedAt}</span>
+
+        {/* Location + time as pill tags */}
+        <div className="flex items-center gap-1.5 mt-auto pb-4 flex-wrap">
+          {listing.location && (
+            <span className="inline-flex items-center gap-1 px-2.5 py-[5px] rounded-full
+              text-[10.5px] font-medium bg-slate-100 text-slate-500">
+              <MapPin className="w-[9px] h-[9px] shrink-0" strokeWidth={2} aria-hidden />
+              <span className="truncate max-w-[120px]">{listing.location}</span>
+            </span>
+          )}
+          <span className="inline-flex items-center px-2.5 py-[5px] rounded-full
+            text-[10.5px] font-medium bg-slate-100 text-slate-500 shrink-0">
+            {listing.postedAt}
+          </span>
         </div>
       </div>
 
@@ -409,7 +420,7 @@ export default function FreshListingsSection({
   const showSkeleton = isLoading || fetchingReal;
 
   return (
-    <section className="bg-[#F8F9FC] py-16 sm:py-20 border-b border-slate-100/80">
+    <section className="bg-white py-24 sm:py-32">
       <div className="page-wrap">
 
         {/* ── Section header ───────────────────────── */}
@@ -418,7 +429,7 @@ export default function FreshListingsSection({
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.38 }}
-          className="flex items-end justify-between mb-10 gap-4"
+          className="flex items-end justify-between mb-14 gap-4"
         >
           <div>
             <div className="flex items-center gap-2 mb-3">
@@ -433,11 +444,11 @@ export default function FreshListingsSection({
                 {t('fresh.live')}
               </span>
             </div>
-            <h2 className="text-[1.625rem] sm:text-[1.75rem] font-bold text-slate-900
-              tracking-[-0.025em] leading-tight">
+            <h2 className="text-[2rem] sm:text-[2.375rem] font-extrabold text-slate-900
+              tracking-[-0.04em] leading-tight">
               {t('fresh.title')}
             </h2>
-            <p className="text-[13px] text-slate-500 mt-2 leading-none">
+            <p className="text-[14px] text-slate-500 mt-3 leading-relaxed">
               {t('fresh.sub')}
             </p>
           </div>
@@ -546,11 +557,11 @@ export default function FreshListingsSection({
               const city = citySlug || (typeof window !== 'undefined' ? (localStorage.getItem('li_city') || 'hyderabad') : 'hyderabad');
               router.push(`/${city}/search`);
             }}
-            className="flex items-center gap-1.5 px-5 py-[10px] rounded-2xl
-              bg-[#F7921E] text-white text-[13px] font-semibold
-              shadow-[0_2px_12px_rgba(247,146,30,0.30)]
-              hover:bg-[#E07B0A]
-              active:scale-[0.97] transition-all duration-200 group"
+            className="flex items-center gap-2 px-8 py-[12px] rounded-full
+              bg-[#F7921E] text-white text-[14px] font-semibold
+              shadow-[0_4px_20px_rgba(247,146,30,0.32),inset_0_1px_0_rgba(255,255,255,0.14)]
+              hover:bg-[#E07B0A] hover:shadow-[0_6px_24px_rgba(247,146,30,0.44)]
+              active:scale-[0.95] transition-all duration-200 group"
           >
             {t('fresh.viewAllNear')}
             <ArrowRight
