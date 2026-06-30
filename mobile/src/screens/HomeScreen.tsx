@@ -194,6 +194,16 @@ export default function HomeScreen({ navigation }: any) {
               <Text style={styles.searchPillText}>Go</Text>
             </View>
           </TouchableOpacity>
+
+          {/* Post Free CTA */}
+          <TouchableOpacity
+            style={styles.postFreeBtn}
+            onPress={() => navigation.navigate('Post', { citySlug, cityName })}
+            activeOpacity={0.85}
+          >
+            <Ionicons name="add-circle-outline" size={15} color="#F7921E" />
+            <Text style={styles.postFreeBtnText}>Post a Free Ad — takes 60 seconds</Text>
+          </TouchableOpacity>
         </View>
 
         {/* ── ROW 1: Recently viewed (conditional — hide if < 3) ── */}
@@ -273,7 +283,7 @@ export default function HomeScreen({ navigation }: any) {
                 onPress={() => navigation.navigate('Search', { citySlug, cityName, categorySlug: cat.slug })}
                 activeOpacity={0.8}
               >
-                <View style={[styles.catIconCircle, { backgroundColor: bgColor + '18' }]}>
+                <View style={[styles.catIconCircle, { backgroundColor: 'rgba(247,146,30,0.12)' }]}>
                   <Text style={styles.catEmoji}>{cat.icon}</Text>
                 </View>
                 <Text style={styles.catLabel}>{cat.name}</Text>
@@ -457,6 +467,27 @@ const styles = StyleSheet.create({
   },
   catEmoji: { fontSize: 15 },
   catLabel: { fontSize: 13, color: '#374151', fontWeight: '600' },
+
+  /* ── Post Free CTA ── */
+  postFreeBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 7,
+    marginTop: 12,
+    paddingVertical: 11,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: 'rgba(247,146,30,0.35)',
+    backgroundColor: 'rgba(247,146,30,0.10)',
+  },
+  postFreeBtnText: {
+    color: '#F7921E',
+    fontWeight: '700',
+    fontSize: 13,
+    letterSpacing: -0.1,
+  },
 
   /* ── Chat FAB ── */
   chatFab: {

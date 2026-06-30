@@ -102,8 +102,8 @@ export default function ListingCard({ listing, onPress }: Props) {
 
   return (
     <View style={[styles.card, { shadowColor: catColor }]}>
-      {/* Category color accent strip at top */}
-      <View style={[styles.catStrip, { backgroundColor: catColor }]} />
+      {/* Brand accent strip at top */}
+      <View style={[styles.catStrip, { backgroundColor: '#F7921E' }]} />
 
       <TouchableOpacity onPress={onPress} activeOpacity={0.92}>
         {/* ── Image area ── */}
@@ -133,8 +133,8 @@ export default function ListingCard({ listing, onPress }: Props) {
               </View>
             </View>
           ) : (
-            /* No image — colored placeholder */
-            <View style={[styles.imagePlaceholder, { backgroundColor: catColor + '18' }]}>
+            /* No image — brand placeholder */
+            <View style={[styles.imagePlaceholder, { backgroundColor: 'rgba(247,146,30,0.07)' }]}>
               <Text style={styles.emoji}>{catEmoji}</Text>
             </View>
           )}
@@ -193,7 +193,7 @@ export default function ListingCard({ listing, onPress }: Props) {
           {/* Action row: WhatsApp + Share */}
           <View style={styles.actionRow}>
             <TouchableOpacity style={styles.waBtn} onPress={handleWhatsApp} activeOpacity={0.85}>
-              <Text style={styles.waBtnText}>💬 WhatsApp</Text>
+              <Text style={styles.waBtnText}>💬 Chat on WhatsApp</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.shareBtn} onPress={handleShare} activeOpacity={0.85}>
               <Ionicons name="share-social-outline" size={18} color="#6b7280" />
@@ -293,8 +293,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   emoji: {
-    fontSize: 42,
-    opacity: 0.35,
+    fontSize: 44,
+    opacity: 0.55,
   },
   body: {
     padding: 12,
