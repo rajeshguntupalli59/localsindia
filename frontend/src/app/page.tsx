@@ -152,12 +152,12 @@ export default function HomePage() {
 
   // ─────────────────────────────────────────────────────────────
   return (
-    <div className="bg-slate-50">
+    <div className="bg-[#F9FAFB]">
 
       {/* ══════════════════════════════════════════════
           HEADER
       ══════════════════════════════════════════════ */}
-      <header className="sticky top-0 z-50 bg-white/[0.98] backdrop-blur-md border-b border-slate-200/60">
+      <header className="sticky top-0 z-50 nav-glass">
         <div className="page-wrap h-16 flex items-center">
 
           {/* ── Logo ─────────────────────────────────── */}
@@ -506,7 +506,7 @@ export default function HomePage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3, duration: 0.45 }}
-            className="flex flex-wrap gap-x-12 gap-y-5 mt-16 pt-8 border-t border-white/[0.07]"
+            className="flex flex-wrap gap-x-14 gap-y-6 mt-20 pt-10 border-t border-white/[0.07]"
           >
             {STATS.map(([num, label]) => (
               <div key={num} className="flex flex-col gap-1.5">
@@ -523,11 +523,11 @@ export default function HomePage() {
       {/* ══════════════════════════════════════════════
           CATEGORY GRID
       ══════════════════════════════════════════════ */}
-      <section className="bg-white py-20 sm:py-24 border-b border-slate-100">
+      <section className="bg-[#F9FAFB] py-24 sm:py-32 border-b border-slate-100/80">
         <div className="page-wrap">
 
           {/* ─── Section header ─────────────────────────────── */}
-          <div className="mb-12 sm:mb-16">
+          <div className="mb-16 sm:mb-20">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-[10.5px] font-bold uppercase tracking-[0.18em]
@@ -561,7 +561,7 @@ export default function HomePage() {
           </div>
 
           {/* ─── Grid ───────────────────────────────────────── */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-7">
             {CATEGORIES.map(({ icon: Icon, name, slug, color, accent, count }, i) => (
               <motion.div
                 key={name}
@@ -672,12 +672,12 @@ export default function HomePage() {
       {/* ══════════════════════════════════════════════
           TRUST BADGES
       ══════════════════════════════════════════════ */}
-      <section className="bg-[#0D0F1C] py-14">
+      <section className="bg-[#0D0F1C] py-20 sm:py-28">
         <div className="page-wrap">
-          <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-600 mb-6">
+          <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-600 mb-8">
             Why LocalsIndia
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {TRUST.map(({ icon: Icon, title, subtitle, iconBg, iconColor, isWhatsApp }) =>
               isWhatsApp ? (
 

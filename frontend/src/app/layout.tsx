@@ -90,7 +90,7 @@ export default async function RootLayout({
       lang={locale}
       className={cn(plusJakarta.variable, notoSans.variable, notoDevanagari.variable, notoTelugu.variable)}
     >
-      <body className="antialiased">
+      <body className={cn("antialiased", plusJakarta.className)}>
         {ADSENSE_PUB_ID && (
           <Script
             async

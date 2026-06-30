@@ -125,7 +125,7 @@ export default function SiteHeader({ citySlug, cityName }: Props) {
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <>
-    <header className="sticky top-0 z-50 bg-white/[0.98] backdrop-blur-md border-b border-slate-200/60">
+    <header className="sticky top-0 z-50 nav-glass">
       <div className="page-wrap h-16 flex items-center gap-4">
 
         {/* ── Logo ─────────────────────────────────────────── */}

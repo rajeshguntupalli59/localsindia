@@ -76,10 +76,10 @@ export default function ListingCard({ listing }: Props) {
         transition: { duration: 0.22, ease: [0.22, 1, 0.36, 1] },
       }}
     >
-      {/* Category color accent strip */}
+      {/* Brand accent strip — unified orange for consistency */}
       <div
         className="absolute inset-x-0 top-0 h-[3px] z-20"
-        style={{ background: catColor }}
+        style={{ background: '#F7921E' }}
         aria-hidden
       />
 
@@ -186,29 +186,29 @@ export default function ListingCard({ listing }: Props) {
       </Link>
 
       {/* ── Body ─────────────────────────────────────── */}
-      <div className="px-3 pt-2.5 pb-3">
+      <div className="px-4 pt-4 pb-5">
         <Link href={href}>
           {/* Price in body — only when NO image */}
           {!image && (
             listing.price !== null ? (
-              <p className="text-[17px] font-black mb-1 leading-none" style={{ color: 'var(--li-primary)' }}>
+              <p className="text-[18px] font-black mb-2 leading-none" style={{ color: 'var(--li-primary)' }}>
                 {formatPrice(listing.price)}
               </p>
             ) : (
-              <p className="text-[11px] text-slate-400 mb-1">Price on request</p>
+              <p className="text-[11px] text-slate-400 mb-2">Price on request</p>
             )
           )}
 
           {/* Title */}
           <p
-            className="text-[13.5px] leading-snug line-clamp-2 mb-2"
+            className="text-[14px] leading-[1.45] line-clamp-2 mb-3"
             style={{ color: 'var(--li-text)', fontWeight: 700 }}
           >
             {listing.title}
           </p>
 
           {/* Meta row */}
-          <div className="flex items-center gap-2 text-[11px] mb-2.5" style={{ color: 'var(--li-muted)' }}>
+          <div className="flex items-center gap-2 text-[11px] mb-4" style={{ color: 'var(--li-muted)' }}>
             {listing.area && (
               <span className="flex items-center gap-1 min-w-0 truncate">
                 <MapPin className="w-3 h-3 shrink-0" strokeWidth={2} />
@@ -230,7 +230,7 @@ export default function ListingCard({ listing }: Props) {
 
         {/* Attribute chips */}
         {listing.attributes && Object.keys(listing.attributes).length > 0 && (
-          <div className="flex flex-wrap gap-1 mb-2">
+          <div className="flex flex-wrap gap-1.5 mb-3">
             {Object.values(listing.attributes).map((val, i) => (
               <span
                 key={i}
@@ -244,7 +244,7 @@ export default function ListingCard({ listing }: Props) {
 
         {/* WA Verified */}
         {listing.wa_verified && (
-          <div className="flex items-center gap-1 mb-2">
+          <div className="flex items-center gap-1 mb-3">
             <span
               className="flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full"
               style={{ background: '#dcfce7', color: '#16a34a' }}
@@ -260,7 +260,7 @@ export default function ListingCard({ listing }: Props) {
           href={waUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="wa-btn w-full py-2.5 text-[13px]"
+          className="wa-btn w-full py-3 text-[13.5px]"
           onClick={e => { e.stopPropagation(); api.listings.waClick(listing.id); }}
         >
           💬 {t('listing.chatOnWA')}
