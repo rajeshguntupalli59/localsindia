@@ -180,7 +180,7 @@ function WaTray({ url, waLabel, listingId, isReal }: { url: string; waLabel: str
     ? url
     : (isReal ? `/listing/${listingId}` : '/search');
   return (
-    <div className="px-3.5 pb-3.5">
+    <div className="px-4 pb-4">
       <div className="h-px bg-slate-100 mb-3" />
       <a
         href={href}
@@ -228,8 +228,10 @@ function SkLine({ className }: { className: string }) {
 
 function CardSkeleton() {
   return (
-    <div className="bg-white rounded-[20px] border border-slate-100/80
-      shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden flex flex-col">
+    <div
+      className="bg-white rounded-2xl overflow-hidden flex flex-col"
+      style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.05), 0 1px 4px rgba(0,0,0,0.03)' }}
+    >
       <div className="relative h-[152px] bg-slate-100 overflow-hidden">
         <div className="absolute inset-0 -translate-x-full
           animate-[shimmer_1.6s_ease-in-out_infinite]
@@ -237,7 +239,7 @@ function CardSkeleton() {
         <div className="absolute top-3 left-3 h-[22px] w-[62px] rounded-full bg-white/35" />
         <div className="absolute top-3 right-3 h-[22px] w-[76px] rounded-full bg-white/20" />
       </div>
-      <div className="flex-1 px-3.5 pt-3.5 pb-2.5 flex flex-col gap-3">
+      <div className="flex-1 px-4 pt-4 pb-2.5 flex flex-col gap-3">
         <SkLine className="h-[20px] w-[80px] rounded-lg" />
         <div className="space-y-[7px]">
           <SkLine className="h-[13px] w-full" />
@@ -245,7 +247,7 @@ function CardSkeleton() {
         </div>
         <SkLine className="h-[11px] w-[45%]" />
       </div>
-      <div className="px-3.5 pb-3.5">
+      <div className="px-4 pb-4">
         <div className="h-px bg-slate-100 mb-3" />
         <SkLine className="h-[42px] w-full rounded-[11px]" />
       </div>
@@ -280,14 +282,14 @@ function FreshListingCard({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-30px' }}
       transition={{ delay: index * 0.06, duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
-      whileHover={{ y: -3, transition: { duration: 0.2, ease: 'easeOut' } }}
+      whileHover={{
+        y: -5,
+        boxShadow: '0 16px 40px rgba(0,0,0,0.10), 0 6px 16px rgba(0,0,0,0.05)',
+        transition: { duration: 0.2, ease: 'easeOut' },
+      }}
       onClick={handleCardClick}
-      className="group bg-white rounded-[20px] border border-slate-100/80
-        overflow-hidden cursor-pointer flex flex-col
-        shadow-[0_1px_3px_rgba(0,0,0,0.05),0_1px_2px_rgba(0,0,0,0.03)]
-        hover:shadow-[0_20px_48px_-8px_rgba(0,0,0,0.10),0_6px_14px_-4px_rgba(0,0,0,0.05)]
-        hover:border-slate-200/60
-        transition-[box-shadow,border-color,transform] duration-300"
+      style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.05), 0 1px 4px rgba(0,0,0,0.03)' }}
+      className="group bg-white rounded-2xl overflow-hidden cursor-pointer flex flex-col"
     >
       {/* ── Image zone ─────────────────────────────── */}
       <div
@@ -312,7 +314,7 @@ function FreshListingCard({
       </div>
 
       {/* ── Card body ────────────────────────────────── */}
-      <div className="flex-1 px-3.5 pt-3.5 pb-0 flex flex-col gap-2">
+      <div className="flex-1 px-4 pt-4 pb-0 flex flex-col gap-2.5">
         <div className="flex items-baseline gap-[5px]">
           <span className="text-[18px] font-black text-slate-900
             tabular-nums tracking-tight leading-none">

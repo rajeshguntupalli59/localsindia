@@ -574,14 +574,16 @@ export default function HomePage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-30px' }}
                 transition={{ duration: 0.32, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
-                whileHover={{ y: -5, transition: { duration: 0.22, ease: [0.22, 1, 0.36, 1] } }}
+                whileHover={{
+                  y: -5,
+                  boxShadow: '0 16px 40px rgba(0,0,0,0.10), 0 6px 16px rgba(0,0,0,0.05)',
+                  transition: { duration: 0.2, ease: 'easeOut' },
+                }}
                 whileTap={{ scale: 0.975 }}
-                className="group relative bg-white border border-slate-100/80 rounded-[22px]
+                className="group relative bg-white rounded-2xl
                   cursor-pointer select-none overflow-hidden
-                  shadow-[0_1px_3px_rgba(0,0,0,0.04),0_1px_2px_rgba(0,0,0,0.03)]
-                  hover:shadow-[0_24px_56px_-8px_rgba(0,0,0,0.10),0_8px_18px_-4px_rgba(0,0,0,0.05)]
-                  hover:border-slate-200/70
-                  transition-[box-shadow,border-color,transform] duration-300"
+                  transition-[box-shadow,transform] duration-200"
+                style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.05), 0 1px 4px rgba(0,0,0,0.03)' }}
               >
                 {/* Top-edge category color accent — slides in on hover */}
                 <div className={`absolute inset-x-0 top-0 h-[2.5px] opacity-0

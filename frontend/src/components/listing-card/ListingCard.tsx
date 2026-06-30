@@ -59,11 +59,11 @@ export default function ListingCard({ listing }: Props) {
 
   return (
     <motion.div
-      className="group relative bg-white rounded-[20px] overflow-hidden"
+      className="group relative bg-white rounded-2xl overflow-hidden"
       style={{
         boxShadow: isFeatured
-          ? '0 2px 16px rgba(247,183,49,0.18), 0 1px 4px rgba(0,0,0,0.06), inset 0 0 0 1.5px rgba(247,183,49,0.38)'
-          : '0 2px 10px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.04), inset 0 0 0 1px rgba(0,0,0,0.06)',
+          ? '0 4px 20px rgba(247,183,49,0.14), 0 2px 8px rgba(0,0,0,0.04)'
+          : '0 4px 20px rgba(0,0,0,0.05), 0 1px 4px rgba(0,0,0,0.03)',
       }}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
@@ -71,9 +71,9 @@ export default function ListingCard({ listing }: Props) {
       whileHover={{
         y: -5,
         boxShadow: isFeatured
-          ? '0 20px 48px rgba(247,183,49,0.22), 0 6px 14px rgba(0,0,0,0.08)'
-          : '0 20px 48px rgba(0,0,0,0.13), 0 6px 12px rgba(0,0,0,0.06)',
-        transition: { duration: 0.22, ease: [0.22, 1, 0.36, 1] },
+          ? '0 16px 40px rgba(247,183,49,0.20), 0 8px 20px rgba(0,0,0,0.07)'
+          : '0 16px 40px rgba(0,0,0,0.10), 0 6px 16px rgba(0,0,0,0.05)',
+        transition: { duration: 0.2, ease: 'easeOut' },
       }}
     >
       {/* Brand accent strip — unified orange for consistency */}
@@ -85,7 +85,7 @@ export default function ListingCard({ listing }: Props) {
 
       <Link href={href} className="block">
         {/* ── Image area ───────────────────────────────── */}
-        <div className="relative h-48 bg-slate-50 overflow-hidden">
+        <div className="relative h-48 bg-[#F1F3F6] overflow-hidden">
 
           {image ? (
             <>
