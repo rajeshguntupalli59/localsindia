@@ -1,6 +1,6 @@
 import {
   View, Text, ScrollView, TouchableOpacity, Image, StyleSheet,
-  Linking, ActivityIndicator, Share, Dimensions,
+  Linking, ActivityIndicator, Share, Dimensions, NativeScrollEvent, NativeSyntheticEvent,
 } from 'react-native';
 import { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
@@ -85,21 +85,36 @@ export default function ListingDetailScreen({ navigation, route }: any) {
     <>
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
 
-        {/* ── Photo area ── */}
+        {/* ── Photo carousel ── */}
         <View style={styles.photoArea}>
           {photos.length > 0 ? (
-            <Image
-              source={{ uri: photos[activePhoto]?.url }}
-              style={styles.mainImage}
-              resizeMode="cover"
-            />
+            <ScrollView
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              scrollEventThrottle={16}
+              onScroll={(e: NativeSyntheticEvent<NativeScrollEvent>) => {
+                const idx = Math.round(e.nativeEvent.contentOffset.x / SW);
+                setActivePhoto(idx);
+              }}
+              style={{ width: SW, height: IMAGE_H }}
+            >
+              {photos.map((img: any, i: number) => (
+                <Image
+                  key={img.id ?? i}
+                  source={{ uri: img.url }}
+                  style={styles.mainImage}
+                  resizeMode="cover"
+                />
+              ))}
+            </ScrollView>
           ) : (
             <View style={styles.imagePlaceholder}>
               <Text style={styles.imagePlaceholderEmoji}>🏷️</Text>
             </View>
           )}
 
-          {/* Gradient overlay for readability of floating buttons */}
+          {/* Top gradient overlay for button readability */}
           <View style={styles.imageTopGrad} pointerEvents="none" />
 
           {/* Floating back button */}
@@ -121,28 +136,8 @@ export default function ListingDetailScreen({ navigation, route }: any) {
             </TouchableOpacity>
           </View>
 
-          {/* Thumbnail row */}
+          {/* Dot indicators */}
           {photos.length > 1 && (
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={styles.thumbRow}
-              contentContainerStyle={styles.thumbRowContent}
-            >
-              {photos.map((img: any, i: number) => (
-                <TouchableOpacity key={img.id} onPress={() => setActivePhoto(i)}>
-                  <Image
-                    source={{ uri: img.url }}
-                    style={[styles.thumb, i === activePhoto && styles.thumbActive]}
-                    resizeMode="cover"
-                  />
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          )}
-
-          {/* Dot indicators if > 1 photo and no thumbs shown */}
-          {photos.length > 1 && photos.length <= 3 && (
             <View style={styles.dots}>
               {photos.map((_: any, i: number) => (
                 <View key={i} style={[styles.dot, i === activePhoto && styles.dotActive]} />
@@ -325,9 +320,13 @@ const styles = StyleSheet.create({
   price: { fontSize: 28, fontWeight: '900', color: C.orange, letterSpacing: -0.5, marginBottom: 12 },
   priceOnRequest: { fontSize: 14, color: C.textMuted, marginBottom: 12, fontStyle: 'italic' },
 
-  metaRow: { flexDirection: 'row', alignItems: 'center', gap: 16, marginBottom: 10, flexWrap: 'wrap' },
-  metaItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  metaText: { fontSize: 13, color: C.textSub, fontWeight: '500' },
+  metaRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10, flexWrap: 'wrap' },
+  metaItem: {
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    backgroundColor: '#f1f5f9', borderRadius: 20,
+    paddingHorizontal: 10, paddingVertical: 5,
+  },
+  metaText: { fontSize: 12, color: '#6b7280', fontWeight: '500' },
 
   waBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
@@ -339,8 +338,7 @@ const styles = StyleSheet.create({
 
   divider: { height: 1, backgroundColor: C.divider, marginVertical: 18 },
   sectionLabel: {
-    fontSize: 12, fontWeight: '700', color: C.textMuted,
-    letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 10,
+    fontSize: 15, fontWeight: '800', color: C.text, marginBottom: 10,
   },
   description: { fontSize: 15, color: C.textSub, lineHeight: 24 },
 
@@ -350,8 +348,9 @@ const styles = StyleSheet.create({
     padding: 14, borderWidth: 1, borderColor: C.border,
   },
   sellerAvatar: {
-    width: 44, height: 44, borderRadius: 22,
+    width: 48, height: 48, borderRadius: 24,
     backgroundColor: C.orange, alignItems: 'center', justifyContent: 'center',
+    borderWidth: 2.5, borderColor: '#fbbf24',
   },
   sellerInitial: { color: 'white', fontSize: 18, fontWeight: '900' },
   sellerName: { fontSize: 15, fontWeight: '700', color: C.text, marginBottom: 2 },

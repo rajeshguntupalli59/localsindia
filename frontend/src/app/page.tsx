@@ -7,7 +7,7 @@ import {
   Search, MapPin, ChevronDown, Plus, ArrowRight,
   Utensils, Home, Briefcase, Car,
   Smartphone, Calendar, Store, GraduationCap,
-  Zap, MessageCircle, Globe, Languages,
+  Zap, MessageCircle, Languages,
   LocateFixed, Loader2, CheckCircle2,
   type LucideIcon,
 } from 'lucide-react';
@@ -52,6 +52,8 @@ const TRUST: TrustDef[] = [
   { icon: Languages,    title: 'Multilingual Support',  subtitle: '11 native languages, your way.',                 iconBg: 'bg-violet-500/[0.15]',  iconColor: 'text-violet-400'  },
 ];
 
+const HERO_WORDS = ['Tiffin', 'PG Rooms', 'Jobs', 'Used Cars', 'Electronics', 'Tutors', 'Events'];
+
 // spring easing for the headline swap
 const SPRING = { duration: 0.3, ease: [0.22, 1, 0.36, 1] } as const;
 
@@ -62,6 +64,13 @@ export default function HomePage() {
   const [q, setQ] = useState('');
   const [showCityPicker, setShowCityPicker] = useState(false);
   const [pendingCategory, setPendingCategory] = useState<string | null>(null);
+  const [heroWordIdx, setHeroWordIdx] = useState(0);
+
+  // Cycle hero category words
+  useEffect(() => {
+    const id = setInterval(() => setHeroWordIdx(i => (i + 1) % HERO_WORDS.length), 2500);
+    return () => clearInterval(id);
+  }, []);
 
   // geolocation
   const [geoStatus, setGeoStatus] = useState<GeoStatus>('idle');
@@ -265,17 +274,22 @@ export default function HomePage() {
             transition={{ duration: 0.45, ease: 'easeOut' }}
             className="max-w-3xl"
           >
-            {/* Eyebrow badge */}
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-7
-              bg-orange-500/[0.12] border border-orange-500/[0.2] text-orange-300 text-xs font-medium tracking-wide">
-              <Globe className="w-3.5 h-3.5 shrink-0" strokeWidth={2} />
-              India&apos;s Hyperlocal Community Platform
-            </div>
-
             {/* ── Dynamic Headline ──────────────────────── */}
             <h1 className="text-4xl sm:text-5xl md:text-[3.75rem] font-extrabold text-white
-              leading-[1.05] tracking-[-0.03em] mb-5">
-              {t('hero.headline1')}<br />
+              leading-[1.08] tracking-[-0.03em] mb-5">
+              {'Find '}
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.span
+                  key={heroWordIdx}
+                  initial={{ opacity: 0, y: 14, filter: 'blur(4px)' }}
+                  animate={{ opacity: 1, y: 0, filter: 'blur(0px)', transition: SPRING }}
+                  exit={{ opacity: 0, y: -10, filter: 'blur(4px)', transition: { duration: 0.15, ease: 'easeIn' } }}
+                  className="text-[#F7921E] inline-block"
+                >
+                  {HERO_WORDS[heroWordIdx]}
+                </motion.span>
+              </AnimatePresence>
+              <br />
               <AnimatePresence mode="wait" initial={false}>
                 <motion.span
                   key={cityName || '__default'}
@@ -284,7 +298,7 @@ export default function HomePage() {
                   exit={{ opacity: 0, y: -10, transition: { duration: 0.16, ease: 'easeIn' } }}
                   className="text-orange-500 inline-block"
                 >
-                  {cityName ? t('hero.inCity', { city: cityName }) : t('hero.inYourCity')}
+                  {cityName ? `in ${cityName}` : t('hero.inYourCity')}
                 </motion.span>
               </AnimatePresence>
             </h1>
@@ -471,8 +485,8 @@ export default function HomePage() {
             <div className="flex flex-wrap items-center gap-x-2 gap-y-2 mt-8">
               {/* Label */}
               <span className="flex items-center gap-1.5 shrink-0 mr-1
-                text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500/70">
-                <span className="w-[3px] h-[3px] rounded-full bg-slate-500/50 inline-block" />
+                text-[11px] font-medium text-slate-400/80">
+                <span className="w-[3px] h-[3px] rounded-full bg-slate-400/50 inline-block" />
                 Trending
               </span>
               {POPULAR_TAGS.map((tag, i) => (
@@ -509,9 +523,9 @@ export default function HomePage() {
             className="flex flex-wrap gap-x-14 gap-y-6 mt-20 pt-10 border-t border-white/[0.07]"
           >
             {STATS.map(([num, label]) => (
-              <div key={num} className="flex flex-col gap-1.5">
-                <div className="text-3xl font-black text-white tracking-tight leading-none">{num}</div>
-                <div className="text-[11px] font-medium text-slate-500 uppercase tracking-widest leading-none">
+              <div key={num} className="flex flex-col gap-2">
+                <div className="text-[2.5rem] sm:text-[2.75rem] font-black text-white tracking-[-0.04em] leading-none">{num}</div>
+                <div className="text-[12px] font-medium text-slate-500 leading-none">
                   {label}
                 </div>
               </div>
@@ -530,10 +544,6 @@ export default function HomePage() {
           <div className="mb-16 sm:mb-20">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-[10.5px] font-bold uppercase tracking-[0.18em]
-                  text-[#F7921E] mb-3 leading-none">
-                  Explore
-                </p>
                 <h2 className="text-[2rem] sm:text-[2.5rem] font-extrabold text-slate-900
                   tracking-[-0.04em] leading-tight">
                   Browse by Category
@@ -674,9 +684,6 @@ export default function HomePage() {
       ══════════════════════════════════════════════ */}
       <section className="bg-[#0D0F1C] py-20 sm:py-28">
         <div className="page-wrap">
-          <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-600 mb-8">
-            Why LocalsIndia
-          </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {TRUST.map(({ icon: Icon, title, subtitle, iconBg, iconColor, isWhatsApp }) =>
               isWhatsApp ? (

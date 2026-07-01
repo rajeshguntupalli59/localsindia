@@ -161,18 +161,6 @@ function ListingBadge({ type, labelNew, labelVerified }: { type: DisplayListing[
   );
 }
 
-function CategoryChip({ Icon, label }: { Icon: LucideIcon; label: string }) {
-  return (
-    <div className="inline-flex items-center gap-1.5
-      pl-[7px] pr-2.5 py-[5px] rounded-full
-      bg-black/28 backdrop-blur-sm">
-      <Icon className="w-[10px] h-[10px] text-white/75 shrink-0" strokeWidth={2} />
-      <span className="text-[9.5px] font-semibold text-white/90 leading-none">
-        {label}
-      </span>
-    </div>
-  );
-}
 
 function WaTray({ url, waLabel, listingId, isReal }: { url: string; waLabel: string; listingId: string; isReal: boolean }) {
   const isRealWaLink = url.startsWith('https://wa.me');
@@ -264,7 +252,7 @@ function FreshListingCard({
   listing: DisplayListing; index: number; labelNew: string; labelVerified: string;
   labelChatOnWA: string; citySlug: string;
 }) {
-  const [from, to] = listing.gradient;
+  const solidColor = listing.gradient[0];
   const router = useRouter();
 
   const handleCardClick = () => {
@@ -291,34 +279,45 @@ function FreshListingCard({
       style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.05), 0 1px 4px rgba(0,0,0,0.03)' }}
       className="group bg-white rounded-2xl overflow-hidden cursor-pointer flex flex-col"
     >
-      {/* ── Image zone ─────────────────────────────── */}
-      <div
-        className="relative h-[152px] shrink-0 overflow-hidden"
-        style={{ background: `linear-gradient(135deg, ${from} 0%, ${to} 100%)` }}
-      >
-        <listing.Icon
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2
-            text-white opacity-[0.11]
-            group-hover:scale-110 group-hover:opacity-[0.16]
-            transition-all duration-500 ease-out"
-          style={{ width: 84, height: 84 }}
-          strokeWidth={0.75}
-          aria-hidden
-        />
-        <div className="absolute top-3 left-3 z-10">
-          <ListingBadge type={listing.badge} labelNew={labelNew} labelVerified={labelVerified} />
+      {/* ── 3px category colour strip ────────────────── */}
+      <div className="h-[3px] shrink-0" style={{ backgroundColor: solidColor }} aria-hidden />
+
+      {/* ── Category header row ──────────────────────── */}
+      <div className="flex items-center gap-2.5 px-4 pt-4 pb-3 shrink-0">
+        {/* Icon swatch */}
+        <div className="relative w-[36px] h-[36px] rounded-[10px] shrink-0">
+          <div
+            className="absolute inset-0 rounded-[10px]"
+            style={{ backgroundColor: solidColor, opacity: 0.12 }}
+          />
+          <div className="relative z-10 w-full h-full flex items-center justify-center">
+            <listing.Icon
+              className="w-[16px] h-[16px]"
+              style={{ color: solidColor }}
+              strokeWidth={2}
+              aria-hidden
+            />
+          </div>
         </div>
-        <div className="absolute top-3 right-3 z-10">
-          <CategoryChip Icon={listing.Icon} label={listing.category} />
+        {/* Category name */}
+        <span
+          className="text-[11.5px] font-semibold leading-none flex-1 truncate"
+          style={{ color: solidColor }}
+        >
+          {listing.category}
+        </span>
+        {/* Badge */}
+        <div className="shrink-0">
+          <ListingBadge type={listing.badge} labelNew={labelNew} labelVerified={labelVerified} />
         </div>
       </div>
 
       {/* ── Card body ────────────────────────────────── */}
-      <div className="flex-1 px-4 pt-4 pb-0 flex flex-col gap-2.5">
-        {/* Price pill */}
-        <div className="flex items-center gap-2 flex-wrap">
+      <div className="flex-1 px-4 pb-0 flex flex-col gap-2">
+        {/* Price pill + unit */}
+        <div className="flex items-baseline gap-2 flex-wrap">
           <span className="inline-flex items-center px-3 py-[6px] rounded-full
-            text-[13px] font-black tabular-nums tracking-tight leading-none
+            text-[14px] font-black tabular-nums tracking-tight leading-none
             bg-orange-50 text-[#E07B0A]">
             {formatINR(listing.price)}
           </span>
@@ -329,22 +328,22 @@ function FreshListingCard({
           )}
         </div>
 
-        <h3 className="text-[13.5px] font-semibold text-slate-700 leading-[1.5]
-          line-clamp-2 tracking-[-0.005em]
+        <h3 className="text-[14px] font-semibold text-slate-800 leading-[1.45]
+          line-clamp-2 tracking-[-0.01em]
           group-hover:text-slate-900 transition-colors duration-200">
           {listing.title}
         </h3>
 
-        {/* Location + time as pill tags */}
-        <div className="flex items-center gap-1.5 mt-auto pb-4 flex-wrap">
+        {/* Location + time pill tags */}
+        <div className="flex items-center gap-1.5 pb-4 flex-wrap">
           {listing.location && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-[5px] rounded-full
+            <span className="inline-flex items-center gap-1 px-2.5 py-[4px] rounded-full
               text-[10.5px] font-medium bg-slate-100 text-slate-500">
               <MapPin className="w-[9px] h-[9px] shrink-0" strokeWidth={2} aria-hidden />
               <span className="truncate max-w-[120px]">{listing.location}</span>
             </span>
           )}
-          <span className="inline-flex items-center px-2.5 py-[5px] rounded-full
+          <span className="inline-flex items-center px-2.5 py-[4px] rounded-full
             text-[10.5px] font-medium bg-slate-100 text-slate-500 shrink-0">
             {listing.postedAt}
           </span>
