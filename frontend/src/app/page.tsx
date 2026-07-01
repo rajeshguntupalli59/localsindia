@@ -26,14 +26,14 @@ type GeoStatus = 'idle' | 'locating' | 'located' | 'denied' | 'failed';
 
 // ─── static data ─────────────────────────────────────────────
 const CATEGORIES: CategoryDef[] = [
-  { icon: Utensils,      name: 'Tiffin & Food', slug: 'tiffin',       color: 'text-amber-500 bg-amber-500/10',     accent: 'bg-[#F7921E]',   count: '2,800+' },
-  { icon: Home,          name: 'PG / Rooms',    slug: 'pg-roommate',  color: 'text-blue-500 bg-blue-500/10',       accent: 'bg-[#F7921E]',   count: '5,000+' },
-  { icon: Briefcase,     name: 'Jobs',          slug: 'jobs',         color: 'text-emerald-500 bg-emerald-500/10', accent: 'bg-[#F7921E]',   count: '3,400+' },
-  { icon: Car,           name: 'Vehicles',      slug: 'vehicles',     color: 'text-orange-500 bg-orange-500/10',   accent: 'bg-[#F7921E]',   count: '4,700+' },
-  { icon: Smartphone,    name: 'Electronics',   slug: 'electronics',  color: 'text-purple-500 bg-purple-500/10',   accent: 'bg-[#F7921E]',   count: '6,900+' },
-  { icon: Calendar,      name: 'Events',        slug: 'events',       color: 'text-rose-500 bg-rose-500/10',       accent: 'bg-[#F7921E]',   count: '800+'   },
-  { icon: Store,         name: 'Businesses',    slug: 'businesses',   color: 'text-cyan-500 bg-cyan-500/10',       accent: 'bg-[#F7921E]',   count: '1,200+' },
-  { icon: GraduationCap, name: 'Education',     slug: 'education',    color: 'text-indigo-500 bg-indigo-500/10',   accent: 'bg-[#F7921E]',   count: '2,000+' },
+  { icon: Utensils,      name: 'Tiffin & Food', slug: 'tiffin',       color: 'text-white bg-orange-500',     accent: 'bg-orange-500',    count: '2,800+' },
+  { icon: Home,          name: 'PG / Rooms',    slug: 'pg-roommate',  color: 'text-white bg-blue-500',       accent: 'bg-blue-500',      count: '5,000+' },
+  { icon: Briefcase,     name: 'Jobs',          slug: 'jobs',         color: 'text-white bg-emerald-500',    accent: 'bg-emerald-500',   count: '3,400+' },
+  { icon: Car,           name: 'Vehicles',      slug: 'vehicles',     color: 'text-white bg-red-500',        accent: 'bg-red-500',       count: '4,700+' },
+  { icon: Smartphone,    name: 'Electronics',   slug: 'electronics',  color: 'text-white bg-purple-500',     accent: 'bg-purple-500',    count: '6,900+' },
+  { icon: Calendar,      name: 'Events',        slug: 'events',       color: 'text-white bg-rose-500',       accent: 'bg-rose-500',      count: '800+'   },
+  { icon: Store,         name: 'Businesses',    slug: 'businesses',   color: 'text-white bg-cyan-500',       accent: 'bg-cyan-500',      count: '1,200+' },
+  { icon: GraduationCap, name: 'Education',     slug: 'education',    color: 'text-white bg-indigo-500',     accent: 'bg-indigo-500',    count: '2,000+' },
 ];
 
 const POPULAR_TAGS = ['Tiffin Service', 'PG for Boys', 'Used Laptop', 'Honda Activa', 'Home Tutor', '2BHK Flat'];
@@ -585,23 +585,21 @@ export default function HomePage() {
                   transition-[box-shadow,transform] duration-200"
                 style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.05), 0 1px 4px rgba(0,0,0,0.03)' }}
               >
-                {/* Top-edge category color accent — slides in on hover */}
-                <div className={`absolute inset-x-0 top-0 h-[2.5px] opacity-0
-                  group-hover:opacity-100 transition-opacity duration-300 ${accent}`}
-                  aria-hidden
-                />
+                {/* Top-edge category color accent — always visible, deepens on hover */}
+                <div className={`absolute inset-x-0 top-0 h-[4px] ${accent}`} aria-hidden />
 
                 <div className="p-6 sm:p-8">
 
-                  {/* ── Icon ── */}
+                  {/* ── Icon — solid colored circle with white icon ── */}
                   <div className={`w-[52px] h-[52px] sm:w-[56px] sm:h-[56px]
-                    rounded-[14px] sm:rounded-[16px]
+                    rounded-2xl
                     flex items-center justify-center mb-5 sm:mb-6
                     ${color}
+                    shadow-[0_4px_12px_rgba(0,0,0,0.12)]
                     group-hover:scale-[1.08]
                     transition-transform duration-200
                     ease-[cubic-bezier(0.22,1,0.36,1)]`}>
-                    <Icon className="w-[22px] h-[22px] sm:w-6 sm:h-6" strokeWidth={1.75} />
+                    <Icon className="w-[22px] h-[22px] sm:w-6 sm:h-6" strokeWidth={2} />
                   </div>
 
                   {/* ── Name ── */}

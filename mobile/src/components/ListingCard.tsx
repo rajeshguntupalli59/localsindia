@@ -102,8 +102,8 @@ export default function ListingCard({ listing, onPress }: Props) {
 
   return (
     <View style={[styles.card, { shadowColor: catColor }]}>
-      {/* Brand accent strip at top */}
-      <View style={[styles.catStrip, { backgroundColor: '#F7921E' }]} />
+      {/* Category-colored accent strip */}
+      <View style={[styles.catStrip, { backgroundColor: catColor }]} />
 
       <TouchableOpacity onPress={onPress} activeOpacity={0.92}>
         {/* ── Image area ── */}
@@ -178,9 +178,9 @@ export default function ListingCard({ listing, onPress }: Props) {
               </View>
             ) : null}
             {listing.created_at ? (
-              <Text style={[styles.metaText, { marginLeft: 'auto' }]}>
-                {timeAgo(listing.created_at)}
-              </Text>
+              <View style={[styles.metaItem, { marginLeft: 'auto' }]}>
+                <Text style={styles.metaText}>{timeAgo(listing.created_at)}</Text>
+              </View>
             ) : null}
             {(listing.view_count ?? 0) > 0 ? (
               <View style={styles.metaItem}>
@@ -337,16 +337,28 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   price: {
-    fontSize: 20,
+    alignSelf: 'flex-start',
+    backgroundColor: '#fff7ed',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    fontSize: 17,
     fontWeight: '900',
-    color: '#f97316',
-    marginBottom: 4,
-    letterSpacing: -0.5,
+    color: '#ea6d0a',
+    marginBottom: 6,
+    letterSpacing: -0.4,
+    overflow: 'hidden',
   },
   priceOnRequest: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#f3f4f6',
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
     fontSize: 11,
     color: '#9ca3af',
-    marginBottom: 4,
+    marginBottom: 6,
+    overflow: 'hidden',
   },
   title: {
     fontSize: 14,
@@ -366,10 +378,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 3,
+    backgroundColor: '#f1f3f6',
+    borderRadius: 20,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
   },
   metaText: {
-    fontSize: 11,
-    color: '#9ca3af',
+    fontSize: 10.5,
+    color: '#6b7280',
+    fontWeight: '500',
   },
   actionRow: { flexDirection: 'row', gap: 8, alignItems: 'center' },
   waBtn: {
