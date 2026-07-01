@@ -59,11 +59,11 @@ export default function ListingCard({ listing }: Props) {
 
   return (
     <motion.div
-      className="group relative bg-white rounded-[20px] overflow-hidden"
+      className="group relative bg-white rounded-2xl overflow-hidden"
       style={{
         boxShadow: isFeatured
-          ? '0 2px 16px rgba(247,183,49,0.18), 0 1px 4px rgba(0,0,0,0.06), inset 0 0 0 1.5px rgba(247,183,49,0.38)'
-          : '0 2px 10px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.04), inset 0 0 0 1px rgba(0,0,0,0.06)',
+          ? '0 4px 20px rgba(247,183,49,0.14), 0 2px 8px rgba(0,0,0,0.04)'
+          : '0 4px 20px rgba(0,0,0,0.05), 0 1px 4px rgba(0,0,0,0.03)',
       }}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
@@ -71,21 +71,21 @@ export default function ListingCard({ listing }: Props) {
       whileHover={{
         y: -5,
         boxShadow: isFeatured
-          ? '0 20px 48px rgba(247,183,49,0.22), 0 6px 14px rgba(0,0,0,0.08)'
-          : '0 20px 48px rgba(0,0,0,0.13), 0 6px 12px rgba(0,0,0,0.06)',
-        transition: { duration: 0.22, ease: [0.22, 1, 0.36, 1] },
+          ? '0 16px 40px rgba(247,183,49,0.20), 0 8px 20px rgba(0,0,0,0.07)'
+          : '0 16px 40px rgba(0,0,0,0.10), 0 6px 16px rgba(0,0,0,0.05)',
+        transition: { duration: 0.2, ease: 'easeOut' },
       }}
     >
-      {/* Category color accent strip */}
+      {/* Brand accent strip — unified orange for consistency */}
       <div
         className="absolute inset-x-0 top-0 h-[3px] z-20"
-        style={{ background: catColor }}
+        style={{ background: '#F7921E' }}
         aria-hidden
       />
 
       <Link href={href} className="block">
         {/* ── Image area ───────────────────────────────── */}
-        <div className="relative h-48 bg-slate-50 overflow-hidden">
+        <div className="relative h-48 bg-[#F1F3F6] overflow-hidden">
 
           {image ? (
             <>
@@ -186,42 +186,54 @@ export default function ListingCard({ listing }: Props) {
       </Link>
 
       {/* ── Body ─────────────────────────────────────── */}
-      <div className="px-3 pt-2.5 pb-3">
+      <div className="px-4 pt-4 pb-5">
         <Link href={href}>
-          {/* Price in body — only when NO image */}
+          {/* Price pill — only when NO image */}
           {!image && (
             listing.price !== null ? (
-              <p className="text-[17px] font-black mb-1 leading-none" style={{ color: 'var(--li-primary)' }}>
-                {formatPrice(listing.price)}
+              <p className="mb-3">
+                <span className="inline-flex items-center px-3 py-[6px] rounded-full
+                  text-[13px] font-black tabular-nums leading-none
+                  bg-orange-50 text-[#E07B0A]">
+                  {formatPrice(listing.price)}
+                </span>
               </p>
             ) : (
-              <p className="text-[11px] text-slate-400 mb-1">Price on request</p>
+              <p className="mb-2">
+                <span className="inline-flex items-center px-2.5 py-[5px] rounded-full
+                  text-[10.5px] font-medium bg-slate-100 text-slate-500">
+                  Price on request
+                </span>
+              </p>
             )
           )}
 
           {/* Title */}
           <p
-            className="text-[13.5px] leading-snug line-clamp-2 mb-2"
+            className="text-[14px] leading-[1.45] line-clamp-2 mb-3"
             style={{ color: 'var(--li-text)', fontWeight: 700 }}
           >
             {listing.title}
           </p>
 
-          {/* Meta row */}
-          <div className="flex items-center gap-2 text-[11px] mb-2.5" style={{ color: 'var(--li-muted)' }}>
+          {/* Meta row — pill tags */}
+          <div className="flex items-center gap-1.5 mb-4 flex-wrap">
             {listing.area && (
-              <span className="flex items-center gap-1 min-w-0 truncate">
-                <MapPin className="w-3 h-3 shrink-0" strokeWidth={2} />
-                <span className="truncate">{listing.area}</span>
+              <span className="inline-flex items-center gap-1 px-2.5 py-[5px] rounded-full
+                text-[10.5px] font-medium bg-slate-100 text-slate-500">
+                <MapPin className="w-[9px] h-[9px] shrink-0" strokeWidth={2} />
+                <span className="truncate max-w-[110px]">{listing.area}</span>
               </span>
             )}
-            <span className="flex items-center gap-1 ml-auto shrink-0">
-              <Clock className="w-3 h-3" strokeWidth={2} />
+            <span className="inline-flex items-center gap-1 px-2.5 py-[5px] rounded-full
+              text-[10.5px] font-medium bg-slate-100 text-slate-500 ml-auto shrink-0">
+              <Clock className="w-[9px] h-[9px]" strokeWidth={2} />
               {timeAgo(listing.created_at)}
             </span>
             {(listing.view_count ?? 0) > 0 && (
-              <span className="flex items-center gap-1 shrink-0">
-                <Eye className="w-3 h-3" strokeWidth={2} />
+              <span className="inline-flex items-center gap-1 px-2.5 py-[5px] rounded-full
+                text-[10.5px] font-medium bg-slate-100 text-slate-500 shrink-0">
+                <Eye className="w-[9px] h-[9px]" strokeWidth={2} />
                 {listing.view_count}
               </span>
             )}
@@ -230,7 +242,7 @@ export default function ListingCard({ listing }: Props) {
 
         {/* Attribute chips */}
         {listing.attributes && Object.keys(listing.attributes).length > 0 && (
-          <div className="flex flex-wrap gap-1 mb-2">
+          <div className="flex flex-wrap gap-1.5 mb-3">
             {Object.values(listing.attributes).map((val, i) => (
               <span
                 key={i}
@@ -244,7 +256,7 @@ export default function ListingCard({ listing }: Props) {
 
         {/* WA Verified */}
         {listing.wa_verified && (
-          <div className="flex items-center gap-1 mb-2">
+          <div className="flex items-center gap-1 mb-3">
             <span
               className="flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full"
               style={{ background: '#dcfce7', color: '#16a34a' }}
@@ -260,7 +272,7 @@ export default function ListingCard({ listing }: Props) {
           href={waUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="wa-btn w-full py-2.5 text-[13px]"
+          className="wa-btn w-full py-3 text-[13.5px] active:scale-[0.97] transition-all duration-150"
           onClick={e => { e.stopPropagation(); api.listings.waClick(listing.id); }}
         >
           💬 {t('listing.chatOnWA')}

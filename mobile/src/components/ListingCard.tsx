@@ -102,7 +102,7 @@ export default function ListingCard({ listing, onPress }: Props) {
 
   return (
     <View style={[styles.card, { shadowColor: catColor }]}>
-      {/* Category color accent strip at top */}
+      {/* Category-colored accent strip */}
       <View style={[styles.catStrip, { backgroundColor: catColor }]} />
 
       <TouchableOpacity onPress={onPress} activeOpacity={0.92}>
@@ -133,8 +133,8 @@ export default function ListingCard({ listing, onPress }: Props) {
               </View>
             </View>
           ) : (
-            /* No image — colored placeholder */
-            <View style={[styles.imagePlaceholder, { backgroundColor: catColor + '18' }]}>
+            /* No image — brand placeholder */
+            <View style={[styles.imagePlaceholder, { backgroundColor: 'rgba(247,146,30,0.07)' }]}>
               <Text style={styles.emoji}>{catEmoji}</Text>
             </View>
           )}
@@ -178,9 +178,9 @@ export default function ListingCard({ listing, onPress }: Props) {
               </View>
             ) : null}
             {listing.created_at ? (
-              <Text style={[styles.metaText, { marginLeft: 'auto' }]}>
-                {timeAgo(listing.created_at)}
-              </Text>
+              <View style={[styles.metaItem, { marginLeft: 'auto' }]}>
+                <Text style={styles.metaText}>{timeAgo(listing.created_at)}</Text>
+              </View>
             ) : null}
             {(listing.view_count ?? 0) > 0 ? (
               <View style={styles.metaItem}>
@@ -193,7 +193,7 @@ export default function ListingCard({ listing, onPress }: Props) {
           {/* Action row: WhatsApp + Share */}
           <View style={styles.actionRow}>
             <TouchableOpacity style={styles.waBtn} onPress={handleWhatsApp} activeOpacity={0.85}>
-              <Text style={styles.waBtnText}>💬 WhatsApp</Text>
+              <Text style={styles.waBtnText}>💬 Chat on WhatsApp</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.shareBtn} onPress={handleShare} activeOpacity={0.85}>
               <Ionicons name="share-social-outline" size={18} color="#6b7280" />
@@ -293,8 +293,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   emoji: {
-    fontSize: 42,
-    opacity: 0.35,
+    fontSize: 44,
+    opacity: 0.55,
   },
   body: {
     padding: 12,
@@ -337,16 +337,28 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   price: {
-    fontSize: 20,
+    alignSelf: 'flex-start',
+    backgroundColor: '#fff7ed',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    fontSize: 17,
     fontWeight: '900',
-    color: '#f97316',
-    marginBottom: 4,
-    letterSpacing: -0.5,
+    color: '#ea6d0a',
+    marginBottom: 6,
+    letterSpacing: -0.4,
+    overflow: 'hidden',
   },
   priceOnRequest: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#f3f4f6',
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
     fontSize: 11,
     color: '#9ca3af',
-    marginBottom: 4,
+    marginBottom: 6,
+    overflow: 'hidden',
   },
   title: {
     fontSize: 14,
@@ -366,10 +378,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 3,
+    backgroundColor: '#f1f3f6',
+    borderRadius: 20,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
   },
   metaText: {
-    fontSize: 11,
-    color: '#9ca3af',
+    fontSize: 10.5,
+    color: '#6b7280',
+    fontWeight: '500',
   },
   actionRow: { flexDirection: 'row', gap: 8, alignItems: 'center' },
   waBtn: {

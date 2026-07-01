@@ -23,6 +23,17 @@ const CAT_COLORS: Record<string, string> = {
   businesses:    '#06b6d4',
 };
 
+const CAT_VISUAL: Record<string, { icon: string; bg: string }> = {
+  tiffin:        { icon: 'fast-food-outline',     bg: '#f97316' },
+  'pg-roommate': { icon: 'home-outline',           bg: '#3b82f6' },
+  jobs:          { icon: 'briefcase-outline',      bg: '#10b981' },
+  vehicles:      { icon: 'car-outline',            bg: '#ef4444' },
+  electronics:   { icon: 'phone-portrait-outline', bg: '#8b5cf6' },
+  education:     { icon: 'school-outline',         bg: '#f59e0b' },
+  events:        { icon: 'calendar-outline',       bg: '#ec4899' },
+  businesses:    { icon: 'storefront-outline',     bg: '#06b6d4' },
+};
+
 type Listing = any;
 
 function getGreeting(): string {
@@ -194,6 +205,16 @@ export default function HomeScreen({ navigation }: any) {
               <Text style={styles.searchPillText}>Go</Text>
             </View>
           </TouchableOpacity>
+
+          {/* Post Free CTA */}
+          <TouchableOpacity
+            style={styles.postFreeBtn}
+            onPress={() => navigation.navigate('Post', { citySlug, cityName })}
+            activeOpacity={0.85}
+          >
+            <Ionicons name="add-circle-outline" size={15} color="#F7921E" />
+            <Text style={styles.postFreeBtnText}>Post a Free Ad — takes 60 seconds</Text>
+          </TouchableOpacity>
         </View>
 
         {/* ── ROW 1: Recently viewed (conditional — hide if < 3) ── */}
@@ -254,33 +275,26 @@ export default function HomeScreen({ navigation }: any) {
           </View>
         )}
 
-        {/* ── ROW 4: Browse by category ── */}
+        {/* ── ROW 4: Browse by category — bold 4-column grid ── */}
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Browse by category</Text>
+          <Text style={styles.sectionTitle}>Browse by Category</Text>
         </View>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 8 }}
-          style={{ marginBottom: 8 }}
-        >
-          {categories.map(cat => {
-            const bgColor = CAT_COLORS[cat.slug] ?? '#94a3b8';
+        <View style={styles.catGrid}>
+          {categories.slice(0, 8).map(cat => {
+            const vis = CAT_VISUAL[cat.slug] ?? { icon: 'grid-outline', bg: '#94a3b8' };
             return (
               <TouchableOpacity
                 key={cat.slug}
-                style={[styles.catChip, { borderColor: bgColor + '28' }]}
+                style={[styles.catBlock, { backgroundColor: vis.bg }]}
                 onPress={() => navigation.navigate('Search', { citySlug, cityName, categorySlug: cat.slug })}
-                activeOpacity={0.8}
+                activeOpacity={0.82}
               >
-                <View style={[styles.catIconCircle, { backgroundColor: bgColor + '18' }]}>
-                  <Text style={styles.catEmoji}>{cat.icon}</Text>
-                </View>
-                <Text style={styles.catLabel}>{cat.name}</Text>
+                <Ionicons name={vis.icon as any} size={26} color="rgba(255,255,255,0.95)" />
+                <Text style={styles.catBlockLabel} numberOfLines={2}>{cat.name}</Text>
               </TouchableOpacity>
             );
           })}
-        </ScrollView>
+        </View>
 
         <View style={{ height: 32 }} />
       </ScrollView>
@@ -457,6 +471,58 @@ const styles = StyleSheet.create({
   },
   catEmoji: { fontSize: 15 },
   catLabel: { fontSize: 13, color: '#374151', fontWeight: '600' },
+
+  catGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    paddingHorizontal: 12,
+    gap: 10,
+    marginBottom: 12,
+  },
+  catBlock: {
+    width: '22%',
+    flexGrow: 1,
+    aspectRatio: 0.9,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 6,
+    gap: 7,
+    shadowColor: '#000',
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 4,
+  },
+  catBlockLabel: {
+    fontSize: 11,
+    color: 'rgba(255,255,255,0.95)',
+    fontWeight: '700',
+    textAlign: 'center',
+    lineHeight: 14,
+  },
+
+  /* ── Post Free CTA ── */
+  postFreeBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 7,
+    marginTop: 12,
+    paddingVertical: 11,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: 'rgba(247,146,30,0.35)',
+    backgroundColor: 'rgba(247,146,30,0.10)',
+  },
+  postFreeBtnText: {
+    color: '#F7921E',
+    fontWeight: '700',
+    fontSize: 13,
+    letterSpacing: -0.1,
+  },
 
   /* ── Chat FAB ── */
   chatFab: {

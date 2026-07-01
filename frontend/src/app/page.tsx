@@ -26,14 +26,14 @@ type GeoStatus = 'idle' | 'locating' | 'located' | 'denied' | 'failed';
 
 // ─── static data ─────────────────────────────────────────────
 const CATEGORIES: CategoryDef[] = [
-  { icon: Utensils,      name: 'Tiffin & Food', slug: 'tiffin',       color: 'text-amber-500 bg-amber-500/10',     accent: 'bg-amber-400/60',   count: '2,800+' },
-  { icon: Home,          name: 'PG / Rooms',    slug: 'pg-roommate',  color: 'text-blue-500 bg-blue-500/10',       accent: 'bg-blue-400/60',    count: '5,000+' },
-  { icon: Briefcase,     name: 'Jobs',          slug: 'jobs',         color: 'text-emerald-500 bg-emerald-500/10', accent: 'bg-emerald-400/60', count: '3,400+' },
-  { icon: Car,           name: 'Vehicles',      slug: 'vehicles',     color: 'text-orange-500 bg-orange-500/10',   accent: 'bg-orange-400/60',  count: '4,700+' },
-  { icon: Smartphone,    name: 'Electronics',   slug: 'electronics',  color: 'text-purple-500 bg-purple-500/10',   accent: 'bg-purple-400/60',  count: '6,900+' },
-  { icon: Calendar,      name: 'Events',        slug: 'events',       color: 'text-rose-500 bg-rose-500/10',       accent: 'bg-rose-400/60',    count: '800+'   },
-  { icon: Store,         name: 'Businesses',    slug: 'businesses',   color: 'text-cyan-500 bg-cyan-500/10',       accent: 'bg-cyan-400/60',    count: '1,200+' },
-  { icon: GraduationCap, name: 'Education',     slug: 'education',    color: 'text-indigo-500 bg-indigo-500/10',   accent: 'bg-indigo-400/60',  count: '2,000+' },
+  { icon: Utensils,      name: 'Tiffin & Food', slug: 'tiffin',       color: 'text-white bg-orange-500',     accent: 'bg-orange-500',    count: '2,800+' },
+  { icon: Home,          name: 'PG / Rooms',    slug: 'pg-roommate',  color: 'text-white bg-blue-500',       accent: 'bg-blue-500',      count: '5,000+' },
+  { icon: Briefcase,     name: 'Jobs',          slug: 'jobs',         color: 'text-white bg-emerald-500',    accent: 'bg-emerald-500',   count: '3,400+' },
+  { icon: Car,           name: 'Vehicles',      slug: 'vehicles',     color: 'text-white bg-red-500',        accent: 'bg-red-500',       count: '4,700+' },
+  { icon: Smartphone,    name: 'Electronics',   slug: 'electronics',  color: 'text-white bg-purple-500',     accent: 'bg-purple-500',    count: '6,900+' },
+  { icon: Calendar,      name: 'Events',        slug: 'events',       color: 'text-white bg-rose-500',       accent: 'bg-rose-500',      count: '800+'   },
+  { icon: Store,         name: 'Businesses',    slug: 'businesses',   color: 'text-white bg-cyan-500',       accent: 'bg-cyan-500',      count: '1,200+' },
+  { icon: GraduationCap, name: 'Education',     slug: 'education',    color: 'text-white bg-indigo-500',     accent: 'bg-indigo-500',    count: '2,000+' },
 ];
 
 const POPULAR_TAGS = ['Tiffin Service', 'PG for Boys', 'Used Laptop', 'Honda Activa', 'Home Tutor', '2BHK Flat'];
@@ -152,12 +152,12 @@ export default function HomePage() {
 
   // ─────────────────────────────────────────────────────────────
   return (
-    <div className="bg-slate-50">
+    <div className="bg-[#F9FAFB]">
 
       {/* ══════════════════════════════════════════════
           HEADER
       ══════════════════════════════════════════════ */}
-      <header className="sticky top-0 z-50 bg-white/[0.98] backdrop-blur-md border-b border-slate-200/60">
+      <header className="sticky top-0 z-50 nav-glass">
         <div className="page-wrap h-16 flex items-center">
 
           {/* ── Logo ─────────────────────────────────── */}
@@ -211,14 +211,14 @@ export default function HomePage() {
                 : setShowCityPicker(true)
               }
               className="ml-2 flex items-center gap-1.5 shrink-0
-                pl-[14px] pr-[18px] py-[9px] rounded-[10px]
+                pl-5 pr-6 py-[10px] rounded-full
                 text-[13px] font-semibold tracking-tight text-white
                 bg-[#F7921E]
-                shadow-[0_2px_12px_rgba(247,146,30,0.28),inset_0_1px_0_rgba(255,255,255,0.14)]
+                shadow-[0_2px_12px_rgba(247,146,30,0.30),inset_0_1px_0_rgba(255,255,255,0.14)]
                 hover:bg-[#E07B0A]
-                hover:shadow-[0_4px_20px_rgba(247,146,30,0.44),inset_0_1px_0_rgba(255,255,255,0.10)]
+                hover:shadow-[0_4px_20px_rgba(247,146,30,0.46),inset_0_1px_0_rgba(255,255,255,0.10)]
                 hover:-translate-y-px
-                active:translate-y-0 active:scale-[0.985]
+                active:translate-y-0 active:scale-[0.94]
                 active:shadow-[0_1px_6px_rgba(247,146,30,0.22)]
                 transition-all duration-200 select-none"
             >
@@ -305,9 +305,9 @@ export default function HomePage() {
                 ],
               } : {}}
               transition={{ duration: 1.1, ease: 'easeOut' }}
-              className="flex max-w-2xl w-full overflow-hidden rounded-[20px] bg-white
-                shadow-[0_24px_64px_-12px_rgba(0,0,0,0.55),0_0_0_1px_rgba(0,0,0,0.07)]
-                focus-within:shadow-[0_24px_64px_-12px_rgba(247,146,30,0.20),0_0_0_2px_rgba(247,146,30,0.22)]
+              className="flex max-w-2xl w-full overflow-hidden rounded-full bg-white
+                shadow-[inset_0_2px_6px_rgba(0,0,0,0.06),0_24px_64px_-12px_rgba(0,0,0,0.50),0_0_0_1px_rgba(0,0,0,0.06)]
+                focus-within:shadow-[inset_0_2px_6px_rgba(0,0,0,0.05),0_24px_64px_-12px_rgba(247,146,30,0.18),0_0_0_2px_rgba(247,146,30,0.22)]
                 transition-shadow duration-300"
             >
               {/* ── Segment 1: City trigger ─────────────────── */}
@@ -426,11 +426,11 @@ export default function HomePage() {
                 <button
                   type="submit"
                   className="flex items-center gap-2 h-[42px]
-                    px-4 sm:px-6 rounded-[11px]
-                    bg-[#F7921E]
-                    shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]
+                    px-6 sm:px-8 rounded-full
+                    bg-[#F7921E] font-semibold
+                    shadow-[inset_0_1px_0_rgba(255,255,255,0.18)]
                     hover:bg-[#E07B0A]
-                    active:scale-[0.97] active:bg-[#D16E05]
+                    active:scale-[0.96] active:bg-[#D16E05]
                     transition-all duration-200 shrink-0 select-none"
                 >
                   <Search
@@ -506,7 +506,7 @@ export default function HomePage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3, duration: 0.45 }}
-            className="flex flex-wrap gap-x-12 gap-y-5 mt-16 pt-8 border-t border-white/[0.07]"
+            className="flex flex-wrap gap-x-14 gap-y-6 mt-20 pt-10 border-t border-white/[0.07]"
           >
             {STATS.map(([num, label]) => (
               <div key={num} className="flex flex-col gap-1.5">
@@ -523,22 +523,22 @@ export default function HomePage() {
       {/* ══════════════════════════════════════════════
           CATEGORY GRID
       ══════════════════════════════════════════════ */}
-      <section className="bg-white py-20 sm:py-24 border-b border-slate-100">
+      <section className="bg-[#F9FAFB] py-24 sm:py-32 border-b border-slate-100/80">
         <div className="page-wrap">
 
           {/* ─── Section header ─────────────────────────────── */}
-          <div className="mb-12 sm:mb-16">
+          <div className="mb-16 sm:mb-20">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-[10.5px] font-bold uppercase tracking-[0.18em]
                   text-[#F7921E] mb-3 leading-none">
                   Explore
                 </p>
-                <h2 className="text-[1.625rem] sm:text-[2rem] font-bold text-slate-900
-                  tracking-[-0.03em] leading-tight">
+                <h2 className="text-[2rem] sm:text-[2.5rem] font-extrabold text-slate-900
+                  tracking-[-0.04em] leading-tight">
                   Browse by Category
                 </h2>
-                <p className="text-[13px] text-slate-400 mt-2 font-normal leading-none">
+                <p className="text-[14px] text-slate-400 mt-3 font-normal leading-relaxed">
                   25,000+ active listings across all categories
                 </p>
               </div>
@@ -561,7 +561,7 @@ export default function HomePage() {
           </div>
 
           {/* ─── Grid ───────────────────────────────────────── */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-7">
             {CATEGORIES.map(({ icon: Icon, name, slug, color, accent, count }, i) => (
               <motion.div
                 key={name}
@@ -574,32 +574,32 @@ export default function HomePage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-30px' }}
                 transition={{ duration: 0.32, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
-                whileHover={{ y: -5, transition: { duration: 0.22, ease: [0.22, 1, 0.36, 1] } }}
+                whileHover={{
+                  y: -5,
+                  boxShadow: '0 16px 40px rgba(0,0,0,0.10), 0 6px 16px rgba(0,0,0,0.05)',
+                  transition: { duration: 0.2, ease: 'easeOut' },
+                }}
                 whileTap={{ scale: 0.975 }}
-                className="group relative bg-white border border-slate-100/80 rounded-[22px]
+                className="group relative bg-white rounded-2xl
                   cursor-pointer select-none overflow-hidden
-                  shadow-[0_1px_3px_rgba(0,0,0,0.04),0_1px_2px_rgba(0,0,0,0.03)]
-                  hover:shadow-[0_24px_56px_-8px_rgba(0,0,0,0.10),0_8px_18px_-4px_rgba(0,0,0,0.05)]
-                  hover:border-slate-200/70
-                  transition-[box-shadow,border-color,transform] duration-300"
+                  transition-[box-shadow,transform] duration-200"
+                style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.05), 0 1px 4px rgba(0,0,0,0.03)' }}
               >
-                {/* Top-edge category color accent — slides in on hover */}
-                <div className={`absolute inset-x-0 top-0 h-[2.5px] opacity-0
-                  group-hover:opacity-100 transition-opacity duration-300 ${accent}`}
-                  aria-hidden
-                />
+                {/* Top-edge category color accent — always visible, deepens on hover */}
+                <div className={`absolute inset-x-0 top-0 h-[4px] ${accent}`} aria-hidden />
 
                 <div className="p-6 sm:p-8">
 
-                  {/* ── Icon ── */}
+                  {/* ── Icon — solid colored circle with white icon ── */}
                   <div className={`w-[52px] h-[52px] sm:w-[56px] sm:h-[56px]
-                    rounded-[14px] sm:rounded-[16px]
+                    rounded-2xl
                     flex items-center justify-center mb-5 sm:mb-6
                     ${color}
+                    shadow-[0_4px_12px_rgba(0,0,0,0.12)]
                     group-hover:scale-[1.08]
                     transition-transform duration-200
                     ease-[cubic-bezier(0.22,1,0.36,1)]`}>
-                    <Icon className="w-[22px] h-[22px] sm:w-6 sm:h-6" strokeWidth={1.75} />
+                    <Icon className="w-[22px] h-[22px] sm:w-6 sm:h-6" strokeWidth={2} />
                   </div>
 
                   {/* ── Name ── */}
@@ -672,12 +672,12 @@ export default function HomePage() {
       {/* ══════════════════════════════════════════════
           TRUST BADGES
       ══════════════════════════════════════════════ */}
-      <section className="bg-[#0D0F1C] py-14">
+      <section className="bg-[#0D0F1C] py-20 sm:py-28">
         <div className="page-wrap">
-          <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-600 mb-6">
+          <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-600 mb-8">
             Why LocalsIndia
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {TRUST.map(({ icon: Icon, title, subtitle, iconBg, iconColor, isWhatsApp }) =>
               isWhatsApp ? (
 
