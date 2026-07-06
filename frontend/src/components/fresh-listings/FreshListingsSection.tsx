@@ -417,6 +417,7 @@ export default function FreshListingsSection({
     'hover:shadow-[0_4px_18px_rgba(0,0,0,0.09)] transition-all duration-200';
 
   const showSkeleton = isLoading || fetchingReal;
+  const isMockData = !showSkeleton && listings.length > 0 && listings[0].isReal === false;
 
   return (
     <section className="bg-white py-24 sm:py-32">
@@ -432,16 +433,25 @@ export default function FreshListingsSection({
         >
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <span className="relative flex h-[7px] w-[7px]">
-                <span className="animate-ping absolute inline-flex h-full w-full
-                  rounded-full bg-emerald-400 opacity-70" />
-                <span className="relative inline-flex rounded-full h-[7px] w-[7px]
-                  bg-emerald-500" />
-              </span>
-              <span className="text-[10px] font-semibold uppercase tracking-[0.13em]
-                text-emerald-600">
-                {t('fresh.live')}
-              </span>
+              {isMockData ? (
+                <span className="text-[10px] font-semibold uppercase tracking-[0.13em]
+                  text-slate-400">
+                  Example listings
+                </span>
+              ) : (
+                <>
+                  <span className="relative flex h-[7px] w-[7px]">
+                    <span className="animate-ping absolute inline-flex h-full w-full
+                      rounded-full bg-emerald-400 opacity-70" />
+                    <span className="relative inline-flex rounded-full h-[7px] w-[7px]
+                      bg-emerald-500" />
+                  </span>
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.13em]
+                    text-emerald-600">
+                    {t('fresh.live')}
+                  </span>
+                </>
+              )}
             </div>
             <h2 className="text-[2rem] sm:text-[2.375rem] font-extrabold text-slate-900
               tracking-[-0.04em] leading-tight">
@@ -573,7 +583,9 @@ export default function FreshListingsSection({
 
         {/* ── Footnote ─────────────────────────────── */}
         <p className="mt-7 text-center text-[11px] text-slate-400/75 tracking-wide">
-          {t('fresh.footnote')}
+          {isMockData
+            ? 'Example listings — no live postings in your city yet. Be the first to post one.'
+            : t('fresh.footnote')}
         </p>
 
       </div>

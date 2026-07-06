@@ -50,8 +50,8 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.localsindia.com'),
-  title: 'LocalsIndia — Your City, Your Community',
-  description: "India's hyperlocal classifieds and community platform. Buy, sell, and connect in your city — in your language.",
+  title: 'LocalsIndia — Buy · Sell · Connect',
+  description: "India's hyperlocal community platform. Post listings, find local services, connect with your neighbourhood.",
   manifest: '/manifest.json',
   verification: {
     google: 'GUgw72IJ4MpHA8grwFYxpNRTtEZA3sJyYGh0yXijL3A',

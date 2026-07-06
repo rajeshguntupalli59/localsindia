@@ -20,28 +20,26 @@ import FreshListingsSection from '@/components/fresh-listings/FreshListingsSecti
 import SiteLogo from '@/components/site-logo/SiteLogo';
 
 // ─── types ───────────────────────────────────────────────────
-interface CategoryDef { icon: LucideIcon; name: string; slug: string; color: string; accent: string; count: string }
+interface CategoryDef { icon: LucideIcon; name: string; slug: string; color: string; accent: string }
 interface TrustDef { icon: LucideIcon; title: string; subtitle: string; iconBg: string; iconColor: string; isWhatsApp?: true }
 type GeoStatus = 'idle' | 'locating' | 'located' | 'denied' | 'failed';
 
 // ─── static data ─────────────────────────────────────────────
 const CATEGORIES: CategoryDef[] = [
-  { icon: Utensils,      name: 'Tiffin & Food', slug: 'tiffin',       color: 'text-white bg-orange-500',     accent: 'bg-orange-500',    count: '2,800+' },
-  { icon: Home,          name: 'PG / Rooms',    slug: 'pg-roommate',  color: 'text-white bg-blue-500',       accent: 'bg-blue-500',      count: '5,000+' },
-  { icon: Briefcase,     name: 'Jobs',          slug: 'jobs',         color: 'text-white bg-emerald-500',    accent: 'bg-emerald-500',   count: '3,400+' },
-  { icon: Car,           name: 'Vehicles',      slug: 'vehicles',     color: 'text-white bg-red-500',        accent: 'bg-red-500',       count: '4,700+' },
-  { icon: Smartphone,    name: 'Electronics',   slug: 'electronics',  color: 'text-white bg-purple-500',     accent: 'bg-purple-500',    count: '6,900+' },
-  { icon: Calendar,      name: 'Events',        slug: 'events',       color: 'text-white bg-rose-500',       accent: 'bg-rose-500',      count: '800+'   },
-  { icon: Store,         name: 'Businesses',    slug: 'businesses',   color: 'text-white bg-cyan-500',       accent: 'bg-cyan-500',      count: '1,200+' },
-  { icon: GraduationCap, name: 'Education',     slug: 'education',    color: 'text-white bg-indigo-500',     accent: 'bg-indigo-500',    count: '2,000+' },
+  { icon: Utensils,      name: 'Tiffin & Food', slug: 'tiffin',       color: 'text-white bg-orange-500',     accent: 'bg-orange-500'    },
+  { icon: Home,          name: 'PG / Rooms',    slug: 'pg-roommate',  color: 'text-white bg-blue-500',       accent: 'bg-blue-500'      },
+  { icon: Briefcase,     name: 'Jobs',          slug: 'jobs',         color: 'text-white bg-emerald-500',    accent: 'bg-emerald-500'   },
+  { icon: Car,           name: 'Vehicles',      slug: 'vehicles',     color: 'text-white bg-red-500',        accent: 'bg-red-500'       },
+  { icon: Smartphone,    name: 'Electronics',   slug: 'electronics',  color: 'text-white bg-purple-500',     accent: 'bg-purple-500'    },
+  { icon: Calendar,      name: 'Events',        slug: 'events',       color: 'text-white bg-rose-500',       accent: 'bg-rose-500'      },
+  { icon: Store,         name: 'Businesses',    slug: 'businesses',   color: 'text-white bg-cyan-500',       accent: 'bg-cyan-500'      },
+  { icon: GraduationCap, name: 'Education',     slug: 'education',    color: 'text-white bg-indigo-500',     accent: 'bg-indigo-500'    },
 ];
 
 const POPULAR_TAGS = ['Tiffin Service', 'PG for Boys', 'Used Laptop', 'Honda Activa', 'Home Tutor', '2BHK Flat'];
 
 const STATS: [string, string][] = [
-  ['1.2L+', 'Active Listings'],
   ['496+', 'Cities'],
-  ['3.8L+', 'Users'],
   ['11', 'Languages'],
 ];
 
@@ -549,7 +547,7 @@ export default function HomePage() {
                   Browse by Category
                 </h2>
                 <p className="text-[14px] text-slate-400 mt-3 font-normal leading-relaxed">
-                  25,000+ active listings across all categories
+                  Everything you need, organised by category
                 </p>
               </div>
 
@@ -572,7 +570,7 @@ export default function HomePage() {
 
           {/* ─── Grid ───────────────────────────────────────── */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-7">
-            {CATEGORIES.map(({ icon: Icon, name, slug, color, accent, count }, i) => (
+            {CATEGORIES.map(({ icon: Icon, name, slug, color, accent }, i) => (
               <motion.div
                 key={name}
                 onClick={() => {
@@ -619,19 +617,6 @@ export default function HomePage() {
                     transition-colors duration-200 mb-2.5">
                     {name}
                   </h3>
-
-                  {/* ── Counter — number + dot + "listings" label ── */}
-                  <div className="flex items-center gap-[5px]">
-                    <span className="text-[12px] font-semibold text-slate-500
-                      tabular-nums leading-none">
-                      {count}
-                    </span>
-                    <span className="w-[3px] h-[3px] rounded-full bg-slate-200
-                      shrink-0 inline-block" />
-                    <span className="text-[11px] font-medium text-slate-400 leading-none">
-                      listings
-                    </span>
-                  </div>
 
                 </div>
 
