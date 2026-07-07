@@ -544,8 +544,10 @@ export default function PostListingPage() {
                           </span>
                         )}
                         <button
+                          type="button"
                           onClick={() => removePhoto(i)}
                           className="absolute top-2 right-2 w-6 h-6 rounded-full bg-black/60 flex items-center justify-center"
+                          aria-label={`Remove photo ${i + 1}`}
                         >
                           <X className="w-3.5 h-3.5 text-white" />
                         </button>

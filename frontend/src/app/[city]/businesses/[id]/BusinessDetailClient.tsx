@@ -29,6 +29,8 @@ function StarPicker({ value, onChange }: { value: number; onChange: (v: number) 
           type="button"
           onClick={() => onChange(i)}
           className="focus:outline-none"
+          aria-label={`Rate ${i} star${i !== 1 ? 's' : ''}`}
+          aria-pressed={i <= value}
         >
           <Star
             className={`w-7 h-7 transition-colors ${

@@ -141,6 +141,12 @@ function SearchInner() {
     router.replace(`/${citySlug}/search?${params.toString()}`);
   };
 
+  const clearFilter = (key: string) => {
+    if (key === 'cat') { applyCategory(''); return; }
+    if (key === 'price') { setPriceMin(''); setPriceMax(''); return; }
+    if (key === 'date') { setDateRange(''); return; }
+  };
+
   const filteredItems = result?.items.filter(l => {
     if (priceMin && (l.price == null || l.price < parseFloat(priceMin))) return false;
     if (priceMax && (l.price == null || l.price > parseFloat(priceMax))) return false;
@@ -185,7 +191,7 @@ function SearchInner() {
                 style={{ color: 'var(--li-text)' }}
               />
               {localQ && (
-                <button type="button" onClick={() => setLocalQ('')}>
+                <button type="button" onClick={() => setLocalQ('')} aria-label="Clear search">
                   <X className="w-4 h-4" style={{ color: 'var(--li-muted)' }} />
                 </button>
               )}
@@ -213,7 +219,7 @@ function SearchInner() {
                   style={{ background: 'var(--li-primary-light)', color: 'var(--li-primary)' }}
                 >
                   {chip.label}
-                  <button onClick={clearAllFilters}>
+                  <button onClick={() => clearFilter(chip.key)} aria-label={`Remove ${chip.label} filter`}>
                     <X className="w-3 h-3" />
                   </button>
                 </motion.span>
@@ -256,6 +262,7 @@ function SearchInner() {
               <button
                 onClick={() => setCatExpanded(e => !e)}
                 className="w-full flex items-center justify-between px-5 py-3.5"
+                aria-expanded={catExpanded}
               >
                 <span className="text-sm font-semibold" style={{ color: 'var(--li-text)' }}>Category</span>
                 {catExpanded ? <ChevronUp className="w-4 h-4" style={{ color: 'var(--li-muted)' }} /> : <ChevronDown className="w-4 h-4" style={{ color: 'var(--li-muted)' }} />}
@@ -307,6 +314,7 @@ function SearchInner() {
               <button
                 onClick={() => setPriceExpanded(e => !e)}
                 className="w-full flex items-center justify-between px-5 py-3.5"
+                aria-expanded={priceExpanded}
               >
                 <span className="text-sm font-semibold" style={{ color: 'var(--li-text)' }}>Price Range</span>
                 {priceExpanded ? <ChevronUp className="w-4 h-4" style={{ color: 'var(--li-muted)' }} /> : <ChevronDown className="w-4 h-4" style={{ color: 'var(--li-muted)' }} />}
@@ -349,6 +357,7 @@ function SearchInner() {
               <button
                 onClick={() => setDateExpanded(e => !e)}
                 className="w-full flex items-center justify-between px-5 py-3.5"
+                aria-expanded={dateExpanded}
               >
                 <span className="text-sm font-semibold" style={{ color: 'var(--li-text)' }}>Date Posted</span>
                 {dateExpanded ? <ChevronUp className="w-4 h-4" style={{ color: 'var(--li-muted)' }} /> : <ChevronDown className="w-4 h-4" style={{ color: 'var(--li-muted)' }} />}
