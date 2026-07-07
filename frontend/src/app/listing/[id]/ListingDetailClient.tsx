@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowLeft, MapPin, Clock, ChevronDown, ChevronUp, Flag, Tag, User, ExternalLink, Heart, Star, ChevronLeft, ChevronRight, Eye, AlertCircle } from 'lucide-react';
-import { api } from '@/lib/api';
+import { api, ApiError } from '@/lib/api';
 import type { Listing, ListingReview } from '@/lib/types';
 import { formatPrice, timeAgo } from '@/lib/utils';
 import { useSaved } from '@/hooks/useSaved';
@@ -68,6 +68,17 @@ export default function ListingDetailClient({ id }: { id: string }) {
       .catch(() => {});
   }, [id]);
 
+  const handleReport = async () => {
+    const token = localStorage.getItem('access_token');
+    if (!token) { router.push('/auth/login'); return; }
+    try {
+      await api.listings.report(id, 'spam', token);
+      toast.success('Report submitted');
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : 'Failed to report');
+    }
+  };
+
   const waUrl = listing
     ? listing.whatsapp_url ?? `https://wa.me/${listing.contact_phone.replace('+', '')}`
     : null;
@@ -106,14 +117,15 @@ export default function ListingDetailClient({ id }: { id: string }) {
                   strokeWidth={2}
                 />
               </button>
-              <Link
-                href={`/auth/login`}
+              <button
+                type="button"
+                onClick={handleReport}
                 className="shrink-0 p-1.5 text-slate-300 hover:text-red-400 transition-colors"
                 title="Report this listing"
                 aria-label="Report listing"
               >
                 <Flag className="w-4 h-4" strokeWidth={1.8} />
-              </Link>
+              </button>
             </div>
           )}
         </div>
@@ -253,6 +265,14 @@ export default function ListingDetailClient({ id }: { id: string }) {
                 <Tag className="w-3 h-3 shrink-0" strokeWidth={2} />
                 {listing.category_name}
               </span>
+            )}
+
+            {/* Job scam safety notice */}
+            {listing.category_slug === 'jobs' && (
+              <div className="px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2"
+                style={{ background: '#FEF2F2', color: '#B91C1C' }}>
+                ⚠️ Never pay money to get a job. Report anyone who asks for a registration fee or deposit.
+              </div>
             )}
 
             {/* Title + Price */}
