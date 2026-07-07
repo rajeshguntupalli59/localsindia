@@ -77,3 +77,11 @@ npm run build && npm run lint # exit 0
 ```
 Show test output as evidence â€” never claim “it works” without proof.
 
+## Health Stack
+
+- typecheck: cd frontend && npm run build (embeds tsc) | cd mobile && npx tsc --noEmit
+- lint: cd frontend && npm run lint
+- test: cd backend && python -m pytest tests/ -x -q
+- deadcode: (none configured)
+- shell: (none configured)
+
