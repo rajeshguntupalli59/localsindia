@@ -1,9 +1,11 @@
 import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { citiesApi } from '../lib/api';
 
 export default function CityPickerScreen({ navigation, route }: any) {
+  const insets = useSafeAreaInsets();
   const { onSelect } = route.params ?? {};
   const [cities, setCities] = useState<any[]>([]);
   const [filtered, setFiltered] = useState<any[]>([]);
@@ -27,9 +29,15 @@ export default function CityPickerScreen({ navigation, route }: any) {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: Math.max(insets.top, 12) + 8 }]}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backBtn}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          accessibilityRole="button"
+          accessibilityLabel="Close city picker"
+        >
           <Ionicons name="arrow-back" size={20} color="#374151" />
         </TouchableOpacity>
         <TextInput
@@ -39,6 +47,7 @@ export default function CityPickerScreen({ navigation, route }: any) {
           onChangeText={setQuery}
           autoFocus
           returnKeyType="search"
+          accessibilityLabel="Search your city"
         />
       </View>
 
@@ -50,7 +59,12 @@ export default function CityPickerScreen({ navigation, route }: any) {
           keyExtractor={c => c.slug}
           contentContainerStyle={{ paddingBottom: 24 }}
           renderItem={({ item }) => (
-            <TouchableOpacity style={styles.cityRow} onPress={() => handleSelect(item)}>
+            <TouchableOpacity
+              style={styles.cityRow}
+              onPress={() => handleSelect(item)}
+              accessibilityRole="button"
+              accessibilityLabel={`${item.name}${item.state ? `, ${item.state}` : ''}`}
+            >
               <View style={styles.cityIcon}>
                 <Ionicons name="location" size={16} color="#f97316" />
               </View>
@@ -71,7 +85,7 @@ export default function CityPickerScreen({ navigation, route }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: 'white', paddingTop: 48 },
+  container: { flex: 1, backgroundColor: 'white' },
   header: {
     flexDirection: 'row',
     alignItems: 'center',

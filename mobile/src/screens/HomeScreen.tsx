@@ -3,6 +3,7 @@ import {
   FlatList, Image, RefreshControl,
 } from 'react-native';
 import { useState, useEffect, useCallback } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { listingsApi, citiesApi, categoriesApi } from '../lib/api';
 import { storage } from '../lib/storage';
@@ -87,6 +88,7 @@ function HRow({
 }
 
 export default function HomeScreen({ navigation }: any) {
+  const insets = useSafeAreaInsets();
   const [citySlug, setCitySlug] = useState('hyderabad');
   const [cityName, setCityName] = useState('Hyderabad');
   const [userName, setUserName] = useState<string | null>(null);
@@ -167,7 +169,7 @@ export default function HomeScreen({ navigation }: any) {
         }
       >
         {/* ── HERO ── */}
-        <View style={styles.hero}>
+        <View style={[styles.hero, { paddingTop: Math.max(insets.top, 20) + 40 }]}>
           {/* Atmospheric glow blobs */}
           <View style={styles.glowTopRight} pointerEvents="none" />
           <View style={styles.glowBottomLeft} pointerEvents="none" />
@@ -185,6 +187,8 @@ export default function HomeScreen({ navigation }: any) {
               <TouchableOpacity
                 style={styles.cityBtn}
                 onPress={() => navigation.navigate('CityPicker', { onSelect: handleCitySelect })}
+                accessibilityRole="button"
+                accessibilityLabel={`Change city, currently ${cityName}`}
               >
                 <Ionicons name="location-outline" size={13} color="#f97316" />
                 <Text style={styles.cityBtnText}>{cityName}</Text>
@@ -198,6 +202,8 @@ export default function HomeScreen({ navigation }: any) {
             style={styles.searchBar}
             onPress={() => navigation.navigate('Search', { citySlug, cityName })}
             activeOpacity={0.9}
+            accessibilityRole="search"
+            accessibilityLabel="Search tiffin, PG, tutor and more"
           >
             <Ionicons name="search-outline" size={18} color="#f97316" />
             <Text style={styles.searchPlaceholder}>Search tiffin, PG, tutor...</Text>
@@ -304,6 +310,8 @@ export default function HomeScreen({ navigation }: any) {
         style={styles.chatFab}
         onPress={() => navigation.navigate('Chat')}
         activeOpacity={0.85}
+        accessibilityRole="button"
+        accessibilityLabel="Open AI chat assistant"
       >
         <Ionicons name="chatbubble-ellipses" size={22} color="white" />
       </TouchableOpacity>
@@ -321,7 +329,6 @@ const styles = StyleSheet.create({
   hero: {
     backgroundColor: '#0D0F1C',
     padding: 20,
-    paddingTop: 60,
     paddingBottom: 24,
     overflow: 'hidden',
     position: 'relative',

@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { preferencesApi } from '../lib/api';
 
-const INTERESTS = [
-  { id: 'jobs', label: 'Jobs', emoji: '💼' },
-  { id: 'pg', label: 'PG / Room', emoji: '🏠' },
-  { id: 'vehicles', label: 'Vehicles', emoji: '🚗' },
-  { id: 'electronics', label: 'Electronics', emoji: '📱' },
-  { id: 'services', label: 'Services', emoji: '🔧' },
-  { id: 'other', label: 'Other', emoji: '📦' },
+const INTERESTS: { id: string; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
+  { id: 'jobs', label: 'Jobs', icon: 'briefcase-outline' },
+  { id: 'pg', label: 'PG / Room', icon: 'home-outline' },
+  { id: 'vehicles', label: 'Vehicles', icon: 'car-outline' },
+  { id: 'electronics', label: 'Electronics', icon: 'phone-portrait-outline' },
+  { id: 'services', label: 'Services', icon: 'build-outline' },
+  { id: 'other', label: 'Other', icon: 'ellipsis-horizontal-outline' },
 ];
 
 const ALERT_FREQ = [
@@ -19,6 +20,7 @@ const ALERT_FREQ = [
 ];
 
 export default function AlertsPrefsScreen({ navigation }: any) {
+  const insets = useSafeAreaInsets();
   const [interests, setInterests] = useState<string[]>([]);
   const [alertFreq, setAlertFreq] = useState('weekly');
   const [loading, setLoading] = useState(true);
@@ -57,8 +59,13 @@ export default function AlertsPrefsScreen({ navigation }: any) {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+      <View style={[styles.header, { paddingTop: Math.max(insets.top, 12) + 8 }]}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+        >
           <Ionicons name="arrow-back" size={24} color="#1f2937" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Alerts & Preferences</Text>
@@ -73,19 +80,25 @@ export default function AlertsPrefsScreen({ navigation }: any) {
           <Text style={styles.sectionTitle}>I'm looking for</Text>
           <Text style={styles.sectionSub}>We'll show relevant listings first</Text>
           <View style={styles.grid}>
-            {INTERESTS.map(item => (
-              <TouchableOpacity
-                key={item.id}
-                style={[styles.chip, interests.includes(item.id) && styles.chipActive]}
-                onPress={() => toggleInterest(item.id)}
-                activeOpacity={0.75}
-              >
-                <Text style={styles.chipEmoji}>{item.emoji}</Text>
-                <Text style={[styles.chipLabel, interests.includes(item.id) && styles.chipLabelActive]}>
-                  {item.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
+            {INTERESTS.map(item => {
+              const active = interests.includes(item.id);
+              return (
+                <TouchableOpacity
+                  key={item.id}
+                  style={[styles.chip, active && styles.chipActive]}
+                  onPress={() => toggleInterest(item.id)}
+                  activeOpacity={0.75}
+                  accessibilityRole="button"
+                  accessibilityLabel={item.label}
+                  accessibilityState={{ selected: active }}
+                >
+                  <Ionicons name={item.icon} size={16} color={active ? '#ea580c' : '#6b7280'} />
+                  <Text style={[styles.chipLabel, active && styles.chipLabelActive]}>
+                    {item.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
 
           {/* Email frequency */}
@@ -97,6 +110,9 @@ export default function AlertsPrefsScreen({ navigation }: any) {
               style={[styles.freqCard, alertFreq === f.id && styles.freqCardActive]}
               onPress={() => setAlertFreq(f.id)}
               activeOpacity={0.8}
+              accessibilityRole="radio"
+              accessibilityLabel={`${f.label}, ${f.desc}`}
+              accessibilityState={{ checked: alertFreq === f.id }}
             >
               <View style={[styles.radio, alertFreq === f.id && styles.radioActive]}>
                 {alertFreq === f.id && <View style={styles.radioDot} />}
@@ -114,12 +130,15 @@ export default function AlertsPrefsScreen({ navigation }: any) {
         </ScrollView>
       )}
 
-      <View style={styles.footer}>
+      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 20) }]}>
         <TouchableOpacity
           style={[styles.saveBtn, saving && { opacity: 0.6 }]}
           onPress={handleSave}
           disabled={saving}
           activeOpacity={0.85}
+          accessibilityRole="button"
+          accessibilityLabel="Save preferences"
+          accessibilityState={{ disabled: saving }}
         >
           {saving ? <ActivityIndicator color="white" /> : <Text style={styles.saveBtnText}>Save preferences</Text>}
         </TouchableOpacity>
@@ -132,7 +151,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f9fafb' },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: 16, paddingTop: 52, paddingBottom: 12,
+    paddingHorizontal: 16, paddingBottom: 12,
     backgroundColor: 'white', borderBottomWidth: 1, borderBottomColor: '#f3f4f6',
   },
   headerTitle: { fontSize: 17, fontWeight: '700', color: '#1f2937' },

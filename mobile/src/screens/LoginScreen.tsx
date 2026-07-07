@@ -3,6 +3,7 @@ import {
   KeyboardAvoidingView, Platform, Image, ActivityIndicator, ScrollView,
 } from 'react-native';
 import { useState, useRef } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { authApi } from '../lib/api';
 import { storage } from '../lib/storage';
 import { isBiometricAvailable } from '../hooks/useBiometric';
@@ -14,6 +15,7 @@ const LOGO = require('../../assets/logo-mark-transparent.png');
 type Step = 'phone' | 'otp' | 'name' | 'admin';
 
 export default function LoginScreen({ navigation }: any) {
+  const insets = useSafeAreaInsets();
   const [step, setStep] = useState<Step>('phone');
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
@@ -141,12 +143,12 @@ export default function LoginScreen({ navigation }: any) {
       <View style={styles.glowBL} pointerEvents="none" />
 
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: Math.max(insets.bottom, 16) }]}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
         {/* ── Brand hero ── */}
-        <View style={styles.hero}>
+        <View style={[styles.hero, { paddingTop: Math.max(insets.top, 24) + 40 }]}>
           <TouchableOpacity onPress={handleLogoTap} activeOpacity={1} style={styles.logoWrap}>
             <Image source={LOGO} style={styles.logo} resizeMode="contain" />
           </TouchableOpacity>
@@ -329,7 +331,7 @@ const styles = StyleSheet.create({
   scrollContent: { flexGrow: 1, paddingHorizontal: 24 },
 
   // Hero
-  hero: { alignItems: 'center', paddingTop: 80, paddingBottom: 36 },
+  hero: { alignItems: 'center', paddingBottom: 36 },
   logoWrap: { marginBottom: 14 },
   logo: { width: 72, height: 72 },
   brandName: {

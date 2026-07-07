@@ -4,6 +4,7 @@ import {
 } from 'react-native';
 import { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { listingsApi } from '../lib/api';
 import { useSavedContext } from '../context/SavedContext';
 import { C, SHADOW, RADIUS } from '../lib/theme';
@@ -29,6 +30,7 @@ function formatPrice(p: number) {
 
 export default function ListingDetailScreen({ navigation, route }: any) {
   const { id } = route.params;
+  const insets = useSafeAreaInsets();
   const [listing, setListing] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activePhoto, setActivePhoto] = useState(0);
@@ -69,9 +71,14 @@ export default function ListingDetailScreen({ navigation, route }: any) {
   if (!listing) {
     return (
       <View style={styles.center}>
-        <Text style={styles.notFoundEmoji}>🔍</Text>
+        <Ionicons name="search-outline" size={48} color={C.textMuted} style={{ marginBottom: 8 }} />
         <Text style={styles.notFoundTitle}>Listing not found</Text>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backLink}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backLink}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+        >
           <Text style={styles.backLinkText}>← Go back</Text>
         </TouchableOpacity>
       </View>
@@ -110,7 +117,7 @@ export default function ListingDetailScreen({ navigation, route }: any) {
             </ScrollView>
           ) : (
             <View style={styles.imagePlaceholder}>
-              <Text style={styles.imagePlaceholderEmoji}>🏷️</Text>
+              <Ionicons name="pricetag-outline" size={56} color={C.textMuted} style={{ opacity: 0.4 }} />
             </View>
           )}
 
@@ -119,19 +126,33 @@ export default function ListingDetailScreen({ navigation, route }: any) {
 
           {/* Floating back button */}
           <TouchableOpacity
-            style={styles.floatBtn}
+            style={[styles.floatBtn, { top: insets.top + 10 }]}
             onPress={() => navigation.goBack()}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            accessibilityRole="button"
+            accessibilityLabel="Go back"
           >
             <Ionicons name="arrow-back" size={20} color="white" />
           </TouchableOpacity>
 
           {/* Floating action buttons — top right */}
-          <View style={styles.floatRight}>
-            <TouchableOpacity style={styles.floatBtn} onPress={handleShare}>
+          <View style={[styles.floatRight, { top: insets.top + 10 }]}>
+            <TouchableOpacity
+              style={styles.floatBtn}
+              onPress={handleShare}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              accessibilityRole="button"
+              accessibilityLabel="Share listing"
+            >
               <Ionicons name="share-social-outline" size={19} color="white" />
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.floatBtn, saved && styles.floatBtnSaved]} onPress={() => toggle(listing)}>
+            <TouchableOpacity
+              style={[styles.floatBtn, saved && styles.floatBtnSaved]}
+              onPress={() => toggle(listing)}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              accessibilityRole="button"
+              accessibilityLabel={saved ? 'Remove from saved listings' : 'Save listing'}
+            >
               <Ionicons name={saved ? 'heart' : 'heart-outline'} size={19} color={saved ? C.danger : 'white'} />
             </TouchableOpacity>
           </View>
@@ -236,8 +257,14 @@ export default function ListingDetailScreen({ navigation, route }: any) {
       </ScrollView>
 
       {/* ── Sticky WhatsApp bar ── */}
-      <View style={styles.stickyBar}>
-        <TouchableOpacity style={styles.waBtn} onPress={handleWhatsApp} activeOpacity={0.9}>
+      <View style={[styles.stickyBar, { paddingBottom: Math.max(insets.bottom, 12) }]}>
+        <TouchableOpacity
+          style={styles.waBtn}
+          onPress={handleWhatsApp}
+          activeOpacity={0.9}
+          accessibilityRole="button"
+          accessibilityLabel={`Chat on WhatsApp about ${listing.title}`}
+        >
           <Ionicons name="logo-whatsapp" size={22} color="white" />
           <Text style={styles.waBtnText}>Chat on WhatsApp</Text>
         </TouchableOpacity>

@@ -4,6 +4,7 @@ import {
 } from 'react-native';
 import { useState, useEffect, useCallback } from 'react';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { adminApi } from '../lib/api';
 
 const TABS = [
@@ -23,6 +24,7 @@ function timeAgo(iso: string): string {
 }
 
 export default function AdminScreen({ navigation }: any) {
+  const insets = useSafeAreaInsets();
   const [tab, setTab] = useState('pending');
   const [listings, setListings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -161,12 +163,24 @@ export default function AdminScreen({ navigation }: any) {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+      <View style={[styles.header, { paddingTop: Math.max(insets.top, 12) + 8 }]}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backBtn}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+        >
           <Ionicons name="arrow-back" size={22} color="#111827" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Admin Panel</Text>
-        <TouchableOpacity onPress={onRefresh} style={styles.refreshBtn}>
+        <TouchableOpacity
+          onPress={onRefresh}
+          style={styles.refreshBtn}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          accessibilityRole="button"
+          accessibilityLabel="Refresh listings"
+        >
           <Ionicons name="refresh" size={20} color="#6b7280" />
         </TouchableOpacity>
       </View>
@@ -177,6 +191,9 @@ export default function AdminScreen({ navigation }: any) {
             key={t.key}
             style={[styles.tab, tab === t.key && styles.tabActive]}
             onPress={() => setTab(t.key)}
+            accessibilityRole="button"
+            accessibilityLabel={`${t.label} tab`}
+            accessibilityState={{ selected: tab === t.key }}
           >
             <Text style={[styles.tabText, tab === t.key && styles.tabTextActive]}>
               {t.label}
@@ -220,7 +237,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'white',
-    paddingTop: 52,
     paddingBottom: 12,
     paddingHorizontal: 16,
     borderBottomWidth: 1,

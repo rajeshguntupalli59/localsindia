@@ -4,11 +4,23 @@ import {
 } from 'react-native';
 import { useState, useEffect, useRef } from 'react';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { listingsApi, categoriesApi } from '../lib/api';
 import ListingCard from '../components/ListingCard';
 import { C, RADIUS, SHADOW } from '../lib/theme';
 
 type Category = { id: string; name: string; slug: string; icon: string };
+
+const CATEGORY_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
+  tiffin:        'restaurant-outline',
+  'pg-roommate': 'home-outline',
+  jobs:          'briefcase-outline',
+  vehicles:      'car-outline',
+  electronics:   'phone-portrait-outline',
+  education:     'school-outline',
+  events:        'calendar-outline',
+  businesses:    'storefront-outline',
+};
 
 export default function SearchScreen({ navigation, route }: any) {
   const {
@@ -25,6 +37,7 @@ export default function SearchScreen({ navigation, route }: any) {
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<TextInput>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     categoriesApi.list().then(setCategories).catch(() => {});
@@ -49,14 +62,20 @@ export default function SearchScreen({ navigation, route }: any) {
     doSearch(query, activeCat, activeCity);
   }, [query, activeCat, activeCity]);
 
-  const allCats: Category[] = [{ id: '', name: 'All', slug: '', icon: '🔍' }, ...categories];
+  const allCats: Category[] = [{ id: '', name: 'All', slug: '', icon: '' }, ...categories];
 
   return (
     <View style={styles.container}>
 
       {/* ── Header ── */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+      <View style={[styles.header, { paddingTop: Math.max(insets.top, 12) + 8 }]}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backBtn}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+        >
           <Ionicons name="arrow-back" size={22} color={C.textOnDark} />
         </TouchableOpacity>
 
@@ -75,9 +94,15 @@ export default function SearchScreen({ navigation, route }: any) {
             onChangeText={setQuery}
             autoFocus={!!initQ}
             returnKeyType="search"
+            accessibilityLabel="Search listings"
           />
           {query.length > 0 && (
-            <TouchableOpacity onPress={() => setQuery('')} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+            <TouchableOpacity
+              onPress={() => setQuery('')}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              accessibilityRole="button"
+              accessibilityLabel="Clear search"
+            >
               <Ionicons name="close-circle" size={18} color={C.textOnDarkSub} />
             </TouchableOpacity>
           )}
@@ -88,6 +113,8 @@ export default function SearchScreen({ navigation, route }: any) {
           onPress={() => navigation.navigate('CityPicker', {
             onSelect: (c: any) => { setActiveCity(c.slug); setActiveCityName(c.name); }
           })}
+          accessibilityRole="button"
+          accessibilityLabel={`Change city, currently ${activeCityName}`}
         >
           <Ionicons name="location-sharp" size={12} color={C.orange} />
           <Text style={styles.cityChipText} numberOfLines={1}>{activeCityName}</Text>
@@ -102,18 +129,28 @@ export default function SearchScreen({ navigation, route }: any) {
           data={allCats}
           keyExtractor={c => c.slug}
           contentContainerStyle={styles.catsContent}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={[styles.catChip, item.slug === activeCat && styles.catChipActive]}
-              onPress={() => setActiveCat(item.slug)}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.catEmoji}>{item.icon}</Text>
-              <Text style={[styles.catText, item.slug === activeCat && styles.catTextActive]}>
-                {item.name}
-              </Text>
-            </TouchableOpacity>
-          )}
+          renderItem={({ item }) => {
+            const active = item.slug === activeCat;
+            return (
+              <TouchableOpacity
+                style={[styles.catChip, active && styles.catChipActive]}
+                onPress={() => setActiveCat(item.slug)}
+                activeOpacity={0.8}
+                accessibilityRole="button"
+                accessibilityLabel={`Filter by ${item.name}`}
+                accessibilityState={{ selected: active }}
+              >
+                <Ionicons
+                  name={CATEGORY_ICONS[item.slug] ?? 'apps-outline'}
+                  size={15}
+                  color={active ? C.orange : C.textMuted}
+                />
+                <Text style={[styles.catText, active && styles.catTextActive]}>
+                  {item.name}
+                </Text>
+              </TouchableOpacity>
+            );
+          }}
         />
       </View>
 
@@ -140,7 +177,7 @@ export default function SearchScreen({ navigation, route }: any) {
           }
           ListEmptyComponent={
             <View style={styles.emptyWrap}>
-              <Text style={styles.emptyEmoji}>🔍</Text>
+              <Ionicons name="search-outline" size={48} color={C.textMuted} style={{ marginBottom: 16 }} />
               <Text style={styles.emptyTitle}>No listings found</Text>
               <Text style={styles.emptyText}>
                 {query ? `Nothing for "${query}" in ${activeCityName}.` : `No listings in ${activeCityName} yet.`}

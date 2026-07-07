@@ -1,10 +1,12 @@
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator, Image } from 'react-native';
 import { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { usersApi } from '../lib/api';
 import ListingCard from '../components/ListingCard';
 
 export default function SellerProfileScreen({ navigation, route }: any) {
+  const insets = useSafeAreaInsets();
   const { userId } = route.params;
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -32,7 +34,7 @@ export default function SellerProfileScreen({ navigation, route }: any) {
     return (
       <View style={styles.center}>
         <Text style={styles.errorText}>Seller not found</Text>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+        <TouchableOpacity onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel="Go back">
           <Text style={styles.backLink}>← Go back</Text>
         </TouchableOpacity>
       </View>
@@ -43,7 +45,13 @@ export default function SellerProfileScreen({ navigation, route }: any) {
 
   return (
     <ScrollView style={styles.container}>
-      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+      <TouchableOpacity
+        onPress={() => navigation.goBack()}
+        style={[styles.backBtn, { paddingTop: Math.max(insets.top, 12) + 16 }]}
+        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        accessibilityRole="button"
+        accessibilityLabel="Go back"
+      >
         <Ionicons name="arrow-back" size={20} color="#374151" />
       </TouchableOpacity>
 
@@ -89,7 +97,7 @@ const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   errorText: { color: '#9ca3af', marginBottom: 12 },
   backLink: { color: '#f97316', fontWeight: '600' },
-  backBtn: { padding: 16, paddingTop: 52 },
+  backBtn: { padding: 16 },
   profileCard: { alignItems: 'center', backgroundColor: 'white', padding: 24, marginBottom: 8 },
   avatar: { width: 80, height: 80, borderRadius: 40, marginBottom: 12 },
   avatarPlaceholder: {

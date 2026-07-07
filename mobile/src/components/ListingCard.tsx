@@ -15,15 +15,15 @@ const CATEGORY_COLORS: Record<string, string> = {
   businesses:    '#06b6d4',
 };
 
-const CATEGORY_EMOJI: Record<string, string> = {
-  tiffin:        '🍱',
-  'pg-roommate': '🏠',
-  jobs:          '💼',
-  vehicles:      '🚗',
-  electronics:   '📱',
-  education:     '📚',
-  events:        '🎉',
-  businesses:    '🏪',
+const CATEGORY_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
+  tiffin:        'restaurant',
+  'pg-roommate': 'home',
+  jobs:          'briefcase',
+  vehicles:      'car-sport',
+  electronics:   'phone-portrait',
+  education:     'school',
+  events:        'calendar',
+  businesses:    'storefront',
 };
 
 function timeAgo(dateStr: string): string {
@@ -69,7 +69,7 @@ function formatPrice(p: number): string {
 export default function ListingCard({ listing, onPress }: Props) {
   const image     = listing.images?.[0];
   const catColor  = CATEGORY_COLORS[listing.category_slug ?? ''] ?? '#94a3b8';
-  const catEmoji  = CATEGORY_EMOJI[listing.category_slug ?? ''] ?? '🏷️';
+  const catIcon   = CATEGORY_ICONS[listing.category_slug ?? ''] ?? 'pricetag';
   const heartScale = useRef(new Animated.Value(1)).current;
   const { isSaved, toggle } = useSavedContext();
   const saved = isSaved(listing.id);
@@ -105,7 +105,12 @@ export default function ListingCard({ listing, onPress }: Props) {
       {/* Category-colored accent strip */}
       <View style={[styles.catStrip, { backgroundColor: catColor }]} />
 
-      <TouchableOpacity onPress={onPress} activeOpacity={0.92}>
+      <TouchableOpacity
+        onPress={onPress}
+        activeOpacity={0.92}
+        accessibilityRole="button"
+        accessibilityLabel={`${listing.title}, ${listing.price !== null ? formatPrice(listing.price) : 'price on request'}`}
+      >
         {/* ── Image area ── */}
         <View style={styles.imageContainer}>
           {image ? (
@@ -135,7 +140,7 @@ export default function ListingCard({ listing, onPress }: Props) {
           ) : (
             /* No image — brand placeholder */
             <View style={[styles.imagePlaceholder, { backgroundColor: 'rgba(247,146,30,0.07)' }]}>
-              <Text style={styles.emoji}>{catEmoji}</Text>
+              <Ionicons name={catIcon} size={32} color={catColor} />
             </View>
           )}
         </View>
@@ -146,7 +151,8 @@ export default function ListingCard({ listing, onPress }: Props) {
           <View style={styles.badgeRow}>
             {listing.is_featured && (
               <View style={styles.featuredBadge}>
-                <Text style={styles.featuredText}>⭐ Featured</Text>
+                <Ionicons name="star" size={11} color="#92400E" />
+                <Text style={styles.featuredText}>Featured</Text>
               </View>
             )}
             {listing.wa_verified && (
@@ -192,10 +198,24 @@ export default function ListingCard({ listing, onPress }: Props) {
 
           {/* Action row: WhatsApp + Share */}
           <View style={styles.actionRow}>
-            <TouchableOpacity style={styles.waBtn} onPress={handleWhatsApp} activeOpacity={0.85}>
-              <Text style={styles.waBtnText}>💬 Chat on WhatsApp</Text>
+            <TouchableOpacity
+              style={styles.waBtn}
+              onPress={handleWhatsApp}
+              activeOpacity={0.85}
+              accessibilityRole="button"
+              accessibilityLabel={`Chat on WhatsApp about ${listing.title}`}
+            >
+              <Ionicons name="logo-whatsapp" size={16} color="white" />
+              <Text style={styles.waBtnText}>Chat on WhatsApp</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.shareBtn} onPress={handleShare} activeOpacity={0.85}>
+            <TouchableOpacity
+              style={styles.shareBtn}
+              onPress={handleShare}
+              activeOpacity={0.85}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              accessibilityRole="button"
+              accessibilityLabel="Share listing"
+            >
               <Ionicons name="share-social-outline" size={18} color="#6b7280" />
             </TouchableOpacity>
           </View>
@@ -207,6 +227,8 @@ export default function ListingCard({ listing, onPress }: Props) {
         style={styles.heartBtn}
         onPress={handleSave}
         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        accessibilityRole="button"
+        accessibilityLabel={saved ? 'Remove from saved listings' : 'Save listing'}
       >
         <Animated.View style={{ transform: [{ scale: heartScale }] }}>
           <Ionicons
@@ -292,10 +314,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  emoji: {
-    fontSize: 44,
-    opacity: 0.55,
-  },
   body: {
     padding: 12,
   },
@@ -310,6 +328,9 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingHorizontal: 8,
     paddingVertical: 3,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
   featuredText: {
     color: '#92400e',
@@ -391,10 +412,13 @@ const styles = StyleSheet.create({
   actionRow: { flexDirection: 'row', gap: 8, alignItems: 'center' },
   waBtn: {
     flex: 1,
+    flexDirection: 'row',
+    gap: 6,
     backgroundColor: '#25d366',
     borderRadius: 11,
     paddingVertical: 12,
     alignItems: 'center',
+    justifyContent: 'center',
     shadowColor: '#25d366',
     shadowOpacity: 0.35,
     shadowRadius: 8,

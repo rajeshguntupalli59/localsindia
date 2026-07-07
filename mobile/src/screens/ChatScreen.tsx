@@ -5,6 +5,7 @@ import {
   Linking,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { storage } from '../lib/storage';
 
 const API_BASE = 'https://localsindia-backend.azurewebsites.net/api/v1';
@@ -29,6 +30,7 @@ const WELCOME: Message = {
 };
 
 export default function ChatScreen({ navigation }: any) {
+  const insets = useSafeAreaInsets();
   const [messages, setMessages] = useState<Message[]>([WELCOME]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -78,8 +80,14 @@ export default function ChatScreen({ navigation }: any) {
       keyboardVerticalOffset={0}
     >
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+      <View style={[styles.header, { paddingTop: Math.max(insets.top, 12) + 8 }]}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backBtn}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+        >
           <Ionicons name="arrow-back" size={22} color="white" />
         </TouchableOpacity>
         <View style={styles.headerInfo}>
@@ -142,7 +150,7 @@ export default function ChatScreen({ navigation }: any) {
       </ScrollView>
 
       {/* Input bar */}
-      <View style={styles.inputBar}>
+      <View style={[styles.inputBar, { paddingBottom: Math.max(insets.bottom, 12) }]}>
         <TextInput
           style={styles.input}
           value={input}
@@ -152,11 +160,14 @@ export default function ChatScreen({ navigation }: any) {
           onSubmitEditing={send}
           returnKeyType="send"
           multiline
+          accessibilityLabel="Message"
         />
         <TouchableOpacity
           style={[styles.sendBtn, (!input.trim() || loading) && styles.sendBtnDisabled]}
           onPress={send}
           disabled={!input.trim() || loading}
+          accessibilityRole="button"
+          accessibilityLabel="Send message"
         >
           <Ionicons name="send" size={18} color="white" />
         </TouchableOpacity>
@@ -171,7 +182,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#f97316',
-    paddingTop: 52,
     paddingBottom: 14,
     paddingHorizontal: 16,
     gap: 12,
@@ -223,7 +233,6 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     gap: 8,
     padding: 12,
-    paddingBottom: 20,
     backgroundColor: 'white',
     borderTopWidth: 1,
     borderTopColor: '#f3f4f6',

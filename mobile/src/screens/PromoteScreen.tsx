@@ -156,7 +156,12 @@ export default function PromoteScreen({ route, navigation }: any) {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+        >
           <Ionicons name="arrow-back" size={24} color="#1f2937" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Promote Listing</Text>
@@ -242,7 +247,13 @@ export default function PromoteScreen({ route, navigation }: any) {
       <Modal visible={webviewVisible} animationType="slide" onRequestClose={() => setWebviewVisible(false)}>
         <SafeAreaView style={{ flex: 1, backgroundColor: '#0d0f1c' }}>
           <View style={styles.webviewHeader}>
-            <TouchableOpacity onPress={() => setWebviewVisible(false)} style={styles.webviewClose}>
+            <TouchableOpacity
+              onPress={() => setWebviewVisible(false)}
+              style={styles.webviewClose}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              accessibilityRole="button"
+              accessibilityLabel="Close payment window"
+            >
               <Ionicons name="close" size={22} color="white" />
             </TouchableOpacity>
             <Text style={styles.webviewTitle}>Secure Payment</Text>

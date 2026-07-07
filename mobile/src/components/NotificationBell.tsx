@@ -7,11 +7,17 @@ import { Ionicons } from '@expo/vector-icons';
 import { notificationsApi } from '../lib/api';
 import { storage } from '../lib/storage';
 
-const TYPE_ICON: Record<string, string> = {
-  listing_approved: '✅',
-  listing_expiring: '⏰',
-  listing_featured: '⭐',
-  new_listing_match: '🔔',
+const TYPE_ICON: Record<string, keyof typeof Ionicons.glyphMap> = {
+  listing_approved: 'checkmark-circle',
+  listing_expiring: 'time',
+  listing_featured: 'star',
+  new_listing_match: 'notifications',
+};
+const TYPE_ICON_COLOR: Record<string, string> = {
+  listing_approved: '#16a34a',
+  listing_expiring: '#f59e0b',
+  listing_featured: '#f97316',
+  new_listing_match: '#6366f1',
 };
 
 function timeAgo(dateStr: string): string {
@@ -86,7 +92,13 @@ export default function NotificationBell() {
 
   return (
     <>
-      <TouchableOpacity onPress={handleOpen} style={styles.bellBtn} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+      <TouchableOpacity
+        onPress={handleOpen}
+        style={styles.bellBtn}
+        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        accessibilityRole="button"
+        accessibilityLabel={unread > 0 ? `Notifications, ${unread} unread` : 'Notifications'}
+      >
         <Animated.View style={{ transform: [{ scale: pulse }] }}>
           <Ionicons name="notifications-outline" size={22} color="rgba(255,255,255,0.85)" />
         </Animated.View>
@@ -107,7 +119,7 @@ export default function NotificationBell() {
             <View style={styles.sheetHeader}>
               <Text style={styles.sheetTitle}>Notifications</Text>
               {unread > 0 && (
-                <TouchableOpacity onPress={markAllRead}>
+                <TouchableOpacity onPress={markAllRead} accessibilityRole="button" accessibilityLabel="Mark all as read">
                   <Text style={styles.markAll}>Mark all read</Text>
                 </TouchableOpacity>
               )}
@@ -133,8 +145,15 @@ export default function NotificationBell() {
                     style={[styles.notifRow, !n.is_read && styles.notifUnread]}
                     onPress={() => markRead(n.id)}
                     activeOpacity={0.7}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${n.title}${!n.is_read ? ', unread' : ''}`}
                   >
-                    <Text style={styles.notifIcon}>{TYPE_ICON[n.type] ?? '📣'}</Text>
+                    <Ionicons
+                      name={TYPE_ICON[n.type] ?? 'megaphone'}
+                      size={22}
+                      color={TYPE_ICON_COLOR[n.type] ?? '#6b7280'}
+                      style={{ marginTop: 2 }}
+                    />
                     <View style={styles.notifContent}>
                       <Text style={[styles.notifTitle, !n.is_read && { fontWeight: '700' }]} numberOfLines={2}>
                         {n.title}

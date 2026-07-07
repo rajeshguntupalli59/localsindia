@@ -3,19 +3,21 @@ import {
   View, Text, TouchableOpacity, StyleSheet, Modal, Pressable,
   ScrollView, Animated,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { preferencesApi } from '../lib/api';
 import { storage } from '../lib/storage';
 
 const ONBOARDING_KEY = 'li_onboarding_done';
 
-const INTERESTS = [
-  { id: 'jobs', label: 'Jobs', emoji: '💼' },
-  { id: 'pg', label: 'PG / Room', emoji: '🏠' },
-  { id: 'vehicles', label: 'Vehicles', emoji: '🚗' },
-  { id: 'electronics', label: 'Electronics', emoji: '📱' },
-  { id: 'services', label: 'Services', emoji: '🔧' },
-  { id: 'other', label: 'Other', emoji: '📦' },
+const INTERESTS: { id: string; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
+  { id: 'jobs', label: 'Jobs', icon: 'briefcase-outline' },
+  { id: 'pg', label: 'PG / Room', icon: 'home-outline' },
+  { id: 'vehicles', label: 'Vehicles', icon: 'car-outline' },
+  { id: 'electronics', label: 'Electronics', icon: 'phone-portrait-outline' },
+  { id: 'services', label: 'Services', icon: 'build-outline' },
+  { id: 'other', label: 'Other', icon: 'ellipsis-horizontal-outline' },
 ];
 
 const ALERT_FREQ = [
@@ -25,6 +27,7 @@ const ALERT_FREQ = [
 ];
 
 export default function AlertOnboardingSheet() {
+  const insets = useSafeAreaInsets();
   const [visible, setVisible] = useState(false);
   const [interests, setInterests] = useState<string[]>([]);
   const [alertFreq, setAlertFreq] = useState('weekly');
@@ -91,8 +94,14 @@ export default function AlertOnboardingSheet() {
                 <Text style={styles.title}>What are you looking for?</Text>
                 <Text style={styles.subtitle}>Personalise your feed in 30 seconds</Text>
               </View>
-              <TouchableOpacity onPress={dismiss} style={styles.closeBtn}>
-                <Text style={styles.closeX}>✕</Text>
+              <TouchableOpacity
+                onPress={dismiss}
+                style={styles.closeBtn}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                accessibilityRole="button"
+                accessibilityLabel="Dismiss"
+              >
+                <Ionicons name="close" size={20} color="rgba(255,255,255,0.6)" />
               </TouchableOpacity>
             </View>
 
@@ -100,19 +109,25 @@ export default function AlertOnboardingSheet() {
               {/* Interests */}
               <Text style={styles.sectionLabel}>I'm looking for</Text>
               <View style={styles.grid}>
-                {INTERESTS.map(item => (
-                  <TouchableOpacity
-                    key={item.id}
-                    style={[styles.chip, interests.includes(item.id) && styles.chipActive]}
-                    onPress={() => toggleInterest(item.id)}
-                    activeOpacity={0.75}
-                  >
-                    <Text style={styles.chipEmoji}>{item.emoji}</Text>
-                    <Text style={[styles.chipLabel, interests.includes(item.id) && styles.chipLabelActive]}>
-                      {item.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+                {INTERESTS.map(item => {
+                  const active = interests.includes(item.id);
+                  return (
+                    <TouchableOpacity
+                      key={item.id}
+                      style={[styles.chip, active && styles.chipActive]}
+                      onPress={() => toggleInterest(item.id)}
+                      activeOpacity={0.75}
+                      accessibilityRole="button"
+                      accessibilityLabel={item.label}
+                      accessibilityState={{ selected: active }}
+                    >
+                      <Ionicons name={item.icon} size={15} color={active ? '#ea580c' : '#6b7280'} />
+                      <Text style={[styles.chipLabel, active && styles.chipLabelActive]}>
+                        {item.label}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
               </View>
 
               {/* Email alerts */}
@@ -124,6 +139,9 @@ export default function AlertOnboardingSheet() {
                     style={[styles.freqBtn, alertFreq === f.id && styles.freqBtnActive]}
                     onPress={() => setAlertFreq(f.id)}
                     activeOpacity={0.75}
+                    accessibilityRole="radio"
+                    accessibilityLabel={f.label}
+                    accessibilityState={{ checked: alertFreq === f.id }}
                   >
                     <Text style={[styles.freqLabel, alertFreq === f.id && styles.freqLabelActive]}>
                       {f.label}
@@ -136,12 +154,15 @@ export default function AlertOnboardingSheet() {
             </ScrollView>
 
             {/* CTA */}
-            <View style={styles.footer}>
+            <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 20) }]}>
               <TouchableOpacity
                 style={[styles.saveBtn, saving && { opacity: 0.6 }]}
                 onPress={handleSave}
                 disabled={saving}
                 activeOpacity={0.85}
+                accessibilityRole="button"
+                accessibilityLabel={interests.length > 0 ? 'Save preferences' : 'Skip for now'}
+                accessibilityState={{ disabled: saving }}
               >
                 <Text style={styles.saveBtnText}>
                   {saving ? 'Saving...' : interests.length > 0 ? 'Save preferences' : 'Skip for now'}

@@ -2,6 +2,7 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Image, Alert } fr
 import { useState, useEffect, useCallback } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { listingsApi } from '../lib/api';
 import { storage } from '../lib/storage';
 
@@ -19,6 +20,7 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 export default function MyListingsScreen({ navigation }: any) {
+  const insets = useSafeAreaInsets();
   const [listings, setListings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionId, setActionId] = useState<string | null>(null);
@@ -103,8 +105,13 @@ export default function MyListingsScreen({ navigation }: any) {
   if (!user) {
     return (
       <View style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
+        <View style={[styles.header, { paddingTop: Math.max(insets.top, 12) + 8 }]}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            accessibilityRole="button"
+            accessibilityLabel="Go back"
+          >
             <Ionicons name="arrow-back" size={24} color="#1f2937" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>My Listings</Text>
@@ -123,12 +130,22 @@ export default function MyListingsScreen({ navigation }: any) {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+      <View style={[styles.header, { paddingTop: Math.max(insets.top, 12) + 8 }]}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+        >
           <Ionicons name="arrow-back" size={24} color="#1f2937" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>My Listings</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('Post')}>
+        <TouchableOpacity
+          onPress={() => navigation.navigate('Post')}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          accessibilityRole="button"
+          accessibilityLabel="Post a new listing"
+        >
           <Ionicons name="add-circle" size={28} color="#f97316" />
         </TouchableOpacity>
       </View>
@@ -163,7 +180,7 @@ export default function MyListingsScreen({ navigation }: any) {
                     {listing.images?.[0]?.url ? (
                       <Image source={{ uri: listing.images[0].url }} style={styles.thumbImg} />
                     ) : (
-                      <Text style={{ fontSize: 28 }}>🏷️</Text>
+                      <Ionicons name="pricetag-outline" size={28} color="#9ca3af" />
                     )}
                   </View>
                   <View style={{ flex: 1 }}>
@@ -178,9 +195,16 @@ export default function MyListingsScreen({ navigation }: any) {
                         </Text>
                       </View>
                       {listing.status === 'active' && (
-                        <Text style={styles.counters}>
-                          👁 {listing.view_count ?? 0}  💬 {listing.contact_click_count ?? 0}
-                        </Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
+                            <Ionicons name="eye-outline" size={12} color="#6b7280" />
+                            <Text style={styles.counters}>{listing.view_count ?? 0}</Text>
+                          </View>
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
+                            <Ionicons name="chatbubble-outline" size={12} color="#6b7280" />
+                            <Text style={styles.counters}>{listing.contact_click_count ?? 0}</Text>
+                          </View>
+                        </View>
                       )}
                     </View>
                   </View>
@@ -242,7 +266,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f9fafb' },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: 16, paddingTop: 52, paddingBottom: 12, backgroundColor: '#fff',
+    paddingHorizontal: 16, paddingBottom: 12, backgroundColor: '#fff',
     borderBottomWidth: 1, borderBottomColor: '#f3f4f6',
   },
   headerTitle: { fontSize: 17, fontWeight: '700', color: '#1f2937' },

@@ -4,6 +4,7 @@ import {
 } from 'react-native';
 import { useState, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { authApi } from '../lib/api';
 import { storage } from '../lib/storage';
@@ -12,6 +13,7 @@ import { isBiometricAvailable } from '../hooks/useBiometric';
 import { C, SHADOW, RADIUS } from '../lib/theme';
 
 export default function ProfileScreen({ navigation }: any) {
+  const insets = useSafeAreaInsets();
   const [user, setUser] = useState<any>(null);
   const [biometricEnabled, setBiometricEnabled] = useState(false);
   const [biometricAvailable, setBiometricAvailable] = useState(false);
@@ -56,7 +58,13 @@ export default function ProfileScreen({ navigation }: any) {
   };
 
   const MenuItem = ({ icon, label, onPress, danger, badge, right }: MenuItemProps) => (
-    <TouchableOpacity style={styles.menuItem} onPress={onPress} activeOpacity={0.7}>
+    <TouchableOpacity
+      style={styles.menuItem}
+      onPress={onPress}
+      activeOpacity={0.7}
+      accessibilityRole="button"
+      accessibilityLabel={badge ? `${label}, ${badge}` : label}
+    >
       <View style={[styles.menuIcon, danger && styles.menuIconDanger]}>
         <Ionicons name={icon as any} size={18} color={danger ? C.danger : C.text} />
       </View>
@@ -74,7 +82,7 @@ export default function ProfileScreen({ navigation }: any) {
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
 
       {/* ── Hero header ── */}
-      <View style={styles.heroHeader}>
+      <View style={[styles.heroHeader, { paddingTop: Math.max(insets.top, 16) + 40 }]}>
         {/* Glow blobs */}
         <View style={styles.glowTR} pointerEvents="none" />
         <View style={styles.glowBL} pointerEvents="none" />
@@ -104,18 +112,28 @@ export default function ProfileScreen({ navigation }: any) {
       {/* ── Stats card ── */}
       {user && (
         <View style={styles.statsCard}>
-          <TouchableOpacity style={styles.statItem} onPress={() => navigation.navigate('MyListings')}>
+          <TouchableOpacity
+            style={styles.statItem}
+            onPress={() => navigation.navigate('MyListings')}
+            accessibilityRole="button"
+            accessibilityLabel={`My Listings, ${listingCount}`}
+          >
             <Text style={styles.statValue}>{listingCount}</Text>
             <Text style={styles.statLabel}>Listings</Text>
           </TouchableOpacity>
           <View style={styles.statDivider} />
-          <TouchableOpacity style={styles.statItem} onPress={() => navigation.navigate('Saved')}>
+          <TouchableOpacity
+            style={styles.statItem}
+            onPress={() => navigation.navigate('Saved')}
+            accessibilityRole="button"
+            accessibilityLabel={`Saved listings, ${savedCount}`}
+          >
             <Text style={styles.statValue}>{savedCount}</Text>
             <Text style={styles.statLabel}>Saved</Text>
           </TouchableOpacity>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Text style={styles.statValue}>⭐</Text>
+            <Ionicons name="star" size={20} color={C.orange} />
             <Text style={styles.statLabel}>Member</Text>
           </View>
         </View>
@@ -182,7 +200,6 @@ const styles = StyleSheet.create({
   heroHeader: {
     backgroundColor: C.navBg,
     paddingHorizontal: 20,
-    paddingTop: 56,
     paddingBottom: 56,
     overflow: 'hidden',
     position: 'relative',

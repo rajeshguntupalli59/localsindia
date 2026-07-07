@@ -1,14 +1,16 @@
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSavedContext } from '../context/SavedContext';
 import ListingCard from '../components/ListingCard';
 
 export default function SavedScreen({ navigation }: any) {
+  const insets = useSafeAreaInsets();
   const { savedListings, savedCount } = useSavedContext();
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: Math.max(insets.top, 12) + 8 }]}>
         <Text style={styles.headerTitle}>Saved</Text>
         {savedCount > 0 && (
           <View style={styles.countBadge}>
@@ -24,7 +26,12 @@ export default function SavedScreen({ navigation }: any) {
           <Text style={styles.emptyText}>
             Tap the heart icon on any listing to save it here. Compare your favourites all in one place.
           </Text>
-          <TouchableOpacity style={styles.browseBtn} onPress={() => navigation.navigate('Home')}>
+          <TouchableOpacity
+            style={styles.browseBtn}
+            onPress={() => navigation.navigate('Home')}
+            accessibilityRole="button"
+            accessibilityLabel="Browse listings"
+          >
             <Text style={styles.browseBtnText}>Browse Listings</Text>
           </TouchableOpacity>
         </View>
@@ -53,7 +60,6 @@ const styles = StyleSheet.create({
     gap: 10,
     backgroundColor: 'white',
     paddingHorizontal: 16,
-    paddingTop: 52,
     paddingBottom: 14,
     borderBottomWidth: 1,
     borderBottomColor: '#f3f4f6',

@@ -7,8 +7,20 @@ import { useState, useEffect } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system/legacy';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { listingsApi, categoriesApi } from '../lib/api';
 import { storage } from '../lib/storage';
+
+const CATEGORY_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
+  tiffin:        'restaurant-outline',
+  'pg-roommate': 'home-outline',
+  jobs:          'briefcase-outline',
+  vehicles:      'car-outline',
+  electronics:   'phone-portrait-outline',
+  education:     'school-outline',
+  events:        'calendar-outline',
+  businesses:    'storefront-outline',
+};
 
 const API_BASE = 'https://localsindia-backend.azurewebsites.net/api/v1';
 
@@ -17,6 +29,7 @@ const STEPS = ['Details', 'Photos', 'Contact'];
 type Category = { id: string; name: string; slug: string; icon: string };
 
 export default function PostScreen({ navigation }: any) {
+  const insets = useSafeAreaInsets();
   const [user, setUser] = useState<any>(undefined);
   const [citySlug, setCitySlug] = useState('hyderabad');
   const [cityName, setCityName] = useState('Hyderabad');
@@ -216,8 +229,13 @@ export default function PostScreen({ navigation }: any) {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => step === 0 ? navigation.goBack() : setStep(s => s - 1)}>
+      <View style={[styles.header, { paddingTop: Math.max(insets.top, 12) + 8 }]}>
+        <TouchableOpacity
+          onPress={() => step === 0 ? navigation.goBack() : setStep(s => s - 1)}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          accessibilityRole="button"
+          accessibilityLabel={step === 0 ? 'Cancel and go back' : 'Previous step'}
+        >
           <Ionicons name="arrow-back" size={20} color="#374151" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Post Listing</Text>
@@ -288,16 +306,26 @@ export default function PostScreen({ navigation }: any) {
                 Pick a category <Text style={styles.required}>*</Text>
               </Text>
               <View style={styles.catGrid}>
-                {categories.map(c => (
-                  <TouchableOpacity
-                    key={c.slug}
-                    style={[styles.catCard, categorySlug === c.slug && styles.catCardActive]}
-                    onPress={() => { setCategorySlug(c.slug); setErrors(e => ({ ...e, category: '' })); }}
-                  >
-                    <Text style={styles.catEmoji}>{c.icon}</Text>
-                    <Text style={[styles.catLabel, categorySlug === c.slug && styles.catLabelActive]}>{c.name}</Text>
-                  </TouchableOpacity>
-                ))}
+                {categories.map(c => {
+                  const active = categorySlug === c.slug;
+                  return (
+                    <TouchableOpacity
+                      key={c.slug}
+                      style={[styles.catCard, active && styles.catCardActive]}
+                      onPress={() => { setCategorySlug(c.slug); setErrors(e => ({ ...e, category: '' })); }}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Category: ${c.name}`}
+                      accessibilityState={{ selected: active }}
+                    >
+                      <Ionicons
+                        name={CATEGORY_ICONS[c.slug] ?? 'pricetag-outline'}
+                        size={22}
+                        color={active ? '#f97316' : '#6b7280'}
+                      />
+                      <Text style={[styles.catLabel, active && styles.catLabelActive]}>{c.name}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
               </View>
               {errors.category ? <Text style={[styles.errorText, { marginTop: 8 }]}>{errors.category}</Text> : null}
             </View>
@@ -370,6 +398,9 @@ export default function PostScreen({ navigation }: any) {
                       <TouchableOpacity
                         style={styles.removePhoto}
                         onPress={() => setImages(prev => prev.filter((_, idx) => idx !== i))}
+                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Remove photo ${i + 1}`}
                       >
                         <Ionicons name="close-circle" size={22} color="white" />
                       </TouchableOpacity>
@@ -487,10 +518,12 @@ export default function PostScreen({ navigation }: any) {
       </ScrollView>
 
       {/* Footer nav */}
-      <View style={styles.footer}>
+      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
         <TouchableOpacity
           style={styles.backBtn}
           onPress={() => step === 0 ? navigation.goBack() : setStep(s => s - 1)}
+          accessibilityRole="button"
+          accessibilityLabel={step === 0 ? 'Cancel and go back' : 'Previous step'}
         >
           <Ionicons name="arrow-back" size={18} color="#374151" />
           <Text style={styles.backBtnText}>{step === 0 ? 'Cancel' : 'Back'}</Text>
@@ -500,6 +533,9 @@ export default function PostScreen({ navigation }: any) {
           style={[styles.nextBtn, loading && styles.btnDisabled]}
           onPress={handleNext}
           disabled={loading}
+          accessibilityRole="button"
+          accessibilityLabel={step === 2 ? 'Post listing' : 'Next step'}
+          accessibilityState={{ disabled: loading }}
         >
           {loading
             ? <Text style={styles.nextBtnText}>{uploadProgress || 'Posting...'}</Text>
@@ -521,7 +557,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingTop: 52,
     paddingBottom: 12,
     backgroundColor: 'white',
     borderBottomWidth: 1,
