@@ -265,6 +265,13 @@ export default function ListingDetailPage() {
                   {timeAgo(listing.created_at)}
                 </span>
               </div>
+
+              {listing.category_slug === 'jobs' && (
+                <div className="mt-4 px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2"
+                  style={{ background: '#FEF2F2', color: '#B91C1C' }}>
+                  ⚠️ Never pay money to get a job. Report anyone who asks for a registration fee or deposit.
+                </div>
+              )}
             </div>
 
             {/* Tabs: Description / Details */}
