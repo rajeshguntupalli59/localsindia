@@ -500,7 +500,7 @@ export default function HomePage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.32 + i * 0.05, duration: 0.28, ease: 'easeOut' }}
                   whileTap={{ scale: 0.94 }}
-                  className="px-3.5 py-[5.5px] rounded-full
+                  className="px-3.5 py-[11px] rounded-full
                     text-[11.5px] font-medium leading-none
                     text-slate-300 bg-white/[0.07] border border-white/[0.12]
                     hover:bg-[#F7921E]/[0.14] hover:border-[#F7921E]/[0.28]
