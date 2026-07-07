@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { Utensils, Home, Briefcase, Car, Smartphone, Wrench, Sofa, BookOpen, type LucideIcon } from 'lucide-react';
 import ListingCard from '@/components/listing-card/ListingCard';
 import SiteHeader from '@/components/site-header/SiteHeader';
 import SiteFooter from '@/components/site-footer/SiteFooter';
@@ -17,7 +18,7 @@ const SEO_CATEGORIES: Record<string, {
   description: string;
   categorySlug?: string;
   searchFallback?: string;
-  emoji: string;
+  icon: LucideIcon;
 }> = {
   tiffin: {
     title: 'Tiffin Services',
@@ -25,56 +26,56 @@ const SEO_CATEGORIES: Record<string, {
     description: 'Find affordable, hygienic home-cooked tiffin and meal delivery services near you.',
     categorySlug: 'services',
     searchFallback: 'tiffin',
-    emoji: '🍱',
+    icon: Utensils,
   },
   'pg-roommate': {
     title: 'PG & Roommate',
     headline: 'PG Accommodation & Roommates',
     description: 'Find paying guest accommodation, shared flats and roommates for rent.',
     categorySlug: 'pg-roommate',
-    emoji: '🏠',
+    icon: Home,
   },
   jobs: {
     title: 'Jobs',
     headline: 'Local Job Openings',
     description: 'Find jobs, employment and career opportunities posted by local businesses and employers.',
     categorySlug: 'jobs',
-    emoji: '💼',
+    icon: Briefcase,
   },
   vehicles: {
     title: 'Vehicles',
     headline: 'Cars, Bikes & Scooters',
     description: 'Buy and sell used cars, motorbikes, scooters and other vehicles directly from owners.',
     categorySlug: 'vehicles',
-    emoji: '🚗',
+    icon: Car,
   },
   electronics: {
     title: 'Electronics',
     headline: 'Mobile Phones, Laptops & Gadgets',
     description: 'Buy and sell used mobile phones, laptops, TVs, cameras and electronics.',
     categorySlug: 'electronics',
-    emoji: '📱',
+    icon: Smartphone,
   },
   services: {
     title: 'Local Services',
     headline: 'Trusted Local Services',
     description: 'Find reliable plumbers, electricians, cleaners, painters and other home services.',
     categorySlug: 'services',
-    emoji: '🔧',
+    icon: Wrench,
   },
   furniture: {
     title: 'Furniture',
     headline: 'Furniture & Home Decor',
     description: 'Buy and sell used furniture, sofas, beds, dining tables and home decor items.',
     searchFallback: 'furniture',
-    emoji: '🛋️',
+    icon: Sofa,
   },
   tutors: {
     title: 'Tutors & Classes',
     headline: 'Tutors, Coaching & Classes',
     description: 'Find qualified tutors for all subjects, spoken English, music and online/offline classes.',
     searchFallback: 'tutor',
-    emoji: '📚',
+    icon: BookOpen,
   },
 };
 
@@ -212,8 +213,9 @@ export default async function SeoCategoryPage({
 
             <div className="flex items-start justify-between gap-4 flex-wrap">
               <div>
-                <h1 className="text-2xl sm:text-3xl font-black" style={{ color: 'var(--li-text)' }}>
-                  {meta.emoji} {meta.headline} in {cityName}
+                <h1 className="text-2xl sm:text-3xl font-black flex items-center gap-2" style={{ color: 'var(--li-text)' }}>
+                  <meta.icon size={26} />
+                  {meta.headline} in {cityName}
                 </h1>
                 <p className="text-sm mt-1.5" style={{ color: 'var(--li-muted)' }}>
                   {listings.length > 0
@@ -243,7 +245,9 @@ export default async function SeoCategoryPage({
         <div className="page-wrap py-8 pb-20 md:pb-8">
           {listings.length === 0 ? (
             <div className="text-center py-20">
-              <div className="text-6xl mb-5">{meta.emoji}</div>
+              <div className="flex justify-center mb-5" style={{ color: 'var(--li-muted)' }}>
+                <meta.icon size={56} strokeWidth={1.5} />
+              </div>
               <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--li-text)' }}>
                 No {meta.title.toLowerCase()} listings in {cityName} yet
               </h2>
@@ -291,7 +295,8 @@ export default async function SeoCategoryPage({
                         className="text-xs px-3 py-1.5 rounded-full border transition-colors hover:border-orange-400 hover:text-orange-500"
                         style={{ borderColor: 'var(--li-border)', color: 'var(--li-muted)' }}
                       >
-                        {m.emoji} {m.title}
+                        <m.icon size={14} className="inline-block mr-1 align-text-bottom" />
+                        {m.title}
                       </Link>
                     ))}
                 </div>

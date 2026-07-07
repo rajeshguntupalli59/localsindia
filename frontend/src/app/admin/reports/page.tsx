@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Flag, Eye, CheckCircle } from 'lucide-react';
+import { Flag, Eye, CheckCircle, Tag } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { formatPrice, timeAgo } from '@/lib/utils';
@@ -119,7 +119,7 @@ export default function AdminReportsPage() {
                   {listing.images && listing.images[0] ? (
                     <Image src={listing.images[0].url} alt={listing.title} fill className="object-cover" />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-2xl">🏷️</div>
+                    <div className="w-full h-full flex items-center justify-center text-slate-300"><Tag size={22} /></div>
                   )}
                 </div>
                 <div className="flex-1 min-w-0">

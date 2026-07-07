@@ -2,17 +2,17 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X } from 'lucide-react';
+import { X, Briefcase, Home, Car, Smartphone, Wrench, Package, Flame, CalendarDays, Eye, type LucideIcon } from 'lucide-react';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend.azurewebsites.net';
 
-const INTERESTS = [
-  { id: 'jobs', label: '💼 Jobs', icon: '💼' },
-  { id: 'pg', label: '🏠 PG / Room', icon: '🏠' },
-  { id: 'vehicles', label: '🚗 Vehicles', icon: '🚗' },
-  { id: 'electronics', label: '📱 Electronics', icon: '📱' },
-  { id: 'services', label: '🔧 Services', icon: '🔧' },
-  { id: 'other', label: '📦 Other', icon: '📦' },
+const INTERESTS: { id: string; label: string; icon: LucideIcon }[] = [
+  { id: 'jobs', label: 'Jobs', icon: Briefcase },
+  { id: 'pg', label: 'PG / Room', icon: Home },
+  { id: 'vehicles', label: 'Vehicles', icon: Car },
+  { id: 'electronics', label: 'Electronics', icon: Smartphone },
+  { id: 'services', label: 'Services', icon: Wrench },
+  { id: 'other', label: 'Other', icon: Package },
 ];
 
 const BUDGETS = [
@@ -22,10 +22,10 @@ const BUDGETS = [
   { id: '20000+', label: '₹20K+', min: 20000, max: null },
 ];
 
-const TIMELINES = [
-  { id: 'asap', label: '🔥 ASAP' },
-  { id: 'this_month', label: '📅 This month' },
-  { id: 'browsing', label: '👀 Just browsing' },
+const TIMELINES: { id: string; label: string; icon: LucideIcon }[] = [
+  { id: 'asap', label: 'ASAP', icon: Flame },
+  { id: 'this_month', label: 'This month', icon: CalendarDays },
+  { id: 'browsing', label: 'Just browsing', icon: Eye },
 ];
 
 const ALERT_FREQ = [
@@ -99,7 +99,7 @@ export default function OnboardingQuiz({ onClose }: Props) {
               <h2 className="text-xl font-bold text-white">What are you looking for?</h2>
               <p className="text-sm text-white/60 mt-1">Personalise your feed in 30 seconds</p>
             </div>
-            <button type="button" onClick={onClose}
+            <button type="button" onClick={onClose} aria-label="Close"
               className="text-white/50 hover:text-white transition-colors mt-1">
               <X className="w-5 h-5" />
             </button>
@@ -111,20 +111,24 @@ export default function OnboardingQuiz({ onClose }: Props) {
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">I&apos;m looking for</p>
               <div className="grid grid-cols-3 gap-2">
-                {INTERESTS.map(i => (
-                  <button
-                    key={i.id}
-                    type="button"
-                    onClick={() => toggleInterest(i.id)}
-                    className={`flex flex-col items-center gap-1 py-3 px-2 rounded-xl border-2 text-xs font-semibold transition-all
-                      ${interests.includes(i.id)
-                        ? 'border-[#F7921E] bg-[#FEF3E2] text-[#E07B0A]'
-                        : 'border-slate-200 text-slate-600 hover:border-slate-300'}`}
-                  >
-                    <span className="text-xl">{i.icon}</span>
-                    {i.label.split(' ').slice(1).join(' ')}
-                  </button>
-                ))}
+                {INTERESTS.map(i => {
+                  const active = interests.includes(i.id);
+                  return (
+                    <button
+                      key={i.id}
+                      type="button"
+                      onClick={() => toggleInterest(i.id)}
+                      aria-pressed={active}
+                      className={`flex flex-col items-center gap-1 py-3 px-2 rounded-xl border-2 text-xs font-semibold transition-all
+                        ${active
+                          ? 'border-[#F7921E] bg-[#FEF3E2] text-[#E07B0A]'
+                          : 'border-slate-200 text-slate-600 hover:border-slate-300'}`}
+                    >
+                      <i.icon size={20} />
+                      {i.label}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -154,19 +158,24 @@ export default function OnboardingQuiz({ onClose }: Props) {
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">How soon?</p>
               <div className="flex gap-2 flex-wrap">
-                {TIMELINES.map(t => (
-                  <button
-                    key={t.id}
-                    type="button"
-                    onClick={() => setTimeline(t.id === timeline ? '' : t.id)}
-                    className={`px-4 py-2 rounded-full border-2 text-sm font-medium transition-all
-                      ${timeline === t.id
-                        ? 'border-[#F7921E] bg-[#FEF3E2] text-[#E07B0A]'
-                        : 'border-slate-200 text-slate-600 hover:border-slate-300'}`}
-                  >
-                    {t.label}
-                  </button>
-                ))}
+                {TIMELINES.map(t => {
+                  const active = timeline === t.id;
+                  return (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => setTimeline(t.id === timeline ? '' : t.id)}
+                      aria-pressed={active}
+                      className={`flex items-center gap-1.5 px-4 py-2 rounded-full border-2 text-sm font-medium transition-all
+                        ${active
+                          ? 'border-[#F7921E] bg-[#FEF3E2] text-[#E07B0A]'
+                          : 'border-slate-200 text-slate-600 hover:border-slate-300'}`}
+                    >
+                      <t.icon size={14} />
+                      {t.label}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 

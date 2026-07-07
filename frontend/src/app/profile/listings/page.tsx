@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Plus, RefreshCw, CheckCircle, Trash2, Pencil, Eye, MessageCircle, Star } from 'lucide-react';
+import { ArrowLeft, Plus, RefreshCw, CheckCircle, Trash2, Pencil, Eye, MessageCircle, Star, Tag } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { api, ApiError } from '@/lib/api';
@@ -148,7 +148,7 @@ export default function MyListingsPage() {
                   {listing.images && listing.images[0] ? (
                     <Image src={listing.images[0].url} alt={listing.title} fill className="object-cover" />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-3xl">🏷️</div>
+                    <div className="w-full h-full flex items-center justify-center text-slate-300"><Tag size={28} /></div>
                   )}
                 </div>
                 <div className="flex-1 min-w-0">

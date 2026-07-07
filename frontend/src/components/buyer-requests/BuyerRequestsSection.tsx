@@ -2,7 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Send, MessageCircle } from 'lucide-react';
+import {
+  X, Send, MessageCircle, Search, Utensils, Home, Briefcase, Car,
+  Smartphone, Calendar, Store, GraduationCap, Wrench, Tag, Building2, Sofa, Shirt,
+  type LucideIcon,
+} from 'lucide-react';
 import { api } from '@/lib/api';
 import type { BuyerRequestOut, Category } from '@/lib/types';
 import { timeAgo, formatPrice } from '@/lib/utils';
@@ -12,10 +16,10 @@ interface Props {
   citySlug: string;
 }
 
-const CATEGORY_ICONS: Record<string, string> = {
-  tiffin: '🍱', 'pg-roommate': '🏠', jobs: '💼', vehicles: '🚗',
-  electronics: '📱', events: '🎉', businesses: '🏪', education: '📚',
-  services: '🛠️', classifieds: '🏷️', 'real-estate': '🏗️', furniture: '🛋️', fashion: '👗',
+const CATEGORY_ICONS: Record<string, LucideIcon> = {
+  tiffin: Utensils, 'pg-roommate': Home, jobs: Briefcase, vehicles: Car,
+  electronics: Smartphone, events: Calendar, businesses: Store, education: GraduationCap,
+  services: Wrench, classifieds: Tag, 'real-estate': Building2, furniture: Sofa, fashion: Shirt,
 };
 
 export default function BuyerRequestsSection({ citySlug }: Props) {
@@ -63,7 +67,9 @@ export default function BuyerRequestsSection({ citySlug }: Props) {
       {/* Header row */}
       <div className="flex items-center justify-between px-4 mb-3">
         <div>
-          <h2 className="font-black text-base" style={{ color: 'var(--li-text)' }}>🔍 Wanted</h2>
+          <h2 className="font-black text-base flex items-center gap-1.5" style={{ color: 'var(--li-text)' }}>
+            <Search size={16} /> Wanted
+          </h2>
           <p className="text-xs" style={{ color: 'var(--li-muted)' }}>People looking to buy — reach out if you have it</p>
         </div>
         <button
@@ -85,7 +91,10 @@ export default function BuyerRequestsSection({ citySlug }: Props) {
               style={{ borderColor: 'var(--li-border)' }}
             >
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-xl">{CATEGORY_ICONS[r.category_slug ?? ''] ?? '🔍'}</span>
+                {(() => {
+                  const Icon = CATEGORY_ICONS[r.category_slug ?? ''] ?? Search;
+                  return <Icon size={18} style={{ color: 'var(--li-primary)' }} />;
+                })()}
                 <span className="text-xs font-semibold" style={{ color: 'var(--li-muted)' }}>{r.category_name}</span>
               </div>
               <p className="text-sm font-semibold line-clamp-2 mb-1" style={{ color: 'var(--li-text)' }}>
@@ -134,24 +143,31 @@ export default function BuyerRequestsSection({ citySlug }: Props) {
             >
               <div className="flex items-center justify-between mb-5">
                 <h2 className="text-lg font-black" style={{ color: 'var(--li-text)' }}>What are you looking for?</h2>
-                <button onClick={() => setShowModal(false)}><X className="w-5 h-5" style={{ color: 'var(--li-muted)' }} /></button>
+                <button onClick={() => setShowModal(false)} aria-label="Close">
+                  <X className="w-5 h-5" style={{ color: 'var(--li-muted)' }} />
+                </button>
               </div>
 
               {/* Category chips */}
               <p className="text-xs font-semibold mb-2" style={{ color: 'var(--li-muted)' }}>Category</p>
               <div className="flex flex-wrap gap-2 mb-4">
-                {categories.map(cat => (
-                  <button
-                    key={cat.id}
-                    onClick={() => setForm(f => ({ ...f, category_slug: cat.slug }))}
-                    className="px-3 py-1.5 rounded-full text-sm font-semibold border-2 transition-all"
-                    style={form.category_slug === cat.slug
-                      ? { borderColor: 'var(--li-primary)', background: 'var(--li-primary-light)', color: 'var(--li-primary)' }
-                      : { borderColor: 'var(--li-border)', color: 'var(--li-muted)' }}
-                  >
-                    {CATEGORY_ICONS[cat.slug] ?? '🏷️'} {cat.name}
-                  </button>
-                ))}
+                {categories.map(cat => {
+                  const Icon = CATEGORY_ICONS[cat.slug] ?? Tag;
+                  const active = form.category_slug === cat.slug;
+                  return (
+                    <button
+                      key={cat.id}
+                      onClick={() => setForm(f => ({ ...f, category_slug: cat.slug }))}
+                      className="px-3 py-1.5 rounded-full text-sm font-semibold border-2 transition-all flex items-center gap-1.5"
+                      style={active
+                        ? { borderColor: 'var(--li-primary)', background: 'var(--li-primary-light)', color: 'var(--li-primary)' }
+                        : { borderColor: 'var(--li-border)', color: 'var(--li-muted)' }}
+                      aria-pressed={active}
+                    >
+                      <Icon size={14} /> {cat.name}
+                    </button>
+                  );
+                })}
               </div>
 
               {/* Description */}

@@ -4,7 +4,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   SearchX, Tag, UtensilsCrossed, Building2, Briefcase, Car,
-  Smartphone, CalendarDays, Store, GraduationCap, Plus,
+  Smartphone, CalendarDays, Store, GraduationCap, Plus, AlertTriangle,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import Link from 'next/link';
@@ -158,7 +158,7 @@ export default function CityHomeClient({
       <div style={{ background: 'var(--li-page-bg)', minHeight: '100vh' }}>
         <SiteHeader citySlug={citySlug} />
         <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 px-4 text-center">
-          <p className="text-2xl">⚠️</p>
+          <AlertTriangle size={28} className="text-amber-500" />
           <h2 className="text-lg font-bold text-slate-800">Could not load listings</h2>
           <p className="text-sm text-slate-500">The server took too long to respond. Please try again.</p>
           <button

@@ -4,22 +4,22 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import { MapPin, Clock, Heart, Eye } from 'lucide-react';
+import { MapPin, Clock, Heart, Eye, Utensils, Home, Briefcase, Car, Smartphone, Calendar, Store, GraduationCap, Tag, Star, MessageCircle, type LucideIcon } from 'lucide-react';
 import { formatPrice, timeAgo, fulfillLabel } from '@/lib/utils';
 import { api } from '@/lib/api';
 import type { Listing } from '@/lib/types';
 import { usePrefs } from '@/context/PrefsContext';
 import { useSaved } from '@/hooks/useSaved';
 
-const CATEGORY_EMOJI: Record<string, string> = {
-  'tiffin':       '🍱',
-  'pg-roommate':  '🏠',
-  'jobs':         '💼',
-  'vehicles':     '🚗',
-  'electronics':  '📱',
-  'events':       '🎉',
-  'businesses':   '🏪',
-  'education':    '📚',
+const CATEGORY_ICON: Record<string, LucideIcon> = {
+  'tiffin':       Utensils,
+  'pg-roommate':  Home,
+  'jobs':         Briefcase,
+  'vehicles':     Car,
+  'electronics':  Smartphone,
+  'events':       Calendar,
+  'businesses':   Store,
+  'education':    GraduationCap,
 };
 
 const CATEGORY_COLOR: Record<string, string> = {
@@ -48,6 +48,7 @@ export default function ListingCard({ listing }: Props) {
   const href       = `/listing/${listing.id}`;
   const saved      = isSaved(listing.id);
   const catColor   = CATEGORY_COLOR[listing.category_slug ?? ''] ?? '#94a3b8';
+  const CatIcon    = CATEGORY_ICON[listing.category_slug ?? ''] ?? Tag;
   const isFeatured = listing.is_featured;
 
   const handleHeartClick = (e: React.MouseEvent) => {
@@ -108,9 +109,7 @@ export default function ListingCard({ listing }: Props) {
               className="absolute inset-0 flex items-center justify-center"
               style={{ background: `linear-gradient(135deg, ${catColor}1A 0%, ${catColor}08 100%)` }}
             >
-              <span className="text-[52px]" style={{ opacity: 0.25 }}>
-                {CATEGORY_EMOJI[listing.category_slug ?? ''] ?? '🏷️'}
-              </span>
+              <CatIcon size={48} style={{ opacity: 0.25, color: catColor }} />
             </div>
           )}
 
@@ -163,14 +162,15 @@ export default function ListingCard({ listing }: Props) {
           {/* Featured badge */}
           {isFeatured && (
             <span
-              className="absolute top-2.5 left-2.5 z-20 text-[10px] font-black px-2.5 py-1 rounded-[8px] leading-none uppercase tracking-wide"
+              className="absolute top-2.5 left-2.5 z-20 flex items-center gap-1 text-[10px] font-black px-2.5 py-1 rounded-[8px] leading-none uppercase tracking-wide"
               style={{
                 background: 'linear-gradient(135deg, #F7B731 0%, #F7921E 100%)',
                 color: '#1A1A2E',
                 boxShadow: '0 2px 10px rgba(247,183,49,0.55)',
               }}
             >
-              ⭐ Featured
+              <Star size={10} fill="#1A1A2E" strokeWidth={0} />
+              Featured
             </span>
           )}
 
@@ -272,10 +272,11 @@ export default function ListingCard({ listing }: Props) {
           href={waUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="wa-btn w-full py-3 text-[13.5px] active:scale-[0.97] transition-all duration-150"
+          className="wa-btn w-full py-3 text-[13.5px] active:scale-[0.97] transition-all duration-150 flex items-center justify-center gap-1.5"
           onClick={e => { e.stopPropagation(); api.listings.waClick(listing.id); }}
         >
-          💬 {t('listing.chatOnWA')}
+          <MessageCircle size={15} fill="currentColor" strokeWidth={0} />
+          {t('listing.chatOnWA')}
         </a>
       </div>
     </motion.div>

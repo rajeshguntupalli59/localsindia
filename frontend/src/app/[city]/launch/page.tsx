@@ -4,17 +4,17 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { MapPin, Users, ArrowRight, MessageCircle, Shield, Zap } from 'lucide-react';
+import { MapPin, Users, ArrowRight, MessageCircle, Shield, Zap, IndianRupee, Lock, Globe, type LucideIcon } from 'lucide-react';
 import { api } from '@/lib/api';
 import type { City } from '@/lib/types';
 import SiteHeader from '@/components/site-header/SiteHeader';
 import SiteFooter from '@/components/site-footer/SiteFooter';
 
-const PERKS = [
-  { icon: '₹', title: 'Completely Free', desc: 'No listing fees ever. No subscription. Post as many listings as you want.' },
-  { icon: '🔒', title: 'No Spam Calls', desc: 'Your number stays private. Buyers contact you on WhatsApp only — no cold calls.' },
-  { icon: '💬', title: 'WhatsApp-First', desc: '90% of Indians use WhatsApp. Every listing has a chat button — deals happen faster.' },
-  { icon: '🌐', title: 'Your Language', desc: 'Browse in Telugu, Hindi, Tamil, Kannada, and 7 more Indian languages.' },
+const PERKS: { icon: LucideIcon; title: string; desc: string }[] = [
+  { icon: IndianRupee, title: 'Completely Free', desc: 'No listing fees ever. No subscription. Post as many listings as you want.' },
+  { icon: Lock, title: 'No Spam Calls', desc: 'Your number stays private. Buyers contact you on WhatsApp only — no cold calls.' },
+  { icon: MessageCircle, title: 'WhatsApp-First', desc: '90% of Indians use WhatsApp. Every listing has a chat button — deals happen faster.' },
+  { icon: Globe, title: 'Your Language', desc: 'Browse in Telugu, Hindi, Tamil, Kannada, and 7 more Indian languages.' },
 ];
 
 export default function CityLaunchPage() {
@@ -124,7 +124,7 @@ export default function CityLaunchPage() {
               className="bg-white rounded-3xl p-6 border"
               style={{ borderColor: 'var(--li-border)' }}
             >
-              <div className="text-3xl mb-3">{p.icon}</div>
+              <div className="mb-3" style={{ color: 'var(--li-primary)' }}><p.icon size={28} strokeWidth={1.75} /></div>
               <h3 className="font-bold text-sm mb-1.5" style={{ color: 'var(--li-text)' }}>{p.title}</h3>
               <p className="text-xs leading-relaxed" style={{ color: 'var(--li-muted)' }}>{p.desc}</p>
             </motion.div>

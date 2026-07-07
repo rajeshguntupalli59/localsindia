@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { CheckCircle, XCircle, Clock, Trash2 } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, Trash2, Tag } from 'lucide-react';
 import Image from 'next/image';
 import { formatPrice, timeAgo } from '@/lib/utils';
 import type { Listing } from '@/lib/types';
@@ -176,7 +176,7 @@ export default function AdminListingsPage() {
                   {listing.images?.[0]?.url ? (
                     <Image src={listing.images[0].url} alt={listing.title ?? ''} fill className="object-cover" />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-3xl">🏷️</div>
+                    <div className="w-full h-full flex items-center justify-center text-slate-300"><Tag size={28} /></div>
                   )}
                 </div>
                 <div className="flex-1 min-w-0">

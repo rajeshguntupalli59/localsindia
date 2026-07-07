@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft, MapPin, Clock, ChevronDown, ChevronUp, Flag, Tag, User, ExternalLink, Heart, Star, ChevronLeft, ChevronRight, Eye, AlertCircle } from 'lucide-react';
+import { ArrowLeft, MapPin, Clock, ChevronDown, ChevronUp, Flag, Tag, User, ExternalLink, Heart, Star, ChevronLeft, ChevronRight, Eye, AlertCircle, Utensils, Home, Briefcase, Car, Smartphone, Calendar, Store, GraduationCap, MessageCircle, type LucideIcon } from 'lucide-react';
 import { api, ApiError } from '@/lib/api';
 import type { Listing, ListingReview } from '@/lib/types';
 import { formatPrice, timeAgo } from '@/lib/utils';
@@ -17,9 +17,9 @@ function Skeleton({ className }: { className?: string }) {
   return <div className={`animate-pulse bg-slate-100 rounded-lg ${className ?? ''}`} />;
 }
 
-const CATEGORY_EMOJI: Record<string, string> = {
-  'tiffin': '🍱', 'pg-roommate': '🏠', 'jobs': '💼', 'vehicles': '🚗',
-  'electronics': '📱', 'events': '🎉', 'businesses': '🏪', 'education': '📚',
+const CATEGORY_ICON: Record<string, LucideIcon> = {
+  tiffin: Utensils, 'pg-roommate': Home, jobs: Briefcase, vehicles: Car,
+  electronics: Smartphone, events: Calendar, businesses: Store, education: GraduationCap,
 };
 
 export default function ListingDetailClient({ id }: { id: string }) {
@@ -174,8 +174,11 @@ export default function ListingDetailClient({ id }: { id: string }) {
                 priority
               />
             ) : (
-              <div className="absolute inset-0 flex items-center justify-center text-4xl opacity-20 select-none">
-                {CATEGORY_EMOJI[listing.category_slug ?? ''] ?? '🏷️'}
+              <div className="absolute inset-0 flex items-center justify-center opacity-20 select-none">
+                {(() => {
+                  const Icon = CATEGORY_ICON[listing.category_slug ?? ''] ?? Tag;
+                  return <Icon size={56} />;
+                })()}
               </div>
             )}
 
@@ -487,10 +490,11 @@ export default function ListingDetailClient({ id }: { id: string }) {
                 href={waUrl ?? '#'}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="wa-btn w-full py-4 text-base font-bold"
+                className="wa-btn w-full py-4 text-base font-bold flex items-center justify-center gap-2"
                 onClick={() => api.listings.waClick(listing.id)}
               >
-                💬 Chat on WhatsApp
+                <MessageCircle size={18} fill="currentColor" strokeWidth={0} />
+                Chat on WhatsApp
               </a>
             </div>
 

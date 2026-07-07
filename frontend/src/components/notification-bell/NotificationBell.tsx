@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Bell } from 'lucide-react';
+import { Bell, CheckCircle2, Clock, Star, BellRing, Megaphone, type LucideIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { timeAgo } from '@/lib/utils';
 
@@ -17,12 +17,19 @@ interface Notification {
   created_at: string;
 }
 
-const TYPE_ICON: Record<string, string> = {
-  listing_approved: '✅',
-  listing_expiring: '⏰',
-  listing_featured: '⭐',
-  new_listing_match: '🔔',
-  default: '📣',
+const TYPE_ICON: Record<string, LucideIcon> = {
+  listing_approved: CheckCircle2,
+  listing_expiring: Clock,
+  listing_featured: Star,
+  new_listing_match: BellRing,
+  default: Megaphone,
+};
+const TYPE_ICON_COLOR: Record<string, string> = {
+  listing_approved: '#16a34a',
+  listing_expiring: '#f59e0b',
+  listing_featured: '#F7921E',
+  new_listing_match: '#6366f1',
+  default: '#94a3b8',
 };
 
 export default function NotificationBell() {
@@ -150,14 +157,17 @@ export default function NotificationBell() {
                   <p className="text-sm text-slate-400">No notifications yet</p>
                 </div>
               ) : (
-                notifications.map(n => (
-                  <div
+                notifications.map(n => {
+                  const Icon = TYPE_ICON[n.type] ?? TYPE_ICON.default;
+                  return (
+                  <button
                     key={n.id}
+                    type="button"
                     onClick={() => { markRead(n.id); if (n.action_url) { window.location.href = n.action_url; setOpen(false); } }}
-                    className={`flex gap-3 px-4 py-3 border-b border-slate-50 cursor-pointer transition-colors
+                    className={`w-full text-left flex gap-3 px-4 py-3 border-b border-slate-50 cursor-pointer transition-colors
                       ${n.is_read ? 'hover:bg-slate-50' : 'bg-orange-50/60 hover:bg-orange-50'}`}
                   >
-                    <span className="text-lg shrink-0 mt-0.5">{TYPE_ICON[n.type] ?? TYPE_ICON.default}</span>
+                    <Icon size={18} className="shrink-0 mt-0.5" style={{ color: TYPE_ICON_COLOR[n.type] ?? TYPE_ICON_COLOR.default }} />
                     <div className="flex-1 min-w-0">
                       <p className={`text-xs leading-snug ${n.is_read ? 'text-slate-600' : 'text-slate-900 font-medium'}`}>
                         {n.title}
@@ -168,8 +178,9 @@ export default function NotificationBell() {
                     {!n.is_read && (
                       <span className="w-2 h-2 rounded-full bg-[#F7921E] shrink-0 mt-1.5" />
                     )}
-                  </div>
-                ))
+                  </button>
+                  );
+                })
               )}
             </div>
           </motion.div>
