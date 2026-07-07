@@ -144,7 +144,8 @@
 | `app/page.tsx` | `/` | Homepage: city selector, categories, fresh listings, trust badges |
 | `app/layout.tsx` | (root) | Root HTML shell: fonts, NextIntlClientProvider, Toaster, ServiceWorker |
 | `app/[city]/layout.tsx` | `/[city]/*` | Sticky header, bottom nav, city context |
-| `app/[city]/page.tsx` | `/[city]` | City home: featured + latest listings by category |
+| `app/[city]/page.tsx` | `/[city]` | Server Component wrapper (2026-07-07): real SSR fetch of city/todayCount/trending/fresh, `generateMetadata` with per-city title + noindex if <3 real listings, JSON-LD. Renders `CityHomeClient.tsx` |
+| `app/[city]/CityHomeClient.tsx` | (client) | City home UI: hero, trending/fresh listing rows, category browse — seeded with server-fetched `initialCity`/`initialFresh`/etc props so first paint has real content, not "Loading..." |
 | `app/[city]/[category]/page.tsx` | `/[city]/jobs` | All listings in a category for the city |
 | `app/[city]/classifieds/[id]/page.tsx` | `/[city]/classifieds/[id]` | Listing detail (Server Component wrapper) |
 | `app/[city]/classifieds/[id]/ListingDetailClient.tsx` | (client) | Listing detail UI: interactive image carousel (activeImg state, prev/next arrows, dot indicators, clickable thumbnails with active orange border), WhatsApp, reviews |
@@ -177,6 +178,8 @@
 | `app/terms/page.tsx` | `/terms` | Terms of service (static) |
 | `app/offline/page.tsx` | `/offline` | PWA offline fallback |
 | `app/invite/page.tsx` | `/invite` | Invite friends page |
+| `app/cities/page.tsx` | `/cities` | Server Component wrapper (2026-07-07): SSR fetch of full city list, renders `CitiesListClient.tsx` |
+| `app/cities/CitiesListClient.tsx` | (client) | City directory search/filter UI, seeded with server-fetched `initialCities` |
 | `app/seller/[id]/page.tsx` | `/seller/[id]` | Public seller profile: avatar, member since, active listings grid |
 | `app/saved/page.tsx` | `/saved` | Saved/bookmarked listings from localStorage |
 | `app/listing/[id]/page.tsx` + `ListingDetailClient.tsx` | `/listing/[id]` | Global (city-agnostic) listing detail — same interactive carousel as city-scoped version |
@@ -236,6 +239,8 @@
 | `.github/workflows/backend-azure.yml` | Auto-deploy backend to Azure App Service on master push |
 | `.github/workflows/frontend-azure.yml` | Auto-deploy frontend to Azure Static Web Apps on master push |
 | `.github/workflows/keepalive.yml` | Pings /api/v1/health every 15 min — prevents Azure cold start |
+| `.github/workflows/test.yml` | Runs `cd frontend && npm test` (Vitest) on push/PR to master + develop (added 2026-07-07) |
+| `frontend/vitest.config.ts` + `vitest.setup.ts` | Vitest config (jsdom env, `@` path alias) + jest-dom matchers setup |
 | `staticwebapp.config.json` | Minimal hybrid-SSR config — `apiRuntime: node:18`, security headers, anonymous `/api/*` (no more SPA fallback rules) |
 | `next.config.mjs` | Hybrid SSR (no `output: 'export'`), unoptimized images, webpack cache disabled |
 | `tailwind.config.ts` | Tailwind theme extension |
@@ -510,4 +515,4 @@ Every new feature (page, endpoint, table, component) requires updates to both fi
 
 ---
 
-*Last updated: 2026-06-19 | Matches ARCHITECTURE.md*
+*Last updated: 2026-07-07 (Server/Client split for `/[city]` + `/cities`, test infra added) | ⚠️ ARCHITECTURE.md §7-9 not yet updated to match — index is current, full doc is stale for these two routes*
