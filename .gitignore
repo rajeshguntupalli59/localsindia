@@ -43,3 +43,4 @@ logs/
 # Docker
 pgdata/
 .railway/
+.gstack/

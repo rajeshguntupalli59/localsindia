@@ -81,7 +81,14 @@ Show test output as evidence â€” never claim “it works” without proof.
 
 - typecheck: cd frontend && npm run build (embeds tsc) | cd mobile && npx tsc --noEmit
 - lint: cd frontend && npm run lint
-- test: cd backend && python -m pytest tests/ -x -q
+- test: cd backend && python -m pytest tests/ -x -q | cd frontend && npm test
 - deadcode: (none configured)
 - shell: (none configured)
+
+## Testing
+- Frontend: Vitest + @testing-library/react, colocated `*.test.ts` files. Run: `cd frontend && npm test`. See TESTING.md.
+- Backend: pytest. Run: `cd backend && python -m pytest tests/ -x -q`
+- 100% test coverage is the goal — tests make vibe coding safe, not slow
+- New function → write a test. Bug fix → write a regression test. New conditional → test both branches.
+- Never commit code that makes existing tests fail
 
