@@ -4,12 +4,13 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft, MapPin, Clock, ChevronDown, ChevronUp, Flag, Tag, User, ExternalLink, Heart, Star, ChevronLeft, ChevronRight, Eye, AlertCircle, Utensils, Home, Briefcase, Car, Smartphone, Calendar, Store, GraduationCap, MessageCircle, type LucideIcon } from 'lucide-react';
+import { ArrowLeft, MapPin, Clock, ChevronDown, ChevronUp, Flag, Tag, User, ExternalLink, Heart, Star, ChevronLeft, ChevronRight, Eye, AlertCircle, Utensils, Home, Briefcase, Car, Smartphone, Calendar, Store, GraduationCap, MessageCircle, Share2, type LucideIcon } from 'lucide-react';
 import { api, ApiError } from '@/lib/api';
 import type { Listing, ListingReview } from '@/lib/types';
 import { formatPrice, timeAgo } from '@/lib/utils';
 import { useSaved } from '@/hooks/useSaved';
 import { toast } from 'sonner';
+import ListingCard from '@/components/listing-card/ListingCard';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend.azurewebsites.net';
 
@@ -22,12 +23,12 @@ const CATEGORY_ICON: Record<string, LucideIcon> = {
   electronics: Smartphone, events: Calendar, businesses: Store, education: GraduationCap,
 };
 
-export default function ListingDetailClient({ id }: { id: string }) {
+export default function ListingDetailClient({ id, initialListing = null }: { id: string; initialListing?: Listing | null }) {
   const router = useRouter();
   const { toggle, isSaved } = useSaved();
 
-  const [listing, setListing] = useState<Listing | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [listing, setListing] = useState<Listing | null>(initialListing);
+  const [loading, setLoading] = useState(!initialListing);
   const [error, setError] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [reviews, setReviews] = useState<ListingReview[]>([]);
@@ -37,6 +38,7 @@ export default function ListingDetailClient({ id }: { id: string }) {
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewBody, setReviewBody] = useState('');
   const [submittingReview, setSubmittingReview] = useState(false);
+  const [similarListings, setSimilarListings] = useState<Listing[]>([]);
 
   useEffect(() => {
     try {
@@ -67,6 +69,31 @@ export default function ListingDetailClient({ id }: { id: string }) {
       .then(d => { if (d) setSaveCount(d.count); })
       .catch(() => {});
   }, [id]);
+
+  // Similar listings — same category + city, excluding this one
+  useEffect(() => {
+    if (!listing?.city_slug || !listing?.category_slug) { setSimilarListings([]); return; }
+    api.cities.listings(listing.city_slug, { category_slug: listing.category_slug, page_size: '9' })
+      .then(data => setSimilarListings(data.filter(l => l.id !== listing.id).slice(0, 8)))
+      .catch(() => setSimilarListings([]));
+  }, [listing?.city_slug, listing?.category_slug, listing?.id]);
+
+  const handleShare = async () => {
+    if (!listing) return;
+    const url = `https://www.localsindia.com/listing/${listing.id}`;
+    const price = listing.price !== null ? ` — ${formatPrice(listing.price)}` : '';
+    const shareData = { title: listing.title, text: `${listing.title}${price}`, url };
+    if (navigator.share) {
+      try { await navigator.share(shareData); } catch {}
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success('Link copied to clipboard');
+    } catch {
+      toast.error('Could not copy link');
+    }
+  };
 
   const handleReport = async () => {
     const token = localStorage.getItem('access_token');
@@ -116,6 +143,15 @@ export default function ListingDetailClient({ id }: { id: string }) {
                   className={`w-4.5 h-4.5 transition-colors ${isSaved(listing.id) ? 'fill-red-500 text-red-500' : 'text-slate-300 hover:text-red-400'}`}
                   strokeWidth={2}
                 />
+              </button>
+              <button
+                type="button"
+                onClick={handleShare}
+                className="shrink-0 p-1.5 text-slate-300 hover:text-[#F7921E] transition-colors"
+                title="Share this listing"
+                aria-label="Share listing"
+              >
+                <Share2 className="w-4 h-4" strokeWidth={1.8} />
               </button>
               <button
                 type="button"
@@ -312,7 +348,7 @@ export default function ListingDetailClient({ id }: { id: string }) {
                 {(listing.view_count ?? 0) > 0 && (
                   <span className="flex items-center gap-1">
                     <Eye className="w-3.5 h-3.5" strokeWidth={2} />
-                    {listing.view_count} views
+                    {listing.view_count} view{listing.view_count !== 1 ? 's' : ''}
                   </span>
                 )}
                 {saveCount !== null && saveCount > 0 && (
@@ -512,6 +548,20 @@ export default function ListingDetailClient({ id }: { id: string }) {
             )}
 
           </div>
+
+          {/* Similar listings */}
+          {similarListings.length > 0 && (
+            <div className="page-wrap mt-8">
+              <h2 className="text-sm font-semibold text-slate-700 mb-3">Similar listings</h2>
+              <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-4">
+                {similarListings.map(l => (
+                  <div key={l.id} className="shrink-0 w-52 sm:w-auto">
+                    <ListingCard listing={l} citySlug={listing.city_slug ?? undefined} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </>
       )}
 

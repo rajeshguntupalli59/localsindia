@@ -145,6 +145,10 @@ export default function HomeScreen({ navigation }: any) {
   };
 
   const handleListingPress = async (listing: Listing) => {
+    // Guard against a tap landing during pull-to-refresh, when all three
+    // horizontal lists are being replaced at once and a recycled card could
+    // hand the touch to a listing that's no longer the one the user saw.
+    if (refreshing) return;
     await storage.recentlyViewed.add(listing, citySlug);
     navigation.navigate('ListingDetail', { id: listing.id });
   };

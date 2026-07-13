@@ -2,6 +2,7 @@ import { useRef } from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet, Linking, Animated, Share } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { listingsApi } from '../lib/api';
+import { formatPrice } from '../lib/format';
 import { useSavedContext } from '../context/SavedContext';
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -58,12 +59,6 @@ interface Listing {
 interface Props {
   listing: Listing;
   onPress?: () => void;
-}
-
-function formatPrice(p: number): string {
-  if (p >= 100000) return `₹${(p / 100000).toFixed(1)}L`;
-  if (p >= 1000) return `₹${(p / 1000).toFixed(0)}k`;
-  return `₹${p}`;
 }
 
 export default function ListingCard({ listing, onPress }: Props) {

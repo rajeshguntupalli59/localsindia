@@ -70,6 +70,7 @@
 | AI chatbot assistant | §6-Chat | `routers/chat.py`, `core/limiter.py` | `components/chat-widget/ChatWidget.tsx`, `mobile/src/screens/ChatScreen.tsx` | — | POST /chat |
 | Listing view tracking | §6-Listings | `routers/listings.py` | `listing/[id]/ListingDetailClient.tsx` | `listings` (view_count) | POST /listings/{id}/view |
 | Saved searches / alerts | §6-SavedSearches | `routers/saved_searches.py` | `/search` page (frontend button pending) | `saved_searches` | POST /api/v1/saved-searches, GET /api/v1/saved-searches |
+| Buyer requests ("Wanted") | §5-buyer_requests (not yet in ARCHITECTURE.md) | `routers/buyer_requests.py`, `models/buyer_request.py`, `schemas/buyer_request.py` | `components/buyer-requests/BuyerRequestsSection.tsx` (rendered on `[city]/CityHomeClient.tsx`) | `buyer_requests` | GET /api/v1/buyer-requests/cities/{slug}, POST /api/v1/buyer-requests, PATCH /api/v1/buyer-requests/{id}/fulfill, DELETE /api/v1/buyer-requests/{id} |
 
 ---
 
@@ -80,7 +81,7 @@
 
 | File | What it does |
 |------|-------------|
-| `backend/app/main.py` | FastAPI app entry point; mounts 13 routers under /api/v1; CORS; /health endpoint; rate-limit exception handler |
+| `backend/app/main.py` | FastAPI app entry point; mounts 18 routers under /api/v1; CORS; /health endpoint; rate-limit exception handler |
 | `backend/app/core/config.py` | All env vars (DATABASE_URL, SECRET_KEY, MSG91, Cloudinary, Razorpay, Google OAuth, ANTHROPIC_API_KEY) |
 | `backend/app/core/database.py` | Async PostgreSQL engine + `get_db()` session dependency |
 | `backend/app/core/security.py` | bcrypt hash/verify, JWT create/decode, 6-digit OTP generator |
@@ -102,6 +103,7 @@
 | `models/event.py` | `events` | Local events; free/paid; status lifecycle |
 | `models/report.py` | `reports` | Spam/abuse reports; 3 triggers auto-flag listing |
 | `models/otp_request.py` | `otp_requests` | OTP lifecycle; bcrypt-hashed; 3-attempt lockout |
+| `models/buyer_request.py` | `buyer_requests` | "Wanted" posts — buyer looking for X; status open/fulfilled; soft-delete |
 
 ### Backend — Routers (API endpoints)
 
@@ -120,6 +122,7 @@
 | `routers/users.py` | `/api/v1/users` | Public seller profiles (name, member since, active listings) |
 | `routers/chat.py` | `/api/v1/chat` | AI chatbot (Gemini 2.0 Flash); rate-limited 5/min + 20/hr per IP; needs GOOGLE_AI_KEY |
 | `routers/saved_searches.py` | `/api/v1/saved-searches` | Save/list search alerts for a user |
+| `routers/buyer_requests.py` | `/api/v1/buyer-requests` | "Wanted" post CRUD — list by city, create, fulfill, soft-delete |
 
 ### Backend — Services
 
@@ -155,6 +158,7 @@
 | `app/[city]/classifieds/[id]/promote/PromoteClient.tsx` | (client) | Razorpay checkout UI |
 | `app/[city]/classifieds/post/page.tsx` | `/[city]/classifieds/post` | 3-step post listing wizard |
 | `app/[city]/search/page.tsx` | `/[city]/search?q=` | Search results + filter panel |
+| `app/[city]/not-found.tsx` | (city-segment 404 boundary) | Client Component (`useParams()` for city) — branded 404 with "Back to {City}", search link, popular category chips (2026-07-12) |
 | `app/[city]/businesses/page.tsx` | `/[city]/businesses` | Business directory with category filter |
 | `app/[city]/businesses/[id]/page.tsx` | `/[city]/businesses/[id]` | Business profile (Server Component wrapper) |
 | `app/[city]/businesses/[id]/BusinessDetailClient.tsx` | (client) | Business detail: info, reviews, claim button |
@@ -182,10 +186,14 @@
 | `app/cities/CitiesListClient.tsx` | (client) | City directory search/filter UI, seeded with server-fetched `initialCities` |
 | `app/seller/[id]/page.tsx` | `/seller/[id]` | Public seller profile: avatar, member since, active listings grid |
 | `app/saved/page.tsx` | `/saved` | Saved/bookmarked listings from localStorage |
-| `app/listing/[id]/page.tsx` + `ListingDetailClient.tsx` | `/listing/[id]` | Global (city-agnostic) listing detail — same interactive carousel as city-scoped version |
+| `app/search/page.tsx` | `/search?q=&city=` | Server Component wrapper (2026-07-12): `generateMetadata` builds `"{q} in {City}"` title from searchParams, `robots: noindex` (query pages are near-infinite variations, not real SEO surface). Renders `SearchClient.tsx` |
+| `app/search/SearchClient.tsx` | (client) | Global (no city pre-selected) search UI: city picker, filters, results grid — same component that used to be `page.tsx` directly |
+| `app/listing/[id]/page.tsx` | `/listing/[id]` | Server Component wrapper (2026-07-12): SSR fetch of the listing, `generateMetadata` (per-listing title/description/OG image from first photo/Twitter card), Product/Offer JSON-LD. Renders `ListingDetailClient.tsx` |
+| `app/listing/[id]/ListingDetailClient.tsx` | (client) | Global (city-agnostic) listing detail — interactive carousel, share button (Web Share API + clipboard fallback), report, similar-listings row (same city+category), seeded via `initialListing` prop |
 | `app/category/[slug]/page.tsx` | `/category/[slug]` | Client redirect → `/{city}/search?category={slug}` |
 | `app/post/page.tsx` | `/post` | Client redirect → `/{city}/classifieds/post` |
 | `app/error.tsx` | (root error boundary) | Auto-reload on ChunkLoadError; friendly "Try again" otherwise |
+| `app/not-found.tsx` | (root 404 boundary) | Server Component — generic branded 404, Home + Browse listings links (2026-07-12) |
 
 ### Frontend — Components
 
@@ -206,6 +214,7 @@
 | `components/ad-banner/AdBanner.tsx` | City page ad banner slot (Phase 3 monetization) |
 | `components/fresh-listings/FreshListingsSection.tsx` | Homepage latest listings carousel |
 | `components/pwa/ServiceWorker.tsx` | Registers PWA service worker for offline support |
+| `components/buyer-requests/BuyerRequestsSection.tsx` | "Wanted" horizontal row on city home + post-request modal (category, description, budget) — WhatsApp-contact CTA per request |
 
 ### Frontend — Library
 
@@ -377,6 +386,14 @@ POST   /api/v1/saved-searches             Save a search alert [AUTH]
 GET    /api/v1/saved-searches             List user's saved searches [AUTH]
 ```
 
+### Buyer Requests ("Wanted")
+```
+GET    /api/v1/buyer-requests/cities/{slug}    List open requests for a city (newest first, limit 20)
+POST   /api/v1/buyer-requests                  Create request -> status='open' [AUTH]
+PATCH  /api/v1/buyer-requests/{id}/fulfill     Mark fulfilled -> drops out of public feed [AUTH, owner/admin]
+DELETE /api/v1/buyer-requests/{id}             Soft-delete [AUTH, owner/admin]
+```
+
 ### Health
 ```
 GET    /api/v1/health                     {"status":"ok"} — keepalive probe
@@ -401,6 +418,7 @@ GET    /api/v1/health                     {"status":"ok"} — keepalive probe
 | `reports` | id, listing_id, user_id, reason, notes | Unique(listing_id, user_id); 3 = auto-flag |
 | `otp_requests` | id, phone, otp_hash, attempts, verified, expires_at | bcrypt hash; 3-attempt max; 10-min expiry |
 | `saved_searches` | id, user_id, city_slug, query, category_slug, created_at | Search alerts; user notified when matching listings appear; migration `f6a7b8c9d0e1` |
+| `buyer_requests` | id, city_id, user_id, category_id, description, budget, contact_phone, status, deleted_at, created_at | "Wanted" posts; status open/fulfilled; migration `f1a2b3c4d5e6` (2026-07-12) |
 
 ---
 
@@ -493,6 +511,7 @@ Every new feature (page, endpoint, table, component) requires updates to both fi
 | `mobile/App.tsx` | Root: bottom tab navigator (Home/Search/Post/Saved/Profile) + stack (ListingDetail/SellerProfile/Login/CityPicker). Wrapped in `SafeAreaProvider`; tab bar height/padding derived from `useSafeAreaInsets().bottom` so it isn't covered by the Android gesture-nav bar or iOS home indicator |
 | `mobile/src/lib/api.ts` | FastAPI-adapted axios layer — `/cities/{slug}/listings`, `contact_phone`, `access_token`/`refresh_token` |
 | `mobile/src/lib/storage.ts` | expo-secure-store wrapper for JWT tokens + user object |
+| `mobile/src/lib/format.ts` | `formatPrice()` — shared Indian-locale price formatter (exact under ₹10k, truncated k/L above, never rounds up); Vitest tests in `format.test.ts`. Run: `cd mobile && npm test` |
 | `mobile/src/hooks/useSaved.ts` | AsyncStorage bookmark hook (same pattern as web, different storage layer) |
 | `mobile/src/components/ListingCard.tsx` | React Native listing card: gradient image placeholder, price, WA button |
 | `mobile/src/screens/HomeScreen.tsx` | Dark hero with real logo mark next to headline, city picker, trending chips, category grid (emoji `fontSize: 34`), fresh listings |
@@ -515,4 +534,4 @@ Every new feature (page, endpoint, table, component) requires updates to both fi
 
 ---
 
-*Last updated: 2026-07-07 (Server/Client split for `/[city]` + `/cities`, test infra added) | ⚠️ ARCHITECTURE.md §7-9 not yet updated to match — index is current, full doc is stale for these two routes*
+*Last updated: 2026-07-12 (QA pre-launch fix pass: buyer-requests backend feature built end-to-end, `/[city]` hydration fix, `/listing/[id]` + `/search` SEO metadata + Server/Client split, root + city-level branded 404 pages, mobile price-formatter fix + Vitest setup, listing detail share/similar-listings) | ⚠️ ARCHITECTURE.md §5-9 not yet updated to match — index is current, full doc is stale for buyer_requests table, these routes, and the not-found/search-metadata changes*

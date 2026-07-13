@@ -107,9 +107,14 @@ export default function CityHomeClient({
   const [freshListings, setFreshListings] = useState<Listing[]>(initialFresh);
   const [recentlyViewed, setRecentlyViewed] = useState<Listing[]>([]);
   const [user, setUser] = useState<{ name?: string } | null>(null);
+  // Time-of-day text (greeting, section heading) depends on the reader's clock —
+  // the server/ISR-cached render and the client hydration pass rarely share the
+  // same hour, so it must only be computed after mount, never during SSR.
+  const [mounted, setMounted] = useState(false);
 
   // Load user + recently-viewed from localStorage (client-side only)
   useEffect(() => {
+    setMounted(true);
     try {
       const raw = localStorage.getItem('user');
       if (raw) setUser(JSON.parse(raw));
@@ -199,7 +204,7 @@ export default function CityHomeClient({
             <motion.div initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }}>
               {/* Greeting line */}
               <p className="text-sm font-medium mb-1" style={{ color: 'rgba(255,255,255,0.65)' }}>
-                Good {getGreeting()}{firstName ? `, ${firstName}` : ''} 👋
+                Good {mounted ? getGreeting() : 'day'}{firstName ? `, ${firstName}` : ''} 👋
                 {' — '}
                 {todayCount !== null && todayCount > 0
                   ? `${todayCount} new listing${todayCount > 1 ? 's' : ''} in ${city?.name} today`
@@ -246,10 +251,12 @@ export default function CityHomeClient({
           <section>
             <div className="flex items-center justify-between mb-3">
               <h2 className="section-title">
-                {(() => {
-                  const h = new Date().getHours();
-                  return h < 12 ? 'New this morning ☀️' : h < 17 ? 'Posted today' : 'Fresh tonight 🌙';
-                })()}
+                {mounted
+                  ? (() => {
+                      const h = new Date().getHours();
+                      return h < 12 ? 'New this morning ☀️' : h < 17 ? 'Posted today' : 'Fresh tonight 🌙';
+                    })()
+                  : 'Fresh listings'}
               </h2>
               {!loading && (
                 <Link

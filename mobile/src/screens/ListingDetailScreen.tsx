@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { listingsApi } from '../lib/api';
+import { formatPrice } from '../lib/format';
 import { useSavedContext } from '../context/SavedContext';
 import { C, SHADOW, RADIUS } from '../lib/theme';
 
@@ -20,12 +21,6 @@ function timeAgo(iso: string) {
   if (d > 0) return `${d}d ago`;
   if (h > 0) return `${h}h ago`;
   return `${m}m ago`;
-}
-
-function formatPrice(p: number) {
-  if (p >= 100000) return `₹${(p / 100000).toFixed(1)}L`;
-  if (p >= 1000) return `₹${(p / 1000).toFixed(0)}k`;
-  return `₹${p}`;
 }
 
 export default function ListingDetailScreen({ navigation, route }: any) {
@@ -207,7 +202,7 @@ export default function ListingDetailScreen({ navigation, route }: any) {
             {(listing.view_count ?? 0) > 0 && (
               <View style={styles.metaItem}>
                 <Ionicons name="eye-outline" size={13} color={C.textMuted} />
-                <Text style={styles.metaText}>{listing.view_count} views</Text>
+                <Text style={styles.metaText}>{listing.view_count} view{listing.view_count !== 1 ? 's' : ''}</Text>
               </View>
             )}
           </View>
