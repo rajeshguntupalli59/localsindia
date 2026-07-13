@@ -28,7 +28,7 @@ const IconYouTube = () => (
 
 const SOCIALS = [
   { label: 'X (Twitter)',  Icon: IconX,         href: 'https://x.com/localsindia',         hover: 'hover:text-slate-200 hover:bg-white/[0.12]' },
-  { label: 'Instagram',   Icon: IconInstagram,  href: 'https://instagram.com/localsindia',  hover: 'hover:text-pink-400  hover:bg-pink-500/[0.12]' },
+  { label: 'Instagram',   Icon: IconInstagram,  href: 'https://www.instagram.com/localsindia1/',  hover: 'hover:text-pink-400  hover:bg-pink-500/[0.12]' },
   { label: 'Facebook',    Icon: IconFacebook,   href: 'https://facebook.com/localsindia',   hover: 'hover:text-blue-400  hover:bg-blue-500/[0.12]' },
   { label: 'YouTube',     Icon: IconYouTube,    href: 'https://youtube.com/@localsindia',   hover: 'hover:text-red-400   hover:bg-red-500/[0.12]'  },
 ];
