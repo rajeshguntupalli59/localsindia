@@ -75,6 +75,12 @@ export interface AuthTokens {
   user: User;
 }
 
+export interface OtpVerifyResult {
+  setup_token: string;
+  has_password: boolean;
+  is_new_user: boolean;
+}
+
 export interface SearchResult {
   items: Listing[];
   total: number;

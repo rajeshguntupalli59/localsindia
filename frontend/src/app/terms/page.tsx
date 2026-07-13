@@ -104,7 +104,7 @@ export default function TermsPage() {
 
           <section>
             <h2 className="text-lg font-bold mb-2">13. Contact</h2>
-            <p><strong>Email:</strong> <a href="mailto:rajeshguntupalli59@gmail.com" style={{ color: 'var(--li-primary)' }}>rajeshguntupalli59@gmail.com</a></p>
+            <p><strong>Email:</strong> <a href="mailto:support@localsindia.com" style={{ color: 'var(--li-primary)' }}>support@localsindia.com</a></p>
             <p><strong>Platform:</strong> <a href="https://www.localsindia.com" style={{ color: 'var(--li-primary)' }}>localsindia.com</a></p>
           </section>
 

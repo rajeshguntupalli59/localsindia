@@ -15,6 +15,8 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
 const GOOGLE_AUTH_ENABLED = process.env.NEXT_PUBLIC_GOOGLE_AUTH_ENABLED === 'true';
 const OTP_DEBUG = process.env.NEXT_PUBLIC_OTP_DEBUG === 'true' && process.env.NODE_ENV !== 'production';
 
+type Step = 'phone' | 'otp' | 'create-password' | 'name' | 'forgot-phone' | 'forgot-otp' | 'forgot-reset';
+
 function getPostLoginRedirect(redirectParam: string | null): string {
   if (redirectParam && redirectParam.startsWith('/')) return redirectParam;
   const city = typeof window !== 'undefined' ? localStorage.getItem('li_city') : null;
@@ -34,48 +36,68 @@ function LoginInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectParam = searchParams.get('redirect');
-  const [step, setStep] = useState<'phone' | 'otp' | 'name'>('phone');
+  const [step, setStep] = useState<Step>('phone');
   const [mode, setMode] = useState<'signin' | 'signup'>(
     searchParams.get('mode') === 'signup' ? 'signup' : 'signin'
   );
   const [digits, setDigits] = useState('');
+  const [password, setPassword] = useState('');
   const [otp, setOtp] = useState('');
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
   const [tokens, setTokens] = useState<{ access: string; refresh: string; user: object } | null>(null);
+  const [setupToken, setSetupToken] = useState<string | null>(null);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const phone = `+91${digits}`;
 
   const oauthError = searchParams.get('error');
 
-  const handlePhoneSubmit = async (e: React.FormEvent) => {
+  const goHome = () => router.push(getPostLoginRedirect(redirectParam));
+
+  const storeSession = (res: { access_token: string; refresh_token: string; user: object }) => {
+    localStorage.setItem('access_token', res.access_token);
+    localStorage.setItem('refresh_token', res.refresh_token);
+    localStorage.setItem('user', JSON.stringify(res.user));
+  };
+
+  // ── Sign in: phone + password ──
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      if (mode === 'signin') {
-        // Existing user — direct login, no OTP
-        const res = await api.auth.signin(phone);
-        localStorage.setItem('access_token', res.access_token);
-        localStorage.setItem('refresh_token', res.refresh_token);
-        localStorage.setItem('user', JSON.stringify(res.user));
-        toast.success(`Welcome back, ${(res.user as { name?: string }).name ?? 'back'}!`);
-        router.push(getPostLoginRedirect(redirectParam));
+      const res = await api.auth.login(phone, password);
+      storeSession(res);
+      toast.success(`Welcome back, ${(res.user as { name?: string }).name ?? 'back'}!`);
+      goHome();
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 404) {
+        toast.error('No account found. Create a free account first!');
+        setMode('signup');
+      } else if (err instanceof ApiError && err.status === 409) {
+        toast.error('This account has no password yet — use "Forgot password" to set one.');
       } else {
-        // New user — send OTP for phone verification
-        const res = await api.auth.sendOtp(phone);
-        setStep('otp');
-        if (res?.otp) {
-          toast.info(`OTP: ${res.otp}`, { duration: 60000 });
-        } else {
-          toast.success('OTP sent to your mobile!');
-        }
+        toast.error(err instanceof ApiError ? err.message : 'Incorrect phone number or password.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ── Sign up: phone → send OTP ──
+  const handleSignupPhoneSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const res = await api.auth.sendOtp(phone);
+      setStep('otp');
+      if (res?.otp) {
+        toast.info(`OTP: ${res.otp}`, { duration: 60000 });
+      } else {
+        toast.success('OTP sent to your mobile!');
       }
     } catch (err) {
-      if (err instanceof ApiError && err.status === 404 && mode === 'signin') {
-        toast.error("No account found. Create a free account first!");
-        setMode('signup');
-      } else {
-        toast.error(err instanceof ApiError ? err.message : mode === 'signin' ? 'Login failed' : 'Failed to send OTP');
-      }
+      toast.error(err instanceof ApiError ? err.message : 'Failed to send OTP');
     } finally {
       setLoading(false);
     }
@@ -86,20 +108,39 @@ function LoginInner() {
     setLoading(true);
     try {
       const res = await api.auth.verifyOtp({ phone, otp });
-      localStorage.setItem('access_token', res.access_token);
-      localStorage.setItem('refresh_token', res.refresh_token);
-      localStorage.setItem('user', JSON.stringify(res.user));
+      if (res.has_password) {
+        toast.error('This number already has an account. Please sign in with your password.');
+        setMode('signin');
+        setStep('phone');
+        setOtp('');
+        return;
+      }
+      setSetupToken(res.setup_token);
+      setStep('create-password');
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : 'Invalid OTP');
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  const handleCreatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!setupToken) return;
+    if (newPassword !== confirmPassword) { toast.error('Passwords do not match'); return; }
+    setLoading(true);
+    try {
+      const res = await api.auth.setPassword(setupToken, newPassword);
+      storeSession(res);
       if (res.is_new_user) {
-        // New user — ask for their name before going home
         setTokens({ access: res.access_token, refresh: res.refresh_token, user: res.user });
         setStep('name');
       } else {
-        toast.success(`Welcome back, ${res.user.name}!`);
-        router.push(getPostLoginRedirect(redirectParam));
+        toast.success('Password set! You\'re all set.');
+        goHome();
       }
     } catch (err) {
-      toast.error(err instanceof ApiError ? err.message : 'Invalid OTP');
+      toast.error(err instanceof ApiError ? err.message : 'Could not set password');
     } finally {
       setLoading(false);
     }
@@ -113,13 +154,77 @@ function LoginInner() {
       const updated = await api.auth.updateProfile({ name: name.trim() }, tokens.access);
       localStorage.setItem('user', JSON.stringify(updated));
       toast.success(`Welcome to LocalsIndia, ${updated.name}!`);
-      router.push(getPostLoginRedirect(redirectParam));
+      goHome();
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : 'Failed to save name');
     } finally {
       setLoading(false);
     }
   };
+
+  // ── Forgot password ──
+  const handleForgotPhoneSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const res = await api.auth.sendOtp(phone);
+      setStep('forgot-otp');
+      if (res?.otp) toast.info(`OTP: ${res.otp}`, { duration: 60000 });
+      else toast.success('OTP sent to your mobile!');
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : 'Failed to send OTP');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleForgotOtpVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const res = await api.auth.verifyOtp({ phone, otp });
+      setSetupToken(res.setup_token);
+      setStep('forgot-reset');
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : 'Invalid OTP');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!setupToken) return;
+    if (newPassword !== confirmPassword) { toast.error('Passwords do not match'); return; }
+    setLoading(true);
+    try {
+      const res = await api.auth.setPassword(setupToken, newPassword);
+      storeSession(res);
+      toast.success('Password reset — you\'re logged in!');
+      goHome();
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : 'Could not reset password');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const heading =
+    step === 'name' ? 'Almost done!' :
+    step === 'create-password' ? 'Create a password' :
+    step === 'forgot-phone' ? 'Reset your password' :
+    step === 'forgot-otp' ? 'Verify OTP' :
+    step === 'forgot-reset' ? 'Set a new password' :
+    mode === 'signup' ? 'Create account' : 'Welcome back';
+
+  const subheading =
+    step === 'name' ? 'Tell us your name to complete setup' :
+    step === 'create-password' ? 'You\'ll use this to sign in next time' :
+    step === 'forgot-phone' ? 'Enter your number to receive a reset code' :
+    step === 'forgot-otp' ? `Code sent to ${phone}` :
+    step === 'forgot-reset' ? 'Choose a new password' :
+    mode === 'signup' ? 'Verify your number to get started' :
+    'Enter your number and password to sign in';
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center py-12 px-4" style={{ background: 'var(--li-page-bg)' }}>
@@ -133,20 +238,11 @@ function LoginInner() {
 
           {/* Header band */}
           <div className="px-6 pt-8 pb-6" style={{ background: 'var(--li-nav-bg)' }}>
-            {/* Logo on dark header */}
             <div className="mb-5">
               <SiteLogo variant="light" size="md" tagline={true} />
             </div>
-            <h1 className="text-2xl font-bold text-white">
-              {step === 'name' ? 'Almost done!' : mode === 'signup' ? 'Create account' : 'Welcome back'}
-            </h1>
-            <p className="text-white/60 text-sm mt-1">
-              {step === 'name'
-                ? 'Tell us your name to complete setup'
-                : mode === 'signup'
-                ? 'Verify your number to get started'
-                : 'Enter your number to sign in instantly'}
-            </p>
+            <h1 className="text-2xl font-bold text-white">{heading}</h1>
+            <p className="text-white/60 text-sm mt-1">{subheading}</p>
 
             {/* Sign In / Sign Up tabs — only on phone step */}
             {step === 'phone' && (
@@ -184,11 +280,9 @@ function LoginInner() {
                   setLoading(true);
                   try {
                     const res = await api.auth.devLogin();
-                    localStorage.setItem('access_token', res.access_token);
-                    localStorage.setItem('refresh_token', res.refresh_token);
-                    localStorage.setItem('user', JSON.stringify(res.user));
+                    storeSession(res);
                     toast.success('Dev login — skipped OTP');
-                    router.push(getPostLoginRedirect(redirectParam));
+                    goHome();
                   } catch { toast.error('Dev login failed'); }
                   finally { setLoading(false); }
                 }}
@@ -209,7 +303,7 @@ function LoginInner() {
               </div>
             )}
 
-            {/* ── Step 1: Phone ── */}
+            {/* ── Step: Phone (sign in = phone+password, sign up = phone only) ── */}
             {step === 'phone' && (
               <>
                 {GOOGLE_AUTH_ENABLED && (
@@ -233,7 +327,7 @@ function LoginInner() {
                     </div>
                   </>
                 )}
-                <form onSubmit={handlePhoneSubmit} className="space-y-5">
+                <form onSubmit={mode === 'signin' ? handleLogin : handleSignupPhoneSubmit} className="space-y-5">
                   <div className="space-y-2">
                     <Label htmlFor="phone">Mobile Number</Label>
                     <div className="flex rounded-lg border border-input overflow-hidden focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-0">
@@ -253,8 +347,34 @@ function LoginInner() {
                         required
                       />
                     </div>
-                    <p className="text-xs text-muted-foreground">Enter your 10-digit mobile number</p>
                   </div>
+
+                  {mode === 'signin' && (
+                    <div className="space-y-2">
+                      <Label htmlFor="password">Password</Label>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          id="password"
+                          type="password"
+                          className="pl-10"
+                          placeholder="Your password"
+                          value={password}
+                          onChange={e => setPassword(e.target.value)}
+                          required
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        className="text-xs underline"
+                        style={{ color: 'var(--li-primary)' }}
+                        onClick={() => { setStep('forgot-phone'); setOtp(''); setNewPassword(''); setConfirmPassword(''); }}
+                      >
+                        Forgot password?
+                      </button>
+                    </div>
+                  )}
+
                   <Button type="submit" className="w-full text-white" style={{ background: 'var(--li-primary)' }} disabled={loading}>
                     {loading
                       ? (mode === 'signin' ? 'Signing in...' : 'Sending OTP...')
@@ -275,7 +395,7 @@ function LoginInner() {
               </>
             )}
 
-            {/* ── Step 2: OTP ── */}
+            {/* ── Step: OTP (signup) ── */}
             {step === 'otp' && (
               <form onSubmit={verifyOtp} className="space-y-5">
                 <div className="space-y-2">
@@ -303,7 +423,41 @@ function LoginInner() {
               </form>
             )}
 
-            {/* ── Step 3: Name (new users only) ── */}
+            {/* ── Step: Create password (signup) ── */}
+            {step === 'create-password' && (
+              <form onSubmit={handleCreatePassword} className="space-y-5">
+                <div className="space-y-2">
+                  <Label htmlFor="new-password">Password</Label>
+                  <Input
+                    id="new-password"
+                    type="password"
+                    placeholder="At least 8 characters"
+                    value={newPassword}
+                    onChange={e => setNewPassword(e.target.value)}
+                    autoFocus
+                    minLength={8}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="confirm-password">Confirm password</Label>
+                  <Input
+                    id="confirm-password"
+                    type="password"
+                    placeholder="Re-enter password"
+                    value={confirmPassword}
+                    onChange={e => setConfirmPassword(e.target.value)}
+                    minLength={8}
+                    required
+                  />
+                </div>
+                <Button type="submit" className="w-full text-white" style={{ background: 'var(--li-primary)' }} disabled={loading || newPassword.length < 8}>
+                  {loading ? 'Saving...' : 'Continue →'}
+                </Button>
+              </form>
+            )}
+
+            {/* ── Step: Name (new users only) ── */}
             {step === 'name' && (
               <form onSubmit={saveName} className="space-y-5">
                 <div className="space-y-2">
@@ -326,6 +480,101 @@ function LoginInner() {
                 </div>
                 <Button type="submit" className="w-full text-white" style={{ background: 'var(--li-primary)' }} disabled={loading || name.trim().length < 2}>
                   {loading ? 'Saving...' : 'Continue →'}
+                </Button>
+              </form>
+            )}
+
+            {/* ── Step: Forgot password — phone ── */}
+            {step === 'forgot-phone' && (
+              <form onSubmit={handleForgotPhoneSubmit} className="space-y-5">
+                <div className="space-y-2">
+                  <Label htmlFor="forgot-phone">Mobile Number</Label>
+                  <div className="flex rounded-lg border border-input overflow-hidden focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-0">
+                    <div className="flex items-center gap-1.5 px-3 bg-slate-50 border-r border-input shrink-0">
+                      <Phone className="w-3.5 h-3.5 text-muted-foreground" />
+                      <span className="text-sm font-semibold text-slate-700">+91</span>
+                    </div>
+                    <input
+                      id="forgot-phone"
+                      type="tel"
+                      className="flex-1 px-3 py-2 text-sm bg-white outline-none"
+                      placeholder="Enter 10-digit mobile number"
+                      value={digits}
+                      onChange={e => setDigits(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                      inputMode="numeric"
+                      maxLength={10}
+                      autoFocus
+                      required
+                    />
+                  </div>
+                </div>
+                <Button type="submit" className="w-full text-white" style={{ background: 'var(--li-primary)' }} disabled={loading}>
+                  {loading ? 'Sending...' : 'Send reset code →'}
+                </Button>
+                <button type="button" className="text-sm underline w-full text-center" style={{ color: 'var(--li-primary)' }} onClick={() => { setStep('phone'); setMode('signin'); }}>
+                  Back to sign in
+                </button>
+              </form>
+            )}
+
+            {/* ── Step: Forgot password — OTP ── */}
+            {step === 'forgot-otp' && (
+              <form onSubmit={handleForgotOtpVerify} className="space-y-5">
+                <div className="space-y-2">
+                  <Label htmlFor="forgot-otp">6-digit code</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      id="forgot-otp"
+                      className="pl-10 text-center tracking-[0.5em] text-xl"
+                      placeholder="------"
+                      value={otp}
+                      onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                      maxLength={6}
+                      autoFocus
+                      required
+                    />
+                  </div>
+                </div>
+                <Button type="submit" className="w-full text-white" style={{ background: 'var(--li-primary)' }} disabled={loading || otp.length < 6}>
+                  {loading ? 'Verifying...' : 'Verify code'}
+                </Button>
+                <button type="button" className="text-sm underline w-full text-center" style={{ color: 'var(--li-primary)' }} onClick={() => { setStep('forgot-phone'); setOtp(''); }}>
+                  Change number
+                </button>
+              </form>
+            )}
+
+            {/* ── Step: Forgot password — reset ── */}
+            {step === 'forgot-reset' && (
+              <form onSubmit={handleResetPassword} className="space-y-5">
+                <div className="space-y-2">
+                  <Label htmlFor="reset-password">New password</Label>
+                  <Input
+                    id="reset-password"
+                    type="password"
+                    placeholder="At least 8 characters"
+                    value={newPassword}
+                    onChange={e => setNewPassword(e.target.value)}
+                    autoFocus
+                    minLength={8}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="reset-confirm">Confirm new password</Label>
+                  <Input
+                    id="reset-confirm"
+                    type="password"
+                    placeholder="Re-enter password"
+                    value={confirmPassword}
+                    onChange={e => setConfirmPassword(e.target.value)}
+                    minLength={8}
+                    required
+                  />
+                </div>
+                <Button type="submit" className="w-full text-white" style={{ background: 'var(--li-primary)' }} disabled={loading || newPassword.length < 8}>
+                  {loading ? 'Saving...' : 'Reset password →'}
                 </Button>
               </form>
             )}

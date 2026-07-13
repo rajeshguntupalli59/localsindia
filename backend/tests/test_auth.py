@@ -41,9 +41,9 @@ async def test_otp_lockout_after_three_failures(client):
     assert resp.status_code == 429
 
 
-# TC-004: Valid OTP verify creates user and returns JWT
+# TC-004: Valid OTP verify creates user and returns a setup_token (not full tokens)
 @pytest.mark.asyncio
-async def test_otp_verify_creates_user_and_returns_jwt(client, db):
+async def test_otp_verify_creates_user_and_returns_setup_token(client, db):
     from app.core.security import generate_otp, hash_password
     from app.models.otp_request import OtpRequest
     from datetime import datetime, timezone, timedelta
@@ -62,9 +62,142 @@ async def test_otp_verify_creates_user_and_returns_jwt(client, db):
     resp = await client.post("/api/v1/auth/otp/verify", json={"phone": phone, "otp": otp})
     assert resp.status_code == 200
     data = resp.json()
+    assert "setup_token" in data
+    assert data["has_password"] is False
+    assert data["is_new_user"] is True
+
+
+async def _verify_otp_get_setup_token(client, db, phone: str) -> str:
+    from app.core.security import generate_otp, hash_password
+    from app.models.otp_request import OtpRequest
+    from datetime import datetime, timezone, timedelta
+
+    otp = generate_otp()
+    record = OtpRequest(
+        phone=phone,
+        otp_hash=hash_password(otp),
+        expires_at=datetime.now(timezone.utc) + timedelta(minutes=10),
+    )
+    db.add(record)
+    await db.commit()
+    resp = await client.post("/api/v1/auth/otp/verify", json={"phone": phone, "otp": otp})
+    return resp.json()["setup_token"]
+
+
+# ── Password set (signup) ───────────────────────────────────────────────────
+
+@pytest.mark.asyncio
+async def test_set_password_after_otp_verify(client, db):
+    phone = "+919444444444"
+    setup_token = await _verify_otp_get_setup_token(client, db, phone)
+
+    resp = await client.post("/api/v1/auth/password/set", json={
+        "setup_token": setup_token, "password": "supersecret1",
+    })
+    assert resp.status_code == 200
+    data = resp.json()
     assert "access_token" in data
-    assert "refresh_token" in data
     assert data["user"]["phone"] == phone
+
+
+@pytest.mark.asyncio
+async def test_set_password_rejects_short_password(client, db):
+    phone = "+919444444445"
+    setup_token = await _verify_otp_get_setup_token(client, db, phone)
+
+    resp = await client.post("/api/v1/auth/password/set", json={
+        "setup_token": setup_token, "password": "short",
+    })
+    assert resp.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_set_password_rejects_invalid_setup_token(client):
+    resp = await client.post("/api/v1/auth/password/set", json={
+        "setup_token": "not-a-real-token", "password": "supersecret1",
+    })
+    assert resp.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_access_token_cannot_be_used_as_setup_token(client):
+    """A normal access token must not double as a password-set credential."""
+    from app.core.security import create_access_token, decode_setup_token
+    access_token = create_access_token("11111111-1111-1111-1111-111111111111")
+    assert decode_setup_token(access_token) is None
+
+    resp = await client.post("/api/v1/auth/password/set", json={
+        "setup_token": access_token, "password": "supersecret1",
+    })
+    assert resp.status_code == 401
+
+
+# ── Login (phone + password) ────────────────────────────────────────────────
+
+@pytest.mark.asyncio
+async def test_login_with_correct_password(client, db):
+    phone = "+919555555555"
+    setup_token = await _verify_otp_get_setup_token(client, db, phone)
+    await client.post("/api/v1/auth/password/set", json={
+        "setup_token": setup_token, "password": "supersecret1",
+    })
+
+    resp = await client.post("/api/v1/auth/login", json={"phone": phone, "password": "supersecret1"})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "access_token" in data
+    assert data["user"]["phone"] == phone
+
+
+@pytest.mark.asyncio
+async def test_login_with_wrong_password(client, db):
+    phone = "+919555555556"
+    setup_token = await _verify_otp_get_setup_token(client, db, phone)
+    await client.post("/api/v1/auth/password/set", json={
+        "setup_token": setup_token, "password": "supersecret1",
+    })
+
+    resp = await client.post("/api/v1/auth/login", json={"phone": phone, "password": "wrongpassword"})
+    assert resp.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_login_no_account(client):
+    resp = await client.post("/api/v1/auth/login", json={"phone": "+919666666666", "password": "supersecret1"})
+    assert resp.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_login_account_without_password_yet(client, db):
+    phone = "+919555555557"
+    await _verify_otp_get_setup_token(client, db, phone)  # creates the user, never sets a password
+
+    resp = await client.post("/api/v1/auth/login", json={"phone": phone, "password": "anything123"})
+    assert resp.status_code == 409
+
+
+# ── Forgot password (same set-password endpoint, reused) ────────────────────
+
+@pytest.mark.asyncio
+async def test_forgot_password_reset_flow(client, db):
+    phone = "+919777777777"
+    setup_token = await _verify_otp_get_setup_token(client, db, phone)
+    await client.post("/api/v1/auth/password/set", json={
+        "setup_token": setup_token, "password": "originalpass1",
+    })
+
+    # Simulate "forgot password": verify OTP again to get a fresh setup_token
+    reset_token = await _verify_otp_get_setup_token(client, db, phone)
+    resp = await client.post("/api/v1/auth/password/set", json={
+        "setup_token": reset_token, "password": "newpassword1",
+    })
+    assert resp.status_code == 200
+
+    # Old password no longer works, new one does
+    old = await client.post("/api/v1/auth/login", json={"phone": phone, "password": "originalpass1"})
+    assert old.status_code == 401
+    new = await client.post("/api/v1/auth/login", json={"phone": phone, "password": "newpassword1"})
+    assert new.status_code == 200
 
 
 # TC-017: 6th OTP request in 1 hour returns 429

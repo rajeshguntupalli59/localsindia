@@ -5,6 +5,7 @@ import type {
   ListingImage,
   User,
   AuthTokens,
+  OtpVerifyResult,
   SearchResult,
   SearchParams,
   CreateListingInput,
@@ -160,10 +161,10 @@ export const api = {
   auth: {
     devLogin: () =>
       req<AuthTokens>('/api/v1/auth/dev-login', { method: 'POST' }),
-    signin: (phone: string) =>
-      req<AuthTokens & { is_new_user: boolean }>('/api/v1/auth/signin', {
+    login: (phone: string, password: string) =>
+      req<AuthTokens & { is_new_user: boolean }>('/api/v1/auth/login', {
         method: 'POST',
-        body: JSON.stringify({ phone }),
+        body: JSON.stringify({ phone, password }),
       }),
     sendOtp: (phone: string) =>
       req<{ message: string; otp?: string }>('/api/v1/auth/otp/send', {
@@ -171,9 +172,14 @@ export const api = {
         body: JSON.stringify({ phone }),
       }),
     verifyOtp: (data: { phone: string; otp: string }) =>
-      req<AuthTokens & { is_new_user: boolean }>('/api/v1/auth/otp/verify', {
+      req<OtpVerifyResult>('/api/v1/auth/otp/verify', {
         method: 'POST',
         body: JSON.stringify(data),
+      }),
+    setPassword: (setupToken: string, password: string) =>
+      req<AuthTokens & { is_new_user: boolean }>('/api/v1/auth/password/set', {
+        method: 'POST',
+        body: JSON.stringify({ setup_token: setupToken, password }),
       }),
     updateProfile: (data: { name?: string }, token: string) =>
       req<User>('/api/v1/auth/me', {

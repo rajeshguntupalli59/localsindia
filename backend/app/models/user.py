@@ -12,6 +12,7 @@ class User(Base):
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     phone: Mapped[str | None] = mapped_column(String(15), unique=True, nullable=True)
     email: Mapped[str | None] = mapped_column(String(254), unique=True, nullable=True)
+    password_hash: Mapped[str | None] = mapped_column(String(100), nullable=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     avatar_url: Mapped[str | None] = mapped_column(nullable=True)
     role: Mapped[str] = mapped_column(String(20), nullable=False, default="user")

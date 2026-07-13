@@ -19,7 +19,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-lg font-bold mb-2">1. Who We Are</h2>
             <p>LocalsIndia (<strong>localsindia.com</strong>) is a hyperlocal community platform that helps people in Indian cities buy, sell, and discover local services. We are operated by Venkata Rajesh Guntupalli, based in India.</p>
-            <p className="mt-2">Contact: <a href="mailto:rajeshguntupalli59@gmail.com" style={{ color: 'var(--li-primary)' }}>rajeshguntupalli59@gmail.com</a></p>
+            <p className="mt-2">Contact: <a href="mailto:support@localsindia.com" style={{ color: 'var(--li-primary)' }}>support@localsindia.com</a></p>
           </section>
 
           <section>
@@ -74,7 +74,7 @@ export default function PrivacyPage() {
               <li>Request deletion of your account and data</li>
               <li>Withdraw consent for communications</li>
             </ul>
-            <p className="mt-2">To exercise any of these rights, email us at <a href="mailto:rajeshguntupalli59@gmail.com" style={{ color: 'var(--li-primary)' }}>rajeshguntupalli59@gmail.com</a>.</p>
+            <p className="mt-2">To exercise any of these rights, email us at <a href="mailto:support@localsindia.com" style={{ color: 'var(--li-primary)' }}>support@localsindia.com</a>.</p>
           </section>
 
           <section>
@@ -90,7 +90,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-lg font-bold mb-2">11. Contact</h2>
             <p>For any privacy-related questions or requests:</p>
-            <p className="mt-1"><strong>Email:</strong> <a href="mailto:rajeshguntupalli59@gmail.com" style={{ color: 'var(--li-primary)' }}>rajeshguntupalli59@gmail.com</a></p>
+            <p className="mt-1"><strong>Email:</strong> <a href="mailto:support@localsindia.com" style={{ color: 'var(--li-primary)' }}>support@localsindia.com</a></p>
             <p><strong>Platform:</strong> <a href="https://www.localsindia.com" style={{ color: 'var(--li-primary)' }}>localsindia.com</a></p>
           </section>
 

@@ -68,14 +68,17 @@ export const authApi = {
   adminLogin: (username: string, password: string) =>
     api.post('/auth/admin-login', { username, password }).then(r => r.data),
 
-  signin: (phone: string) =>
-    api.post('/auth/signin', { phone }).then(r => r.data),
+  login: (phone: string, password: string) =>
+    api.post('/auth/login', { phone, password }).then(r => r.data),
 
   sendOtp: (phone: string) =>
     api.post('/auth/otp/send', { phone }).then(r => r.data),
 
   verifyOtp: (phone: string, otp: string) =>
     api.post('/auth/otp/verify', { phone, otp }).then(r => r.data),
+
+  setPassword: (setupToken: string, password: string) =>
+    api.post('/auth/password/set', { setup_token: setupToken, password }).then(r => r.data),
 
   getMe: () =>
     api.get('/auth/me').then(r => r.data),

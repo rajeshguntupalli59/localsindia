@@ -12,14 +12,20 @@ import { C, RADIUS, SHADOW } from '../lib/theme';
 
 const LOGO = require('../../assets/logo-mark-transparent.png');
 
-type Step = 'phone' | 'otp' | 'name' | 'admin';
+type Step = 'phone' | 'otp' | 'create-password' | 'name' | 'forgot-phone' | 'forgot-otp' | 'forgot-reset' | 'admin';
+type Mode = 'signin' | 'signup';
 
 export default function LoginScreen({ navigation }: any) {
   const insets = useSafeAreaInsets();
   const [step, setStep] = useState<Step>('phone');
+  const [mode, setMode] = useState<Mode>('signin');
   const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('');
   const [otp, setOtp] = useState('');
   const [name, setName] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [setupToken, setSetupToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [debugOtp, setDebugOtp] = useState<string | undefined>(undefined);
   const [pendingTokens, setPendingTokens] = useState<{ access: string; refresh: string } | null>(null);
@@ -56,24 +62,30 @@ export default function LoginScreen({ navigation }: any) {
     navigation.replace('Main');
   };
 
-  const handleSignIn = async () => {
+  // ── Sign in: phone + password ──
+  const handleLogin = async () => {
     if (!/^[6-9]\d{9}$/.test(phone)) { Alert.alert('Invalid number', 'Enter a valid 10-digit Indian mobile number.'); return; }
+    if (!password) { Alert.alert('Password required', 'Enter your password.'); return; }
     setLoading(true);
     try {
-      const data = await authApi.signin(`+91${phone}`);
+      const data = await authApi.login(`+91${phone}`, password);
       await finish(data);
     } catch (err: any) {
-      if (err?.response?.status === 404) {
+      const status = err?.response?.status;
+      if (status === 404) {
         Alert.alert('No account found', 'No account with this number. Sign up first.', [
           { text: 'Sign Up', onPress: handleSignUp },
           { text: 'Cancel', style: 'cancel' },
         ]);
+      } else if (status === 409) {
+        Alert.alert('No password set', 'This account has no password yet. Use "Forgot password" to set one.');
       } else {
-        Alert.alert('Error', err?.response?.data?.detail || 'Sign in failed. Please try again.');
+        Alert.alert('Sign in failed', err?.response?.data?.detail || 'Incorrect phone number or password.');
       }
     } finally { setLoading(false); }
   };
 
+  // ── Sign up: phone → send OTP ──
   const handleSignUp = async () => {
     if (!/^[6-9]\d{9}$/.test(phone)) { Alert.alert('Invalid number', 'Enter a valid 10-digit Indian mobile number.'); return; }
     setLoading(true);
@@ -81,15 +93,8 @@ export default function LoginScreen({ navigation }: any) {
       const data = await authApi.sendOtp(`+91${phone}`);
       if (data.otp) setDebugOtp(data.otp);
       setStep('otp');
-    } catch (err: any) {
-      if (err?.response?.status === 409) {
-        Alert.alert('Already registered', 'This number already has an account.', [
-          { text: 'Sign In', onPress: handleSignIn },
-          { text: 'Cancel', style: 'cancel' },
-        ]);
-      } else {
-        Alert.alert('Error', 'Could not send OTP. Please try again.');
-      }
+    } catch {
+      Alert.alert('Error', 'Could not send OTP. Please try again.');
     } finally { setLoading(false); }
   };
 
@@ -98,6 +103,26 @@ export default function LoginScreen({ navigation }: any) {
     setLoading(true);
     try {
       const data = await authApi.verifyOtp(`+91${phone}`, otp);
+      if (data.has_password) {
+        Alert.alert('Already registered', 'This number already has an account. Please sign in with your password.');
+        setMode('signin');
+        setStep('phone');
+        setOtp('');
+        return;
+      }
+      setSetupToken(data.setup_token);
+      setStep('create-password');
+    } catch { Alert.alert('Invalid OTP', 'The code is incorrect. Please try again.'); }
+    finally { setLoading(false); }
+  };
+
+  const handleCreatePasswordSubmit = async () => {
+    if (newPassword.length < 8) { Alert.alert('Password too short', 'Use at least 8 characters.'); return; }
+    if (newPassword !== confirmPassword) { Alert.alert('Passwords don\'t match', 'Re-enter your password.'); return; }
+    if (!setupToken) return;
+    setLoading(true);
+    try {
+      const data = await authApi.setPassword(setupToken, newPassword);
       if (data.is_new_user) {
         setPendingTokens({ access: data.access_token, refresh: data.refresh_token ?? '' });
         await storage.setUser(data.user);
@@ -105,7 +130,7 @@ export default function LoginScreen({ navigation }: any) {
       } else {
         await finish(data);
       }
-    } catch { Alert.alert('Invalid OTP', 'The code is incorrect. Please try again.'); }
+    } catch { Alert.alert('Error', 'Could not set password. Please try again.'); }
     finally { setLoading(false); }
   };
 
@@ -122,6 +147,42 @@ export default function LoginScreen({ navigation }: any) {
     finally { setLoading(false); }
   };
 
+  // ── Forgot password ──
+  const handleForgotPhoneSubmit = async () => {
+    if (!/^[6-9]\d{9}$/.test(phone)) { Alert.alert('Invalid number', 'Enter a valid 10-digit Indian mobile number.'); return; }
+    setLoading(true);
+    try {
+      const data = await authApi.sendOtp(`+91${phone}`);
+      if (data.otp) setDebugOtp(data.otp);
+      setStep('forgot-otp');
+    } catch {
+      Alert.alert('Error', 'Could not send OTP. Please try again.');
+    } finally { setLoading(false); }
+  };
+
+  const handleForgotOtpSubmit = async () => {
+    if (otp.length < 6) { Alert.alert('Invalid OTP', 'Enter the 6-digit code.'); return; }
+    setLoading(true);
+    try {
+      const data = await authApi.verifyOtp(`+91${phone}`, otp);
+      setSetupToken(data.setup_token);
+      setStep('forgot-reset');
+    } catch { Alert.alert('Invalid OTP', 'The code is incorrect. Please try again.'); }
+    finally { setLoading(false); }
+  };
+
+  const handleResetPasswordSubmit = async () => {
+    if (newPassword.length < 8) { Alert.alert('Password too short', 'Use at least 8 characters.'); return; }
+    if (newPassword !== confirmPassword) { Alert.alert('Passwords don\'t match', 'Re-enter your password.'); return; }
+    if (!setupToken) return;
+    setLoading(true);
+    try {
+      const data = await authApi.setPassword(setupToken, newPassword);
+      await finish(data);
+    } catch { Alert.alert('Error', 'Could not reset password. Please try again.'); }
+    finally { setLoading(false); }
+  };
+
   const handleAdminLogin = async () => {
     if (!adminUser.trim() || !adminPass.trim()) { Alert.alert('Required', 'Enter username and password.'); return; }
     setLoading(true);
@@ -133,7 +194,25 @@ export default function LoginScreen({ navigation }: any) {
     } finally { setLoading(false); }
   };
 
-  const stepProgress = { phone: 1, otp: 2, name: 3, admin: 1 };
+  const heading =
+    step === 'phone' ? (mode === 'signup' ? 'Create your account' : 'Welcome back') :
+    step === 'otp' ? 'Verify OTP' :
+    step === 'create-password' ? 'Create a password' :
+    step === 'name' ? 'Almost done!' :
+    step === 'forgot-phone' ? 'Reset your password' :
+    step === 'forgot-otp' ? 'Verify OTP' :
+    step === 'forgot-reset' ? 'Set a new password' :
+    'Admin Access';
+
+  const subheading =
+    step === 'phone' ? (mode === 'signup' ? 'We\'ll send a 6-digit OTP to verify' : 'Enter your number and password') :
+    step === 'otp' ? `Code sent to +91 ${phone}` :
+    step === 'create-password' ? 'You\'ll use this to sign in next time' :
+    step === 'name' ? 'What should we call you?' :
+    step === 'forgot-phone' ? 'We\'ll send a reset code' :
+    step === 'forgot-otp' ? `Code sent to +91 ${phone}` :
+    step === 'forgot-reset' ? 'Choose a new password' :
+    'Admin login only';
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}>
@@ -159,26 +238,27 @@ export default function LoginScreen({ navigation }: any) {
         {/* ── Glass card ── */}
         <View style={styles.card}>
 
-          {/* Progress dots */}
-          {step !== 'admin' && (
-            <View style={styles.progressRow}>
-              {[1, 2, 3].map(n => (
-                <View key={n} style={[styles.progressDot, n <= stepProgress[step] && styles.progressDotActive]} />
-              ))}
+          {/* Step heading */}
+          <Text style={styles.cardHeading}>{heading}</Text>
+          <Text style={styles.cardSub}>{subheading}</Text>
+
+          {/* Sign In / Sign Up tabs — only on phone step */}
+          {step === 'phone' && (
+            <View style={styles.modeTabs}>
+              <TouchableOpacity
+                style={[styles.modeTab, mode === 'signin' && styles.modeTabActive]}
+                onPress={() => setMode('signin')}
+              >
+                <Text style={[styles.modeTabText, mode === 'signin' && styles.modeTabTextActive]}>Sign In</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modeTab, mode === 'signup' && styles.modeTabActive]}
+                onPress={() => setMode('signup')}
+              >
+                <Text style={[styles.modeTabText, mode === 'signup' && styles.modeTabTextActive]}>Create Account</Text>
+              </TouchableOpacity>
             </View>
           )}
-
-          {/* Step heading */}
-          <Text style={styles.cardHeading}>
-            {step === 'phone' ? 'Enter your number' :
-             step === 'otp' ? 'Verify OTP' :
-             step === 'name' ? 'Almost done!' : 'Admin Access'}
-          </Text>
-          <Text style={styles.cardSub}>
-            {step === 'phone' ? 'We\'ll send a 6-digit OTP to verify' :
-             step === 'otp' ? `Code sent to +91 ${phone}` :
-             step === 'name' ? 'What should we call you?' : 'Admin login only'}
-          </Text>
 
           {/* ── Phone step ── */}
           {step === 'phone' && (
@@ -199,29 +279,41 @@ export default function LoginScreen({ navigation }: any) {
                 />
               </View>
 
+              {mode === 'signin' && (
+                <>
+                  <View style={styles.nameRow}>
+                    <Ionicons name="lock-closed-outline" size={18} color={C.textMuted} style={styles.nameIcon} />
+                    <TextInput
+                      style={styles.nameInput}
+                      value={password}
+                      onChangeText={setPassword}
+                      placeholder="Password"
+                      placeholderTextColor={C.textMuted}
+                      secureTextEntry
+                    />
+                  </View>
+                  <TouchableOpacity
+                    onPress={() => { setStep('forgot-phone'); setOtp(''); setNewPassword(''); setConfirmPassword(''); }}
+                    style={{ alignSelf: 'flex-start', marginBottom: 16 }}
+                  >
+                    <Text style={styles.linkBtnText}>Forgot password?</Text>
+                  </TouchableOpacity>
+                </>
+              )}
+
               <TouchableOpacity
                 style={[styles.primaryBtn, loading && styles.btnDisabled]}
-                onPress={handleSignIn}
+                onPress={mode === 'signin' ? handleLogin : handleSignUp}
                 disabled={loading}
               >
                 {loading
                   ? <ActivityIndicator color="white" />
-                  : <Text style={styles.primaryBtnText}>Sign In</Text>}
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.outlineBtn, loading && styles.btnDisabled]}
-                onPress={handleSignUp}
-                disabled={loading}
-              >
-                {loading
-                  ? <ActivityIndicator color={C.orange} />
-                  : <Text style={styles.outlineBtnText}>Create Account →</Text>}
+                  : <Text style={styles.primaryBtnText}>{mode === 'signin' ? 'Sign In' : 'Send OTP →'}</Text>}
               </TouchableOpacity>
             </>
           )}
 
-          {/* ── OTP step ── */}
+          {/* ── OTP step (signup) ── */}
           {step === 'otp' && (
             <>
               {debugOtp && (
@@ -252,6 +344,42 @@ export default function LoginScreen({ navigation }: any) {
             </>
           )}
 
+          {/* ── Create password step (signup) ── */}
+          {step === 'create-password' && (
+            <>
+              <View style={styles.nameRow}>
+                <Ionicons name="lock-closed-outline" size={18} color={C.textMuted} style={styles.nameIcon} />
+                <TextInput
+                  style={styles.nameInput}
+                  value={newPassword}
+                  onChangeText={setNewPassword}
+                  placeholder="At least 8 characters"
+                  placeholderTextColor={C.textMuted}
+                  secureTextEntry
+                  autoFocus
+                />
+              </View>
+              <View style={[styles.nameRow, { marginTop: 10 }]}>
+                <Ionicons name="lock-closed-outline" size={18} color={C.textMuted} style={styles.nameIcon} />
+                <TextInput
+                  style={styles.nameInput}
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                  placeholder="Confirm password"
+                  placeholderTextColor={C.textMuted}
+                  secureTextEntry
+                />
+              </View>
+              <TouchableOpacity
+                style={[styles.primaryBtn, { marginTop: 20 }, (loading || newPassword.length < 8) && styles.btnDisabled]}
+                onPress={handleCreatePasswordSubmit}
+                disabled={loading || newPassword.length < 8}
+              >
+                {loading ? <ActivityIndicator color="white" /> : <Text style={styles.primaryBtnText}>Continue →</Text>}
+              </TouchableOpacity>
+            </>
+          )}
+
           {/* ── Name step ── */}
           {step === 'name' && (
             <>
@@ -274,6 +402,105 @@ export default function LoginScreen({ navigation }: any) {
                 disabled={loading || name.trim().length < 2}
               >
                 {loading ? <ActivityIndicator color="white" /> : <Text style={styles.primaryBtnText}>Get Started →</Text>}
+              </TouchableOpacity>
+            </>
+          )}
+
+          {/* ── Forgot password: phone step ── */}
+          {step === 'forgot-phone' && (
+            <>
+              <View style={styles.phoneRow}>
+                <View style={styles.countryCodeBox}>
+                  <Text style={styles.flag}>🇮🇳</Text>
+                  <Text style={styles.countryCode}>+91</Text>
+                </View>
+                <TextInput
+                  style={styles.phoneInput}
+                  value={phone}
+                  onChangeText={setPhone}
+                  placeholder="Enter 10-digit number"
+                  placeholderTextColor={C.textMuted}
+                  keyboardType="phone-pad"
+                  maxLength={10}
+                  autoFocus
+                />
+              </View>
+              <TouchableOpacity
+                style={[styles.primaryBtn, loading && styles.btnDisabled]}
+                onPress={handleForgotPhoneSubmit}
+                disabled={loading}
+              >
+                {loading ? <ActivityIndicator color="white" /> : <Text style={styles.primaryBtnText}>Send reset code →</Text>}
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => { setStep('phone'); setMode('signin'); }} style={styles.linkBtn}>
+                <Text style={styles.linkBtnText}>← Back to sign in</Text>
+              </TouchableOpacity>
+            </>
+          )}
+
+          {/* ── Forgot password: OTP step ── */}
+          {step === 'forgot-otp' && (
+            <>
+              {debugOtp && (
+                <View style={styles.debugBox}>
+                  <Text style={styles.debugText}>Debug OTP: {debugOtp}</Text>
+                </View>
+              )}
+              <TextInput
+                style={styles.otpInput}
+                value={otp}
+                onChangeText={t => setOtp(t.replace(/\D/g, '').slice(0, 6))}
+                placeholder="• • • • • •"
+                placeholderTextColor={C.textMuted}
+                keyboardType="number-pad"
+                maxLength={6}
+                autoFocus
+              />
+              <TouchableOpacity
+                style={[styles.primaryBtn, (loading || otp.length < 6) && styles.btnDisabled]}
+                onPress={handleForgotOtpSubmit}
+                disabled={loading || otp.length < 6}
+              >
+                {loading ? <ActivityIndicator color="white" /> : <Text style={styles.primaryBtnText}>Verify code</Text>}
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => { setStep('forgot-phone'); setOtp(''); setDebugOtp(undefined); }} style={styles.linkBtn}>
+                <Text style={styles.linkBtnText}>← Change number</Text>
+              </TouchableOpacity>
+            </>
+          )}
+
+          {/* ── Forgot password: reset step ── */}
+          {step === 'forgot-reset' && (
+            <>
+              <View style={styles.nameRow}>
+                <Ionicons name="lock-closed-outline" size={18} color={C.textMuted} style={styles.nameIcon} />
+                <TextInput
+                  style={styles.nameInput}
+                  value={newPassword}
+                  onChangeText={setNewPassword}
+                  placeholder="At least 8 characters"
+                  placeholderTextColor={C.textMuted}
+                  secureTextEntry
+                  autoFocus
+                />
+              </View>
+              <View style={[styles.nameRow, { marginTop: 10 }]}>
+                <Ionicons name="lock-closed-outline" size={18} color={C.textMuted} style={styles.nameIcon} />
+                <TextInput
+                  style={styles.nameInput}
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                  placeholder="Confirm password"
+                  placeholderTextColor={C.textMuted}
+                  secureTextEntry
+                />
+              </View>
+              <TouchableOpacity
+                style={[styles.primaryBtn, { marginTop: 20 }, (loading || newPassword.length < 8) && styles.btnDisabled]}
+                onPress={handleResetPasswordSubmit}
+                disabled={loading || newPassword.length < 8}
+              >
+                {loading ? <ActivityIndicator color="white" /> : <Text style={styles.primaryBtnText}>Reset password →</Text>}
               </TouchableOpacity>
             </>
           )}
@@ -350,23 +577,27 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
 
-  progressRow: {
-    flexDirection: 'row',
-    gap: 8,
-    justifyContent: 'center',
-    marginBottom: 20,
-  },
-  progressDot: {
-    width: 6, height: 6, borderRadius: 3,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-  },
-  progressDotActive: { backgroundColor: C.orange, width: 20 },
-
   cardHeading: {
     fontSize: 22, fontWeight: '800', color: C.textOnDark,
     marginBottom: 6, letterSpacing: -0.3,
   },
-  cardSub: { fontSize: 13, color: C.textOnDarkSub, marginBottom: 24 },
+  cardSub: { fontSize: 13, color: C.textOnDarkSub, marginBottom: 20 },
+
+  // Mode tabs
+  modeTabs: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(255,255,255,0.07)',
+    borderRadius: RADIUS.md,
+    padding: 4,
+    marginBottom: 20,
+  },
+  modeTab: {
+    flex: 1, paddingVertical: 10, borderRadius: RADIUS.md - 2,
+    alignItems: 'center',
+  },
+  modeTabActive: { backgroundColor: 'white' },
+  modeTabText: { fontSize: 13, fontWeight: '700', color: 'rgba(255,255,255,0.7)' },
+  modeTabTextActive: { color: C.navBg },
 
   // Phone input
   phoneRow: {
@@ -401,7 +632,7 @@ const styles = StyleSheet.create({
     color: C.textOnDark, marginBottom: 16,
   },
 
-  // Name input
+  // Name / generic labeled-row input
   nameRow: {
     flexDirection: 'row', alignItems: 'center',
     backgroundColor: 'rgba(255,255,255,0.07)',
@@ -419,12 +650,6 @@ const styles = StyleSheet.create({
     ...SHADOW.orange,
   },
   primaryBtnText: { color: 'white', fontSize: 16, fontWeight: '800', letterSpacing: 0.2 },
-  outlineBtn: {
-    borderWidth: 1.5, borderColor: C.orange,
-    borderRadius: RADIUS.md, paddingVertical: 16, alignItems: 'center', marginBottom: 4,
-    backgroundColor: 'rgba(247,146,30,0.06)',
-  },
-  outlineBtnText: { color: C.orange, fontSize: 15, fontWeight: '700' },
   btnDisabled: { opacity: 0.45 },
 
   linkBtn: { alignItems: 'center', marginTop: 14 },

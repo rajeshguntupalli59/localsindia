@@ -20,8 +20,10 @@
 
 | Feature | ARCH.md § | Backend | Frontend | DB Tables | Endpoints |
 |---------|-----------|---------|----------|-----------|-----------|
-| OTP Login (phone) | §11, §6-Auth | `routers/auth.py`, `services/msg91.py`, `core/security.py` | `auth/login/page.tsx` | `otp_requests`, `users` | POST /auth/otp/send, POST /auth/otp/verify |
-| Google OAuth | §11, §6-Auth | `routers/auth.py`, `core/config.py` | `auth/login/page.tsx`, `auth/callback/page.tsx` | `users` | GET /auth/google, GET /auth/google/callback |
+| OTP phone verification (signup + forgot-password) | §11, §6-Auth | `routers/auth.py`, `services/msg91.py`, `core/security.py` (setup_token, 10-min expiry) | `auth/login/page.tsx`, `mobile/src/screens/LoginScreen.tsx` | `otp_requests`, `users` | POST /auth/otp/send, POST /auth/otp/verify (returns `setup_token`, not full tokens) |
+| Password auth (2026-07-12) | §11, §6-Auth | `routers/auth.py`, `models/user.py` (`password_hash`, migration `a7b8c9d0e1f2`) | `auth/login/page.tsx`, `mobile/src/screens/LoginScreen.tsx` | `users` | POST /auth/password/set (signup or reset — same endpoint), POST /auth/login (phone+password, replaces the old passwordless `/auth/signin`) |
+| Biometric re-login (mobile only, pre-existing) | §11 | — | `mobile/src/hooks/useBiometric.ts`, `mobile/src/lib/storage.ts` (`biometric_enabled`), `App.tsx` (unlock on launch), `ProfileScreen.tsx` (toggle) | — (local SecureStore only) | — |
+| Google OAuth | §11, §6-Auth | `routers/auth.py`, `core/config.py` | `auth/login/page.tsx`, `auth/callback/page.tsx` | `users` | GET /auth/google, GET /auth/google/callback — **kept intentionally** (existing Google-only users would be locked out otherwise); Raj to notify users before eventual removal |
 | JWT token refresh | §11 | `routers/auth.py`, `core/security.py` | `lib/api.ts` (auto-refresh) | — | POST /auth/refresh |
 | Admin login | §6-Auth | `routers/auth.py` | `admin/login/page.tsx` | `users` (role=admin) | POST /auth/admin-login |
 | User profile | §8-Profile | `routers/auth.py` | `profile/page.tsx` | `users` | GET /auth/me, PATCH /auth/me |
@@ -263,17 +265,23 @@
 ## Endpoint Index
 *Quick lookup: what method + path does what.*
 
-### Auth
+### Auth (reworked 2026-07-12 — phone+OTP+password, see migration `a7b8c9d0e1f2`)
 ```
-POST   /api/v1/auth/otp/send              Send OTP SMS (rate-limited: 5/hr)
-POST   /api/v1/auth/otp/verify            Verify OTP -> JWT tokens
-POST   /api/v1/auth/signin                Sign in by phone (no OTP, existing users)
-POST   /api/v1/auth/admin-login           Admin username+password login
+POST   /api/v1/auth/otp/send              Send OTP SMS (rate-limited: 5/hr) — used for both signup and forgot-password
+POST   /api/v1/auth/otp/verify            Verify OTP -> {setup_token, has_password, is_new_user}
+                                          NOTE: no longer returns access/refresh tokens directly.
+                                          setup_token is a 10-min JWT (type=otp_verified), only valid for /auth/password/set
+POST   /api/v1/auth/password/set          {setup_token, password} -> AuthResponse (full tokens)
+                                          Serves BOTH signup (create password) and forgot-password (reset) — same action
+POST   /api/v1/auth/login                 {phone, password} -> AuthResponse. Replaces the old passwordless /auth/signin
+                                          (which let anyone log in as any known phone number with zero verification)
+                                          404 = no account, 409 = account has no password yet, 401 = wrong password
+POST   /api/v1/auth/admin-login           Admin username+password login (unrelated to user password_hash)
 POST   /api/v1/auth/refresh               Exchange refresh token for new access token
 DELETE /api/v1/auth/logout                Client-side only (stateless)
 GET    /api/v1/auth/me                    Get current user [AUTH]
 PATCH  /api/v1/auth/me                    Update name/lang_pref [AUTH]
-GET    /api/v1/auth/google?mobile=1        Redirect to Google OAuth (mobile=1 -> deep-link callback for RN app)
+GET    /api/v1/auth/google?mobile=1        Redirect to Google OAuth (mobile=1 -> deep-link callback for RN app) — kept for existing Google-only users
 GET    /api/v1/auth/google/callback       Handle OAuth code -> JWT -> redirect frontend or localsindia:// deep link
 POST   /api/v1/auth/dev-login             Skip OTP (OTP_DEBUG=true only)
 ```
@@ -406,7 +414,7 @@ GET    /api/v1/health                     {"status":"ok"} — keepalive probe
 
 | Table | Key Columns | Notes |
 |-------|-------------|-------|
-| `users` | id, phone, email, name, role, city_id, lang_pref, is_active, deleted_at | Soft-delete; PDPB |
+| `users` | id, phone, email, password_hash, name, role, city_id, lang_pref, is_active, deleted_at | Soft-delete; PDPB. `password_hash` nullable (migration `a7b8c9d0e1f2`, 2026-07-12) — null means the user has never set a password (pre-migration or Google-only account) |
 | `cities` | id, name, state, slug, lang_default, active | slug = URL segment |
 | `categories` | id, name, slug, icon, parent_id, sort_order | Self-join for sub-cats |
 | `listings` | id, user_id, city_id, category_id, title, description, price, contact_phone, whatsapp_url, status, is_featured, report_count, expires_at, view_count, contact_click_count, last_renewed_at, search_vector, deleted_at | Core product; tsvector search; view/click counters added migration `f6a7b8c9d0e1` |
@@ -534,4 +542,4 @@ Every new feature (page, endpoint, table, component) requires updates to both fi
 
 ---
 
-*Last updated: 2026-07-12 (QA pre-launch fix pass: buyer-requests backend feature built end-to-end, `/[city]` hydration fix, `/listing/[id]` + `/search` SEO metadata + Server/Client split, root + city-level branded 404 pages, mobile price-formatter fix + Vitest setup, listing detail share/similar-listings) | ⚠️ ARCHITECTURE.md §5-9 not yet updated to match — index is current, full doc is stale for buyer_requests table, these routes, and the not-found/search-metadata changes*
+*Last updated: 2026-07-12 (2nd pass same day — password-based auth added: phone+OTP+password login/signup, forgot-password reset flow, biometric re-login on mobile confirmed pre-existing/unchanged, Google OAuth intentionally kept for now; earlier same-day pass: buyer-requests backend feature built end-to-end, `/[city]` hydration fix, `/listing/[id]` + `/search` SEO metadata + Server/Client split, root + city-level branded 404 pages, mobile price-formatter fix + Vitest setup, listing detail share/similar-listings, support email updated to support@localsindia.com) | ⚠️ ARCHITECTURE.md §5-9, §11 not yet updated to match — index is current, full doc is stale for buyer_requests table, the password-auth rework, and the not-found/search-metadata changes*

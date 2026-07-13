@@ -16,6 +16,7 @@ from app.core.database import get_db
 from app.core.security import (
     hash_password, verify_password, generate_otp,
     create_access_token, create_refresh_token, decode_token,
+    create_setup_token, decode_setup_token,
 )
 from app.models.otp_request import OtpRequest
 from app.models.user import User
@@ -23,6 +24,7 @@ from app.core.deps import get_current_user
 from app.schemas.auth import (
     OtpSendRequest, OtpVerifyRequest, AuthResponse,
     RefreshRequest, TokenResponse, UserOut, ProfileUpdate, AdminLoginRequest,
+    OtpVerifyResponse, LoginRequest, SetPasswordRequest,
 )
 from app.services import msg91
 
@@ -67,9 +69,9 @@ async def admin_login(body: AdminLoginRequest, db: AsyncSession = Depends(get_db
     )
 
 
-@router.post("/signin", response_model=AuthResponse)
-async def direct_signin(body: OtpSendRequest, db: AsyncSession = Depends(get_db)):
-    """Sign in an existing user directly — no OTP required (phone already verified at signup)."""
+@router.post("/login", response_model=AuthResponse)
+async def login(body: LoginRequest, db: AsyncSession = Depends(get_db)):
+    """Returning-user login — phone + password."""
     result = await db.execute(
         select(User).where(User.phone == body.phone, User.deleted_at.is_(None))
     )
@@ -81,6 +83,13 @@ async def direct_signin(body: OtpSendRequest, db: AsyncSession = Depends(get_db)
         )
     if not user.is_active:
         raise HTTPException(status_code=403, detail="Your account has been deactivated. Contact support.")
+    if not user.password_hash:
+        raise HTTPException(
+            status_code=409,
+            detail="This account doesn't have a password yet. Use \"Forgot password\" to set one.",
+        )
+    if not verify_password(body.password, user.password_hash):
+        raise HTTPException(status_code=401, detail="Incorrect phone number or password.")
     return AuthResponse(
         access_token=create_access_token(str(user.id)),
         refresh_token=create_refresh_token(str(user.id)),
@@ -138,7 +147,7 @@ async def send_otp(body: OtpSendRequest, db: AsyncSession = Depends(get_db)):
     return {"message": "OTP sent successfully", "expires_in": OTP_EXPIRE_MINUTES * 60}
 
 
-@router.post("/otp/verify", response_model=AuthResponse)
+@router.post("/otp/verify", response_model=OtpVerifyResponse)
 async def verify_otp(body: OtpVerifyRequest, db: AsyncSession = Depends(get_db)):
     phone = body.phone
     now = datetime.now(timezone.utc)
@@ -188,11 +197,38 @@ async def verify_otp(body: OtpVerifyRequest, db: AsyncSession = Depends(get_db))
     await db.commit()
     await db.refresh(user)
 
+    return OtpVerifyResponse(
+        setup_token=create_setup_token(str(user.id)),
+        has_password=bool(user.password_hash),
+        is_new_user=is_new,
+    )
+
+
+@router.post("/password/set", response_model=AuthResponse)
+async def set_password(body: SetPasswordRequest, db: AsyncSession = Depends(get_db)):
+    """Set (signup) or reset (forgot-password) a user's password.
+    Requires a short-lived setup_token proving a recent OTP verification —
+    same endpoint serves both flows since the action is identical."""
+    user_id = decode_setup_token(body.setup_token)
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Verification expired. Please verify your phone again.")
+
+    result = await db.execute(select(User).where(User.id == user_id, User.deleted_at.is_(None)))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found.")
+    if not user.is_active:
+        raise HTTPException(status_code=403, detail="Your account has been deactivated. Contact support.")
+
+    user.password_hash = hash_password(body.password)
+    await db.commit()
+    await db.refresh(user)
+
     return AuthResponse(
         access_token=create_access_token(str(user.id)),
         refresh_token=create_refresh_token(str(user.id)),
         user=UserOut.model_validate(user),
-        is_new_user=is_new,
+        is_new_user=False,
     )
 
 

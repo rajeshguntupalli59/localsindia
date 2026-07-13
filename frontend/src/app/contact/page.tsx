@@ -34,10 +34,10 @@ export default function ContactPage() {
             For general enquiries, listing issues, account help, or partnerships.
           </p>
           <a
-            href="mailto:rajeshguntupalli59@gmail.com"
+            href="mailto:support@localsindia.com"
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#F7921E] hover:bg-[#E07B0A] transition-colors"
           >
-            rajeshguntupalli59@gmail.com
+            support@localsindia.com
           </a>
         </div>
 
