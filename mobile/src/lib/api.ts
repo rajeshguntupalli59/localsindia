@@ -42,6 +42,9 @@ export const listingsApi = {
   create: (data: Record<string, unknown>) =>
     api.post('/listings', data).then(r => r.data),
 
+  update: (id: string, data: Record<string, unknown>) =>
+    api.patch(`/listings/${id}`, data).then(r => r.data),
+
   search: (q: string, citySlug: string, params?: Record<string, string>) =>
     api.get('/search', { params: { q, city_slug: citySlug, ...params } }).then(r => r.data),
 

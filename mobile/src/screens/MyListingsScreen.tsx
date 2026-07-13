@@ -247,6 +247,14 @@ export default function MyListingsScreen({ navigation }: any) {
                   <TouchableOpacity
                     style={styles.actionBtn}
                     disabled={actionId === listing.id}
+                    onPress={() => navigation.navigate('EditListing', { listingId: listing.id })}
+                  >
+                    <Ionicons name="create-outline" size={16} color="#6b7280" />
+                    <Text style={[styles.actionText, { color: '#6b7280' }]}>Edit</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.actionBtn}
+                    disabled={actionId === listing.id}
                     onPress={() => handleDelete(listing.id)}
                   >
                     <Ionicons name="trash-outline" size={16} color="#ef4444" />
@@ -283,9 +291,9 @@ const styles = StyleSheet.create({
   badge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 999 },
   badgeText: { fontSize: 11, fontWeight: '700' },
   counters: { fontSize: 11, color: '#6b7280' },
-  actions: { flexDirection: 'row', borderTopWidth: 1, borderTopColor: '#f3f4f6' },
+  actions: { flexDirection: 'row', flexWrap: 'wrap', borderTopWidth: 1, borderTopColor: '#f3f4f6' },
   actionBtn: {
-    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    flexBasis: '33%', flexGrow: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     gap: 4, paddingVertical: 10,
   },
   actionText: { fontSize: 12, fontWeight: '600' },
