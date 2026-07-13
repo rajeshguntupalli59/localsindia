@@ -1,5 +1,31 @@
 # MSG91 OTP Delivery Issue — Support Ticket Details
 
+## ✅ RESOLVED (2026-07-13)
+
+**Root cause:** `template_id=6a397a20d362af077a07ff52` (the one we'd been using) wasn't properly linked for API-based sends in this account, and the `sender`/`DLT_TE_ID` params weren't needed. MSG91 support confirmed the correct working call.
+
+**Working curl (verified — real SMS delivered):**
+```bash
+curl --request POST \
+  --url 'https://control.msg91.com/api/v5/otp?otp=123456&mobile=919505212640&authkey=524248ABowLnBsGYc96a285d00P1&otp_expiry=10&otp_length=6&template_id=6a285e8ebdea123941082df7' \
+  --header 'Content-Type: application/json' \
+  --data '{}'
+```
+
+**Key differences from the old (broken) call:**
+- `template_id` changed to `6a285e8ebdea123941082df7` (new working template ID, was `6a397a20d362af077a07ff52`)
+- `sender` param removed (not needed)
+- `DLT_TE_ID` param removed (not needed)
+- `otp_length` param added
+
+**Fix applied:**
+- `backend/app/services/msg91.py` updated to match (commit `75e9bbf`)
+- Azure `MSG91_TEMPLATE_ID` updated to `6a285e8ebdea123941082df7`
+- `MSG91_DLT_TEMPLATE_ID` env var left in place on Azure (now unused, harmless)
+
+---
+
+
 **Date:** 2026-07-13
 **Account:** MSG91 account currently labelled "vitaliq" in the dashboard (confirmed this is the correct account for LocalsIndia — label is just a naming mistake, not a wrong account)
 **Product affected:** LocalsIndia (localsindia.com) — phone/OTP login
