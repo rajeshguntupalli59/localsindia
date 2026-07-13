@@ -151,7 +151,7 @@ export default function ProfileScreen({ navigation }: any) {
           <View style={styles.menuSection}>
             <Text style={styles.sectionLabel}>ACCOUNT</Text>
             <MenuItem icon="person-outline" label="Edit Profile"
-              onPress={() => Alert.alert('Coming soon', 'Profile editing coming soon.')} />
+              onPress={() => navigation.navigate('EditProfile', { user })} />
             <MenuItem icon="notifications-outline" label="Alerts & Preferences"
               onPress={() => navigation.navigate('AlertsPrefs')} />
             <MenuItem icon="location-outline" label="Change City"
