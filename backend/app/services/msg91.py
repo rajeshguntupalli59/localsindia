@@ -17,8 +17,7 @@ async def send_otp(phone: str, otp: str) -> tuple[bool, dict]:
         "template_id": settings.MSG91_TEMPLATE_ID,
         "otp": otp,
         "otp_expiry": 10,
-        "sender": "LCLIND",
-        "DLT_TE_ID": settings.MSG91_DLT_TEMPLATE_ID,
+        "otp_length": len(otp),
     }
     try:
         async with httpx.AsyncClient(timeout=10) as client:
