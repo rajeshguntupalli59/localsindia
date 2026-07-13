@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { listingsApi } from '../lib/api';
 import { formatPrice } from '../lib/format';
 import { useSavedContext } from '../context/SavedContext';
+import { storage } from '../lib/storage';
 import { C, SHADOW, RADIUS } from '../lib/theme';
 
 const { width: SW } = Dimensions.get('window');
@@ -29,6 +30,7 @@ export default function ListingDetailScreen({ navigation, route }: any) {
   const [listing, setListing] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activePhoto, setActivePhoto] = useState(0);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const { isSaved, toggle } = useSavedContext();
 
   useEffect(() => {
@@ -36,6 +38,10 @@ export default function ListingDetailScreen({ navigation, route }: any) {
       .then(data => { setListing(data); setLoading(false); })
       .catch(() => setLoading(false));
   }, [id]);
+
+  useEffect(() => {
+    storage.getUser().then(u => setCurrentUserId(u?.id ?? null));
+  }, []);
 
   const handleWhatsApp = () => {
     if (!listing) return;
@@ -245,6 +251,20 @@ export default function ListingDetailScreen({ navigation, route }: any) {
               </TouchableOpacity>
             </>
           )}
+
+          {/* Promote — owner only, not already featured */}
+          {currentUserId && listing.user_id === currentUserId && !listing.is_featured && (
+            <TouchableOpacity
+              style={styles.promoteBtn}
+              onPress={() => navigation.navigate('Promote', { listingId: listing.id, listingTitle: listing.title })}
+              activeOpacity={0.85}
+              accessibilityRole="button"
+              accessibilityLabel="Promote this listing"
+            >
+              <Ionicons name="star" size={16} color={C.orange} />
+              <Text style={styles.promoteBtnText}>Promote this listing — from ₹99</Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* Space for sticky bar */}
@@ -377,6 +397,14 @@ const styles = StyleSheet.create({
   sellerInitial: { color: 'white', fontSize: 18, fontWeight: '900' },
   sellerName: { fontSize: 15, fontWeight: '700', color: C.text, marginBottom: 2 },
   sellerSub: { fontSize: 12, color: C.textMuted },
+
+  promoteBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+    marginTop: 18, height: 48, borderRadius: RADIUS.md,
+    borderWidth: 1.5, borderColor: C.orange, borderStyle: 'dashed',
+    backgroundColor: 'rgba(247,146,30,0.06)',
+  },
+  promoteBtnText: { color: C.orange, fontSize: 14, fontWeight: '700' },
 
   // Sticky bar
   stickyBar: {
