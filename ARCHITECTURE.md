@@ -475,6 +475,14 @@ Frontend "🔔 Notify me" button on `/search` page is **pending** — backend en
 | GET | `/google?mobile=1` | Redirect to Google OAuth consent; `mobile=1` requests a deep-link callback for the React Native app instead of a web redirect | No |
 | GET | `/google/callback` | Exchange code -> tokens -> redirect frontend (`state=web`) or `localsindia://auth/callback` deep link (`state=mobile`) | No |
 
+### Errors: `/api/v1/errors` (added 2026-07-14)
+
+| Method | Path | What it does | Auth? |
+|--------|------|-------------|-------|
+| POST | `/report` | Report a mobile/web app error — `{platform, message, stack?, context?, app_version?}`. Public (a crash can happen before login) but rate-limited 20/min per IP | No |
+
+Also `GET /api/v1/admin/errors` (admin-only, see Admin section below) — lists recent errors grouped by message+platform+context with a count and last-seen timestamp, surfaced in `/admin/monitoring` as "Recent App Errors". Built because the mobile app previously had zero crash/error visibility (no Sentry/Firebase/analytics SDK of any kind).
+
 ### Cities: `/api/v1/cities`
 
 | Method | Path | What it does |

@@ -24,9 +24,17 @@ import AlertsPrefsScreen from './src/screens/AlertsPrefsScreen';
 import BusinessDetailScreen from './src/screens/BusinessDetailScreen';
 import EditProfileScreen from './src/screens/EditProfileScreen';
 import EditListingScreen from './src/screens/EditListingScreen';
+import ErrorBoundary from './src/components/ErrorBoundary';
 import { storage } from './src/lib/storage';
 import { isBiometricAvailable, authenticateWithBiometric } from './src/hooks/useBiometric';
 import { SavedProvider, useSavedContext } from './src/context/SavedContext';
+import { reportError } from './src/lib/errorReporting';
+
+const previousGlobalHandler = ErrorUtils.getGlobalHandler();
+ErrorUtils.setGlobalHandler((error, isFatal) => {
+  reportError(error, isFatal ? 'fatal' : 'non-fatal');
+  previousGlobalHandler(error, isFatal);
+});
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -162,31 +170,33 @@ export default function App() {
   }
 
   return (
-    <SafeAreaProvider>
-      <SavedProvider>
-        <NavigationContainer>
-          <StatusBar style="light" />
-          <Stack.Navigator initialRouteName={initialRoute} screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="Main" component={TabNavigator} />
-            <Stack.Screen name="ListingDetail" component={ListingDetailScreen} />
-            <Stack.Screen name="SellerProfile" component={SellerProfileScreen} />
-            <Stack.Screen name="Login" component={LoginScreen} />
-            <Stack.Screen
-              name="CityPicker"
-              component={CityPickerScreen}
-              options={{ presentation: 'modal' }}
-            />
-            <Stack.Screen name="Admin" component={AdminScreen} />
-            <Stack.Screen name="Chat" component={ChatScreen} />
-            <Stack.Screen name="MyListings" component={MyListingsScreen} />
-            <Stack.Screen name="Promote" component={PromoteScreen} />
-            <Stack.Screen name="AlertsPrefs" component={AlertsPrefsScreen} />
-            <Stack.Screen name="BusinessDetail" component={BusinessDetailScreen} />
-            <Stack.Screen name="EditProfile" component={EditProfileScreen} />
-            <Stack.Screen name="EditListing" component={EditListingScreen} />
-          </Stack.Navigator>
-        </NavigationContainer>
-      </SavedProvider>
-    </SafeAreaProvider>
+    <ErrorBoundary>
+      <SafeAreaProvider>
+        <SavedProvider>
+          <NavigationContainer>
+            <StatusBar style="light" />
+            <Stack.Navigator initialRouteName={initialRoute} screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="Main" component={TabNavigator} />
+              <Stack.Screen name="ListingDetail" component={ListingDetailScreen} />
+              <Stack.Screen name="SellerProfile" component={SellerProfileScreen} />
+              <Stack.Screen name="Login" component={LoginScreen} />
+              <Stack.Screen
+                name="CityPicker"
+                component={CityPickerScreen}
+                options={{ presentation: 'modal' }}
+              />
+              <Stack.Screen name="Admin" component={AdminScreen} />
+              <Stack.Screen name="Chat" component={ChatScreen} />
+              <Stack.Screen name="MyListings" component={MyListingsScreen} />
+              <Stack.Screen name="Promote" component={PromoteScreen} />
+              <Stack.Screen name="AlertsPrefs" component={AlertsPrefsScreen} />
+              <Stack.Screen name="BusinessDetail" component={BusinessDetailScreen} />
+              <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+              <Stack.Screen name="EditListing" component={EditListingScreen} />
+            </Stack.Navigator>
+          </NavigationContainer>
+        </SavedProvider>
+      </SafeAreaProvider>
+    </ErrorBoundary>
   );
 }

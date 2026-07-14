@@ -41,6 +41,7 @@
 | Photo upload | §13 | `routers/uploads.py`, `services/cloudinary_svc.py` | `[city]/classifieds/post/page.tsx`, `profile/listings/[id]/edit/EditListingClient.tsx` (2026-07-13: add photos when editing, was post-only) | `listing_images` | POST /upload/image/{listing_id} |
 | Photo delete | §13 | `routers/uploads.py`, `services/cloudinary_svc.py` | `profile/listings/[id]/edit/EditListingClient.tsx`; `mobile/src/screens/EditListingScreen.tsx` (2026-07-13, mobile previously had no photo management at all on edit) | `listing_images` | DELETE /upload/image/{image_id} |
 | Full-text search | §14 | `routers/search.py`, `services/search_svc.py` | `[city]/search/page.tsx` | `listings` (search_vector) | GET /search?q=&city_slug= |
+| App error tracking (2026-07-14) | §6-Auth (adjacent) | `routers/errors.py` (public report), `routers/admin.py` (admin list) | `admin/monitoring/page.tsx` ("Recent App Errors" panel); mobile `App.tsx` (`ErrorUtils.setGlobalHandler`), `src/components/ErrorBoundary.tsx`, `src/lib/errorReporting.ts`, `src/lib/api.ts` (reports 5xx/network failures) | `app_error_logs` | POST /errors/report (public, rate-limited 20/min/IP), GET /admin/errors (grouped by message) |
 | Featured listings (paid) | §12 | `routers/payments.py` | `[city]/classifieds/[id]/promote/page.tsx`, `PromoteClient.tsx`, `lib/razorpay.ts` | `listings` (is_featured) | POST /payments/featured/create-order, POST /payments/featured/verify |
 | Public seller profile | §8-SellerProfile, §6-Users | `routers/users.py` | `seller/[id]/page.tsx` | `users`, `listings` | GET /users/{user_id}/public-profile |
 | Bookmarks (saved listings) | §9-useSaved | — | `hooks/useSaved.ts`, `saved/page.tsx`, `listing-card/ListingCard.tsx` | — (localStorage) | — |
@@ -283,9 +284,19 @@ POST   /api/v1/auth/refresh               Exchange refresh token for new access 
 DELETE /api/v1/auth/logout                Client-side only (stateless)
 GET    /api/v1/auth/me                    Get current user [AUTH]
 PATCH  /api/v1/auth/me                    Update name/lang_pref [AUTH]
+DELETE /api/v1/auth/me                    Delete account (2026-07-14) — soft-deletes + anonymises user,
+                                          cascades soft-delete to all their listings [AUTH]
 GET    /api/v1/auth/google?mobile=1        Redirect to Google OAuth (mobile=1 -> deep-link callback for RN app) — kept for existing Google-only users
 GET    /api/v1/auth/google/callback       Handle OAuth code -> JWT -> redirect frontend or localsindia:// deep link
 POST   /api/v1/auth/dev-login             Skip OTP (OTP_DEBUG=true only)
+```
+
+### App Error Tracking (2026-07-14)
+```
+POST   /api/v1/errors/report              Report an app error/crash (public, no auth, rate-limited 20/min/IP)
+                                          {platform: 'mobile'|'web', message, stack?, context?, app_version?}
+GET    /api/v1/admin/errors               List recent errors grouped by message+platform+context,
+                                          with count + last_seen [ADMIN]
 ```
 
 ### Cities & Categories
@@ -429,6 +440,7 @@ GET    /api/v1/health                     {"status":"ok"} — keepalive probe
 | `otp_requests` | id, phone, otp_hash, attempts, verified, expires_at | bcrypt hash; 3-attempt max; 10-min expiry |
 | `saved_searches` | id, user_id, city_slug, query, category_slug, created_at | Search alerts; user notified when matching listings appear; migration `f6a7b8c9d0e1` |
 | `buyer_requests` | id, city_id, user_id, category_id, description, budget, contact_phone, status, deleted_at, created_at | "Wanted" posts; status open/fulfilled; migration `f1a2b3c4d5e6` (2026-07-12) |
+| `app_error_logs` | id, platform, message, stack, context, app_version, created_at | No user_id (reports must work pre-login/no-auth); platform in ('mobile','web'); migration `b3c4d5e6f7a8` (2026-07-14) |
 
 ---
 
@@ -518,7 +530,9 @@ Every new feature (page, endpoint, table, component) requires updates to both fi
 
 | File | What it does |
 |------|-------------|
-| `mobile/App.tsx` | Root: bottom tab navigator (Home/Search/Post/Saved/Profile) + stack (ListingDetail/SellerProfile/Login/CityPicker). Wrapped in `SafeAreaProvider`; tab bar height/padding derived from `useSafeAreaInsets().bottom` so it isn't covered by the Android gesture-nav bar or iOS home indicator |
+| `mobile/App.tsx` | Root: bottom tab navigator (Home/Search/Post/Saved/Profile) + stack (ListingDetail/SellerProfile/Login/CityPicker). Wrapped in `SafeAreaProvider`; tab bar height/padding derived from `useSafeAreaInsets().bottom` so it isn't covered by the Android gesture-nav bar or iOS home indicator. Also wrapped in `ErrorBoundary` + registers a global `ErrorUtils` handler for uncaught JS errors (2026-07-14 — previously zero crash visibility existed) |
+| `mobile/src/components/ErrorBoundary.tsx` | Catches render-time errors app-wide, reports via `errorReporting.ts`, shows a "Try again" fallback instead of a blank/crashed screen (2026-07-14) |
+| `mobile/src/lib/errorReporting.ts` | `reportError(error, context)` — fire-and-forget POST to `/api/v1/errors/report`, never throws (2026-07-14) |
 | `mobile/src/lib/api.ts` | FastAPI-adapted axios layer — `/cities/{slug}/listings`, `contact_phone`, `access_token`/`refresh_token` |
 | `mobile/src/lib/storage.ts` | expo-secure-store wrapper for JWT tokens + user object |
 | `mobile/src/lib/format.ts` | `formatPrice()` — shared Indian-locale price formatter (exact under ₹10k, truncated k/L above, never rounds up); Vitest tests in `format.test.ts`. Run: `cd mobile && npm test` |

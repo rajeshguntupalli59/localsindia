@@ -7,7 +7,7 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from app.core.config import settings
 from app.core.limiter import limiter
-from app.routers import auth, cities, categories, listings, uploads, search, admin, events, businesses, payments, users, chat, saved_searches, favorites, notifications, preferences, cron, buyer_requests
+from app.routers import auth, cities, categories, listings, uploads, search, admin, events, businesses, payments, users, chat, saved_searches, favorites, notifications, preferences, cron, buyer_requests, errors
 
 
 @asynccontextmanager
@@ -68,6 +68,7 @@ app.include_router(notifications.router)
 app.include_router(preferences.router)
 app.include_router(cron.router)
 app.include_router(buyer_requests.router)
+app.include_router(errors.router)
 
 
 @app.get("/api/v1/health")

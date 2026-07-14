@@ -10,9 +10,10 @@ from app.models.report import Report
 from app.models.otp_request import OtpRequest
 from app.models.listing_review import ListingReview
 from app.models.buyer_request import BuyerRequest
+from app.models.app_error_log import AppErrorLog
 
 __all__ = [
     "City", "User", "Category", "Listing", "ListingImage",
     "Event", "Business", "Review", "Report", "OtpRequest", "ListingReview",
-    "BuyerRequest",
+    "BuyerRequest", "AppErrorLog",
 ]

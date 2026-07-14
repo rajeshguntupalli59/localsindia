@@ -1,6 +1,7 @@
 import axios from 'axios';
 import * as FileSystem from 'expo-file-system/legacy';
 import { storage } from './storage';
+import { reportError } from './errorReporting';
 
 const API_BASE = 'https://localsindia-backend.azurewebsites.net/api/v1';
 
@@ -28,6 +29,13 @@ api.interceptors.response.use(
       } catch {
         await storage.clear();
       }
+    }
+    if (!error.response || error.response.status >= 500) {
+      const url = error.config?.url ?? 'unknown';
+      reportError(
+        new Error(error.response ? `HTTP ${error.response.status} on ${url}` : `Network error on ${url}`),
+        url,
+      );
     }
     return Promise.reject(error);
   }

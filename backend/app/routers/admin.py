@@ -16,12 +16,14 @@ PLACEHOLDER_URLS = [
 
 from app.core.database import get_db
 from app.core.deps import get_current_admin
+from app.models.app_error_log import AppErrorLog
 from app.models.business import Business
 from app.models.event import Event
 from app.models.listing import Listing
 from app.models.report import Report
 from app.models.user import User
 from app.schemas.business import BusinessOut
+from app.schemas.error_log import ErrorLogGroup
 from app.schemas.event import EventOut
 from app.schemas.listing import ListingOut
 
@@ -447,6 +449,34 @@ async def get_platform_stats(
             "sendgrid_configured": bool(settings.SENDGRID_API_KEY),
         },
     }
+
+
+@router.get("/errors", response_model=list[ErrorLogGroup])
+async def list_app_errors(
+    db: AsyncSession = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+):
+    """Recent app errors reported from mobile/web, grouped by message so repeat
+    crashes show up as one row with a count instead of flooding the list."""
+    result = await db.execute(
+        select(
+            AppErrorLog.message,
+            AppErrorLog.platform,
+            AppErrorLog.context,
+            func.count().label("count"),
+            func.max(AppErrorLog.created_at).label("last_seen"),
+        )
+        .group_by(AppErrorLog.message, AppErrorLog.platform, AppErrorLog.context)
+        .order_by(func.max(AppErrorLog.created_at).desc())
+        .limit(100)
+    )
+    return [
+        ErrorLogGroup(
+            message=row.message, platform=row.platform, context=row.context,
+            count=row.count, last_seen=row.last_seen,
+        )
+        for row in result
+    ]
 
 
 @router.get("/businesses")

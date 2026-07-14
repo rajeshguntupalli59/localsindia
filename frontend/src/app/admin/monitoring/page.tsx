@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { RefreshCw, MapPin, Phone, TrendingUp, AlertCircle, CheckCircle } from 'lucide-react';
+import { RefreshCw, MapPin, Phone, TrendingUp, AlertCircle, CheckCircle, Bug } from 'lucide-react';
 import { toast } from 'sonner';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
@@ -19,6 +19,14 @@ interface PlatformStats {
   otp: { today_total: number; today_verified: number };
   content: { reports: number; saves: number; reviews: number };
   system: { chatbot_key_set: boolean; razorpay_configured: boolean; sendgrid_configured: boolean };
+}
+
+interface ErrorGroup {
+  message: string;
+  platform: string;
+  context: string | null;
+  count: number;
+  last_seen: string;
 }
 
 function pct(n: number, total: number) {
@@ -44,6 +52,7 @@ function StatusRow({ label, count, total, color }: { label: string; count: numbe
 
 export default function AdminMonitoringPage() {
   const [stats, setStats] = useState<PlatformStats | null>(null);
+  const [errorGroups, setErrorGroups] = useState<ErrorGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -52,11 +61,13 @@ export default function AdminMonitoringPage() {
   const fetchStats = useCallback(async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true); else setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/v1/admin/stats`, {
-        headers: { Authorization: `Bearer ${token()}` },
-      });
-      if (!res.ok) throw new Error();
-      setStats(await res.json());
+      const [statsRes, errorsRes] = await Promise.all([
+        fetch(`${API_BASE}/api/v1/admin/stats`, { headers: { Authorization: `Bearer ${token()}` } }),
+        fetch(`${API_BASE}/api/v1/admin/errors`, { headers: { Authorization: `Bearer ${token()}` } }),
+      ]);
+      if (!statsRes.ok) throw new Error();
+      setStats(await statsRes.json());
+      setErrorGroups(errorsRes.ok ? await errorsRes.json() : []);
     } catch {
       toast.error('Failed to load monitoring data');
     } finally {
@@ -281,6 +292,42 @@ export default function AdminMonitoringPage() {
             </div>
           ))}
         </div>
+      </motion.div>
+
+      {/* Recent App Errors */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+        className="bg-white rounded-xl shadow-sm p-5"
+      >
+        <h2 className="text-sm font-bold mb-1 flex items-center gap-2">
+          <Bug className="w-4 h-4 text-red-500" />
+          Recent App Errors
+        </h2>
+        <p className="text-xs text-muted-foreground mb-4">
+          Reported from mobile crashes and failed API calls, grouped by message
+        </p>
+        {errorGroups.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-6">No errors reported — looking good</p>
+        ) : (
+          <div className="space-y-2">
+            {errorGroups.map((e, i) => (
+              <div key={`${e.message}-${i}`} className="flex items-start gap-3 p-3 rounded-lg bg-red-50/60 border border-red-100">
+                <span className="shrink-0 text-xs font-bold uppercase px-2 py-1 rounded-full bg-red-100 text-red-700">
+                  {e.platform}
+                </span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-slate-800 break-words">{e.message}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {e.context ? `${e.context} · ` : ''}last seen {new Date(e.last_seen).toLocaleString()}
+                  </p>
+                </div>
+                <span className="shrink-0 text-sm font-bold text-red-600">×{e.count}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </motion.div>
     </div>
   );
