@@ -187,6 +187,8 @@ export const api = {
         body: JSON.stringify(data),
         token,
       }),
+    deleteAccount: (token: string) =>
+      req<void>('/api/v1/auth/me', { method: 'DELETE', token }),
   },
   events: {
     list: (citySlug: string, params?: Record<string, string>) =>

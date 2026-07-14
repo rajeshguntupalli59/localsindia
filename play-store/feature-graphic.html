@@ -1,0 +1,96 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face {
+    font-family: 'Plus Jakarta Sans';
+    src: local('Plus Jakarta Sans');
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 1024px; height: 500px;
+    overflow: hidden;
+    font-family: 'Plus Jakarta Sans', -apple-system, 'Segoe UI', sans-serif;
+  }
+  .stage {
+    width: 1024px; height: 500px;
+    position: relative;
+    background: #0A0C17;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .glow-orange {
+    position: absolute; top: -140px; right: -100px;
+    width: 420px; height: 420px; border-radius: 50%;
+    background: #F7921E; opacity: 0.14;
+  }
+  .glow-teal {
+    position: absolute; bottom: -160px; left: -120px;
+    width: 380px; height: 380px; border-radius: 50%;
+    background: #163D6B; opacity: 0.35;
+  }
+  .content {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 46px;
+    padding: 0 64px;
+  }
+  .logo {
+    width: 168px; height: 168px;
+    flex-shrink: 0;
+  }
+  .text-block {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .wordmark {
+    font-size: 68px;
+    font-weight: 800;
+    letter-spacing: -1.5px;
+    color: #F7921E;
+    line-height: 1;
+  }
+  .tagline {
+    font-size: 26px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.92);
+  }
+  .usp-row {
+    display: flex;
+    gap: 14px;
+    margin-top: 8px;
+  }
+  .usp-chip {
+    font-size: 16px;
+    font-weight: 700;
+    color: #0A0C17;
+    background: #F7B731;
+    padding: 7px 16px;
+    border-radius: 999px;
+  }
+</style>
+</head>
+<body>
+  <div class="stage">
+    <div class="glow-orange"></div>
+    <div class="glow-teal"></div>
+    <div class="content">
+      <img class="logo" src="file:///C:/Users/rajes/localindia/mobile/assets/logo-mark-transparent.png" />
+      <div class="text-block">
+        <div class="wordmark">LocalsIndia</div>
+        <div class="tagline">Buy. Sell. Connect locally.</div>
+        <div class="usp-row">
+          <div class="usp-chip">100% Free</div>
+          <div class="usp-chip">No Spam</div>
+          <div class="usp-chip">WhatsApp Contact</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

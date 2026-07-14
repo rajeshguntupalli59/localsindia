@@ -46,6 +46,41 @@ export default function ProfileScreen({ navigation }: any) {
     ]);
   };
 
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      'Delete account',
+      'This permanently deletes your account and hides all your listings. This cannot be undone. Are you sure?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete', style: 'destructive',
+          onPress: () => {
+            Alert.alert(
+              'Are you absolutely sure?',
+              'Your name, phone number, and listings will be permanently removed.',
+              [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                  text: 'Yes, delete my account', style: 'destructive',
+                  onPress: async () => {
+                    try {
+                      await authApi.deleteAccount();
+                    } catch {
+                      Alert.alert('Error', 'Could not delete your account. Please try again.');
+                      return;
+                    }
+                    await storage.clear();
+                    navigation.replace('Login');
+                  },
+                },
+              ],
+            );
+          },
+        },
+      ],
+    );
+  };
+
   const initial = user?.name?.[0]?.toUpperCase() ?? user?.phone?.[3] ?? '?';
 
   type MenuItemProps = {
@@ -184,8 +219,12 @@ export default function ProfileScreen({ navigation }: any) {
             </View>
           )}
 
-          <View style={[styles.menuSection, { marginBottom: 32 }]}>
+          <View style={styles.menuSection}>
             <MenuItem icon="log-out-outline" label="Log out" onPress={handleLogout} danger />
+          </View>
+
+          <View style={[styles.menuSection, { marginBottom: 32 }]}>
+            <MenuItem icon="trash-outline" label="Delete account" onPress={handleDeleteAccount} danger />
           </View>
         </>
       )}

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import * as FileSystem from 'expo-file-system/legacy';
 import { storage } from './storage';
 
 const API_BASE = 'https://localsindia-backend.azurewebsites.net/api/v1';
@@ -91,6 +92,34 @@ export const authApi = {
 
   updateName: (name: string) =>
     api.patch('/auth/me', { name }).then(r => r.data),
+
+  deleteAccount: () =>
+    api.delete('/auth/me').then(r => r.data),
+};
+
+export const uploadsApi = {
+  image: async (listingId: string, uri: string) => {
+    const token = await storage.getAccessToken();
+    const result = await FileSystem.uploadAsync(
+      `${API_BASE}/upload/image/${listingId}`,
+      uri,
+      {
+        fieldName: 'file',
+        httpMethod: 'POST',
+        uploadType: (FileSystem.FileSystemUploadType?.MULTIPART ?? 1) as any,
+        headers: { Authorization: `Bearer ${token ?? ''}` },
+      }
+    );
+    if (result.status >= 400) {
+      let detail = `HTTP ${result.status}`;
+      try { detail = JSON.parse(result.body)?.detail ?? detail; } catch {}
+      throw new Error(detail);
+    }
+    return JSON.parse(result.body) as { id: string; url: string; cloudinary_id: string };
+  },
+
+  deleteImage: (imageId: string) =>
+    api.delete(`/upload/image/${imageId}`).then(r => r.data),
 };
 
 export const citiesApi = {

@@ -27,18 +27,19 @@
 | JWT token refresh | §11 | `routers/auth.py`, `core/security.py` | `lib/api.ts` (auto-refresh) | — | POST /auth/refresh |
 | Admin login | §6-Auth | `routers/auth.py` | `admin/login/page.tsx` | `users` (role=admin) | POST /auth/admin-login |
 | User profile | §8-Profile | `routers/auth.py` | `profile/page.tsx` | `users` | GET /auth/me, PATCH /auth/me |
+| Account deletion (2026-07-14) | §8-Profile, §6-Auth | `routers/auth.py` (soft-deletes user + cascades to their listings) | `profile/page.tsx` (Delete account button), `account-deletion/page.tsx` (public, no-login-required page for Play Store data-deletion policy), `mobile/src/screens/ProfileScreen.tsx` (Delete account, double-confirm) | `users`, `listings` (both soft-deleted; user PII scrubbed: name/phone/email/password_hash/avatar_url set to null/placeholder) | DELETE /auth/me |
 | Post a listing | §8-PostListing, §10 | `routers/listings.py` | `[city]/classifieds/post/page.tsx` | `listings` | POST /listings |
 | Browse listings | §8-CityHome | `routers/listings.py` | `[city]/page.tsx`, `[city]/[category]/page.tsx` | `listings`, `listing_images` | GET /cities/{slug}/listings |
 | Listing detail | §8-ListingDetail | `routers/listings.py` | `[city]/classifieds/[id]/page.tsx`, `ListingDetailClient.tsx` | `listings`, `listing_images`, `listing_reviews` | GET /listings/{id} |
-| Edit listing | §8-EditListing | `routers/listings.py` | `[city]/classifieds/[id]/edit/page.tsx`, `EditListingClient.tsx` | `listings` | PATCH /listings/{id} |
+| Edit listing | §8-EditListing | `routers/listings.py` | `profile/listings/[id]/edit/page.tsx`, `EditListingClient.tsx` (web); `mobile/src/screens/EditListingScreen.tsx` | `listings` | PATCH /listings/{id} |
 | Delete listing | §10 | `routers/listings.py` | `profile/listings/page.tsx` | `listings` (soft-delete) | DELETE /listings/{id} |
 | Renew listing | §8-MyListings | `routers/listings.py` | `profile/listings/page.tsx` | `listings` | POST /listings/{id}/renew |
 | Mark as sold | §8-MyListings | `routers/listings.py` | `profile/listings/page.tsx` | `listings` | POST /listings/{id}/fulfill |
 | Report listing | §10-BL04 | `routers/listings.py` | `[city]/classifieds/[id]/ListingDetailClient.tsx` | `reports`, `listings` | POST /listings/{id}/report |
 | Listing reviews | §5-listing_reviews | `routers/listings.py` | `ListingDetailClient.tsx` | `listing_reviews` | GET /listings/{id}/reviews, POST /listings/{id}/reviews |
 | WhatsApp tracking | §9-WhatsAppButton | `routers/listings.py` | `WhatsAppButton.tsx` | `listings` (wa_verified) | POST /listings/{id}/wa-click |
-| Photo upload | §13 | `routers/uploads.py`, `services/cloudinary_svc.py` | `[city]/classifieds/post/page.tsx` | `listing_images` | POST /upload/image/{listing_id} |
-| Photo delete | §13 | `routers/uploads.py`, `services/cloudinary_svc.py` | `[city]/classifieds/[id]/edit/EditListingClient.tsx` | `listing_images` | DELETE /upload/image/{image_id} |
+| Photo upload | §13 | `routers/uploads.py`, `services/cloudinary_svc.py` | `[city]/classifieds/post/page.tsx`, `profile/listings/[id]/edit/EditListingClient.tsx` (2026-07-13: add photos when editing, was post-only) | `listing_images` | POST /upload/image/{listing_id} |
+| Photo delete | §13 | `routers/uploads.py`, `services/cloudinary_svc.py` | `profile/listings/[id]/edit/EditListingClient.tsx`; `mobile/src/screens/EditListingScreen.tsx` (2026-07-13, mobile previously had no photo management at all on edit) | `listing_images` | DELETE /upload/image/{image_id} |
 | Full-text search | §14 | `routers/search.py`, `services/search_svc.py` | `[city]/search/page.tsx` | `listings` (search_vector) | GET /search?q=&city_slug= |
 | Featured listings (paid) | §12 | `routers/payments.py` | `[city]/classifieds/[id]/promote/page.tsx`, `PromoteClient.tsx`, `lib/razorpay.ts` | `listings` (is_featured) | POST /payments/featured/create-order, POST /payments/featured/verify |
 | Public seller profile | §8-SellerProfile, §6-Users | `routers/users.py` | `seller/[id]/page.tsx` | `users`, `listings` | GET /users/{user_id}/public-profile |
@@ -154,8 +155,8 @@
 | `app/[city]/[category]/page.tsx` | `/[city]/jobs` | All listings in a category for the city |
 | `app/[city]/classifieds/[id]/page.tsx` | `/[city]/classifieds/[id]` | Listing detail (Server Component wrapper) |
 | `app/[city]/classifieds/[id]/ListingDetailClient.tsx` | (client) | Listing detail UI: interactive image carousel (activeImg state, prev/next arrows, dot indicators, clickable thumbnails with active orange border), WhatsApp, reviews |
-| `app/[city]/classifieds/[id]/edit/page.tsx` | `/[city]/classifieds/[id]/edit` | Edit listing form (owner only) |
-| `app/[city]/classifieds/[id]/edit/EditListingClient.tsx` | (client) | Edit form state and API calls |
+| `app/profile/listings/[id]/edit/page.tsx` | `/profile/listings/{id}/edit` | Edit listing form (owner only) |
+| `app/profile/listings/[id]/edit/EditListingClient.tsx` | (client) | Edit form state and API calls; includes photo add/remove (2026-07-13, uses `api.upload.image`/`api.upload.deleteImage`, same as post flow) |
 | `app/[city]/classifieds/[id]/promote/page.tsx` | `/[city]/classifieds/[id]/promote` | Featured listing payment (wrapper) |
 | `app/[city]/classifieds/[id]/promote/PromoteClient.tsx` | (client) | Razorpay checkout UI |
 | `app/[city]/classifieds/post/page.tsx` | `/[city]/classifieds/post` | 3-step post listing wizard |
@@ -170,7 +171,8 @@
 | `app/[city]/launch/page.tsx` | `/[city]/launch` | City launch celebration page |
 | `app/auth/login/page.tsx` | `/auth/login` | Phone OTP + Google OAuth login (Suspense-wrapped) |
 | `app/auth/callback/page.tsx` | `/auth/callback` | Google OAuth redirect handler (Suspense-wrapped) |
-| `app/profile/page.tsx` | `/profile` | User settings: name, language, city |
+| `app/profile/page.tsx` | `/profile` | User settings: name, language, city; Delete account button (2026-07-14) |
+| `app/account-deletion/page.tsx` | `/account-deletion` | Public page (no login required) explaining how to delete your account — in-app self-serve + email fallback for users without app access. Required by Google Play's account-deletion policy (2026-07-14) |
 | `app/profile/listings/page.tsx` | `/profile/listings` | My listings: manage, renew, fulfill, promote |
 | `app/profile/listings/[id]/page.tsx` | `/profile/listings/[id]` | Static export segment stub |
 | `app/profile/listings/[id]/edit/page.tsx` | `/profile/listings/[id]/edit` | Edit listing (owner view) |
@@ -529,11 +531,11 @@ Every new feature (page, endpoint, table, component) requires updates to both fi
 | `mobile/src/screens/LoginScreen.tsx` | OTP phone → code flow; stores access_token/refresh_token in SecureStore; real logo image above the wordmark |
 | `mobile/src/screens/PostScreen.tsx` | 3-step wizard: details → photos (expo-image-picker) → contact |
 | `mobile/src/screens/SavedScreen.tsx` | AsyncStorage bookmark list with empty state |
-| `mobile/src/screens/ProfileScreen.tsx` | User avatar, name, phone, menu (My Listings, Saved, Edit, City), logout |
+| `mobile/src/screens/ProfileScreen.tsx` | User avatar, name, phone, menu (My Listings, Saved, Edit, City), logout, Delete account (double-confirm, 2026-07-14) |
 | `mobile/src/screens/CityPickerScreen.tsx` | Searchable modal pulling cities from `/api/v1/cities` |
 | `mobile/src/screens/AdminScreen.tsx` | Admin panel: listing moderation, approve/reject, role management |
 | `mobile/src/screens/EditProfileScreen.tsx` | Edit display name (2026-07-13, was a "coming soon" placeholder) — phone shown read-only, calls `PATCH /auth/me` |
-| `mobile/src/screens/EditListingScreen.tsx` | Edit a posted listing (2026-07-13, previously didn't exist on mobile at all) — title/description/price/area/WhatsApp/website/social, same fields as web's edit page, no featured-status restriction |
+| `mobile/src/screens/EditListingScreen.tsx` | Edit a posted listing (2026-07-13, previously didn't exist on mobile at all) — title/description/price/area/WhatsApp/website/social, same fields as web's edit page, no featured-status restriction; photo add/remove added same day (was missing on initial build — uses `uploadsApi.image`/`uploadsApi.deleteImage`) |
 | `mobile/eas.json` | EAS Build profiles: development (debug APK), preview (internal APK), production (AAB) |
 | `mobile/app.json` | Expo config + EAS project link (`@rajeshguntupalli59/localsindia`) + splash/permission config for store builds |
 | `mobile/assets/icon.png`, `android-icon-foreground.png`, `favicon.png`, `splash-icon.png` | Real LocalsIndia logo (mark-only for icon sizes, full mark+wordmark for splash) |

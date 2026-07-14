@@ -58,7 +58,7 @@ export default function PrivacyPage() {
 
           <section>
             <h2 className="text-lg font-bold mb-2">6. Data Retention</h2>
-            <p>Your account data is retained as long as your account is active. If you delete a listing, it is soft-deleted and not shown publicly, but may be retained for up to 90 days for fraud prevention purposes. You may request deletion of your account and all associated data by emailing us.</p>
+            <p>Your account data is retained as long as your account is active. If you delete a listing, it is soft-deleted and not shown publicly, but may be retained for up to 90 days for fraud prevention purposes. You may delete your entire account at any time — see <Link href="/account-deletion" style={{ color: 'var(--li-primary)' }}>How to delete your account</Link> for both in-app and email options.</p>
           </section>
 
           <section>

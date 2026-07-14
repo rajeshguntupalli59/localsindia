@@ -3,10 +3,11 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { LogOut, ListOrdered, ChevronRight, User, Heart, Search } from 'lucide-react';
+import { LogOut, ListOrdered, ChevronRight, User, Heart, Search, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import type { User as UserType } from '@/lib/types';
 import { toast } from 'sonner';
+import { api, ApiError } from '@/lib/api';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -24,6 +25,23 @@ export default function ProfilePage() {
     localStorage.removeItem('user');
     toast.success('Logged out');
     router.replace('/');
+  };
+
+  const handleDeleteAccount = async () => {
+    const token = localStorage.getItem('access_token');
+    if (!token) return;
+    if (!confirm('This permanently deletes your account and hides all your listings. This cannot be undone. Are you sure?')) return;
+    if (!confirm('Are you absolutely sure? Your name, phone number, and listings will be permanently removed.')) return;
+    try {
+      await api.auth.deleteAccount(token);
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      localStorage.removeItem('user');
+      toast.success('Your account has been deleted');
+      router.replace('/');
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : 'Failed to delete account');
+    }
   };
 
   if (!user) return null;
@@ -79,6 +97,13 @@ export default function ProfilePage() {
           className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl border border-destructive text-destructive font-semibold text-sm hover:bg-destructive/5 transition-colors"
         >
           <LogOut className="w-4 h-4" /> Sign out
+        </button>
+
+        <button
+          onClick={handleDeleteAccount}
+          className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl border border-destructive text-destructive font-semibold text-sm hover:bg-destructive/5 transition-colors"
+        >
+          <Trash2 className="w-4 h-4" /> Delete account
         </button>
       </div>
     </div>

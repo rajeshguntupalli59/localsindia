@@ -47,6 +47,7 @@ const FOOTER_LINKS: Record<string, { label: string; href: string }[]> = {
   Legal: [
     { label: 'Privacy Policy', href: '/privacy' },
     { label: 'Terms of Service', href: '/terms' },
+    { label: 'Delete Your Account', href: '/account-deletion' },
   ],
 };
 

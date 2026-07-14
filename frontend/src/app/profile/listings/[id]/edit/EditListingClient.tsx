@@ -1,14 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, Globe, MapPin, Save, Share2 } from 'lucide-react';
+import { ArrowLeft, Camera, Globe, MapPin, Save, Share2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { api, ApiError } from '@/lib/api';
-import type { Listing } from '@/lib/types';
+import type { Listing, ListingImage } from '@/lib/types';
 
 export default function EditListingPage() {
   const { id } = useParams<{ id: string }>();
@@ -25,6 +25,10 @@ export default function EditListingPage() {
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [socialUrl, setSocialUrl] = useState('');
   const [area, setArea] = useState('');
+
+  const [images, setImages] = useState<ListingImage[]>([]);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const token = localStorage.getItem('access_token');
@@ -52,11 +56,46 @@ export default function EditListingPage() {
       setWebsiteUrl(data.website_url ?? '');
       setSocialUrl(data.social_url ?? '');
       setArea(data.area ?? '');
+      setImages(data.images ?? []);
     } catch {
       toast.error('Listing not found');
       router.replace('/profile/listings');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleFiles = async (files: FileList | null) => {
+    if (!files || !listing) return;
+    const token = localStorage.getItem('access_token');
+    if (!token) return;
+    const arr = Array.from(files).slice(0, 5 - images.length);
+    const oversized = arr.filter(f => f.size > 5 * 1024 * 1024);
+    if (oversized.length) { toast.error('Images must be under 5MB'); return; }
+
+    setUploadingPhoto(true);
+    try {
+      for (const file of arr) {
+        const uploaded = await api.upload.image(listing.id, file, token);
+        setImages(prev => [...prev, uploaded]);
+      }
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : 'Failed to upload photo');
+    } finally {
+      setUploadingPhoto(false);
+      if (fileRef.current) fileRef.current.value = '';
+    }
+  };
+
+  const removeImage = async (imageId: string) => {
+    const token = localStorage.getItem('access_token');
+    if (!token) return;
+    if (!confirm('Remove this photo?')) return;
+    try {
+      await api.upload.deleteImage(imageId, token);
+      setImages(prev => prev.filter(img => img.id !== imageId));
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : 'Failed to remove photo');
     }
   };
 
@@ -144,6 +183,47 @@ export default function EditListingPage() {
             placeholder="Describe the item, condition, reason for selling..."
             className="w-full border rounded-xl px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-orange-400"
           />
+        </div>
+
+        {/* Photos */}
+        <div className="space-y-2">
+          <Label>Photos</Label>
+          <div className="flex flex-wrap gap-3">
+            {images.map(img => (
+              <div key={img.id} className="relative w-20 h-20 rounded-xl overflow-hidden bg-gray-100">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={img.url} alt="" className="w-full h-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => removeImage(img.id)}
+                  className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 flex items-center justify-center"
+                  aria-label="Remove photo"
+                >
+                  <X className="w-3 h-3 text-white" />
+                </button>
+              </div>
+            ))}
+            {images.length < 5 && (
+              <button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                disabled={uploadingPhoto}
+                className="w-20 h-20 rounded-xl border-2 border-dashed flex items-center justify-center transition-colors hover:border-orange-400 disabled:opacity-60"
+                style={{ borderColor: 'var(--li-border)' }}
+              >
+                <Camera className="w-5 h-5" style={{ color: 'var(--li-primary)' }} />
+              </button>
+            )}
+          </div>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            multiple
+            className="hidden"
+            onChange={e => handleFiles(e.target.files)}
+          />
+          <p className="text-xs text-muted-foreground">{images.length}/5 photos</p>
         </div>
 
         {/* Price */}

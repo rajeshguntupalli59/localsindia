@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 logger = logging.getLogger(__name__)
 from fastapi.responses import RedirectResponse
-from sqlalchemy import select, func
+from sqlalchemy import select, func, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
@@ -20,6 +20,7 @@ from app.core.security import (
 )
 from app.models.otp_request import OtpRequest
 from app.models.user import User
+from app.models.listing import Listing
 from app.core.deps import get_current_user
 from app.schemas.auth import (
     OtpSendRequest, OtpVerifyRequest, AuthResponse,
@@ -299,6 +300,32 @@ async def update_profile(
 @router.get("/me", response_model=UserOut)
 async def get_me(current_user: User = Depends(get_current_user)):
     return UserOut.model_validate(current_user)
+
+
+@router.delete("/me", status_code=204)
+async def delete_account(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Soft-delete the account and anonymise PII (BL: soft-delete only, never hard-delete).
+    Frees up the phone/email for reuse and hides the user's listings, since their
+    contact details no longer exist once anonymised."""
+    now = datetime.now(timezone.utc)
+
+    await db.execute(
+        update(Listing)
+        .where(Listing.user_id == current_user.id, Listing.deleted_at.is_(None))
+        .values(deleted_at=now)
+    )
+
+    current_user.deleted_at = now
+    current_user.is_active = False
+    current_user.name = "Deleted User"
+    current_user.phone = None
+    current_user.email = None
+    current_user.password_hash = None
+    current_user.avatar_url = None
+    await db.commit()
 
 
 # ─── Google OAuth ─────────────────────────────────────────────

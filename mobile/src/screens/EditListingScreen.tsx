@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Alert, Image } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { listingsApi } from '../lib/api';
+import { listingsApi, uploadsApi } from '../lib/api';
 import { storage } from '../lib/storage';
+
+type ListingImage = { id: string; url: string };
 
 export default function EditListingScreen({ navigation, route }: any) {
   const insets = useSafeAreaInsets();
@@ -19,6 +22,9 @@ export default function EditListingScreen({ navigation, route }: any) {
   const [whatsappUrl, setWhatsappUrl] = useState('');
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [socialUrl, setSocialUrl] = useState('');
+
+  const [images, setImages] = useState<ListingImage[]>([]);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -36,6 +42,7 @@ export default function EditListingScreen({ navigation, route }: any) {
         setWhatsappUrl(listing.whatsapp_url ?? '');
         setWebsiteUrl(listing.website_url ?? '');
         setSocialUrl(listing.social_url ?? '');
+        setImages(listing.images ?? []);
       } catch {
         Alert.alert('Error', 'Could not load this listing.');
         navigation.goBack();
@@ -44,6 +51,46 @@ export default function EditListingScreen({ navigation, route }: any) {
       }
     })();
   }, [listingId, navigation]);
+
+  const pickPhoto = async () => {
+    if (images.length >= 5) { Alert.alert('Max 5 photos allowed'); return; }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsMultipleSelection: true,
+      selectionLimit: 5 - images.length,
+      quality: 0.7,
+    });
+    if (result.canceled || result.assets.length === 0) return;
+    setUploadingPhoto(true);
+    try {
+      for (const asset of result.assets) {
+        const uploaded = await uploadsApi.image(listingId, asset.uri);
+        setImages(prev => [...prev, { id: uploaded.id, url: uploaded.url }]);
+      }
+    } catch (err: any) {
+      Alert.alert('Upload failed', err?.message ?? 'Could not upload photo.');
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
+  const removePhoto = (imageId: string) => {
+    Alert.alert('Remove photo', 'Are you sure you want to remove this photo?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Remove',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await uploadsApi.deleteImage(imageId);
+            setImages(prev => prev.filter(img => img.id !== imageId));
+          } catch {
+            Alert.alert('Error', 'Could not remove photo.');
+          }
+        },
+      },
+    ]);
+  };
 
   const handleSave = async () => {
     if (title.trim().length < 3) { Alert.alert('Title too short', 'Enter at least 3 characters.'); return; }
@@ -99,6 +146,32 @@ export default function EditListingScreen({ navigation, route }: any) {
             placeholder="Describe the item, condition, reason for selling..."
           />
 
+          <Text style={styles.label}>Photos</Text>
+          <View style={styles.photoGrid}>
+            {images.map(img => (
+              <View key={img.id} style={styles.photoWrapper}>
+                <Image source={{ uri: img.url }} style={styles.photo} />
+                <TouchableOpacity
+                  style={styles.removePhoto}
+                  onPress={() => removePhoto(img.id)}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  accessibilityRole="button"
+                  accessibilityLabel="Remove photo"
+                >
+                  <Ionicons name="close-circle" size={22} color="white" />
+                </TouchableOpacity>
+              </View>
+            ))}
+            {images.length < 5 && (
+              <TouchableOpacity style={styles.addPhotoBtn} onPress={pickPhoto} disabled={uploadingPhoto}>
+                {uploadingPhoto
+                  ? <ActivityIndicator color="#f97316" />
+                  : <Ionicons name="camera-outline" size={26} color="#f97316" />}
+              </TouchableOpacity>
+            )}
+          </View>
+          <Text style={styles.hint}>{images.length}/5 photos</Text>
+
           <Text style={styles.label}>Price (₹) — optional</Text>
           <TextInput style={styles.input} value={price} onChangeText={setPrice} keyboardType="numeric" placeholder="Leave blank for price on request" />
 
@@ -142,6 +215,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#1f2937',
   },
   textarea: { height: 100, textAlignVertical: 'top' },
+  photoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  photoWrapper: { position: 'relative' },
+  photo: { width: 80, height: 80, borderRadius: 12 },
+  removePhoto: {
+    position: 'absolute', top: -6, right: -6,
+    backgroundColor: 'rgba(0,0,0,0.6)', borderRadius: 12,
+  },
+  addPhotoBtn: {
+    width: 80, height: 80, borderRadius: 12,
+    borderWidth: 2, borderColor: '#e5e7eb', borderStyle: 'dashed',
+    alignItems: 'center', justifyContent: 'center', backgroundColor: '#fafafa',
+  },
+  hint: { fontSize: 12, color: '#9ca3af', marginTop: 6 },
   saveBtn: {
     marginTop: 28, backgroundColor: '#f97316', borderRadius: 12,
     paddingVertical: 16, alignItems: 'center',

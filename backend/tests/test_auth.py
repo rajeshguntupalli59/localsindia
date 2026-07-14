@@ -1,5 +1,8 @@
 import pytest
 from unittest.mock import patch
+from sqlalchemy import select
+
+from app.models.user import User
 
 
 # TC-001: Valid Indian number gets OTP (mock mode)
@@ -198,6 +201,69 @@ async def test_forgot_password_reset_flow(client, db):
     assert old.status_code == 401
     new = await client.post("/api/v1/auth/login", json={"phone": phone, "password": "newpassword1"})
     assert new.status_code == 200
+
+
+# ── Account deletion ─────────────────────────────────────────────────────────
+
+@pytest.mark.asyncio
+async def test_delete_account_anonymises_user_and_hides_listings(client, db):
+    from app.models.category import Category
+    from app.models.city import City
+    from app.models.listing import Listing
+
+    phone = "+919555555555"
+    setup_token = await _verify_otp_get_setup_token(client, db, phone)
+    signup = await client.post("/api/v1/auth/password/set", json={
+        "setup_token": setup_token, "password": "supersecret1",
+    })
+    access_token = signup.json()["access_token"]
+    user_id = signup.json()["user"]["id"]
+    headers = {"Authorization": f"Bearer {access_token}"}
+
+    city = City(name="Test City", slug="test-city-del", state="Test State", lang_default="en")
+    category = Category(name="Test Cat", slug="test-cat-del")
+    db.add_all([city, category])
+    await db.commit()
+    await db.refresh(city)
+    await db.refresh(category)
+
+    listing = Listing(
+        user_id=user_id, city_id=city.id, category_id=category.id,
+        title="A listing to be hidden", description="Some description here",
+        contact_phone=phone, status="active",
+    )
+    db.add(listing)
+    await db.commit()
+    await db.refresh(listing)
+    listing_id = listing.id
+
+    resp = await client.delete("/api/v1/auth/me", headers=headers)
+    assert resp.status_code == 204
+
+    # Account is gone from the caller's perspective — token no longer resolves to a live user
+    me = await client.get("/api/v1/auth/me", headers=headers)
+    assert me.status_code == 401
+
+    # The endpoint committed via a different session — expire this session's identity map
+    # so re-querying the listing sees the update rather than the pre-delete cached row.
+    db.expire_all()
+
+    result = await db.execute(select(User).where(User.id == user_id))
+    deleted_user = result.scalar_one()
+    assert deleted_user.deleted_at is not None
+    assert deleted_user.is_active is False
+    assert deleted_user.phone is None
+    assert deleted_user.name == "Deleted User"
+
+    result = await db.execute(select(Listing).where(Listing.id == listing_id))
+    deleted_listing = result.scalar_one()
+    assert deleted_listing.deleted_at is not None
+
+
+@pytest.mark.asyncio
+async def test_delete_account_requires_auth(client):
+    resp = await client.delete("/api/v1/auth/me")
+    assert resp.status_code == 403
 
 
 # TC-017: 6th OTP request in 1 hour returns 429

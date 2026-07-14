@@ -462,14 +462,16 @@ Frontend "🔔 Notify me" button on `/search` page is **pending** — backend en
 | Method | Path | What it does | Auth? |
 |--------|------|-------------|-------|
 | POST | `/admin-login` | Admin login with username+password | No |
-| POST | `/signin` | Sign in existing user by phone (no OTP) | No |
+| POST | `/login` | Sign in by phone + password (replaced the old passwordless `/signin`, 2026-07-12 — that was a real security hole) | No |
 | POST | `/otp/send` | Send OTP SMS to phone | No |
-| POST | `/otp/verify` | Verify OTP -> get tokens | No |
+| POST | `/otp/verify` | Verify OTP -> returns a short-lived `setup_token`, not full tokens (2026-07-12) | No |
+| POST | `/password/set` | Set password using a `setup_token` — same endpoint for signup password-creation and forgot-password reset | No |
 | POST | `/refresh` | Get new access token using refresh token | No |
 | DELETE | `/logout` | Client clears tokens (server stateless) | No |
 | POST | `/dev-login` | Skip OTP (only when OTP_DEBUG=true) | No |
 | GET | `/me` | Get current user profile | Yes |
 | PATCH | `/me` | Update name or language preference | Yes |
+| DELETE | `/me` | Delete account — soft-deletes + anonymises the user (name/phone/email/password scrubbed) and cascades a soft-delete to all their listings (2026-07-14) | Yes |
 | GET | `/google?mobile=1` | Redirect to Google OAuth consent; `mobile=1` requests a deep-link callback for the React Native app instead of a web redirect | No |
 | GET | `/google/callback` | Exchange code -> tokens -> redirect frontend (`state=web`) or `localsindia://auth/callback` deep link (`state=mobile`) | No |
 
@@ -746,12 +748,13 @@ Data saved across steps in component state (no loss on Back navigation).
 
 ---
 
-### `/[city]/classifieds/[id]/edit` — Edit Listing
+### `/profile/listings/{id}/edit` — Edit Listing
 
-**Files:** `app/[city]/classifieds/[id]/edit/page.tsx` + `EditListingClient.tsx`
+**Files:** `app/profile/listings/[id]/edit/page.tsx` + `EditListingClient.tsx` (web); `mobile/src/screens/EditListingScreen.tsx` (mobile)
 
-Same form as Post but pre-filled with existing data. Only listing owner can access.
+Same fields as Post, pre-filled with existing data. Only listing owner can access.
 Sends PATCH to `/api/v1/listings/{id}`.
+**Photos** (added 2026-07-13 — was missing on both web and mobile until caught in live emulator testing): existing photos shown in a grid with per-photo remove; add button uploads a new photo. Both actions call `POST/DELETE /api/v1/upload/image/...` immediately (not deferred to Save), since this is an already-live listing rather than a draft. Max 5 photos total, same limit as Post.
 
 ---
 
@@ -875,6 +878,19 @@ User settings:
 - Change display name
 - Set preferred language
 - Change home city
+- Delete account (2026-07-14) — double `confirm()` then `DELETE /api/v1/auth/me`
+
+---
+
+### `/account-deletion` — Delete Your Account (public, no login required)
+
+**File:** `app/account-deletion/page.tsx`
+
+Added 2026-07-14 to satisfy Google Play's requirement that apps with accounts provide a public, always-reachable way to request deletion — even for someone who's uninstalled the app or can't sign in. Two paths:
+- Self-serve: Profile → Delete account (web and mobile), takes effect immediately
+- Email fallback: `support@localsindia.com` with the registered phone number, processed within 7 days
+
+Explains exactly what's deleted (name/phone/email/password, all listings hidden) vs. what's retained (an anonymised fraud-prevention record with no identifying info). Linked from the site footer and from `/privacy` §6.
 
 ---
 
@@ -1503,8 +1519,6 @@ Side services (called from backend):
 | `app/[city]/classifieds/[id]/ListingDetailClient.tsx` | Listing detail -- actual UI with state |
 | `app/[city]/classifieds/[id]/promote/page.tsx` | Featured listing payment (wrapper) |
 | `app/[city]/classifieds/[id]/promote/PromoteClient.tsx` | Razorpay checkout UI |
-| `app/[city]/classifieds/[id]/edit/page.tsx` | Edit listing (wrapper) |
-| `app/[city]/classifieds/[id]/edit/EditListingClient.tsx` | Edit form UI with state |
 | `app/[city]/classifieds/post/page.tsx` | Post new listing (3-step wizard) |
 | `app/[city]/search/page.tsx` | Search results with filters |
 | `app/[city]/businesses/page.tsx` | Business directory |
@@ -1519,7 +1533,8 @@ Side services (called from backend):
 | `app/profile/page.tsx` | User settings (name, language, city) |
 | `app/profile/listings/page.tsx` | My listings management |
 | `app/profile/listings/[id]/page.tsx` | Listing stub (static export segment coverage) |
-| `app/profile/listings/[id]/edit/page.tsx` | Edit listing |
+| `app/profile/listings/[id]/edit/page.tsx` | Edit listing (wrapper) |
+| `app/profile/listings/[id]/edit/EditListingClient.tsx` | Edit form UI with state, incl. photo add/remove (2026-07-13) |
 | `app/admin/login/page.tsx` | Admin login |
 | `app/admin/layout.tsx` | Admin sidebar navigation |
 | `app/admin/listings/page.tsx` | Listing moderation queue |
