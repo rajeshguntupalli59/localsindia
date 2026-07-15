@@ -1,8 +1,8 @@
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
-  FlatList, Image, RefreshControl,
+  FlatList, Image, RefreshControl, Alert,
 } from 'react-native';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { listingsApi, citiesApi, categoriesApi } from '../lib/api';
@@ -98,6 +98,15 @@ export default function HomeScreen({ navigation }: any) {
   const [recentlyViewed, setRecentlyViewed] = useState<Listing[]>([]);
   const [categories, setCategories] = useState<{ id: string; name: string; slug: string; icon: string }[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+  // Guards against alerting twice when the categories call and the
+  // count/trending/fresh calls fail at the same time (e.g. no network) —
+  // reset on each explicit pull-to-refresh so a retry can alert again.
+  const errorShownRef = useRef(false);
+  const reportLoadFailure = useCallback(() => {
+    if (errorShownRef.current) return;
+    errorShownRef.current = true;
+    Alert.alert('Could not load listings', 'Check your internet connection and try again.');
+  }, []);
 
   const loadAll = useCallback(async (slug: string, name: string) => {
     try {
@@ -109,8 +118,10 @@ export default function HomeScreen({ navigation }: any) {
       setTodayCount(countData.count ?? 0);
       setTrendingListings(trending ?? []);
       setFreshListings(Array.isArray(fresh) ? fresh : (fresh?.items ?? []));
-    } catch {}
-  }, []);
+    } catch {
+      reportLoadFailure();
+    }
+  }, [reportLoadFailure]);
 
   useEffect(() => {
     // Load saved city, user, categories
@@ -120,8 +131,8 @@ export default function HomeScreen({ navigation }: any) {
     storage.getUser().then((u: any) => {
       if (u?.name) setUserName(u.name.split(' ')[0]);
     });
-    categoriesApi.list().then(setCategories).catch(() => {});
-  }, []);
+    categoriesApi.list().then(setCategories).catch(reportLoadFailure);
+  }, [reportLoadFailure]);
 
   useEffect(() => {
     loadAll(citySlug, cityName);
@@ -131,6 +142,7 @@ export default function HomeScreen({ navigation }: any) {
 
   const handleRefresh = async () => {
     setRefreshing(true);
+    errorShownRef.current = false;
     await loadAll(citySlug, cityName);
     // Refresh recently viewed too
     const rv = await storage.recentlyViewed.get(citySlug);

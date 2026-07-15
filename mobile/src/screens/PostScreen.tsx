@@ -65,7 +65,9 @@ export default function PostScreen({ navigation }: any) {
     storage.getCity().then(c => {
       if (c) { setCitySlug(c.slug); setCityName(c.name); }
     });
-    categoriesApi.list().then(setCategories).catch(() => {});
+    categoriesApi.list().then(setCategories).catch(() => {
+      Alert.alert('Could not load categories', 'Check your internet connection and try again.');
+    });
   }, []);
 
   const pickImage = async () => {

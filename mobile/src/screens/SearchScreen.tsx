@@ -1,6 +1,6 @@
 import {
   View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet,
-  ActivityIndicator,
+  ActivityIndicator, Alert,
 } from 'react-native';
 import { useState, useEffect, useRef } from 'react';
 import { Ionicons } from '@expo/vector-icons';
@@ -40,7 +40,9 @@ export default function SearchScreen({ navigation, route }: any) {
   const insets = useSafeAreaInsets();
 
   useEffect(() => {
-    categoriesApi.list().then(setCategories).catch(() => {});
+    categoriesApi.list().then(setCategories).catch(() => {
+      Alert.alert('Could not load categories', 'Check your internet connection and try again.');
+    });
   }, []);
 
   const doSearch = (q: string, cat: string, city: string) => {
