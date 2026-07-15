@@ -54,14 +54,17 @@ async def pending_listings(
 @router.get("/listings", response_model=list[ListingOut])
 async def list_listings_by_status(
     status: str = "active",
+    q: str | None = None,
     page: int = 1,
     page_size: int = 50,
     db: AsyncSession = Depends(get_db),
     _admin: User = Depends(get_current_admin),
 ):
+    query = select(Listing).where(Listing.status == status, Listing.deleted_at.is_(None))
+    if q:
+        query = query.where(Listing.title.ilike(f"%{q}%"))
     result = await db.execute(
-        select(Listing)
-        .where(Listing.status == status, Listing.deleted_at.is_(None))
+        query
         .order_by(Listing.created_at.desc())
         .offset((page - 1) * page_size)
         .limit(page_size)

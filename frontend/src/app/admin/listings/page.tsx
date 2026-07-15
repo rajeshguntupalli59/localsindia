@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { CheckCircle, XCircle, Clock, Trash2, Tag } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, Trash2, Tag, Search, X } from 'lucide-react';
 import Image from 'next/image';
 import { formatPrice, timeAgo } from '@/lib/utils';
 import type { Listing } from '@/lib/types';
@@ -26,20 +26,25 @@ export default function AdminListingsPage() {
   const [rejectModal, setRejectModal] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState('');
   const [deleteModal, setDeleteModal] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
 
   const token = () => localStorage.getItem('access_token') ?? '';
 
-  const fetchListings = useCallback(async (status: string) => {
+  const fetchListings = useCallback(async (status: string, q: string) => {
     setLoading(true);
     try {
       const endpoint = status === 'pending'
         ? `${API_BASE}/api/v1/admin/listings/pending`
-        : `${API_BASE}/api/v1/admin/listings?status=${status}`;
+        : `${API_BASE}/api/v1/admin/listings?status=${status}${q ? `&q=${encodeURIComponent(q)}` : ''}`;
       const res = await fetch(endpoint, {
         headers: { Authorization: `Bearer ${token()}` },
       });
       if (!res.ok) throw new Error();
-      setListings(await res.json());
+      let data: Listing[] = await res.json();
+      if (status === 'pending' && q) {
+        data = data.filter(l => l.title?.toLowerCase().includes(q.toLowerCase()));
+      }
+      setListings(data);
     } catch {
       toast.error('Failed to load listings');
     } finally {
@@ -47,7 +52,10 @@ export default function AdminListingsPage() {
     }
   }, []);
 
-  useEffect(() => { fetchListings(tab); }, [tab, fetchListings]);
+  useEffect(() => {
+    const timer = setTimeout(() => fetchListings(tab, search), search ? 300 : 0);
+    return () => clearTimeout(timer);
+  }, [tab, search, fetchListings]);
 
   const approve = async (id: string) => {
     setActionId(id);
@@ -130,7 +138,7 @@ export default function AdminListingsPage() {
             Seed Images
           </button>
           <button
-            onClick={() => fetchListings(tab)}
+            onClick={() => fetchListings(tab, search)}
             className="text-sm px-4 py-2 rounded-lg border hover:bg-muted transition-colors"
           >
             Refresh
@@ -139,7 +147,7 @@ export default function AdminListingsPage() {
       </div>
 
       {/* Status tabs */}
-      <div className="flex gap-1 mb-5 bg-muted p-1 rounded-xl w-fit">
+      <div className="flex gap-1 mb-4 bg-muted p-1 rounded-xl w-fit">
         {STATUS_TABS.map(t => (
           <button
             key={t.key}
@@ -151,6 +159,27 @@ export default function AdminListingsPage() {
             {t.label}
           </button>
         ))}
+      </div>
+
+      {/* Search box */}
+      <div className="relative mb-5 max-w-sm">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <input
+          type="text"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Search by title..."
+          className="w-full pl-9 pr-9 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
+        />
+        {search && (
+          <button
+            onClick={() => setSearch('')}
+            aria-label="Clear search"
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-slate-700"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
       {loading ? (

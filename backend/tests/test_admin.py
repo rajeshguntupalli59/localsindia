@@ -145,6 +145,43 @@ async def test_admin_list_listings_by_status(admin_client, auth_client, city, ca
     assert listing_id in ids
 
 
+@pytest.mark.asyncio
+async def test_admin_list_listings_search_by_title(admin_client, auth_client, city, category):
+    """GET /admin/listings?status=active&q=... narrows results to matching titles.
+
+    Regression coverage for a real admin pain point: a test/QA listing was
+    hard to find by scrolling a long active-listings list.
+    """
+    ac, _user = auth_client
+    admin_ac, _admin = admin_client
+
+    qa_resp = await ac.post("/api/v1/listings", json={
+        "title": "QA test listing please ignore",
+        "description": "Created for QA, should be easy to find and delete",
+        "category_id": str(category.id),
+        "city_id": str(city.id),
+        "contact_phone": "+919876543210",
+    })
+    qa_id = qa_resp.json()["id"]
+    await admin_ac.patch(f"/api/v1/admin/listings/{qa_id}/approve")
+
+    other_resp = await ac.post("/api/v1/listings", json={
+        "title": "Genuine sofa for sale",
+        "description": "Not a QA listing",
+        "category_id": str(category.id),
+        "city_id": str(city.id),
+        "contact_phone": "+919876543210",
+    })
+    other_id = other_resp.json()["id"]
+    await admin_ac.patch(f"/api/v1/admin/listings/{other_id}/approve")
+
+    resp = await admin_ac.get("/api/v1/admin/listings?status=active&q=QA")
+    assert resp.status_code == 200
+    ids = [l["id"] for l in resp.json()]
+    assert qa_id in ids
+    assert other_id not in ids
+
+
 # ── Users list ────────────────────────────────────────────────────────────────
 
 @pytest.mark.asyncio
