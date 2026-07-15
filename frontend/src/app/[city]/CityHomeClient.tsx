@@ -112,17 +112,37 @@ export default function CityHomeClient({
   // same hour, so it must only be computed after mount, never during SSR.
   const [mounted, setMounted] = useState(false);
 
-  // Load user + recently-viewed from localStorage (client-side only)
+  // Load user from localStorage, then re-validate recently-viewed listings
+  // against the backend — the cached copy goes stale once a listing is
+  // rejected, deleted, or unpublished, and would otherwise keep showing a
+  // dead listing (with a dead WhatsApp button) indefinitely.
   useEffect(() => {
     setMounted(true);
     try {
       const raw = localStorage.getItem('user');
       if (raw) setUser(JSON.parse(raw));
     } catch {}
-    try {
-      const rv: Listing[] = JSON.parse(localStorage.getItem('li_rv') ?? '[]');
-      setRecentlyViewed(rv.slice(0, 10));
-    } catch {}
+    (async () => {
+      let cached: Listing[] = [];
+      try {
+        cached = JSON.parse(localStorage.getItem('li_rv') ?? '[]').slice(0, 10);
+      } catch {}
+      if (cached.length === 0) return;
+
+      const fresh = await Promise.all(
+        cached.map(l => api.listings.get(l.id).catch(() => null))
+      );
+      const valid = fresh.filter(
+        (l): l is Listing => l !== null && l.status === 'active'
+      );
+      setRecentlyViewed(valid);
+
+      const validIds = new Set(valid.map(l => l.id));
+      const prunedCache = cached.filter(l => validIds.has(l.id));
+      if (prunedCache.length !== cached.length) {
+        localStorage.setItem('li_rv', JSON.stringify(prunedCache));
+      }
+    })();
   }, []);
 
   useEffect(() => {
