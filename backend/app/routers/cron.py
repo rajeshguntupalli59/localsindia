@@ -33,7 +33,8 @@ async def send_expiry_reminders(
 ):
     """
     Find active listings expiring within EXPIRY_WARN_DAYS and email their owners.
-    Also expires business badges that have passed their badge_expires_at date.
+    Also expires business badges that have passed their badge_expires_at date,
+    and un-features listings whose paid featured-boost window has passed.
     Called daily by GitHub Actions at 9am IST (3:30am UTC).
     """
     from app.services.email_svc import send_listing_expiry_email
@@ -88,12 +89,28 @@ async def send_expiry_reminders(
         biz.badge_expires_at = None
         badges_expired += 1
 
-    if badges_expired:
+    # --- Featured-listing boost expiry ---
+    featured_result = await db.execute(
+        select(Listing).where(
+            Listing.is_featured.is_(True),
+            Listing.featured_until.isnot(None),
+            Listing.featured_until < now,
+            Listing.deleted_at.is_(None),
+        )
+    )
+    expired_featured_listings = featured_result.scalars().all()
+    featured_expired = 0
+    for listing in expired_featured_listings:
+        listing.is_featured = False
+        featured_expired += 1
+
+    if badges_expired or featured_expired:
         await db.commit()
 
     return {
         "listing_reminders_sent": listing_emails_sent,
         "listings_checked": len(rows),
         "badges_expired": badges_expired,
+        "featured_expired": featured_expired,
         "ran_at": now.isoformat(),
     }

@@ -157,7 +157,7 @@ async def verify_featured_payment(
 
     listing.is_featured = True
     listing.featured_at = datetime.now(timezone.utc)
-    listing.expires_at = datetime.now(timezone.utc) + timedelta(days=plan["days"])
+    listing.featured_until = datetime.now(timezone.utc) + timedelta(days=plan["days"])
     await db.commit()
 
     return {"success": True, "message": f"Listing featured for {plan['label']}!"}

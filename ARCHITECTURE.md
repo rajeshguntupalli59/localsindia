@@ -570,7 +570,9 @@ Also `GET /api/v1/admin/errors` (admin-only, see Admin section below) — lists 
 | Method | Path | What it does | Auth? |
 |--------|------|-------------|-------|
 | POST | `/featured/create-order` | Create Razorpay order (Rs.99/week or Rs.199/month) | Yes |
-| POST | `/featured/verify` | Verify payment signature -> set is_featured=true | Yes |
+| POST | `/featured/verify` | Verify payment signature -> set is_featured=true, featured_until=now+plan_days. **Fixed 2026-07-15**: this used to overwrite the listing's own `expires_at` with the featured-plan duration instead of using a dedicated field — a real bug where promoting for a week could shrink an otherwise-longer listing lifetime. Now uses `featured_until`, decoupled from `expires_at`. | Yes |
+
+Featured boosts expire via the daily `GET /api/v1/cron/expiry-reminders` job (same one that reminds about listing expiry and expires business badges) — it un-features any listing where `featured_until < now`. Before this fix (also 2026-07-15), nothing anywhere ever un-set `is_featured`, so paid featured boosts lasted forever regardless of the plan purchased.
 
 ### Users: `/api/v1/users`
 

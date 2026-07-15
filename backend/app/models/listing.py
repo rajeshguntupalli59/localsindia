@@ -32,6 +32,7 @@ class Listing(Base):
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="pending")
     is_featured: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     featured_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    featured_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     report_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     view_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     contact_click_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
