@@ -10,12 +10,14 @@ import { storage } from '../lib/storage';
 const TYPE_ICON: Record<string, keyof typeof Ionicons.glyphMap> = {
   listing_approved: 'checkmark-circle',
   listing_expiring: 'time',
+  listing_expired: 'close-circle',
   listing_featured: 'star',
   new_listing_match: 'notifications',
 };
 const TYPE_ICON_COLOR: Record<string, string> = {
   listing_approved: '#16a34a',
   listing_expiring: '#f59e0b',
+  listing_expired: '#6b7280',
   listing_featured: '#f97316',
   new_listing_match: '#6366f1',
 };

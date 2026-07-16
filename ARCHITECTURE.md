@@ -455,6 +455,37 @@ Frontend "🔔 Notify me" button on `/search` page is **pending** — backend en
 
 ---
 
+### `user_notifications` — In-app bell notifications
+
+| Column | Type | What it stores |
+|--------|------|----------------|
+| `id` | UUID | |
+| `user_id` | FK->users | Recipient |
+| `type` | String | e.g. `listing_approved`, `listing_expiring`, `listing_expired` |
+| `title` / `body` | String / Text | Shown in the mobile `NotificationBell` sheet |
+| `action_url` | String, nullable | Not currently navigated to on tap — stored for future use |
+| `is_read` | Boolean | |
+| `listing_id` | FK->listings, nullable | |
+
+Created via the single `notify()` helper in `services/notification_svc.py` — every call site (admin approve, expiry cron) goes through it, and it also pushes to the user's devices (see `device_tokens` below).
+
+---
+
+### `device_tokens` — Push notification targets (added 2026-07-15)
+
+| Column | Type | What it stores |
+|--------|------|----------------|
+| `id` | UUID | |
+| `user_id` | FK->users | Owner of this device |
+| `token` | Text, unique | Raw Expo push token (`ExponentPushToken[...]`) |
+| `created_at` | DateTime | |
+
+**This table existed since 2026-06-11 but was never wired up** — its original schema stored only `token_hash` (a bcrypt hash), which can't actually be used to send a push (delivery requires the raw token; a one-way hash is only useful for equality checks, which nothing did either). Migration `7921c37a8128` renamed it to a plain `token` column. Registered via `POST /notifications/device-token` on login/app-open (`mobile/src/lib/pushNotifications.ts`), removed via `DELETE /notifications/device-token` on logout/account-delete. One row per token; re-registering the same token under a different account reassigns it (handles a device switching users).
+
+**Android push requires a one-time Firebase setup** that hasn't been done yet: create a Firebase project, generate a service account key (Firebase Console -> Project Settings -> Service Accounts -> Generate New Private Key), then run `eas credentials` -> Android -> production -> Google Service Account -> upload that key for FCM V1. Until that's done, `send_push()` (`services/push_svc.py`) will call Expo's push API but Android devices won't actually receive anything.
+
+---
+
 ## 6. API Endpoints — Every Route
 
 ### Auth: `/api/v1/auth`
@@ -573,6 +604,23 @@ Also `GET /api/v1/admin/errors` (admin-only, see Admin section below) — lists 
 | POST | `/featured/verify` | Verify payment signature -> set is_featured=true, featured_until=now+plan_days. **Fixed 2026-07-15**: this used to overwrite the listing's own `expires_at` with the featured-plan duration instead of using a dedicated field — a real bug where promoting for a week could shrink an otherwise-longer listing lifetime. Now uses `featured_until`, decoupled from `expires_at`. | Yes |
 
 Featured boosts expire via the daily `GET /api/v1/cron/expiry-reminders` job (same one that reminds about listing expiry and expires business badges) — it un-features any listing where `featured_until < now`. Before this fix (also 2026-07-15), nothing anywhere ever un-set `is_featured`, so paid featured boosts lasted forever regardless of the plan purchased.
+
+**Listing expiry lifecycle, fixed 2026-07-15**: the same cron job now also drives the full `active` -> `expired` transition, which previously never happened anywhere in the codebase — `listings.status` stayed `'active'` forever past `expires_at`. This was a real, user-visible bug: the city browse endpoint (`GET /cities/{slug}/listings`) filters only on `status`, not `expires_at`, so an expired listing kept showing up in normal city/category browsing indefinitely (only the full-text search endpoint checked `expires_at` directly, which masked the gap there). It also meant the owner's "My Listings" screen kept showing a green "Active" badge on a listing buyers could otherwise no longer find via search.
+
+The job now, in order: (1) for active listings expiring within `EXPIRY_WARN_DAYS` (3 days), sends an in-app notification (`listing_expiring`) to every owner unconditionally, and additionally emails them via `send_listing_expiry_email` only if `User.email` is set — previously this reminder was **email-only** and the query outright excluded owners without an email, which is most users, since signup is phone+OTP only and never collects one; (2) flips any listing where `expires_at <= now` to `status='expired'` and sends an in-app notification (`listing_expired`) to the owner — there was previously no signal at all once a listing actually expired.
+
+Separately (not a cron change): "Mark as Sold" on `MyListingsScreen.tsx` is now category-aware — `pg-roommate`/`jobs` show "Filled", `services`/`tiffin`/`businesses`/`events` show "Closed", everything else keeps "Sold" — since a roommate or job listing was never literally "sold".
+
+### Notifications: `/api/v1/notifications`
+
+| Method | Path | What it does | Auth? |
+|--------|------|-------------|-------|
+| GET | `` | List recent notifications for the current user | Yes |
+| GET | `/unread-count` | Unread count for the bell badge | Yes |
+| POST | `/read/{notification_id}` | Mark one as read | Yes |
+| POST | `/read-all` | Mark all as read | Yes |
+| POST | `/device-token` | Register/reassign an Expo push token to the current user. **Added 2026-07-15.** | Yes |
+| DELETE | `/device-token?token=` | Remove a push token (called on logout/account-delete). **Added 2026-07-15.** | Yes |
 
 ### Users: `/api/v1/users`
 

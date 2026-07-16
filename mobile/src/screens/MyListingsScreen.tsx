@@ -15,9 +15,20 @@ const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
 };
 
 const STATUS_LABELS: Record<string, string> = {
-  active: 'Active', pending: 'Under Review', flagged: 'Flagged',
-  fulfilled: 'Sold', expired: 'Expired',
+  active: 'Active', pending: 'Under Review', flagged: 'Flagged', expired: 'Expired',
 };
+
+// "Sold" doesn't fit every category (a roommate isn't "sold") — use a word that matches.
+const FULFILLED_LABELS: Record<string, string> = {
+  'pg-roommate': 'Filled',
+  jobs: 'Filled',
+  services: 'Closed',
+  tiffin: 'Closed',
+  businesses: 'Closed',
+  events: 'Closed',
+};
+
+const fulfilledLabel = (categorySlug?: string) => FULFILLED_LABELS[categorySlug ?? ''] ?? 'Sold';
 
 export default function MyListingsScreen({ navigation }: any) {
   const insets = useSafeAreaInsets();
@@ -66,11 +77,11 @@ export default function MyListingsScreen({ navigation }: any) {
     }
   };
 
-  const handleFulfill = async (id: string) => {
-    Alert.alert('Mark as Sold?', 'This will hide the listing from search.', [
+  const handleFulfill = async (id: string, label: string) => {
+    Alert.alert(`Mark as ${label}?`, 'This will hide the listing from search.', [
       { text: 'Cancel', style: 'cancel' },
       {
-        text: 'Mark Sold', style: 'destructive',
+        text: `Mark ${label}`, style: 'destructive',
         onPress: async () => {
           setActionId(id);
           try {
@@ -191,7 +202,9 @@ export default function MyListingsScreen({ navigation }: any) {
                     <View style={styles.metaRow}>
                       <View style={[styles.badge, { backgroundColor: sc.bg }]}>
                         <Text style={[styles.badgeText, { color: sc.text }]}>
-                          {STATUS_LABELS[listing.status] ?? listing.status}
+                          {listing.status === 'fulfilled'
+                            ? fulfilledLabel(listing.category_slug)
+                            : STATUS_LABELS[listing.status] ?? listing.status}
                         </Text>
                       </View>
                       {listing.status === 'active' && (
@@ -216,10 +229,12 @@ export default function MyListingsScreen({ navigation }: any) {
                     <TouchableOpacity
                       style={styles.actionBtn}
                       disabled={actionId === listing.id}
-                      onPress={() => handleFulfill(listing.id)}
+                      onPress={() => handleFulfill(listing.id, fulfilledLabel(listing.category_slug))}
                     >
                       <Ionicons name="checkmark-circle-outline" size={16} color="#16a34a" />
-                      <Text style={[styles.actionText, { color: '#16a34a' }]}>Sold</Text>
+                      <Text style={[styles.actionText, { color: '#16a34a' }]}>
+                        {fulfilledLabel(listing.category_slug)}
+                      </Text>
                     </TouchableOpacity>
                   )}
                   {(listing.status === 'active' || listing.status === 'expired') && (

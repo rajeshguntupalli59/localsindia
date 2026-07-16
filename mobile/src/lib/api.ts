@@ -179,6 +179,10 @@ export const notificationsApi = {
     api.post(`/notifications/read/${id}`).then(r => r.data),
   markAllRead: () =>
     api.post('/notifications/read-all').then(r => r.data),
+  registerDevice: (token: string) =>
+    api.post('/notifications/device-token', { token }).then(r => r.data),
+  unregisterDevice: (token: string) =>
+    api.delete('/notifications/device-token', { params: { token } }).then(r => r.data),
 };
 
 export const favoritesApi = {

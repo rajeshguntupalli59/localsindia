@@ -32,18 +32,21 @@ async def send_expiry_reminders(
     db: AsyncSession = Depends(get_db),
 ):
     """
-    Find active listings expiring within EXPIRY_WARN_DAYS and email their owners.
-    Also expires business badges that have passed their badge_expires_at date,
-    and un-features listings whose paid featured-boost window has passed.
+    Find active listings expiring within EXPIRY_WARN_DAYS and notify their owners
+    (in-app always, email if they have one on file). Also flips listings whose
+    expires_at has already passed to status='expired' and notifies the owner,
+    expires business badges past badge_expires_at, and un-features listings whose
+    paid featured-boost window has passed.
     Called daily by GitHub Actions at 9am IST (3:30am UTC).
     """
     from app.services.email_svc import send_listing_expiry_email
+    from app.services.notification_svc import notify
     from app.models.business import Business
 
     now = datetime.now(timezone.utc)
     warn_cutoff = now + timedelta(days=EXPIRY_WARN_DAYS)
 
-    # --- Listing expiry reminders ---
+    # --- Listing expiry reminders (in-app notification always; email if on file) ---
     result = await db.execute(
         select(Listing, User)
         .join(User, User.id == Listing.user_id)
@@ -52,25 +55,63 @@ async def send_expiry_reminders(
             Listing.deleted_at.is_(None),
             Listing.expires_at > now,
             Listing.expires_at <= warn_cutoff,
-            User.email.isnot(None),
             User.deleted_at.is_(None),
         )
     )
     rows = result.all()
 
     listing_emails_sent = 0
+    listing_notifs_sent = 0
     for listing, owner in rows:
         renew_url = f"https://localsindia.com/profile/listings/{listing.id}"
+        days_left = max(1, (listing.expires_at - now).days)
         try:
-            await send_listing_expiry_email(
-                to=owner.email,
-                listing_title=listing.title,
-                renew_url=renew_url,
-                days_left=max(1, (listing.expires_at - now).days),
+            await notify(
+                db, listing.user_id, "listing_expiring",
+                f"Your listing expires in {days_left} day{'s' if days_left != 1 else ''}",
+                "Renew now to stay visible to buyers in your city.",
+                renew_url, listing.id,
             )
-            listing_emails_sent += 1
+            listing_notifs_sent += 1
         except Exception:
             pass
+        if owner.email:
+            try:
+                await send_listing_expiry_email(
+                    to=owner.email,
+                    listing_title=listing.title,
+                    renew_url=renew_url,
+                    days_left=days_left,
+                )
+                listing_emails_sent += 1
+            except Exception:
+                pass
+
+    # --- Flip past-due active listings to 'expired' and notify owners ---
+    expired_result = await db.execute(
+        select(Listing).where(
+            Listing.status == "active",
+            Listing.deleted_at.is_(None),
+            Listing.expires_at <= now,
+        )
+    )
+    newly_expired = expired_result.scalars().all()
+    for listing in newly_expired:
+        listing.status = "expired"
+    if newly_expired:
+        await db.commit()
+    for listing in newly_expired:
+        try:
+            await notify(
+                db, listing.user_id, "listing_expired",
+                f"Your listing has expired — {listing.title[:60]}",
+                "It's no longer visible to buyers. Renew it to bring it back.",
+                f"https://localsindia.com/profile/listings/{listing.id}",
+                listing.id,
+            )
+        except Exception:
+            pass
+    listings_expired = len(newly_expired)
 
     # --- Business badge expiry ---
     badge_result = await db.execute(
@@ -109,7 +150,9 @@ async def send_expiry_reminders(
 
     return {
         "listing_reminders_sent": listing_emails_sent,
+        "listing_reminder_notifs_sent": listing_notifs_sent,
         "listings_checked": len(rows),
+        "listings_expired": listings_expired,
         "badges_expired": badges_expired,
         "featured_expired": featured_expired,
         "ran_at": now.isoformat(),

@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { authApi } from '../lib/api';
 import { storage } from '../lib/storage';
+import { unregisterCurrentDevicePushToken } from '../lib/pushNotifications';
 import { useSavedContext } from '../context/SavedContext';
 import { isBiometricAvailable } from '../hooks/useBiometric';
 import { C, SHADOW, RADIUS } from '../lib/theme';
@@ -41,7 +42,7 @@ export default function ProfileScreen({ navigation }: any) {
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Log out', style: 'destructive',
-        onPress: async () => { await storage.clear(); navigation.replace('Login'); },
+        onPress: async () => { await unregisterCurrentDevicePushToken(); await storage.clear(); navigation.replace('Login'); },
       },
     ]);
   };
@@ -64,6 +65,7 @@ export default function ProfileScreen({ navigation }: any) {
                   text: 'Yes, delete my account', style: 'destructive',
                   onPress: async () => {
                     try {
+                      await unregisterCurrentDevicePushToken();
                       await authApi.deleteAccount();
                     } catch {
                       Alert.alert('Error', 'Could not delete your account. Please try again.');

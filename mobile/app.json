@@ -44,7 +44,14 @@
           "photosPermission": "Allow LocalsIndia to access your photos so you can add pictures to your listings."
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/android-icon-monochrome.png",
+          "color": "#F7921E"
+        }
+      ]
     ],
     "extra": {
       "eas": {

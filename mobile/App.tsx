@@ -26,6 +26,7 @@ import EditProfileScreen from './src/screens/EditProfileScreen';
 import EditListingScreen from './src/screens/EditListingScreen';
 import ErrorBoundary from './src/components/ErrorBoundary';
 import { storage } from './src/lib/storage';
+import { registerForPushNotificationsAsync } from './src/lib/pushNotifications';
 import { isBiometricAvailable, authenticateWithBiometric } from './src/hooks/useBiometric';
 import { SavedProvider, useSavedContext } from './src/context/SavedContext';
 import { reportError } from './src/lib/errorReporting';
@@ -163,6 +164,7 @@ export default function App() {
         }
       }
     }
+    registerForPushNotificationsAsync();
     setInitialRoute('Main');
   };
 

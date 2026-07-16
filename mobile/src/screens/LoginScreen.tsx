@@ -6,6 +6,7 @@ import { useState, useRef } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { authApi } from '../lib/api';
 import { storage } from '../lib/storage';
+import { registerForPushNotificationsAsync } from '../lib/pushNotifications';
 import { isBiometricAvailable } from '../hooks/useBiometric';
 import { Ionicons } from '@expo/vector-icons';
 import { C, RADIUS, SHADOW } from '../lib/theme';
@@ -47,6 +48,7 @@ export default function LoginScreen({ navigation }: any) {
   const finish = async (data: any) => {
     await storage.setTokens(data.access_token, data.refresh_token ?? '');
     await storage.setUser(data.user);
+    registerForPushNotificationsAsync();
     const biometricEnabled = await storage.getBiometricEnabled();
     if (!biometricEnabled) {
       const available = await isBiometricAvailable();
@@ -151,6 +153,7 @@ export default function LoginScreen({ navigation }: any) {
       await storage.setTokens(pendingTokens.access, pendingTokens.refresh);
       const updated = await authApi.updateName(name.trim());
       await storage.setUser(updated);
+      registerForPushNotificationsAsync();
       navigation.replace('Main');
     } catch { Alert.alert('Error', 'Could not save your name. Please try again.'); }
     finally { setLoading(false); }

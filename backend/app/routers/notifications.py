@@ -8,9 +8,48 @@ from datetime import datetime
 from app.core.database import get_db
 from app.core.deps import get_current_user
 from app.models.user_notification import UserNotification
+from app.models.device_token import DeviceToken
 from app.models.user import User
 
 router = APIRouter(prefix="/api/v1/notifications", tags=["notifications"])
+
+
+class DeviceTokenIn(BaseModel):
+    token: str
+
+
+@router.post("/device-token", status_code=200)
+async def register_device_token(
+    body: DeviceTokenIn,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Register (or reassign, if the device switched accounts) a push token to this user."""
+    result = await db.execute(select(DeviceToken).where(DeviceToken.token == body.token))
+    existing = result.scalar_one_or_none()
+    if existing:
+        existing.user_id = current_user.id
+    else:
+        db.add(DeviceToken(user_id=current_user.id, token=body.token))
+    await db.commit()
+    return {"ok": True}
+
+
+@router.delete("/device-token", status_code=200)
+async def unregister_device_token(
+    token: str = Query(...),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Called on logout so a signed-out device stops receiving pushes for this account."""
+    result = await db.execute(
+        select(DeviceToken).where(DeviceToken.token == token, DeviceToken.user_id == current_user.id)
+    )
+    row = result.scalar_one_or_none()
+    if row:
+        await db.delete(row)
+        await db.commit()
+    return {"ok": True}
 
 
 class NotificationOut(BaseModel):
