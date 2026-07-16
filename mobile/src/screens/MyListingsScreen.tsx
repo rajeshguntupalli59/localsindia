@@ -152,7 +152,7 @@ export default function MyListingsScreen({ navigation }: any) {
         </TouchableOpacity>
         <Text style={styles.headerTitle}>My Listings</Text>
         <TouchableOpacity
-          onPress={() => navigation.navigate('Post')}
+          onPress={() => navigation.navigate('Main', { screen: 'Post' })}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           accessibilityRole="button"
           accessibilityLabel="Post a new listing"
@@ -171,7 +171,7 @@ export default function MyListingsScreen({ navigation }: any) {
             <Ionicons name="list-outline" size={56} color="#e5e7eb" />
             <Text style={styles.emptyTitle}>No listings yet</Text>
             <Text style={styles.emptyText}>Post your first listing — it's free!</Text>
-            <TouchableOpacity style={styles.postBtn} onPress={() => navigation.navigate('Post')}>
+            <TouchableOpacity style={styles.postBtn} onPress={() => navigation.navigate('Main', { screen: 'Post' })}>
               <Text style={styles.postBtnText}>Post Listing</Text>
             </TouchableOpacity>
           </View>

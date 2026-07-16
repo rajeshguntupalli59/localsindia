@@ -164,3 +164,76 @@ async def test_city_listings_endpoint(client, city):
     resp = await client.get(f"/api/v1/cities/{city.slug}/listings")
     assert resp.status_code == 200
     assert isinstance(resp.json(), list)
+
+
+# Regression test: this is the endpoint the mobile Search screen actually
+# calls (not /search) — the q-filter here used to require the whole typed
+# phrase as one literal substring, so "dental service near me" found nothing
+# even for a listing that obviously matches "dental" alone.
+@pytest.mark.asyncio
+async def test_city_listings_extra_word_does_not_break_match(client, db, auth_client, city, category):
+    ac, _user = auth_client
+    resp = await ac.post("/api/v1/listings", json={
+        "title": "Best Dentist Near Me",
+        "description": "Advanced dental care for the whole family.",
+        "category_id": str(category.id),
+        "city_id": str(city.id),
+        "contact_phone": "+919876543214",
+    })
+    listing_id = resp.json()["id"]
+
+    from sqlalchemy import select
+    from app.models.listing import Listing
+    result = await db.execute(select(Listing).where(Listing.id == listing_id))
+    listing = result.scalar_one()
+    listing.status = "active"
+    await db.commit()
+
+    resp = await client.get(f"/api/v1/cities/{city.slug}/listings?q=dental+service+near+me")
+    assert resp.status_code == 200
+    ids = [item["id"] for item in resp.json()]
+    assert listing_id in ids
+
+
+@pytest.mark.asyncio
+async def test_city_listings_orders_by_distance_when_location_given(client, db, auth_client, city, category):
+    ac, _user = auth_client
+
+    near_resp = await ac.post("/api/v1/listings", json={
+        "title": "Nearby Grocery Store",
+        "description": "Fresh produce daily.",
+        "category_id": str(category.id),
+        "city_id": str(city.id),
+        "contact_phone": "+919876543215",
+    })
+    far_resp = await ac.post("/api/v1/listings", json={
+        "title": "Faraway Grocery Store",
+        "description": "Fresh produce daily.",
+        "category_id": str(category.id),
+        "city_id": str(city.id),
+        "contact_phone": "+919876543216",
+    })
+
+    from sqlalchemy import select
+    from app.models.listing import Listing
+
+    near_id, far_id = near_resp.json()["id"], far_resp.json()["id"]
+
+    result = await db.execute(select(Listing).where(Listing.id == near_id))
+    near = result.scalar_one()
+    near.status = "active"
+    near.latitude, near.longitude = 17.4000, 78.4800
+
+    result = await db.execute(select(Listing).where(Listing.id == far_id))
+    far = result.scalar_one()
+    far.status = "active"
+    far.latitude, far.longitude = 17.4450, 78.4800  # ~5km north
+
+    await db.commit()
+
+    resp = await client.get(
+        f"/api/v1/cities/{city.slug}/listings?q=grocery&lat=17.4010&lng=78.4800"
+    )
+    assert resp.status_code == 200
+    ids = [item["id"] for item in resp.json()]
+    assert ids.index(near_id) < ids.index(far_id)

@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime, timezone, timedelta, date as date_type
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import select, func, asc, desc
+from sqlalchemy import select, func, asc, desc, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
@@ -122,6 +122,8 @@ async def list_city_listings(
     sort: str = Query(default="newest"),
     verified_only: bool = Query(default=False),
     within: str | None = Query(default=None),
+    lat: float | None = Query(default=None),
+    lng: float | None = Query(default=None),
     db: AsyncSession = Depends(get_db),
 ):
     from app.models.category import Category
@@ -152,9 +154,15 @@ async def list_city_listings(
     if category_id:
         stmt = stmt.where(Listing.category_id == category_id)
     if q:
-        stmt = stmt.where(
-            Listing.title.ilike(f"%{q}%") | Listing.description.ilike(f"%{q}%")
-        )
+        # OR-match each word instead of requiring the whole phrase as one
+        # literal substring — "dental service near me" used to need that exact
+        # phrase to appear verbatim in the text, which almost nothing does.
+        words = [w for w in q.strip().split() if w]
+        if words:
+            stmt = stmt.where(or_(*[
+                Listing.title.ilike(f"%{w}%") | Listing.description.ilike(f"%{w}%")
+                for w in words
+            ]))
     if min_price is not None:
         stmt = stmt.where(Listing.price >= min_price)
     if max_price is not None:
@@ -168,13 +176,29 @@ async def list_city_listings(
             cutoff = datetime.now(timezone.utc) - timedelta(days=days)
             stmt = stmt.where(Listing.created_at >= cutoff)
 
+    # Distance from the caller's location, when given — Haversine in plain SQL
+    # since no PostGIS/earthdistance extension is available. NULL for listings
+    # with no latitude/longitude, so nulls_last() keeps them in the results
+    # instead of dropping them.
+    order_clauses = [Listing.is_featured.desc()]
+    if lat is not None and lng is not None:
+        distance_km = 6371 * func.acos(
+            func.least(1.0, func.greatest(-1.0,
+                func.cos(func.radians(lat)) * func.cos(func.radians(Listing.latitude))
+                * func.cos(func.radians(Listing.longitude) - func.radians(lng))
+                + func.sin(func.radians(lat)) * func.sin(func.radians(Listing.latitude))
+            ))
+        )
+        order_clauses.append(distance_km.asc().nulls_last())
+
     # Sort
     if sort == "price_asc":
-        stmt = stmt.order_by(Listing.is_featured.desc(), Listing.featured_at.desc().nulls_last(), asc(Listing.price).nulls_last())
+        order_clauses += [Listing.featured_at.desc().nulls_last(), asc(Listing.price).nulls_last()]
     elif sort == "price_desc":
-        stmt = stmt.order_by(Listing.is_featured.desc(), Listing.featured_at.desc().nulls_last(), desc(Listing.price).nulls_first())
+        order_clauses += [Listing.featured_at.desc().nulls_last(), desc(Listing.price).nulls_first()]
     else:
-        stmt = stmt.order_by(Listing.is_featured.desc(), Listing.featured_at.desc().nulls_last(), Listing.created_at.desc())
+        order_clauses += [Listing.featured_at.desc().nulls_last(), Listing.created_at.desc()]
+    stmt = stmt.order_by(*order_clauses)
 
     result = await db.execute(stmt)
     listings = result.scalars().all()
@@ -265,6 +289,8 @@ async def create_listing(
         website_url=body.website_url,
         social_url=body.social_url,
         area=body.area,
+        latitude=body.latitude,
+        longitude=body.longitude,
         status="pending",  # BL-11: always pending on create
     )
     db.add(listing)

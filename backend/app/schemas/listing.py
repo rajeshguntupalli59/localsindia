@@ -20,6 +20,8 @@ class ListingCreate(BaseModel):
     website_url: str | None = None
     social_url: str | None = None
     area: str | None = None
+    latitude: float | None = None
+    longitude: float | None = None
     @field_validator("contact_phone")
     @classmethod
     def validate_phone(cls, v: str) -> str:
@@ -70,6 +72,8 @@ class ListingOut(BaseModel):
     website_url: str | None = None
     social_url: str | None = None
     area: str | None = None
+    latitude: float | None = None
+    longitude: float | None = None
     status: str
     is_featured: bool
     wa_verified: bool = False

@@ -12,7 +12,7 @@ export default function PrivacyPage() {
         </Link>
 
         <h1 className="text-3xl font-black mb-2" style={{ color: 'var(--li-text)' }}>Privacy Policy</h1>
-        <p className="text-sm text-muted-foreground mb-8">Last updated: June 9, 2026</p>
+        <p className="text-sm text-muted-foreground mb-8">Last updated: July 16, 2026</p>
 
         <div className="prose prose-slate max-w-none space-y-6 text-sm leading-relaxed" style={{ color: 'var(--li-text)' }}>
 
@@ -30,6 +30,7 @@ export default function PrivacyPage() {
               <li><strong>Name</strong> — provided by you during registration or from your Google profile.</li>
               <li><strong>Listing content</strong> — titles, descriptions, photos, and contact details you post publicly.</li>
               <li><strong>Usage data</strong> — pages visited, searches made, actions taken. Used to improve the service.</li>
+              <li><strong>Approximate location</strong> (mobile app only) — collected only if you grant permission, either once when posting a listing or when you turn on the &ldquo;Near Me&rdquo; search toggle. Used to: sort search results by distance; suggest a neighbourhood/locality name when you post a listing (you can still edit or clear it); and suggest which city to post under when it matches one we already list (you can still change the city yourself). It is never shown to other users or shared with anyone, and the app works fully without granting this permission. You can turn it off any time in your phone&apos;s app settings.</li>
             </ul>
           </section>
 

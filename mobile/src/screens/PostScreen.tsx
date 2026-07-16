@@ -8,8 +8,9 @@ import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system/legacy';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { listingsApi, categoriesApi } from '../lib/api';
+import { listingsApi, categoriesApi, citiesApi } from '../lib/api';
 import { storage } from '../lib/storage';
+import { getApproxLocationWithArea } from '../lib/location';
 
 const CATEGORY_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
   tiffin:        'restaurant-outline',
@@ -34,6 +35,7 @@ export default function PostScreen({ navigation }: any) {
   const [citySlug, setCitySlug] = useState('hyderabad');
   const [cityName, setCityName] = useState('Hyderabad');
   const [categories, setCategories] = useState<Category[]>([]);
+  const [cities, setCities] = useState<{ name: string; slug: string }[]>([]);
   const [step, setStep] = useState(0);
 
   // Form fields
@@ -47,6 +49,9 @@ export default function PostScreen({ navigation }: any) {
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [socialUrl, setSocialUrl] = useState('');
   const [images, setImages] = useState<string[]>([]);
+  const [includeLocation, setIncludeLocation] = useState(false);
+  const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [locationLoading, setLocationLoading] = useState(false);
 
   // UI state
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -68,7 +73,45 @@ export default function PostScreen({ navigation }: any) {
     categoriesApi.list().then(setCategories).catch(() => {
       Alert.alert('Could not load categories', 'Check your internet connection and try again.');
     });
+    citiesApi.list().then(setCities).catch(() => {});
   }, []);
+
+  const toggleIncludeLocation = async () => {
+    if (includeLocation) {
+      setIncludeLocation(false);
+      setLocation(null);
+      return;
+    }
+    setLocationLoading(true);
+    const loc = await getApproxLocationWithArea();
+    setLocationLoading(false);
+    if (!loc) {
+      Alert.alert(
+        'Location unavailable',
+        'Turn on location permission for LocalsIndia in your phone settings to include your location.',
+      );
+      return;
+    }
+    setLocation({ latitude: loc.latitude, longitude: loc.longitude });
+    setIncludeLocation(true);
+    // Only pre-fill Area if the user hasn't already typed something —
+    // never overwrite what they entered themselves.
+    if (loc.areaGuess && !area.trim()) {
+      setArea(loc.areaGuess);
+    }
+    // Auto-pick the posting city from the geocoded city/district name — only
+    // if it exact-matches one of our actual seeded cities. No match (e.g. a
+    // village we don't have) just leaves the city exactly as it was, so this
+    // can never force the wrong city onto a listing; the "Posting in" chip
+    // above is always there to change it manually either way.
+    if (loc.cityGuess) {
+      const match = cities.find(c => c.name.toLowerCase() === loc.cityGuess!.toLowerCase());
+      if (match) {
+        setCitySlug(match.slug);
+        setCityName(match.name);
+      }
+    }
+  };
 
   const pickImage = async () => {
     if (images.length >= 5) { Alert.alert('Max 5 photos allowed'); return; }
@@ -141,6 +184,8 @@ export default function PostScreen({ navigation }: any) {
         whatsapp_url: whatsappOn ? `https://wa.me/91${phone}` : null,
         website_url: websiteUrl.trim() || null,
         social_url: socialUrl.trim() || null,
+        latitude: location?.latitude ?? null,
+        longitude: location?.longitude ?? null,
       });
 
       if (images.length > 0) {
@@ -262,6 +307,30 @@ export default function PostScreen({ navigation }: any) {
         <Ionicons name="location-outline" size={14} color="#f97316" />
         <Text style={styles.cityRowText}>Posting in <Text style={styles.cityRowTextBold}>{cityName}</Text></Text>
         <Ionicons name="chevron-down" size={13} color="#9ca3af" />
+      </TouchableOpacity>
+
+      {/* Optional location — helps buyers using "Near Me" find this listing.
+          Visible and opt-in, unlike a silent permission prompt at submit time. */}
+      <TouchableOpacity
+        style={styles.locationRow}
+        onPress={toggleIncludeLocation}
+        disabled={locationLoading}
+        accessibilityRole="button"
+        accessibilityLabel={includeLocation ? 'Location included — tap to remove it' : 'Include my location so nearby buyers can find this listing'}
+        accessibilityState={{ checked: includeLocation }}
+      >
+        {locationLoading ? (
+          <ActivityIndicator size="small" color="#f97316" />
+        ) : (
+          <Ionicons
+            name={includeLocation ? 'checkmark-circle' : 'navigate-outline'}
+            size={16}
+            color={includeLocation ? '#16a34a' : '#6b7280'}
+          />
+        )}
+        <Text style={[styles.locationRowText, includeLocation && styles.locationRowTextActive]}>
+          {includeLocation ? 'Location included — buyers nearby can find this' : 'Include my location (helps buyers find you nearby)'}
+        </Text>
       </TouchableOpacity>
 
       {/* Step bubbles */}
@@ -598,6 +667,19 @@ const styles = StyleSheet.create({
   },
   cityRowText: { fontSize: 12.5, color: '#78350f' },
   cityRowTextBold: { fontWeight: '700', color: '#ea6d0a' },
+
+  locationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 9,
+    backgroundColor: '#f9fafb',
+    borderBottomWidth: 1,
+    borderBottomColor: '#f3f4f6',
+  },
+  locationRowText: { fontSize: 12, color: '#6b7280' },
+  locationRowTextActive: { color: '#16a34a', fontWeight: '600' },
 
   // Step bubbles
   stepsRow: {

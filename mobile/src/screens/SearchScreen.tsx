@@ -6,6 +6,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { listingsApi, categoriesApi } from '../lib/api';
+import { getApproxLocation } from '../lib/location';
 import ListingCard from '../components/ListingCard';
 import { C, RADIUS, SHADOW } from '../lib/theme';
 
@@ -35,6 +36,8 @@ export default function SearchScreen({ navigation, route }: any) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [listings, setListings] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [nearMe, setNearMe] = useState(false);
+  const [nearMeLoading, setNearMeLoading] = useState(false);
   const inputRef = useRef<TextInput>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const insets = useSafeAreaInsets();
@@ -45,7 +48,7 @@ export default function SearchScreen({ navigation, route }: any) {
     });
   }, []);
 
-  const doSearch = (q: string, cat: string, city: string) => {
+  const doSearch = (q: string, cat: string, city: string, useNearMe: boolean) => {
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(async () => {
       setLoading(true);
@@ -53,6 +56,13 @@ export default function SearchScreen({ navigation, route }: any) {
         const params: Record<string, string> = { page_size: '20' };
         if (q) params.q = q;
         if (cat) params.category_slug = cat;
+        if (useNearMe) {
+          const location = await getApproxLocation();
+          if (location) {
+            params.lat = String(location.latitude);
+            params.lng = String(location.longitude);
+          }
+        }
         const data = await listingsApi.byCitySlug(city, params);
         setListings(data);
       } catch { setListings([]); }
@@ -61,8 +71,23 @@ export default function SearchScreen({ navigation, route }: any) {
   };
 
   useEffect(() => {
-    doSearch(query, activeCat, activeCity);
-  }, [query, activeCat, activeCity]);
+    doSearch(query, activeCat, activeCity, nearMe);
+  }, [query, activeCat, activeCity, nearMe]);
+
+  const toggleNearMe = async () => {
+    if (nearMe) { setNearMe(false); return; }
+    setNearMeLoading(true);
+    const location = await getApproxLocation();
+    setNearMeLoading(false);
+    if (!location) {
+      Alert.alert(
+        'Location unavailable',
+        'Turn on location permission for LocalsIndia in your phone settings to sort listings by distance.',
+      );
+      return;
+    }
+    setNearMe(true);
+  };
 
   const allCats: Category[] = [{ id: '', name: 'All', slug: '', icon: '' }, ...categories];
 
@@ -120,6 +145,26 @@ export default function SearchScreen({ navigation, route }: any) {
         >
           <Ionicons name="location-sharp" size={12} color={C.orange} />
           <Text style={styles.cityChipText} numberOfLines={1}>{activeCityName}</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* ── Near Me toggle ── */}
+      <View style={styles.nearMeRow}>
+        <TouchableOpacity
+          style={[styles.nearMeChip, nearMe && styles.nearMeChipActive]}
+          onPress={toggleNearMe}
+          disabled={nearMeLoading}
+          activeOpacity={0.8}
+          accessibilityRole="button"
+          accessibilityLabel={nearMe ? 'Near Me is on — showing closest listings first' : 'Sort listings by distance from you'}
+          accessibilityState={{ selected: nearMe }}
+        >
+          {nearMeLoading ? (
+            <ActivityIndicator size="small" color={nearMe ? 'white' : C.orange} />
+          ) : (
+            <Ionicons name="navigate" size={14} color={nearMe ? 'white' : C.orange} />
+          )}
+          <Text style={[styles.nearMeText, nearMe && styles.nearMeTextActive]}>Near Me</Text>
         </TouchableOpacity>
       </View>
 
@@ -236,6 +281,25 @@ const styles = StyleSheet.create({
     maxWidth: 90, flexShrink: 0,
   },
   cityChipText: { color: C.orange, fontWeight: '700', fontSize: 11 },
+
+  // Near Me toggle
+  nearMeRow: {
+    backgroundColor: C.navBg,
+    paddingHorizontal: 14, paddingBottom: 12,
+  },
+  nearMeChip: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(247,146,30,0.12)',
+    borderRadius: RADIUS.pill,
+    paddingHorizontal: 13, paddingVertical: 8,
+    borderWidth: 1, borderColor: 'rgba(247,146,30,0.3)',
+  },
+  nearMeChipActive: {
+    backgroundColor: C.orange, borderColor: C.orange,
+  },
+  nearMeText: { fontSize: 13, color: C.orange, fontWeight: '700' },
+  nearMeTextActive: { color: 'white' },
 
   // Categories
   catsContainer: {

@@ -19,6 +19,8 @@ async def search(
     category_id: str | None = Query(default=None),
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, le=50),
+    lat: float | None = Query(default=None),
+    lng: float | None = Query(default=None),
     db: AsyncSession = Depends(get_db),
 ):
     city_result = await db.execute(select(City).where(City.slug == city_slug, City.active == True))
@@ -43,4 +45,6 @@ async def search(
         category_id=resolved_category_id,
         page=page,
         page_size=page_size,
+        lat=lat,
+        lng=lng,
     )
