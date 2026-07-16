@@ -230,6 +230,70 @@ async def test_forgot_password_reset_flow(client, db):
     assert new.status_code == 200
 
 
+# ── Profile (/auth/me) ───────────────────────────────────────────────────────
+
+@pytest.mark.asyncio
+async def test_me_reports_zero_listings_for_new_user(client, db):
+    phone = "+919888888883"
+    setup_token = await _verify_otp_get_setup_token(client, db, phone)
+    signup = await client.post("/api/v1/auth/password/set", json={
+        "setup_token": setup_token, "password": "supersecret1",
+    })
+    headers = {"Authorization": f"Bearer {signup.json()['access_token']}"}
+
+    resp = await client.get("/api/v1/auth/me", headers=headers)
+    assert resp.status_code == 200
+    assert resp.json()["listing_count"] == 0
+
+
+# Regression test for a real bug: the mobile Profile screen's "X Listings" stat
+# read `me.listing_count`, but /auth/me never returned that field at all — so
+# it silently stayed at its default of 0 forever, no matter how many listings
+# the user actually had.
+@pytest.mark.asyncio
+async def test_me_reports_correct_listing_count_and_excludes_deleted(client, db):
+    from app.models.category import Category
+    from app.models.city import City
+    from app.models.listing import Listing
+
+    phone = "+919888888884"
+    setup_token = await _verify_otp_get_setup_token(client, db, phone)
+    signup = await client.post("/api/v1/auth/password/set", json={
+        "setup_token": setup_token, "password": "supersecret1",
+    })
+    user_id = signup.json()["user"]["id"]
+    headers = {"Authorization": f"Bearer {signup.json()['access_token']}"}
+
+    city = City(name="Test City", slug="test-city-count", state="Test State", lang_default="en")
+    category = Category(name="Test Cat", slug="test-cat-count")
+    db.add_all([city, category])
+    await db.commit()
+    await db.refresh(city)
+    await db.refresh(category)
+
+    listings = [
+        Listing(
+            user_id=user_id, city_id=city.id, category_id=category.id,
+            title=f"Listing {i}", description="Some description here",
+            contact_phone=phone, status="active",
+        )
+        for i in range(3)
+    ]
+    db.add_all(listings)
+    await db.commit()
+    for l in listings:
+        await db.refresh(l)
+
+    # One is already soft-deleted — must not count.
+    from datetime import datetime, timezone
+    listings[0].deleted_at = datetime.now(timezone.utc)
+    await db.commit()
+
+    resp = await client.get("/api/v1/auth/me", headers=headers)
+    assert resp.status_code == 200
+    assert resp.json()["listing_count"] == 2
+
+
 # ── Account deletion ─────────────────────────────────────────────────────────
 
 @pytest.mark.asyncio

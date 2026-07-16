@@ -312,8 +312,19 @@ async def update_profile(
 
 
 @router.get("/me", response_model=UserOut)
-async def get_me(current_user: User = Depends(get_current_user)):
-    return UserOut.model_validate(current_user)
+async def get_me(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    out = UserOut.model_validate(current_user)
+    count_result = await db.execute(
+        select(func.count()).select_from(Listing).where(
+            Listing.user_id == current_user.id,
+            Listing.deleted_at.is_(None),
+        )
+    )
+    out.listing_count = count_result.scalar() or 0
+    return out
 
 
 @router.delete("/me", status_code=204)

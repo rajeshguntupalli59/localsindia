@@ -190,6 +190,13 @@ export default function PostScreen({ navigation }: any) {
     );
   }
 
+  const handleCitySelect = (c: any) => {
+    // Local to this post only — does not change the city the user is browsing
+    // elsewhere in the app (Home/Search keep their own selection in storage).
+    setCitySlug(c.slug);
+    setCityName(c.name);
+  };
+
   const resetForm = () => {
     setTitle('');
     setDescription('');
@@ -243,6 +250,19 @@ export default function PostScreen({ navigation }: any) {
         <Text style={styles.headerTitle}>Post Listing</Text>
         <View style={{ width: 20 }} />
       </View>
+
+      {/* Posting-city selector — lets the user post into a different city than
+          the one they're currently browsing (e.g. a hometown listing) */}
+      <TouchableOpacity
+        style={styles.cityRow}
+        onPress={() => navigation.navigate('CityPicker', { onSelect: handleCitySelect })}
+        accessibilityRole="button"
+        accessibilityLabel={`Change the city you're posting in, currently ${cityName}`}
+      >
+        <Ionicons name="location-outline" size={14} color="#f97316" />
+        <Text style={styles.cityRowText}>Posting in <Text style={styles.cityRowTextBold}>{cityName}</Text></Text>
+        <Ionicons name="chevron-down" size={13} color="#9ca3af" />
+      </TouchableOpacity>
 
       {/* Step bubbles */}
       <View style={styles.stepsRow}>
@@ -565,6 +585,19 @@ const styles = StyleSheet.create({
     borderBottomColor: '#f3f4f6',
   },
   headerTitle: { fontSize: 16, fontWeight: 'bold', color: '#111827' },
+
+  cityRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 10,
+    backgroundColor: '#fff7ed',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ffedd5',
+  },
+  cityRowText: { fontSize: 12.5, color: '#78350f' },
+  cityRowTextBold: { fontWeight: '700', color: '#ea6d0a' },
 
   // Step bubbles
   stepsRow: {

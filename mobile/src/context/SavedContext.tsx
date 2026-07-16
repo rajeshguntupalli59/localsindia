@@ -38,8 +38,17 @@ export function SavedProvider({ children }: { children: React.ReactNode }) {
 
     storage.getAccessToken().then(token => {
       if (!token) return;
-      favoritesApi.ids()
-        .then(ids => { if (ids.length > 0) setSavedIds(new Set(ids)); })
+      // The server is the source of truth once logged in — the local cache can
+      // be stale (a previous session, another device, or a save/unsave that
+      // only ever reached this AsyncStorage cache and never the server, or
+      // vice versa). Replace both savedListings and savedIds together so the
+      // Saved tab's list/count and every heart icon agree with each other.
+      favoritesApi.list()
+        .then(listings => {
+          setSavedListings(listings);
+          setSavedIds(new Set(listings.map((l: any) => l.id)));
+          AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(listings)).catch(() => {});
+        })
         .catch(() => {});
     });
   }, []);

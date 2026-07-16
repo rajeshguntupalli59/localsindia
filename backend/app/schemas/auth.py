@@ -75,6 +75,7 @@ class UserOut(BaseModel):
     name: str
     role: str
     lang_pref: str
+    listing_count: int = 0
 
     model_config = {"from_attributes": True}
 
