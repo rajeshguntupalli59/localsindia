@@ -179,6 +179,33 @@ async def test_login_account_without_password_yet(client, db):
     assert resp.status_code == 409
 
 
+# ── Phone check (avoids sending a wasted OTP SMS to an already-registered number) ──
+
+@pytest.mark.asyncio
+async def test_phone_check_reports_no_account_for_unknown_number(client):
+    resp = await client.post("/api/v1/auth/phone/check", json={"phone": "+919888888881"})
+    assert resp.status_code == 200
+    assert resp.json()["has_account"] is False
+
+
+@pytest.mark.asyncio
+async def test_phone_check_reports_account_exists_after_password_set(client, db):
+    phone = "+919888888882"
+    setup_token = await _verify_otp_get_setup_token(client, db, phone)
+
+    # Before a password is set, this is still an incomplete signup — not a real account yet.
+    resp = await client.post("/api/v1/auth/phone/check", json={"phone": phone})
+    assert resp.json()["has_account"] is False
+
+    await client.post("/api/v1/auth/password/set", json={
+        "setup_token": setup_token, "password": "supersecret1",
+    })
+
+    resp = await client.post("/api/v1/auth/phone/check", json={"phone": phone})
+    assert resp.status_code == 200
+    assert resp.json()["has_account"] is True
+
+
 # ── Forgot password (same set-password endpoint, reused) ────────────────────
 
 @pytest.mark.asyncio

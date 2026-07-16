@@ -83,6 +83,9 @@ export const authApi = {
   login: (phone: string, password: string) =>
     api.post('/auth/login', { phone, password }).then(r => r.data),
 
+  checkPhone: (phone: string) =>
+    api.post('/auth/phone/check', { phone }).then(r => r.data),
+
   sendOtp: (phone: string) =>
     api.post('/auth/otp/send', { phone }).then(r => r.data),
 

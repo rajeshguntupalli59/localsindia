@@ -63,6 +63,7 @@ function TabNavigator() {
           elevation: 24,
         },
         tabBarLabelStyle: { fontSize: 11, fontWeight: '600', marginTop: -2 },
+        tabBarLabel: route.name === 'Post' ? () => null : undefined,
         tabBarIcon: ({ color, size, focused }) => {
           const icons: Record<string, { on: string; off: string }> = {
             Home:    { on: 'home',            off: 'home-outline'    },

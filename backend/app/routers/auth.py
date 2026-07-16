@@ -99,6 +99,20 @@ async def login(body: LoginRequest, db: AsyncSession = Depends(get_db)):
     )
 
 
+@router.post("/phone/check")
+async def check_phone(body: OtpSendRequest, db: AsyncSession = Depends(get_db)):
+    """Check whether a phone number already has a password-set account.
+
+    Lets the signup flow warn the user before sending an OTP SMS, instead of
+    burning a real SMS credit only to tell them afterwards to sign in instead.
+    """
+    result = await db.execute(
+        select(User).where(User.phone == body.phone, User.deleted_at.is_(None))
+    )
+    user = result.scalar_one_or_none()
+    return {"has_account": bool(user and user.password_hash)}
+
+
 @router.post("/otp/send", status_code=200)
 async def send_otp(body: OtpSendRequest, db: AsyncSession = Depends(get_db)):
     phone = body.phone

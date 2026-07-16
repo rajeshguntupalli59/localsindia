@@ -31,6 +31,9 @@ export default function LoginScreen({ navigation }: any) {
   const [pendingTokens, setPendingTokens] = useState<{ access: string; refresh: string } | null>(null);
   const [adminUser, setAdminUser] = useState('');
   const [adminPass, setAdminPass] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const logoTapCount = useRef(0);
   const logoTapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -90,6 +93,12 @@ export default function LoginScreen({ navigation }: any) {
     if (!/^[6-9]\d{9}$/.test(phone)) { Alert.alert('Invalid number', 'Enter a valid 10-digit Indian mobile number.'); return; }
     setLoading(true);
     try {
+      const { has_account } = await authApi.checkPhone(`+91${phone}`);
+      if (has_account) {
+        Alert.alert('Already registered', 'This number already has an account. Please sign in with your password.');
+        setMode('signin');
+        return;
+      }
       const data = await authApi.sendOtp(`+91${phone}`);
       if (data.otp) setDebugOtp(data.otp);
       setStep('otp');
@@ -289,8 +298,11 @@ export default function LoginScreen({ navigation }: any) {
                       onChangeText={setPassword}
                       placeholder="Password"
                       placeholderTextColor={C.textMuted}
-                      secureTextEntry
+                      secureTextEntry={!showPassword}
                     />
+                    <TouchableOpacity onPress={() => setShowPassword(v => !v)} hitSlop={8}>
+                      <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={18} color={C.textMuted} />
+                    </TouchableOpacity>
                   </View>
                   <TouchableOpacity
                     onPress={() => { setStep('forgot-phone'); setOtp(''); setNewPassword(''); setConfirmPassword(''); }}
@@ -355,9 +367,12 @@ export default function LoginScreen({ navigation }: any) {
                   onChangeText={setNewPassword}
                   placeholder="At least 8 characters"
                   placeholderTextColor={C.textMuted}
-                  secureTextEntry
+                  secureTextEntry={!showNewPassword}
                   autoFocus
                 />
+                <TouchableOpacity onPress={() => setShowNewPassword(v => !v)} hitSlop={8}>
+                  <Ionicons name={showNewPassword ? 'eye-off-outline' : 'eye-outline'} size={18} color={C.textMuted} />
+                </TouchableOpacity>
               </View>
               <View style={[styles.nameRow, { marginTop: 10 }]}>
                 <Ionicons name="lock-closed-outline" size={18} color={C.textMuted} style={styles.nameIcon} />
@@ -367,8 +382,11 @@ export default function LoginScreen({ navigation }: any) {
                   onChangeText={setConfirmPassword}
                   placeholder="Confirm password"
                   placeholderTextColor={C.textMuted}
-                  secureTextEntry
+                  secureTextEntry={!showConfirmPassword}
                 />
+                <TouchableOpacity onPress={() => setShowConfirmPassword(v => !v)} hitSlop={8}>
+                  <Ionicons name={showConfirmPassword ? 'eye-off-outline' : 'eye-outline'} size={18} color={C.textMuted} />
+                </TouchableOpacity>
               </View>
               <TouchableOpacity
                 style={[styles.primaryBtn, { marginTop: 20 }, (loading || newPassword.length < 8) && styles.btnDisabled]}
@@ -480,9 +498,12 @@ export default function LoginScreen({ navigation }: any) {
                   onChangeText={setNewPassword}
                   placeholder="At least 8 characters"
                   placeholderTextColor={C.textMuted}
-                  secureTextEntry
+                  secureTextEntry={!showNewPassword}
                   autoFocus
                 />
+                <TouchableOpacity onPress={() => setShowNewPassword(v => !v)} hitSlop={8}>
+                  <Ionicons name={showNewPassword ? 'eye-off-outline' : 'eye-outline'} size={18} color={C.textMuted} />
+                </TouchableOpacity>
               </View>
               <View style={[styles.nameRow, { marginTop: 10 }]}>
                 <Ionicons name="lock-closed-outline" size={18} color={C.textMuted} style={styles.nameIcon} />
@@ -492,8 +513,11 @@ export default function LoginScreen({ navigation }: any) {
                   onChangeText={setConfirmPassword}
                   placeholder="Confirm password"
                   placeholderTextColor={C.textMuted}
-                  secureTextEntry
+                  secureTextEntry={!showConfirmPassword}
                 />
+                <TouchableOpacity onPress={() => setShowConfirmPassword(v => !v)} hitSlop={8}>
+                  <Ionicons name={showConfirmPassword ? 'eye-off-outline' : 'eye-outline'} size={18} color={C.textMuted} />
+                </TouchableOpacity>
               </View>
               <TouchableOpacity
                 style={[styles.primaryBtn, { marginTop: 20 }, (loading || newPassword.length < 8) && styles.btnDisabled]}
