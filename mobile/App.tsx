@@ -24,6 +24,7 @@ import AlertsPrefsScreen from './src/screens/AlertsPrefsScreen';
 import BusinessDetailScreen from './src/screens/BusinessDetailScreen';
 import EditProfileScreen from './src/screens/EditProfileScreen';
 import EditListingScreen from './src/screens/EditListingScreen';
+import SplashScreen from './src/screens/SplashScreen';
 import ErrorBoundary from './src/components/ErrorBoundary';
 import { storage } from './src/lib/storage';
 import { registerForPushNotificationsAsync } from './src/lib/pushNotifications';
@@ -169,7 +170,12 @@ export default function App() {
   };
 
   if (!initialRoute) {
-    return <View style={{ flex: 1, backgroundColor: '#111827' }} />;
+    return (
+      <>
+        <StatusBar style="dark" />
+        <SplashScreen />
+      </>
+    );
   }
 
   return (
