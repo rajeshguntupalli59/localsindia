@@ -315,7 +315,11 @@ Every classified ad posted on the platform. This is the most important table.
 | `contact_click_count` | Integer | Incremented by POST /listings/{id}/wa-click on every WhatsApp tap |
 | `last_renewed_at` | DateTime | Timestamp of last renewal; enforces 24h cooldown |
 | `search_vector` | TSVECTOR | Auto-computed from title+description for full-text search |
+| `latitude` | Numeric(9,6), nullable | Approximate seller device location at post time (2026-07-16, migration `f906010e814a`) — optional, only set if location permission granted; drives Haversine distance ordering |
+| `longitude` | Numeric(9,6), nullable | Paired with `latitude` above |
 | `deleted_at` | DateTime | Soft-delete |
+
+*(Note: `featured_at`/`featured_until` columns exist in production per migration `c5d6e7f8a9b0` but are not yet reflected in this table listing — pre-existing doc gap, see ARCHITECTURE_INDEX.md's DB Table Index for the current full column list.)*
 
 **Status lifecycle:**
 ```
@@ -482,7 +486,7 @@ Created via the single `notify()` helper in `services/notification_svc.py` — e
 
 **This table existed since 2026-06-11 but was never wired up** — its original schema stored only `token_hash` (a bcrypt hash), which can't actually be used to send a push (delivery requires the raw token; a one-way hash is only useful for equality checks, which nothing did either). Migration `7921c37a8128` renamed it to a plain `token` column. Registered via `POST /notifications/device-token` on login/app-open (`mobile/src/lib/pushNotifications.ts`), removed via `DELETE /notifications/device-token` on logout/account-delete. One row per token; re-registering the same token under a different account reassigns it (handles a device switching users).
 
-**Android push requires a one-time Firebase setup** that hasn't been done yet: create a Firebase project, generate a service account key (Firebase Console -> Project Settings -> Service Accounts -> Generate New Private Key), then run `eas credentials` -> Android -> production -> Google Service Account -> upload that key for FCM V1. Until that's done, `send_push()` (`services/push_svc.py`) will call Expo's push API but Android devices won't actually receive anything.
+**Android push Firebase/FCM V1 setup — DONE (2026-07-16).** Two separate pieces were needed, both now in place: (1) the Firebase Admin SDK service-account key, uploaded to Expo via the expo.dev dashboard (Project → Credentials → Android → Push Notifications FCM V1) — lets Expo's servers deliver to FCM; (2) `mobile/google-services.json` (gitignored, live API key) wired into `app.json` via `googleServicesFile` — lets the app itself initialize Firebase and generate a device token in the first place (missed in the original plan; discovered via a real device error, `Default FirebaseApp is not initialized`). Verified end-to-end with real test notifications delivered to a device's system tray via `curl` against Expo's push API + receipt check. **Requires a new EAS build to reach production** — the native config changed (Google Services Gradle plugin), so this can't ship via a JS/OTA update; the current Play Store Internal Testing build predates this fix entirely.
 
 ---
 
@@ -531,7 +535,7 @@ Also `GET /api/v1/admin/errors` (admin-only, see Admin section below) — lists 
 
 | Method | Path | What it does | Auth? |
 |--------|------|-------------|-------|
-| GET | `/cities/{slug}/listings` | Listings for a city (filter by category, status, page) | No |
+| GET | `/cities/{slug}/listings` | Listings for a city (filter by category, status, page); optional `lat`/`lng` (2026-07-16) sorts by real Haversine distance, unlocated listings kept via `NULLS LAST` rather than dropped; `q` OR-matches per word (fixed 2026-07-16 — was AND-matching every word, so one filler word could zero out an otherwise-exact match) | No |
 | POST | `/listings` | Create listing (status='pending') | Yes |
 | GET | `/listings/mine` | My listings (all statuses) | Yes |
 | GET | `/listings/{id}` | Single listing detail | No |
@@ -548,7 +552,7 @@ Also `GET /api/v1/admin/errors` (admin-only, see Admin section below) — lists 
 
 | Method | Path | What it does |
 |--------|------|-------------|
-| GET | `/?q=...&city_slug=...` | Full-text search + ILIKE fallback. Returns paginated results. |
+| GET | `/?q=...&city_slug=...&lat=...&lng=...` | Full-text search (OR-combined per-word `tsquery`, ranked by `ts_rank` — fixed 2026-07-16, was AND-matching every word) + ILIKE fallback. Optional `lat`/`lng` sorts by real Haversine distance; unlocated listings kept, never dropped. Returns paginated results. |
 
 ### Uploads: `/api/v1/upload`
 
@@ -1664,23 +1668,24 @@ Side services (called from backend):
 | `mobile/src/hooks/useSaved.ts` | AsyncStorage bookmark hook (same API as web `useSaved`) |
 | `mobile/src/components/ListingCard.tsx` | RN listing card with gradient emoji placeholder, price, WA button |
 | `mobile/src/screens/HomeScreen.tsx` | Dark hero with real `logo-mark-transparent.png` brand mark next to the headline, city switcher, trending chips, category grid (2×4, emoji `fontSize: 34` for legibility), fresh listings |
-| `mobile/src/screens/SearchScreen.tsx` | Debounced search, category tabs (horizontal `FlatList`; `contentContainerStyle={{alignItems:'center'}}` + fixed `height:44` + `flexGrow:0` — without this the pills stretch to fill the list's full height, a classic horizontal-FlatList `alignItems:'stretch'` cross-axis gotcha), city chip, FlatList with results |
+| `mobile/src/screens/SearchScreen.tsx` | Debounced search, category tabs (horizontal `FlatList`; `contentContainerStyle={{alignItems:'center'}}` + fixed `height:44` + `flexGrow:0` — without this the pills stretch to fill the list's full height, a classic horizontal-FlatList `alignItems:'stretch'` cross-axis gotcha), city chip, FlatList with results; "Near Me" toggle (2026-07-16) sends device `lat`/`lng` for real distance sorting |
 | `mobile/src/screens/ListingDetailScreen.tsx` | Photo gallery + thumbnail strip, sticky WA button, seller → SellerProfile |
 | `mobile/src/screens/SellerProfileScreen.tsx` | Seller avatar/initials, member since, listing count, listings list |
 | `mobile/src/screens/LoginScreen.tsx` | OTP flow: phone → code → tokens stored in SecureStore; debug OTP shown; real logo image above the wordmark text |
-| `mobile/src/screens/PostScreen.tsx` | 3-step wizard: details + category grid → photos (expo-image-picker) → contact |
+| `mobile/src/screens/PostScreen.tsx` | 3-step wizard: details + category grid → photos (expo-image-picker) → contact; "Include my location" toggle (2026-07-16) auto-fills Area if empty + auto-picks City by exact name match against the seeded list (never forces an unmatched city), both always manually editable |
+| `mobile/src/screens/SplashScreen.tsx` | Animated launch screen (2026-07-16, new) — logo spring-in, wordmark fade-in, "Buy · Sell · Connect" tagline pops word-by-word; shown in `App.tsx` in place of the old blank placeholder View during `checkAuth()` |
 | `mobile/src/screens/SavedScreen.tsx` | AsyncStorage bookmarks with empty state CTA |
 | `mobile/src/screens/ProfileScreen.tsx` | User info + menu (My Listings, Saved, City, Edit) + logout with confirmation |
 | `mobile/src/screens/CityPickerScreen.tsx` | Searchable modal; pulls from `/api/v1/cities`; callback pattern for city selection |
 | `mobile/src/screens/AdminScreen.tsx` | Admin panel ported to mobile: listing moderation queue, approve/reject, role management |
 | `mobile/src/screens/LoginScreen.tsx` (Google) | Also handles Google Sign-In via `expo-web-browser` deep-link flow — see §11 |
 | `mobile/eas.json` | EAS Build profiles: `development` (debug APK), `preview` (internal APK), `production` (AAB for Play Store, autoIncrement) |
-| `mobile/app.json` | Expo config; `extra.eas.projectId` links to EAS project `@rajeshguntupalli59/localsindia`; splash image + image-picker permission text configured for store builds |
+| `mobile/app.json` | Expo config; `extra.eas.projectId` links to EAS project `@rajeshguntupalli59/localsindia`; splash image + image-picker permission text configured for store builds; `googleServicesFile` (2026-07-16) → `mobile/google-services.json` (gitignored) — required client-side for push notifications to generate a device token |
 | `mobile/assets/icon.png`, `android-icon-foreground.png`, `favicon.png` | Real LocalsIndia logo — mark-only crop (turtle+pin symbol, no wordmark text since it'd be illegible at icon sizes) |
 | `mobile/assets/splash-icon.png` | Real logo — full mark + "LocalsIndia" wordmark + tagline, shown on the orange splash background |
 | `mobile/assets/logo-mark-transparent.png` | Logo mark with white chroma-keyed to transparent — used inside app UI (HomeScreen hero, LoginScreen) so it sits cleanly on colored/dark backgrounds |
 
-**EAS Build (Play Store pipeline, added 2026-06-16):** `eas build --platform android --profile preview|production` from `mobile/`. Build dashboard: `https://expo.dev/accounts/rajeshguntupalli59/projects/localsindia/builds/`. Not yet submitted to Play Console — `eas submit` is the remaining step once a production AAB is verified.
+**EAS Build (Play Store pipeline, added 2026-06-16):** `eas build --platform android --profile preview|production` from `mobile/`. Build dashboard: `https://expo.dev/accounts/rajeshguntupalli59/projects/localsindia/builds/`. **Update 2026-07-15:** already submitted and live on the Play Store Internal Testing track (versionCode 4, commit `a34006e`). **That build is now stale** — it predates the proximity search/location posting, search fix, splash screen, and the push notification client fix (all `2026-07-16`). A new build is the next step before promoting past Internal Testing.
 
 ---
 
