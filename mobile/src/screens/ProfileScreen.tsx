@@ -171,7 +171,11 @@ export default function ProfileScreen({ navigation }: any) {
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
             <Ionicons name="star" size={20} color={C.orange} />
-            <Text style={styles.statLabel}>Member</Text>
+            <Text style={styles.statLabel}>
+              {user.created_at
+                ? `Since ${new Date(user.created_at).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })}`
+                : 'Member'}
+            </Text>
           </View>
         </View>
       )}

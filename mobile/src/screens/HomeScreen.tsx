@@ -33,6 +33,12 @@ const CAT_VISUAL: Record<string, { icon: string; bg: string }> = {
   education:     { icon: 'school-outline',         bg: '#f59e0b' },
   events:        { icon: 'calendar-outline',       bg: '#ec4899' },
   businesses:    { icon: 'storefront-outline',     bg: '#06b6d4' },
+  classifieds:   { icon: 'pricetags-outline',      bg: '#64748b' },
+  services:      { icon: 'construct-outline',      bg: '#0d9488' },
+  'real-estate': { icon: 'business-outline',       bg: '#a21caf' },
+  furniture:     { icon: 'cube-outline',           bg: '#92400e' },
+  fashion:       { icon: 'shirt-outline',          bg: '#db2777' },
+  doctors:       { icon: 'medical-outline',        bg: '#0284c7' },
 };
 
 type Listing = any;
@@ -302,7 +308,7 @@ export default function HomeScreen({ navigation }: any) {
           <Text style={styles.sectionTitle}>Browse by Category</Text>
         </View>
         <View style={styles.catGrid}>
-          {categories.slice(0, 8).map(cat => {
+          {categories.map(cat => {
             const vis = CAT_VISUAL[cat.slug] ?? { icon: 'grid-outline', bg: '#94a3b8' };
             return (
               <TouchableOpacity
@@ -504,7 +510,7 @@ const styles = StyleSheet.create({
   },
   catBlock: {
     width: '22%',
-    flexGrow: 1,
+    flexGrow: 0,
     aspectRatio: 0.9,
     borderRadius: 16,
     alignItems: 'center',

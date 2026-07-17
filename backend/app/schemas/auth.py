@@ -1,5 +1,6 @@
 import re
 import uuid
+from datetime import datetime
 from pydantic import BaseModel, field_validator
 
 PHONE_RE = re.compile(r"^\+91[6-9]\d{9}$")
@@ -76,6 +77,7 @@ class UserOut(BaseModel):
     role: str
     lang_pref: str
     listing_count: int = 0
+    created_at: datetime
 
     model_config = {"from_attributes": True}
 

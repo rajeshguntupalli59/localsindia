@@ -21,6 +21,30 @@ const CATEGORY_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
   education:     'school-outline',
   events:        'calendar-outline',
   businesses:    'storefront-outline',
+  classifieds:   'pricetags-outline',
+  services:      'construct-outline',
+  'real-estate': 'business-outline',
+  furniture:     'cube-outline',
+  fashion:       'shirt-outline',
+  doctors:       'medical-outline',
+};
+
+// Same palette as HomeScreen's "Browse by Category" grid, for visual consistency.
+const CATEGORY_COLORS: Record<string, string> = {
+  tiffin:        '#f97316',
+  'pg-roommate': '#3b82f6',
+  jobs:          '#10b981',
+  vehicles:      '#ef4444',
+  electronics:   '#8b5cf6',
+  education:     '#f59e0b',
+  events:        '#ec4899',
+  businesses:    '#06b6d4',
+  classifieds:   '#64748b',
+  services:      '#0d9488',
+  'real-estate': '#a21caf',
+  furniture:     '#92400e',
+  fashion:       '#db2777',
+  doctors:       '#0284c7',
 };
 
 const API_BASE = 'https://localsindia-backend.azurewebsites.net/api/v1';
@@ -399,21 +423,31 @@ export default function PostScreen({ navigation }: any) {
               <View style={styles.catGrid}>
                 {categories.map(c => {
                   const active = categorySlug === c.slug;
+                  const bg = CATEGORY_COLORS[c.slug] ?? '#94a3b8';
                   return (
                     <TouchableOpacity
                       key={c.slug}
-                      style={[styles.catCard, active && styles.catCardActive]}
+                      style={[
+                        styles.catCard,
+                        { backgroundColor: bg, opacity: active ? 1 : 0.85 },
+                        active && styles.catCardActive,
+                      ]}
                       onPress={() => { setCategorySlug(c.slug); setErrors(e => ({ ...e, category: '' })); }}
                       accessibilityRole="button"
                       accessibilityLabel={`Category: ${c.name}`}
                       accessibilityState={{ selected: active }}
                     >
+                      {active && (
+                        <View style={styles.catCheck}>
+                          <Ionicons name="checkmark" size={12} color={bg} />
+                        </View>
+                      )}
                       <Ionicons
                         name={CATEGORY_ICONS[c.slug] ?? 'pricetag-outline'}
                         size={22}
-                        color={active ? '#f97316' : '#6b7280'}
+                        color="white"
                       />
-                      <Text style={[styles.catLabel, active && styles.catLabelActive]}>{c.name}</Text>
+                      <Text style={styles.catLabel}>{c.name}</Text>
                     </TouchableOpacity>
                   );
                 })}
@@ -753,18 +787,35 @@ const styles = StyleSheet.create({
   catGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 },
   catCard: {
     width: '22%',
-    aspectRatio: 1,
-    backgroundColor: '#f9fafb',
+    aspectRatio: 0.9,
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1.5,
-    borderColor: 'transparent',
+    gap: 4,
+    paddingHorizontal: 4,
   },
-  catCardActive: { borderColor: '#f97316', backgroundColor: '#fff7ed' },
+  catCardActive: {
+    borderWidth: 2.5,
+    borderColor: 'white',
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  catCheck: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: 'white',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   catEmoji: { fontSize: 22 },
-  catLabel: { fontSize: 10, color: '#6b7280', marginTop: 3, textAlign: 'center' },
-  catLabelActive: { color: '#f97316', fontWeight: '700' },
+  catLabel: { fontSize: 10, color: 'white', fontWeight: '700', marginTop: 3, textAlign: 'center' },
 
   // Price
   priceRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
