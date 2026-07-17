@@ -28,7 +28,13 @@ export default function ProfileScreen({ navigation }: any) {
     storage.getBiometricEnabled().then(setBiometricEnabled);
     isBiometricAvailable().then(setBiometricAvailable);
     authApi.getMe().then(me => {
-      if (me?.listing_count != null) setListingCount(me.listing_count);
+      if (!me) return;
+      if (me.listing_count != null) setListingCount(me.listing_count);
+      setUser((prev: any) => {
+        const merged = { ...prev, ...me };
+        storage.setUser(merged);
+        return merged;
+      });
     }).catch(() => {});
   }, [navigation]));
 

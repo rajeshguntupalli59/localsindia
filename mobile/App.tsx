@@ -22,6 +22,8 @@ import MyListingsScreen from './src/screens/MyListingsScreen';
 import PromoteScreen from './src/screens/PromoteScreen';
 import AlertsPrefsScreen from './src/screens/AlertsPrefsScreen';
 import BusinessDetailScreen from './src/screens/BusinessDetailScreen';
+import BusinessesScreen from './src/screens/BusinessesScreen';
+import PostBusinessScreen from './src/screens/PostBusinessScreen';
 import EditProfileScreen from './src/screens/EditProfileScreen';
 import EditListingScreen from './src/screens/EditListingScreen';
 import SplashScreen from './src/screens/SplashScreen';
@@ -200,6 +202,8 @@ export default function App() {
               <Stack.Screen name="Promote" component={PromoteScreen} />
               <Stack.Screen name="AlertsPrefs" component={AlertsPrefsScreen} />
               <Stack.Screen name="BusinessDetail" component={BusinessDetailScreen} />
+              <Stack.Screen name="Businesses" component={BusinessesScreen} />
+              <Stack.Screen name="PostBusiness" component={PostBusinessScreen} />
               <Stack.Screen name="EditProfile" component={EditProfileScreen} />
               <Stack.Screen name="EditListing" component={EditListingScreen} />
             </Stack.Navigator>

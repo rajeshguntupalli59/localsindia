@@ -324,6 +324,20 @@ export default function HomeScreen({ navigation }: any) {
           })}
         </View>
 
+        {/* ── Business Directory promo — separate from category grid ── */}
+        <TouchableOpacity
+          style={styles.bizPromo}
+          onPress={() => navigation.navigate('Businesses', { citySlug, cityName })}
+          activeOpacity={0.88}
+        >
+          <Ionicons name="storefront" size={22} color="white" />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.bizPromoTitle}>Own a Business in {cityName}?</Text>
+            <Text style={styles.bizPromoDesc}>List it free, get discovered, and go verified with a blue ✓ badge</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.85)" />
+        </TouchableOpacity>
+
         <View style={{ height: 32 }} />
       </ScrollView>
 
@@ -552,6 +566,18 @@ const styles = StyleSheet.create({
     fontSize: 13,
     letterSpacing: -0.1,
   },
+  bizPromo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginHorizontal: 16,
+    marginTop: 20,
+    padding: 14,
+    borderRadius: 14,
+    backgroundColor: '#2563eb',
+  },
+  bizPromoTitle: { color: 'white', fontWeight: '700', fontSize: 14 },
+  bizPromoDesc: { color: 'rgba(255,255,255,0.85)', fontSize: 11.5, marginTop: 2, lineHeight: 15 },
 
   /* ── Chat FAB ── */
   chatFab: {

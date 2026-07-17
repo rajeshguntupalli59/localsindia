@@ -211,8 +211,24 @@ export const paymentsApi = {
 };
 
 export const businessesApi = {
+  list: (citySlug: string) =>
+    api.get('/businesses', { params: { city_slug: citySlug } }).then(r => r.data),
+
   getById: (id: string) =>
     api.get(`/businesses/${id}`).then(r => r.data),
+
+  create: (data: {
+    name: string;
+    city_id: string;
+    description?: string | null;
+    address?: string | null;
+    phone?: string | null;
+    whatsapp_url?: string | null;
+    website_url?: string | null;
+  }) => api.post('/businesses', data).then(r => r.data),
+
+  claim: (businessId: string) =>
+    api.post(`/businesses/${businessId}/claim`).then(r => r.data),
 
   createBadgeOrder: (businessId: string, plan: 'monthly' | 'quarterly') =>
     api.post('/payments/business-badge/create-order', { business_id: businessId, plan }).then(r => r.data),
