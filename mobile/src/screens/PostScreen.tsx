@@ -8,7 +8,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system/legacy';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { listingsApi, categoriesApi, citiesApi } from '../lib/api';
+import { listingsApi, categoriesApi, citiesApi, businessesApi } from '../lib/api';
 import { storage } from '../lib/storage';
 import { getApproxLocationWithArea } from '../lib/location';
 
@@ -53,7 +53,7 @@ const STEPS = ['Details', 'Photos', 'Contact'];
 
 type Category = { id: string; name: string; slug: string; icon: string };
 
-export default function PostScreen({ navigation }: any) {
+export default function PostScreen({ navigation, route }: any) {
   const insets = useSafeAreaInsets();
   const [user, setUser] = useState<any>(undefined);
   const [citySlug, setCitySlug] = useState('hyderabad');
@@ -98,6 +98,7 @@ export default function PostScreen({ navigation }: any) {
       Alert.alert('Could not load categories', 'Check your internet connection and try again.');
     });
     citiesApi.list().then(setCities).catch(() => {});
+    if (route?.params?.presetCategory) setCategorySlug(route.params.presetCategory);
   }, []);
 
   const toggleIncludeLocation = async () => {
@@ -197,6 +198,26 @@ export default function PostScreen({ navigation }: any) {
     if (!validateStep2()) return;
     setLoading(true);
     try {
+      // "Businesses" category creates a real, badge-eligible Business Directory
+      // entry instead of a plain classified — same wizard, different backend
+      // table. Businesses have no photo storage and no approval queue (they're
+      // live immediately), so we land straight on the business's own page
+      // instead of the classifieds "under review" success screen.
+      if (categorySlug === 'businesses') {
+        const city = await citiesApi.get(citySlug);
+        const business = await businessesApi.create({
+          name: title.trim(),
+          city_id: city.id,
+          description: description.trim() || null,
+          address: area.trim() || null,
+          phone: `+91${phone}`,
+          whatsapp_url: whatsappOn ? `https://wa.me/91${phone}` : null,
+          website_url: websiteUrl.trim() || null,
+        });
+        navigation.replace('BusinessDetail', { businessId: business.id });
+        return;
+      }
+
       const listing = await listingsApi.create({
         title: title.trim(),
         description: description.trim(),
@@ -455,29 +476,37 @@ export default function PostScreen({ navigation }: any) {
               {errors.category ? <Text style={[styles.errorText, { marginTop: 8 }]}>{errors.category}</Text> : null}
             </View>
 
-            {/* Price + Area */}
+            {/* Price + Area (Price doesn't apply to Businesses — hidden) */}
             <View style={styles.card}>
-              <Text style={styles.label}>Price (₹) <Text style={styles.optional}>(optional)</Text></Text>
-              <View style={styles.priceRow}>
-                <Text style={styles.pricePrefix}>₹</Text>
-                <TextInput
-                  style={[styles.input, { flex: 1 }]}
-                  value={price}
-                  onChangeText={setPrice}
-                  placeholder="0 — leave blank for 'Price on request'"
-                  keyboardType="numeric"
-                />
-              </View>
+              {categorySlug !== 'businesses' && (
+                <>
+                  <Text style={styles.label}>Price (₹) <Text style={styles.optional}>(optional)</Text></Text>
+                  <View style={styles.priceRow}>
+                    <Text style={styles.pricePrefix}>₹</Text>
+                    <TextInput
+                      style={[styles.input, { flex: 1 }]}
+                      value={price}
+                      onChangeText={setPrice}
+                      placeholder="0 — leave blank for 'Price on request'"
+                      keyboardType="numeric"
+                    />
+                  </View>
+                </>
+              )}
 
-              <Text style={[styles.label, { marginTop: 16 }]}>Area / Locality <Text style={styles.optional}>(optional)</Text></Text>
+              <Text style={[styles.label, categorySlug !== 'businesses' && { marginTop: 16 }]}>
+                {categorySlug === 'businesses' ? 'Address' : 'Area / Locality'} <Text style={styles.optional}>(optional)</Text>
+              </Text>
               <TextInput
                 style={styles.input}
                 value={area}
                 onChangeText={setArea}
-                placeholder="e.g. Koramangala, Banjara Hills"
+                placeholder={categorySlug === 'businesses' ? 'Street, Area, City' : 'e.g. Koramangala, Banjara Hills'}
                 maxLength={100}
               />
-              <Text style={styles.hint}>Helps buyers find listings near them</Text>
+              <Text style={styles.hint}>
+                {categorySlug === 'businesses' ? 'Shown on your business page' : 'Helps buyers find listings near them'}
+              </Text>
             </View>
 
             {/* Tip card */}
@@ -493,8 +522,15 @@ export default function PostScreen({ navigation }: any) {
           </>
         )}
 
-        {/* ── STEP 2: PHOTOS ── */}
+        {/* ── STEP 2: PHOTOS (Businesses don't support photos yet) ── */}
         {step === 1 && (
+          categorySlug === 'businesses' ? (
+            <View style={styles.card}>
+              <Ionicons name="images-outline" size={28} color="#9ca3af" />
+              <Text style={[styles.cardTitle, { marginTop: 10 }]}>Photos aren't available for Businesses yet</Text>
+              <Text style={styles.cardSubtitle}>You can still add your business now — photo support for the Business Directory is coming soon.</Text>
+            </View>
+          ) : (
           <>
             <View style={styles.card}>
               <Text style={styles.cardTitle}>Add photos</Text>
@@ -553,6 +589,7 @@ export default function PostScreen({ navigation }: any) {
               ))}
             </View>
           </>
+          )
         )}
 
         {/* ── STEP 3: CONTACT ── */}
@@ -561,12 +598,12 @@ export default function PostScreen({ navigation }: any) {
             {/* Mini listing summary */}
             {(title || images.length > 0) && (
               <View style={styles.summaryCard}>
-                <Text style={styles.summaryLabel}>YOUR LISTING SUMMARY</Text>
+                <Text style={styles.summaryLabel}>{categorySlug === 'businesses' ? 'YOUR BUSINESS SUMMARY' : 'YOUR LISTING SUMMARY'}</Text>
                 {images.length > 0 && (
                   <Image source={{ uri: images[0] }} style={styles.summaryThumb} />
                 )}
                 {title ? <Text style={styles.summaryTitle} numberOfLines={2}>{title}</Text> : null}
-                {price ? (
+                {price && categorySlug !== 'businesses' ? (
                   <Text style={styles.summaryPrice}>₹{parseInt(price, 10).toLocaleString('en-IN')}</Text>
                 ) : null}
                 <Text style={styles.summaryCity}>
@@ -659,13 +696,13 @@ export default function PostScreen({ navigation }: any) {
           onPress={handleNext}
           disabled={loading}
           accessibilityRole="button"
-          accessibilityLabel={step === 2 ? 'Post listing' : 'Next step'}
+          accessibilityLabel={step === 2 ? (categorySlug === 'businesses' ? 'Add business' : 'Post listing') : 'Next step'}
           accessibilityState={{ disabled: loading }}
         >
           {loading
-            ? <Text style={styles.nextBtnText}>{uploadProgress || 'Posting...'}</Text>
+            ? <Text style={styles.nextBtnText}>{uploadProgress || (categorySlug === 'businesses' ? 'Adding...' : 'Posting...')}</Text>
             : step === 2
-              ? <><Text style={styles.nextBtnText}>✦ Post Listing</Text></>
+              ? <><Text style={styles.nextBtnText}>{categorySlug === 'businesses' ? '✦ Add Business' : '✦ Post Listing'}</Text></>
               : <Text style={styles.nextBtnText}>Next →</Text>}
         </TouchableOpacity>
       </View>

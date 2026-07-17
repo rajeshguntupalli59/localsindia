@@ -39,7 +39,7 @@ export default function BusinessesScreen({ route, navigation }: any) {
 
       <TouchableOpacity
         style={styles.addButton}
-        onPress={() => navigation.navigate('PostBusiness', { citySlug, cityName })}
+        onPress={() => navigation.navigate('Main', { screen: 'Post', params: { presetCategory: 'businesses' } })}
         activeOpacity={0.85}
       >
         <Ionicons name="add-circle-outline" size={18} color="white" />
