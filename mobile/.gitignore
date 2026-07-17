@@ -45,3 +45,6 @@ yarn-error.*
 
 # Keystore backup (contains plaintext signing passwords — never commit)
 /keystore-backup/
+
+# Firebase client config (contains a live API key — never commit)
+google-services.json
