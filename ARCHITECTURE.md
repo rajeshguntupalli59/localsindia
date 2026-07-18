@@ -1343,6 +1343,15 @@ On error (`state=mobile` + Google denies): redirects to `localsindia://auth/call
 | Week | Rs. 99 | 7 days featured |
 | Month | Rs. 199 | 30 days featured |
 
+### Business Analytics Dashboard (added 2026-07-18)
+
+First piece of Phase 3 monetization built after Featured Listings — chosen first specifically because it's pure reporting with no new Razorpay payment code, unlike the still-unbuilt ad banners and event ticketing pieces of the same plan.
+
+- `POST /api/v1/businesses/{id}/view` and `POST /api/v1/businesses/{id}/wa-click` — fire-and-forget, same pattern as the existing `listings.py` view/wa-click endpoints, but log a row to a new `analytics_events` table (`business_id`, `event_type`, `created_at`) instead of incrementing a denormalized counter. A log was needed here (not just a counter) because the dashboard shows a day-by-day trend, not just a lifetime total.
+- `GET /api/v1/analytics/business/{id}` — owner-or-admin only (403 otherwise). Aggregates the last 30 days: total views, total WhatsApp clicks, plus a per-day breakdown for the trend chart. Review count and average rating come straight off the `businesses` row, not the event log.
+- `/[city]/businesses/[id]/dashboard` — 4 stat cards (Views, WhatsApp Taps, Reviews, Avg Rating) and a plain CSS bar chart for the daily trend. Deliberately no new charting library (`recharts`) added for one simple chart, in keeping with this app's existing preference against heavy dependencies.
+- Reached via a "View Analytics" link on the business detail page, shown whenever the business has an owner on record (same gating convention the existing "Get Verified" CTA already uses on that page — the backend is the actual authorization boundary, not this link's visibility).
+
 ---
 
 ## 13. Image Upload — Cloudinary
@@ -1700,4 +1709,4 @@ Side services (called from backend):
 
 ---
 
-*Updated: 2026-07-18 | Two-sided referral system (§5 users table, §6 Auth endpoints, §8 /invite page, §9 ReferralCapture component, §18 mobile App.tsx/LoginScreen/ProfileScreen/InviteScreen) — commits `1f7243c` (backend+web) and `ce2ee31` (mobile); real Play Console App Signing SHA-256 added to assetlinks.json, commit `3015c0a`. ⚠️ This pass only closes the referral-system gap specifically — several earlier feature passes (2026-07-12 through 2026-07-17: password auth rework, buyer requests, proximity search, business directory mobile parity, push notifications, error tracking) are still only reflected in `ARCHITECTURE_INDEX.md`, not fully backfilled into this file's narrative sections yet. Previous update: 2026-06-16 | LocalIndia v3 -- hybrid SSR migration, admin role management, business soft-delete, mobile Google Sign-In + admin panel + EAS Play Store pipeline + real logo assets + safe-area bottom nav fix*
+*Updated: 2026-07-18 | Business Analytics Dashboard (§12) — first piece of Phase 3 monetization, commit `63155f0`; verified live in production (migration ran clean via CI, new route confirmed present + auth-gated on the deployed backend). Also today: two-sided referral system (§5 users table, §6 Auth endpoints, §8 /invite page, §9 ReferralCapture component, §18 mobile App.tsx/LoginScreen/ProfileScreen/InviteScreen) — commits `1f7243c` (backend+web) and `ce2ee31` (mobile); real Play Console App Signing SHA-256 added to assetlinks.json, commit `3015c0a`. ⚠️ This pass only closes the referral-system gap specifically — several earlier feature passes (2026-07-12 through 2026-07-17: password auth rework, buyer requests, proximity search, business directory mobile parity, push notifications, error tracking) are still only reflected in `ARCHITECTURE_INDEX.md`, not fully backfilled into this file's narrative sections yet. Previous update: 2026-06-16 | LocalIndia v3 -- hybrid SSR migration, admin role management, business soft-delete, mobile Google Sign-In + admin panel + EAS Play Store pipeline + real logo assets + safe-area bottom nav fix*
