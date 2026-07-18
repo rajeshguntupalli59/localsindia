@@ -135,6 +135,12 @@ export async function generateStaticParams() {
   return params;
 }
 
+// A page with zero real listings just shows a "be the first to post" empty
+// state — Google flags that as a soft 404, and category pages that fall back
+// to the city's full listing set (see fetchListings) duplicate other category
+// pages for the same city. Only index once there's at least one real listing.
+const MIN_LISTINGS_FOR_INDEX = 1;
+
 export async function generateMetadata(
   { params }: { params: { city: string; category: string } }
 ): Promise<Metadata> {
@@ -143,6 +149,8 @@ export async function generateMetadata(
   const cityName = params.city.charAt(0).toUpperCase() + params.city.slice(1);
   const title = `${meta.title} in ${cityName} — Free Listings | LocalsIndia`;
   const description = `${meta.description} Post free on LocalsIndia — India's hyperlocal community platform.`;
+  const listings = await fetchListings(params.city, meta);
+  const shouldIndex = listings.length >= MIN_LISTINGS_FOR_INDEX;
   return {
     title,
     description,
@@ -156,7 +164,7 @@ export async function generateMetadata(
     alternates: {
       canonical: `https://www.localsindia.com/${params.city}/${params.category}`,
     },
-    robots: { index: true, follow: true },
+    robots: { index: shouldIndex, follow: true },
   };
 }
 
