@@ -255,6 +255,9 @@ async def create_listing(
 | `lang_pref` | Enum | Preferred language (en/hi/te/ta/kn/mr/bn/gu/pa/ml/or) |
 | `is_active` | Boolean | `false` = account suspended |
 | `deleted_at` | DateTime | Soft-delete timestamp (PDPB compliance -- never hard-delete) |
+| `referral_code` | String(12), unique, indexed | 8-char generated code (2026-07-18) — every user gets one, lazily backfilled for pre-feature accounts on their next `/auth/me` call |
+| `referred_by_user_id` | FK->users, nullable, SET NULL on delete | Whoever's code this user signed up with, if any (2026-07-18) |
+| `referral_rewards_count` | Integer, default 0 | Denormalized counter — how many referred signups have earned this user a reward, capped at 20 (2026-07-18) |
 
 **Why soft-delete?** India's Personal Data Protection Bill requires audit trails. Hard-deleting users could violate compliance.
 
@@ -499,12 +502,12 @@ Created via the single `notify()` helper in `services/notification_svc.py` — e
 | POST | `/admin-login` | Admin login with username+password | No |
 | POST | `/login` | Sign in by phone + password (replaced the old passwordless `/signin`, 2026-07-12 — that was a real security hole) | No |
 | POST | `/otp/send` | Send OTP SMS to phone | No |
-| POST | `/otp/verify` | Verify OTP -> returns a short-lived `setup_token`, not full tokens (2026-07-12) | No |
+| POST | `/otp/verify` | Verify OTP -> returns a short-lived `setup_token`, not full tokens (2026-07-12). Accepts an optional `ref_code` (2026-07-18) — applied only for new signups; unknown, stale, or self-referred codes are silently ignored rather than erroring | No |
 | POST | `/password/set` | Set password using a `setup_token` — same endpoint for signup password-creation and forgot-password reset | No |
 | POST | `/refresh` | Get new access token using refresh token | No |
 | DELETE | `/logout` | Client clears tokens (server stateless) | No |
 | POST | `/dev-login` | Skip OTP (only when OTP_DEBUG=true) | No |
-| GET | `/me` | Get current user profile | Yes |
+| GET | `/me` | Get current user profile — now includes `referral_code`, lazily generating and persisting one if the account predates this feature (2026-07-18) | Yes |
 | PATCH | `/me` | Update name or language preference | Yes |
 | DELETE | `/me` | Delete account — soft-deletes + anonymises the user (name/phone/email/password scrubbed) and cascades a soft-delete to all their listings (2026-07-14) | Yes |
 | GET | `/google?mobile=1` | Redirect to Google OAuth consent; `mobile=1` requests a deep-link callback for the React Native app instead of a web redirect | No |
@@ -1018,7 +1021,7 @@ Shown when user is offline and service worker can't serve cached content.
 
 **File:** `app/invite/page.tsx`
 
-Share the platform with friends via WhatsApp/SMS.
+Rebuilt 2026-07-18 as the real referral share page. Fetches the logged-in user's `referral_code` via `GET /auth/me` and builds a real link (`https://www.localsindia.com/{city}?ref={code}`). Guests without a token see a login-gate card instead of the share section. When someone signs up through the link and their first listing gets admin-approved, both the referrer's and referee's most-recent active listing get Featured for free for 3 days — see `routers/admin.py`'s `approve_listing` in §6.
 
 ---
 
@@ -1215,6 +1218,12 @@ Registers the PWA service worker (`public/sw.js`). Enables:
 - Offline access to cached pages
 - "Add to home screen" on Android Chrome
 - Background sync (future)
+
+### `ReferralCapture`
+
+**File:** `components/referral-capture/ReferralCapture.tsx`
+
+New 2026-07-18. Invisible client component mounted in root `layout.tsx` alongside `OnboardingGate`/`ContextualPrompt`. Reads `?ref=` off `window.location.search` on mount and persists it to `localStorage['li_ref_code']`, so it survives from whatever page a shared link lands on through to the signup form later — the login page's OTP-verify handler reads it back out and sends it as `ref_code`.
 
 ---
 
@@ -1662,7 +1671,7 @@ Side services (called from backend):
 
 | File | What it does |
 |------|-------------|
-| `mobile/App.tsx` | Navigation root: bottom tabs (Home/Search/Post/Saved/Profile) + stack navigator. Wrapped in `SafeAreaProvider`; tab bar height/padding driven by `useSafeAreaInsets().bottom` so it clears the Android gesture-nav pill / iOS home indicator instead of sitting under it |
+| `mobile/App.tsx` | Navigation root: bottom tabs (Home/Search/Post/Saved/Profile) + stack navigator (now includes `Invite`). Wrapped in `SafeAreaProvider`; tab bar height/padding driven by `useSafeAreaInsets().bottom` so it clears the Android gesture-nav pill / iOS home indicator instead of sitting under it. (2026-07-18) A new `expo-linking` effect captures `?ref=` from both cold-start (`getInitialURL`) and warm (`addEventListener('url')`) deep links into `storage.setReferralRefCode` |
 | `mobile/src/lib/api.ts` | FastAPI-adapted axios layer; JWT auto-refresh; field names match backend (`contact_phone`, `access_token`) |
 | `mobile/src/lib/storage.ts` | expo-secure-store wrapper for tokens + user; `clear()` for logout |
 | `mobile/src/hooks/useSaved.ts` | AsyncStorage bookmark hook (same API as web `useSaved`) |
@@ -1671,12 +1680,13 @@ Side services (called from backend):
 | `mobile/src/screens/SearchScreen.tsx` | Debounced search, category tabs (horizontal `FlatList`; `contentContainerStyle={{alignItems:'center'}}` + fixed `height:44` + `flexGrow:0` — without this the pills stretch to fill the list's full height, a classic horizontal-FlatList `alignItems:'stretch'` cross-axis gotcha), city chip, FlatList with results; "Near Me" toggle (2026-07-16) sends device `lat`/`lng` for real distance sorting |
 | `mobile/src/screens/ListingDetailScreen.tsx` | Photo gallery + thumbnail strip, sticky WA button, seller → SellerProfile |
 | `mobile/src/screens/SellerProfileScreen.tsx` | Seller avatar/initials, member since, listing count, listings list |
-| `mobile/src/screens/LoginScreen.tsx` | OTP flow: phone → code → tokens stored in SecureStore; debug OTP shown; real logo image above the wordmark text |
+| `mobile/src/screens/LoginScreen.tsx` | OTP flow: phone → code → tokens stored in SecureStore; debug OTP shown; real logo image above the wordmark text. Signup path only (2026-07-18) reads any captured referral code out of storage and sends it as `ref_code` on `verifyOtp` — the separate forgot-password OTP flow is untouched |
 | `mobile/src/screens/PostScreen.tsx` | 3-step wizard: details + category grid → photos (expo-image-picker) → contact; "Include my location" toggle (2026-07-16) auto-fills Area if empty + auto-picks City by exact name match against the seeded list (never forces an unmatched city), both always manually editable; (2026-07-17) picking "Businesses" as the category branches submit() to create a real Business Directory entry (`businessesApi.create`) instead of a classified — same wizard, Price hidden, Area relabels to Address, Photos step shows a note instead of the upload zone |
 | `mobile/src/screens/BusinessesScreen.tsx` | (new, 2026-07-17) Business Directory browse list for the user's city; "Add Your Business" opens Post Listing with category pre-selected via route params rather than a separate screen |
 | `mobile/src/screens/SplashScreen.tsx` | Animated launch screen (2026-07-16, new) — logo spring-in, wordmark fade-in, "Buy · Sell · Connect" tagline pops word-by-word; shown in `App.tsx` in place of the old blank placeholder View during `checkAuth()` |
 | `mobile/src/screens/SavedScreen.tsx` | AsyncStorage bookmarks with empty state CTA |
-| `mobile/src/screens/ProfileScreen.tsx` | User info + menu (My Listings, Saved, City, Edit) + logout with confirmation |
+| `mobile/src/screens/ProfileScreen.tsx` | User info + menu (My Listings, Saved, Invite Friends (2026-07-18), City, Edit) + logout with confirmation |
+| `mobile/src/screens/InviteScreen.tsx` | (new, 2026-07-18) Fetches own `referral_code` via `getMe()`, builds `https://www.localsindia.com/{citySlug}?ref={code}`, shares it via the native `Share.share()` API (same pattern as `ListingDetailScreen.tsx`'s share button) |
 | `mobile/src/screens/CityPickerScreen.tsx` | Searchable modal; pulls from `/api/v1/cities`; callback pattern for city selection |
 | `mobile/src/screens/AdminScreen.tsx` | Admin panel ported to mobile: listing moderation queue, approve/reject, role management |
 | `mobile/src/screens/LoginScreen.tsx` (Google) | Also handles Google Sign-In via `expo-web-browser` deep-link flow — see §11 |
@@ -1686,8 +1696,8 @@ Side services (called from backend):
 | `mobile/assets/splash-icon.png` | Real logo — full mark + "LocalsIndia" wordmark + tagline, shown on the orange splash background |
 | `mobile/assets/logo-mark-transparent.png` | Logo mark with white chroma-keyed to transparent — used inside app UI (HomeScreen hero, LoginScreen) so it sits cleanly on colored/dark backgrounds |
 
-**EAS Build (Play Store pipeline, added 2026-06-16):** `eas build --platform android --profile preview|production` from `mobile/`. Build dashboard: `https://expo.dev/accounts/rajeshguntupalli59/projects/localsindia/builds/`. **Update 2026-07-15:** already submitted and live on the Play Store Internal Testing track (versionCode 4, commit `a34006e`). **That build is now stale** — it predates the proximity search/location posting, search fix, splash screen, and the push notification client fix (all `2026-07-16`). A new build is the next step before promoting past Internal Testing.
+**EAS Build (Play Store pipeline, added 2026-06-16):** `eas build --platform android --profile preview|production` from `mobile/`. Build dashboard: `https://expo.dev/accounts/rajeshguntupalli59/projects/localsindia/builds/`. **Update 2026-07-15:** already submitted and live on the Play Store Internal Testing track (versionCode 4, commit `a34006e`). **That build is now stale** — it predates the proximity search/location posting, search fix, splash screen, and the push notification client fix (all `2026-07-16`). A new build is the next step before promoting past Internal Testing. **Update 2026-07-18:** the gap has grown — the last actual *production-profile* build (versionCode 6, commit `1014006`) also predates the referral system (App Links capture + InviteScreen, commit `ce2ee31`), the Business Directory mobile screens, and the category-icon/member-since fixes. The next build needs to bundle all of it, not just the referral feature. `assetlinks.json`'s SHA-256 is already fixed (commit `3015c0a`) and live on the web, but Android verifies App Links at install time — so it only takes effect once a new build actually ships.
 
 ---
 
-*Updated: 2026-06-16 | LocalIndia v3 -- hybrid SSR migration, admin role management, business soft-delete, mobile Google Sign-In + admin panel + EAS Play Store pipeline + real logo assets + safe-area bottom nav fix*
+*Updated: 2026-07-18 | Two-sided referral system (§5 users table, §6 Auth endpoints, §8 /invite page, §9 ReferralCapture component, §18 mobile App.tsx/LoginScreen/ProfileScreen/InviteScreen) — commits `1f7243c` (backend+web) and `ce2ee31` (mobile); real Play Console App Signing SHA-256 added to assetlinks.json, commit `3015c0a`. ⚠️ This pass only closes the referral-system gap specifically — several earlier feature passes (2026-07-12 through 2026-07-17: password auth rework, buyer requests, proximity search, business directory mobile parity, push notifications, error tracking) are still only reflected in `ARCHITECTURE_INDEX.md`, not fully backfilled into this file's narrative sections yet. Previous update: 2026-06-16 | LocalIndia v3 -- hybrid SSR migration, admin role management, business soft-delete, mobile Google Sign-In + admin panel + EAS Play Store pipeline + real logo assets + safe-area bottom nav fix*
