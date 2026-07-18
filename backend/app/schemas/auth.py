@@ -1,7 +1,7 @@
 import re
 import uuid
 from datetime import datetime
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field, field_validator
 
 PHONE_RE = re.compile(r"^\+91[6-9]\d{9}$")
 
@@ -20,6 +20,7 @@ class OtpSendRequest(BaseModel):
 class OtpVerifyRequest(BaseModel):
     phone: str
     otp: str
+    ref_code: str | None = Field(default=None, max_length=12)
 
     @field_validator("phone")
     @classmethod
@@ -78,6 +79,7 @@ class UserOut(BaseModel):
     lang_pref: str
     listing_count: int = 0
     created_at: datetime
+    referral_code: str | None = None
 
     model_config = {"from_attributes": True}
 

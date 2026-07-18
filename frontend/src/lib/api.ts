@@ -171,7 +171,7 @@ export const api = {
         method: 'POST',
         body: JSON.stringify({ phone }),
       }),
-    verifyOtp: (data: { phone: string; otp: string }) =>
+    verifyOtp: (data: { phone: string; otp: string; ref_code?: string }) =>
       req<OtpVerifyResult>('/api/v1/auth/otp/verify', {
         method: 'POST',
         body: JSON.stringify(data),
@@ -181,6 +181,8 @@ export const api = {
         method: 'POST',
         body: JSON.stringify({ setup_token: setupToken, password }),
       }),
+    getMe: (token: string) =>
+      req<User>('/api/v1/auth/me', { token }),
     updateProfile: (data: { name?: string }, token: string) =>
       req<User>('/api/v1/auth/me', {
         method: 'PATCH',

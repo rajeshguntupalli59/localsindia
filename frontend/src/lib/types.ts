@@ -67,6 +67,7 @@ export interface User {
   avatar_url: string | null;
   role: 'user' | 'admin';
   is_active: boolean;
+  referral_code?: string | null;
 }
 
 export interface AuthTokens {

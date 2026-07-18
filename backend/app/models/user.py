@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime, timezone
-from sqlalchemy import String, Boolean, ForeignKey, CheckConstraint, Index, DateTime
+from sqlalchemy import String, Boolean, Integer, ForeignKey, CheckConstraint, Index, DateTime
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import UUID
 from app.core.database import Base
@@ -21,6 +21,11 @@ class User(Base):
     )
     lang_pref: Mapped[str] = mapped_column(String(10), nullable=False, default="en")
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    referral_code: Mapped[str | None] = mapped_column(String(12), unique=True, nullable=True)
+    referred_by_user_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
+    referral_rewards_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updated_at: Mapped[datetime] = mapped_column(
@@ -36,4 +41,5 @@ class User(Base):
             name="ck_users_lang_pref",
         ),
         Index("idx_users_city", "city_id"),
+        Index("idx_users_referral_code", "referral_code"),
     )

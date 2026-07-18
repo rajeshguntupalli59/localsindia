@@ -6,6 +6,9 @@ from pydantic import BaseModel
 from sqlalchemy import select, func, distinct, cast, Date
 from sqlalchemy.ext.asyncio import AsyncSession
 
+REFERRAL_REWARD_CAP = 20
+REFERRAL_FEATURED_DAYS = 3
+
 PLACEHOLDER_URLS = [
     "https://placehold.co/400x300/f97316/white?text=LocalsIndia",
     "https://placehold.co/400x300/3b82f6/white?text=LocalsIndia",
@@ -87,6 +90,55 @@ async def approve_listing(
     listing.status = "active"
     await db.commit()
     await db.refresh(listing)
+
+    # Referral reward: fires once, only on the referred user's FIRST approved
+    # listing (not bare signup) — matches the anti-gaming pattern used by
+    # Urban Company/OYO. Never blocks the approval itself if anything here fails.
+    try:
+        referred_result = await db.execute(select(User).where(User.id == listing.user_id))
+        referred_user = referred_result.scalar_one_or_none()
+        if referred_user and referred_user.referred_by_user_id:
+            other_active = await db.scalar(
+                select(func.count()).select_from(Listing).where(
+                    Listing.user_id == referred_user.id,
+                    Listing.status == "active",
+                    Listing.id != listing.id,
+                    Listing.deleted_at.is_(None),
+                )
+            )
+            if other_active == 0:
+                referrer_result = await db.execute(
+                    select(User).where(User.id == referred_user.referred_by_user_id)
+                )
+                referrer = referrer_result.scalar_one_or_none()
+                if referrer and referrer.is_active and referrer.referral_rewards_count < REFERRAL_REWARD_CAP:
+                    now = datetime.now(timezone.utc)
+                    featured_until = now + timedelta(days=REFERRAL_FEATURED_DAYS)
+
+                    listing.is_featured = True
+                    listing.featured_at = now
+                    listing.featured_until = featured_until
+
+                    referrer_listing_result = await db.execute(
+                        select(Listing)
+                        .where(
+                            Listing.user_id == referrer.id,
+                            Listing.status == "active",
+                            Listing.deleted_at.is_(None),
+                        )
+                        .order_by(Listing.created_at.desc())
+                        .limit(1)
+                    )
+                    referrer_listing = referrer_listing_result.scalar_one_or_none()
+                    if referrer_listing:
+                        referrer_listing.is_featured = True
+                        referrer_listing.featured_at = now
+                        referrer_listing.featured_until = featured_until
+
+                    referrer.referral_rewards_count += 1
+                    await db.commit()
+    except Exception:
+        pass  # reward is a bonus side-effect; never block the core approve action
 
     # In-app notification + email to listing owner
     try:
@@ -409,6 +461,19 @@ async def get_platform_stats(
     saves_total = await db.scalar(select(func.count()).select_from(SavedListing))
     reviews_total = await db.scalar(select(func.count()).select_from(ListingReview))
 
+    # Referrals — only visibility into the referral system (no dashboard by design)
+    referred_signups_total = await db.scalar(
+        select(func.count()).select_from(User)
+        .where(User.referred_by_user_id.isnot(None), User.deleted_at.is_(None))
+    )
+    referral_rewards_total = await db.scalar(
+        select(func.coalesce(func.sum(User.referral_rewards_count), 0)).select_from(User)
+    )
+    referrers_at_cap = await db.scalar(
+        select(func.count()).select_from(User)
+        .where(User.referral_rewards_count >= REFERRAL_REWARD_CAP)
+    )
+
     return {
         "users": {
             "total": users_total or 0,
@@ -445,6 +510,11 @@ async def get_platform_stats(
             "reports": reports_total or 0,
             "saves": saves_total or 0,
             "reviews": reviews_total or 0,
+        },
+        "referrals": {
+            "signups": referred_signups_total or 0,
+            "rewards_granted": int(referral_rewards_total or 0),
+            "referrers_at_cap": referrers_at_cap or 0,
         },
         "system": {
             "chatbot_key_set": bool(settings.GOOGLE_AI_KEY),

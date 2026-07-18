@@ -107,7 +107,8 @@ function LoginInner() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await api.auth.verifyOtp({ phone, otp });
+      const refCode = localStorage.getItem('li_ref_code') ?? undefined;
+      const res = await api.auth.verifyOtp({ phone, otp, ref_code: refCode });
       if (res.has_password) {
         toast.error('This number already has an account. Please sign in with your password.');
         setMode('signin');

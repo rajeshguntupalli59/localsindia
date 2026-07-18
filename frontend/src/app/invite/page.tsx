@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { MessageCircle, Copy, Star, Users, ArrowRight, Check } from 'lucide-react';
+import { MessageCircle, Copy, Star, Users, ArrowRight, Check, LogIn } from 'lucide-react';
 import { toast } from 'sonner';
+import { api } from '@/lib/api';
 import SiteHeader from '@/components/site-header/SiteHeader';
 import SiteFooter from '@/components/site-footer/SiteFooter';
 
@@ -22,9 +23,22 @@ const CITIES = [
 export default function InvitePage() {
   const [selectedCity, setSelectedCity] = useState('hyderabad');
   const [copied, setCopied] = useState(false);
+  const [referralCode, setReferralCode] = useState<string | null>(null);
+  const [loadingCode, setLoadingCode] = useState(true);
+
+  useEffect(() => {
+    const token = localStorage.getItem('access_token');
+    if (!token) { setLoadingCode(false); return; }
+    api.auth.getMe(token)
+      .then(me => setReferralCode(me.referral_code ?? null))
+      .catch(() => { /* not logged in / token expired — treated as guest below */ })
+      .finally(() => setLoadingCode(false));
+  }, []);
 
   const cityName = CITIES.find(c => c.slug === selectedCity)?.name ?? selectedCity;
-  const cityUrl = `https://www.localsindia.com/${selectedCity}`;
+  const cityUrl = referralCode
+    ? `https://www.localsindia.com/${selectedCity}?ref=${referralCode}`
+    : `https://www.localsindia.com/${selectedCity}`;
 
   const waMessage = `Hey! I found this amazing free platform for local listings in ${cityName} 👇\n\n📢 LocalsIndia — India's free classifieds, WhatsApp-first\n✅ Post listings for free\n✅ No spam calls (WhatsApp only)\n✅ Works in Telugu, Hindi & more\n\nCheck it out: ${cityUrl}\n\nYou can list your business, sell stuff, find PG rooms, post jobs — all free!`;
 
@@ -88,7 +102,23 @@ export default function InvitePage() {
           </div>
         </div>
 
-        {/* Message preview */}
+        {/* Message preview + share — gated on login, since the link needs the
+            sharer's own referral code to attribute anything */}
+        {loadingCode ? null : !referralCode ? (
+          <div className="bg-white rounded-3xl p-8 border mb-8 text-center" style={{ borderColor: 'var(--li-border)' }}>
+            <LogIn className="w-8 h-8 mx-auto mb-3" style={{ color: 'var(--li-primary)' }} />
+            <p className="font-bold text-sm mb-1" style={{ color: 'var(--li-text)' }}>Sign in to get your personal invite link</p>
+            <p className="text-xs mb-5" style={{ color: 'var(--li-muted)' }}>Your own link lets us give you credit when someone you invite joins.</p>
+            <Link
+              href="/auth/login"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-white font-bold text-sm"
+              style={{ background: 'var(--li-primary)' }}
+            >
+              Sign In <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        ) : (
+        <>
         <div className="bg-white rounded-3xl p-6 border mb-5" style={{ borderColor: 'var(--li-border)' }}>
           <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--li-muted)' }}>Your invite message</p>
           <div
@@ -121,6 +151,8 @@ export default function InvitePage() {
             {copied ? 'Copied!' : `Copy link — ${cityUrl}`}
           </button>
         </div>
+        </>
+        )}
 
         {/* Stats / social proof */}
         <div className="grid grid-cols-3 gap-4 mb-8">

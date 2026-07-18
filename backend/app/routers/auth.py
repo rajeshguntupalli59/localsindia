@@ -1,5 +1,6 @@
 import logging
 import re
+import secrets
 import urllib.parse
 from datetime import datetime, timezone, timedelta
 
@@ -162,6 +163,16 @@ async def send_otp(body: OtpSendRequest, db: AsyncSession = Depends(get_db)):
     return {"message": "OTP sent successfully", "expires_in": OTP_EXPIRE_MINUTES * 60}
 
 
+async def _generate_referral_code(db: AsyncSession) -> str:
+    """8-char uppercase code, retried on the astronomically rare collision."""
+    for _ in range(5):
+        code = secrets.token_hex(4).upper()
+        exists = await db.execute(select(User.id).where(User.referral_code == code))
+        if not exists.scalar_one_or_none():
+            return code
+    raise HTTPException(status_code=500, detail="Could not generate a referral code. Try again.")
+
+
 @router.post("/otp/verify", response_model=OtpVerifyResponse)
 async def verify_otp(body: OtpVerifyRequest, db: AsyncSession = Depends(get_db)):
     phone = body.phone
@@ -204,6 +215,14 @@ async def verify_otp(body: OtpVerifyRequest, db: AsyncSession = Depends(get_db))
     is_new = False
     if not user:
         user = User(phone=phone, name=phone)  # name updated on profile setup
+        user.referral_code = await _generate_referral_code(db)
+        if body.ref_code:
+            referrer = await db.execute(
+                select(User).where(User.referral_code == body.ref_code.upper())
+            )
+            referrer_user = referrer.scalar_one_or_none()
+            if referrer_user:
+                user.referred_by_user_id = referrer_user.id
         db.add(user)
         is_new = True
     elif not user.is_active:
@@ -316,6 +335,13 @@ async def get_me(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    # Lazily backfill referral codes for users who signed up before this
+    # feature existed — no migration/backfill script needed, self-operating.
+    if not current_user.referral_code:
+        current_user.referral_code = await _generate_referral_code(db)
+        await db.commit()
+        await db.refresh(current_user)
+
     out = UserOut.model_validate(current_user)
     count_result = await db.execute(
         select(func.count()).select_from(Listing).where(

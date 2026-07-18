@@ -7,6 +7,7 @@ import ServiceWorker from '@/components/pwa/ServiceWorker';
 import ChatWidget from '@/components/chat-widget/ChatWidget';
 import OnboardingGate from '@/components/onboarding-quiz/OnboardingGate';
 import ContextualPrompt from '@/components/contextual-prompt/ContextualPrompt';
+import ReferralCapture from '@/components/referral-capture/ReferralCapture';
 import { PrefsProvider } from '@/context/PrefsContext';
 import { cn } from '@/lib/utils';
 import Script from 'next/script';
@@ -108,6 +109,7 @@ export default async function RootLayout({
           <ChatWidget />
           <OnboardingGate />
           <ContextualPrompt />
+          <ReferralCapture />
         </NextIntlClientProvider>
       </body>
     </html>
