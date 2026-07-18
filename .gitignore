@@ -44,3 +44,7 @@ logs/
 pgdata/
 .railway/
 .gstack/
+
+# Local dev tool caches (generated, not source)
+.codegraph/
+graphify-out/
