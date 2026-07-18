@@ -15,9 +15,10 @@ import type {
   Review,
   SellerProfile,
   BuyerRequestOut,
+  BusinessAnalytics,
 } from './types';
 
-export type { User, Event, Business, Review };
+export type { User, Event, Business, Review, BusinessAnalytics };
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend.azurewebsites.net';
 
@@ -215,6 +216,12 @@ export const api = {
       req<Business>(`/api/v1/businesses/${id}/claim`, { method: 'POST', token }),
     addReview: (id: string, data: { rating: number; body?: string }, token: string) =>
       req<Review>(`/api/v1/businesses/${id}/reviews`, { method: 'POST', body: JSON.stringify(data), token }),
+    view: (id: string) =>
+      req<void>(`/api/v1/businesses/${id}/view`, { method: 'POST' }).catch(() => {}),
+    waClick: (id: string) =>
+      req<void>(`/api/v1/businesses/${id}/wa-click`, { method: 'POST' }).catch(() => {}),
+    analytics: (id: string, token: string) =>
+      req<BusinessAnalytics>(`/api/v1/analytics/business/${id}`, { token }),
   },
   users: {
     publicProfile: (userId: string) =>

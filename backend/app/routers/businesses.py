@@ -12,6 +12,7 @@ from app.models.business import Business
 from app.models.city import City
 from app.models.review import Review
 from app.models.user import User
+from app.models.analytics_event import AnalyticsEvent
 from app.schemas.business import BusinessCreate, BusinessOut, BusinessUpdate, ReviewCreate, ReviewOut
 
 router = APIRouter(prefix="/api/v1", tags=["businesses"])
@@ -185,3 +186,25 @@ async def add_review(
     await db.commit()
     await db.refresh(review)
     return review
+
+
+@router.post("/businesses/{business_id}/view", status_code=204)
+async def record_business_view(business_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
+    """Fire-and-forget: logs a view event for the owner's analytics dashboard."""
+    result = await db.execute(
+        select(Business.id).where(Business.id == business_id, Business.deleted_at.is_(None))
+    )
+    if result.scalar_one_or_none():
+        db.add(AnalyticsEvent(business_id=business_id, event_type="view"))
+        await db.commit()
+
+
+@router.post("/businesses/{business_id}/wa-click", status_code=204)
+async def record_business_wa_click(business_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
+    """Fire-and-forget: logs a WhatsApp-click event for the owner's analytics dashboard."""
+    result = await db.execute(
+        select(Business.id).where(Business.id == business_id, Business.deleted_at.is_(None))
+    )
+    if result.scalar_one_or_none():
+        db.add(AnalyticsEvent(business_id=business_id, event_type="whatsapp_click"))
+        await db.commit()

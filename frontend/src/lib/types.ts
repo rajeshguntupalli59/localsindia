@@ -141,6 +141,20 @@ export interface Business {
   reviews?: Review[];
 }
 
+export interface BusinessAnalyticsTrendPoint {
+  date: string;
+  views: number;
+  whatsapp_clicks: number;
+}
+
+export interface BusinessAnalytics {
+  views_30d: number;
+  whatsapp_clicks_30d: number;
+  review_count: number;
+  avg_rating: number;
+  daily_trend: BusinessAnalyticsTrendPoint[];
+}
+
 export interface SellerProfile {
   id: string;
   name: string | null;

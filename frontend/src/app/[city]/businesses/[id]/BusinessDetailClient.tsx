@@ -60,7 +60,10 @@ export default function BusinessDetailPage() {
 
   useEffect(() => {
     api.businesses.get(businessId)
-      .then(setBusiness)
+      .then(b => {
+        setBusiness(b);
+        api.businesses.view(businessId); // fire-and-forget view count
+      })
       .catch(() => router.push(`/${citySlug}/businesses`))
       .finally(() => setLoading(false));
   }, [businessId, citySlug, router]);
@@ -239,6 +242,7 @@ export default function BusinessDetailPage() {
                 href={business.whatsapp_url}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => api.businesses.waClick(businessId)}
                 className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-white font-semibold text-sm"
                 style={{ background: '#25D366' }}
               >
@@ -257,6 +261,16 @@ export default function BusinessDetailPage() {
               </Button>
             )}
           </div>
+
+          {/* Analytics dashboard link — shown once the business has an owner on record */}
+          {business.owner_id && (
+            <Link
+              href={`/${citySlug}/businesses/${businessId}/dashboard`}
+              className="mt-3 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+            >
+              View Analytics
+            </Link>
+          )}
 
           {/* Get Verified CTA — shown to owner if not yet verified */}
           {business.owner_id && !business.verified && (

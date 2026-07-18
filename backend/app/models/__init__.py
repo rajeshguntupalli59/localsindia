@@ -12,9 +12,10 @@ from app.models.listing_review import ListingReview
 from app.models.buyer_request import BuyerRequest
 from app.models.app_error_log import AppErrorLog
 from app.models.device_token import DeviceToken
+from app.models.analytics_event import AnalyticsEvent
 
 __all__ = [
     "City", "User", "Category", "Listing", "ListingImage",
     "Event", "Business", "Review", "Report", "OtpRequest", "ListingReview",
-    "BuyerRequest", "AppErrorLog", "DeviceToken",
+    "BuyerRequest", "AppErrorLog", "DeviceToken", "AnalyticsEvent",
 ]
