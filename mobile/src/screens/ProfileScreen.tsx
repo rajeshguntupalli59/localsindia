@@ -193,6 +193,7 @@ export default function ProfileScreen({ navigation }: any) {
             <Text style={styles.sectionLabel}>LISTINGS</Text>
             <MenuItem icon="list-outline" label="My Listings" onPress={() => navigation.navigate('MyListings')} badge={listingCount} />
             <MenuItem icon="heart-outline" label="Saved Listings" onPress={() => navigation.navigate('Saved')} badge={savedCount} />
+            <MenuItem icon="gift-outline" label="Invite Friends" onPress={() => navigation.navigate('Invite')} />
           </View>
 
           <View style={styles.menuSection}>

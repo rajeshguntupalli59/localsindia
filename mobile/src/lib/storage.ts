@@ -45,6 +45,8 @@ export const storage = {
     const raw = await getItem('city');
     return raw ? JSON.parse(raw) : null;
   },
+  setReferralRefCode: (code: string) => setItem('li_ref_code', code),
+  getReferralRefCode: () => getItem('li_ref_code'),
   recentlyViewed: {
     get: async (citySlug: string): Promise<any[]> => {
       try {

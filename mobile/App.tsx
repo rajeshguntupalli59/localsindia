@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { View, Text } from 'react-native';
+import * as ExpoLinking from 'expo-linking';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -25,6 +26,7 @@ import BusinessDetailScreen from './src/screens/BusinessDetailScreen';
 import BusinessesScreen from './src/screens/BusinessesScreen';
 import EditProfileScreen from './src/screens/EditProfileScreen';
 import EditListingScreen from './src/screens/EditListingScreen';
+import InviteScreen from './src/screens/InviteScreen';
 import SplashScreen from './src/screens/SplashScreen';
 import ErrorBoundary from './src/components/ErrorBoundary';
 import { storage } from './src/lib/storage';
@@ -148,6 +150,23 @@ export default function App() {
     checkAuth();
   }, []);
 
+  // Captures ?ref=CODE from an App Links open (cold start or already-running)
+  // and persists it so it survives navigation to signup — invite links point
+  // at a city page, not directly at the login screen.
+  useEffect(() => {
+    const captureRef = (url: string | null) => {
+      if (!url) return;
+      try {
+        const { queryParams } = ExpoLinking.parse(url);
+        const ref = queryParams?.ref;
+        if (typeof ref === 'string' && ref) storage.setReferralRefCode(ref);
+      } catch { /* malformed URL — ignore */ }
+    };
+    ExpoLinking.getInitialURL().then(captureRef);
+    const sub = ExpoLinking.addEventListener('url', ({ url }) => captureRef(url));
+    return () => sub.remove();
+  }, []);
+
   const checkAuth = async () => {
     const token = await storage.getAccessToken();
     if (!token) {
@@ -204,6 +223,7 @@ export default function App() {
               <Stack.Screen name="Businesses" component={BusinessesScreen} />
               <Stack.Screen name="EditProfile" component={EditProfileScreen} />
               <Stack.Screen name="EditListing" component={EditListingScreen} />
+              <Stack.Screen name="Invite" component={InviteScreen} />
             </Stack.Navigator>
           </NavigationContainer>
         </SavedProvider>

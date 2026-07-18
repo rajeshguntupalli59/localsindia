@@ -113,7 +113,8 @@ export default function LoginScreen({ navigation }: any) {
     if (otp.length < 6) { Alert.alert('Invalid OTP', 'Enter the 6-digit code.'); return; }
     setLoading(true);
     try {
-      const data = await authApi.verifyOtp(`+91${phone}`, otp);
+      const refCode = await storage.getReferralRefCode();
+      const data = await authApi.verifyOtp(`+91${phone}`, otp, refCode);
       if (data.has_password) {
         Alert.alert('Already registered', 'This number already has an account. Please sign in with your password.');
         setMode('signin');
