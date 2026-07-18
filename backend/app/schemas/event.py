@@ -12,6 +12,7 @@ class EventCreate(BaseModel):
     category_id: uuid.UUID | None = None
     is_free: bool = True
     ticket_url: str | None = None
+    ticket_price: float | None = None
 
     @field_validator("title")
     @classmethod
@@ -35,6 +36,7 @@ class EventUpdate(BaseModel):
     event_date: datetime | None = None
     is_free: bool | None = None
     ticket_url: str | None = None
+    ticket_price: float | None = None
     status: str | None = None
 
 
@@ -46,6 +48,7 @@ class EventOut(BaseModel):
     event_date: datetime
     is_free: bool
     ticket_url: str | None
+    ticket_price: float | None
     status: str
     city_id: uuid.UUID
     user_id: uuid.UUID

@@ -16,9 +16,10 @@ import type {
   SellerProfile,
   BuyerRequestOut,
   BusinessAnalytics,
+  Ticket,
 } from './types';
 
-export type { User, Event, Business, Review, BusinessAnalytics };
+export type { User, Event, Business, Review, BusinessAnalytics, Ticket };
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend.azurewebsites.net';
 
@@ -203,6 +204,19 @@ export const api = {
       req<Event>(`/api/v1/events/${id}`, { method: 'PATCH', body: JSON.stringify(data), token }),
     delete: (id: string, token: string) =>
       req<void>(`/api/v1/events/${id}`, { method: 'DELETE', token }),
+  },
+  tickets: {
+    createOrder: (eventId: string, token: string) =>
+      req<{ order_id: string; amount: number; currency: string; key_id: string; event_id: string }>(
+        '/api/v1/tickets/create-order',
+        { method: 'POST', body: JSON.stringify({ event_id: eventId }), token },
+      ),
+    verify: (
+      data: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string; event_id: string },
+      token: string,
+    ) => req<Ticket>('/api/v1/tickets/verify', { method: 'POST', body: JSON.stringify(data), token }),
+    get: (id: string, token: string) => req<Ticket>(`/api/v1/tickets/${id}`, { token }),
+    my: (token: string) => req<Ticket[]>('/api/v1/tickets/my', { token }),
   },
   businesses: {
     list: (citySlug: string, params?: Record<string, string>) =>

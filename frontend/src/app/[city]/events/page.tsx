@@ -68,13 +68,17 @@ function EventCard({ event }: { event: Event }) {
       <p className="text-sm text-slate-600 mt-3 line-clamp-2">{event.description}</p>
 
       <div className="mt-4">
-        {event.is_free ? (
+        {event.is_free || event.ticket_price ? (
           <Link
             href={`/events/${event.id}`}
             className="inline-flex items-center gap-1.5 text-sm font-semibold px-4 py-2 rounded-xl border-2 transition-colors"
             style={{ borderColor: 'var(--li-primary)', color: 'var(--li-primary)' }}
           >
-            View Details
+            {event.is_free ? 'View Details' : (
+              <>
+                <Ticket className="w-3.5 h-3.5" /> Buy Ticket
+              </>
+            )}
           </Link>
         ) : (
           <a

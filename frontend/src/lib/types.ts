@@ -106,11 +106,25 @@ export interface Event {
   event_date: string;
   is_free: boolean;
   ticket_url: string | null;
+  ticket_price: number | null;
   status: string;
   city_id: string;
   user_id: string;
   category_id: string | null;
   created_at: string;
+}
+
+export interface Ticket {
+  id: string;
+  event_id: string;
+  amount: number;
+  qr_token: string;
+  qr_image: string;
+  used_at: string | null;
+  created_at: string;
+  event_title: string;
+  event_venue: string;
+  event_date: string;
 }
 
 export interface Review {

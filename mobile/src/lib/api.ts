@@ -163,6 +163,9 @@ export const adminApi = {
 
   rejectListing: (id: string) =>
     api.patch(`/admin/listings/${id}/reject`).then(r => r.data),
+
+  scanTicket: (qrToken: string) =>
+    api.post('/admin/tickets/scan', { qr_token: qrToken }).then(r => r.data),
 };
 
 export const chatApi = {
@@ -243,6 +246,39 @@ export const businessesApi = {
 
   submitReview: (businessId: string, data: { rating: number; body: string }) =>
     api.post(`/businesses/${businessId}/reviews`, data).then(r => r.data),
+};
+
+export const eventsApi = {
+  list: (citySlug: string) =>
+    api.get('/events', { params: { city_slug: citySlug } }).then(r => r.data),
+
+  getById: (id: string) =>
+    api.get(`/events/${id}`).then(r => r.data),
+
+  create: (data: {
+    title: string;
+    description: string;
+    venue: string;
+    event_date: string;
+    city_id: string;
+    is_free: boolean;
+    ticket_url?: string | null;
+    ticket_price?: number | null;
+  }) => api.post('/events', data).then(r => r.data),
+};
+
+export const ticketsApi = {
+  createOrder: (eventId: string) =>
+    api.post('/tickets/create-order', { event_id: eventId }).then(r => r.data),
+
+  verify: (data: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string; event_id: string }) =>
+    api.post('/tickets/verify', data).then(r => r.data),
+
+  getById: (id: string) =>
+    api.get(`/tickets/${id}`).then(r => r.data),
+
+  my: () =>
+    api.get('/tickets/my').then(r => r.data),
 };
 
 export default api;

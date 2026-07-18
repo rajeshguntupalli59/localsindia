@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy import select, func, distinct, cast, Date
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 REFERRAL_REWARD_CAP = 20
 REFERRAL_FEATURED_DAYS = 3
@@ -24,11 +25,13 @@ from app.models.business import Business
 from app.models.event import Event
 from app.models.listing import Listing
 from app.models.report import Report
+from app.models.ticket import Ticket
 from app.models.user import User
 from app.schemas.business import BusinessOut
 from app.schemas.error_log import ErrorLogGroup
 from app.schemas.event import EventOut
 from app.schemas.listing import ListingOut
+from app.schemas.ticket import TicketScanRequest, TicketScanResponse
 
 
 class RoleUpdate(BaseModel):
@@ -650,3 +653,39 @@ async def list_reports(
         }
         for r in reports
     ]
+
+
+@router.post("/tickets/scan", response_model=TicketScanResponse)
+async def scan_ticket(
+    body: TicketScanRequest,
+    db: AsyncSession = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+):
+    result = await db.execute(
+        select(Ticket)
+        .options(selectinload(Ticket.event))
+        .where(Ticket.qr_token == body.qr_token)
+    )
+    ticket = result.scalar_one_or_none()
+    if not ticket:
+        raise HTTPException(status_code=404, detail="Invalid ticket.")
+    if ticket.used_at is not None:
+        raise HTTPException(
+            status_code=409,
+            detail=f"Ticket already used at {ticket.used_at.isoformat()}.",
+        )
+
+    ticket.used_at = datetime.now(timezone.utc)
+    await db.commit()
+    await db.refresh(ticket)
+
+    attendee_result = await db.execute(select(User.name).where(User.id == ticket.user_id))
+    attendee_name = attendee_result.scalar_one_or_none()
+
+    return TicketScanResponse(
+        status="valid",
+        ticket_id=ticket.id,
+        event_title=ticket.event.title,
+        attendee_name=attendee_name,
+        used_at=ticket.used_at,
+    )

@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime, timezone
-from sqlalchemy import String, Text, Boolean, ForeignKey, CheckConstraint, Index, DateTime
+from sqlalchemy import String, Text, Boolean, Numeric, ForeignKey, CheckConstraint, Index, DateTime
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import UUID
 from app.core.database import Base
@@ -25,6 +25,7 @@ class Event(Base):
     event_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     is_free: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     ticket_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    ticket_price: Mapped[float | None] = mapped_column(Numeric(10, 2), nullable=True)
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="pending")
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))

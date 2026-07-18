@@ -79,6 +79,7 @@ async def create_event(
         event_date=payload.event_date,
         is_free=payload.is_free,
         ticket_url=payload.ticket_url,
+        ticket_price=payload.ticket_price,
         status="pending",
     )
     db.add(event)

@@ -338,6 +338,20 @@ export default function HomeScreen({ navigation }: any) {
           <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.85)" />
         </TouchableOpacity>
 
+        {/* ── Events promo — separate from category grid ── */}
+        <TouchableOpacity
+          style={styles.eventsPromo}
+          onPress={() => navigation.navigate('Events', { citySlug, cityName })}
+          activeOpacity={0.88}
+        >
+          <Ionicons name="calendar" size={22} color="white" />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.eventsPromoTitle}>What's happening in {cityName}?</Text>
+            <Text style={styles.eventsPromoDesc}>Browse local events and grab a ticket in-app</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.85)" />
+        </TouchableOpacity>
+
         <View style={{ height: 32 }} />
       </ScrollView>
 
@@ -578,6 +592,18 @@ const styles = StyleSheet.create({
   },
   bizPromoTitle: { color: 'white', fontWeight: '700', fontSize: 14 },
   bizPromoDesc: { color: 'rgba(255,255,255,0.85)', fontSize: 11.5, marginTop: 2, lineHeight: 15 },
+  eventsPromo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginHorizontal: 16,
+    marginTop: 12,
+    padding: 14,
+    borderRadius: 14,
+    backgroundColor: '#ec4899',
+  },
+  eventsPromoTitle: { color: 'white', fontWeight: '700', fontSize: 14 },
+  eventsPromoDesc: { color: 'rgba(255,255,255,0.85)', fontSize: 11.5, marginTop: 2, lineHeight: 15 },
 
   /* ── Chat FAB ── */
   chatFab: {

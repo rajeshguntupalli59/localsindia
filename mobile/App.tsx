@@ -28,6 +28,11 @@ import EditProfileScreen from './src/screens/EditProfileScreen';
 import EditListingScreen from './src/screens/EditListingScreen';
 import InviteScreen from './src/screens/InviteScreen';
 import SplashScreen from './src/screens/SplashScreen';
+import EventsScreen from './src/screens/EventsScreen';
+import EventDetailScreen from './src/screens/EventDetailScreen';
+import TicketScreen from './src/screens/TicketScreen';
+import MyTicketsScreen from './src/screens/MyTicketsScreen';
+import AdminScanTicketsScreen from './src/screens/AdminScanTicketsScreen';
 import ErrorBoundary from './src/components/ErrorBoundary';
 import { storage } from './src/lib/storage';
 import { registerForPushNotificationsAsync } from './src/lib/pushNotifications';
@@ -224,6 +229,11 @@ export default function App() {
               <Stack.Screen name="EditProfile" component={EditProfileScreen} />
               <Stack.Screen name="EditListing" component={EditListingScreen} />
               <Stack.Screen name="Invite" component={InviteScreen} />
+              <Stack.Screen name="Events" component={EventsScreen} />
+              <Stack.Screen name="EventDetail" component={EventDetailScreen} />
+              <Stack.Screen name="Ticket" component={TicketScreen} />
+              <Stack.Screen name="MyTickets" component={MyTicketsScreen} />
+              <Stack.Screen name="AdminScanTickets" component={AdminScanTicketsScreen} />
             </Stack.Navigator>
           </NavigationContainer>
         </SavedProvider>

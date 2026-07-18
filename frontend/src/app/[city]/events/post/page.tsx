@@ -25,6 +25,7 @@ export default function PostEventPage() {
     event_date: '',
     is_free: true,
     ticket_url: '',
+    ticket_price: '',
   });
 
   useEffect(() => {
@@ -50,6 +51,7 @@ export default function PostEventPage() {
           city_id: city.id,
           is_free: form.is_free,
           ticket_url: form.is_free ? null : form.ticket_url || null,
+          ticket_price: form.is_free ? null : (form.ticket_price ? Number(form.ticket_price) : null),
         },
         token,
       );
@@ -155,15 +157,32 @@ export default function PostEventPage() {
             </div>
 
             {!form.is_free && (
-              <div className="space-y-1.5">
-                <Label>Ticket URL</Label>
-                <Input
-                  type="url"
-                  placeholder="https://bookmyshow.com/..."
-                  value={form.ticket_url}
-                  onChange={e => setForm(p => ({ ...p, ticket_url: e.target.value }))}
-                />
-              </div>
+              <>
+                <div className="space-y-1.5">
+                  <Label>Sell tickets in-app (₹)</Label>
+                  <Input
+                    type="number"
+                    min="1"
+                    step="1"
+                    placeholder="e.g. 299"
+                    value={form.ticket_price}
+                    onChange={e => setForm(p => ({ ...p, ticket_price: e.target.value }))}
+                  />
+                  <p className="text-xs text-slate-400">
+                    Buyers pay in-app and get a QR ticket. Leave blank if you&apos;d rather link to an external ticketing site below.
+                  </p>
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Or: External Ticket URL</Label>
+                  <Input
+                    type="url"
+                    placeholder="https://bookmyshow.com/..."
+                    value={form.ticket_url}
+                    onChange={e => setForm(p => ({ ...p, ticket_url: e.target.value }))}
+                    disabled={!!form.ticket_price}
+                  />
+                </div>
+              </>
             )}
 
             <Button

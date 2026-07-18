@@ -3,12 +3,13 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { ClipboardList, CalendarDays, Flag, Users, LayoutDashboard, LogOut, Activity, ShieldCheck } from 'lucide-react';
+import { ClipboardList, CalendarDays, Flag, Users, LayoutDashboard, LogOut, Activity, ShieldCheck, QrCode } from 'lucide-react';
 
 const NAV = [
   { href: '/admin', exact: true, icon: <LayoutDashboard className="w-4 h-4" />, label: 'Dashboard', badge: null },
   { href: '/admin/listings', exact: false, icon: <ClipboardList className="w-4 h-4" />, label: 'Listings', badge: 'pending' },
   { href: '/admin/events', exact: false, icon: <CalendarDays className="w-4 h-4" />, label: 'Events', badge: null },
+  { href: '/admin/events/scan', exact: false, icon: <QrCode className="w-4 h-4" />, label: 'Scan Tickets', badge: null },
   { href: '/admin/reports', exact: false, icon: <Flag className="w-4 h-4" />, label: 'Flagged', badge: 'flagged' },
   { href: '/admin/users', exact: false, icon: <Users className="w-4 h-4" />, label: 'Users', badge: null },
   { href: '/admin/businesses', exact: false, icon: <ShieldCheck className="w-4 h-4" />, label: 'Businesses', badge: null },

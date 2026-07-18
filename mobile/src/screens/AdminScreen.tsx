@@ -174,15 +174,26 @@ export default function AdminScreen({ navigation }: any) {
           <Ionicons name="arrow-back" size={22} color="#111827" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Admin Panel</Text>
-        <TouchableOpacity
-          onPress={onRefresh}
-          style={styles.refreshBtn}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          accessibilityRole="button"
-          accessibilityLabel="Refresh listings"
-        >
-          <Ionicons name="refresh" size={20} color="#6b7280" />
-        </TouchableOpacity>
+        <View style={{ flexDirection: 'row', gap: 4 }}>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('AdminScanTickets')}
+            style={styles.refreshBtn}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            accessibilityRole="button"
+            accessibilityLabel="Scan tickets"
+          >
+            <Ionicons name="qr-code-outline" size={20} color="#6b7280" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={onRefresh}
+            style={styles.refreshBtn}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            accessibilityRole="button"
+            accessibilityLabel="Refresh listings"
+          >
+            <Ionicons name="refresh" size={20} color="#6b7280" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View style={styles.tabRow}>
