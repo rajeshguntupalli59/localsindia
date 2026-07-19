@@ -37,6 +37,15 @@ export default function EventsScreen({ route, navigation }: any) {
         <View style={{ width: 24 }} />
       </View>
 
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={() => navigation.navigate('Main', { screen: 'Post', params: { presetCategory: 'events' } })}
+        activeOpacity={0.85}
+      >
+        <Ionicons name="add-circle-outline" size={18} color="white" />
+        <Text style={styles.addButtonText}>Post an Event</Text>
+      </TouchableOpacity>
+
       {loading ? (
         <ActivityIndicator style={{ marginTop: 40 }} color="#f97316" />
       ) : (
@@ -91,6 +100,12 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1, borderBottomColor: '#f1f5f9',
   },
   headerTitle: { fontSize: 17, fontWeight: '700', color: '#1f2937', flex: 1, textAlign: 'center' },
+  addButton: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
+    backgroundColor: '#ec4899', marginHorizontal: 16, marginTop: 14,
+    paddingVertical: 12, borderRadius: 12,
+  },
+  addButtonText: { color: 'white', fontWeight: '700', fontSize: 14 },
   list: { padding: 16, paddingTop: 14, gap: 10 },
   card: {
     flexDirection: 'row', gap: 12,

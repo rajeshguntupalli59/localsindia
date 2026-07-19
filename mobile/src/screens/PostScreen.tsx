@@ -7,8 +7,9 @@ import { useState, useEffect } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system/legacy';
 import { Ionicons } from '@expo/vector-icons';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { listingsApi, categoriesApi, citiesApi, businessesApi } from '../lib/api';
+import { listingsApi, categoriesApi, citiesApi, businessesApi, eventsApi } from '../lib/api';
 import { storage } from '../lib/storage';
 import { getApproxLocationWithArea } from '../lib/location';
 
@@ -76,6 +77,15 @@ export default function PostScreen({ navigation, route }: any) {
   const [includeLocation, setIncludeLocation] = useState(false);
   const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [locationLoading, setLocationLoading] = useState(false);
+
+  // Event-only fields
+  const [venue, setVenue] = useState('');
+  const [eventDate, setEventDate] = useState<Date | null>(null);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [isEventFree, setIsEventFree] = useState(true);
+  const [ticketPrice, setTicketPrice] = useState('');
+  const [ticketUrl, setTicketUrl] = useState('');
 
   // UI state
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -152,16 +162,43 @@ export default function PostScreen({ navigation, route }: any) {
     }
   };
 
+  const onEventDateChange = (event: any, selected?: Date) => {
+    setShowDatePicker(false);
+    if (event.type === 'dismissed' || !selected) return;
+    setEventDate(prev => {
+      const merged = new Date(selected);
+      if (prev) merged.setHours(prev.getHours(), prev.getMinutes());
+      return merged;
+    });
+    setShowTimePicker(true);
+  };
+
+  const onEventTimeChange = (event: any, selected?: Date) => {
+    setShowTimePicker(false);
+    if (event.type === 'dismissed' || !selected) return;
+    setEventDate(prev => {
+      const base = prev ?? new Date();
+      const merged = new Date(base);
+      merged.setHours(selected.getHours(), selected.getMinutes());
+      return merged;
+    });
+  };
+
   const validateStep0 = () => {
     const e: Record<string, string> = {};
     if (!title.trim() || title.trim().length < 5) e.title = 'Minimum 5 characters';
     if (!categorySlug) e.category = 'Please pick a category';
     if (!description.trim() || description.trim().length < 20) e.description = 'At least 20 characters';
+    if (categorySlug === 'events') {
+      if (!venue.trim() || venue.trim().length < 3) e.venue = 'Minimum 3 characters';
+      if (!eventDate) e.eventDate = 'Please pick a date & time';
+    }
     setErrors(e);
     return Object.keys(e).length === 0;
   };
 
   const validateStep2 = () => {
+    if (categorySlug === 'events') return true; // events have no contact-info step
     const e: Record<string, string> = {};
     if (!/^[6-9]\d{9}$/.test(phone)) e.phone = 'Enter a valid 10-digit Indian mobile number';
     setErrors(e);
@@ -215,6 +252,27 @@ export default function PostScreen({ navigation, route }: any) {
           website_url: websiteUrl.trim() || null,
         });
         navigation.replace('BusinessDetail', { businessId: business.id });
+        return;
+      }
+
+      // "Events" category creates a real Event Calendar entry instead of a
+      // classified. Unlike Businesses, events go into the same admin
+      // moderation queue as listings (status='pending'), so this lands on
+      // the generic "submitted, under review" success screen rather than
+      // navigating straight to the event's own page.
+      if (categorySlug === 'events') {
+        const city = await citiesApi.get(citySlug);
+        await eventsApi.create({
+          title: title.trim(),
+          description: description.trim(),
+          venue: venue.trim(),
+          event_date: eventDate!.toISOString(),
+          city_id: city.id,
+          is_free: isEventFree,
+          ticket_url: isEventFree ? null : (ticketPrice.trim() ? null : (ticketUrl.trim() || null)),
+          ticket_price: isEventFree ? null : (ticketPrice.trim() ? Number(ticketPrice) : null),
+        });
+        setSuccess(true);
         return;
       }
 
@@ -296,6 +354,11 @@ export default function PostScreen({ navigation, route }: any) {
     setImages([]);
     setWebsiteUrl('');
     setSocialUrl('');
+    setVenue('');
+    setEventDate(null);
+    setIsEventFree(true);
+    setTicketPrice('');
+    setTicketUrl('');
     setErrors({});
     setStep(0);
     setSuccess(false);
@@ -308,15 +371,22 @@ export default function PostScreen({ navigation, route }: any) {
         <View style={styles.successIconWrap}>
           <Ionicons name="checkmark" size={48} color="#f97316" />
         </View>
-        <Text style={styles.successTitle}>Listing submitted!</Text>
+        <Text style={styles.successTitle}>{categorySlug === 'events' ? 'Event submitted!' : 'Listing submitted!'}</Text>
         <Text style={styles.successText}>
-          Your listing is under review. We'll activate it shortly — usually within an hour.
+          {categorySlug === 'events'
+            ? "Your event is under review. It'll go live shortly — usually within a few hours."
+            : "Your listing is under review. We'll activate it shortly — usually within an hour."}
         </Text>
         <TouchableOpacity style={styles.doneBtn} onPress={resetForm}>
-          <Text style={styles.doneBtnText}>+ Post Another Listing</Text>
+          <Text style={styles.doneBtnText}>{categorySlug === 'events' ? '+ Post Another Event' : '+ Post Another Listing'}</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.homeLink} onPress={() => navigation.navigate('Home')}>
-          <Text style={styles.homeLinkText}>Back to Home</Text>
+        <TouchableOpacity
+          style={styles.homeLink}
+          onPress={() => categorySlug === 'events'
+            ? navigation.replace('Events', { citySlug, cityName })
+            : navigation.navigate('Home')}
+        >
+          <Text style={styles.homeLinkText}>{categorySlug === 'events' ? 'Back to Events' : 'Back to Home'}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -476,38 +546,123 @@ export default function PostScreen({ navigation, route }: any) {
               {errors.category ? <Text style={[styles.errorText, { marginTop: 8 }]}>{errors.category}</Text> : null}
             </View>
 
-            {/* Price + Area (Price doesn't apply to Businesses — hidden) */}
-            <View style={styles.card}>
-              {categorySlug !== 'businesses' && (
-                <>
-                  <Text style={styles.label}>Price (₹) <Text style={styles.optional}>(optional)</Text></Text>
-                  <View style={styles.priceRow}>
-                    <Text style={styles.pricePrefix}>₹</Text>
+            {categorySlug === 'events' ? (
+              <View style={[styles.card, errors.venue && styles.cardError]}>
+                <Text style={styles.label}>Venue <Text style={styles.required}>*</Text></Text>
+                <TextInput
+                  style={[styles.input, errors.venue && styles.inputError]}
+                  value={venue}
+                  onChangeText={t => { setVenue(t); if (errors.venue) setErrors(e => ({ ...e, venue: '' })); }}
+                  placeholder="e.g. LB Stadium, Hyderabad"
+                  maxLength={200}
+                />
+                {errors.venue ? <Text style={styles.errorText}>{errors.venue}</Text> : null}
+
+                <Text style={[styles.label, { marginTop: 16 }]}>Date & Time <Text style={styles.required}>*</Text></Text>
+                <TouchableOpacity
+                  style={[styles.input, errors.eventDate && styles.inputError]}
+                  onPress={() => setShowDatePicker(true)}
+                  accessibilityRole="button"
+                  accessibilityLabel="Pick event date and time"
+                >
+                  <Text style={eventDate ? undefined : { color: '#9ca3af' }}>
+                    {eventDate
+                      ? eventDate.toLocaleString('en-IN', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+                      : 'Select date & time'}
+                  </Text>
+                </TouchableOpacity>
+                {errors.eventDate ? <Text style={styles.errorText}>{errors.eventDate}</Text> : null}
+                {showDatePicker && (
+                  <DateTimePicker
+                    value={eventDate ?? new Date()}
+                    mode="date"
+                    minimumDate={new Date()}
+                    onChange={onEventDateChange}
+                  />
+                )}
+                {showTimePicker && (
+                  <DateTimePicker
+                    value={eventDate ?? new Date()}
+                    mode="time"
+                    onChange={onEventTimeChange}
+                  />
+                )}
+
+                <Text style={[styles.label, { marginTop: 16 }]}>Admission</Text>
+                <View style={styles.admissionRow}>
+                  <TouchableOpacity
+                    onPress={() => setIsEventFree(true)}
+                    style={[styles.admissionBtn, isEventFree && styles.admissionBtnFreeActive]}
+                  >
+                    <Text style={[styles.admissionBtnText, isEventFree && { color: '#15803d' }]}>Free Entry</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => setIsEventFree(false)}
+                    style={[styles.admissionBtn, !isEventFree && styles.admissionBtnPaidActive]}
+                  >
+                    <Text style={[styles.admissionBtnText, !isEventFree && { color: '#b45309' }]}>Paid / Ticketed</Text>
+                  </TouchableOpacity>
+                </View>
+
+                {!isEventFree && (
+                  <>
+                    <Text style={[styles.label, { marginTop: 16 }]}>Sell tickets in-app (₹) <Text style={styles.optional}>(optional)</Text></Text>
                     <TextInput
-                      style={[styles.input, { flex: 1 }]}
-                      value={price}
-                      onChangeText={setPrice}
-                      placeholder="0 — leave blank for 'Price on request'"
+                      style={styles.input}
+                      value={ticketPrice}
+                      onChangeText={setTicketPrice}
+                      placeholder="e.g. 299"
                       keyboardType="numeric"
                     />
-                  </View>
-                </>
-              )}
+                    <Text style={styles.hint}>Buyers pay in-app and get a QR ticket. Leave blank to link externally instead.</Text>
 
-              <Text style={[styles.label, categorySlug !== 'businesses' && { marginTop: 16 }]}>
-                {categorySlug === 'businesses' ? 'Address' : 'Area / Locality'} <Text style={styles.optional}>(optional)</Text>
-              </Text>
-              <TextInput
-                style={styles.input}
-                value={area}
-                onChangeText={setArea}
-                placeholder={categorySlug === 'businesses' ? 'Street, Area, City' : 'e.g. Koramangala, Banjara Hills'}
-                maxLength={100}
-              />
-              <Text style={styles.hint}>
-                {categorySlug === 'businesses' ? 'Shown on your business page' : 'Helps buyers find listings near them'}
-              </Text>
-            </View>
+                    <Text style={[styles.label, { marginTop: 16 }]}>Or: External Ticket URL</Text>
+                    <TextInput
+                      style={styles.input}
+                      value={ticketUrl}
+                      onChangeText={setTicketUrl}
+                      placeholder="https://bookmyshow.com/..."
+                      keyboardType="url"
+                      autoCapitalize="none"
+                      editable={!ticketPrice.trim()}
+                    />
+                  </>
+                )}
+              </View>
+            ) : (
+              /* Price + Area (Price doesn't apply to Businesses — hidden) */
+              <View style={styles.card}>
+                {categorySlug !== 'businesses' && (
+                  <>
+                    <Text style={styles.label}>Price (₹) <Text style={styles.optional}>(optional)</Text></Text>
+                    <View style={styles.priceRow}>
+                      <Text style={styles.pricePrefix}>₹</Text>
+                      <TextInput
+                        style={[styles.input, { flex: 1 }]}
+                        value={price}
+                        onChangeText={setPrice}
+                        placeholder="0 — leave blank for 'Price on request'"
+                        keyboardType="numeric"
+                      />
+                    </View>
+                  </>
+                )}
+
+                <Text style={[styles.label, categorySlug !== 'businesses' && { marginTop: 16 }]}>
+                  {categorySlug === 'businesses' ? 'Address' : 'Area / Locality'} <Text style={styles.optional}>(optional)</Text>
+                </Text>
+                <TextInput
+                  style={styles.input}
+                  value={area}
+                  onChangeText={setArea}
+                  placeholder={categorySlug === 'businesses' ? 'Street, Area, City' : 'e.g. Koramangala, Banjara Hills'}
+                  maxLength={100}
+                />
+                <Text style={styles.hint}>
+                  {categorySlug === 'businesses' ? 'Shown on your business page' : 'Helps buyers find listings near them'}
+                </Text>
+              </View>
+            )}
 
             {/* Tip card */}
             <View style={styles.tipCard}>
@@ -522,13 +677,19 @@ export default function PostScreen({ navigation, route }: any) {
           </>
         )}
 
-        {/* ── STEP 2: PHOTOS (Businesses don't support photos yet) ── */}
+        {/* ── STEP 2: PHOTOS (Businesses and Events don't support photos yet) ── */}
         {step === 1 && (
-          categorySlug === 'businesses' ? (
+          categorySlug === 'businesses' || categorySlug === 'events' ? (
             <View style={styles.card}>
               <Ionicons name="images-outline" size={28} color="#9ca3af" />
-              <Text style={[styles.cardTitle, { marginTop: 10 }]}>Photos aren't available for Businesses yet</Text>
-              <Text style={styles.cardSubtitle}>You can still add your business now — photo support for the Business Directory is coming soon.</Text>
+              <Text style={[styles.cardTitle, { marginTop: 10 }]}>
+                {categorySlug === 'businesses' ? "Photos aren't available for Businesses yet" : "Photos aren't available for Events yet"}
+              </Text>
+              <Text style={styles.cardSubtitle}>
+                {categorySlug === 'businesses'
+                  ? 'You can still add your business now — photo support for the Business Directory is coming soon.'
+                  : 'You can still post your event now — photo support for Events is coming soon.'}
+              </Text>
             </View>
           ) : (
           <>
@@ -598,13 +759,20 @@ export default function PostScreen({ navigation, route }: any) {
             {/* Mini listing summary */}
             {(title || images.length > 0) && (
               <View style={styles.summaryCard}>
-                <Text style={styles.summaryLabel}>{categorySlug === 'businesses' ? 'YOUR BUSINESS SUMMARY' : 'YOUR LISTING SUMMARY'}</Text>
+                <Text style={styles.summaryLabel}>
+                  {categorySlug === 'businesses' ? 'YOUR BUSINESS SUMMARY' : categorySlug === 'events' ? 'YOUR EVENT SUMMARY' : 'YOUR LISTING SUMMARY'}
+                </Text>
                 {images.length > 0 && (
                   <Image source={{ uri: images[0] }} style={styles.summaryThumb} />
                 )}
                 {title ? <Text style={styles.summaryTitle} numberOfLines={2}>{title}</Text> : null}
-                {price && categorySlug !== 'businesses' ? (
+                {price && categorySlug !== 'businesses' && categorySlug !== 'events' ? (
                   <Text style={styles.summaryPrice}>₹{parseInt(price, 10).toLocaleString('en-IN')}</Text>
+                ) : null}
+                {categorySlug === 'events' && eventDate ? (
+                  <Text style={styles.summaryPrice}>
+                    {eventDate.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })} · {venue}
+                  </Text>
                 ) : null}
                 <Text style={styles.summaryCity}>
                   <Ionicons name="location-outline" size={12} /> {area ? `${area}, ` : ''}{cityName}
@@ -612,6 +780,15 @@ export default function PostScreen({ navigation, route }: any) {
               </View>
             )}
 
+            {categorySlug === 'events' ? (
+              <View style={styles.card}>
+                <Ionicons name="checkmark-circle-outline" size={28} color="#22c55e" />
+                <Text style={[styles.cardTitle, { marginTop: 10 }]}>Ready to submit</Text>
+                <Text style={styles.cardSubtitle}>
+                  Your event will go live after a quick review — usually within a few hours.
+                </Text>
+              </View>
+            ) : (
             <View style={styles.card}>
               <Text style={styles.cardTitle}>Contact details</Text>
 
@@ -673,6 +850,7 @@ export default function PostScreen({ navigation, route }: any) {
                 />
               </View>
             </View>
+            )}
           </>
         )}
 
@@ -696,13 +874,13 @@ export default function PostScreen({ navigation, route }: any) {
           onPress={handleNext}
           disabled={loading}
           accessibilityRole="button"
-          accessibilityLabel={step === 2 ? (categorySlug === 'businesses' ? 'Add business' : 'Post listing') : 'Next step'}
+          accessibilityLabel={step === 2 ? (categorySlug === 'businesses' ? 'Add business' : categorySlug === 'events' ? 'Post event' : 'Post listing') : 'Next step'}
           accessibilityState={{ disabled: loading }}
         >
           {loading
-            ? <Text style={styles.nextBtnText}>{uploadProgress || (categorySlug === 'businesses' ? 'Adding...' : 'Posting...')}</Text>
+            ? <Text style={styles.nextBtnText}>{uploadProgress || (categorySlug === 'businesses' ? 'Adding...' : categorySlug === 'events' ? 'Submitting...' : 'Posting...')}</Text>
             : step === 2
-              ? <><Text style={styles.nextBtnText}>{categorySlug === 'businesses' ? '✦ Add Business' : '✦ Post Listing'}</Text></>
+              ? <><Text style={styles.nextBtnText}>{categorySlug === 'businesses' ? '✦ Add Business' : categorySlug === 'events' ? '✦ Post Event' : '✦ Post Listing'}</Text></>
               : <Text style={styles.nextBtnText}>Next →</Text>}
         </TouchableOpacity>
       </View>
@@ -857,6 +1035,14 @@ const styles = StyleSheet.create({
   // Price
   priceRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   pricePrefix: { fontSize: 18, fontWeight: '700', color: '#374151' },
+  admissionRow: { flexDirection: 'row', gap: 10 },
+  admissionBtn: {
+    flex: 1, paddingVertical: 12, borderRadius: 12, borderWidth: 2,
+    borderColor: '#e5e7eb', alignItems: 'center',
+  },
+  admissionBtnFreeActive: { borderColor: '#22c55e', backgroundColor: '#f0fdf4' },
+  admissionBtnPaidActive: { borderColor: '#f59e0b', backgroundColor: '#fffbeb' },
+  admissionBtnText: { fontSize: 13, fontWeight: '700', color: '#6b7280' },
 
   // Photos
   uploadZone: {
