@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 const DISMISS_KEY = 'li_prompt_dismissed';
 
@@ -43,6 +44,7 @@ function detectPrompt(): Prompt | null {
 }
 
 export default function ContextualPrompt() {
+  const pathname = usePathname();
   const [prompt, setPrompt] = useState<Prompt | null>(null);
 
   useEffect(() => {
@@ -51,7 +53,7 @@ export default function ContextualPrompt() {
     return () => clearTimeout(t);
   }, []);
 
-  if (!prompt) return null;
+  if (!prompt || pathname?.startsWith('/auth')) return null;
 
   const dismiss = () => {
     try {

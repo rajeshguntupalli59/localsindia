@@ -17,6 +17,11 @@ const OTP_DEBUG = process.env.NEXT_PUBLIC_OTP_DEBUG === 'true' && process.env.NO
 
 type Step = 'phone' | 'otp' | 'create-password' | 'name' | 'forgot-phone' | 'forgot-otp' | 'forgot-reset';
 
+// Shared sizing so every step reads as one consistent, modern form — not a mix of eras.
+const FIELD = 'h-12 rounded-xl text-[15px]';
+const PRIMARY_BTN = 'w-full h-12 rounded-xl text-[15px] font-semibold text-white shadow-sm shadow-orange-950/10 transition-transform active:scale-[0.99]';
+const LABEL_CLS = 'text-[13px] font-semibold text-slate-600';
+
 function getPostLoginRedirect(redirectParam: string | null): string {
   if (redirectParam && redirectParam.startsWith('/')) return redirectParam;
   const city = typeof window !== 'undefined' ? localStorage.getItem('li_city') : null;
@@ -52,11 +57,11 @@ function PasswordInput({
   const [show, setShow] = useState(false);
   return (
     <div className="relative">
-      {withLockIcon && <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />}
+      {withLockIcon && <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />}
       <Input
         id={id}
         type={show ? 'text' : 'password'}
-        className={withLockIcon ? 'pl-10 pr-10' : 'pr-10'}
+        className={`${FIELD} ${withLockIcon ? 'pl-11' : 'pl-4'} pr-11`}
         placeholder={placeholder}
         value={value}
         onChange={onChange}
@@ -67,11 +72,11 @@ function PasswordInput({
       <button
         type="button"
         onClick={() => setShow(v => !v)}
-        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-slate-700"
+        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-slate-700 transition-colors"
         aria-label={show ? 'Hide password' : 'Show password'}
         tabIndex={-1}
       >
-        {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+        {show ? <EyeOff className="w-[18px] h-[18px]" /> : <Eye className="w-[18px] h-[18px]" />}
       </button>
     </div>
   );
@@ -273,31 +278,37 @@ function LoginInner() {
     'Enter your number and password to sign in';
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center py-12 px-4" style={{ background: 'var(--li-page-bg)' }}>
+    <div
+      className="min-h-screen flex flex-col items-center justify-center py-12 px-4"
+      style={{ background: 'radial-gradient(ellipse 900px 520px at 50% -12%, var(--li-primary-light) 0%, var(--li-page-bg) 62%)' }}
+    >
       <div className="w-full max-w-sm">
 
-        <Link href="/" className="flex items-center gap-2 text-slate-500 hover:text-slate-800 mb-6 w-fit text-sm">
+        <Link href="/" className="flex items-center gap-2 text-slate-500 hover:text-slate-800 mb-6 w-fit text-sm font-medium transition-colors">
           <ArrowLeft className="w-4 h-4" /> Back to home
         </Link>
 
-        <div className="rounded-2xl overflow-hidden shadow-xl border border-slate-200 bg-white">
+        <div className="rounded-[28px] overflow-hidden shadow-2xl shadow-slate-900/10 border border-slate-100 bg-white">
 
           {/* Header band */}
-          <div className="px-6 pt-8 pb-6" style={{ background: 'var(--li-nav-bg)' }}>
-            <div className="mb-5">
-              <SiteLogo variant="light" size="md" tagline={true} />
+          <div className="relative overflow-hidden px-7 pt-10 pb-7" style={{ background: 'var(--li-nav-bg)' }}>
+            <div className="absolute -top-12 -left-8 w-48 h-48 rounded-full opacity-25 blur-3xl pointer-events-none" style={{ background: 'var(--li-primary)' }} />
+            <div className="absolute -bottom-16 -right-10 w-56 h-56 rounded-full opacity-[0.12] blur-3xl pointer-events-none" style={{ background: 'var(--li-featured)' }} />
+
+            <div className="relative mb-7">
+              <SiteLogo variant="light" size="lg" tagline={true} />
             </div>
-            <h1 className="text-2xl font-bold text-white">{heading}</h1>
-            <p className="text-white/60 text-sm mt-1">{subheading}</p>
+            <h1 className="relative text-[28px] font-extrabold leading-[1.15] tracking-tight text-white text-balance">{heading}</h1>
+            <p className="relative text-white/65 text-[14.5px] mt-2 leading-relaxed">{subheading}</p>
 
             {/* Sign In / Sign Up tabs — only on phone step */}
             {step === 'phone' && (
-              <div className="flex gap-1 mt-5 bg-white/10 p-1 rounded-xl">
+              <div className="relative flex gap-1 mt-6 bg-white/10 p-1 rounded-full">
                 <button
                   type="button"
                   onClick={() => setMode('signin')}
-                  className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-colors ${
-                    mode === 'signin' ? 'bg-white text-slate-900' : 'text-white/70 hover:text-white'
+                  className={`flex-1 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 ${
+                    mode === 'signin' ? 'bg-white text-slate-900 shadow-sm' : 'text-white/70 hover:text-white'
                   }`}
                 >
                   Sign In
@@ -305,8 +316,8 @@ function LoginInner() {
                 <button
                   type="button"
                   onClick={() => setMode('signup')}
-                  className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-colors ${
-                    mode === 'signup' ? 'bg-white text-slate-900' : 'text-white/70 hover:text-white'
+                  className={`flex-1 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 ${
+                    mode === 'signup' ? 'bg-white text-slate-900 shadow-sm' : 'text-white/70 hover:text-white'
                   }`}
                 >
                   Create Account
@@ -315,7 +326,7 @@ function LoginInner() {
             )}
           </div>
 
-          <div className="px-6 py-7">
+          <div className="px-7 py-8">
 
             {/* Dev bypass */}
             {OTP_DEBUG && step === 'phone' && (
@@ -359,32 +370,32 @@ function LoginInner() {
                       onClick={() => { window.location.href = `${BACKEND_URL}/api/v1/auth/google`; }}
                       className="flex items-center justify-center gap-3 w-full h-12 px-4
                         bg-white rounded-xl border border-slate-200
-                        text-sm font-semibold text-slate-700
+                        text-[15px] font-semibold text-slate-700
                         hover:bg-slate-50 hover:border-slate-300
                         transition-all duration-200 shadow-sm"
                     >
                       <GoogleIcon />
                       Continue with Google
                     </button>
-                    <div className="flex items-center gap-3 my-5">
+                    <div className="flex items-center gap-3 my-6">
                       <div className="flex-1 h-px bg-slate-200" />
                       <span className="text-xs font-medium text-slate-400">or use your phone</span>
                       <div className="flex-1 h-px bg-slate-200" />
                     </div>
                   </>
                 )}
-                <form onSubmit={mode === 'signin' ? handleLogin : handleSignupPhoneSubmit} className="space-y-5">
+                <form onSubmit={mode === 'signin' ? handleLogin : handleSignupPhoneSubmit} className="space-y-6">
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Mobile Number</Label>
-                    <div className="flex rounded-lg border border-input overflow-hidden focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-0">
-                      <div className="flex items-center gap-1.5 px-3 bg-slate-50 border-r border-input shrink-0">
+                    <Label htmlFor="phone" className={LABEL_CLS}>Mobile Number</Label>
+                    <div className={`flex ${FIELD} border border-input overflow-hidden focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-0 bg-white`}>
+                      <div className="flex items-center gap-1.5 px-3.5 bg-slate-50 border-r border-input shrink-0">
                         <Phone className="w-3.5 h-3.5 text-muted-foreground" />
-                        <span className="text-sm font-semibold text-slate-700">+91</span>
+                        <span className="text-[15px] font-semibold text-slate-700">+91</span>
                       </div>
                       <input
                         id="phone"
                         type="tel"
-                        className="flex-1 px-3 py-2 text-sm bg-white outline-none"
+                        className="flex-1 px-3.5 text-[15px] bg-white outline-none"
                         placeholder="Enter 10-digit mobile number"
                         value={digits}
                         onChange={e => setDigits(e.target.value.replace(/\D/g, '').slice(0, 10))}
@@ -397,7 +408,7 @@ function LoginInner() {
 
                   {mode === 'signin' && (
                     <div className="space-y-2">
-                      <Label htmlFor="password">Password</Label>
+                      <Label htmlFor="password" className={LABEL_CLS}>Password</Label>
                       <PasswordInput
                         id="password"
                         value={password}
@@ -407,7 +418,7 @@ function LoginInner() {
                       />
                       <button
                         type="button"
-                        className="text-xs underline"
+                        className="text-[13px] font-medium underline underline-offset-2"
                         style={{ color: 'var(--li-primary)' }}
                         onClick={() => { setStep('forgot-phone'); setOtp(''); setNewPassword(''); setConfirmPassword(''); }}
                       >
@@ -416,20 +427,20 @@ function LoginInner() {
                     </div>
                   )}
 
-                  <Button type="submit" className="w-full text-white" style={{ background: 'var(--li-primary)' }} disabled={loading}>
+                  <Button type="submit" className={PRIMARY_BTN} style={{ background: 'var(--li-primary)' }} disabled={loading}>
                     {loading
                       ? (mode === 'signin' ? 'Signing in...' : 'Sending OTP...')
                       : mode === 'signin' ? 'Sign In →' : 'Send OTP →'}
                   </Button>
                   {mode === 'signup' ? (
-                    <p className="text-xs text-center text-muted-foreground">
+                    <p className="text-[13px] text-center text-muted-foreground">
                       Already have an account?{' '}
-                      <button type="button" className="underline" style={{ color: 'var(--li-primary)' }} onClick={() => setMode('signin')}>Sign in</button>
+                      <button type="button" className="font-medium underline underline-offset-2" style={{ color: 'var(--li-primary)' }} onClick={() => setMode('signin')}>Sign in</button>
                     </p>
                   ) : (
-                    <p className="text-xs text-center text-muted-foreground">
+                    <p className="text-[13px] text-center text-muted-foreground">
                       New to LocalsIndia?{' '}
-                      <button type="button" className="underline" style={{ color: 'var(--li-primary)' }} onClick={() => setMode('signup')}>Create free account</button>
+                      <button type="button" className="font-medium underline underline-offset-2" style={{ color: 'var(--li-primary)' }} onClick={() => setMode('signup')}>Create free account</button>
                     </p>
                   )}
                 </form>
@@ -438,14 +449,14 @@ function LoginInner() {
 
             {/* ── Step: OTP (signup) ── */}
             {step === 'otp' && (
-              <form onSubmit={verifyOtp} className="space-y-5">
+              <form onSubmit={verifyOtp} className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="otp">6-digit OTP</Label>
+                  <Label htmlFor="otp" className={LABEL_CLS}>6-digit OTP</Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
                       id="otp"
-                      className="pl-10 text-center tracking-[0.5em] text-xl"
+                      className="h-14 rounded-xl pl-11 text-center tracking-[0.5em] text-xl"
                       placeholder="------"
                       value={otp}
                       onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
@@ -455,10 +466,10 @@ function LoginInner() {
                     />
                   </div>
                 </div>
-                <Button type="submit" className="w-full text-white" style={{ background: 'var(--li-primary)' }} disabled={loading || otp.length < 6}>
+                <Button type="submit" className={PRIMARY_BTN} style={{ background: 'var(--li-primary)' }} disabled={loading || otp.length < 6}>
                   {loading ? 'Verifying...' : 'Verify OTP'}
                 </Button>
-                <button type="button" className="text-sm underline w-full text-center" style={{ color: 'var(--li-primary)' }} onClick={() => { setStep('phone'); setOtp(''); }}>
+                <button type="button" className="text-sm font-medium underline underline-offset-2 w-full text-center" style={{ color: 'var(--li-primary)' }} onClick={() => { setStep('phone'); setOtp(''); }}>
                   Change number
                 </button>
               </form>
@@ -466,9 +477,9 @@ function LoginInner() {
 
             {/* ── Step: Create password (signup) ── */}
             {step === 'create-password' && (
-              <form onSubmit={handleCreatePassword} className="space-y-5">
+              <form onSubmit={handleCreatePassword} className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="new-password">Password</Label>
+                  <Label htmlFor="new-password" className={LABEL_CLS}>Password</Label>
                   <PasswordInput
                     id="new-password"
                     value={newPassword}
@@ -479,7 +490,7 @@ function LoginInner() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="confirm-password">Confirm password</Label>
+                  <Label htmlFor="confirm-password" className={LABEL_CLS}>Confirm password</Label>
                   <PasswordInput
                     id="confirm-password"
                     value={confirmPassword}
@@ -488,7 +499,7 @@ function LoginInner() {
                     minLength={8}
                   />
                 </div>
-                <Button type="submit" className="w-full text-white" style={{ background: 'var(--li-primary)' }} disabled={loading || newPassword.length < 8}>
+                <Button type="submit" className={PRIMARY_BTN} style={{ background: 'var(--li-primary)' }} disabled={loading || newPassword.length < 8}>
                   {loading ? 'Saving...' : 'Continue →'}
                 </Button>
               </form>
@@ -496,14 +507,14 @@ function LoginInner() {
 
             {/* ── Step: Name (new users only) ── */}
             {step === 'name' && (
-              <form onSubmit={saveName} className="space-y-5">
+              <form onSubmit={saveName} className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Your Name</Label>
+                  <Label htmlFor="name" className={LABEL_CLS}>Your Name</Label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
                       id="name"
-                      className="pl-10"
+                      className={`${FIELD} pl-11`}
                       placeholder="e.g. Rajesh Kumar"
                       value={name}
                       onChange={e => setName(e.target.value)}
@@ -513,9 +524,9 @@ function LoginInner() {
                       maxLength={60}
                     />
                   </div>
-                  <p className="text-xs text-muted-foreground">This is shown to other users on your listings</p>
+                  <p className="text-[13px] text-muted-foreground">This is shown to other users on your listings</p>
                 </div>
-                <Button type="submit" className="w-full text-white" style={{ background: 'var(--li-primary)' }} disabled={loading || name.trim().length < 2}>
+                <Button type="submit" className={PRIMARY_BTN} style={{ background: 'var(--li-primary)' }} disabled={loading || name.trim().length < 2}>
                   {loading ? 'Saving...' : 'Continue →'}
                 </Button>
               </form>
@@ -523,18 +534,18 @@ function LoginInner() {
 
             {/* ── Step: Forgot password — phone ── */}
             {step === 'forgot-phone' && (
-              <form onSubmit={handleForgotPhoneSubmit} className="space-y-5">
+              <form onSubmit={handleForgotPhoneSubmit} className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="forgot-phone">Mobile Number</Label>
-                  <div className="flex rounded-lg border border-input overflow-hidden focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-0">
-                    <div className="flex items-center gap-1.5 px-3 bg-slate-50 border-r border-input shrink-0">
+                  <Label htmlFor="forgot-phone" className={LABEL_CLS}>Mobile Number</Label>
+                  <div className={`flex ${FIELD} border border-input overflow-hidden focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-0 bg-white`}>
+                    <div className="flex items-center gap-1.5 px-3.5 bg-slate-50 border-r border-input shrink-0">
                       <Phone className="w-3.5 h-3.5 text-muted-foreground" />
-                      <span className="text-sm font-semibold text-slate-700">+91</span>
+                      <span className="text-[15px] font-semibold text-slate-700">+91</span>
                     </div>
                     <input
                       id="forgot-phone"
                       type="tel"
-                      className="flex-1 px-3 py-2 text-sm bg-white outline-none"
+                      className="flex-1 px-3.5 text-[15px] bg-white outline-none"
                       placeholder="Enter 10-digit mobile number"
                       value={digits}
                       onChange={e => setDigits(e.target.value.replace(/\D/g, '').slice(0, 10))}
@@ -545,10 +556,10 @@ function LoginInner() {
                     />
                   </div>
                 </div>
-                <Button type="submit" className="w-full text-white" style={{ background: 'var(--li-primary)' }} disabled={loading}>
+                <Button type="submit" className={PRIMARY_BTN} style={{ background: 'var(--li-primary)' }} disabled={loading}>
                   {loading ? 'Sending...' : 'Send reset code →'}
                 </Button>
-                <button type="button" className="text-sm underline w-full text-center" style={{ color: 'var(--li-primary)' }} onClick={() => { setStep('phone'); setMode('signin'); }}>
+                <button type="button" className="text-sm font-medium underline underline-offset-2 w-full text-center" style={{ color: 'var(--li-primary)' }} onClick={() => { setStep('phone'); setMode('signin'); }}>
                   Back to sign in
                 </button>
               </form>
@@ -556,14 +567,14 @@ function LoginInner() {
 
             {/* ── Step: Forgot password — OTP ── */}
             {step === 'forgot-otp' && (
-              <form onSubmit={handleForgotOtpVerify} className="space-y-5">
+              <form onSubmit={handleForgotOtpVerify} className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="forgot-otp">6-digit code</Label>
+                  <Label htmlFor="forgot-otp" className={LABEL_CLS}>6-digit code</Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
                       id="forgot-otp"
-                      className="pl-10 text-center tracking-[0.5em] text-xl"
+                      className="h-14 rounded-xl pl-11 text-center tracking-[0.5em] text-xl"
                       placeholder="------"
                       value={otp}
                       onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
@@ -573,10 +584,10 @@ function LoginInner() {
                     />
                   </div>
                 </div>
-                <Button type="submit" className="w-full text-white" style={{ background: 'var(--li-primary)' }} disabled={loading || otp.length < 6}>
+                <Button type="submit" className={PRIMARY_BTN} style={{ background: 'var(--li-primary)' }} disabled={loading || otp.length < 6}>
                   {loading ? 'Verifying...' : 'Verify code'}
                 </Button>
-                <button type="button" className="text-sm underline w-full text-center" style={{ color: 'var(--li-primary)' }} onClick={() => { setStep('forgot-phone'); setOtp(''); }}>
+                <button type="button" className="text-sm font-medium underline underline-offset-2 w-full text-center" style={{ color: 'var(--li-primary)' }} onClick={() => { setStep('forgot-phone'); setOtp(''); }}>
                   Change number
                 </button>
               </form>
@@ -584,9 +595,9 @@ function LoginInner() {
 
             {/* ── Step: Forgot password — reset ── */}
             {step === 'forgot-reset' && (
-              <form onSubmit={handleResetPassword} className="space-y-5">
+              <form onSubmit={handleResetPassword} className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="reset-password">New password</Label>
+                  <Label htmlFor="reset-password" className={LABEL_CLS}>New password</Label>
                   <PasswordInput
                     id="reset-password"
                     value={newPassword}
@@ -597,7 +608,7 @@ function LoginInner() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="reset-confirm">Confirm new password</Label>
+                  <Label htmlFor="reset-confirm" className={LABEL_CLS}>Confirm new password</Label>
                   <PasswordInput
                     id="reset-confirm"
                     value={confirmPassword}
@@ -606,7 +617,7 @@ function LoginInner() {
                     minLength={8}
                   />
                 </div>
-                <Button type="submit" className="w-full text-white" style={{ background: 'var(--li-primary)' }} disabled={loading || newPassword.length < 8}>
+                <Button type="submit" className={PRIMARY_BTN} style={{ background: 'var(--li-primary)' }} disabled={loading || newPassword.length < 8}>
                   {loading ? 'Saving...' : 'Reset password →'}
                 </Button>
               </form>
@@ -615,11 +626,11 @@ function LoginInner() {
           </div>
 
           {/* Privacy / Terms notice */}
-          <p className="text-[11px] text-center text-muted-foreground px-4 pb-2">
+          <p className="text-[11.5px] text-center text-muted-foreground px-6 pb-6 leading-relaxed">
             By continuing, you agree to our{' '}
-            <a href="/terms" className="underline hover:text-slate-700">Terms of Service</a>
+            <a href="/terms" className="underline underline-offset-2 hover:text-slate-700">Terms of Service</a>
             {' '}and{' '}
-            <a href="/privacy" className="underline hover:text-slate-700">Privacy Policy</a>.
+            <a href="/privacy" className="underline underline-offset-2 hover:text-slate-700">Privacy Policy</a>.
           </p>
         </div>
       </div>
