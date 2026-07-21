@@ -44,6 +44,12 @@ class Business(Base):
         order_by="Review.created_at.desc()",
         lazy="selectin",
     )
+    images: Mapped[list["BusinessImage"]] = relationship(
+        "BusinessImage",
+        primaryjoin="Business.id == foreign(BusinessImage.business_id)",
+        order_by="BusinessImage.display_order",
+        lazy="selectin",
+    )
 
     __table_args__ = (
         Index("idx_businesses_city", "city_id", "category_id"),

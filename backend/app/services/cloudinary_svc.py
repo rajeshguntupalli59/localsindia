@@ -10,7 +10,7 @@ def _is_configured() -> bool:
     return bool(settings.CLOUDINARY_CLOUD_NAME and settings.CLOUDINARY_API_KEY)
 
 
-async def upload_image(file_bytes: bytes, filename: str) -> dict:
+async def upload_image(file_bytes: bytes, filename: str, folder: str = "localindia/listings") -> dict:
     if not _is_configured():
         mock_id = f"mock/{uuid.uuid4()}"
         mock_url = f"https://placehold.co/400x300/f97316/white?text=LocalsIndia"
@@ -25,7 +25,7 @@ async def upload_image(file_bytes: bytes, filename: str) -> dict:
     )
     result = cloudinary.uploader.upload(
         file_bytes,
-        folder="localindia/listings",
+        folder=folder,
         resource_type="image",
         format="webp",
     )

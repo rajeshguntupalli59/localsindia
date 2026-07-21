@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime, timezone
 from sqlalchemy import String, Text, Boolean, Numeric, ForeignKey, CheckConstraint, Index, DateTime
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID
 from app.core.database import Base
 
@@ -33,6 +33,13 @@ class Event(Base):
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
         onupdate=lambda: datetime.now(timezone.utc),
+    )
+
+    images: Mapped[list["EventImage"]] = relationship(
+        "EventImage",
+        primaryjoin="Event.id == foreign(EventImage.event_id)",
+        order_by="EventImage.display_order",
+        lazy="selectin",
     )
 
     __table_args__ = (

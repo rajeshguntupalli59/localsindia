@@ -40,6 +40,14 @@ class EventUpdate(BaseModel):
     status: str | None = None
 
 
+class EventImageOut(BaseModel):
+    id: uuid.UUID
+    url: str
+    display_order: int
+
+    model_config = {"from_attributes": True}
+
+
 class EventOut(BaseModel):
     id: uuid.UUID
     title: str
@@ -54,5 +62,6 @@ class EventOut(BaseModel):
     user_id: uuid.UUID
     category_id: uuid.UUID | None
     created_at: datetime
+    images: list[EventImageOut] = []
 
     model_config = {"from_attributes": True}

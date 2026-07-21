@@ -46,6 +46,14 @@ class ReviewOut(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class BusinessImageOut(BaseModel):
+    id: uuid.UUID
+    url: str
+    display_order: int
+
+    model_config = {"from_attributes": True}
+
+
 class BusinessOut(BaseModel):
     id: uuid.UUID
     name: str
@@ -64,5 +72,6 @@ class BusinessOut(BaseModel):
     owner_id: uuid.UUID | None
     created_at: datetime
     reviews: list[ReviewOut] = []
+    images: list[BusinessImageOut] = []
 
     model_config = {"from_attributes": True}
