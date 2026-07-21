@@ -131,6 +131,104 @@ const CATEGORY_DETAIL_FIELDS: Record<string, DetailField[]> = {
   ],
 };
 
+// Copy for the generic Listing step (Title/Description/Price) — tailored per
+// category so it reads like it's actually about a PG, a job, a course, etc.,
+// instead of a one-size-fits-all "What are you selling?". Categories that
+// already ask for pricing in their specific questions (Jobs -> salary,
+// Doctors -> consultation fee) skip the generic price field entirely rather
+// than asking twice.
+type ListingCopy = {
+  cardTitle: string;
+  titleLabel: string;
+  titlePlaceholder: string;
+  descLabel: string;
+  descPlaceholder: string;
+  showPrice: boolean;
+  priceLabel?: string;
+  priceHint?: string;
+};
+
+const LISTING_COPY: Record<string, ListingCopy> = {
+  classifieds: {
+    cardTitle: 'What are you selling?', titleLabel: 'Title',
+    titlePlaceholder: 'e.g. Study table with drawer, barely used',
+    descLabel: 'Description', descPlaceholder: 'Describe your item — condition, age, any defects, reason for selling...',
+    showPrice: true, priceLabel: 'Price (₹)', priceHint: "Leave blank to show 'Price on request'",
+  },
+  vehicles: {
+    cardTitle: 'Tell buyers about your vehicle', titleLabel: 'Listing Title',
+    titlePlaceholder: 'e.g. Honda Activa 6G 2022 — Low Mileage',
+    descLabel: 'Description', descPlaceholder: "Describe the vehicle's condition, service history, accessories, reason for selling...",
+    showPrice: true, priceLabel: 'Price (₹)', priceHint: "Leave blank to show 'Price on request'",
+  },
+  jobs: {
+    cardTitle: 'Tell candidates about this job', titleLabel: 'Job Title',
+    titlePlaceholder: 'e.g. Field Sales Executive, Delivery Partner',
+    descLabel: 'Job Description', descPlaceholder: "Responsibilities, working hours, who this role is right for...",
+    showPrice: false,
+  },
+  'pg-roommate': {
+    cardTitle: 'Tell seekers about this PG / Room', titleLabel: 'PG / Room Title',
+    titlePlaceholder: 'e.g. Cozy PG for Working Women near Hitech City',
+    descLabel: 'Description', descPlaceholder: 'Describe the PG — food, amenities, house rules, nearby landmarks...',
+    showPrice: true, priceLabel: 'Monthly Rent (₹)', priceHint: "Leave blank to show 'Price on request'",
+  },
+  'real-estate': {
+    cardTitle: 'Tell buyers about this property', titleLabel: 'Property Title',
+    titlePlaceholder: 'e.g. Spacious 2BHK near Metro Station',
+    descLabel: 'Description', descPlaceholder: "Describe the property — layout, condition, nearby landmarks, why you're renting/selling...",
+    showPrice: true, priceLabel: 'Price (₹)', priceHint: 'Monthly rent, or total sale price',
+  },
+  electronics: {
+    cardTitle: 'Tell buyers about this item', titleLabel: 'Title',
+    titlePlaceholder: 'e.g. Samsung Galaxy S23, 128GB',
+    descLabel: 'Description', descPlaceholder: 'Condition, accessories included, reason for selling...',
+    showPrice: true, priceLabel: 'Price (₹)', priceHint: "Leave blank to show 'Price on request'",
+  },
+  furniture: {
+    cardTitle: 'Tell buyers about this item', titleLabel: 'Title',
+    titlePlaceholder: 'e.g. 6-Seater Wooden Dining Table',
+    descLabel: 'Description', descPlaceholder: 'Condition, age, reason for selling...',
+    showPrice: true, priceLabel: 'Price (₹)', priceHint: "Leave blank to show 'Price on request'",
+  },
+  fashion: {
+    cardTitle: 'Tell buyers about this item', titleLabel: 'Title',
+    titlePlaceholder: 'e.g. Nike Air Max, UK 9, worn twice',
+    descLabel: 'Description', descPlaceholder: 'Condition, fit, reason for selling...',
+    showPrice: true, priceLabel: 'Price (₹)', priceHint: "Leave blank to show 'Price on request'",
+  },
+  education: {
+    cardTitle: 'Tell students about this course', titleLabel: 'Course Title',
+    titlePlaceholder: 'e.g. Spoken English for Beginners',
+    descLabel: 'Description', descPlaceholder: "What this course covers, who it's for, batch timings...",
+    showPrice: true, priceLabel: 'Course Fee (₹)', priceHint: "Leave blank to show 'Price on request'",
+  },
+  doctors: {
+    cardTitle: 'Tell patients about this practice', titleLabel: 'Practice / Clinic Title',
+    titlePlaceholder: "e.g. Dr. Sharma's Dental Clinic",
+    descLabel: 'Description', descPlaceholder: "Services offered, experience, why patients should choose you...",
+    showPrice: false,
+  },
+  services: {
+    cardTitle: 'Tell customers about this service', titleLabel: 'Service Title',
+    titlePlaceholder: 'e.g. Home AC Repair & Servicing',
+    descLabel: 'Description', descPlaceholder: 'What you offer, your experience, service area...',
+    showPrice: true, priceLabel: 'Starting Price (₹)', priceHint: "Leave blank to show 'Price on request'",
+  },
+  tiffin: {
+    cardTitle: 'Tell customers about your tiffin service', titleLabel: 'Service Title',
+    titlePlaceholder: 'e.g. Home-style North Indian Tiffin',
+    descLabel: 'Description', descPlaceholder: 'Menu variety, hygiene, delivery timings...',
+    showPrice: true, priceLabel: 'Price per meal/plan (₹)', priceHint: "Leave blank to show 'Price on request'",
+  },
+  businesses: {
+    cardTitle: 'Tell customers about your business', titleLabel: 'Business Name',
+    titlePlaceholder: 'e.g. Sharma Electricals & Repairs',
+    descLabel: 'Description', descPlaceholder: 'What you offer, specialities, years in business...',
+    showPrice: false,
+  },
+};
+
 export default function PostScreen({ navigation, route }: any) {
   const insets = useSafeAreaInsets();
   const [user, setUser] = useState<any>(undefined);
@@ -184,6 +282,7 @@ export default function PostScreen({ navigation, route }: any) {
   const STEP_LISTING = hasDetailsStep ? 2 : 1;
   const STEP_PHOTOS = STEP_LISTING + 1;
   const STEP_CONTACT = STEP_PHOTOS + 1;
+  const listingCopy = LISTING_COPY[categorySlug] ?? LISTING_COPY.classifieds;
 
   useEffect(() => {
     storage.getUser().then(u => {
@@ -461,7 +560,7 @@ export default function PostScreen({ navigation, route }: any) {
       const listing = await listingsApi.create({
         title: title.trim(),
         description: description.trim(),
-        price: price ? parseInt(price, 10) : null,
+        price: listingCopy.showPrice && price ? parseInt(price, 10) : null,
         area: area.trim() || null,
         category_slug: categorySlug,
         contact_phone: `+91${phone}`,
@@ -727,24 +826,24 @@ export default function PostScreen({ navigation, route }: any) {
           <>
             {/* Title + Description */}
             <View style={styles.card}>
-              <Text style={styles.cardTitle}>What are you selling?</Text>
+              <Text style={styles.cardTitle}>{listingCopy.cardTitle}</Text>
 
-              <Text style={styles.label}>Title <Text style={styles.required}>*</Text></Text>
+              <Text style={styles.label}>{listingCopy.titleLabel} <Text style={styles.required}>*</Text></Text>
               <TextInput
                 style={[styles.input, errors.title && styles.inputError]}
                 value={title}
                 onChangeText={t => { setTitle(t); if (errors.title) setErrors(e => ({ ...e, title: '' })); }}
-                placeholder="e.g. Honda Activa 6G 2022 — Low Mileage"
+                placeholder={listingCopy.titlePlaceholder}
                 maxLength={100}
               />
               {errors.title ? <Text style={styles.errorText}>{errors.title}</Text> : null}
 
-              <Text style={[styles.label, { marginTop: 16 }]}>Description <Text style={styles.required}>*</Text></Text>
+              <Text style={[styles.label, { marginTop: 16 }]}>{listingCopy.descLabel} <Text style={styles.required}>*</Text></Text>
               <TextInput
                 style={[styles.input, styles.textarea, errors.description && styles.inputError]}
                 value={description}
                 onChangeText={t => { setDescription(t); if (errors.description) setErrors(e => ({ ...e, description: '' })); }}
-                placeholder="Describe your item — condition, age, any defects, reason for selling..."
+                placeholder={listingCopy.descPlaceholder}
                 multiline
                 numberOfLines={5}
                 maxLength={1000}
@@ -840,25 +939,25 @@ export default function PostScreen({ navigation, route }: any) {
                 )}
               </View>
             ) : (
-              /* Price + Area (Price doesn't apply to Businesses — hidden) */
+              /* Price + Area (hidden/relabeled per category — see LISTING_COPY) */
               <View style={styles.card}>
-                {categorySlug !== 'businesses' && (
+                {listingCopy.showPrice && (
                   <>
-                    <Text style={styles.label}>Price (₹) <Text style={styles.optional}>(optional)</Text></Text>
+                    <Text style={styles.label}>{listingCopy.priceLabel} <Text style={styles.optional}>(optional)</Text></Text>
                     <View style={styles.priceRow}>
                       <Text style={styles.pricePrefix}>₹</Text>
                       <TextInput
                         style={[styles.input, { flex: 1 }]}
                         value={price}
                         onChangeText={setPrice}
-                        placeholder="0 — leave blank for 'Price on request'"
+                        placeholder={`0 — ${listingCopy.priceHint}`}
                         keyboardType="numeric"
                       />
                     </View>
                   </>
                 )}
 
-                <Text style={[styles.label, categorySlug !== 'businesses' && { marginTop: 16 }]}>
+                <Text style={[styles.label, listingCopy.showPrice && { marginTop: 16 }]}>
                   {categorySlug === 'businesses' ? 'Address' : 'Area / Locality'} <Text style={styles.optional}>(optional)</Text>
                 </Text>
                 <TextInput
@@ -976,7 +1075,7 @@ export default function PostScreen({ navigation, route }: any) {
                   <Image source={{ uri: images[0] }} style={styles.summaryThumb} />
                 )}
                 {title ? <Text style={styles.summaryTitle} numberOfLines={2}>{title}</Text> : null}
-                {price && categorySlug !== 'businesses' && categorySlug !== 'events' ? (
+                {price && listingCopy.showPrice && categorySlug !== 'events' ? (
                   <Text style={styles.summaryPrice}>₹{parseInt(price, 10).toLocaleString('en-IN')}</Text>
                 ) : null}
                 {categorySlug === 'events' && eventDate ? (

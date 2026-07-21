@@ -109,6 +109,104 @@ const CATEGORY_DETAIL_FIELDS: Record<string, DetailField[]> = {
   ],
 };
 
+// Copy for the generic Listing step (Title/Description/Price) — tailored per
+// category so it reads like it's actually about a PG, a job, a course, etc.,
+// instead of a one-size-fits-all "What are you selling?". Categories that
+// already ask for pricing in their specific questions (Jobs -> salary,
+// Doctors -> consultation fee) skip the generic price field entirely rather
+// than asking twice. Kept in sync with the mobile app's PostScreen.tsx.
+interface ListingCopy {
+  cardTitle: string;
+  titleLabel: string;
+  titlePlaceholder: string;
+  descLabel: string;
+  descPlaceholder: string;
+  showPrice: boolean;
+  priceLabel?: string;
+  priceHint?: string;
+}
+
+const LISTING_COPY: Record<string, ListingCopy> = {
+  classifieds: {
+    cardTitle: 'What are you selling?', titleLabel: 'Title',
+    titlePlaceholder: "e.g. Study table with drawer, barely used",
+    descLabel: 'Description', descPlaceholder: 'Describe your item — condition, age, any defects, reason for selling...',
+    showPrice: true, priceLabel: 'Price (₹)', priceHint: "Leave blank to show \"Price on request\"",
+  },
+  vehicles: {
+    cardTitle: 'Tell buyers about your vehicle', titleLabel: 'Listing Title',
+    titlePlaceholder: "e.g. Honda Activa 6G 2022 — Low Mileage",
+    descLabel: 'Description', descPlaceholder: "Describe the vehicle's condition, service history, accessories, reason for selling...",
+    showPrice: true, priceLabel: 'Price (₹)', priceHint: "Leave blank to show \"Price on request\"",
+  },
+  jobs: {
+    cardTitle: 'Tell candidates about this job', titleLabel: 'Job Title',
+    titlePlaceholder: 'e.g. Field Sales Executive, Delivery Partner',
+    descLabel: 'Job Description', descPlaceholder: 'Responsibilities, working hours, who this role is right for...',
+    showPrice: false,
+  },
+  'pg-roommate': {
+    cardTitle: 'Tell seekers about this PG / Room', titleLabel: 'PG / Room Title',
+    titlePlaceholder: 'e.g. Cozy PG for Working Women near Hitech City',
+    descLabel: 'Description', descPlaceholder: 'Describe the PG — food, amenities, house rules, nearby landmarks...',
+    showPrice: true, priceLabel: 'Monthly Rent (₹)', priceHint: "Leave blank to show \"Price on request\"",
+  },
+  'real-estate': {
+    cardTitle: 'Tell buyers about this property', titleLabel: 'Property Title',
+    titlePlaceholder: 'e.g. Spacious 2BHK near Metro Station',
+    descLabel: 'Description', descPlaceholder: "Describe the property — layout, condition, nearby landmarks, why you're renting/selling...",
+    showPrice: true, priceLabel: 'Price (₹)', priceHint: 'Monthly rent, or total sale price',
+  },
+  electronics: {
+    cardTitle: 'Tell buyers about this item', titleLabel: 'Title',
+    titlePlaceholder: 'e.g. Samsung Galaxy S23, 128GB',
+    descLabel: 'Description', descPlaceholder: 'Condition, accessories included, reason for selling...',
+    showPrice: true, priceLabel: 'Price (₹)', priceHint: "Leave blank to show \"Price on request\"",
+  },
+  furniture: {
+    cardTitle: 'Tell buyers about this item', titleLabel: 'Title',
+    titlePlaceholder: 'e.g. 6-Seater Wooden Dining Table',
+    descLabel: 'Description', descPlaceholder: 'Condition, age, reason for selling...',
+    showPrice: true, priceLabel: 'Price (₹)', priceHint: "Leave blank to show \"Price on request\"",
+  },
+  fashion: {
+    cardTitle: 'Tell buyers about this item', titleLabel: 'Title',
+    titlePlaceholder: 'e.g. Nike Air Max, UK 9, worn twice',
+    descLabel: 'Description', descPlaceholder: 'Condition, fit, reason for selling...',
+    showPrice: true, priceLabel: 'Price (₹)', priceHint: "Leave blank to show \"Price on request\"",
+  },
+  education: {
+    cardTitle: 'Tell students about this course', titleLabel: 'Course Title',
+    titlePlaceholder: 'e.g. Spoken English for Beginners',
+    descLabel: 'Description', descPlaceholder: "What this course covers, who it's for, batch timings...",
+    showPrice: true, priceLabel: 'Course Fee (₹)', priceHint: "Leave blank to show \"Price on request\"",
+  },
+  doctors: {
+    cardTitle: 'Tell patients about this practice', titleLabel: 'Practice / Clinic Title',
+    titlePlaceholder: "e.g. Dr. Sharma's Dental Clinic",
+    descLabel: 'Description', descPlaceholder: 'Services offered, experience, why patients should choose you...',
+    showPrice: false,
+  },
+  services: {
+    cardTitle: 'Tell customers about this service', titleLabel: 'Service Title',
+    titlePlaceholder: 'e.g. Home AC Repair & Servicing',
+    descLabel: 'Description', descPlaceholder: 'What you offer, your experience, service area...',
+    showPrice: true, priceLabel: 'Starting Price (₹)', priceHint: "Leave blank to show \"Price on request\"",
+  },
+  tiffin: {
+    cardTitle: 'Tell customers about your tiffin service', titleLabel: 'Service Title',
+    titlePlaceholder: 'e.g. Home-style North Indian Tiffin',
+    descLabel: 'Description', descPlaceholder: 'Menu variety, hygiene, delivery timings...',
+    showPrice: true, priceLabel: 'Price per meal/plan (₹)', priceHint: "Leave blank to show \"Price on request\"",
+  },
+  businesses: {
+    cardTitle: 'Tell customers about your business', titleLabel: 'Business Name',
+    titlePlaceholder: 'e.g. Sharma Electricals & Repairs',
+    descLabel: 'Description', descPlaceholder: 'What you offer, specialities, years in business...',
+    showPrice: false,
+  },
+};
+
 interface FormData {
   title: string;
   description: string;
@@ -171,6 +269,7 @@ export default function PostListingPage() {
   const STEP_LISTING = hasDetailsStep ? 2 : 1;
   const STEP_PHOTOS = STEP_LISTING + 1;
   const STEP_CONTACT = STEP_PHOTOS + 1;
+  const listingCopy = (selectedCategory ? LISTING_COPY[selectedCategory.slug] : null) ?? LISTING_COPY.classifieds;
 
   useEffect(() => {
     if (!localStorage.getItem('access_token')) {
@@ -365,7 +464,7 @@ export default function PostListingPage() {
         category_id: form.category_id,
         city_id: city.id,
         contact_phone: phone,
-        price: form.price ? parseFloat(form.price) : undefined,
+        price: listingCopy.showPrice && form.price ? parseFloat(form.price) : undefined,
         whatsapp_url: form.whatsapp_toggle ? `https://wa.me/91${phone.replace('+91', '')}` : undefined,
         website_url: form.website_url.trim() || undefined,
         social_url: form.social_url.trim() || undefined,
@@ -573,17 +672,17 @@ export default function PostListingPage() {
               {/* Left: Title + Description */}
               <div className="space-y-6" data-listing-form>
                 <div className="bg-white rounded-3xl p-6 border" style={{ borderColor: 'var(--li-border)' }}>
-                  <h2 className="text-lg font-black mb-5" style={{ color: 'var(--li-text)' }}>What are you selling?</h2>
+                  <h2 className="text-lg font-black mb-5" style={{ color: 'var(--li-text)' }}>{listingCopy.cardTitle}</h2>
 
                   <div className="space-y-5">
                     <div>
                       <label className="text-sm font-bold mb-2 block" style={{ color: 'var(--li-text)' }}>
-                        Title <span style={{ color: '#EF4444' }}>*</span>
+                        {listingCopy.titleLabel} <span style={{ color: '#EF4444' }}>*</span>
                       </label>
                       <input
                         value={form.title}
                         onChange={e => save({ title: e.target.value })}
-                        placeholder="e.g. 'Honda Activa 6G 2022 — Low Mileage'"
+                        placeholder={listingCopy.titlePlaceholder}
                         className="w-full rounded-xl px-4 py-3 text-sm outline-none focus:border-orange-400 transition-colors"
                         style={{ border: `2px solid ${errors.title ? '#EF4444' : 'var(--li-border)'}`, color: 'var(--li-text)' }}
                       />
@@ -592,12 +691,12 @@ export default function PostListingPage() {
 
                     <div>
                       <label className="text-sm font-bold mb-2 block" style={{ color: 'var(--li-text)' }}>
-                        Description <span style={{ color: '#EF4444' }}>*</span>
+                        {listingCopy.descLabel} <span style={{ color: '#EF4444' }}>*</span>
                       </label>
                       <textarea
                         value={form.description}
                         onChange={e => save({ description: e.target.value })}
-                        placeholder="Describe your item in detail — condition, age, any defects, reason for selling..."
+                        placeholder={listingCopy.descPlaceholder}
                         rows={5}
                         className="w-full rounded-xl px-4 py-3 text-sm resize-none outline-none focus:border-orange-400 transition-colors"
                         style={{ border: `2px solid ${errors.description ? '#EF4444' : 'var(--li-border)'}`, color: 'var(--li-text)' }}
@@ -613,10 +712,11 @@ export default function PostListingPage() {
 
               {/* Right: Price + preview tip */}
               <div className="space-y-5 md:sticky md:top-24">
+                {listingCopy.showPrice && (
                 <div className="bg-white rounded-3xl p-6 border" style={{ borderColor: 'var(--li-border)' }}>
                   <h2 className="text-base font-bold mb-4" style={{ color: 'var(--li-text)' }}>Set a price</h2>
                   <label className="text-sm font-medium mb-2 block" style={{ color: 'var(--li-muted)' }}>
-                    Price (optional)
+                    {listingCopy.priceLabel} <span className="font-normal">(optional)</span>
                   </label>
                   <div className="relative">
                     <span
@@ -633,9 +733,10 @@ export default function PostListingPage() {
                     />
                   </div>
                   <p className="text-xs mt-2" style={{ color: 'var(--li-muted)' }}>
-                    Leave blank to show &quot;Price on request&quot;
+                    {listingCopy.priceHint}
                   </p>
                 </div>
+                )}
 
                 <div
                   className="rounded-3xl p-5 border"
@@ -897,7 +998,7 @@ export default function PostListingPage() {
                     </div>
                   )}
                   <p className="font-bold text-sm mb-1" style={{ color: 'var(--li-text)' }}>{form.title || '—'}</p>
-                  {form.price && (
+                  {listingCopy.showPrice && form.price && (
                     <p className="font-black text-lg" style={{ color: 'var(--li-primary)' }}>
                       ₹{parseFloat(form.price).toLocaleString('en-IN')}
                     </p>
