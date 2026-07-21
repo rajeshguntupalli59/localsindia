@@ -16,6 +16,17 @@ export interface City {
   active: boolean;
 }
 
+export interface CityBanner {
+  id: string;
+  city_id: string;
+  advertiser_name: string;
+  image_url: string;
+  link_url: string;
+  start_date: string;
+  end_date: string;
+  created_at: string;
+}
+
 export interface Category {
   id: string;
   name: string;

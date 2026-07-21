@@ -493,6 +493,22 @@ Created via the single `notify()` helper in `services/notification_svc.py` — e
 
 ---
 
+### `city_banners` — Admin-sold sponsor slots per city (added 2026-07-20)
+
+| Column | Type | What it stores |
+|--------|------|----------------|
+| `id` | UUID | |
+| `city_id` | FK->cities, CASCADE | Which city homepage shows this banner |
+| `advertiser_name` | String(150) | Shown to admins only; not rendered on the public page |
+| `image_url` | Text | Banner creative, hosted wherever the advertiser/admin uploaded it |
+| `link_url` | Text | Where a tap/click sends the visitor |
+| `start_date` / `end_date` | Date | Inclusive range the banner is shown; "newest wins" if ranges overlap |
+| `created_at` | DateTime | |
+
+See §12 "City Banner Ads" for why this is its own table rather than a `listings` row with `category='advertisement'` (the original Phase 3 plan-doc sketch).
+
+---
+
 ## 6. API Endpoints — Every Route
 
 ### Auth: `/api/v1/auth`
@@ -527,6 +543,7 @@ Also `GET /api/v1/admin/errors` (admin-only, see Admin section below) — lists 
 |--------|------|-------------|
 | GET | `/` | All active cities (sorted by state then name) |
 | GET | `/{slug}` | Single city by slug |
+| GET | `/{slug}/banner` | Active sponsor banner for this city today, or `null` if none is scheduled (added 2026-07-20) |
 
 ### Categories: `/api/v1/categories`
 
@@ -602,6 +619,9 @@ Also `GET /api/v1/admin/errors` (admin-only, see Admin section below) — lists 
 | PATCH | `/users/{user_id}/role` | Set role to `admin` or `user` (cannot change own role) |
 | POST | `/seed-placeholder-images` | Backfills a placeholder image onto every listing with zero photos; also fixes a previously-seeded "LocalIndia" → "LocalsIndia" text typo on old placeholders |
 | GET | `/reports` | All abuse reports |
+| GET | `/banners` | All city banners, newest first (added 2026-07-20) |
+| POST | `/banners` | Create a banner: `{city_id, advertiser_name, image_url, link_url, start_date, end_date}` — 400 if `end_date < start_date` |
+| DELETE | `/banners/{id}` | Remove a banner |
 
 ### Payments: `/api/v1/payments`
 
@@ -1190,7 +1210,13 @@ Never shows a blank white screen.
 
 **File:** `components/ad-banner/AdBanner.tsx`
 
-Responsive banner slot above category chips on city page. Phase 3 monetization feature.
+Google AdSense slot in the city page footer. Phase 3 monetization feature. Not to be confused with `CityBanner` below — that's a directly-sold, admin-managed local sponsor slot, this is third-party programmatic ad inventory.
+
+### `CityBanner` (added 2026-07-20)
+
+**File:** `components/city-banner/CityBanner.tsx`
+
+Fetches `GET /cities/{slug}/banner` on mount and renders nothing if the response is `null` — no skeleton, no placeholder, so an unsold city shows no gap. Rendered at the top of `[city]/CityHomeClient.tsx`, directly below the hero. Banners themselves are created and removed from `/admin/banners`, not by advertisers self-serving.
 
 ### `FreshListingsSection`
 
@@ -1366,6 +1392,16 @@ Second piece of Phase 3 monetization. Two real gaps surfaced during this build, 
 - **Check-in is asymmetric by design**: web admin scanning uses the browser's native `BarcodeDetector` API (Chrome/Edge; no new npm dependency) with a manual-entry fallback for unsupported browsers. Mobile has **no camera scanning at all** — `expo-camera` isn't installed, and adding it would force yet another native rebuild before the pending one has even shipped. Mobile check-in is manual token entry only (`AdminScanTicketsScreen.tsx`). `POST /api/v1/admin/tickets/scan` is idempotent-safe: a re-scanned `qr_token` returns 409 with the original `used_at` timestamp rather than allowing re-entry.
 - **Mobile Events, built from scratch**: `EventsScreen.tsx` (browse), `EventDetailScreen.tsx`, `TicketScreen.tsx`, `MyTicketsScreen.tsx`. Reached via a new "Events" promo banner on `HomeScreen.tsx`, deliberately mirroring how the Business Directory got its own promo banner in the 2026-07-17 pass rather than repurposing the existing "Events" category tile (which still points at generic classifieds search, unchanged).
 - **Mobile event creation** (added later the same day, after initially being scoped out): rather than a second parallel screen, extends the existing `PostScreen.tsx` 3-step wizard exactly the way Businesses did — picking "Events" as the category swaps the Price/Area card for Venue + Date&Time + Free/Paid Admission fields, hides the Photos step (Events has no photo storage, same gap Businesses has), and branches `submit()` to `eventsApi.create()`. Unlike Businesses (live immediately), a newly-created event goes into the same `status='pending'` moderation queue as listings, so it lands on the generic "submitted, under review" success screen rather than navigating straight to the event's own detail page. Needed one new native dependency, `@react-native-community/datetimepicker` (v9.1.0) — a deliberate exception to the "avoid native deps that force a rebuild" reasoning used for QR/camera earlier in this same feature: a native rebuild is *already* unavoidable this cycle for several other reasons, so adding one more standard, well-maintained module to it costs nothing extra, unlike adding the first thing that would force a rebuild that otherwise wouldn't be needed yet.
+
+### City Banner Ads (added 2026-07-20)
+
+Third and last piece of the original Phase 3 monetization plan (Rs.999–2,999/mo per city slot, admin-assigned and manually invoiced — not a self-serve Razorpay flow, same as originally scoped).
+
+- **Data model**: new `city_banners` table (`city_id`, `advertiser_name`, `image_url`, `link_url`, `start_date`, `end_date`). Deliberately **not** modeled as `listings` with `category='advertisement'`, which was the original plan-doc sketch — a banner has no price, WhatsApp contact, photo gallery, or moderation-queue lifecycle the way a real classified does, so folding it into `listings` would have added a non-classified row type that search, the moderation queue, and reporting would all need to know to exclude. A dedicated four-column table with two admin endpoints was less code overall, not more.
+- **Public read**: `GET /api/v1/cities/{slug}/banner` returns the newest banner (by `created_at`) whose `start_date`/`end_date` range covers today, or `null`. "Newest wins" means an admin can simply add a new banner to switch sponsors without deleting the old one first.
+- **Admin control**: `GET/POST /api/v1/admin/banners`, `DELETE /api/v1/admin/banners/{id}` — plain CRUD, no approval workflow (an admin is the one creating it). `/admin/banners` in the dashboard: a form (city picker, advertiser name, image URL, link URL, start/end date) plus a list showing Active/Scheduled/Expired computed client-side from today's date vs. the row's range.
+- **Rendering**: `components/city-banner/CityBanner.tsx` fetches the active banner for the current city on mount and renders nothing at all if there isn't one — no placeholder, no layout-shifting skeleton, since an unsold slot should look like it was never there. Wired into `[city]/CityHomeClient.tsx` directly below the hero section, at the top of the page content.
+- **Distinct from `AdBanner.tsx`** (see §9) — that component is Google AdSense, third-party programmatic ad inventory shown in the city page footer, already live. This is a directly-sold, admin-controlled local sponsor slot at the top of the page. The two coexist; neither replaces the other.
 
 ---
 

@@ -22,12 +22,14 @@ from app.core.database import get_db
 from app.core.deps import get_current_admin
 from app.models.app_error_log import AppErrorLog
 from app.models.business import Business
+from app.models.city_banner import CityBanner
 from app.models.event import Event
 from app.models.listing import Listing
 from app.models.report import Report
 from app.models.ticket import Ticket
 from app.models.user import User
 from app.schemas.business import BusinessOut
+from app.schemas.city_banner import CityBannerCreate, CityBannerOut
 from app.schemas.error_log import ErrorLogGroup
 from app.schemas.event import EventOut
 from app.schemas.listing import ListingOut
@@ -626,6 +628,45 @@ async def admin_unverify_business(
     business.badge_expires_at = None
     await db.commit()
     return {"id": str(business.id), "verified": False}
+
+
+@router.get("/banners", response_model=list[CityBannerOut])
+async def list_banners_admin(
+    db: AsyncSession = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+):
+    result = await db.execute(select(CityBanner).order_by(CityBanner.created_at.desc()))
+    return result.scalars().all()
+
+
+@router.post("/banners", response_model=CityBannerOut)
+async def create_banner_admin(
+    payload: CityBannerCreate,
+    db: AsyncSession = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+):
+    if payload.end_date < payload.start_date:
+        raise HTTPException(status_code=400, detail="End date must be on or after start date.")
+    banner = CityBanner(**payload.model_dump())
+    db.add(banner)
+    await db.commit()
+    await db.refresh(banner)
+    return banner
+
+
+@router.delete("/banners/{banner_id}")
+async def delete_banner_admin(
+    banner_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+):
+    result = await db.execute(select(CityBanner).where(CityBanner.id == banner_id))
+    banner = result.scalar_one_or_none()
+    if not banner:
+        raise HTTPException(status_code=404, detail="Banner not found.")
+    await db.delete(banner)
+    await db.commit()
+    return {"id": str(banner_id), "deleted": True}
 
 
 @router.get("/reports")

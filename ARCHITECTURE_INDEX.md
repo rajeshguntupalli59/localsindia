@@ -59,6 +59,7 @@
 | Claim business | §8-BusinessProfile | `routers/businesses.py` | `BusinessDetailClient.tsx` | `businesses` (owner_id) | POST /businesses/{id}/claim |
 | Business reviews | §5-reviews | `routers/businesses.py` | `BusinessDetailClient.tsx` | `reviews` | POST /businesses/{id}/reviews |
 | Business analytics dashboard (Phase 3, 2026-07-18) | §6-Businesses, §12 | `routers/analytics.py` (new — owner/admin-only, aggregates 30-day totals + a daily views/whatsapp-click trend from `analytics_events`), `routers/businesses.py` (`/view`, `/wa-click` — fire-and-forget event logging, mirrors the existing pattern on `listings.py`), `models/analytics_event.py` (new table, migration `e1a2b3c4d5f6`) | `BusinessDetailClient.tsx` ("View Analytics" link + view/click tracking calls), `[city]/businesses/[id]/dashboard/BusinessDashboardClient.tsx` (new — 4 stat cards + a plain CSS bar chart, deliberately no new charting dependency since recharts wasn't already installed) | `analytics_events` (new — business_id, event_type, created_at) | GET /analytics/business/{id} [AUTH, owner or admin only], POST /businesses/{id}/view, POST /businesses/{id}/wa-click — first piece of Phase 3 monetization built (of ad banners / analytics / event ticketing); chosen first because it's pure reporting, no new Razorpay payment code, unlike the other two |
+| City banner ads (Phase 3, 2026-07-20) | §5-city_banners, §6-Cities, §12 | `models/city_banner.py` (new — `city_id`, `advertiser_name`, `image_url`, `link_url`, `start_date`, `end_date`), migration `b4c5d6e7f8a9`, `routers/cities.py` (`GET /cities/{slug}/banner` — public, returns the newest banner whose date range covers today, or `null`), `routers/admin.py` (`GET/POST /admin/banners`, `DELETE /admin/banners/{id}`) | `admin/banners/page.tsx` (new — city picker + advertiser/image/link fields + start/end date, list with Active/Scheduled/Expired status pill), `components/city-banner/CityBanner.tsx` (new — fetches the active banner for the current city, renders nothing if none; wired into `[city]/CityHomeClient.tsx` right below the hero) | `city_banners` (new) | GET /cities/{slug}/banner (public), GET/POST /admin/banners, DELETE /admin/banners/{id} [ADMIN] — last remaining piece of the original Phase 3 monetization plan (Rs.999–2,999/mo per city slot, admin-assigned/manually-invoiced, not self-serve Razorpay). Built as its own small table rather than "a listing with category=advertisement" (the original plan-doc sketch) — a banner has no price/WhatsApp/photos/moderation-queue semantics a classifieds listing carries, so overloading `listings` would have polluted search/reporting with non-classified rows for no benefit. Distinct from the pre-existing `AdBanner.tsx` (Google AdSense, `[city]/CityHomeClient.tsx` footer) — that's third-party programmatic ad inventory; this is a directly-sold, admin-controlled local sponsor slot. |
 | Event ticketing (Phase 3, 2026-07-18) — web + mobile | §6-Events, §12 | `routers/tickets.py` (new — `/create-order`, `/verify` (HMAC, mirrors `payments.py`), `/my`, `/{id}`), `routers/admin.py` (`POST /admin/tickets/scan` — checks in a ticket by `qr_token`, 409 if already used, 404 if unknown), `models/ticket.py` (new table), `models/event.py` (`ticket_price`, nullable — an event can EITHER sell in-app tickets via `ticket_price` OR link externally via the pre-existing `ticket_url`), migration `f2b3c4d5e6a7` | Web (new): `events/[id]/EventDetailClient.tsx` (first-ever web event detail page — didn't exist before today), `tickets/[id]/TicketClient.tsx` + `tickets/page.tsx` (My Tickets list), `admin/events/scan/page.tsx` (camera QR scan via the browser's native `BarcodeDetector` API, manual-entry fallback — no new npm dependency). Mobile (new — Events didn't exist on mobile at all before today): `EventsScreen.tsx`, `EventDetailScreen.tsx`, `TicketScreen.tsx`, `MyTicketsScreen.tsx`, `AdminScanTicketsScreen.tsx` (manual token entry, not camera — see note below), `HomeScreen.tsx` (new "Events" promo banner, same pattern as the Business Directory promo) | `tickets` (new — event_id, user_id, amount, razorpay_order_id, razorpay_payment_id, qr_token unique, used_at, created_at), `events.ticket_price` (new, nullable) | POST /tickets/create-order, POST /tickets/verify, GET /tickets/my, GET /tickets/{id} [AUTH], POST /admin/tickets/scan [ADMIN] — QR image generated server-side (`qrcode[pil]`, base64 PNG in `TicketOut.qr_image`) specifically so mobile could display it via React Native's built-in `Image` component with **zero new native dependencies** — avoided `react-native-svg`/`expo-camera` deliberately since either would force a second native rebuild on top of the one already pending for referrals/push notifications; mobile ticket check-in is therefore manual-token-entry rather than camera-based, camera scanning is web-only for now. Mobile event **creation** (added later same day, `PostScreen.tsx`) extends the existing Post Listing wizard exactly like Businesses did — picking "Events" as the category shows Venue/Date-Time/Admission fields instead of Price, branches `submit()` to `eventsApi.create()`, and (unlike Businesses, which is live immediately) lands on the generic "submitted, under review" success screen since events go through the same moderation queue as listings. Needed a new native dependency, `@react-native-community/datetimepicker` — added anyway despite the "avoid forcing a new native rebuild" rule used elsewhere in this feature, since a rebuild was *already* unavoidable this cycle (referrals/push/ticketing all need one), so this one rides along at no extra cost. |
 | Post a business (mobile, 2026-07-17) | §8-Businesses | `routers/businesses.py` (no backend change — already fully supported) | `mobile/src/screens/PostScreen.tsx` — picking "Businesses" as the category in the *same* Post Listing wizard branches `submit()` to `businessesApi.create()` instead of a classified; Price field hidden, "Area/Locality" relabels to "Address", Photos step shows an explanatory note (Business has no photo storage yet), lands on the new business's own detail page (no approval queue, live immediately) | `businesses` | POST /businesses — deliberately NOT a separate screen; an earlier attempt built one (`PostBusinessScreen`) and was reverted per explicit feedback not to add a new path when the existing wizard could be extended instead |
 | Post an event (mobile, 2026-07-18) | §6-Events, §8-Events | `routers/events.py` (no backend change — already fully supported) | `mobile/src/screens/PostScreen.tsx` — same wizard-extension pattern as Businesses: picking "Events" swaps Price/Area for Venue + Date&Time (native picker) + Free/Paid Admission (+ in-app ticket price or external URL if paid); Photos step shows a note (Events has no photo storage); lands on the generic "under review" success screen, not the event's own page, since events are moderated like listings (unlike Businesses); `EventsScreen.tsx` gained a "Post an Event" button reaching it via `presetCategory` | `events` | POST /events — new native dependency `@react-native-community/datetimepicker` added (a deliberate exception since a native rebuild is already unavoidable this cycle for other reasons) |
@@ -123,20 +124,21 @@
 | `models/buyer_request.py` | `buyer_requests` | "Wanted" posts — buyer looking for X; status open/fulfilled; soft-delete |
 | `models/analytics_event.py` | `analytics_events` | One row per business view/whatsapp-click event (2026-07-18); aggregated into the owner's analytics dashboard |
 | `models/ticket.py` | `tickets` | Paid event ticket (2026-07-18); created only after Razorpay verify, holds a unique `qr_token` scanned at check-in |
+| `models/city_banner.py` | `city_banners` | Admin-managed sponsor banner per city with a date range (2026-07-20); deliberately its own table, not a `listings` row |
 
 ### Backend — Routers (API endpoints)
 
 | File | Prefix | What it handles |
 |------|--------|----------------|
 | `routers/auth.py` | `/api/v1/auth` | OTP login, Google OAuth, JWT refresh, profile update |
-| `routers/cities.py` | `/api/v1/cities` | List cities, get by slug |
+| `routers/cities.py` | `/api/v1/cities` | List cities, get by slug, get active sponsor banner for city (2026-07-20) |
 | `routers/categories.py` | `/api/v1/categories` | List all categories |
 | `routers/listings.py` | `/api/v1` | Full listing CRUD + report + renew + fulfill + reviews |
 | `routers/uploads.py` | `/api/v1/upload` | Cloudinary image upload/delete |
 | `routers/search.py` | `/api/v1/search` | PostgreSQL full-text search |
 | `routers/businesses.py` | `/api/v1` | Business directory CRUD + claim + reviews |
 | `routers/events.py` | `/api/v1` | Events calendar CRUD |
-| `routers/admin.py` | `/api/v1/admin` | Moderation queues, approve/reject, user management |
+| `routers/admin.py` | `/api/v1/admin` | Moderation queues, approve/reject, user management, city banner CRUD (2026-07-20) |
 | `routers/payments.py` | `/api/v1/payments` | Razorpay featured listing orders + verification |
 | `routers/users.py` | `/api/v1/users` | Public seller profiles (name, member since, active listings) |
 | `routers/chat.py` | `/api/v1/chat` | AI chatbot (Gemini 2.0 Flash); rate-limited 5/min + 20/hr per IP; needs GOOGLE_AI_KEY |
@@ -205,6 +207,7 @@
 | `app/admin/events/page.tsx` | `/admin/events` | Event moderation queue |
 | `app/admin/users/page.tsx` | `/admin/users` | User list + role management |
 | `app/admin/reports/page.tsx` | `/admin/reports` | Abuse reports for flagged listings |
+| `app/admin/banners/page.tsx` | `/admin/banners` | (new, 2026-07-20) City banner ads: create form (city picker + advertiser/image/link + date range), list with Active/Scheduled/Expired status pill, remove |
 | `app/privacy/page.tsx` | `/privacy` | Privacy policy (static) |
 | `app/terms/page.tsx` | `/terms` | Terms of service (static) |
 | `app/offline/page.tsx` | `/offline` | PWA offline fallback |
@@ -233,6 +236,7 @@
 | `components/site-logo/SiteLogo.tsx` | Brand logo (light/dark/size variants) |
 | `components/city-picker/CityPickerModal.tsx` | City search modal with geolocation + recent cities |
 | `components/language-selector/LanguageSelector.tsx` | 11-language dropdown |
+| `components/city-banner/CityBanner.tsx` | (new, 2026-07-20) Fetches the current city's active sponsor banner, renders nothing if none; distinct from `AdBanner.tsx` (Google AdSense) below |
 | `components/language-switcher/LanguageSwitcher.tsx` | Language toggle button |
 | `components/whatsapp-button/WhatsAppButton.tsx` | Green #25D366 button opening wa.me link |
 | `components/whatsapp-badge/WhatsAppBadge.tsx` | Small WhatsApp indicator badge |
@@ -329,6 +333,7 @@ GET    /api/v1/admin/errors               List recent errors grouped by message+
 ```
 GET    /api/v1/cities                     All active cities
 GET    /api/v1/cities/{slug}              Single city
+GET    /api/v1/cities/{slug}/banner       Active sponsor banner for city (null if none)
 GET    /api/v1/categories                 All parent categories
 ```
 
@@ -393,6 +398,9 @@ GET    /api/v1/admin/users               All users
 PATCH  /api/v1/admin/users/{id}/role     Set role to admin|user (cannot change own role)
 POST   /api/v1/admin/seed-placeholder-images  Backfill placeholder images on photo-less listings; fixes old typo'd placeholders
 GET    /api/v1/admin/reports             All abuse reports
+GET    /api/v1/admin/banners             All city banners
+POST   /api/v1/admin/banners             Create banner (city_id, advertiser_name, image_url, link_url, start_date, end_date)
+DELETE /api/v1/admin/banners/{id}        Remove banner
 ```
 
 ### Payments
@@ -469,6 +477,7 @@ GET    /api/v1/health                     {"status":"ok"} — keepalive probe
 | `analytics_events` | id, business_id, event_type, created_at | One row per view/whatsapp_click event; migration `e1a2b3c4d5f6` (2026-07-18); aggregated (not queried raw) by `GET /analytics/business/{id}` |
 | `tickets` | id, event_id, user_id, amount, razorpay_order_id, razorpay_payment_id, qr_token (unique), used_at, created_at | Migration `f2b3c4d5e6a7` (2026-07-18); created only after Razorpay signature verification, never at order-creation time |
 | `app_error_logs` | id, platform, message, stack, context, app_version, created_at | No user_id (reports must work pre-login/no-auth); platform in ('mobile','web'); migration `b3c4d5e6f7a8` (2026-07-14) |
+| `city_banners` | id, city_id, advertiser_name, image_url, link_url, start_date, end_date, created_at | Admin-managed sponsor slot per city, one active banner shown per city homepage; migration `b4c5d6e7f8a9` (2026-07-20); no listing/moderation semantics — intentionally its own table, not `listings` with `category='advertisement'` |
 
 ---
 

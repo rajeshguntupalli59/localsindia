@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { ClipboardList, CalendarDays, Flag, Users, LayoutDashboard, LogOut, Activity, ShieldCheck, QrCode } from 'lucide-react';
+import { ClipboardList, CalendarDays, Flag, Users, LayoutDashboard, LogOut, Activity, ShieldCheck, QrCode, Megaphone } from 'lucide-react';
 
 const NAV = [
   { href: '/admin', exact: true, icon: <LayoutDashboard className="w-4 h-4" />, label: 'Dashboard', badge: null },
@@ -13,6 +13,7 @@ const NAV = [
   { href: '/admin/reports', exact: false, icon: <Flag className="w-4 h-4" />, label: 'Flagged', badge: 'flagged' },
   { href: '/admin/users', exact: false, icon: <Users className="w-4 h-4" />, label: 'Users', badge: null },
   { href: '/admin/businesses', exact: false, icon: <ShieldCheck className="w-4 h-4" />, label: 'Businesses', badge: null },
+  { href: '/admin/banners', exact: false, icon: <Megaphone className="w-4 h-4" />, label: 'Banners', badge: null },
   { href: '/admin/monitoring', exact: false, icon: <Activity className="w-4 h-4" />, label: 'Monitoring', badge: null },
 ];
 

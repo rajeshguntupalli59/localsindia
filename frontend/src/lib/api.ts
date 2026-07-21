@@ -1,5 +1,6 @@
 import type {
   City,
+  CityBanner,
   Category,
   Listing,
   ListingImage,
@@ -114,6 +115,8 @@ export const api = {
       req<{ count: number }>(`/api/v1/cities/${slug}/listings/today-count`),
     trending: (slug: string) =>
       req<Listing[]>(`/api/v1/cities/${slug}/listings/trending`),
+    banner: (slug: string) =>
+      req<CityBanner | null>(`/api/v1/cities/${slug}/banner`),
   },
   listings: {
     mine: (token: string) =>

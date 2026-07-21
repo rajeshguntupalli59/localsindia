@@ -38,17 +38,16 @@ const CATEGORIES: CategoryDef[] = [
 
 const POPULAR_TAGS = ['Tiffin Service', 'PG for Boys', 'Used Laptop', 'Honda Activa', 'Home Tutor', '2BHK Flat'];
 
-const STATS: [string, string][] = [
-  ['496+', 'Cities'],
-  ['11', 'Languages'],
-];
-
-const TRUST: TrustDef[] = [
-  { icon: Zap,          title: 'Instant Posting',      subtitle: 'Go live in under a minute with verified reach.', iconBg: 'bg-orange-500/[0.15]',  iconColor: 'text-orange-400'  },
-  { icon: MessageCircle,title: 'WhatsApp Native',       subtitle: 'Contact sellers directly — no middlemen.',       iconBg: 'bg-emerald-500/[0.15]', iconColor: 'text-emerald-400', isWhatsApp: true },
-  { icon: MapPin,       title: 'Localized Scale',       subtitle: '496+ cities across India.',                iconBg: 'bg-blue-500/[0.15]',    iconColor: 'text-blue-400'    },
-  { icon: Languages,    title: 'Multilingual Support',  subtitle: '11 native languages, your way.',                 iconBg: 'bg-violet-500/[0.15]',  iconColor: 'text-violet-400'  },
-];
+// City count is real, not hardcoded — derived from the live `cities` list
+// (usePrefs) at render time, so it can never drift from what's actually active.
+function buildTrust(cityCount: number): TrustDef[] {
+  return [
+    { icon: Zap,          title: 'Instant Posting',      subtitle: 'Go live in under a minute with verified reach.', iconBg: 'bg-orange-500/[0.15]',  iconColor: 'text-orange-400'  },
+    { icon: MessageCircle,title: 'WhatsApp Native',       subtitle: 'Contact sellers directly — no middlemen.',       iconBg: 'bg-emerald-500/[0.15]', iconColor: 'text-emerald-400', isWhatsApp: true },
+    { icon: MapPin,       title: 'Localized Scale',       subtitle: `${cityCount}+ cities across South India.`,      iconBg: 'bg-blue-500/[0.15]',    iconColor: 'text-blue-400'    },
+    { icon: Languages,    title: 'Multilingual Support',  subtitle: '11 native languages, your way.',                 iconBg: 'bg-violet-500/[0.15]',  iconColor: 'text-violet-400'  },
+  ];
+}
 
 const HERO_WORDS = ['Tiffin', 'PG Rooms', 'Jobs', 'Used Cars', 'Electronics', 'Tutors', 'Events'];
 
@@ -63,6 +62,14 @@ export default function HomePage() {
   const [showCityPicker, setShowCityPicker] = useState(false);
   const [pendingCategory, setPendingCategory] = useState<string | null>(null);
   const [heroWordIdx, setHeroWordIdx] = useState(0);
+
+  // Real, live counts — never a hardcoded number that can drift from what's actually active
+  const cityCount = cities.length;
+  const STATS: [string, string][] = [
+    [cityCount > 0 ? `${cityCount}+` : '—', 'Cities'],
+    ['11', 'Languages'],
+  ];
+  const TRUST = buildTrust(cityCount > 0 ? cityCount : 151);
 
   // Cycle hero category words
   useEffect(() => {

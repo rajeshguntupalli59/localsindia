@@ -14,6 +14,7 @@ import { usePrefs } from '@/context/PrefsContext';
 import SiteHeader from '@/components/site-header/SiteHeader';
 import SiteFooter from '@/components/site-footer/SiteFooter';
 import AdBanner from '@/components/ad-banner/AdBanner';
+import CityBanner from '@/components/city-banner/CityBanner';
 import ListingCard from '@/components/listing-card/ListingCard';
 import ListingCardSkeleton from '@/components/listing-card/ListingCardSkeleton';
 import EmptyState from '@/components/empty-state/EmptyState';
@@ -242,6 +243,8 @@ export default function CityHomeClient({
       </div>
 
       <div className="page-wrap py-8 space-y-10">
+
+        {!loading && <CityBanner citySlug={citySlug} />}
 
         {/* ── ROW 1: Picked up where you left off (conditional) ── */}
         <AnimatePresence>
