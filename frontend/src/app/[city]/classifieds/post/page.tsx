@@ -12,12 +12,6 @@ import SiteHeader from '@/components/site-header/SiteHeader';
 import { toast } from 'sonner';
 import { usePrefs } from '@/context/PrefsContext';
 
-const STEPS = [
-  { label: 'Details', desc: 'Title, category, description' },
-  { label: 'Photos', desc: 'Up to 5 photos' },
-  { label: 'Contact', desc: 'Phone & WhatsApp' },
-];
-
 const CATEGORY_ICONS: Record<string, LucideIcon> = {
   tiffin: UtensilsCrossed,
   'pg-roommate': Building2,
@@ -35,18 +29,84 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
   fashion: ShoppingBag,
 };
 
-// Category-specific chip options shown after picking a category
-const CATEGORY_CHIPS: Record<string, { key: string; label: string; options: string[] }[]> = {
-  'tiffin':      [{ key: 'diet', label: 'Diet', options: ['Veg', 'Non-Veg', 'Both'] }, { key: 'plan', label: 'Plan', options: ['Daily', 'Monthly', 'Weekly'] }],
-  'pg-roommate': [{ key: 'gender', label: 'For', options: ['Male', 'Female', 'Any'] }, { key: 'furnishing', label: 'Furnishing', options: ['Furnished', 'Unfurnished', 'Semi-furnished'] }],
-  'jobs':        [{ key: 'type', label: 'Job Type', options: ['Full-time', 'Part-time', 'Freelance'] }, { key: 'mode', label: 'Work Mode', options: ['Office', 'WFH', 'Hybrid'] }],
-  'vehicles':    [{ key: 'fuel', label: 'Fuel', options: ['Petrol', 'Diesel', 'Electric', 'CNG'] }, { key: 'condition', label: 'Condition', options: ['Excellent', 'Good', 'Needs repair'] }],
-  'electronics': [{ key: 'condition', label: 'Condition', options: ['Like new', 'Good', 'Fair'] }, { key: 'warranty', label: 'Warranty', options: ['In warranty', 'Out of warranty'] }],
-  'real-estate': [{ key: 'type', label: 'Type', options: ['Rent', 'Sale'] }, { key: 'bhk', label: 'Size', options: ['1BHK', '2BHK', '3BHK', '4BHK+'] }],
-  'education':   [{ key: 'mode', label: 'Mode', options: ['Online', 'Offline', 'Both'] }, { key: 'level', label: 'Level', options: ['School', 'College', 'Competitive', 'Skills'] }],
-  'services':    [{ key: 'availability', label: 'Available', options: ['Weekdays', 'Weekends', 'Anytime'] }],
-  'furniture':   [{ key: 'condition', label: 'Condition', options: ['Like new', 'Good', 'Fair'] }],
-  'fashion':     [{ key: 'condition', label: 'Condition', options: ['New with tag', 'Like new', 'Used'] }],
+// Category-specific questions shown on their own step, right after picking a
+// category. Keys match the backend's per-category *_details table columns
+// 1:1 (backend/app/models/listing_details.py), so these are sent straight
+// through as `category_details` on create — same field-set as the mobile
+// app's PostScreen.tsx, kept in sync for parity across platforms.
+type DetailField =
+  | { key: string; label: string; type: 'text'; placeholder?: string }
+  | { key: string; label: string; type: 'number'; placeholder?: string }
+  | { key: string; label: string; type: 'select'; options: string[] }
+  | { key: string; label: string; type: 'multiselect'; options: string[] }
+  | { key: string; label: string; type: 'switch' };
+
+const CATEGORY_DETAIL_FIELDS: Record<string, DetailField[]> = {
+  vehicles: [
+    { key: 'brand', label: 'Brand', type: 'text', placeholder: 'e.g. Honda, Maruti Suzuki' },
+    { key: 'model', label: 'Model', type: 'text', placeholder: 'e.g. Activa 6G, Swift' },
+    { key: 'year', label: 'Year', type: 'number', placeholder: 'e.g. 2022' },
+    { key: 'km_driven', label: 'KM Driven', type: 'number', placeholder: 'e.g. 15000' },
+    { key: 'fuel_type', label: 'Fuel Type', type: 'select', options: ['Petrol', 'Diesel', 'Electric', 'CNG', 'Hybrid'] },
+    { key: 'transmission', label: 'Transmission', type: 'select', options: ['Manual', 'Automatic'] },
+    { key: 'owners_count', label: 'Number of Owners', type: 'number', placeholder: 'e.g. 1' },
+  ],
+  jobs: [
+    { key: 'company_name', label: 'Company Name', type: 'text', placeholder: 'e.g. Acme Pvt Ltd' },
+    { key: 'salary_min', label: 'Min Salary (₹/month)', type: 'number', placeholder: 'e.g. 15000' },
+    { key: 'salary_max', label: 'Max Salary (₹/month)', type: 'number', placeholder: 'e.g. 25000' },
+    { key: 'job_type', label: 'Job Type', type: 'select', options: ['Full-time', 'Part-time', 'Contract', 'Internship'] },
+    { key: 'experience_required', label: 'Experience Required', type: 'text', placeholder: 'e.g. 1-2 years' },
+    { key: 'work_mode', label: 'Work Mode', type: 'select', options: ['On-site', 'Remote', 'Hybrid'] },
+  ],
+  'pg-roommate': [
+    { key: 'room_type', label: 'Room Type', type: 'select', options: ['Single', 'Sharing', '1RK', '1BHK'] },
+    { key: 'gender_preference', label: 'Gender Preference', type: 'select', options: ['Male', 'Female', 'Any'] },
+    { key: 'deposit_amount', label: 'Deposit Amount (₹)', type: 'number', placeholder: 'e.g. 10000' },
+    { key: 'amenities', label: 'Amenities', type: 'multiselect', options: ['WiFi', 'AC', 'Food', 'Laundry', 'Parking'] },
+  ],
+  'real-estate': [
+    { key: 'property_type', label: 'Property Type', type: 'select', options: ['Apartment', 'Villa', 'Plot', 'Commercial'] },
+    { key: 'bhk', label: 'BHK', type: 'number', placeholder: 'e.g. 2' },
+    { key: 'sqft', label: 'Area (sq.ft)', type: 'number', placeholder: 'e.g. 1200' },
+    { key: 'furnishing', label: 'Furnishing', type: 'select', options: ['Furnished', 'Semi-furnished', 'Unfurnished'] },
+    { key: 'listing_type', label: 'Listing Type', type: 'select', options: ['Rent', 'Sale'] },
+  ],
+  electronics: [
+    { key: 'brand', label: 'Brand', type: 'text', placeholder: 'e.g. Samsung, Apple' },
+    { key: 'model', label: 'Model', type: 'text', placeholder: 'e.g. Galaxy S23' },
+    { key: 'condition', label: 'Condition', type: 'select', options: ['New', 'Like New', 'Good', 'Fair'] },
+    { key: 'warranty_remaining', label: 'Warranty Remaining', type: 'text', placeholder: 'e.g. 6 months' },
+  ],
+  furniture: [
+    { key: 'material', label: 'Material', type: 'text', placeholder: 'e.g. Wood, Metal' },
+    { key: 'dimensions', label: 'Dimensions', type: 'text', placeholder: 'e.g. 6ft x 4ft' },
+    { key: 'condition', label: 'Condition', type: 'select', options: ['New', 'Like New', 'Good', 'Fair'] },
+  ],
+  fashion: [
+    { key: 'brand', label: 'Brand', type: 'text', placeholder: 'e.g. Nike, Zara' },
+    { key: 'size', label: 'Size', type: 'text', placeholder: 'e.g. M, 32, UK 8' },
+    { key: 'gender', label: 'Gender', type: 'select', options: ['Men', 'Women', 'Unisex', 'Kids'] },
+  ],
+  education: [
+    { key: 'course_type', label: 'Course Type', type: 'text', placeholder: 'e.g. Spoken English, Maths Tuition' },
+    { key: 'mode', label: 'Mode', type: 'select', options: ['Online', 'Offline', 'Hybrid'] },
+    { key: 'duration', label: 'Duration', type: 'text', placeholder: 'e.g. 3 months' },
+  ],
+  doctors: [
+    { key: 'specialization', label: 'Specialization', type: 'text', placeholder: 'e.g. Dentist, Cardiologist' },
+    { key: 'consultation_fee', label: 'Consultation Fee (₹)', type: 'number', placeholder: 'e.g. 500' },
+    { key: 'available_timings', label: 'Available Timings', type: 'text', placeholder: 'e.g. Mon-Sat 10am-6pm' },
+  ],
+  services: [
+    { key: 'service_type', label: 'Service Type', type: 'text', placeholder: 'e.g. Plumber, Electrician' },
+    { key: 'experience_years', label: 'Experience (years)', type: 'number', placeholder: 'e.g. 5' },
+  ],
+  tiffin: [
+    { key: 'meal_type', label: 'Meal Type', type: 'select', options: ['Veg', 'Non-Veg', 'Both'] },
+    { key: 'delivery_area', label: 'Delivery Area', type: 'text', placeholder: 'e.g. Within 5km of Kukatpally' },
+    { key: 'subscription_available', label: 'Subscription Available', type: 'switch' },
+  ],
 };
 
 interface FormData {
@@ -59,13 +119,13 @@ interface FormData {
   website_url: string;
   social_url: string;
   area: string;
-  attributes: Record<string, string>;
+  category_details: Record<string, unknown>;
 }
 
 const EMPTY: FormData = {
   title: '', description: '', category_id: '', price: '',
   contact_phone: '', whatsapp_toggle: true,
-  website_url: '', social_url: '', area: '', attributes: {},
+  website_url: '', social_url: '', area: '', category_details: {},
 };
 
 const PHONE_RE = /^\+91[6-9]\d{9}$/;
@@ -86,6 +146,32 @@ export default function PostListingPage() {
   const [done, setDone] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
+  // Step layout depends on whether the picked category has its own specific
+  // questions — those get a dedicated step, separate from the generic
+  // Title/Description step, instead of both living on one scrollable screen.
+  const selectedCategory = categories.find(c => c.id === form.category_id) ?? null;
+  const detailFields = selectedCategory ? CATEGORY_DETAIL_FIELDS[selectedCategory.slug] ?? null : null;
+  const hasDetailsStep = !!detailFields;
+  const STEPS = hasDetailsStep
+    ? [
+        { label: 'Category', desc: 'What are you posting?' },
+        { label: 'Details', desc: 'Category-specific questions' },
+        { label: 'Listing', desc: 'Title & description' },
+        { label: 'Photos', desc: 'Up to 5 photos' },
+        { label: 'Contact', desc: 'Phone & WhatsApp' },
+      ]
+    : [
+        { label: 'Category', desc: 'What are you posting?' },
+        { label: 'Listing', desc: 'Title & description' },
+        { label: 'Photos', desc: 'Up to 5 photos' },
+        { label: 'Contact', desc: 'Phone & WhatsApp' },
+      ];
+  const STEP_CATEGORY = 0;
+  const STEP_DETAILS = hasDetailsStep ? 1 : -1;
+  const STEP_LISTING = hasDetailsStep ? 2 : 1;
+  const STEP_PHOTOS = STEP_LISTING + 1;
+  const STEP_CONTACT = STEP_PHOTOS + 1;
+
   useEffect(() => {
     if (!localStorage.getItem('access_token')) {
       router.replace(`/auth/login?next=/${citySlug}/classifieds/post`);
@@ -96,9 +182,9 @@ export default function PostListingPage() {
       try {
         const draft = JSON.parse(stored);
         // Merge with EMPTY so any field missing from an older draft version gets a safe default.
-        // attributes must always be an object — if absent from the stored draft, accessing
-        // attributes[key] in the chip renderer throws "Cannot read properties of undefined".
-        setForm({ ...EMPTY, ...draft, attributes: draft.attributes ?? {} });
+        // category_details must always be an object — if absent from the stored draft, accessing
+        // category_details[key] in the field renderer throws "Cannot read properties of undefined".
+        setForm({ ...EMPTY, ...draft, category_details: draft.category_details ?? {} });
       } catch {
         // Corrupted JSON — discard the draft rather than crash on every page load
         localStorage.removeItem('li_post_form');
@@ -117,24 +203,107 @@ export default function PostListingPage() {
     localStorage.setItem('li_post_form', JSON.stringify(merged));
   };
 
-  const validateStep1 = () => {
+  const setDetailField = (key: string, value: unknown) => {
+    save({ category_details: { ...form.category_details, [key]: value } });
+  };
+
+  const renderDetailField = (field: DetailField) => {
+    const value = form.category_details[field.key];
+
+    if (field.type === 'select' || field.type === 'multiselect') {
+      const selected: string[] = field.type === 'multiselect'
+        ? (Array.isArray(value) ? value as string[] : [])
+        : (typeof value === 'string' && value ? [value] : []);
+      return (
+        <div>
+          <p className="text-sm font-bold mb-2" style={{ color: 'var(--li-text)' }}>{field.label}</p>
+          <div className="flex flex-wrap gap-2">
+            {field.options.map(opt => {
+              const active = selected.includes(opt);
+              return (
+                <button
+                  key={opt}
+                  type="button"
+                  onClick={() => {
+                    if (field.type === 'multiselect') {
+                      const next = active ? selected.filter(o => o !== opt) : [...selected, opt];
+                      setDetailField(field.key, next);
+                    } else {
+                      setDetailField(field.key, opt);
+                    }
+                  }}
+                  className="px-3 py-1.5 rounded-full text-sm font-semibold border-2 transition-all"
+                  style={active
+                    ? { borderColor: 'var(--li-primary)', background: 'var(--li-primary-light)', color: 'var(--li-primary)' }
+                    : { borderColor: 'var(--li-border)', color: 'var(--li-muted)' }}
+                >
+                  {opt}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      );
+    }
+
+    if (field.type === 'switch') {
+      return (
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-bold" style={{ color: 'var(--li-text)' }}>{field.label}</p>
+          <button
+            type="button"
+            onClick={() => setDetailField(field.key, !value)}
+            className="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors duration-200 focus:outline-none"
+            style={{ background: value ? 'var(--li-wa-green)' : '#D1D5DB' }}
+          >
+            <span
+              className="inline-block h-5 w-5 rounded-full bg-white shadow-md transition-transform duration-200"
+              style={{ transform: value ? 'translateX(22px)' : 'translateX(2px)' }}
+            />
+          </button>
+        </div>
+      );
+    }
+
+    return (
+      <div>
+        <label className="text-sm font-bold mb-2 block" style={{ color: 'var(--li-text)' }}>{field.label}</label>
+        <input
+          type={field.type === 'number' ? 'number' : 'text'}
+          value={value != null ? String(value) : ''}
+          onChange={e => setDetailField(field.key, e.target.value)}
+          placeholder={field.placeholder}
+          className="w-full rounded-xl px-4 py-3 text-sm outline-none focus:border-orange-400 transition-colors"
+          style={{ border: '2px solid var(--li-border)', color: 'var(--li-text)' }}
+        />
+      </div>
+    );
+  };
+
+  const validateCategoryStep = () => {
+    const e: Partial<FormData> = {};
+    if (!form.category_id) e.category_id = 'Please pick a category';
+    setErrors(e);
+    if (Object.keys(e).length > 0) toast.error('Pick a category to continue');
+    return Object.keys(e).length === 0;
+  };
+
+  const validateListingStep = () => {
     const e: Partial<FormData> = {};
     if (!form.title.trim() || form.title.trim().length < 5) e.title = 'Min 5 characters required';
-    if (!form.category_id) e.category_id = 'Please pick a category';
     if (!form.description.trim() || form.description.length < 20) e.description = 'At least 20 characters';
     setErrors(e);
     if (Object.keys(e).length > 0) {
       const msgs = [];
       if (e.title) msgs.push('Title too short');
-      if (e.category_id) msgs.push('Pick a category');
       if (e.description) msgs.push('Description too short (20+ chars)');
       toast.error(msgs.join(' · '));
-      document.querySelector('[data-step1-form]')?.scrollIntoView({ behavior: 'smooth' });
+      document.querySelector('[data-listing-form]')?.scrollIntoView({ behavior: 'smooth' });
     }
     return Object.keys(e).length === 0;
   };
 
-  const validateStep3 = () => {
+  const validateContactStep = () => {
     const e: Partial<FormData> = {};
     const phone = form.contact_phone.trim().startsWith('+91')
       ? form.contact_phone.trim()
@@ -145,9 +314,21 @@ export default function PostListingPage() {
     return Object.keys(e).length === 0;
   };
 
+  const buildCategoryDetailsPayload = (): Record<string, unknown> | null => {
+    if (!detailFields) return null;
+    const out: Record<string, unknown> = {};
+    for (const f of detailFields) {
+      const v = form.category_details[f.key];
+      if (v === undefined || v === null || v === '' || (Array.isArray(v) && v.length === 0)) continue;
+      out[f.key] = f.type === 'number' ? Number(v) : v;
+    }
+    return Object.keys(out).length > 0 ? out : null;
+  };
+
   const handleNext = () => {
-    if (step === 0 && !validateStep1()) return;
-    if (step === 2) { handleSubmit(); return; }
+    if (step === STEP_CATEGORY && !validateCategoryStep()) return;
+    if (step === STEP_LISTING && !validateListingStep()) return;
+    if (step === STEP_CONTACT) { handleSubmit(); return; }
     setStep(s => s + 1);
   };
 
@@ -168,7 +349,7 @@ export default function PostListingPage() {
   };
 
   const handleSubmit = async () => {
-    if (!validateStep3()) return;
+    if (!validateContactStep()) return;
     const token = localStorage.getItem('access_token');
     if (!token) { router.push('/auth/login'); return; }
     if (!city) { toast.error('City not loaded, please refresh'); return; }
@@ -189,7 +370,7 @@ export default function PostListingPage() {
         website_url: form.website_url.trim() || undefined,
         social_url: form.social_url.trim() || undefined,
         area: form.area.trim() || undefined,
-        attributes: Object.keys(form.attributes).length > 0 ? form.attributes : undefined,
+        category_details: buildCategoryDetailsPayload(),
       }, token);
 
       for (const photo of photos) {
@@ -297,17 +478,100 @@ export default function PostListingPage() {
       <div className="page-wrap py-8">
         <AnimatePresence mode="wait">
 
-          {/* ── STEP 1: DETAILS ── */}
-          {step === 0 && (
+          {/* ── STEP: CATEGORY ── */}
+          {step === STEP_CATEGORY && (
             <motion.div
-              key="step1"
+              key="stepCategory"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="max-w-3xl mx-auto"
+            >
+              <div className="bg-white rounded-3xl p-6 border" style={{ borderColor: `${errors.category_id ? '#EF4444' : 'var(--li-border)'}` }}>
+                <h2 className="text-lg font-black mb-1" style={{ color: 'var(--li-text)' }}>
+                  What are you posting? <span style={{ color: '#EF4444' }}>*</span>
+                </h2>
+                <p className="text-sm mb-5" style={{ color: 'var(--li-muted)' }}>
+                  Pick a category — we&apos;ll ask the right questions for it next.
+                </p>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {categories.map(cat => {
+                    const Icon = CATEGORY_ICONS[cat.slug] ?? Tag;
+                    const isActive = form.category_id === cat.id;
+                    return (
+                      <motion.button
+                        key={cat.id}
+                        whileHover={{ y: -2 }}
+                        whileTap={{ scale: 0.97 }}
+                        onClick={() => save({ category_id: cat.id, category_details: {} })}
+                        className="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all"
+                        style={
+                          isActive
+                            ? { borderColor: 'var(--li-primary)', background: 'var(--li-primary-light)' }
+                            : { borderColor: 'var(--li-border)' }
+                        }
+                      >
+                        <div
+                          className="w-10 h-10 rounded-xl flex items-center justify-center transition-colors"
+                          style={{ background: isActive ? 'rgba(255,107,53,0.15)' : '#F3F4F6' }}
+                        >
+                          <Icon
+                            className="w-5 h-5"
+                            style={{ color: isActive ? 'var(--li-primary)' : 'var(--li-muted)' }}
+                            strokeWidth={1.8}
+                          />
+                        </div>
+                        <span
+                          className="text-xs font-bold text-center leading-tight"
+                          style={{ color: isActive ? 'var(--li-primary)' : 'var(--li-text)' }}
+                        >
+                          {cat.name}
+                        </span>
+                      </motion.button>
+                    );
+                  })}
+                </div>
+                {errors.category_id && <p className="text-xs mt-3" style={{ color: '#EF4444' }}>{errors.category_id}</p>}
+              </div>
+            </motion.div>
+          )}
+
+          {/* ── STEP: CATEGORY-SPECIFIC DETAILS (only for categories with their own questions) ── */}
+          {hasDetailsStep && step === STEP_DETAILS && detailFields && selectedCategory && (
+            <motion.div
+              key="stepDetails"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="max-w-3xl mx-auto"
+            >
+              <div className="bg-white rounded-3xl p-6 border" style={{ borderColor: 'var(--li-border)' }}>
+                <h2 className="text-lg font-black mb-1" style={{ color: 'var(--li-text)' }}>
+                  {selectedCategory.name} details
+                </h2>
+                <p className="text-sm mb-5" style={{ color: 'var(--li-muted)' }}>
+                  A few quick questions specific to this category.
+                </p>
+                <div className="space-y-5">
+                  {detailFields.map(field => (
+                    <div key={field.key}>{renderDetailField(field)}</div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* ── STEP: LISTING INFO (generic title/description + price) ── */}
+          {step === STEP_LISTING && (
+            <motion.div
+              key="stepListing"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               className="grid grid-cols-1 md:grid-cols-[1fr_360px] gap-6 md:gap-8 items-start"
             >
-              {/* Left: Title + Category + Description */}
-              <div className="space-y-6" data-step1-form>
+              {/* Left: Title + Description */}
+              <div className="space-y-6" data-listing-form>
                 <div className="bg-white rounded-3xl p-6 border" style={{ borderColor: 'var(--li-border)' }}>
                   <h2 className="text-lg font-black mb-5" style={{ color: 'var(--li-text)' }}>What are you selling?</h2>
 
@@ -345,99 +609,6 @@ export default function PostListingPage() {
                     </div>
                   </div>
                 </div>
-
-                {/* Category */}
-                <div className="bg-white rounded-3xl p-6 border" style={{ borderColor: `${errors.category_id ? '#EF4444' : 'var(--li-border)'}` }}>
-                  <h2 className="text-lg font-black mb-5" style={{ color: 'var(--li-text)' }}>
-                    Pick a category <span style={{ color: '#EF4444' }}>*</span>
-                  </h2>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    {categories.map(cat => {
-                      const Icon = CATEGORY_ICONS[cat.slug] ?? Tag;
-                      const isActive = form.category_id === cat.id;
-                      return (
-                        <motion.button
-                          key={cat.id}
-                          whileHover={{ y: -2 }}
-                          whileTap={{ scale: 0.97 }}
-                          onClick={() => save({ category_id: cat.id })}
-                          className="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all"
-                          style={
-                            isActive
-                              ? { borderColor: 'var(--li-primary)', background: 'var(--li-primary-light)' }
-                              : { borderColor: 'var(--li-border)' }
-                          }
-                        >
-                          <div
-                            className="w-10 h-10 rounded-xl flex items-center justify-center transition-colors"
-                            style={{ background: isActive ? 'rgba(255,107,53,0.15)' : '#F3F4F6' }}
-                          >
-                            <Icon
-                              className="w-5 h-5"
-                              style={{ color: isActive ? 'var(--li-primary)' : 'var(--li-muted)' }}
-                              strokeWidth={1.8}
-                            />
-                          </div>
-                          <span
-                            className="text-xs font-bold text-center leading-tight"
-                            style={{ color: isActive ? 'var(--li-primary)' : 'var(--li-text)' }}
-                          >
-                            {cat.name}
-                          </span>
-                        </motion.button>
-                      );
-                    })}
-                  </div>
-                  {errors.category_id && <p className="text-xs mt-3" style={{ color: '#EF4444' }}>{errors.category_id}</p>}
-                </div>
-
-                {/* Category smart chips — slide in after picking a category */}
-                {(() => {
-                  const selectedCat = categories.find(c => c.id === form.category_id);
-                  const chips = selectedCat ? CATEGORY_CHIPS[selectedCat.slug] : null;
-                  if (!chips) return null;
-                  return (
-                    <motion.div
-                      initial={{ opacity: 0, y: -8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="bg-white rounded-3xl p-6 border"
-                      style={{ borderColor: 'var(--li-border)' }}
-                    >
-                      <h2 className="text-base font-bold mb-4" style={{ color: 'var(--li-text)' }}>
-                        Quick details <span className="font-normal text-xs" style={{ color: 'var(--li-muted)' }}>(optional)</span>
-                      </h2>
-                      <div className="space-y-4">
-                        {chips.map(({ key, label, options }) => (
-                          <div key={key}>
-                            <p className="text-xs font-semibold mb-2" style={{ color: 'var(--li-muted)' }}>{label}</p>
-                            <div className="flex flex-wrap gap-2">
-                              {options.map(opt => {
-                                const active = (form.attributes ?? {})[key] === opt;
-                                return (
-                                  <button
-                                    key={opt}
-                                    type="button"
-                                    onClick={() => {
-                                      const next = { ...form.attributes };
-                                      if (active) delete next[key]; else next[key] = opt;
-                                      save({ attributes: next });
-                                    }}
-                                    className="px-3 py-1.5 rounded-full text-sm font-semibold border-2 transition-all"
-                                    style={active
-                                      ? { borderColor: 'var(--li-primary)', background: 'var(--li-primary-light)', color: 'var(--li-primary)' }
-                                      : { borderColor: 'var(--li-border)', color: 'var(--li-muted)' }}
-                                  >
-                                    {opt}
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </motion.div>
-                  );
-                })()}
               </div>
 
               {/* Right: Price + preview tip */}
@@ -486,8 +657,8 @@ export default function PostListingPage() {
             </motion.div>
           )}
 
-          {/* ── STEP 2: PHOTOS ── */}
-          {step === 1 && (
+          {/* ── STEP: PHOTOS ── */}
+          {step === STEP_PHOTOS && (
             <motion.div
               key="step2"
               initial={{ opacity: 0, x: 20 }}
@@ -585,7 +756,7 @@ export default function PostListingPage() {
           )}
 
           {/* ── STEP 3: CONTACT ── */}
-          {step === 2 && (
+          {step === STEP_CONTACT && (
             <motion.div
               key="step3"
               initial={{ opacity: 0, x: 20 }}
@@ -749,12 +920,12 @@ export default function PostListingPage() {
           style={{ borderColor: 'var(--li-border)' }}
         >
           <button
-            onClick={() => step === 0 ? router.back() : setStep(s => s - 1)}
+            onClick={() => step === STEP_CATEGORY ? router.back() : setStep(s => s - 1)}
             className="flex items-center gap-2 px-6 py-3 rounded-2xl border font-semibold text-sm transition-colors hover:border-orange-400"
             style={{ borderColor: 'var(--li-border)', color: 'var(--li-text)' }}
           >
             <ArrowLeft className="w-4 h-4" />
-            {step === 0 ? 'Cancel' : 'Back'}
+            {step === STEP_CATEGORY ? 'Cancel' : 'Back'}
           </button>
 
           <motion.button
@@ -765,7 +936,7 @@ export default function PostListingPage() {
             className="flex items-center gap-2 px-8 py-3 rounded-2xl font-bold text-sm text-white disabled:opacity-60 transition-opacity"
             style={{ background: 'var(--li-primary)' }}
           >
-            {submitting ? 'Posting...' : step === 2 ? <><Sparkles className="w-4 h-4" strokeWidth={2} /> Post Listing</> : <>Next <ArrowRight className="w-4 h-4" /></>}
+            {submitting ? 'Posting...' : step === STEP_CONTACT ? <><Sparkles className="w-4 h-4" strokeWidth={2} /> Post Listing</> : <>Next <ArrowRight className="w-4 h-4" /></>}
           </motion.button>
         </div>
       </div>

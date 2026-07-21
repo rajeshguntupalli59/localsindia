@@ -52,6 +52,7 @@ export interface Listing {
   social_url: string | null;
   area: string | null;
   attributes?: Record<string, string> | null;
+  category_details?: Record<string, unknown> | null;
   wa_verified: boolean;
   view_count?: number;
   contact_click_count?: number;
@@ -201,6 +202,7 @@ export interface CreateListingInput {
   social_url?: string;
   area?: string;
   attributes?: Record<string, string>;
+  category_details?: Record<string, unknown> | null;
 }
 
 export interface BuyerRequestOut {
