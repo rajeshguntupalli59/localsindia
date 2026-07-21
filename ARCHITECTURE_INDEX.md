@@ -89,6 +89,7 @@
 | Listing view tracking | §6-Listings | `routers/listings.py` | `listing/[id]/ListingDetailClient.tsx` | `listings` (view_count) | POST /listings/{id}/view |
 | Saved searches / alerts | §6-SavedSearches | `routers/saved_searches.py` | `/search` page (frontend button pending) | `saved_searches` | POST /api/v1/saved-searches, GET /api/v1/saved-searches |
 | Buyer requests ("Wanted") | §5-buyer_requests (not yet in ARCHITECTURE.md) | `routers/buyer_requests.py`, `models/buyer_request.py`, `schemas/buyer_request.py` | `components/buyer-requests/BuyerRequestsSection.tsx` (rendered on `[city]/CityHomeClient.tsx`) | `buyer_requests` | GET /api/v1/buyer-requests/cities/{slug}, POST /api/v1/buyer-requests, PATCH /api/v1/buyer-requests/{id}/fulfill, DELETE /api/v1/buyer-requests/{id} |
+| Category-specific structured listing fields (2026-07-21) | §5-listing_details (not yet in ARCHITECTURE.md), §6-Listings, §8-PostListing | `models/listing_details.py` (11 new 1:1 detail tables, `DETAILS_BY_CATEGORY_SLUG` lookup), migration `d3c3f83522ec`, `schemas/listing.py` (11 `*DetailsIn` schemas + `DETAILS_SCHEMA_BY_CATEGORY_SLUG`, `category_details` field on `ListingCreate`/`ListingOut`), `routers/listings.py` (`_save_category_details()`/`_load_category_details()`, wired into create/get/mine — deliberately NOT wired into the bulk city-listing/trending endpoints, to avoid N+1 queries on hot grid views) | Post wizard restructured on both platforms: category picker is now its own first step, followed by a dedicated category-specific-questions step (skipped automatically for Classifieds/Businesses/Events, which have none), then the generic Title/Description step — `mobile/src/screens/PostScreen.tsx` (`CATEGORY_DETAIL_FIELDS`, dynamic `STEPS`/step-index constants based on whether the picked category has fields), `frontend/src/app/[city]/classifieds/post/page.tsx` (same field-set and step split; replaced the old `CATEGORY_CHIPS`/`attributes` system, which the backend silently dropped — `ListingCreate` never declared an `attributes` field) | `vehicle_details`, `job_details`, `pg_roommate_details`, `real_estate_details`, `electronics_details`, `furniture_details`, `fashion_details`, `education_details`, `doctor_details`, `service_details`, `tiffin_details` (all new) | POST /listings (now accepts `category_details`), GET /listings/{id} (now returns it), GET /listings/mine (now returns it per listing) — real typed columns per category rather than a flexible JSON blob, a deliberate choice for future Search filterability |
 
 ---
 
@@ -125,6 +126,7 @@
 | `models/analytics_event.py` | `analytics_events` | One row per business view/whatsapp-click event (2026-07-18); aggregated into the owner's analytics dashboard |
 | `models/ticket.py` | `tickets` | Paid event ticket (2026-07-18); created only after Razorpay verify, holds a unique `qr_token` scanned at check-in |
 | `models/city_banner.py` | `city_banners` | Admin-managed sponsor banner per city with a date range (2026-07-20); deliberately its own table, not a `listings` row |
+| `models/listing_details.py` | `vehicle_details`, `job_details`, `pg_roommate_details`, `real_estate_details`, `electronics_details`, `furniture_details`, `fashion_details`, `education_details`, `doctor_details`, `service_details`, `tiffin_details` | 11 tables (2026-07-21), each a 1:1 extension of `listings` (unique `listing_id` FK, `ondelete=CASCADE`) holding real typed columns per category — not a flexible JSON blob, so Search can filter/sort on them later. `DETAILS_BY_CATEGORY_SLUG` maps category slug → model. Classifieds/Businesses/Events excluded (no specific fields / have their own dedicated tables already) |
 
 ### Backend — Routers (API endpoints)
 
@@ -340,9 +342,12 @@ GET    /api/v1/categories                 All parent categories
 ### Listings
 ```
 GET    /api/v1/cities/{slug}/listings     City listings (filter: category, status, page)
-POST   /api/v1/listings                   Create listing -> status='pending' [AUTH]
-GET    /api/v1/listings/mine              My listings [AUTH]
-GET    /api/v1/listings/{id}              Listing detail
+POST   /api/v1/listings                   Create listing -> status='pending' [AUTH]; body may include
+                                           category_details (2026-07-21), validated against
+                                           DETAILS_SCHEMA_BY_CATEGORY_SLUG and persisted to the
+                                           matching *_details table — Classifieds/Businesses/Events ignore it
+GET    /api/v1/listings/mine              My listings [AUTH]; includes category_details per listing
+GET    /api/v1/listings/{id}              Listing detail; includes category_details if the category has any
 PATCH  /api/v1/listings/{id}              Update listing [AUTH, owner]
 DELETE /api/v1/listings/{id}              Soft-delete [AUTH, owner/admin]
 POST   /api/v1/listings/{id}/report       Report listing [AUTH]
@@ -352,6 +357,7 @@ GET    /api/v1/listings/{id}/reviews      Get reviews
 POST   /api/v1/listings/{id}/reviews      Submit review [AUTH]
 POST   /api/v1/listings/{id}/fulfill      Mark as sold [AUTH, owner]
 ```
+Note: `GET /cities/{slug}/listings` and the trending endpoint do NOT load `category_details` — deliberately, to avoid N+1 queries on hot grid views.
 
 ### Search
 ```
@@ -478,6 +484,17 @@ GET    /api/v1/health                     {"status":"ok"} — keepalive probe
 | `tickets` | id, event_id, user_id, amount, razorpay_order_id, razorpay_payment_id, qr_token (unique), used_at, created_at | Migration `f2b3c4d5e6a7` (2026-07-18); created only after Razorpay signature verification, never at order-creation time |
 | `app_error_logs` | id, platform, message, stack, context, app_version, created_at | No user_id (reports must work pre-login/no-auth); platform in ('mobile','web'); migration `b3c4d5e6f7a8` (2026-07-14) |
 | `city_banners` | id, city_id, advertiser_name, image_url, link_url, start_date, end_date, created_at | Admin-managed sponsor slot per city, one active banner shown per city homepage; migration `b4c5d6e7f8a9` (2026-07-20); no listing/moderation semantics — intentionally its own table, not `listings` with `category='advertisement'` |
+| `vehicle_details` | id, listing_id (unique FK), brand, model, year, km_driven, fuel_type, transmission, owners_count, created_at | 1:1 with `listings` where category='vehicles'; migration `d3c3f83522ec` (2026-07-21) |
+| `job_details` | id, listing_id (unique FK), company_name, salary_min, salary_max, job_type, experience_required, work_mode, created_at | category='jobs'; migration `d3c3f83522ec` |
+| `pg_roommate_details` | id, listing_id (unique FK), room_type, gender_preference, deposit_amount, amenities (text array), created_at | category='pg-roommate'; migration `d3c3f83522ec` |
+| `real_estate_details` | id, listing_id (unique FK), property_type, bhk, sqft, furnishing, listing_type, created_at | category='real-estate'; migration `d3c3f83522ec` |
+| `electronics_details` | id, listing_id (unique FK), brand, model, condition, warranty_remaining, created_at | category='electronics'; migration `d3c3f83522ec` |
+| `furniture_details` | id, listing_id (unique FK), material, dimensions, condition, created_at | category='furniture'; migration `d3c3f83522ec` |
+| `fashion_details` | id, listing_id (unique FK), brand, size, gender, created_at | category='fashion'; migration `d3c3f83522ec` |
+| `education_details` | id, listing_id (unique FK), course_type, mode, duration, created_at | category='education'; migration `d3c3f83522ec` |
+| `doctor_details` | id, listing_id (unique FK), specialization, consultation_fee, available_timings, created_at | category='doctors'; migration `d3c3f83522ec` |
+| `service_details` | id, listing_id (unique FK), service_type, experience_years, created_at | category='services'; migration `d3c3f83522ec` |
+| `tiffin_details` | id, listing_id (unique FK), meal_type, delivery_area, subscription_available, created_at | category='tiffin'; migration `d3c3f83522ec` |
 
 ---
 

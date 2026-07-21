@@ -509,6 +509,30 @@ See §12 "City Banner Ads" for why this is its own table rather than a `listings
 
 ---
 
+### `vehicle_details`, `job_details`, `pg_roommate_details`, `real_estate_details`, `electronics_details`, `furniture_details`, `fashion_details`, `education_details`, `doctor_details`, `service_details`, `tiffin_details` — category-specific structured fields (added 2026-07-21)
+
+11 tables, one per category that has its own specific questions — each a 1:1 extension of `listings` (unique `listing_id` FK, `ondelete=CASCADE`), holding **real typed columns**, not a flexible JSON blob, so Search can filter/sort on them directly later (e.g. "vehicles under ₹5L, Petrol, Automatic"). Classifieds/Businesses/Events are excluded: Classifieds is the deliberate catch-all with no specific fields; Businesses/Events already have their own dedicated tables (`businesses`, `events`) rather than a `listings` row.
+
+| Table | Columns (beyond id/listing_id/created_at) |
+|-------|--------------------------------------------|
+| `vehicle_details` | brand, model, year, km_driven, fuel_type, transmission, owners_count |
+| `job_details` | company_name, salary_min, salary_max, job_type, experience_required, work_mode |
+| `pg_roommate_details` | room_type, gender_preference, deposit_amount, amenities (text array) |
+| `real_estate_details` | property_type, bhk, sqft, furnishing, listing_type |
+| `electronics_details` | brand, model, condition, warranty_remaining |
+| `furniture_details` | material, dimensions, condition |
+| `fashion_details` | brand, size, gender |
+| `education_details` | course_type, mode, duration |
+| `doctor_details` | specialization, consultation_fee, available_timings |
+| `service_details` | service_type, experience_years |
+| `tiffin_details` | meal_type, delivery_area, subscription_available |
+
+`models/listing_details.py` also exports `DETAILS_BY_CATEGORY_SLUG` (category slug → SQLAlchemy model) and `schemas/listing.py` exports the matching `DETAILS_SCHEMA_BY_CATEGORY_SLUG` (category slug → Pydantic validation schema) — both used by `routers/listings.py` to persist/load the right detail row without a long if/elif chain. Migration `d3c3f83522ec`.
+
+**Why this needed its own migration cleanup:** Alembic's autogenerate picked up unrelated pre-existing schema drift in the local dev DB (spurious `drop_table`/`create_index` for `user_notifications`, `saved_searches`, `user_preferences`, `saved_listings`, and an index-expression change on `idx_listings_active`) alongside the intended 11 new tables. The migration file was hand-edited to contain only the 11 `create_table`/`drop_table` calls; the unrelated drift was left untouched (a separate, pre-existing issue, not introduced by this feature).
+
+---
+
 ## 6. API Endpoints — Every Route
 
 ### Auth: `/api/v1/auth`
@@ -556,9 +580,9 @@ Also `GET /api/v1/admin/errors` (admin-only, see Admin section below) — lists 
 | Method | Path | What it does | Auth? |
 |--------|------|-------------|-------|
 | GET | `/cities/{slug}/listings` | Listings for a city (filter by category, status, page); optional `lat`/`lng` (2026-07-16) sorts by real Haversine distance, unlocated listings kept via `NULLS LAST` rather than dropped; `q` OR-matches per word (fixed 2026-07-16 — was AND-matching every word, so one filler word could zero out an otherwise-exact match) | No |
-| POST | `/listings` | Create listing (status='pending') | Yes |
-| GET | `/listings/mine` | My listings (all statuses) | Yes |
-| GET | `/listings/{id}` | Single listing detail | No |
+| POST | `/listings` | Create listing (status='pending'); body may include `category_details` (2026-07-21) — validated against the category's schema and persisted to the matching `*_details` table (no-op for Classifieds/Businesses/Events) | Yes |
+| GET | `/listings/mine` | My listings (all statuses); includes `category_details` per listing | Yes |
+| GET | `/listings/{id}` | Single listing detail; includes `category_details` if the category has any | No |
 | PATCH | `/listings/{id}` | Update listing (owner only) | Yes |
 | DELETE | `/listings/{id}` | Soft-delete listing (owner or admin) | Yes |
 | POST | `/listings/{id}/report` | Report listing | Yes |
@@ -823,13 +847,19 @@ Shows one listing in full detail:
 
 **File:** `app/[city]/classifieds/post/page.tsx`
 
-3-step wizard:
-1. **Details**: title, category selection (grid of cards), description, price (optional), area
-2. **Photos**: drag-drop zone, thumbnail preview, reorder, max 5 photos
-3. **Contact**: phone (prefilled if logged in), WhatsApp toggle, city confirmation
+Dynamic step wizard (restructured 2026-07-21 — category is picked before any generic fields, instead of alongside them; a category with no specific questions of its own skips the Details step entirely):
+1. **Category**: pick a category (grid of cards) — nothing else on this step
+2. **Details** *(only if the category has specific questions — see `CATEGORY_DETAIL_FIELDS`, mirrors `mobile/src/screens/PostScreen.tsx`'s field-set)*: category-specific questions (e.g. Vehicles → brand/model/year/km_driven/fuel_type/transmission/owners_count), rendered via `renderDetailField()`
+3. **Listing**: title, description, price (optional)
+4. **Photos**: drag-drop zone, thumbnail preview, reorder, max 5 photos
+5. **Contact**: phone (prefilled if logged in), WhatsApp toggle, area, city confirmation
 
-On submit: POSTs to `/api/v1/listings` -> shows "Your listing is under review" success screen.
-Data saved across steps in component state (no loss on Back navigation).
+Step indices (`STEP_CATEGORY`/`STEP_DETAILS`/`STEP_LISTING`/`STEP_PHOTOS`/`STEP_CONTACT`) are computed each render from whether the selected category has entries in `CATEGORY_DETAIL_FIELDS`, so `STEP_DETAILS` is `-1` (skipped) for Classifieds/Businesses/Events.
+
+On submit: POSTs to `/api/v1/listings` (now includes `category_details`, built by `buildCategoryDetailsPayload()`) -> shows "Your listing is under review" success screen.
+Data saved across steps in component state + `localStorage` draft (no loss on Back navigation or page refresh).
+
+Replaces the earlier `CATEGORY_CHIPS`/`form.attributes` system (a much smaller per-category chip set that the backend silently discarded — `ListingCreate` never declared an `attributes` field, so anything typed there never reached the database).
 
 ---
 
@@ -1650,7 +1680,7 @@ Side services (called from backend):
 | `app/[city]/classifieds/[id]/ListingDetailClient.tsx` | Listing detail -- actual UI with state |
 | `app/[city]/classifieds/[id]/promote/page.tsx` | Featured listing payment (wrapper) |
 | `app/[city]/classifieds/[id]/promote/PromoteClient.tsx` | Razorpay checkout UI |
-| `app/[city]/classifieds/post/page.tsx` | Post new listing (3-step wizard) |
+| `app/[city]/classifieds/post/page.tsx` | Post new listing (dynamic 4–5 step wizard: category first, then category-specific questions, listing, photos, contact) |
 | `app/[city]/search/page.tsx` | Search results with filters |
 | `app/[city]/businesses/page.tsx` | Business directory |
 | `app/[city]/businesses/[id]/page.tsx` | Business profile (wrapper) |
@@ -1741,7 +1771,7 @@ Side services (called from backend):
 | `mobile/src/screens/ListingDetailScreen.tsx` | Photo gallery + thumbnail strip, sticky WA button, seller → SellerProfile |
 | `mobile/src/screens/SellerProfileScreen.tsx` | Seller avatar/initials, member since, listing count, listings list |
 | `mobile/src/screens/LoginScreen.tsx` | OTP flow: phone → code → tokens stored in SecureStore; debug OTP shown; real logo image above the wordmark text. Signup path only (2026-07-18) reads any captured referral code out of storage and sends it as `ref_code` on `verifyOtp` — the separate forgot-password OTP flow is untouched |
-| `mobile/src/screens/PostScreen.tsx` | 3-step wizard: details + category grid → photos (expo-image-picker) → contact; "Include my location" toggle (2026-07-16) auto-fills Area if empty + auto-picks City by exact name match against the seeded list (never forces an unmatched city), both always manually editable; (2026-07-17) picking "Businesses" as the category branches submit() to create a real Business Directory entry (`businessesApi.create`) instead of a classified — same wizard, Price hidden, Area relabels to Address, Photos step shows a note instead of the upload zone |
+| `mobile/src/screens/PostScreen.tsx` | Dynamic 4–5 step wizard (restructured 2026-07-21): category grid (own step, nothing else) → category-specific questions *(skipped for Classifieds/Businesses/Events via `hasDetailsStep`)* → title/description/price/area (or event fields) → photos (expo-image-picker) → contact. `CATEGORY_DETAIL_FIELDS` + `renderDetailField()` render per-category text/number/select/multiselect/switch inputs; `buildCategoryDetailsPayload()` sends the result as `category_details` on create. "Include my location" toggle (2026-07-16) auto-fills Area if empty + auto-picks City by exact name match against the seeded list (never forces an unmatched city), both always manually editable; (2026-07-17) picking "Businesses" as the category branches submit() to create a real Business Directory entry (`businessesApi.create`) instead of a classified — same wizard, Price hidden, Area relabels to Address, Photos step shows a note instead of the upload zone |
 | `mobile/src/screens/BusinessesScreen.tsx` | (new, 2026-07-17) Business Directory browse list for the user's city; "Add Your Business" opens Post Listing with category pre-selected via route params rather than a separate screen |
 | `mobile/src/screens/SplashScreen.tsx` | Animated launch screen (2026-07-16, new) — logo spring-in, wordmark fade-in, "Buy · Sell · Connect" tagline pops word-by-word; shown in `App.tsx` in place of the old blank placeholder View during `checkAuth()` |
 | `mobile/src/screens/SavedScreen.tsx` | AsyncStorage bookmarks with empty state CTA |
@@ -1760,4 +1790,4 @@ Side services (called from backend):
 
 ---
 
-*Updated: 2026-07-18 | Scoped to South India only (migration `a3b4c5d6e7f8`, §5 cities table) — reversible `cities.active` data change, no code touched, both web and mobile automatically reflect it via the shared `/api/v1/cities` endpoints. Google Auth removed from web login via its pre-existing feature flag (§11 updated — corrected a stale claim that mobile still had a working Google deep-link; it had already been silently removed from `LoginScreen.tsx` in an earlier, undated pass). Backend `/auth/google*` routes deliberately kept, not deleted, for one real Google-only user with no phone fallback. Also today: Mobile event creation (§12) — added to `PostScreen.tsx` right after the ticketing feature shipped, once Raj asked specifically whether mobile event creation could be added too; extends the wizard exactly like Businesses did, one new native dependency accepted (`@react-native-community/datetimepicker`) since a rebuild is already pending regardless. Also today: Event ticketing, web + mobile (§12) — second piece of Phase 3 monetization; new `tickets` table, `routers/tickets.py`, the first-ever web `/events/[id]` page, and mobile Events built from scratch (browse/detail/buy/my-tickets); QR generated server-side so mobile needed zero new native dependencies, deliberately avoiding a second pending native rebuild — see §12 for the full reasoning. 129/129 backend tests, frontend + mobile verification all clean. Also today: Business Analytics Dashboard (§12) — first piece of Phase 3 monetization, commit `63155f0`; verified live in production (migration ran clean via CI, new route confirmed present + auth-gated on the deployed backend). Also today: two-sided referral system (§5 users table, §6 Auth endpoints, §8 /invite page, §9 ReferralCapture component, §18 mobile App.tsx/LoginScreen/ProfileScreen/InviteScreen) — commits `1f7243c` (backend+web) and `ce2ee31` (mobile); real Play Console App Signing SHA-256 added to assetlinks.json, commit `3015c0a`. ⚠️ This pass only closes the referral-system gap specifically — several earlier feature passes (2026-07-12 through 2026-07-17: password auth rework, buyer requests, proximity search, business directory mobile parity, push notifications, error tracking) are still only reflected in `ARCHITECTURE_INDEX.md`, not fully backfilled into this file's narrative sections yet. Previous update: 2026-06-16 | LocalIndia v3 -- hybrid SSR migration, admin role management, business soft-delete, mobile Google Sign-In + admin panel + EAS Play Store pipeline + real logo assets + safe-area bottom nav fix*
+*Updated: 2026-07-21 | Category-specific structured listing fields (§5 11 new `*_details` tables, §6 Listings endpoints, §8 Post Listing page) — the Post wizard on both web and mobile now picks a category first, then shows a dedicated step of category-specific questions (Vehicles, Jobs, PG/Roommate, Real Estate, Electronics, Furniture, Fashion, Education, Doctors, Services, Tiffin), separate from the generic Title/Description step, instead of asking for both at once; Classifieds/Businesses/Events skip that step since they have no specific fields (or, for Businesses/Events, their own dedicated tables already). Chose real typed columns per category over a flexible JSON blob, for future Search filterability. Web's old `CATEGORY_CHIPS`/`attributes` system — a much smaller per-category chip set the backend silently discarded, since `ListingCreate` never declared an `attributes` field — was replaced with the real `category_details` payload, matching the backend schema and the mobile field-set exactly. Backend: 138/138 tests passing (2 new). Verified live on the Android emulator (full create→review→My-Listings round trip) and via Playwright on the web dev server. Previous update: 2026-07-18 | Scoped to South India only (migration `a3b4c5d6e7f8`, §5 cities table) — reversible `cities.active` data change, no code touched, both web and mobile automatically reflect it via the shared `/api/v1/cities` endpoints. Google Auth removed from web login via its pre-existing feature flag (§11 updated — corrected a stale claim that mobile still had a working Google deep-link; it had already been silently removed from `LoginScreen.tsx` in an earlier, undated pass). Backend `/auth/google*` routes deliberately kept, not deleted, for one real Google-only user with no phone fallback. Also today: Mobile event creation (§12) — added to `PostScreen.tsx` right after the ticketing feature shipped, once Raj asked specifically whether mobile event creation could be added too; extends the wizard exactly like Businesses did, one new native dependency accepted (`@react-native-community/datetimepicker`) since a rebuild is already pending regardless. Also today: Event ticketing, web + mobile (§12) — second piece of Phase 3 monetization; new `tickets` table, `routers/tickets.py`, the first-ever web `/events/[id]` page, and mobile Events built from scratch (browse/detail/buy/my-tickets); QR generated server-side so mobile needed zero new native dependencies, deliberately avoiding a second pending native rebuild — see §12 for the full reasoning. 129/129 backend tests, frontend + mobile verification all clean. Also today: Business Analytics Dashboard (§12) — first piece of Phase 3 monetization, commit `63155f0`; verified live in production (migration ran clean via CI, new route confirmed present + auth-gated on the deployed backend). Also today: two-sided referral system (§5 users table, §6 Auth endpoints, §8 /invite page, §9 ReferralCapture component, §18 mobile App.tsx/LoginScreen/ProfileScreen/InviteScreen) — commits `1f7243c` (backend+web) and `ce2ee31` (mobile); real Play Console App Signing SHA-256 added to assetlinks.json, commit `3015c0a`. ⚠️ This pass only closes the referral-system gap specifically — several earlier feature passes (2026-07-12 through 2026-07-17: password auth rework, buyer requests, proximity search, business directory mobile parity, push notifications, error tracking) are still only reflected in `ARCHITECTURE_INDEX.md`, not fully backfilled into this file's narrative sections yet. Previous update: 2026-06-16 | LocalIndia v3 -- hybrid SSR migration, admin role management, business soft-delete, mobile Google Sign-In + admin panel + EAS Play Store pipeline + real logo assets + safe-area bottom nav fix*
