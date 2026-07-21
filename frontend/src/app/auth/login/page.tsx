@@ -1,7 +1,7 @@
 'use client';
 
 import { Suspense, useState } from 'react';
-import { ArrowLeft, Phone, Lock, User, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Phone, Lock, User, Eye, EyeOff, Zap, MessageCircle, Globe, ShieldCheck, type LucideIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,6 +10,7 @@ import { api, ApiError } from '@/lib/api';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import SiteLogo from '@/components/site-logo/SiteLogo';
+import { usePrefs } from '@/context/PrefsContext';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
 const GOOGLE_AUTH_ENABLED = process.env.NEXT_PUBLIC_GOOGLE_AUTH_ENABLED === 'true';
@@ -21,6 +22,14 @@ type Step = 'phone' | 'otp' | 'create-password' | 'name' | 'forgot-phone' | 'for
 const FIELD = 'h-12 rounded-xl text-[15px]';
 const PRIMARY_BTN = 'w-full h-12 rounded-xl text-[15px] font-semibold text-white shadow-sm shadow-orange-950/10 transition-transform active:scale-[0.99]';
 const LABEL_CLS = 'text-[13px] font-semibold text-slate-600';
+
+// Brand panel content — desktop only (lg+), the login form itself is unchanged from mobile.
+const VALUE_PROPS: { icon: LucideIcon; title: string; subtitle: string }[] = [
+  { icon: Zap,           title: 'Free to post',              subtitle: 'List anything in under a minute — no fees.' },
+  { icon: MessageCircle, title: 'Direct WhatsApp contact',   subtitle: 'Talk to sellers directly — no middlemen, no spam calls.' },
+  { icon: Globe,         title: 'Your city, your language',  subtitle: '11 Indian languages, hyperlocal to where you live.' },
+  { icon: ShieldCheck,   title: 'Verified local sellers',    subtitle: 'Real people from your own neighborhood.' },
+];
 
 function getPostLoginRedirect(redirectParam: string | null): string {
   if (redirectParam && redirectParam.startsWith('/')) return redirectParam;
@@ -85,6 +94,8 @@ function PasswordInput({
 function LoginInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { cities } = usePrefs();
+  const cityCount = cities.length;
   const redirectParam = searchParams.get('redirect');
   const [step, setStep] = useState<Step>('phone');
   const [mode, setMode] = useState<'signin' | 'signup'>(
@@ -278,10 +289,57 @@ function LoginInner() {
     'Enter your number and password to sign in';
 
   return (
-    <div
-      className="min-h-screen flex flex-col items-center justify-center py-12 px-4"
-      style={{ background: 'radial-gradient(ellipse 900px 520px at 50% -12%, var(--li-primary-light) 0%, var(--li-page-bg) 62%)' }}
-    >
+    <div className="min-h-screen flex flex-col lg:flex-row">
+
+      {/* Brand panel — desktop only (lg+); mobile gets just the form, unchanged */}
+      <div className="hidden lg:flex lg:w-[44%] xl:w-1/2 relative overflow-hidden flex-col justify-between px-12 xl:px-16 py-16" style={{ background: 'var(--li-nav-bg)' }}>
+        <div className="absolute -top-24 -left-16 w-96 h-96 rounded-full opacity-20 blur-3xl pointer-events-none" style={{ background: 'var(--li-primary)' }} />
+        <div className="absolute -bottom-32 -right-20 w-[28rem] h-[28rem] rounded-full opacity-[0.10] blur-3xl pointer-events-none" style={{ background: 'var(--li-featured)' }} />
+
+        <div className="relative">
+          <SiteLogo variant="light" size="lg" />
+        </div>
+
+        <div className="relative">
+          <h2 className="text-[40px] xl:text-[44px] font-extrabold leading-[1.1] tracking-tight text-white text-balance">
+            Your neighborhood,<br />online.
+          </h2>
+          <p className="text-white/60 text-[15px] mt-4 max-w-sm leading-relaxed">
+            Buy, sell, and connect with people in your own city — in your own language.
+          </p>
+
+          <div className="mt-10 space-y-5">
+            {VALUE_PROPS.map(({ icon: Icon, title, subtitle }) => (
+              <div key={title} className="flex items-start gap-3.5">
+                <div className="shrink-0 w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
+                  <Icon className="w-[18px] h-[18px] text-white" />
+                </div>
+                <div>
+                  <p className="text-white text-[15px] font-semibold leading-tight">{title}</p>
+                  <p className="text-white/55 text-[13px] mt-0.5 leading-relaxed">{subtitle}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="relative flex gap-10">
+          <div>
+            <p className="text-white text-2xl font-extrabold tracking-tight">{cityCount > 0 ? `${cityCount}+` : '—'}</p>
+            <p className="text-white/50 text-[13px] mt-0.5">Cities</p>
+          </div>
+          <div>
+            <p className="text-white text-2xl font-extrabold tracking-tight">11</p>
+            <p className="text-white/50 text-[13px] mt-0.5">Languages</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Form side */}
+      <div
+        className="flex-1 flex flex-col items-center justify-center py-12 px-4"
+        style={{ background: 'radial-gradient(ellipse 900px 520px at 50% -12%, var(--li-primary-light) 0%, var(--li-page-bg) 62%)' }}
+      >
       <div className="w-full max-w-sm">
 
         <Link href="/" className="flex items-center gap-2 text-slate-500 hover:text-slate-800 mb-6 w-fit text-sm font-medium transition-colors">
@@ -633,6 +691,7 @@ function LoginInner() {
             <a href="/privacy" className="underline underline-offset-2 hover:text-slate-700">Privacy Policy</a>.
           </p>
         </div>
+      </div>
       </div>
     </div>
   );
