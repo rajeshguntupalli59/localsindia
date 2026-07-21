@@ -205,6 +205,12 @@ const LISTING_COPY: Record<string, ListingCopy> = {
     descLabel: 'Description', descPlaceholder: 'What you offer, specialities, years in business...',
     showPrice: false,
   },
+  events: {
+    cardTitle: 'Tell people about your event', titleLabel: 'Event Title',
+    titlePlaceholder: 'e.g. Sankranti Mela at LB Stadium',
+    descLabel: 'Description', descPlaceholder: "What's happening, who it's for, why people should come...",
+    showPrice: false,
+  },
 };
 
 interface FormData {

@@ -227,6 +227,12 @@ const LISTING_COPY: Record<string, ListingCopy> = {
     descLabel: 'Description', descPlaceholder: 'What you offer, specialities, years in business...',
     showPrice: false,
   },
+  events: {
+    cardTitle: 'Tell people about your event', titleLabel: 'Event Title',
+    titlePlaceholder: 'e.g. Sankranti Mela at LB Stadium',
+    descLabel: 'Description', descPlaceholder: "What's happening, who it's for, why people should come...",
+    showPrice: false, // events use their own Free/Paid + ticket price fields below, not the generic price
+  },
 };
 
 export default function PostScreen({ navigation, route }: any) {
@@ -532,7 +538,13 @@ export default function PostScreen({ navigation, route }: any) {
         });
         // promptVerify tells BusinessDetailScreen to surface the Get Verified
         // offer immediately, instead of only being discoverable later.
-        navigation.replace('BusinessDetail', { businessId: business.id, promptVerify: true });
+        // Must be `navigate`, not `replace`: PostScreen lives inside the tab
+        // navigator, so a `replace` bubbles up and swaps out the ENTIRE "Main"
+        // stack entry (tabs + their history) for BusinessDetail alone, leaving
+        // nothing for the back button to return to. `navigate` pushes
+        // BusinessDetail on top instead, so back correctly pops back to Main.
+        resetForm();
+        navigation.navigate('BusinessDetail', { businessId: business.id, promptVerify: true });
         return;
       }
 
@@ -665,9 +677,18 @@ export default function PostScreen({ navigation, route }: any) {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.homeLink}
-          onPress={() => categorySlug === 'events'
-            ? navigation.replace('Events', { citySlug, cityName })
-            : navigation.navigate('Home')}
+          onPress={() => {
+            // `navigate`, not `replace` — see the same note on the Business
+            // creation branch above: `replace` from inside the tab navigator
+            // bubbles up and wipes the whole "Main" (tabs) stack entry,
+            // breaking the back button on the destination screen.
+            resetForm();
+            if (categorySlug === 'events') {
+              navigation.navigate('Events', { citySlug, cityName });
+            } else {
+              navigation.navigate('Home');
+            }
+          }}
         >
           <Text style={styles.homeLinkText}>{categorySlug === 'events' ? 'Back to Events' : 'Back to Home'}</Text>
         </TouchableOpacity>
