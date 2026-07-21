@@ -15,7 +15,7 @@ import Link from 'next/link';
 import { usePrefs } from '@/context/PrefsContext';
 import CityPickerModal from '@/components/city-picker/CityPickerModal';
 import SiteFooter from '@/components/site-footer/SiteFooter';
-import LanguageSelector from '@/components/language-selector/LanguageSelector';
+import LanguageSelector, { LANGUAGES } from '@/components/language-selector/LanguageSelector';
 import FreshListingsSection from '@/components/fresh-listings/FreshListingsSection';
 import SiteLogo from '@/components/site-logo/SiteLogo';
 
@@ -38,14 +38,15 @@ const CATEGORIES: CategoryDef[] = [
 
 const POPULAR_TAGS = ['Tiffin Service', 'PG for Boys', 'Used Laptop', 'Honda Activa', 'Home Tutor', '2BHK Flat'];
 
-// City count is real, not hardcoded — derived from the live `cities` list
-// (usePrefs) at render time, so it can never drift from what's actually active.
+// City + language counts are real, not hardcoded — derived from the live
+// `cities` list (usePrefs) and the LANGUAGES registry (lib/prefs.ts's
+// VALID_LANGS) at render time, so neither can drift from what's actually live.
 function buildTrust(cityCount: number): TrustDef[] {
   return [
     { icon: Zap,          title: 'Instant Posting',      subtitle: 'Go live in under a minute with verified reach.', iconBg: 'bg-orange-500/[0.15]',  iconColor: 'text-orange-400'  },
     { icon: MessageCircle,title: 'WhatsApp Native',       subtitle: 'Contact sellers directly — no middlemen.',       iconBg: 'bg-emerald-500/[0.15]', iconColor: 'text-emerald-400', isWhatsApp: true },
     { icon: MapPin,       title: 'Localized Scale',       subtitle: `${cityCount}+ cities across South India.`,      iconBg: 'bg-blue-500/[0.15]',    iconColor: 'text-blue-400'    },
-    { icon: Languages,    title: 'Multilingual Support',  subtitle: '11 native languages, your way.',                 iconBg: 'bg-violet-500/[0.15]',  iconColor: 'text-violet-400'  },
+    { icon: Languages,    title: 'Multilingual Support',  subtitle: `${LANGUAGES.length} native languages, your way.`, iconBg: 'bg-violet-500/[0.15]',  iconColor: 'text-violet-400'  },
   ];
 }
 
@@ -67,7 +68,7 @@ export default function HomePage() {
   const cityCount = cities.length;
   const STATS: [string, string][] = [
     [cityCount > 0 ? `${cityCount}+` : '—', 'Cities'],
-    ['11', 'Languages'],
+    [String(LANGUAGES.length), 'Languages'],
   ];
   const TRUST = buildTrust(cityCount > 0 ? cityCount : 151);
 

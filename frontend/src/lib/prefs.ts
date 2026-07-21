@@ -6,11 +6,14 @@
 // ── Constants ─────────────────────────────────────────────────────────────────
 const CITY_KEY    = 'li_city';    // localStorage: selected city slug
 const RECENT_KEY  = 'li_recent'; // localStorage: JSON array of recent city slugs
-const LANG_COOKIE = 'lang';      // cookie: shared with next-intl locale detection
+const LANG_COOKIE = 'lang';      // cookie: read by LanguageSelector / PrefsContext
 
-export const VALID_LANGS = [
-  'en', 'hi', 'te', 'ta', 'kn', 'ml', 'mr', 'bn', 'gu', 'pa', 'or',
-] as const;
+// Scoped to the languages of the states we're actually live in (South India —
+// see cities.state in production: Andhra Pradesh, Telangana, Karnataka, Kerala,
+// Tamil Nadu, Puducherry). Don't add a language back here until listings exist
+// in a state that speaks it — this is the single source of truth every
+// "N languages" stat on the site/app derives from.
+export const VALID_LANGS = ['en', 'te', 'ta', 'kn', 'ml'] as const;
 
 export type LangCode = (typeof VALID_LANGS)[number];
 

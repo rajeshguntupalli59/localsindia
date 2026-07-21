@@ -63,11 +63,11 @@ export const metadata: Metadata = {
     description: "India's hyperlocal community platform. Post listings, find local services, connect with your neighbourhood.",
     url: 'https://www.localsindia.com',
     siteName: 'LocalsIndia',
-    images: [{ url: '/logo.png', width: 400, height: 160, alt: 'LocalsIndia' }],
+    images: [{ url: '/logo.png', width: 1200, height: 630, alt: 'LocalsIndia' }],
     type: 'website',
   },
   twitter: {
-    card: 'summary',
+    card: 'summary_large_image',
     title: 'LocalsIndia — Buy · Sell · Connect',
     description: "India's hyperlocal community platform.",
     images: ['/logo.png'],

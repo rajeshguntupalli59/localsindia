@@ -4,23 +4,19 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Globe, Check, X } from 'lucide-react';
 import { usePrefs } from '@/context/PrefsContext';
+import type { LangCode } from '@/lib/prefs';
 
 // ─── Language registry ───────────────────────────────────────
-export const LANGUAGES = [
+// Codes must match VALID_LANGS in lib/prefs.ts (the single source of truth) —
+// TypeScript enforces this below, so this list can't silently drift out of
+// sync with what's actually supported.
+export const LANGUAGES: { code: LangCode; native: string; english: string; region: string }[] = [
   { code: 'en', native: 'English',   english: 'English',   region: 'All India'          },
-  { code: 'hi', native: 'हिन्दी',    english: 'Hindi',     region: 'North India'        },
   { code: 'te', native: 'తెలుగు',    english: 'Telugu',    region: 'Andhra · Telangana' },
   { code: 'ta', native: 'தமிழ்',     english: 'Tamil',     region: 'Tamil Nadu'         },
   { code: 'kn', native: 'ಕನ್ನಡ',    english: 'Kannada',   region: 'Karnataka'          },
   { code: 'ml', native: 'മലയാളം',   english: 'Malayalam', region: 'Kerala'             },
-  { code: 'mr', native: 'मराठी',     english: 'Marathi',   region: 'Maharashtra'        },
-  { code: 'bn', native: 'বাংলা',     english: 'Bengali',   region: 'West Bengal'        },
-  { code: 'gu', native: 'ગુજરાતી',  english: 'Gujarati',  region: 'Gujarat'            },
-  { code: 'pa', native: 'ਪੰਜਾਬੀ',   english: 'Punjabi',   region: 'Punjab'             },
-  { code: 'or', native: 'ଓଡ଼ିଆ',    english: 'Odia',      region: 'Odisha'             },
-] as const;
-
-export type LangCode = (typeof LANGUAGES)[number]['code'];
+];
 
 // ─── Chevron icon (no extra dependency) ─────────────────────
 function ChevronIcon({ open }: { open: boolean }) {
@@ -218,7 +214,7 @@ export default function LanguageSelector() {
   }, [isMobile, isOpen]);
 
   const selectLang = (code: LangCode) => {
-    setLang(code as import('@/lib/prefs').LangCode);
+    setLang(code);
     setIsOpen(false);
   };
 

@@ -1,15 +1,17 @@
 import Link from 'next/link';
+import Image from 'next/image';
 
 /**
  * SiteLogo — the canonical LocalsIndia logo component.
  *
- * Renders the SVG mark (three interlocked-figure community icon + location pin)
- * alongside the "LocalsIndia" wordmark in the exact logo color scheme.
+ * Renders the real brand mark (public/logo-mark.png — the same interlocked-
+ * rings-and-pin artwork used for the mobile app icon and Play Store assets)
+ * alongside the "LocalsIndia" wordmark.
  *
- * To use the actual PNG file instead of the inline SVG:
- *   1. Export your logo (transparent bg) as /public/logo.png  (400×160px ideal)
- *   2. Replace <LogoMark> below with <Image src="/logo.png" width={120} height={48} alt="LocalsIndia" />
- *   3. Remove the text <Wordmark> span — the image already includes it.
+ * This used to render a hand-drawn inline SVG approximation ("stacked
+ * figure-blobs") that never actually matched the real mark — fixed by
+ * switching to the verified-correct source image instead of re-deriving
+ * bezier paths by hand.
  *
  * Props:
  *   variant   — "default": colored mark + dark text (white bg headers)
@@ -29,74 +31,26 @@ interface SiteLogoProps {
   className?: string;
 }
 
-// ── Logo mark colours (exact logo values) ─────────────────────────────────────
-const TEAL   = '#3DADA8';
-const NAVY   = '#1A6FAD';
-const ORANGE = '#F7921E';
+// ── Logo mark colours (exact logo values, used by the wordmark text only) ─────
 const PIN    = '#163D6B';
+const ORANGE = '#F7921E';
 
-// ── Inline SVG mark ───────────────────────────────────────────────────────────
+// Real source asset is 218×198 — keep every rendered size on that exact ratio.
+const MARK_ASPECT = 218 / 198;
+
+// ── Mark (real artwork) ────────────────────────────────────────────────────────
 function LogoMark({ size }: { size: 'sm' | 'md' | 'lg' }) {
   const h = size === 'sm' ? 28 : size === 'lg' ? 44 : 36;
+  const w = Math.round(h * MARK_ASPECT);
 
   return (
-    /**
-     * The mark: three interlocked person-figures (teal, navy, orange)
-     * arranged in a circular community cluster, with a drop-pin at the top.
-     *
-     * Layer order (back → front):
-     *   1. Teal figure body + head
-     *   2. Navy figure body + head
-     *   3. Orange figure body + head (foreground)
-     *   4. Location pin (topmost)
-     */
-    <svg
-      viewBox="0 0 82 90"
+    <Image
+      src="/logo-mark.png"
+      alt=""
+      width={w}
       height={h}
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden
-      focusable="false"
-      style={{ display: 'block', flexShrink: 0 }}
-    >
-      {/* ── Teal figure (back-left, tilted left) ──────────── */}
-      <ellipse
-        cx="26" cy="56"
-        rx="13.5" ry="20"
-        transform="rotate(-20 26 56)"
-        fill={TEAL}
-      />
-      <circle cx="20" cy="33" r="10" fill={TEAL} />
-
-      {/* ── Navy figure (back-right, tilted right) ─────────── */}
-      <ellipse
-        cx="56" cy="56"
-        rx="13.5" ry="20"
-        transform="rotate(20 56 56)"
-        fill={NAVY}
-      />
-      <circle cx="62" cy="33" r="10" fill={NAVY} />
-
-      {/* ── Orange figure (front-center, upright) ──────────── */}
-      <ellipse cx="41" cy="63" rx="13.5" ry="20" fill={ORANGE} />
-      <circle  cx="41" cy="40" r="10"            fill={ORANGE} />
-
-      {/* ── Subtle overlap shadow (depth hint at center) ───── */}
-      <ellipse
-        cx="41" cy="57"
-        rx="10" ry="10"
-        fill="#00000018"
-      />
-
-      {/* ── Location drop-pin ───────────────────────────────── */}
-      {/* Outer body */}
-      <path
-        d="M41 4 C35.2 4 30.5 8.7 30.5 14.5 C30.5 22.8 41 34 41 34 C41 34 51.5 22.8 51.5 14.5 C51.5 8.7 46.8 4 41 4Z"
-        fill={PIN}
-      />
-      {/* Inner white dot */}
-      <circle cx="41" cy="14.5" r="4.5" fill="white" />
-    </svg>
+      style={{ display: 'block', flexShrink: 0, height: h, width: w }}
+    />
   );
 }
 

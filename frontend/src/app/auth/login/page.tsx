@@ -11,6 +11,15 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import SiteLogo from '@/components/site-logo/SiteLogo';
 import { usePrefs } from '@/context/PrefsContext';
+import { LANGUAGES } from '@/components/language-selector/LanguageSelector';
+
+// "English, Telugu, Tamil, Kannada & Malayalam" — built from the same
+// LANGUAGES registry the picker uses, so this can't drift out of sync.
+function joinWithAnd(items: string[]): string {
+  if (items.length <= 1) return items.join('');
+  return `${items.slice(0, -1).join(', ')} & ${items[items.length - 1]}`;
+}
+const LANGUAGE_LIST = joinWithAnd(LANGUAGES.map(l => l.english));
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
 const GOOGLE_AUTH_ENABLED = process.env.NEXT_PUBLIC_GOOGLE_AUTH_ENABLED === 'true';
@@ -27,7 +36,7 @@ const LABEL_CLS = 'text-[13px] font-semibold text-slate-600';
 const VALUE_PROPS: { icon: LucideIcon; title: string; subtitle: string }[] = [
   { icon: Zap,           title: 'Free to post',              subtitle: 'List anything in under a minute — no fees.' },
   { icon: MessageCircle, title: 'Direct WhatsApp contact',   subtitle: 'Talk to sellers directly — no middlemen, no spam calls.' },
-  { icon: Globe,         title: 'Your city, your language',  subtitle: 'English, Telugu, Tamil, Kannada & Malayalam — hyperlocal to South India.' },
+  { icon: Globe,         title: 'Your city, your language',  subtitle: `${LANGUAGE_LIST} — hyperlocal to South India.` },
   { icon: ShieldCheck,   title: 'Verified local sellers',    subtitle: 'Real people from your own neighborhood.' },
 ];
 
@@ -329,7 +338,7 @@ function LoginInner() {
             <p className="text-white/50 text-[13px] mt-0.5">Cities</p>
           </div>
           <div>
-            <p className="text-white text-2xl font-extrabold tracking-tight">5</p>
+            <p className="text-white text-2xl font-extrabold tracking-tight">{LANGUAGES.length}</p>
             <p className="text-white/50 text-[13px] mt-0.5">Languages</p>
           </div>
         </div>
@@ -337,35 +346,35 @@ function LoginInner() {
 
       {/* Form side */}
       <div
-        className="flex-1 flex flex-col items-center justify-center py-12 px-4"
+        className="flex-1 flex flex-col items-center justify-center py-4 px-4 overflow-y-auto"
         style={{ background: 'radial-gradient(ellipse 900px 520px at 50% -12%, var(--li-primary-light) 0%, var(--li-page-bg) 62%)' }}
       >
-      <div className="w-full max-w-sm">
+      <div className="w-full max-w-sm my-auto">
 
-        <Link href="/" className="flex items-center gap-2 text-slate-500 hover:text-slate-800 mb-6 w-fit text-sm font-medium transition-colors">
+        <Link href="/" className="flex items-center gap-2 text-slate-500 hover:text-slate-800 mb-3 w-fit text-sm font-medium transition-colors">
           <ArrowLeft className="w-4 h-4" /> Back to home
         </Link>
 
         <div className="rounded-[28px] overflow-hidden shadow-2xl shadow-slate-900/10 border border-slate-100 bg-white">
 
           {/* Header band */}
-          <div className="relative overflow-hidden px-7 pt-10 pb-7" style={{ background: 'var(--li-nav-bg)' }}>
+          <div className="relative overflow-hidden px-7 pt-6 pb-5" style={{ background: 'var(--li-nav-bg)' }}>
             <div className="absolute -top-12 -left-8 w-48 h-48 rounded-full opacity-25 blur-3xl pointer-events-none" style={{ background: 'var(--li-primary)' }} />
             <div className="absolute -bottom-16 -right-10 w-56 h-56 rounded-full opacity-[0.12] blur-3xl pointer-events-none" style={{ background: 'var(--li-featured)' }} />
 
-            <div className="relative mb-7">
-              <SiteLogo variant="light" size="lg" tagline={true} />
+            <div className="relative mb-4">
+              <SiteLogo variant="light" size="md" tagline={true} />
             </div>
-            <h1 className="relative text-[28px] font-extrabold leading-[1.15] tracking-tight text-white text-balance">{heading}</h1>
-            <p className="relative text-white/65 text-[14.5px] mt-2 leading-relaxed">{subheading}</p>
+            <h1 className="relative text-2xl font-extrabold leading-[1.15] tracking-tight text-white text-balance">{heading}</h1>
+            <p className="relative text-white/65 text-[14.5px] mt-1.5 leading-relaxed">{subheading}</p>
 
             {/* Sign In / Sign Up tabs — only on phone step */}
             {step === 'phone' && (
-              <div className="relative flex gap-1 mt-6 bg-white/10 p-1 rounded-full">
+              <div className="relative flex gap-1 mt-4 bg-white/10 p-1 rounded-full">
                 <button
                   type="button"
                   onClick={() => setMode('signin')}
-                  className={`flex-1 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 ${
+                  className={`flex-1 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${
                     mode === 'signin' ? 'bg-white text-slate-900 shadow-sm' : 'text-white/70 hover:text-white'
                   }`}
                 >
@@ -374,7 +383,7 @@ function LoginInner() {
                 <button
                   type="button"
                   onClick={() => setMode('signup')}
-                  className={`flex-1 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 ${
+                  className={`flex-1 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${
                     mode === 'signup' ? 'bg-white text-slate-900 shadow-sm' : 'text-white/70 hover:text-white'
                   }`}
                 >
@@ -384,7 +393,7 @@ function LoginInner() {
             )}
           </div>
 
-          <div className="px-7 py-8">
+          <div className="px-7 py-5">
 
             {/* Dev bypass */}
             {OTP_DEBUG && step === 'phone' && (
@@ -435,14 +444,14 @@ function LoginInner() {
                       <GoogleIcon />
                       Continue with Google
                     </button>
-                    <div className="flex items-center gap-3 my-6">
+                    <div className="flex items-center gap-3 my-4">
                       <div className="flex-1 h-px bg-slate-200" />
                       <span className="text-xs font-medium text-slate-400">or use your phone</span>
                       <div className="flex-1 h-px bg-slate-200" />
                     </div>
                   </>
                 )}
-                <form onSubmit={mode === 'signin' ? handleLogin : handleSignupPhoneSubmit} className="space-y-6">
+                <form onSubmit={mode === 'signin' ? handleLogin : handleSignupPhoneSubmit} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="phone" className={LABEL_CLS}>Mobile Number</Label>
                     <div className={`flex ${FIELD} border border-input overflow-hidden focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-0 bg-white`}>
@@ -507,7 +516,7 @@ function LoginInner() {
 
             {/* ── Step: OTP (signup) ── */}
             {step === 'otp' && (
-              <form onSubmit={verifyOtp} className="space-y-6">
+              <form onSubmit={verifyOtp} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="otp" className={LABEL_CLS}>6-digit OTP</Label>
                   <div className="relative">
@@ -535,7 +544,7 @@ function LoginInner() {
 
             {/* ── Step: Create password (signup) ── */}
             {step === 'create-password' && (
-              <form onSubmit={handleCreatePassword} className="space-y-6">
+              <form onSubmit={handleCreatePassword} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="new-password" className={LABEL_CLS}>Password</Label>
                   <PasswordInput
@@ -565,7 +574,7 @@ function LoginInner() {
 
             {/* ── Step: Name (new users only) ── */}
             {step === 'name' && (
-              <form onSubmit={saveName} className="space-y-6">
+              <form onSubmit={saveName} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="name" className={LABEL_CLS}>Your Name</Label>
                   <div className="relative">
@@ -592,7 +601,7 @@ function LoginInner() {
 
             {/* ── Step: Forgot password — phone ── */}
             {step === 'forgot-phone' && (
-              <form onSubmit={handleForgotPhoneSubmit} className="space-y-6">
+              <form onSubmit={handleForgotPhoneSubmit} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="forgot-phone" className={LABEL_CLS}>Mobile Number</Label>
                   <div className={`flex ${FIELD} border border-input overflow-hidden focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-0 bg-white`}>
@@ -625,7 +634,7 @@ function LoginInner() {
 
             {/* ── Step: Forgot password — OTP ── */}
             {step === 'forgot-otp' && (
-              <form onSubmit={handleForgotOtpVerify} className="space-y-6">
+              <form onSubmit={handleForgotOtpVerify} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="forgot-otp" className={LABEL_CLS}>6-digit code</Label>
                   <div className="relative">
@@ -653,7 +662,7 @@ function LoginInner() {
 
             {/* ── Step: Forgot password — reset ── */}
             {step === 'forgot-reset' && (
-              <form onSubmit={handleResetPassword} className="space-y-6">
+              <form onSubmit={handleResetPassword} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="reset-password" className={LABEL_CLS}>New password</Label>
                   <PasswordInput
@@ -684,7 +693,7 @@ function LoginInner() {
           </div>
 
           {/* Privacy / Terms notice */}
-          <p className="text-[11.5px] text-center text-muted-foreground px-6 pb-6 leading-relaxed">
+          <p className="text-[11.5px] text-center text-muted-foreground px-6 pb-4 leading-relaxed">
             By continuing, you agree to our{' '}
             <a href="/terms" className="underline underline-offset-2 hover:text-slate-700">Terms of Service</a>
             {' '}and{' '}

@@ -1,8 +1,10 @@
 /**
- * Static i18n dictionaries for all 11 languages.
- * Bundled at build time — zero async loading, zero FOUT risk, zero flicker.
- * Covers all UI chrome: nav, hero, city picker, search, listing cards,
- * categories, sort, bottom nav, fresh section, and city home page.
+ * Static i18n dictionaries for the 5 languages actually live in production
+ * (English + the 4 languages of the South Indian states we serve — see
+ * VALID_LANGS in lib/prefs.ts, the single source of truth this type derives
+ * from). Bundled at build time — zero async loading, zero FOUT risk, zero
+ * flicker. Covers all UI chrome: nav, hero, city picker, search, listing
+ * cards, categories, sort, bottom nav, fresh section, and city home page.
  */
 
 import type { LangCode } from './prefs';
@@ -100,18 +102,6 @@ const DICTS: Record<LangCode, UIDict> = {
     bottomNav: { home: 'Home', search: 'Search', post: 'Post', myListings: 'My Listings', profile: 'Profile', signUp: 'Sign Up' },
     fresh:  { title: 'Fresh Listings Near You', live: 'Live · Updated just now', sub: 'Real people, real prices — contact sellers directly via WhatsApp.', viewAll: 'View all', viewAllNear: 'View all near you', footnote: 'All sellers contactable directly via WhatsApp · No middlemen · No commissions', badgeNew: 'New', badgeVerified: 'Verified' },
   },
-  hi: {
-    nav:    { cities: 'शहर', signIn: 'साइन इन', post: 'लिस्टिंग पोस्ट करें', postShort: 'पोस्ट' },
-    hero:   { headline1: 'खरीदें. बेचें. जुड़ें.', inCity: '{city} में.', inYourCity: 'आपके शहर में.', sub: 'लिस्टिंग पोस्ट करें, PG खोजें, स्थानीय सेवाएं खोजें — आपकी भाषा में।' },
-    city:   { select: 'शहर चुनें', search: 'शहर खोजें...', recent: 'हाल के', locate: 'मेरी लोकेशन', notFound: '"{query}" से कोई शहर नहीं मिला' },
-    search: { placeholder: 'टिफिन, PG, ट्यूटर खोजें...' },
-    listing:{ priceOnRequest: 'कीमत पर जानकारी लें', featured: 'फीचर्ड', sold: 'बिका', activeOnWA: 'WA पर सक्रिय', chatOnWA: 'WhatsApp पर चैट करें', viewAll: 'सभी देखें →', viewAllListings: 'सभी लिस्टिंग देखें →', noListings: 'अभी कोई लिस्टिंग नहीं', beFirst: 'अपने शहर में पहली लिस्टिंग पोस्ट करें!', postListing: '+ लिस्टिंग पोस्ट करें' },
-    categories: { all: 'सभी', tiffin: 'टिफिन', pgRooms: 'PG / कमरे', jobs: 'नौकरी', vehicles: 'वाहन', electronics: 'इलेक्ट्रॉनिक्स', events: 'इवेंट', businesses: 'व्यवसाय', education: 'शिक्षा' },
-    sort:   { newest: 'नवीनतम पहले', priceAsc: 'कीमत: कम से अधिक', priceDesc: 'कीमत: अधिक से कम', featuredFirst: 'फीचर्ड पहले' },
-    city2:  { discover: 'खोजें', activeListings: '{count} सक्रिय लिस्टिंग · अभी अपडेट', featuredListings: 'फीचर्ड लिस्टिंग', latestListings: 'नवीनतम लिस्टिंग' },
-    bottomNav: { home: 'होम', search: 'खोजें', post: 'पोस्ट', myListings: 'मेरी लिस्टिंग', profile: 'प्रोफ़ाइल', signUp: 'साइन अप' },
-    fresh:  { title: 'आपके पास ताज़ी लिस्टिंग', live: 'लाइव · अभी अपडेट', sub: 'असली लोग, असली कीमतें — WhatsApp पर सीधे संपर्क करें।', viewAll: 'सभी देखें', viewAllNear: 'आस-पास सभी देखें', footnote: 'सभी विक्रेता WhatsApp पर सीधे · कोई बिचौलिया नहीं · कोई कमीशन नहीं', badgeNew: 'नया', badgeVerified: 'सत्यापित' },
-  },
   te: {
     nav:    { cities: 'నగరాలు', signIn: 'సైన్ ఇన్', post: 'లిస్టింగ్ పోస్ట్ చేయి', postShort: 'పోస్ట్' },
     hero:   { headline1: 'కొనండి. అమ్మండి. కలవండి.', inCity: '{city}లో.', inYourCity: 'మీ నగరంలో.', sub: 'లిస్టింగ్‌లు పోస్ట్ చేయండి, PGలు కనుగొనండి — మీ భాషలో.' },
@@ -159,66 +149,6 @@ const DICTS: Record<LangCode, UIDict> = {
     city2:  { discover: 'കണ്ടെത്തുക', activeListings: '{count} സജീവ ലിസ്റ്റിംഗ് · ഇപ്പോൾ അപ്‌ഡേറ്റ്', featuredListings: 'ഫീച്ചർഡ് ലിസ്റ്റിംഗുകൾ', latestListings: 'ഏറ്റവും പുതിയ ലിസ്റ്റിംഗുകൾ' },
     bottomNav: { home: 'ഹോം', search: 'തിരയുക', post: 'ചേർക്കുക', myListings: 'എന്റെ ലിസ്റ്റിംഗ്', profile: 'പ്രൊഫൈൽ', signUp: 'സൈൻ അപ്' },
     fresh:  { title: 'നിങ്ങൾക്ക് അടുത്ത് പുതിയ ലിസ്റ്റിംഗുകൾ', live: 'തത്സമയം · ഇപ്പോൾ അപ്‌ഡേറ്റ്', sub: 'യഥാർഥ ആളുകൾ, യഥാർഥ വിലകൾ — WhatsApp-ൽ നേരിട്ട് ബന്ധപ്പെടുക.', viewAll: 'എല്ലാം കാണുക', viewAllNear: 'അടുത്ത് എല്ലാം കാണുക', footnote: 'എല്ലാ വിൽപ്പനക്കാരും WhatsApp-ൽ നേരിട്ട് · ഇടനിലക്കാർ ഇല്ല · കമ്മീഷൻ ഇല്ല', badgeNew: 'പുതിയത്', badgeVerified: 'പരിശോധിച്ചത്' },
-  },
-  mr: {
-    nav:    { cities: 'शहरे', signIn: 'साइन इन', post: 'लिस्टिंग टाका', postShort: 'टाका' },
-    hero:   { headline1: 'खरेदी करा. विका. जोडा.', inCity: '{city}मध्ये.', inYourCity: 'तुमच्या शहरात.', sub: 'लिस्टिंग टाका, PG शोधा — तुमच्या भाषेत.' },
-    city:   { select: 'शहर निवडा', search: 'शहर शोधा...', recent: 'अलीकडील', locate: 'माझे स्थान', notFound: '"{query}" साठी कोणतेही शहर आढळले नाही' },
-    search: { placeholder: 'टिफिन, PG, शिक्षक शोधा...' },
-    listing:{ priceOnRequest: 'किंमत विचारा', featured: 'वैशिष्ट्यीकृत', sold: 'विकले', activeOnWA: 'WA वर सक्रिय', chatOnWA: 'WhatsApp वर चॅट करा', viewAll: 'सर्व पाहा →', viewAllListings: 'सर्व लिस्टिंग पाहा →', noListings: 'अजून लिस्टिंग नाही', beFirst: 'तुमच्या शहरात पहिले पोस्ट करा!', postListing: '+ लिस्टिंग टाका' },
-    categories: { all: 'सर्व', tiffin: 'टिफिन', pgRooms: 'PG / खोल्या', jobs: 'नोकऱ्या', vehicles: 'वाहने', electronics: 'इलेक्ट्रॉनिक्स', events: 'कार्यक्रम', businesses: 'व्यवसाय', education: 'शिक्षण' },
-    sort:   { newest: 'नवीनतम प्रथम', priceAsc: 'किंमत: कमी ते जास्त', priceDesc: 'किंमत: जास्त ते कमी', featuredFirst: 'वैशिष्ट्यीकृत प्रथम' },
-    city2:  { discover: 'शोधा', activeListings: '{count} सक्रिय लिस्टिंग · आत्ता अपडेट', featuredListings: 'वैशिष्ट्यीकृत लिस्टिंग', latestListings: 'नवीनतम लिस्टिंग' },
-    bottomNav: { home: 'होम', search: 'शोधा', post: 'टाका', myListings: 'माझ्या लिस्टिंग', profile: 'प्रोफाइल', signUp: 'साइन अप' },
-    fresh:  { title: 'तुमच्या जवळ नवीन लिस्टिंग', live: 'थेट · आत्ता अपडेट', sub: 'खरे लोक, खऱ्या किंमती — WhatsApp वर थेट संपर्क करा.', viewAll: 'सर्व पाहा', viewAllNear: 'जवळ सर्व पाहा', footnote: 'सर्व विक्रेते WhatsApp वर थेट · दलाल नाही · कमिशन नाही', badgeNew: 'नवीन', badgeVerified: 'सत्यापित' },
-  },
-  bn: {
-    nav:    { cities: 'শহর', signIn: 'সাইন ইন', post: 'লিস্টিং দিন', postShort: 'দিন' },
-    hero:   { headline1: 'কিনুন. বেচুন. সংযুক্ত হন.', inCity: '{city}তে.', inYourCity: 'আপনার শহরে.', sub: 'লিস্টিং দিন, PG খুঁজুন — আপনার ভাষায়।' },
-    city:   { select: 'শহর বেছে নিন', search: 'শহর খুঁজুন...', recent: 'সাম্প্রতিক', locate: 'আমার অবস্থান', notFound: '"{query}" এর জন্য কোনো শহর পাওয়া যায়নি' },
-    search: { placeholder: 'টিফিন, PG, টিউটর খুঁজুন...' },
-    listing:{ priceOnRequest: 'মূল্য জিজ্ঞাসা করুন', featured: 'ফিচার্ড', sold: 'বিক্রি হয়েছে', activeOnWA: 'WA তে সক্রিয়', chatOnWA: 'WhatsApp এ কথা বলুন', viewAll: 'সব দেখুন →', viewAllListings: 'সব লিস্টিং দেখুন →', noListings: 'এখনও কোনো লিস্টিং নেই', beFirst: 'আপনার শহরে প্রথম পোস্ট করুন!', postListing: '+ লিস্টিং দিন' },
-    categories: { all: 'সব', tiffin: 'টিফিন', pgRooms: 'PG / ঘর', jobs: 'চাকরি', vehicles: 'যানবাহন', electronics: 'ইলেকট্রনিক্স', events: 'ইভেন্ট', businesses: 'ব্যবসা', education: 'শিক্ষা' },
-    sort:   { newest: 'নতুন প্রথমে', priceAsc: 'দাম: কম থেকে বেশি', priceDesc: 'দাম: বেশি থেকে কম', featuredFirst: 'ফিচার্ড প্রথমে' },
-    city2:  { discover: 'আবিষ্কার করুন', activeListings: '{count}টি সক্রিয় লিস্টিং · এইমাত্র আপডেট', featuredListings: 'ফিচার্ড লিস্টিং', latestListings: 'সর্বশেষ লিস্টিং' },
-    bottomNav: { home: 'হোম', search: 'খুঁজুন', post: 'দিন', myListings: 'আমার লিস্টিং', profile: 'প্রোফাইল', signUp: 'সাইন আপ' },
-    fresh:  { title: 'আপনার কাছে নতুন লিস্টিং', live: 'লাইভ · এইমাত্র আপডেট', sub: 'আসল মানুষ, আসল দাম — WhatsApp এ সরাসরি যোগাযোগ করুন।', viewAll: 'সব দেখুন', viewAllNear: 'কাছে সব দেখুন', footnote: 'সব বিক্রেতা WhatsApp এ সরাসরি · দালাল নেই · কমিশন নেই', badgeNew: 'নতুন', badgeVerified: 'যাচাইকৃত' },
-  },
-  gu: {
-    nav:    { cities: 'શહેરો', signIn: 'સાઇન ઇન', post: 'લિસ્ટિંગ મૂકો', postShort: 'મૂકો' },
-    hero:   { headline1: 'ખરીદો. વેચો. જોડાઓ.', inCity: '{city}માં.', inYourCity: 'તમારા શહેરમાં.', sub: 'લિસ્ટિંગ મૂકો, PG શોધો — તમારી ભાષામાં.' },
-    city:   { select: 'શહેર પસંદ કરો', search: 'શહેર શોધો...', recent: 'તાજેતરના', locate: 'મારું સ્થાન', notFound: '"{query}" માટે કોઈ શહેર મળ્યું નહીં' },
-    search: { placeholder: 'ટિફિન, PG, ટ્યુટર શોધો...' },
-    listing:{ priceOnRequest: 'ભાવ પૂછો', featured: 'ફીચર્ડ', sold: 'વેચાઈ ગયું', activeOnWA: 'WA પર સક્રિય', chatOnWA: 'WhatsApp પર વાત કરો', viewAll: 'બધું જુઓ →', viewAllListings: 'બધી લિસ્ટિંગ જુઓ →', noListings: 'હજુ કોઈ લિસ્ટિંગ નથી', beFirst: 'તમારા શહેરમાં પ્રથમ પોસ્ટ કરો!', postListing: '+ લિસ્ટિંગ મૂકો' },
-    categories: { all: 'બધું', tiffin: 'ટિફિન', pgRooms: 'PG / ઓરડા', jobs: 'નોકરી', vehicles: 'વાહન', electronics: 'ઇલેક્ટ્રોનિક્સ', events: 'ઇવેન્ટ', businesses: 'ધંધો', education: 'શિક્ષણ' },
-    sort:   { newest: 'નવું પ્રથમ', priceAsc: 'ભાવ: ઓછા થી વધુ', priceDesc: 'ભાવ: વધુ થી ઓછા', featuredFirst: 'ફીચર્ડ પ્રથમ' },
-    city2:  { discover: 'શોધો', activeListings: '{count} સક્રિય લિસ્ટિંગ · હમણાં અપડેટ', featuredListings: 'ફીચર્ડ લિસ્ટિંગ', latestListings: 'નવીનતમ લિસ્ટિંગ' },
-    bottomNav: { home: 'હોમ', search: 'શોધો', post: 'મૂકો', myListings: 'મારી લિસ્ટિંગ', profile: 'પ્રોફાઇલ', signUp: 'સાઇન અપ' },
-    fresh:  { title: 'તમારી નજીક નવી લિસ્ટિંગ', live: 'લાઇવ · હમણાં અપડેટ', sub: 'સાચા લોકો, સાચી કિંમત — WhatsApp પર સીધો સંપર્ક.', viewAll: 'બધું જુઓ', viewAllNear: 'નજીક બધું જુઓ', footnote: 'બધા વિક્રેતા WhatsApp પર સીધા · દલાલ નહીં · કમિશન નહીં', badgeNew: 'નવું', badgeVerified: 'ચકાસાયેલ' },
-  },
-  pa: {
-    nav:    { cities: 'ਸ਼ਹਿਰ', signIn: 'ਸਾਈਨ ਇਨ', post: 'ਲਿਸਟਿੰਗ ਪਾਓ', postShort: 'ਪਾਓ' },
-    hero:   { headline1: 'ਖਰੀਦੋ. ਵੇਚੋ. ਜੁੜੋ.', inCity: '{city} ਵਿੱਚ.', inYourCity: 'ਤੁਹਾਡੇ ਸ਼ਹਿਰ ਵਿੱਚ.', sub: 'ਲਿਸਟਿੰਗ ਪਾਓ, PG ਲੱਭੋ — ਤੁਹਾਡੀ ਭਾਸ਼ਾ ਵਿੱਚ।' },
-    city:   { select: 'ਸ਼ਹਿਰ ਚੁਣੋ', search: 'ਸ਼ਹਿਰ ਖੋਜੋ...', recent: 'ਹਾਲੀਆ', locate: 'ਮੇਰੀ ਲੋਕੇਸ਼ਨ', notFound: '"{query}" ਲਈ ਕੋਈ ਸ਼ਹਿਰ ਨਹੀਂ ਮਿਲਿਆ' },
-    search: { placeholder: 'ਟਿਫਿਨ, PG, ਟਿਊਟਰ ਖੋਜੋ...' },
-    listing:{ priceOnRequest: 'ਕੀਮਤ ਪੁੱਛੋ', featured: 'ਫੀਚਰਡ', sold: 'ਵਿਕ ਗਿਆ', activeOnWA: "WA 'ਤੇ ਸਰਗਰਮ", chatOnWA: "WhatsApp 'ਤੇ ਗੱਲ ਕਰੋ", viewAll: 'ਸਭ ਦੇਖੋ →', viewAllListings: 'ਸਾਰੀਆਂ ਲਿਸਟਿੰਗ ਦੇਖੋ →', noListings: 'ਅਜੇ ਕੋਈ ਲਿਸਟਿੰਗ ਨਹੀਂ', beFirst: 'ਆਪਣੇ ਸ਼ਹਿਰ ਵਿੱਚ ਪਹਿਲੀ ਪੋਸਟ ਕਰੋ!', postListing: '+ ਲਿਸਟਿੰਗ ਪਾਓ' },
-    categories: { all: 'ਸਭ', tiffin: 'ਟਿਫਿਨ', pgRooms: 'PG / ਕਮਰੇ', jobs: 'ਨੌਕਰੀਆਂ', vehicles: 'ਵਾਹਨ', electronics: 'ਇਲੈਕਟ੍ਰੋਨਿਕਸ', events: 'ਸਮਾਗਮ', businesses: 'ਕਾਰੋਬਾਰ', education: 'ਸਿੱਖਿਆ' },
-    sort:   { newest: 'ਨਵੇਂ ਪਹਿਲਾਂ', priceAsc: 'ਕੀਮਤ: ਘੱਟ ਤੋਂ ਵੱਧ', priceDesc: 'ਕੀਮਤ: ਵੱਧ ਤੋਂ ਘੱਟ', featuredFirst: 'ਫੀਚਰਡ ਪਹਿਲਾਂ' },
-    city2:  { discover: 'ਖੋਜੋ', activeListings: '{count} ਸਰਗਰਮ ਲਿਸਟਿੰਗ · ਹੁਣੇ ਅਪਡੇਟ', featuredListings: 'ਫੀਚਰਡ ਲਿਸਟਿੰਗ', latestListings: 'ਤਾਜ਼ਾ ਲਿਸਟਿੰਗ' },
-    bottomNav: { home: 'ਹੋਮ', search: 'ਖੋਜੋ', post: 'ਪਾਓ', myListings: 'ਮੇਰੀਆਂ ਲਿਸਟਿੰਗ', profile: 'ਪ੍ਰੋਫਾਈਲ', signUp: 'ਸਾਈਨ ਅੱਪ' },
-    fresh:  { title: 'ਤੁਹਾਡੇ ਨੇੜੇ ਨਵੀਆਂ ਲਿਸਟਿੰਗ', live: "ਲਾਈਵ · ਹੁਣੇ ਅਪਡੇਟ", sub: "ਅਸਲ ਲੋਕ, ਅਸਲ ਕੀਮਤਾਂ — WhatsApp 'ਤੇ ਸਿੱਧਾ ਸੰਪਰਕ।", viewAll: 'ਸਭ ਦੇਖੋ', viewAllNear: 'ਨੇੜੇ ਸਭ ਦੇਖੋ', footnote: "ਸਾਰੇ ਵਿਕ੍ਰੇਤਾ WhatsApp 'ਤੇ ਸਿੱਧੇ · ਦਲਾਲ ਨਹੀਂ · ਕਮਿਸ਼ਨ ਨਹੀਂ", badgeNew: 'ਨਵੀਂ', badgeVerified: 'ਪੁਸ਼ਟੀਕ੍ਰਿਤ' },
-  },
-  or: {
-    nav:    { cities: 'ସହର', signIn: 'ସାଇନ ଇନ', post: 'ଲିଷ୍ଟିଂ ଦିଅ', postShort: 'ଦିଅ' },
-    hero:   { headline1: 'କିଣ. ବେଚ. ସଂଯୁକ୍ତ ହ.', inCity: '{city}ରେ.', inYourCity: 'ତୁମ ସହରରେ.', sub: 'ଲିଷ୍ଟିଂ ଦିଅ, PG ଖୋଜ — ତୁମ ଭାଷାରେ।' },
-    city:   { select: 'ସହର ବାଛ', search: 'ସହର ଖୋଜ...', recent: 'ସାମ୍ପ୍ରତିକ', locate: 'ମୋ ସ୍ଥାନ', notFound: '"{query}" ପାଇଁ କୌଣସି ସହର ମିଳିଲା ନାହିଁ' },
-    search: { placeholder: 'ଟିଫିନ, PG, ଟ୍ୟୁଟର ଖୋଜ...' },
-    listing:{ priceOnRequest: 'ଦାମ ପଚାର', featured: 'ଫିଚର୍ଡ', sold: 'ବିକ୍ରି ହୋଇଛି', activeOnWA: 'WA ରେ ସକ୍ରିୟ', chatOnWA: 'WhatsApp ରେ କଥା ହ', viewAll: 'ସବୁ ଦେଖ →', viewAllListings: 'ସବୁ ଲିଷ୍ଟିଂ ଦେଖ →', noListings: 'ଏପର୍ଯ୍ୟନ୍ତ ଲିଷ୍ଟିଂ ନାହିଁ', beFirst: 'ତୁମ ସହରରେ ପ୍ରଥମ ପୋଷ୍ଟ କର!', postListing: '+ ଲିଷ୍ଟିଂ ଦିଅ' },
-    categories: { all: 'ସବୁ', tiffin: 'ଟିଫିନ', pgRooms: 'PG / ଘର', jobs: 'ଚାକିରି', vehicles: 'ଯାନ', electronics: 'ଇଲେକ୍ଟ୍ରୋନିକ୍ସ', events: 'ଅନୁଷ୍ଠାନ', businesses: 'ବ୍ୟବସାୟ', education: 'ଶିକ୍ଷା' },
-    sort:   { newest: 'ନୂଆ ପ୍ରଥମ', priceAsc: 'ଦାମ: କମ ଠୁ ଅଧିକ', priceDesc: 'ଦାମ: ଅଧିକ ଠୁ କମ', featuredFirst: 'ଫିଚର୍ଡ ପ୍ରଥମ' },
-    city2:  { discover: 'ଅନ୍ୱେଷଣ', activeListings: '{count} ସକ୍ରିୟ ଲିଷ୍ଟିଂ · ଏଇମାତ୍ର ଅପଡ଼େଟ', featuredListings: 'ଫିଚର୍ଡ ଲିଷ୍ଟିଂ', latestListings: 'ସର୍ବଶେଷ ଲିଷ୍ଟିଂ' },
-    bottomNav: { home: 'ହୋମ', search: 'ଖୋଜ', post: 'ଦିଅ', myListings: 'ମୋ ଲିଷ୍ଟିଂ', profile: 'ପ୍ରୋଫାଇଲ', signUp: 'ସାଇନ ଅପ' },
-    fresh:  { title: 'ତୁମ ନିକଟରେ ତାଜା ଲିଷ୍ଟିଂ', live: 'ଲାଇଭ · ଏଇମାତ୍ର ଅପଡ଼େଟ', sub: 'ଆସଲ ଲୋକ, ଆସଲ ଦାମ — WhatsApp ରେ ସିଧା ଯୋଗାଯୋଗ।', viewAll: 'ସବୁ ଦେଖ', viewAllNear: 'ନିକଟରେ ସବୁ ଦେଖ', footnote: 'ସବୁ ବିକ୍ରେତା WhatsApp ରେ ସିଧା · ଦଲାଲ ନାହିଁ · କମିଶନ ନାହିଁ', badgeNew: 'ନୂଆ', badgeVerified: 'ଯାଞ୍ଚ ହୋଇଛି' },
   },
 };
 
