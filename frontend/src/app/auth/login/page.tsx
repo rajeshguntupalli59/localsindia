@@ -27,7 +27,7 @@ const LABEL_CLS = 'text-[13px] font-semibold text-slate-600';
 const VALUE_PROPS: { icon: LucideIcon; title: string; subtitle: string }[] = [
   { icon: Zap,           title: 'Free to post',              subtitle: 'List anything in under a minute — no fees.' },
   { icon: MessageCircle, title: 'Direct WhatsApp contact',   subtitle: 'Talk to sellers directly — no middlemen, no spam calls.' },
-  { icon: Globe,         title: 'Your city, your language',  subtitle: '11 Indian languages, hyperlocal to where you live.' },
+  { icon: Globe,         title: 'Your city, your language',  subtitle: 'English, Telugu, Tamil, Kannada & Malayalam — hyperlocal to South India.' },
   { icon: ShieldCheck,   title: 'Verified local sellers',    subtitle: 'Real people from your own neighborhood.' },
 ];
 
@@ -329,7 +329,7 @@ function LoginInner() {
             <p className="text-white/50 text-[13px] mt-0.5">Cities</p>
           </div>
           <div>
-            <p className="text-white text-2xl font-extrabold tracking-tight">11</p>
+            <p className="text-white text-2xl font-extrabold tracking-tight">5</p>
             <p className="text-white/50 text-[13px] mt-0.5">Languages</p>
           </div>
         </div>

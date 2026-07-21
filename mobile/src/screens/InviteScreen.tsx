@@ -82,7 +82,7 @@ export default function InviteScreen({ navigation }: any) {
             {[
               { val: '100%', label: 'Free forever' },
               { val: '0', label: 'Spam calls' },
-              { val: '8+', label: 'Languages' },
+              { val: '5', label: 'Languages' },
             ].map(s => (
               <View key={s.label} style={styles.statCard}>
                 <Text style={styles.statVal}>{s.val}</Text>
