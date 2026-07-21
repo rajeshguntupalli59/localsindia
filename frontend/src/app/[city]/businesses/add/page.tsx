@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ShieldCheck, PartyPopper } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { api, ApiError } from '@/lib/api';
 import type { City } from '@/lib/types';
+import GetVerifiedModal from '@/components/get-verified-modal/GetVerifiedModal';
 
 export default function AddBusinessPage() {
   const params = useParams();
@@ -26,6 +27,11 @@ export default function AddBusinessPage() {
     whatsapp_url: '',
     website_url: '',
   });
+
+  // Set once the business is created — switches the screen into the
+  // "get verified now, or skip" upsell instead of navigating away immediately.
+  const [createdBusinessId, setCreatedBusinessId] = useState<string | null>(null);
+  const [badgeModal, setBadgeModal] = useState(false);
 
   useEffect(() => {
     api.cities.get(citySlug).then(setCity).catch(() => {});
@@ -51,13 +57,60 @@ export default function AddBusinessPage() {
         token,
       );
       toast.success('Business listed!');
-      router.push(`/${citySlug}/businesses/${biz.id}`);
+      setCreatedBusinessId(biz.id);
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : 'Failed to add business');
     } finally {
       setLoading(false);
     }
   };
+
+  const goToBusiness = () => router.push(`/${citySlug}/businesses/${createdBusinessId}`);
+
+  // ── Post-creation: get verified now, or skip ──────────────────────────────
+  if (createdBusinessId) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4" style={{ background: 'var(--li-page-bg)' }}>
+        <div className="w-full max-w-sm bg-white rounded-2xl shadow-sm border border-slate-100 p-6 text-center">
+          <PartyPopper className="w-10 h-10 mx-auto text-orange-500" />
+          <h1 className="text-xl font-black mt-3" style={{ color: 'var(--li-text)' }}>Business listed!</h1>
+          <p className="text-sm text-slate-500 mt-1">{form.name} is now live in {city?.name || citySlug}.</p>
+
+          <div className="mt-5 p-4 rounded-xl border-2 border-blue-100 bg-blue-50 text-left flex items-start gap-3">
+            <ShieldCheck className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-semibold text-blue-900">Want to stand out?</p>
+              <p className="text-xs text-blue-700 mt-0.5">Get Verified — blue ✓ badge and priority ranking. Starts at ₹499/month.</p>
+            </div>
+          </div>
+
+          <Button
+            type="button"
+            className="w-full text-white mt-4"
+            style={{ background: 'var(--li-primary)' }}
+            onClick={() => setBadgeModal(true)}
+          >
+            Get Verified Now
+          </Button>
+          <button
+            type="button"
+            onClick={goToBusiness}
+            className="w-full py-2.5 mt-2 text-sm text-slate-500 hover:text-slate-800 transition-colors"
+          >
+            Skip for now
+          </button>
+        </div>
+
+        {badgeModal && (
+          <GetVerifiedModal
+            businessId={createdBusinessId}
+            onClose={() => setBadgeModal(false)}
+            onVerified={goToBusiness}
+          />
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--li-page-bg)' }}>

@@ -81,6 +81,16 @@ export default function BusinessDetailScreen({ route, navigation }: any) {
 
   useEffect(() => { load(); }, [businessId]);
 
+  // Right after creating a business (PostScreen passes promptVerify), surface
+  // the Get Verified offer immediately instead of only being discoverable if
+  // the owner comes back to their listing later.
+  useEffect(() => {
+    if (route.params?.promptVerify && business && !business.verified) {
+      setBadgeModal(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [business]);
+
   const load = async () => {
     setLoading(true);
     try {
@@ -394,7 +404,9 @@ export default function BusinessDetailScreen({ route, navigation }: any) {
           <View style={styles.modalSheet}>
             <View style={styles.modalHandle} />
             <Text style={styles.modalTitle}>Choose a Verification Plan</Text>
-            <Text style={styles.modalSubtitle}>Get the blue ✓ badge and rank higher in search results.</Text>
+            <Text style={styles.modalSubtitle}>
+              Your business is already live. Add the blue ✓ badge to rank higher in search results, or skip — you can always get verified later from your business page.
+            </Text>
 
             {BADGE_PLANS.map(plan => (
               <TouchableOpacity
@@ -439,7 +451,7 @@ export default function BusinessDetailScreen({ route, navigation }: any) {
             <Text style={styles.secureNote}>🔒 Powered by Razorpay · Secure payment</Text>
 
             <TouchableOpacity style={styles.cancelBtn} onPress={() => setBadgeModal(false)}>
-              <Text style={styles.cancelBtnText}>Cancel</Text>
+              <Text style={styles.cancelBtnText}>Skip for now — my business is already listed</Text>
             </TouchableOpacity>
           </View>
         </View>
