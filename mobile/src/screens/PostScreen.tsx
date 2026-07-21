@@ -50,9 +50,86 @@ const CATEGORY_COLORS: Record<string, string> = {
 
 const API_BASE = 'https://localsindia-backend.azurewebsites.net/api/v1';
 
-const STEPS = ['Details', 'Photos', 'Contact'];
-
 type Category = { id: string; name: string; slug: string; icon: string };
+
+// Category-specific questions shown on the Details step, right above the
+// generic Title/Description fields. Keys match the backend's per-category
+// *_details table columns (models/listing_details.py) 1:1, so these can be
+// sent straight through as `category_details` on create — no renaming layer.
+type DetailField =
+  | { key: string; label: string; type: 'text'; placeholder?: string }
+  | { key: string; label: string; type: 'number'; placeholder?: string }
+  | { key: string; label: string; type: 'select'; options: string[] }
+  | { key: string; label: string; type: 'multiselect'; options: string[] }
+  | { key: string; label: string; type: 'switch' };
+
+const CATEGORY_DETAIL_FIELDS: Record<string, DetailField[]> = {
+  vehicles: [
+    { key: 'brand', label: 'Brand', type: 'text', placeholder: 'e.g. Honda, Maruti Suzuki' },
+    { key: 'model', label: 'Model', type: 'text', placeholder: 'e.g. Activa 6G, Swift' },
+    { key: 'year', label: 'Year', type: 'number', placeholder: 'e.g. 2022' },
+    { key: 'km_driven', label: 'KM Driven', type: 'number', placeholder: 'e.g. 15000' },
+    { key: 'fuel_type', label: 'Fuel Type', type: 'select', options: ['Petrol', 'Diesel', 'Electric', 'CNG', 'Hybrid'] },
+    { key: 'transmission', label: 'Transmission', type: 'select', options: ['Manual', 'Automatic'] },
+    { key: 'owners_count', label: 'Number of Owners', type: 'number', placeholder: 'e.g. 1' },
+  ],
+  jobs: [
+    { key: 'company_name', label: 'Company Name', type: 'text', placeholder: 'e.g. Acme Pvt Ltd' },
+    { key: 'salary_min', label: 'Min Salary (₹/month)', type: 'number', placeholder: 'e.g. 15000' },
+    { key: 'salary_max', label: 'Max Salary (₹/month)', type: 'number', placeholder: 'e.g. 25000' },
+    { key: 'job_type', label: 'Job Type', type: 'select', options: ['Full-time', 'Part-time', 'Contract', 'Internship'] },
+    { key: 'experience_required', label: 'Experience Required', type: 'text', placeholder: 'e.g. 1-2 years' },
+    { key: 'work_mode', label: 'Work Mode', type: 'select', options: ['On-site', 'Remote', 'Hybrid'] },
+  ],
+  'pg-roommate': [
+    { key: 'room_type', label: 'Room Type', type: 'select', options: ['Single', 'Sharing', '1RK', '1BHK'] },
+    { key: 'gender_preference', label: 'Gender Preference', type: 'select', options: ['Male', 'Female', 'Any'] },
+    { key: 'deposit_amount', label: 'Deposit Amount (₹)', type: 'number', placeholder: 'e.g. 10000' },
+    { key: 'amenities', label: 'Amenities', type: 'multiselect', options: ['WiFi', 'AC', 'Food', 'Laundry', 'Parking'] },
+  ],
+  'real-estate': [
+    { key: 'property_type', label: 'Property Type', type: 'select', options: ['Apartment', 'Villa', 'Plot', 'Commercial'] },
+    { key: 'bhk', label: 'BHK', type: 'number', placeholder: 'e.g. 2' },
+    { key: 'sqft', label: 'Area (sq.ft)', type: 'number', placeholder: 'e.g. 1200' },
+    { key: 'furnishing', label: 'Furnishing', type: 'select', options: ['Furnished', 'Semi-furnished', 'Unfurnished'] },
+    { key: 'listing_type', label: 'Listing Type', type: 'select', options: ['Rent', 'Sale'] },
+  ],
+  electronics: [
+    { key: 'brand', label: 'Brand', type: 'text', placeholder: 'e.g. Samsung, Apple' },
+    { key: 'model', label: 'Model', type: 'text', placeholder: 'e.g. Galaxy S23' },
+    { key: 'condition', label: 'Condition', type: 'select', options: ['New', 'Like New', 'Good', 'Fair'] },
+    { key: 'warranty_remaining', label: 'Warranty Remaining', type: 'text', placeholder: 'e.g. 6 months' },
+  ],
+  furniture: [
+    { key: 'material', label: 'Material', type: 'text', placeholder: 'e.g. Wood, Metal' },
+    { key: 'dimensions', label: 'Dimensions', type: 'text', placeholder: 'e.g. 6ft x 4ft' },
+    { key: 'condition', label: 'Condition', type: 'select', options: ['New', 'Like New', 'Good', 'Fair'] },
+  ],
+  fashion: [
+    { key: 'brand', label: 'Brand', type: 'text', placeholder: 'e.g. Nike, Zara' },
+    { key: 'size', label: 'Size', type: 'text', placeholder: 'e.g. M, 32, UK 8' },
+    { key: 'gender', label: 'Gender', type: 'select', options: ['Men', 'Women', 'Unisex', 'Kids'] },
+  ],
+  education: [
+    { key: 'course_type', label: 'Course Type', type: 'text', placeholder: 'e.g. Spoken English, Maths Tuition' },
+    { key: 'mode', label: 'Mode', type: 'select', options: ['Online', 'Offline', 'Hybrid'] },
+    { key: 'duration', label: 'Duration', type: 'text', placeholder: 'e.g. 3 months' },
+  ],
+  doctors: [
+    { key: 'specialization', label: 'Specialization', type: 'text', placeholder: 'e.g. Dentist, Cardiologist' },
+    { key: 'consultation_fee', label: 'Consultation Fee (₹)', type: 'number', placeholder: 'e.g. 500' },
+    { key: 'available_timings', label: 'Available Timings', type: 'text', placeholder: 'e.g. Mon-Sat 10am-6pm' },
+  ],
+  services: [
+    { key: 'service_type', label: 'Service Type', type: 'text', placeholder: 'e.g. Plumber, Electrician' },
+    { key: 'experience_years', label: 'Experience (years)', type: 'number', placeholder: 'e.g. 5' },
+  ],
+  tiffin: [
+    { key: 'meal_type', label: 'Meal Type', type: 'select', options: ['Veg', 'Non-Veg', 'Both'] },
+    { key: 'delivery_area', label: 'Delivery Area', type: 'text', placeholder: 'e.g. Within 5km of Kukatpally' },
+    { key: 'subscription_available', label: 'Subscription Available', type: 'switch' },
+  ],
+};
 
 export default function PostScreen({ navigation, route }: any) {
   const insets = useSafeAreaInsets();
@@ -69,6 +146,7 @@ export default function PostScreen({ navigation, route }: any) {
   const [price, setPrice] = useState('');
   const [area, setArea] = useState('');
   const [categorySlug, setCategorySlug] = useState('');
+  const [categoryDetails, setCategoryDetails] = useState<Record<string, any>>({});
   const [phone, setPhone] = useState('');
   const [whatsappOn, setWhatsappOn] = useState(true);
   const [websiteUrl, setWebsiteUrl] = useState('');
@@ -92,6 +170,20 @@ export default function PostScreen({ navigation, route }: any) {
   const [loading, setLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState('');
   const [success, setSuccess] = useState(false);
+
+  // Step layout depends on whether the picked category has its own specific
+  // questions — those get a dedicated step, separate from the generic
+  // Title/Description step, instead of both living on one scrollable screen.
+  const detailFields = CATEGORY_DETAIL_FIELDS[categorySlug] ?? null;
+  const hasDetailsStep = !!detailFields;
+  const STEPS = hasDetailsStep
+    ? ['Category', 'Details', 'Listing', 'Photos', 'Contact']
+    : ['Category', 'Listing', 'Photos', 'Contact'];
+  const STEP_CATEGORY = 0;
+  const STEP_DETAILS = hasDetailsStep ? 1 : -1;
+  const STEP_LISTING = hasDetailsStep ? 2 : 1;
+  const STEP_PHOTOS = STEP_LISTING + 1;
+  const STEP_CONTACT = STEP_PHOTOS + 1;
 
   useEffect(() => {
     storage.getUser().then(u => {
@@ -184,10 +276,16 @@ export default function PostScreen({ navigation, route }: any) {
     });
   };
 
-  const validateStep0 = () => {
+  const validateCategoryStep = () => {
+    const e: Record<string, string> = {};
+    if (!categorySlug) e.category = 'Please pick a category';
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
+
+  const validateListingStep = () => {
     const e: Record<string, string> = {};
     if (!title.trim() || title.trim().length < 5) e.title = 'Minimum 5 characters';
-    if (!categorySlug) e.category = 'Please pick a category';
     if (!description.trim() || description.trim().length < 20) e.description = 'At least 20 characters';
     if (categorySlug === 'events') {
       if (!venue.trim() || venue.trim().length < 3) e.venue = 'Minimum 3 characters';
@@ -197,7 +295,7 @@ export default function PostScreen({ navigation, route }: any) {
     return Object.keys(e).length === 0;
   };
 
-  const validateStep2 = () => {
+  const validateContactStep = () => {
     if (categorySlug === 'events') return true; // events have no contact-info step
     const e: Record<string, string> = {};
     if (!/^[6-9]\d{9}$/.test(phone)) e.phone = 'Enter a valid 10-digit Indian mobile number';
@@ -206,10 +304,92 @@ export default function PostScreen({ navigation, route }: any) {
   };
 
   const handleNext = () => {
-    if (step === 0 && !validateStep0()) return;
-    if (step === 2) { submit(); return; }
+    if (step === STEP_CATEGORY && !validateCategoryStep()) return;
+    if (step === STEP_LISTING && !validateListingStep()) return;
+    if (step === STEP_CONTACT) { submit(); return; }
     setErrors({});
     setStep(s => s + 1);
+  };
+
+  const setDetailField = (key: string, value: any) => {
+    setCategoryDetails(prev => ({ ...prev, [key]: value }));
+  };
+
+  const buildCategoryDetailsPayload = () => {
+    const fields = CATEGORY_DETAIL_FIELDS[categorySlug];
+    if (!fields) return null;
+    const out: Record<string, any> = {};
+    for (const f of fields) {
+      const v = categoryDetails[f.key];
+      if (v === undefined || v === null || v === '' || (Array.isArray(v) && v.length === 0)) continue;
+      out[f.key] = f.type === 'number' ? Number(v) : v;
+    }
+    return Object.keys(out).length > 0 ? out : null;
+  };
+
+  const renderDetailField = (field: DetailField) => {
+    const value = categoryDetails[field.key];
+
+    if (field.type === 'select' || field.type === 'multiselect') {
+      const selected: string[] = field.type === 'multiselect'
+        ? (Array.isArray(value) ? value : [])
+        : (value ? [value] : []);
+      return (
+        <>
+          <Text style={styles.label}>{field.label}</Text>
+          <View style={styles.chipRow}>
+            {field.options.map(opt => {
+              const active = selected.includes(opt);
+              return (
+                <TouchableOpacity
+                  key={opt}
+                  style={[styles.chip, active && styles.chipActive]}
+                  onPress={() => {
+                    if (field.type === 'multiselect') {
+                      const next = active ? selected.filter(o => o !== opt) : [...selected, opt];
+                      setDetailField(field.key, next);
+                    } else {
+                      setDetailField(field.key, opt);
+                    }
+                  }}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: active }}
+                >
+                  <Text style={[styles.chipText, active && styles.chipTextActive]}>{opt}</Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </>
+      );
+    }
+
+    if (field.type === 'switch') {
+      return (
+        <View style={styles.detailSwitchRow}>
+          <Text style={[styles.label, { marginBottom: 0 }]}>{field.label}</Text>
+          <Switch
+            value={!!value}
+            onValueChange={v => setDetailField(field.key, v)}
+            trackColor={{ false: '#d1d5db', true: '#25D366' }}
+            thumbColor="white"
+          />
+        </View>
+      );
+    }
+
+    return (
+      <>
+        <Text style={styles.label}>{field.label}</Text>
+        <TextInput
+          style={styles.input}
+          value={value != null ? String(value) : ''}
+          onChangeText={t => setDetailField(field.key, field.type === 'number' ? t.replace(/[^0-9.]/g, '') : t)}
+          placeholder={field.placeholder}
+          keyboardType={field.type === 'number' ? 'numeric' : 'default'}
+        />
+      </>
+    );
   };
 
   const uploadPhoto = async (listingId: string, uri: string, index: number) => {
@@ -232,7 +412,7 @@ export default function PostScreen({ navigation, route }: any) {
   };
 
   const submit = async () => {
-    if (!validateStep2()) return;
+    if (!validateContactStep()) return;
     setLoading(true);
     try {
       // "Businesses" category creates a real, badge-eligible Business Directory
@@ -251,7 +431,9 @@ export default function PostScreen({ navigation, route }: any) {
           whatsapp_url: whatsappOn ? `https://wa.me/91${phone}` : null,
           website_url: websiteUrl.trim() || null,
         });
-        navigation.replace('BusinessDetail', { businessId: business.id });
+        // promptVerify tells BusinessDetailScreen to surface the Get Verified
+        // offer immediately, instead of only being discoverable later.
+        navigation.replace('BusinessDetail', { businessId: business.id, promptVerify: true });
         return;
       }
 
@@ -289,6 +471,7 @@ export default function PostScreen({ navigation, route }: any) {
         social_url: socialUrl.trim() || null,
         latitude: location?.latitude ?? null,
         longitude: location?.longitude ?? null,
+        category_details: buildCategoryDetailsPayload(),
       });
 
       if (images.length > 0) {
@@ -351,6 +534,7 @@ export default function PostScreen({ navigation, route }: any) {
     setPrice('');
     setArea('');
     setCategorySlug('');
+    setCategoryDetails({});
     setImages([]);
     setWebsiteUrl('');
     setSocialUrl('');
@@ -472,10 +656,76 @@ export default function PostScreen({ navigation, route }: any) {
         keyboardShouldPersistTaps="handled"
       >
 
-        {/* ── STEP 1: DETAILS ── */}
-        {step === 0 && (
+        {/* ── STEP: CATEGORY ── */}
+        {step === STEP_CATEGORY && (
           <>
-            {/* Title + Description + Price + Area */}
+            <View style={[styles.card, errors.category && styles.cardError]}>
+              <Text style={styles.cardTitle}>
+                What are you posting? <Text style={styles.required}>*</Text>
+              </Text>
+              <Text style={styles.cardSubtitle}>Pick a category — we'll ask the right questions for it next.</Text>
+              <View style={styles.catGrid}>
+                {categories.map(c => {
+                  const active = categorySlug === c.slug;
+                  const bg = CATEGORY_COLORS[c.slug] ?? '#94a3b8';
+                  return (
+                    <TouchableOpacity
+                      key={c.slug}
+                      style={[
+                        styles.catCard,
+                        { backgroundColor: bg, opacity: active ? 1 : 0.85 },
+                        active && styles.catCardActive,
+                      ]}
+                      onPress={() => {
+                        setCategorySlug(c.slug);
+                        setCategoryDetails({});
+                        setErrors(e => ({ ...e, category: '' }));
+                      }}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Category: ${c.name}`}
+                      accessibilityState={{ selected: active }}
+                    >
+                      {active && (
+                        <View style={styles.catCheck}>
+                          <Ionicons name="checkmark" size={12} color={bg} />
+                        </View>
+                      )}
+                      <Ionicons
+                        name={CATEGORY_ICONS[c.slug] ?? 'pricetag-outline'}
+                        size={22}
+                        color="white"
+                      />
+                      <Text style={styles.catLabel}>{c.name}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+              {errors.category ? <Text style={[styles.errorText, { marginTop: 8 }]}>{errors.category}</Text> : null}
+            </View>
+          </>
+        )}
+
+        {/* ── STEP: CATEGORY-SPECIFIC DETAILS (only for categories with their own questions) ── */}
+        {hasDetailsStep && step === STEP_DETAILS && detailFields && (
+          <>
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>
+                {categories.find(c => c.slug === categorySlug)?.name ?? 'Category'} details
+              </Text>
+              <Text style={styles.cardSubtitle}>A few quick questions specific to this category.</Text>
+              {detailFields.map(field => (
+                <View key={field.key} style={{ marginTop: 14 }}>
+                  {renderDetailField(field)}
+                </View>
+              ))}
+            </View>
+          </>
+        )}
+
+        {/* ── STEP: LISTING INFO (generic title/description + price/area or event fields) ── */}
+        {step === STEP_LISTING && (
+          <>
+            {/* Title + Description */}
             <View style={styles.card}>
               <Text style={styles.cardTitle}>What are you selling?</Text>
 
@@ -504,46 +754,6 @@ export default function PostScreen({ navigation, route }: any) {
                 {errors.description ? <Text style={styles.errorText}>{errors.description}</Text> : <Text />}
                 <Text style={styles.charCount}>{description.length}/1000</Text>
               </View>
-            </View>
-
-            {/* Category */}
-            <View style={[styles.card, errors.category && styles.cardError]}>
-              <Text style={styles.cardTitle}>
-                Pick a category <Text style={styles.required}>*</Text>
-              </Text>
-              <View style={styles.catGrid}>
-                {categories.map(c => {
-                  const active = categorySlug === c.slug;
-                  const bg = CATEGORY_COLORS[c.slug] ?? '#94a3b8';
-                  return (
-                    <TouchableOpacity
-                      key={c.slug}
-                      style={[
-                        styles.catCard,
-                        { backgroundColor: bg, opacity: active ? 1 : 0.85 },
-                        active && styles.catCardActive,
-                      ]}
-                      onPress={() => { setCategorySlug(c.slug); setErrors(e => ({ ...e, category: '' })); }}
-                      accessibilityRole="button"
-                      accessibilityLabel={`Category: ${c.name}`}
-                      accessibilityState={{ selected: active }}
-                    >
-                      {active && (
-                        <View style={styles.catCheck}>
-                          <Ionicons name="checkmark" size={12} color={bg} />
-                        </View>
-                      )}
-                      <Ionicons
-                        name={CATEGORY_ICONS[c.slug] ?? 'pricetag-outline'}
-                        size={22}
-                        color="white"
-                      />
-                      <Text style={styles.catLabel}>{c.name}</Text>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-              {errors.category ? <Text style={[styles.errorText, { marginTop: 8 }]}>{errors.category}</Text> : null}
             </View>
 
             {categorySlug === 'events' ? (
@@ -677,8 +887,8 @@ export default function PostScreen({ navigation, route }: any) {
           </>
         )}
 
-        {/* ── STEP 2: PHOTOS (Businesses and Events don't support photos yet) ── */}
-        {step === 1 && (
+        {/* ── STEP: PHOTOS (Businesses and Events don't support photos yet) ── */}
+        {step === STEP_PHOTOS && (
           categorySlug === 'businesses' || categorySlug === 'events' ? (
             <View style={styles.card}>
               <Ionicons name="images-outline" size={28} color="#9ca3af" />
@@ -753,8 +963,8 @@ export default function PostScreen({ navigation, route }: any) {
           )
         )}
 
-        {/* ── STEP 3: CONTACT ── */}
-        {step === 2 && (
+        {/* ── STEP: CONTACT ── */}
+        {step === STEP_CONTACT && (
           <>
             {/* Mini listing summary */}
             {(title || images.length > 0) && (
@@ -874,12 +1084,12 @@ export default function PostScreen({ navigation, route }: any) {
           onPress={handleNext}
           disabled={loading}
           accessibilityRole="button"
-          accessibilityLabel={step === 2 ? (categorySlug === 'businesses' ? 'Add business' : categorySlug === 'events' ? 'Post event' : 'Post listing') : 'Next step'}
+          accessibilityLabel={step === STEP_CONTACT ? (categorySlug === 'businesses' ? 'Add business' : categorySlug === 'events' ? 'Post event' : 'Post listing') : 'Next step'}
           accessibilityState={{ disabled: loading }}
         >
           {loading
             ? <Text style={styles.nextBtnText}>{uploadProgress || (categorySlug === 'businesses' ? 'Adding...' : categorySlug === 'events' ? 'Submitting...' : 'Posting...')}</Text>
-            : step === 2
+            : step === STEP_CONTACT
               ? <><Text style={styles.nextBtnText}>{categorySlug === 'businesses' ? '✦ Add Business' : categorySlug === 'events' ? '✦ Post Event' : '✦ Post Listing'}</Text></>
               : <Text style={styles.nextBtnText}>Next →</Text>}
         </TouchableOpacity>
@@ -1031,6 +1241,21 @@ const styles = StyleSheet.create({
   },
   catEmoji: { fontSize: 22 },
   catLabel: { fontSize: 10, color: 'white', fontWeight: '700', marginTop: 3, textAlign: 'center' },
+
+  // Category-specific detail fields (select / multiselect chips, switch row)
+  chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  chip: {
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderRadius: 20,
+    borderWidth: 1.5,
+    borderColor: '#e5e7eb',
+    backgroundColor: '#fafafa',
+  },
+  chipActive: { borderColor: '#f97316', backgroundColor: '#fff7ed' },
+  chipText: { fontSize: 13, fontWeight: '600', color: '#6b7280' },
+  chipTextActive: { color: '#f97316' },
+  detailSwitchRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
 
   // Price
   priceRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
