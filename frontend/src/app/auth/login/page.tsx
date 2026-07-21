@@ -1,7 +1,7 @@
 'use client';
 
 import { Suspense, useState } from 'react';
-import { ArrowLeft, Phone, Lock, User } from 'lucide-react';
+import { ArrowLeft, Phone, Lock, User, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -31,6 +31,51 @@ const GoogleIcon = () => (
     <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
   </svg>
 );
+
+function PasswordInput({
+  id,
+  value,
+  onChange,
+  placeholder,
+  autoFocus,
+  minLength,
+  withLockIcon,
+}: {
+  id: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  placeholder?: string;
+  autoFocus?: boolean;
+  minLength?: number;
+  withLockIcon?: boolean;
+}) {
+  const [show, setShow] = useState(false);
+  return (
+    <div className="relative">
+      {withLockIcon && <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />}
+      <Input
+        id={id}
+        type={show ? 'text' : 'password'}
+        className={withLockIcon ? 'pl-10 pr-10' : 'pr-10'}
+        placeholder={placeholder}
+        value={value}
+        onChange={onChange}
+        autoFocus={autoFocus}
+        minLength={minLength}
+        required
+      />
+      <button
+        type="button"
+        onClick={() => setShow(v => !v)}
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-slate-700"
+        aria-label={show ? 'Hide password' : 'Show password'}
+        tabIndex={-1}
+      >
+        {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+      </button>
+    </div>
+  );
+}
 
 function LoginInner() {
   const router = useRouter();
@@ -353,18 +398,13 @@ function LoginInner() {
                   {mode === 'signin' && (
                     <div className="space-y-2">
                       <Label htmlFor="password">Password</Label>
-                      <div className="relative">
-                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input
-                          id="password"
-                          type="password"
-                          className="pl-10"
-                          placeholder="Your password"
-                          value={password}
-                          onChange={e => setPassword(e.target.value)}
-                          required
-                        />
-                      </div>
+                      <PasswordInput
+                        id="password"
+                        value={password}
+                        onChange={e => setPassword(e.target.value)}
+                        placeholder="Your password"
+                        withLockIcon
+                      />
                       <button
                         type="button"
                         className="text-xs underline"
@@ -429,27 +469,23 @@ function LoginInner() {
               <form onSubmit={handleCreatePassword} className="space-y-5">
                 <div className="space-y-2">
                   <Label htmlFor="new-password">Password</Label>
-                  <Input
+                  <PasswordInput
                     id="new-password"
-                    type="password"
-                    placeholder="At least 8 characters"
                     value={newPassword}
                     onChange={e => setNewPassword(e.target.value)}
+                    placeholder="At least 8 characters"
                     autoFocus
                     minLength={8}
-                    required
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="confirm-password">Confirm password</Label>
-                  <Input
+                  <PasswordInput
                     id="confirm-password"
-                    type="password"
-                    placeholder="Re-enter password"
                     value={confirmPassword}
                     onChange={e => setConfirmPassword(e.target.value)}
+                    placeholder="Re-enter password"
                     minLength={8}
-                    required
                   />
                 </div>
                 <Button type="submit" className="w-full text-white" style={{ background: 'var(--li-primary)' }} disabled={loading || newPassword.length < 8}>
@@ -551,27 +587,23 @@ function LoginInner() {
               <form onSubmit={handleResetPassword} className="space-y-5">
                 <div className="space-y-2">
                   <Label htmlFor="reset-password">New password</Label>
-                  <Input
+                  <PasswordInput
                     id="reset-password"
-                    type="password"
-                    placeholder="At least 8 characters"
                     value={newPassword}
                     onChange={e => setNewPassword(e.target.value)}
+                    placeholder="At least 8 characters"
                     autoFocus
                     minLength={8}
-                    required
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="reset-confirm">Confirm new password</Label>
-                  <Input
+                  <PasswordInput
                     id="reset-confirm"
-                    type="password"
-                    placeholder="Re-enter password"
                     value={confirmPassword}
                     onChange={e => setConfirmPassword(e.target.value)}
+                    placeholder="Re-enter password"
                     minLength={8}
-                    required
                   />
                 </div>
                 <Button type="submit" className="w-full text-white" style={{ background: 'var(--li-primary)' }} disabled={loading || newPassword.length < 8}>

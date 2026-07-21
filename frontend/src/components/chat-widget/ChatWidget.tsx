@@ -3,6 +3,7 @@ import { useState, useRef, useEffect, FormEvent } from 'react';
 import { MessageCircle, X, Send, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 interface ListingSnippet {
   id: string;
@@ -26,6 +27,7 @@ const WELCOME: Message = {
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend.azurewebsites.net';
 
 export default function ChatWidget() {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([WELCOME]);
   const [input, setInput] = useState('');
@@ -35,6 +37,8 @@ export default function ChatWidget() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading]);
+
+  if (pathname?.startsWith('/auth')) return null;
 
   async function send(e: FormEvent) {
     e.preventDefault();
