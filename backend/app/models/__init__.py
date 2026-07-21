@@ -15,10 +15,18 @@ from app.models.device_token import DeviceToken
 from app.models.analytics_event import AnalyticsEvent
 from app.models.ticket import Ticket
 from app.models.city_banner import CityBanner
+from app.models.listing_details import (
+    VehicleDetails, JobDetails, PgRoommateDetails, RealEstateDetails,
+    ElectronicsDetails, FurnitureDetails, FashionDetails, EducationDetails,
+    DoctorDetails, ServiceDetails, TiffinDetails, DETAILS_BY_CATEGORY_SLUG,
+)
 
 __all__ = [
     "City", "User", "Category", "Listing", "ListingImage",
     "Event", "Business", "Review", "Report", "OtpRequest", "ListingReview",
     "BuyerRequest", "AppErrorLog", "DeviceToken", "AnalyticsEvent", "Ticket",
     "CityBanner",
+    "VehicleDetails", "JobDetails", "PgRoommateDetails", "RealEstateDetails",
+    "ElectronicsDetails", "FurnitureDetails", "FashionDetails", "EducationDetails",
+    "DoctorDetails", "ServiceDetails", "TiffinDetails", "DETAILS_BY_CATEGORY_SLUG",
 ]

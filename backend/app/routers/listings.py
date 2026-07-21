@@ -24,6 +24,42 @@ REPORT_FLAG_THRESHOLD = 3
 RENEW_DAYS = 30
 
 
+async def _save_category_details(
+    db: AsyncSession, listing_id: uuid.UUID, category_slug: str, details: dict,
+) -> None:
+    """Validate `details` against the schema for `category_slug` and persist
+    it into the matching *_details table. No-op for categories without one
+    (Classifieds, Businesses, Events) or an empty/missing payload."""
+    from app.models.listing_details import DETAILS_BY_CATEGORY_SLUG
+    from app.schemas.listing import DETAILS_SCHEMA_BY_CATEGORY_SLUG
+
+    schema_cls = DETAILS_SCHEMA_BY_CATEGORY_SLUG.get(category_slug)
+    model_cls = DETAILS_BY_CATEGORY_SLUG.get(category_slug)
+    if not schema_cls or not model_cls:
+        return
+    validated = schema_cls(**details)
+    db.add(model_cls(listing_id=listing_id, **validated.model_dump()))
+    await db.commit()
+
+
+async def _load_category_details(
+    db: AsyncSession, listing_id: uuid.UUID, category_slug: str | None,
+) -> dict | None:
+    """Fetch the category-specific detail row for a listing, if its category
+    has one, as a plain dict for ListingOut.category_details."""
+    from app.models.listing_details import DETAILS_BY_CATEGORY_SLUG
+
+    model_cls = DETAILS_BY_CATEGORY_SLUG.get(category_slug or "")
+    if not model_cls:
+        return None
+    result = await db.execute(select(model_cls).where(model_cls.listing_id == listing_id))
+    row = result.scalar_one_or_none()
+    if not row:
+        return None
+    exclude = {"id", "listing_id", "created_at", "_sa_instance_state"}
+    return {k: v for k, v in row.__dict__.items() if k not in exclude}
+
+
 async def _get_active_listing(listing_id: uuid.UUID, db: AsyncSession) -> Listing:
     result = await db.execute(
         select(Listing).where(Listing.id == listing_id, Listing.deleted_at.is_(None))
@@ -256,6 +292,12 @@ async def create_listing(
             raise HTTPException(status_code=404, detail=f"Category '{body.category_slug}' not found.")
         category_id = cat.id
 
+    # Resolved regardless of whether category_id or category_slug was sent in,
+    # so category_details persistence always knows which *_details table (if any).
+    resolved_cat_result = await db.execute(select(Category).where(Category.id == category_id))
+    resolved_cat = resolved_cat_result.scalar_one_or_none()
+    resolved_category_slug = resolved_cat.slug if resolved_cat else None
+
     # Auto-generate whatsapp_url from contact_phone if not provided
     whatsapp_url = body.whatsapp_url
     if not whatsapp_url and body.contact_phone.startswith("+91"):
@@ -296,7 +338,14 @@ async def create_listing(
     db.add(listing)
     await db.commit()
     await db.refresh(listing)
-    return listing
+
+    if body.category_details and resolved_category_slug:
+        await _save_category_details(db, listing.id, resolved_category_slug, body.category_details)
+
+    out = ListingOut.model_validate(listing)
+    out.category_slug = resolved_category_slug
+    out.category_details = await _load_category_details(db, listing.id, resolved_category_slug)
+    return out
 
 
 @router.get("/listings/mine", response_model=list[ListingOut])
@@ -323,6 +372,7 @@ async def my_listings(
         cat = cat_res.scalar_one_or_none()
         if cat:
             item.category_slug = cat.slug
+            item.category_details = await _load_category_details(db, listing.id, cat.slug)
         out.append(item)
     return out
 
@@ -339,6 +389,7 @@ async def get_listing(listing_id: uuid.UUID, db: AsyncSession = Depends(get_db))
     out.category_name = cat.name if cat else None
     out.category_slug = cat.slug if cat else None
     out.seller_name = (user.name or '').split('+91')[0].strip() or None if user else None
+    out.category_details = await _load_category_details(db, listing.id, cat.slug if cat else None)
     return out
 
 

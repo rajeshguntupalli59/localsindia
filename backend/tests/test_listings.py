@@ -237,3 +237,59 @@ async def test_city_listings_orders_by_distance_when_location_given(client, db, 
     assert resp.status_code == 200
     ids = [item["id"] for item in resp.json()]
     assert ids.index(near_id) < ids.index(far_id)
+
+
+@pytest.mark.asyncio
+async def test_category_details_round_trip_for_vehicles(client, db, auth_client, city):
+    """Category-specific structured fields (real typed columns per category,
+    see models/listing_details.py) persist on create and come back on GET,
+    for a category that has them."""
+    from app.models.category import Category
+    vehicles_cat = Category(name="Vehicles", slug="vehicles", sort_order=0)
+    db.add(vehicles_cat)
+    await db.commit()
+    await db.refresh(vehicles_cat)
+
+    ac, _user = auth_client
+    resp = await ac.post("/api/v1/listings", json={
+        "title": "Honda Activa 6G 2022",
+        "description": "Low mileage, single owner.",
+        "category_id": str(vehicles_cat.id),
+        "city_id": str(city.id),
+        "contact_phone": "+919876543215",
+        "category_details": {
+            "brand": "Honda",
+            "model": "Activa 6G",
+            "year": 2022,
+            "km_driven": 4500,
+            "fuel_type": "Petrol",
+            "transmission": "Automatic",
+            "owners_count": 1,
+        },
+    })
+    assert resp.status_code == 201
+    created = resp.json()
+    assert created["category_details"]["brand"] == "Honda"
+    assert created["category_details"]["year"] == 2022
+
+    get_resp = await ac.get(f"/api/v1/listings/{created['id']}")
+    assert get_resp.status_code == 200
+    fetched = get_resp.json()
+    assert fetched["category_details"]["model"] == "Activa 6G"
+    assert fetched["category_details"]["km_driven"] == 4500
+
+
+@pytest.mark.asyncio
+async def test_category_details_absent_for_classifieds(auth_client, city, category):
+    """Classifieds (and any category without a details table) returns
+    category_details: null rather than an empty/error payload."""
+    ac, _user = auth_client
+    resp = await ac.post("/api/v1/listings", json={
+        "title": "Old sofa for sale",
+        "description": "Good condition.",
+        "category_id": str(category.id),
+        "city_id": str(city.id),
+        "contact_phone": "+919876543216",
+    })
+    assert resp.status_code == 201
+    assert resp.json()["category_details"] is None

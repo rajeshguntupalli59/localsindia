@@ -7,6 +7,104 @@ PHONE_RE = re.compile(r"^\+91[6-9]\d{9}$")
 WA_RE = re.compile(r"^https://wa\.me/91\d{10}$")
 
 
+# ── Category-specific detail schemas ────────────────────────────────────────
+# One per category needing structured questions beyond title/description/price.
+# `category_slug` on ListingCreate picks which of these validates the raw
+# `category_details` dict — see DETAILS_SCHEMA_BY_CATEGORY_SLUG below and
+# routers/listings.py, which persists the validated result into the matching
+# *_details table (models/listing_details.py).
+
+class VehicleDetailsIn(BaseModel):
+    brand: str | None = None
+    model: str | None = None
+    year: int | None = None
+    km_driven: int | None = None
+    fuel_type: str | None = None
+    transmission: str | None = None
+    owners_count: int | None = None
+
+
+class JobDetailsIn(BaseModel):
+    company_name: str | None = None
+    salary_min: float | None = None
+    salary_max: float | None = None
+    job_type: str | None = None
+    experience_required: str | None = None
+    work_mode: str | None = None
+
+
+class PgRoommateDetailsIn(BaseModel):
+    room_type: str | None = None
+    gender_preference: str | None = None
+    deposit_amount: float | None = None
+    amenities: list[str] | None = None
+
+
+class RealEstateDetailsIn(BaseModel):
+    property_type: str | None = None
+    bhk: int | None = None
+    sqft: int | None = None
+    furnishing: str | None = None
+    listing_type: str | None = None
+
+
+class ElectronicsDetailsIn(BaseModel):
+    brand: str | None = None
+    model: str | None = None
+    condition: str | None = None
+    warranty_remaining: str | None = None
+
+
+class FurnitureDetailsIn(BaseModel):
+    material: str | None = None
+    dimensions: str | None = None
+    condition: str | None = None
+
+
+class FashionDetailsIn(BaseModel):
+    brand: str | None = None
+    size: str | None = None
+    gender: str | None = None
+
+
+class EducationDetailsIn(BaseModel):
+    course_type: str | None = None
+    mode: str | None = None
+    duration: str | None = None
+
+
+class DoctorDetailsIn(BaseModel):
+    specialization: str | None = None
+    consultation_fee: float | None = None
+    available_timings: str | None = None
+
+
+class ServiceDetailsIn(BaseModel):
+    service_type: str | None = None
+    experience_years: int | None = None
+
+
+class TiffinDetailsIn(BaseModel):
+    meal_type: str | None = None
+    delivery_area: str | None = None
+    subscription_available: bool | None = None
+
+
+DETAILS_SCHEMA_BY_CATEGORY_SLUG: dict[str, type[BaseModel]] = {
+    "vehicles": VehicleDetailsIn,
+    "jobs": JobDetailsIn,
+    "pg-roommate": PgRoommateDetailsIn,
+    "real-estate": RealEstateDetailsIn,
+    "electronics": ElectronicsDetailsIn,
+    "furniture": FurnitureDetailsIn,
+    "fashion": FashionDetailsIn,
+    "education": EducationDetailsIn,
+    "doctors": DoctorDetailsIn,
+    "services": ServiceDetailsIn,
+    "tiffin": TiffinDetailsIn,
+}
+
+
 class ListingCreate(BaseModel):
     title: str
     description: str
@@ -22,6 +120,7 @@ class ListingCreate(BaseModel):
     area: str | None = None
     latitude: float | None = None
     longitude: float | None = None
+    category_details: dict | None = None
     @field_validator("contact_phone")
     @classmethod
     def validate_phone(cls, v: str) -> str:
@@ -90,6 +189,7 @@ class ListingOut(BaseModel):
     category_name: str | None = None
     category_slug: str | None = None
     seller_name: str | None = None
+    category_details: dict | None = None
 
     model_config = {"from_attributes": True}
 
