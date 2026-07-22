@@ -22,7 +22,7 @@ import type {
 
 export type { User, Event, Business, Review, BusinessAnalytics, Ticket };
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend.azurewebsites.net';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend-in.azurewebsites.net';
 
 export class ApiError extends Error {
   constructor(public status: number, message: string) {
