@@ -112,7 +112,7 @@ async def chat(request: Request, req: ChatRequest, db: AsyncSession = Depends(ge
 
     try:
         chat_session = client.chats.create(
-            model="gemini-2.0-flash",
+            model="gemini-flash-latest",
             config=types.GenerateContentConfig(
                 system_instruction=_SYSTEM,
                 tools=[_SEARCH_TOOL],
