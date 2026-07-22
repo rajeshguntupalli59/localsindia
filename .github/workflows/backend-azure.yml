@@ -42,7 +42,7 @@ jobs:
         run: |
           cd backend
           DB_URL=$(az webapp config appsettings list \
-            --name localsindia-backend \
+            --name localsindia-backend-in \
             --resource-group localsindia-rg \
             --query "[?name=='DATABASE_URL'].value" -o tsv)
           DATABASE_URL="$DB_URL" alembic upgrade head
@@ -52,7 +52,7 @@ jobs:
         run: |
           az webapp deploy \
             --resource-group localsindia-rg \
-            --name localsindia-backend \
+            --name localsindia-backend-in \
             --src-path backend.zip \
             --type zip \
             --restart false
@@ -61,11 +61,11 @@ jobs:
         run: |
           echo "Waiting 90s for Kudu to finish extracting zip in background..."
           sleep 90
-          az webapp restart --name localsindia-backend --resource-group localsindia-rg
+          az webapp restart --name localsindia-backend-in --resource-group localsindia-rg
           echo "Waiting for app to start..."
           for i in $(seq 1 18); do
             sleep 10
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://localsindia-backend.azurewebsites.net/api/v1/health --max-time 10 || echo "000")
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://localsindia-backend-in.azurewebsites.net/api/v1/health --max-time 10 || echo "000")
             echo "Attempt $i: $STATUS"
             if [ "$STATUS" = "200" ]; then
               echo "Backend is up!"
