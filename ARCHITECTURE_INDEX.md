@@ -90,6 +90,8 @@
 | Saved searches / alerts | §6-SavedSearches | `routers/saved_searches.py` | `/search` page (frontend button pending) | `saved_searches` | POST /api/v1/saved-searches, GET /api/v1/saved-searches |
 | Buyer requests ("Wanted") | §5-buyer_requests (not yet in ARCHITECTURE.md) | `routers/buyer_requests.py`, `models/buyer_request.py`, `schemas/buyer_request.py` | `components/buyer-requests/BuyerRequestsSection.tsx` (rendered on `[city]/CityHomeClient.tsx`) | `buyer_requests` | GET /api/v1/buyer-requests/cities/{slug}, POST /api/v1/buyer-requests, PATCH /api/v1/buyer-requests/{id}/fulfill, DELETE /api/v1/buyer-requests/{id} |
 | Category-specific structured listing fields (2026-07-21) | §5-listing_details (not yet in ARCHITECTURE.md), §6-Listings, §8-PostListing | `models/listing_details.py` (11 new 1:1 detail tables, `DETAILS_BY_CATEGORY_SLUG` lookup), migration `d3c3f83522ec`, `schemas/listing.py` (11 `*DetailsIn` schemas + `DETAILS_SCHEMA_BY_CATEGORY_SLUG`, `category_details` field on `ListingCreate`/`ListingOut`), `routers/listings.py` (`_save_category_details()`/`_load_category_details()`, wired into create/get/mine — deliberately NOT wired into the bulk city-listing/trending endpoints, to avoid N+1 queries on hot grid views) | Post wizard restructured on both platforms: category picker is now its own first step, followed by a dedicated category-specific-questions step (skipped automatically for Classifieds/Businesses/Events, which have none), then the generic Title/Description step — `mobile/src/screens/PostScreen.tsx` (`CATEGORY_DETAIL_FIELDS`, dynamic `STEPS`/step-index constants based on whether the picked category has fields), `frontend/src/app/[city]/classifieds/post/page.tsx` (same field-set and step split; replaced the old `CATEGORY_CHIPS`/`attributes` system, which the backend silently dropped — `ListingCreate` never declared an `attributes` field) | `vehicle_details`, `job_details`, `pg_roommate_details`, `real_estate_details`, `electronics_details`, `furniture_details`, `fashion_details`, `education_details`, `doctor_details`, `service_details`, `tiffin_details` (all new) | POST /listings (now accepts `category_details`), GET /listings/{id} (now returns it), GET /listings/mine (now returns it per listing) — real typed columns per category rather than a flexible JSON blob, a deliberate choice for future Search filterability |
+| Category-aware Listing-step copy (2026-07-21) | §8-PostListing | — (frontend/mobile only) | `mobile/src/screens/PostScreen.tsx` (`LISTING_COPY`), `frontend/src/app/[city]/classifieds/post/page.tsx` (same) — the generic Title/Description/Price step now shows contextual copy per category (e.g. PG/Roommate → "Monthly Rent", Education → "Course Fee") instead of one-size-fits-all "What are you selling?"; Jobs/Doctors/Businesses hide the generic price field entirely since their category-specific questions (salary, consultation fee) already cover it | — | — |
+| Photo upload for Businesses and Events (2026-07-22) | §5-business_images/event_images (not yet in ARCHITECTURE.md), §6-Uploads, §8-PostListing | `models/business_image.py`, `models/event_image.py` (new — 1:1 extension pattern, same shape as `listing_images`), migration `bc6a44aafa08`, `routers/uploads.py` (`POST/DELETE /upload/business-image/{id}`, `POST/DELETE /upload/event-image/{id}`, shared `_validate_and_upload()` helper), `schemas/business.py`/`schemas/event.py` (`images` list, auto-loaded via `lazy="selectin"` relationships — no router query changes needed) | Post wizard's Photos step now shows the real upload zone for Businesses/Events instead of a "coming soon" placeholder — `mobile/src/screens/PostScreen.tsx` (`uploadPhoto()` generalized to take an endpoint segment), `frontend/src/app/[city]/businesses/add/page.tsx` + `frontend/src/app/[city]/events/post/page.tsx` (new photo picker UI, mirrors classifieds/post). Detail pages display a cover photo + thumbnail strip: `mobile/src/screens/BusinessDetailScreen.tsx`, `mobile/src/screens/EventDetailScreen.tsx`, `frontend/.../BusinessDetailClient.tsx`, `frontend/src/app/events/[id]/EventDetailClient.tsx` | `business_images`, `event_images` (both new) | POST/DELETE /upload/business-image/{business_id\|image_id}, POST/DELETE /upload/event-image/{event_id\|image_id} — same 5MB/5-image limits as listings (BL-08); 143/143 backend tests passing (5 new) |
 
 ---
 
@@ -127,6 +129,8 @@
 | `models/ticket.py` | `tickets` | Paid event ticket (2026-07-18); created only after Razorpay verify, holds a unique `qr_token` scanned at check-in |
 | `models/city_banner.py` | `city_banners` | Admin-managed sponsor banner per city with a date range (2026-07-20); deliberately its own table, not a `listings` row |
 | `models/listing_details.py` | `vehicle_details`, `job_details`, `pg_roommate_details`, `real_estate_details`, `electronics_details`, `furniture_details`, `fashion_details`, `education_details`, `doctor_details`, `service_details`, `tiffin_details` | 11 tables (2026-07-21), each a 1:1 extension of `listings` (unique `listing_id` FK, `ondelete=CASCADE`) holding real typed columns per category — not a flexible JSON blob, so Search can filter/sort on them later. `DETAILS_BY_CATEGORY_SLUG` maps category slug → model. Classifieds/Businesses/Events excluded (no specific fields / have their own dedicated tables already) |
+| `models/business_image.py` | `business_images` | 1:1 extension of `businesses` (2026-07-22), same shape as `listing_images`; `Business.images` relationship (`lazy="selectin"`) auto-loads it on any query |
+| `models/event_image.py` | `event_images` | 1:1 extension of `events` (2026-07-22), same shape as `listing_images`; `Event.images` relationship (`lazy="selectin"`) auto-loads it on any query |
 
 ### Backend — Routers (API endpoints)
 
@@ -366,9 +370,14 @@ GET    /api/v1/search?q=&city_slug=       Full-text search (tsvector + ILIKE fal
 
 ### Uploads
 ```
-POST   /api/v1/upload/image/{listing_id}  Upload photo to Cloudinary [AUTH]
-DELETE /api/v1/upload/image/{image_id}    Delete photo from Cloudinary [AUTH]
+POST   /api/v1/upload/image/{listing_id}           Upload photo to Cloudinary [AUTH]
+DELETE /api/v1/upload/image/{image_id}             Delete photo from Cloudinary [AUTH]
+POST   /api/v1/upload/business-image/{business_id} Upload business photo (2026-07-22) [AUTH, owner/admin]
+DELETE /api/v1/upload/business-image/{image_id}    Delete business photo [AUTH, owner/admin]
+POST   /api/v1/upload/event-image/{event_id}       Upload event photo (2026-07-22) [AUTH, owner/admin]
+DELETE /api/v1/upload/event-image/{image_id}       Delete event photo [AUTH, owner/admin]
 ```
+Same 5MB size / 5-image count limits everywhere (BL-08), shared via `_validate_and_upload()` in `routers/uploads.py`.
 
 ### Businesses
 ```
@@ -495,6 +504,8 @@ GET    /api/v1/health                     {"status":"ok"} — keepalive probe
 | `doctor_details` | id, listing_id (unique FK), specialization, consultation_fee, available_timings, created_at | category='doctors'; migration `d3c3f83522ec` |
 | `service_details` | id, listing_id (unique FK), service_type, experience_years, created_at | category='services'; migration `d3c3f83522ec` |
 | `tiffin_details` | id, listing_id (unique FK), meal_type, delivery_area, subscription_available, created_at | category='tiffin'; migration `d3c3f83522ec` |
+| `business_images` | id, business_id (FK), url, cloudinary_id, display_order, created_at | 1:1 extension of `businesses`, same shape as `listing_images`; migration `bc6a44aafa08` (2026-07-22) |
+| `event_images` | id, event_id (FK), url, cloudinary_id, display_order, created_at | 1:1 extension of `events`, same shape as `listing_images`; migration `bc6a44aafa08` (2026-07-22) |
 
 ---
 
