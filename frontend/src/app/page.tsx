@@ -7,7 +7,7 @@ import {
   Search, MapPin, ChevronDown, Plus, ArrowRight,
   Utensils, Home, Briefcase, Car,
   Smartphone, Calendar, Store, GraduationCap,
-  Zap, MessageCircle, Languages,
+  MessageCircle, Languages, Layers,
   LocateFixed, Loader2, CheckCircle2,
   type LucideIcon,
 } from 'lucide-react';
@@ -21,7 +21,8 @@ import SiteLogo from '@/components/site-logo/SiteLogo';
 
 // ─── types ───────────────────────────────────────────────────
 interface CategoryDef { icon: LucideIcon; name: string; slug: string; color: string; accent: string }
-interface TrustDef { icon: LucideIcon; title: string; subtitle: string; iconBg: string; iconColor: string; isWhatsApp?: true }
+interface WhyDef { icon: LucideIcon; title: string; body: string }
+interface DaySection { time: string; tagline: string; slugs: string[] }
 type GeoStatus = 'idle' | 'locating' | 'located' | 'denied' | 'failed';
 
 // ─── static data ─────────────────────────────────────────────
@@ -36,17 +37,27 @@ const CATEGORIES: CategoryDef[] = [
   { icon: GraduationCap, name: 'Education',     slug: 'education',    color: 'text-white bg-indigo-500',     accent: 'bg-indigo-500'    },
 ];
 
+// Category browsing organized around actual daily life instead of a flat
+// icon grid — the same 8 categories, grouped by when someone typically
+// needs them, each with a one-line editorial frame.
+const DAY_SECTIONS: DaySection[] = [
+  { time: 'Morning',  tagline: 'Start the day sorted', slugs: ['tiffin', 'pg-roommate'] },
+  { time: 'Midday',   tagline: 'Get things done',      slugs: ['jobs', 'electronics'] },
+  { time: 'Evening',  tagline: "See what's on",        slugs: ['events', 'businesses'] },
+  { time: 'Anytime',  tagline: 'The bigger stuff',     slugs: ['vehicles', 'education'] },
+];
+
 const POPULAR_TAGS = ['Tiffin Service', 'PG for Boys', 'Used Laptop', 'Honda Activa', 'Home Tutor', '2BHK Flat'];
 
-// City + language counts are real, not hardcoded — derived from the live
-// `cities` list (usePrefs) and the LANGUAGES registry (lib/prefs.ts's
-// VALID_LANGS) at render time, so neither can drift from what's actually live.
-function buildTrust(cityCount: number): TrustDef[] {
+// The direct answer to "why LocalsIndia" — concrete differentiators, not
+// vague trust badges. City/language counts are real, derived from the live
+// `cities` list (usePrefs) and the LANGUAGES registry at render time.
+function buildWhyUs(cityCount: number): WhyDef[] {
   return [
-    { icon: Zap,          title: 'Instant Posting',      subtitle: 'Go live in under a minute with verified reach.', iconBg: 'bg-orange-500/[0.15]',  iconColor: 'text-orange-400'  },
-    { icon: MessageCircle,title: 'WhatsApp Native',       subtitle: 'Contact sellers directly — no middlemen.',       iconBg: 'bg-emerald-500/[0.15]', iconColor: 'text-emerald-400', isWhatsApp: true },
-    { icon: MapPin,       title: 'Localized Scale',       subtitle: `${cityCount}+ cities across South India.`,      iconBg: 'bg-blue-500/[0.15]',    iconColor: 'text-blue-400'    },
-    { icon: Languages,    title: 'Multilingual Support',  subtitle: `${LANGUAGES.length} native languages, your way.`, iconBg: 'bg-violet-500/[0.15]',  iconColor: 'text-violet-400'  },
+    { icon: Layers,        title: 'Everything in one place', body: 'Tiffin, jobs, rooms, vehicles, events, businesses — stop juggling five different apps.' },
+    { icon: MessageCircle, title: 'Talk directly, no middlemen', body: 'Every listing connects straight to WhatsApp. No commission, no waiting for approval.' },
+    { icon: MapPin,        title: 'Built for your neighbourhood', body: `Search by area, not just city — live across ${cityCount}+ cities in South India.` },
+    { icon: Languages,     title: 'In your language',        body: `Browse and post in ${LANGUAGES.length} South Indian languages, not just English.` },
   ];
 }
 
@@ -70,7 +81,7 @@ export default function HomePage() {
     [cityCount > 0 ? `${cityCount}+` : '—', 'Cities'],
     [String(LANGUAGES.length), 'Languages'],
   ];
-  const TRUST = buildTrust(cityCount > 0 ? cityCount : 151);
+  const WHY_US = buildWhyUs(cityCount > 0 ? cityCount : 151);
 
   // Cycle hero category words
   useEffect(() => {
@@ -541,109 +552,123 @@ export default function HomePage() {
       </section>
 
       {/* ══════════════════════════════════════════════
-          CATEGORY GRID
+          WHY LOCALSINDIA — the direct answer, not a badge grid
       ══════════════════════════════════════════════ */}
-      <section className="bg-[#F9FAFB] py-24 sm:py-32 border-b border-slate-100/80">
+      <section className="bg-white py-24 sm:py-28 border-b border-slate-100/80">
         <div className="page-wrap">
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-30px' }}
+            transition={{ duration: 0.4 }}
+            className="max-w-2xl mb-14 sm:mb-16"
+          >
+            <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#F7921E]">
+              Why LocalsIndia
+            </span>
+            <h2 className="text-[2rem] sm:text-[2.5rem] font-extrabold text-slate-900
+              tracking-[-0.04em] leading-tight mt-3">
+              One app, not five
+            </h2>
+            <p className="text-[15px] text-slate-500 mt-3 leading-relaxed">
+              Every other option means a different app for jobs, a different one for rooms, a
+              different one for the market. LocalsIndia is the one your neighbourhood actually uses.
+            </p>
+          </motion.div>
 
-          {/* ─── Section header ─────────────────────────────── */}
-          <div className="mb-16 sm:mb-20">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h2 className="text-[2rem] sm:text-[2.5rem] font-extrabold text-slate-900
-                  tracking-[-0.04em] leading-tight">
-                  Browse by Category
-                </h2>
-                <p className="text-[14px] text-slate-400 mt-3 font-normal leading-relaxed">
-                  Everything you need, organised by category
-                </p>
-              </div>
-
-              {/* Live indicator */}
-              <div className="hidden sm:flex items-center gap-2 shrink-0 mt-1.5">
-                <span className="relative flex h-[7px] w-[7px]">
-                  <span className="animate-ping absolute inset-0 rounded-full bg-emerald-400/60" />
-                  <span className="relative inline-flex rounded-full h-[7px] w-[7px] bg-emerald-400/70" />
-                </span>
-                <span className="text-[11px] font-medium text-slate-400 leading-none">
-                  Updated daily
-                </span>
-              </div>
-            </div>
-
-            {/* Gradient rule */}
-            <div className="mt-6 h-px bg-gradient-to-r
-              from-slate-200 via-slate-100/80 to-transparent" />
-          </div>
-
-          {/* ─── Grid ───────────────────────────────────────── */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-7">
-            {CATEGORIES.map(({ icon: Icon, name, slug, color, accent }, i) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
+            {WHY_US.map(({ icon: Icon, title, body }, i) => (
               <motion.div
-                key={name}
-                onClick={() => {
-                  const p = new URLSearchParams({ category: slug });
-                  if (citySlug) p.set('city', citySlug);
-                  router.push(`/search?${p.toString()}`);
-                }}
+                key={title}
                 initial={{ opacity: 0, y: 14 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-30px' }}
-                transition={{ duration: 0.32, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
-                whileHover={{
-                  y: -5,
-                  boxShadow: '0 16px 40px rgba(0,0,0,0.10), 0 6px 16px rgba(0,0,0,0.05)',
-                  transition: { duration: 0.2, ease: 'easeOut' },
-                }}
-                whileTap={{ scale: 0.975 }}
-                className="group relative bg-white rounded-2xl
-                  cursor-pointer select-none overflow-hidden
-                  transition-[box-shadow,transform] duration-200"
-                style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.05), 0 1px 4px rgba(0,0,0,0.03)' }}
+                transition={{ duration: 0.32, delay: i * 0.07, ease: [0.22, 1, 0.36, 1] }}
+                className="flex items-start gap-4 p-6 rounded-2xl border border-slate-100"
+                style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.04)' }}
               >
-                {/* Top-edge category color accent — always visible, deepens on hover */}
-                <div className={`absolute inset-x-0 top-0 h-[4px] ${accent}`} aria-hidden />
-
-                <div className="p-6 sm:p-8">
-
-                  {/* ── Icon — solid colored circle with white icon ── */}
-                  <div className={`w-[52px] h-[52px] sm:w-[56px] sm:h-[56px]
-                    rounded-2xl
-                    flex items-center justify-center mb-5 sm:mb-6
-                    ${color}
-                    shadow-[0_4px_12px_rgba(0,0,0,0.12)]
-                    group-hover:scale-[1.08]
-                    transition-transform duration-200
-                    ease-[cubic-bezier(0.22,1,0.36,1)]`}>
-                    <Icon className="w-[22px] h-[22px] sm:w-6 sm:h-6" strokeWidth={2} />
-                  </div>
-
-                  {/* ── Name ── */}
-                  <h3 className="text-[14.5px] sm:text-[15.5px] font-semibold
-                    text-slate-800 leading-snug tracking-[-0.01em]
-                    group-hover:text-[#F7921E]
-                    transition-colors duration-200 mb-2.5">
-                    {name}
-                  </h3>
-
+                <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
+                  style={{ background: 'var(--li-primary-light)' }}>
+                  <Icon className="w-5 h-5" style={{ color: 'var(--li-primary)' }} strokeWidth={2} />
                 </div>
-
-                {/* ── Hover arrow — slides in from right ── */}
-                <div className="absolute bottom-[22px] right-[22px]
-                  opacity-0 group-hover:opacity-100
-                  translate-x-2 group-hover:translate-x-0
-                  transition-all duration-220 ease-[cubic-bezier(0.22,1,0.36,1)]">
-                  <ArrowRight
-                    className="w-[14px] h-[14px] text-slate-300"
-                    strokeWidth={2}
-                    aria-hidden
-                  />
+                <div>
+                  <h3 className="text-[15px] font-bold text-slate-900 tracking-[-0.01em]">{title}</h3>
+                  <p className="text-[13.5px] text-slate-500 mt-1.5 leading-relaxed">{body}</p>
                 </div>
-
               </motion.div>
             ))}
           </div>
+        </div>
+      </section>
 
+      {/* ══════════════════════════════════════════════
+          A DAY IN YOUR CITY — categories grouped by when you
+          actually need them, not a flat icon grid
+      ══════════════════════════════════════════════ */}
+      <section className="bg-[#F9FAFB] py-24 sm:py-32 border-b border-slate-100/80">
+        <div className="page-wrap">
+          <div className="mb-14 sm:mb-16">
+            <h2 className="text-[2rem] sm:text-[2.5rem] font-extrabold text-slate-900
+              tracking-[-0.04em] leading-tight">
+              A day in {cityName || 'your city'}
+            </h2>
+            <p className="text-[14px] text-slate-400 mt-3 font-normal leading-relaxed">
+              Whatever you need, whenever you need it
+            </p>
+          </div>
+
+          <div className="space-y-10 sm:space-y-12">
+            {DAY_SECTIONS.map((section, si) => (
+              <motion.div
+                key={section.time}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-30px' }}
+                transition={{ duration: 0.36, delay: si * 0.05, ease: [0.22, 1, 0.36, 1] }}
+                className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-5 md:gap-8 items-start"
+              >
+                {/* Time label — the organizing device */}
+                <div className="md:pt-2">
+                  <h3 className="text-[13px] font-bold uppercase tracking-[0.1em]" style={{ color: 'var(--li-primary)' }}>
+                    {section.time}
+                  </h3>
+                  <p className="text-[13.5px] text-slate-400 mt-1">{section.tagline}</p>
+                </div>
+
+                {/* The 2 categories for this time of day */}
+                <div className="grid grid-cols-2 gap-4">
+                  {section.slugs.map(slug => {
+                    const cat = CATEGORIES.find(c => c.slug === slug);
+                    if (!cat) return null;
+                    const Icon = cat.icon;
+                    return (
+                      <button
+                        key={slug}
+                        type="button"
+                        onClick={() => {
+                          const p = new URLSearchParams({ category: slug });
+                          if (citySlug) p.set('city', citySlug);
+                          router.push(`/search?${p.toString()}`);
+                        }}
+                        className="group flex items-center gap-3.5 p-5 rounded-2xl bg-white border border-slate-100
+                          text-left transition-all duration-200 hover:-translate-y-0.5"
+                        style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.04)' }}
+                      >
+                        <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${cat.color}`}>
+                          <Icon className="w-5 h-5" strokeWidth={2} />
+                        </div>
+                        <span className="text-[14.5px] font-semibold text-slate-800 group-hover:text-[#F7921E] transition-colors duration-200">
+                          {cat.name}
+                        </span>
+                        <ArrowRight className="w-3.5 h-3.5 text-slate-300 ml-auto shrink-0
+                          opacity-0 group-hover:opacity-100 -translate-x-1 group-hover:translate-x-0 transition-all duration-200" />
+                      </button>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -673,105 +698,60 @@ export default function HomePage() {
       )}
 
       {/* ══════════════════════════════════════════════
-          TRUST BADGES
+          CLOSING CTA — one decisive close, not a badge grid
       ══════════════════════════════════════════════ */}
-      <section className="bg-[#0D0F1C] py-20 sm:py-28">
-        <div className="page-wrap">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {TRUST.map(({ icon: Icon, title, subtitle, iconBg, iconColor, isWhatsApp }) =>
-              isWhatsApp ? (
+      <section className="relative overflow-hidden bg-[#0D0F1C] py-20 sm:py-28">
+        <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
+          <div className="absolute -right-24 -bottom-24 h-[380px] w-[380px] rounded-full bg-orange-500/[0.08] blur-[100px]" />
+        </div>
+        <div className="page-wrap relative z-10">
+          <div className="max-w-2xl mx-auto text-center">
+            {/* WhatsApp-native — the one claim worth a hero moment */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full
+              bg-[#25D366]/[0.10] border border-[#25D366]/[0.22] mb-6">
+              <svg viewBox="0 0 24 24" className="w-4 h-4 fill-[#4ade80]" aria-hidden>
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+              </svg>
+              <span className="text-[12.5px] font-semibold text-emerald-400">
+                Every listing talks straight to WhatsApp — zero commission
+              </span>
+            </div>
 
-                /* ── WhatsApp Native — hero card ────────────────── */
-                <div
-                  key={title}
-                  className="relative flex items-start gap-4 p-5 rounded-2xl overflow-hidden
-                    bg-[#25D366]/[0.07] border border-[#25D366]/[0.18]
-                    hover:bg-[#25D366]/[0.10] transition-colors duration-200"
-                >
-                  {/* Atmospheric corner glow */}
-                  <div
-                    className="absolute -right-5 -top-5 w-20 h-20 rounded-full
-                      bg-[#25D366]/[0.12] blur-2xl pointer-events-none"
-                    aria-hidden
-                  />
+            <h2 className="text-[2rem] sm:text-[2.75rem] font-extrabold text-white
+              tracking-[-0.04em] leading-tight">
+              Your neighbourhood is already here
+            </h2>
+            <p className="text-[15px] text-slate-400 mt-4 leading-relaxed">
+              {cityCount > 0 ? cityCount : 151}+ cities, {LANGUAGES.length} languages, one free listing away.
+            </p>
 
-                  {/* Icon with slow pulsing ring */}
-                  <div className="relative shrink-0">
-                    <motion.div
-                      animate={{ scale: [1, 1.7, 1], opacity: [0.28, 0, 0.28] }}
-                      transition={{
-                        duration: 2.8,
-                        repeat: Infinity,
-                        ease: 'easeOut',
-                        repeatDelay: 1,
-                      }}
-                      className="absolute inset-0 rounded-xl bg-[#25D366]/[0.35]"
-                      aria-hidden
-                    />
-                    <div className="relative w-10 h-10 rounded-xl bg-[#25D366]/[0.22]
-                      flex items-center justify-center">
-                      <svg
-                        viewBox="0 0 24 24"
-                        className="w-5 h-5 fill-[#4ade80]"
-                        aria-hidden
-                      >
-                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                      </svg>
-                    </div>
-                  </div>
-
-                  {/* Text */}
-                  <div className="relative">
-                    {/* Title + live pill */}
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <p className="text-sm font-semibold text-white leading-none">
-                        WhatsApp Native
-                      </p>
-                      <span className="inline-flex items-center gap-[5px] px-[7px] py-[3px]
-                        rounded-full bg-[#25D366]/[0.16] border border-[#25D366]/[0.28]">
-                        <span className="relative flex h-[6px] w-[6px]">
-                          <span className="animate-ping absolute inset-0 rounded-full
-                            bg-emerald-400 opacity-65" />
-                          <span className="relative inline-flex rounded-full h-[6px] w-[6px]
-                            bg-emerald-400" />
-                        </span>
-                        <span className="text-[9px] font-bold uppercase tracking-[0.08em]
-                          text-emerald-400 leading-none">
-                          Live
-                        </span>
-                      </span>
-                    </div>
-
-                    {/* Subtitle — key phrase highlighted */}
-                    <p className="text-xs text-slate-400 mt-1.5 leading-relaxed">
-                      Contact sellers directly —{' '}
-                      <span className="text-emerald-400/80 font-medium">
-                        zero middlemen, zero commissions.
-                      </span>
-                    </p>
-                  </div>
-                </div>
-
-              ) : (
-
-                /* ── Standard trust cards ───────────────────────── */
-                <div
-                  key={title}
-                  className="flex items-start gap-4 p-5 rounded-2xl
-                    bg-white/[0.04] border border-white/[0.06]
-                    hover:bg-white/[0.07] transition-colors duration-200"
-                >
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${iconBg}`}>
-                    <Icon className={`w-5 h-5 ${iconColor}`} strokeWidth={1.8} />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-white">{title}</p>
-                    <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">{subtitle}</p>
-                  </div>
-                </div>
-
-              )
-            )}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8">
+              <button
+                type="button"
+                onClick={() => citySlug
+                  ? router.push(`/${citySlug}/classifieds/post`)
+                  : setShowCityPicker(true)
+                }
+                className="flex items-center gap-2 px-8 py-[13px] rounded-full
+                  text-[14px] font-semibold text-white bg-[#F7921E]
+                  shadow-[0_4px_20px_rgba(247,146,30,0.32),inset_0_1px_0_rgba(255,255,255,0.14)]
+                  hover:bg-[#E07B0A] hover:shadow-[0_6px_24px_rgba(247,146,30,0.44)]
+                  active:scale-[0.96] transition-all duration-200"
+              >
+                <Plus className="w-4 h-4" strokeWidth={2.6} />
+                Post for free
+              </button>
+              <button
+                type="button"
+                onClick={() => citySlug ? router.push(`/${citySlug}`) : setShowCityPicker(true)}
+                className="flex items-center gap-2 px-8 py-[13px] rounded-full
+                  text-[14px] font-semibold text-white/90 border border-white/15
+                  hover:bg-white/[0.06] transition-all duration-200"
+              >
+                Browse {cityName || 'your city'}
+                <ArrowRight className="w-3.5 h-3.5" strokeWidth={2.2} />
+              </button>
+            </div>
           </div>
         </div>
       </section>
