@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator,
-  ScrollView, Modal, Linking,
+  ScrollView, Modal, Linking, Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
@@ -175,6 +175,19 @@ export default function EventDetailScreen({ route, navigation }: any) {
       </SafeAreaView>
 
       <ScrollView contentContainerStyle={styles.body}>
+        {event.images?.length > 0 && (
+          <>
+            <Image source={{ uri: event.images[0].url }} style={styles.coverPhoto} />
+            {event.images.length > 1 && (
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.thumbRow} contentContainerStyle={{ gap: 8 }}>
+                {event.images.map((img: any) => (
+                  <Image key={img.id} source={{ uri: img.url }} style={styles.thumbPhoto} />
+                ))}
+              </ScrollView>
+            )}
+          </>
+        )}
+
         <Text style={[styles.badge, event.is_free ? styles.badgeFree : styles.badgePaid]}>
           {event.is_free ? 'Free' : 'Paid'}
         </Text>
@@ -259,6 +272,9 @@ const styles = StyleSheet.create({
   },
   headerTitle: { fontSize: 17, fontWeight: '700', color: '#1f2937', flex: 1, textAlign: 'center' },
   body: { padding: 20 },
+  coverPhoto: { width: '100%', aspectRatio: 4 / 3, borderRadius: 16, backgroundColor: '#e5e7eb', marginBottom: 12 },
+  thumbRow: { flexGrow: 0, marginBottom: 12 },
+  thumbPhoto: { width: 72, height: 72, borderRadius: 10, backgroundColor: '#e5e7eb' },
   badge: {
     alignSelf: 'flex-start', fontSize: 11, fontWeight: '700', textTransform: 'uppercase',
     paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, overflow: 'hidden', marginBottom: 8,

@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator,
-  ScrollView, Modal, TextInput, Linking,
+  ScrollView, Modal, TextInput, Linking, Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
@@ -222,6 +222,20 @@ export default function BusinessDetailScreen({ route, navigation }: any) {
       </View>
 
       <ScrollView contentContainerStyle={styles.body}>
+        {/* Photo gallery */}
+        {business.images?.length > 0 && (
+          <>
+            <Image source={{ uri: business.images[0].url }} style={styles.coverPhoto} />
+            {business.images.length > 1 && (
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.thumbRow} contentContainerStyle={{ gap: 8 }}>
+                {business.images.map((img: any) => (
+                  <Image key={img.id} source={{ uri: img.url }} style={styles.thumbPhoto} />
+                ))}
+              </ScrollView>
+            )}
+          </>
+        )}
+
         {/* Business info card */}
         <View style={styles.card}>
           <View style={styles.nameRow}>
@@ -507,6 +521,10 @@ const styles = StyleSheet.create({
   },
 
   body: { padding: 16, gap: 12 },
+
+  coverPhoto: { width: '100%', aspectRatio: 4 / 3, borderRadius: 16, backgroundColor: '#e5e7eb' },
+  thumbRow: { flexGrow: 0 },
+  thumbPhoto: { width: 72, height: 72, borderRadius: 10, backgroundColor: '#e5e7eb' },
 
   card: {
     backgroundColor: 'white', borderRadius: 16, padding: 18, gap: 10,

@@ -497,10 +497,15 @@ export default function PostScreen({ navigation, route }: any) {
     );
   };
 
-  const uploadPhoto = async (listingId: string, uri: string, index: number) => {
+  const uploadPhoto = async (
+    entityId: string,
+    uri: string,
+    index: number,
+    endpoint: 'image' | 'business-image' | 'event-image' = 'image',
+  ) => {
     const token = await storage.getAccessToken();
     const result = await FileSystem.uploadAsync(
-      `${API_BASE}/upload/image/${listingId}`,
+      `${API_BASE}/upload/${endpoint}/${entityId}`,
       uri,
       {
         fieldName: 'file',
@@ -536,6 +541,15 @@ export default function PostScreen({ navigation, route }: any) {
           whatsapp_url: whatsappOn ? `https://wa.me/91${phone}` : null,
           website_url: websiteUrl.trim() || null,
         });
+
+        if (images.length > 0) {
+          for (let i = 0; i < images.length; i++) {
+            setUploadProgress(`Uploading photo ${i + 1}/${images.length}...`);
+            await uploadPhoto(business.id, images[i], i, 'business-image');
+          }
+          setUploadProgress('');
+        }
+
         // promptVerify tells BusinessDetailScreen to surface the Get Verified
         // offer immediately, instead of only being discoverable later.
         // Must be `navigate`, not `replace`: PostScreen lives inside the tab
@@ -555,7 +569,7 @@ export default function PostScreen({ navigation, route }: any) {
       // navigating straight to the event's own page.
       if (categorySlug === 'events') {
         const city = await citiesApi.get(citySlug);
-        await eventsApi.create({
+        const event = await eventsApi.create({
           title: title.trim(),
           description: description.trim(),
           venue: venue.trim(),
@@ -565,6 +579,15 @@ export default function PostScreen({ navigation, route }: any) {
           ticket_url: isEventFree ? null : (ticketPrice.trim() ? null : (ticketUrl.trim() || null)),
           ticket_price: isEventFree ? null : (ticketPrice.trim() ? Number(ticketPrice) : null),
         });
+
+        if (images.length > 0) {
+          for (let i = 0; i < images.length; i++) {
+            setUploadProgress(`Uploading photo ${i + 1}/${images.length}...`);
+            await uploadPhoto(event.id, images[i], i, 'event-image');
+          }
+          setUploadProgress('');
+        }
+
         setSuccess(true);
         return;
       }
@@ -1007,25 +1030,18 @@ export default function PostScreen({ navigation, route }: any) {
           </>
         )}
 
-        {/* ── STEP: PHOTOS (Businesses and Events don't support photos yet) ── */}
+        {/* ── STEP: PHOTOS ── */}
         {step === STEP_PHOTOS && (
-          categorySlug === 'businesses' || categorySlug === 'events' ? (
-            <View style={styles.card}>
-              <Ionicons name="images-outline" size={28} color="#9ca3af" />
-              <Text style={[styles.cardTitle, { marginTop: 10 }]}>
-                {categorySlug === 'businesses' ? "Photos aren't available for Businesses yet" : "Photos aren't available for Events yet"}
-              </Text>
-              <Text style={styles.cardSubtitle}>
-                {categorySlug === 'businesses'
-                  ? 'You can still add your business now — photo support for the Business Directory is coming soon.'
-                  : 'You can still post your event now — photo support for Events is coming soon.'}
-              </Text>
-            </View>
-          ) : (
           <>
             <View style={styles.card}>
               <Text style={styles.cardTitle}>Add photos</Text>
-              <Text style={styles.cardSubtitle}>Listings with photos get 5× more inquiries. Add up to 5 — first photo is the cover.</Text>
+              <Text style={styles.cardSubtitle}>
+                {categorySlug === 'businesses'
+                  ? 'Businesses with photos build more trust. Add up to 5 — first photo is the cover.'
+                  : categorySlug === 'events'
+                  ? 'Events with photos get more RSVPs. Add up to 5 — first photo is the cover.'
+                  : 'Listings with photos get 5× more inquiries. Add up to 5 — first photo is the cover.'}
+              </Text>
 
               {images.length < 5 && (
                 <TouchableOpacity style={styles.uploadZone} onPress={pickImage}>
@@ -1080,7 +1096,6 @@ export default function PostScreen({ navigation, route }: any) {
               ))}
             </View>
           </>
-          )
         )}
 
         {/* ── STEP: CONTACT ── */}
