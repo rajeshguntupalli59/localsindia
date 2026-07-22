@@ -124,6 +124,7 @@ export interface Event {
   user_id: string;
   category_id: string | null;
   created_at: string;
+  images?: ListingImage[];
 }
 
 export interface Ticket {
@@ -165,6 +166,7 @@ export interface Business {
   owner_id: string | null;
   created_at: string;
   reviews?: Review[];
+  images?: ListingImage[];
 }
 
 export interface BusinessAnalyticsTrendPoint {

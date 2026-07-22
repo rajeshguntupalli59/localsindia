@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, ShieldCheck, PartyPopper } from 'lucide-react';
+import { ArrowLeft, ShieldCheck, PartyPopper, Upload, X } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,6 +27,26 @@ export default function AddBusinessPage() {
     whatsapp_url: '',
     website_url: '',
   });
+
+  const [photos, setPhotos] = useState<File[]>([]);
+  const [previews, setPreviews] = useState<string[]>([]);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const handleFiles = (files: FileList | null) => {
+    if (!files) return;
+    const arr = Array.from(files).slice(0, 5 - photos.length);
+    const oversized = arr.filter(f => f.size > 5 * 1024 * 1024);
+    if (oversized.length) { toast.error('Images must be under 5MB'); return; }
+    const newPhotos = [...photos, ...arr].slice(0, 5);
+    setPhotos(newPhotos);
+    setPreviews(newPhotos.map(f => URL.createObjectURL(f)));
+  };
+
+  const removePhoto = (i: number) => {
+    const next = photos.filter((_, idx) => idx !== i);
+    setPhotos(next);
+    setPreviews(next.map(f => URL.createObjectURL(f)));
+  };
 
   // Set once the business is created — switches the screen into the
   // "get verified now, or skip" upsell instead of navigating away immediately.
@@ -56,6 +76,10 @@ export default function AddBusinessPage() {
         },
         token,
       );
+      for (const photo of photos) {
+        try { await api.upload.businessImage(biz.id, photo, token); } catch { /* non-fatal */ }
+      }
+
       toast.success('Business listed!');
       setCreatedBusinessId(biz.id);
     } catch (err) {
@@ -183,6 +207,49 @@ export default function AddBusinessPage() {
                 value={form.website_url}
                 onChange={e => setForm(p => ({ ...p, website_url: e.target.value }))}
               />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>Photos <span className="font-normal text-xs text-slate-400">(optional, up to 5)</span></Label>
+
+              {photos.length < 5 && (
+                <button
+                  type="button"
+                  onClick={() => fileRef.current?.click()}
+                  className="w-full border-2 border-dashed rounded-xl p-5 flex flex-col items-center gap-2 transition-colors hover:border-orange-400 hover:bg-orange-50"
+                  style={{ borderColor: 'var(--li-border)' }}
+                >
+                  <Upload className="w-5 h-5 text-slate-400" />
+                  <span className="text-xs text-slate-500">Tap to add photos — JPEG, PNG, max 5MB each</span>
+                </button>
+              )}
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                multiple
+                className="hidden"
+                onChange={e => handleFiles(e.target.files)}
+              />
+
+              {previews.length > 0 && (
+                <div className="grid grid-cols-3 gap-2">
+                  {previews.map((url, i) => (
+                    <div key={i} className="relative rounded-lg overflow-hidden bg-slate-100" style={{ aspectRatio: '4/3' }}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={url} alt="" className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => removePhoto(i)}
+                        className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 flex items-center justify-center"
+                        aria-label={`Remove photo ${i + 1}`}
+                      >
+                        <X className="w-3 h-3 text-white" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <Button

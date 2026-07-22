@@ -274,5 +274,29 @@ export const api = {
     },
     deleteImage: (imageId: string, token: string) =>
       req<void>(`/api/v1/upload/image/${imageId}`, { method: 'DELETE', token }),
+
+    businessImage: (businessId: string, file: File, token: string) => {
+      const form = new FormData();
+      form.append('file', file);
+      return req<ListingImage>(`/api/v1/upload/business-image/${businessId}`, {
+        method: 'POST',
+        body: form,
+        token,
+      });
+    },
+    deleteBusinessImage: (imageId: string, token: string) =>
+      req<void>(`/api/v1/upload/business-image/${imageId}`, { method: 'DELETE', token }),
+
+    eventImage: (eventId: string, file: File, token: string) => {
+      const form = new FormData();
+      form.append('file', file);
+      return req<ListingImage>(`/api/v1/upload/event-image/${eventId}`, {
+        method: 'POST',
+        body: form,
+        token,
+      });
+    },
+    deleteEventImage: (imageId: string, token: string) =>
+      req<void>(`/api/v1/upload/event-image/${imageId}`, { method: 'DELETE', token }),
   },
 };

@@ -114,6 +114,28 @@ export default function BusinessDetailPage() {
 
         {/* Business card */}
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 mb-6">
+          {business.images && business.images.length > 0 && (
+            <div className="grid grid-cols-3 gap-2 mb-5">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={business.images[0].url}
+                alt={business.name}
+                className="col-span-3 w-full rounded-xl object-cover"
+                style={{ aspectRatio: '16/9' }}
+              />
+              {business.images.slice(1).map(img => (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  key={img.id}
+                  src={img.url}
+                  alt=""
+                  className="w-full rounded-lg object-cover"
+                  style={{ aspectRatio: '1/1' }}
+                />
+              ))}
+            </div>
+          )}
+
           <div className="flex items-start justify-between mb-3">
             <div>
               <div className="flex items-center gap-2">

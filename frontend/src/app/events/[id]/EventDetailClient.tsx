@@ -114,6 +114,28 @@ export default function EventDetailClient({ id, initialEvent = null }: { id: str
         </Link>
 
         <div className="bg-white rounded-2xl border border-slate-100 p-6">
+          {event.images && event.images.length > 0 && (
+            <div className="grid grid-cols-3 gap-2 mb-5">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={event.images[0].url}
+                alt={event.title}
+                className="col-span-3 w-full rounded-xl object-cover"
+                style={{ aspectRatio: '16/9' }}
+              />
+              {event.images.slice(1).map(img => (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  key={img.id}
+                  src={img.url}
+                  alt=""
+                  className="w-full rounded-lg object-cover"
+                  style={{ aspectRatio: '1/1' }}
+                />
+              ))}
+            </div>
+          )}
+
           <span
             className={`text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full ${
               event.is_free ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
