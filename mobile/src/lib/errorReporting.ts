@@ -1,7 +1,7 @@
 import axios from 'axios';
 import appJson from '../../app.json';
 
-const API_BASE = 'https://localsindia-backend.azurewebsites.net/api/v1';
+const API_BASE = 'https://localsindia-backend-in.azurewebsites.net/api/v1';
 
 export function reportError(error: unknown, context?: string) {
   const message = error instanceof Error ? `${error.name}: ${error.message}` : String(error);

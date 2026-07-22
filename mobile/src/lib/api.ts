@@ -3,7 +3,7 @@ import * as FileSystem from 'expo-file-system/legacy';
 import { storage } from './storage';
 import { reportError } from './errorReporting';
 
-const API_BASE = 'https://localsindia-backend.azurewebsites.net/api/v1';
+const API_BASE = 'https://localsindia-backend-in.azurewebsites.net/api/v1';
 
 const api = axios.create({ baseURL: API_BASE });
 

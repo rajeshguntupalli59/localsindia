@@ -48,7 +48,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   doctors:       '#0284c7',
 };
 
-const API_BASE = 'https://localsindia-backend.azurewebsites.net/api/v1';
+const API_BASE = 'https://localsindia-backend-in.azurewebsites.net/api/v1';
 
 type Category = { id: string; name: string; slug: string; icon: string };
 

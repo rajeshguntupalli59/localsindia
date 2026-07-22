@@ -8,7 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { storage } from '../lib/storage';
 
-const API_BASE = 'https://localsindia-backend.azurewebsites.net/api/v1';
+const API_BASE = 'https://localsindia-backend-in.azurewebsites.net/api/v1';
 
 interface ListingSnippet {
   id: string;
