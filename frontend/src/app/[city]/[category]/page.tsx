@@ -86,7 +86,7 @@ const TOP_CITIES = [
   'thane', 'patna',
 ];
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend.azurewebsites.net';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend-in.azurewebsites.net';
 
 async function fetchListings(citySlug: string, meta: typeof SEO_CATEGORIES[string]): Promise<Listing[]> {
   try {

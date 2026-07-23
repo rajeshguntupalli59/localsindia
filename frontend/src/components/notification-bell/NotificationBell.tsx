@@ -5,7 +5,7 @@ import { Bell, CheckCircle2, Clock, Star, BellRing, Megaphone, type LucideIcon }
 import { motion, AnimatePresence } from 'framer-motion';
 import { timeAgo } from '@/lib/utils';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend.azurewebsites.net';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend-in.azurewebsites.net';
 
 interface Notification {
   id: string;

@@ -7,7 +7,7 @@ import { useSaved } from '@/hooks/useSaved';
 import ListingCard from '@/components/listing-card/ListingCard';
 import type { Listing } from '@/lib/types';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend.azurewebsites.net';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend-in.azurewebsites.net';
 
 function SavedInner() {
   const { saved: localSaved } = useSaved();

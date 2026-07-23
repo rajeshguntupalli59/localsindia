@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import type { City, Listing } from '@/lib/types';
 import CityHomeClient from './CityHomeClient';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend.azurewebsites.net';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend-in.azurewebsites.net';
 
 // Cities with fewer real listings than this are kept out of the Google index —
 // a thin/empty city page hurts trust and drags down the whole domain's SEO.

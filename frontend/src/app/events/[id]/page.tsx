@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import type { Event } from '@/lib/types';
 import EventDetailClient from './EventDetailClient';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend.azurewebsites.net';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend-in.azurewebsites.net';
 
 async function fetchEvent(id: string): Promise<Event | null> {
   try {

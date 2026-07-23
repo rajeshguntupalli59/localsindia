@@ -12,7 +12,7 @@ import { useSaved } from '@/hooks/useSaved';
 import { toast } from 'sonner';
 import ListingCard from '@/components/listing-card/ListingCard';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend.azurewebsites.net';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend-in.azurewebsites.net';
 
 function Skeleton({ className }: { className?: string }) {
   return <div className={`animate-pulse bg-slate-100 rounded-lg ${className ?? ''}`} />;

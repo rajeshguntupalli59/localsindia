@@ -6,7 +6,7 @@ import { ArrowLeft, Search, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { timeAgo } from '@/lib/utils';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend.azurewebsites.net';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend-in.azurewebsites.net';
 
 interface SavedSearch {
   id: string;

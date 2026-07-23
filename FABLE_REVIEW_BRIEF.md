@@ -13,8 +13,8 @@ PG/roommate listings — for 496+ Indian cities in 11 languages. Think "JustDial
 mobile-first, WhatsApp-native, and free to post.
 
 - **Web:** https://www.localsindia.com (Next.js, live on Azure Static Web Apps)
-- **Backend API:** https://localsindia-backend.azurewebsites.net (FastAPI, Azure App Service)
-- **Health check:** https://localsindia-backend.azurewebsites.net/api/v1/health → `{"status":"ok"}`
+- **Backend API:** https://localsindia-backend-in.azurewebsites.net (FastAPI, Azure App Service)
+- **Health check:** https://localsindia-backend-in.azurewebsites.net/api/v1/health → `{"status":"ok"}`
 - **Mobile:** React Native + Expo 56, not yet published to Play Store (still on EAS preview builds)
 - **GitHub:** https://github.com/rajeshguntupalli59/localsindia
 

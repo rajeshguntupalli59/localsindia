@@ -30,7 +30,7 @@ from dotenv import load_dotenv
 sys.path.insert(0, str(Path(__file__).parent))
 from base_agent import save_output
 
-BACKEND_URL = os.getenv("LOCALINDIA_API_URL", "https://localsindia-backend.azurewebsites.net")
+BACKEND_URL = os.getenv("LOCALINDIA_API_URL", "https://localsindia-backend-in.azurewebsites.net")
 
 # Minimum listings threshold — cities below this need seeding
 MIN_LISTINGS_THRESHOLD = 5

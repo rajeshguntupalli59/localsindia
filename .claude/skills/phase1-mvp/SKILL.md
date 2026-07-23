@@ -377,7 +377,7 @@ Admin sidebar design:
 2. All env vars set in Azure App Service → Configuration → Application settings
 3. Run DB migration: az webapp ssh -n localsindia-backend -g localsindia-rg → alembic upgrade head
 4. Seed cities: same SSH session → python scripts/seed_cities.py
-5. /api/v1/health returns 200 at https://localsindia-backend.azurewebsites.net/api/v1/health
+5. /api/v1/health returns 200 at https://localsindia-backend-in.azurewebsites.net/api/v1/health
 6. localsindia.com DNS (GoDaddy) CNAME www → Azure SWA
 ```
 

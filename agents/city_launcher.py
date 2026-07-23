@@ -16,7 +16,7 @@ What it does:
 Env vars required (set in .env or environment):
   ANTHROPIC_API_KEY          — Claude API key
   LOCALINDIA_ADMIN_PASSWORD  — Admin password for the live site
-  LOCALINDIA_API_URL         — Optional override (default: https://localsindia-backend.azurewebsites.net)
+  LOCALINDIA_API_URL         — Optional override (default: https://localsindia-backend-in.azurewebsites.net)
 """
 
 import argparse
@@ -36,7 +36,7 @@ from base_agent import generate, save_output, build_system_prompt as _build_sp
 
 # ─── Config ────────────────────────────────────────────────────────────────────
 
-BACKEND_URL = os.getenv("LOCALINDIA_API_URL", "https://localsindia-backend.azurewebsites.net")
+BACKEND_URL = os.getenv("LOCALINDIA_API_URL", "https://localsindia-backend-in.azurewebsites.net")
 ADMIN_USERNAME = "localsindia_admin"
 
 LANG_NAMES = {

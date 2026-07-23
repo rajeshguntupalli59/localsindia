@@ -83,12 +83,12 @@ LocalIndia (at **localsindia.com**) is India's hyperlocal community platform. Th
 | Service | URL | Platform | Cost |
 |---------|-----|----------|------|
 | Frontend | https://www.localsindia.com | Azure Static Web Apps (Free) | Rs.0 |
-| Backend API | https://localsindia-backend.azurewebsites.net | Azure App Service F1 (Free) | Rs.0 |
+| Backend API | https://localsindia-backend-in.azurewebsites.net | Azure App Service F1 (Free) | Rs.0 |
 | Database | localsindia-db.postgres.database.azure.com | Azure PostgreSQL Flexible Server B1ms | ~Rs.1,600/month |
 | Images | res.cloudinary.com | Cloudinary (Free tier) | Rs.0 |
 | DNS | localsindia.com | GoDaddy | Rs.800/year |
 
-**Health check:** GET https://localsindia-backend.azurewebsites.net/api/v1/health → `{"status":"ok"}`
+**Health check:** GET https://localsindia-backend-in.azurewebsites.net/api/v1/health → `{"status":"ok"}`
 
 **CI/CD:** Every `git push` to `master` branch triggers:
 - GitHub Action → builds frontend → deploys to Azure SWA
@@ -190,7 +190,7 @@ localsindia/
 1. Browser fetches `/hyderabad/index.html` from Azure SWA CDN (instant — static file)
 2. Next.js hydrates — React takes over in the browser
 3. Page loads `PrefsContext` from localStorage (remembers user's city + language)
-4. Page calls `GET https://localsindia-backend.azurewebsites.net/api/v1/cities/hyderabad/listings` from browser
+4. Page calls `GET https://localsindia-backend-in.azurewebsites.net/api/v1/cities/hyderabad/listings` from browser
 5. Backend: FastAPI receives request → `get_db()` opens PostgreSQL session → `listings.py` queries DB → returns JSON
 6. Frontend renders the listings using the ListingCard component
 7. User clicks WhatsApp button → `wa.me/91XXXXXXXXXX` opens WhatsApp (no backend call needed)
@@ -311,7 +311,7 @@ Search alerts — when a user clicks "🔔 Notify me" on a search, the query is 
 
 ## 7. The Backend API
 
-**Base URL:** `https://localsindia-backend.azurewebsites.net/api/v1`
+**Base URL:** `https://localsindia-backend-in.azurewebsites.net/api/v1`
 **Local dev URL:** `http://localhost:8000/api/v1`
 
 **How routers work:** `main.py` imports all 10 router files and mounts them. Each router file handles one feature area.
@@ -836,7 +836,7 @@ python agents/growth_tracker.py
 ```
 ANTHROPIC_API_KEY=sk-ant-api03-...
 LOCALINDIA_ADMIN_PASSWORD=...
-LOCALINDIA_API_URL=https://localsindia-backend.azurewebsites.net
+LOCALINDIA_API_URL=https://localsindia-backend-in.azurewebsites.net
 ```
 **NEVER commit this file to git.** It's gitignored.
 

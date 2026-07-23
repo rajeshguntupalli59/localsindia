@@ -24,7 +24,7 @@ const WELCOME: Message = {
   content: "Hi! I'm the LocalsIndia assistant. Ask me to find listings (\"PG in Hyderabad under ₹7000\") or ask anything about the platform.",
 };
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend.azurewebsites.net';
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend-in.azurewebsites.net';
 
 export default function ChatWidget() {
   const pathname = usePathname();

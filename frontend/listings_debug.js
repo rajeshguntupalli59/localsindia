@@ -1,6 +1,6 @@
 const { chromium } = require('playwright');
 const BASE = 'https://www.localsindia.com';
-const API = 'https://localsindia-backend.azurewebsites.net';
+const API = 'https://localsindia-backend-in.azurewebsites.net';
 
 async function run() {
   const browser = await chromium.launch({ headless: true, args: ['--no-sandbox'] });

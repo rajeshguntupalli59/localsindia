@@ -3,7 +3,7 @@ import Link from 'next/link';
 import type { City } from '@/lib/types';
 import CitiesListClient from './CitiesListClient';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend.azurewebsites.net';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend-in.azurewebsites.net';
 
 async function fetchCities(): Promise<City[]> {
   try {

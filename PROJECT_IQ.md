@@ -18,10 +18,10 @@ Covers classifieds, events, businesses, PG/roommate across 249+ Indian cities in
 | Surface | URL | Status |
 |---|---|---|
 | Website | https://www.localsindia.com | ✅ LIVE |
-| Backend API | https://localsindia-backend.azurewebsites.net | ✅ LIVE |
-| Health check | https://localsindia-backend.azurewebsites.net/api/v1/health | ✅ `{"status":"ok"}` |
+| Backend API | https://localsindia-backend-in.azurewebsites.net | ✅ LIVE |
+| Health check | https://localsindia-backend-in.azurewebsites.net/api/v1/health | ✅ `{"status":"ok"}` |
 | Admin panel | https://www.localsindia.com/admin/login | ✅ LIVE (no public link) |
-| API docs | https://localsindia-backend.azurewebsites.net/docs | ✅ FastAPI Swagger |
+| API docs | https://localsindia-backend-in.azurewebsites.net/docs | ✅ FastAPI Swagger |
 
 ---
 
@@ -101,7 +101,7 @@ Covers classifieds, events, businesses, PG/roommate across 249+ Indian cities in
 | CLOUDINARY_API_SECRET | (set) | ✅ LIVE |
 | GOOGLE_CLIENT_ID | 919627354106-a74cb4li3cn3g4odl8tiqu63beeo45kc.apps.googleusercontent.com | ✅ LIVE |
 | GOOGLE_CLIENT_SECRET | (set) | ✅ LIVE |
-| GOOGLE_REDIRECT_URI | https://localsindia-backend.azurewebsites.net/api/v1/auth/google/callback | ✅ SET |
+| GOOGLE_REDIRECT_URI | https://localsindia-backend-in.azurewebsites.net/api/v1/auth/google/callback | ✅ SET |
 | ADMIN_USERNAME | localsindia_admin | ✅ SET |
 | ADMIN_PASSWORD_HASH | (bcrypt hash of Rajesh@4356) | ✅ SET |
 
@@ -114,7 +114,7 @@ Covers classifieds, events, businesses, PG/roommate across 249+ Indian cities in
 | AZURE_TENANT_ID | (set) |
 | AZURE_SUBSCRIPTION_ID | (set) |
 | AZURE_STATIC_WEB_APPS_API_TOKEN | (set) |
-| NEXT_PUBLIC_API_URL | https://localsindia-backend.azurewebsites.net |
+| NEXT_PUBLIC_API_URL | https://localsindia-backend-in.azurewebsites.net |
 | NEXT_PUBLIC_GOOGLE_AUTH_ENABLED | true |
 | NEXT_PUBLIC_OTP_DEBUG | true |
 

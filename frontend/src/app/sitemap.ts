@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next';
 
 const BASE = 'https://www.localsindia.com';
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend.azurewebsites.net';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend-in.azurewebsites.net';
 
 // Must match the keys of SEO_CATEGORIES in app/[city]/[category]/page.tsx —
 // that page self-gates its own robots/noindex per city based on real listing

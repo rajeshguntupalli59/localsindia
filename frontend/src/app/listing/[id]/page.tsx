@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import type { Listing } from '@/lib/types';
 import ListingDetailClient from './ListingDetailClient';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend.azurewebsites.net';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend-in.azurewebsites.net';
 
 async function fetchListing(id: string): Promise<Listing | null> {
   try {

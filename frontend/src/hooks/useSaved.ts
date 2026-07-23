@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import type { Listing } from '@/lib/types';
 
 const STORAGE_KEY = 'localsindia_saved';
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend.azurewebsites.net';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend-in.azurewebsites.net';
 
 function getToken() {
   try { return localStorage.getItem('access_token'); } catch { return null; }

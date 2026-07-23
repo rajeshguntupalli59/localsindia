@@ -11,4 +11,4 @@ jobs:
     steps:
       - name: Ping health endpoint
         run: |
-          curl -sf https://localsindia-backend.azurewebsites.net/api/v1/health || echo "Backend warming up"
+          curl -sf https://localsindia-backend-in.azurewebsites.net/api/v1/health || echo "Backend warming up"
