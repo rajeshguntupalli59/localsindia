@@ -48,6 +48,7 @@ jobs:
           DATABASE_URL="$DB_URL" alembic upgrade head
 
       - name: Deploy to Azure App Service
+        id: deploy
         continue-on-error: true
         run: |
           az webapp deploy \
@@ -73,4 +74,13 @@ jobs:
             fi
           done
           echo "Backend did not respond in time — check Azure logs"
+          exit 1
+
+      - name: Fail job if deploy step actually failed
+        if: steps.deploy.outcome == 'failure'
+        run: |
+          echo "The 'Deploy to Azure App Service' step reported failure."
+          echo "Health check passing above only proves *some* container is healthy -"
+          echo "it may be the stale, pre-deploy version still running, not this commit."
+          echo "Re-run the deploy manually and confirm the new code is actually live."
           exit 1
