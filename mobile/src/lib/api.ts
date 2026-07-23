@@ -168,11 +168,6 @@ export const adminApi = {
     api.post('/admin/tickets/scan', { qr_token: qrToken }).then(r => r.data),
 };
 
-export const chatApi = {
-  send: (message: string, citySlug?: string, history: {role: string; content: string}[] = []) =>
-    api.post('/chat', { message, city_slug: citySlug, history }).then(r => r.data),
-};
-
 export const notificationsApi = {
   list: (limit = 20) =>
     api.get(`/notifications?limit=${limit}`).then(r => r.data),
@@ -280,5 +275,3 @@ export const ticketsApi = {
   my: () =>
     api.get('/tickets/my').then(r => r.data),
 };
-
-export default api;

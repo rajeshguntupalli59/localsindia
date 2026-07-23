@@ -1,4 +1,3 @@
-import uuid
 from datetime import datetime
 from pydantic import BaseModel, field_validator
 
@@ -29,18 +28,6 @@ class ErrorReportCreate(BaseModel):
     @classmethod
     def truncate_stack(cls, v: str | None) -> str | None:
         return v[:8000] if v else v
-
-
-class ErrorLogOut(BaseModel):
-    id: uuid.UUID
-    platform: str
-    message: str
-    stack: str | None
-    context: str | None
-    app_version: str | None
-    created_at: datetime
-
-    model_config = {"from_attributes": True}
 
 
 class ErrorLogGroup(BaseModel):

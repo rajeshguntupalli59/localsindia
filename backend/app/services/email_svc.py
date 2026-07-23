@@ -1,6 +1,5 @@
 import logging
 import os
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -68,16 +67,6 @@ def _base_template(title: str, body_html: str) -> str:
 </body></html>"""
 
 
-async def send_welcome_email(to: str, name: str) -> bool:
-    html = _base_template(
-        f"Welcome to LocalsIndia, {name}!",
-        f"""<p>You're all set! LocalsIndia connects you with jobs, PGs, and services in your city.</p>
-        <p>Start by browsing listings in your city or post your first listing for free.</p>
-        <p><a class="btn" href="https://localsindia.com">Explore LocalsIndia →</a></p>"""
-    )
-    return await send_email(to, f"Welcome to LocalsIndia, {name}!", html)
-
-
 async def send_listing_approved_email(to: str, listing_title: str, listing_url: str) -> bool:
     html = _base_template(
         "Your listing is live!",
@@ -96,21 +85,3 @@ async def send_listing_expiry_email(to: str, listing_title: str, renew_url: str,
         <p><a class="btn" href="{renew_url}">Renew Listing →</a></p>"""
     )
     return await send_email(to, f"Renew your listing — expires in {days_left} days", html)
-
-
-async def send_digest_email(to: str, city_name: str, listings: list[dict]) -> bool:
-    items_html = "".join([
-        f'<div style="border:1px solid #f3f4f6;border-radius:10px;padding:12px;margin-bottom:10px">'
-        f'<p style="margin:0;font-weight:700;color:#1a1a2e">{l["title"]}</p>'
-        f'<p style="margin:4px 0 8px;color:#6b7280;font-size:12px">{l.get("area","")}</p>'
-        f'<a href="https://localsindia.com/listing/{l["id"]}" style="color:#F7921E;font-size:12px;font-weight:600">View listing →</a>'
-        f'</div>'
-        for l in listings[:5]
-    ])
-    html = _base_template(
-        f"New listings in {city_name}",
-        f"""<p>{len(listings)} new listings posted in {city_name} recently. Don't miss out!</p>
-        {items_html}
-        <p><a class="btn" href="https://localsindia.com/{city_name.lower()}">See All Listings →</a></p>"""
-    )
-    return await send_email(to, f"{len(listings)} new listings in {city_name} — LocalsIndia", html)
