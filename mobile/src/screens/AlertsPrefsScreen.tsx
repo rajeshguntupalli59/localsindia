@@ -4,19 +4,29 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { preferencesApi } from '../lib/api';
 
+// Same slugs + icons as PostScreen's CATEGORY_ICONS, so alert choices map
+// directly onto real categories/listings.
 const INTERESTS: { id: string; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
+  { id: 'classifieds', label: 'Classifieds', icon: 'pricetags-outline' },
+  { id: 'pg-roommate', label: 'PG / Roommate', icon: 'home-outline' },
   { id: 'jobs', label: 'Jobs', icon: 'briefcase-outline' },
-  { id: 'pg', label: 'PG / Room', icon: 'home-outline' },
   { id: 'vehicles', label: 'Vehicles', icon: 'car-outline' },
   { id: 'electronics', label: 'Electronics', icon: 'phone-portrait-outline' },
-  { id: 'services', label: 'Services', icon: 'build-outline' },
-  { id: 'other', label: 'Other', icon: 'ellipsis-horizontal-outline' },
+  { id: 'services', label: 'Services', icon: 'construct-outline' },
+  { id: 'events', label: 'Events', icon: 'calendar-outline' },
+  { id: 'businesses', label: 'Businesses', icon: 'storefront-outline' },
+  { id: 'tiffin', label: 'Tiffin / Food', icon: 'restaurant-outline' },
+  { id: 'real-estate', label: 'Real Estate', icon: 'business-outline' },
+  { id: 'furniture', label: 'Furniture', icon: 'cube-outline' },
+  { id: 'fashion', label: 'Fashion', icon: 'shirt-outline' },
+  { id: 'education', label: 'Education', icon: 'school-outline' },
+  { id: 'doctors', label: 'Doctors', icon: 'medical-outline' },
 ];
 
 const ALERT_FREQ = [
-  { id: 'daily', label: 'Daily digest', desc: 'Get a summary every morning' },
-  { id: 'weekly', label: 'Weekly digest', desc: 'One email per week' },
-  { id: 'never', label: 'No emails', desc: 'In-app notifications only' },
+  { id: 'daily', label: 'Daily alerts', desc: 'Get a push notification every morning' },
+  { id: 'weekly', label: 'Weekly alerts', desc: 'One push notification per week' },
+  { id: 'never', label: 'No alerts', desc: 'In-app notifications only' },
 ];
 
 export default function AlertsPrefsScreen({ navigation }: any) {
@@ -101,9 +111,9 @@ export default function AlertsPrefsScreen({ navigation }: any) {
             })}
           </View>
 
-          {/* Email frequency */}
-          <Text style={[styles.sectionTitle, { marginTop: 28 }]}>Email alerts</Text>
-          <Text style={styles.sectionSub}>How often should we send you listing updates?</Text>
+          {/* Alert frequency */}
+          <Text style={[styles.sectionTitle, { marginTop: 28 }]}>Listing alerts</Text>
+          <Text style={styles.sectionSub}>How often should we notify you about new listings?</Text>
           {ALERT_FREQ.map(f => (
             <TouchableOpacity
               key={f.id}
