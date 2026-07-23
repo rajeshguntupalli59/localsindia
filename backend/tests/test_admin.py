@@ -346,3 +346,89 @@ async def test_full_listing_lifecycle(admin_client, auth_client, city, category)
     city_resp = await ac.get(f"/api/v1/cities/{city.slug}/listings")
     active_ids = [l["id"] for l in city_resp.json()]
     assert listing_id not in active_ids
+
+
+# ── Admin broadcast ─────────────────────────────────────────────────────────
+# Raj asked for a way to send an announcement to every device that has the
+# app installed - existing push infra (DeviceToken + send_push) already does
+# per-user pushes for events like listing approval, this reuses it but
+# batches every registered token into one Expo call instead of one per user.
+
+@pytest.mark.asyncio
+async def test_broadcast_requires_admin(auth_client):
+    ac, _user = auth_client
+    resp = await ac.post("/api/v1/admin/broadcast", json={"title": "Hi", "body": "Test"})
+    assert resp.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_broadcast_pushes_to_every_registered_device(db, admin_client, user_and_token):
+    """Scoped against a baseline read rather than an absolute count, since the
+    shared test DB may already have device tokens from other tests."""
+    from unittest.mock import patch, AsyncMock
+    from app.models.device_token import DeviceToken
+    from app.models.user_notification import UserNotification
+    from sqlalchemy import select
+
+    ac, _admin = admin_client
+    user, _token = user_and_token
+
+    baseline_tokens = (await db.execute(select(DeviceToken.token))).scalars().all()
+    baseline_users = (await db.execute(select(DeviceToken.user_id))).scalars().all()
+
+    db.add(DeviceToken(user_id=user.id, token="ExponentPushToken[bob]"))
+    await db.commit()
+
+    with patch("app.services.push_svc.send_push", new_callable=AsyncMock) as mock_send:
+        resp = await ac.post("/api/v1/admin/broadcast", json={"title": "New feature!", "body": "Check it out"})
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["devices_pushed"] == len(baseline_tokens) + 1
+    assert body["users_notified"] == len(set(baseline_users) | {user.id})
+
+    all_pushed_tokens = [t for call in mock_send.call_args_list for t in call.args[0]]
+    assert "ExponentPushToken[bob]" in all_pushed_tokens
+    for call in mock_send.call_args_list:
+        assert call.args[1] == "New feature!"
+        assert call.args[2] == "Check it out"
+
+    notif_result = await db.execute(
+        select(UserNotification).where(
+            UserNotification.user_id == user.id,
+            UserNotification.type == "admin_broadcast",
+        )
+    )
+    notif = notif_result.scalar_one()
+    assert notif.title == "New feature!"
+    assert notif.body == "Check it out"
+
+
+@pytest.mark.asyncio
+async def test_broadcast_chunks_over_100_tokens(db, admin_client, user_and_token):
+    """Expo's push API documents a 100-message-per-request limit - a user
+    with many devices, or many users total, must be split into batches."""
+    from unittest.mock import patch, AsyncMock
+    import math
+    from sqlalchemy import select, func
+    from app.models.device_token import DeviceToken
+
+    ac, _admin = admin_client
+    user, _token = user_and_token
+
+    baseline_count = await db.scalar(select(func.count()).select_from(DeviceToken))
+
+    for i in range(150):
+        db.add(DeviceToken(user_id=user.id, token=f"ExponentPushToken[device-{i}]"))
+    await db.commit()
+
+    with patch("app.services.push_svc.send_push", new_callable=AsyncMock) as mock_send:
+        resp = await ac.post("/api/v1/admin/broadcast", json={"title": "Hi", "body": "Test"})
+    assert resp.status_code == 200
+    total = baseline_count + 150
+    assert resp.json()["devices_pushed"] == total
+
+    expected_batches = math.ceil(total / 100)
+    assert mock_send.await_count == expected_batches
+    for call in mock_send.call_args_list[:-1]:
+        assert len(call.args[0]) == 100
+    assert len(mock_send.call_args_list[-1].args[0]) == total - 100 * (expected_batches - 1)

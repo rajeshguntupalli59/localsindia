@@ -39,6 +39,16 @@ from app.schemas.ticket import TicketScanRequest, TicketScanResponse
 class RoleUpdate(BaseModel):
     role: str
 
+
+class BroadcastIn(BaseModel):
+    title: str
+    body: str
+
+
+class BroadcastResult(BaseModel):
+    users_notified: int
+    devices_pushed: int
+
 router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
 
 
@@ -730,3 +740,32 @@ async def scan_ticket(
         attendee_name=attendee_name,
         used_at=ticket.used_at,
     )
+
+
+@router.post("/broadcast", response_model=BroadcastResult)
+async def send_broadcast(
+    body: BroadcastIn,
+    _admin: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Send an announcement to every device that has the app installed (i.e.
+    has a registered push token) - in-app notification for each user plus a
+    real push. Not routed through notify() since that sends one push per
+    user; this batches all tokens into Expo's push API in chunks of 100
+    (Expo's documented per-request limit)."""
+    from app.models.device_token import DeviceToken
+    from app.models.user_notification import UserNotification
+    from app.services.push_svc import send_push
+
+    rows = (await db.execute(select(DeviceToken.user_id, DeviceToken.token))).all()
+    tokens = [token for _, token in rows]
+    user_ids = {user_id for user_id, _ in rows}
+
+    for user_id in user_ids:
+        db.add(UserNotification(user_id=user_id, type="admin_broadcast", title=body.title, body=body.body))
+    await db.commit()
+
+    for i in range(0, len(tokens), 100):
+        await send_push(tokens[i:i + 100], body.title, body.body, {"type": "admin_broadcast"})
+
+    return BroadcastResult(users_notified=len(user_ids), devices_pushed=len(tokens))
