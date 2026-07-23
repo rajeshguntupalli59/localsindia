@@ -6,7 +6,7 @@ Think Craigslist + Nextdoor built natively for India — city-specific, regional
 Users pick their city, browse listings in their language, post for free, contact sellers via WhatsApp.
 
 ## Who We Serve
-Indian urban and semi-urban residents in 249+ cities.
+Indian urban and semi-urban residents across 151 cities in South India (Telangana, Andhra Pradesh, Karnataka, Tamil Nadu, Kerala, Puducherry — scoped to South India since 2026-07-18, do not cite older all-India numbers).
 - Students: PG rooms, roommates, used books
 - Homemakers: tiffin services, domestic help, cooking classes
 - Young professionals: carpool, events, gym equipment
@@ -32,7 +32,7 @@ Never use: "platform", "ecosystem", "seamless", "solution", "leverage", "innovat
 - fashion: Clothes, accessories, jewellery (new and secondhand)
 
 ## Key Differentiators
-- All 11 major Indian languages (Unicode script, not romanized)
+- 5 languages, real Unicode script not romanized (English, Telugu, Tamil, Kannada, Malayalam)
 - WhatsApp contact on every listing — zero friction to reach seller
 - City-wise hyperlocal (not national like OLX/JustDial)
 - India-specific: tiffin, carpool, cricket clubs, temple events

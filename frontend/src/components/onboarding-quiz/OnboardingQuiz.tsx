@@ -2,17 +2,30 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Briefcase, Home, Car, Smartphone, Wrench, Package, Flame, CalendarDays, Eye, type LucideIcon } from 'lucide-react';
+import {
+  X, Briefcase, Car, Smartphone, Wrench, Flame, CalendarDays, Eye, type LucideIcon,
+  Tag, UtensilsCrossed, Building2, Store, GraduationCap, Stethoscope, Home, Package, ShoppingBag,
+} from 'lucide-react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend.azurewebsites.net';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend-in.azurewebsites.net';
 
+// Same slugs + icons as the category picker in the post-listing wizard, so a
+// user's onboarding choices map directly onto real categories/listings.
 const INTERESTS: { id: string; label: string; icon: LucideIcon }[] = [
+  { id: 'classifieds', label: 'Classifieds', icon: Tag },
+  { id: 'pg-roommate', label: 'PG / Roommate', icon: Building2 },
   { id: 'jobs', label: 'Jobs', icon: Briefcase },
-  { id: 'pg', label: 'PG / Room', icon: Home },
   { id: 'vehicles', label: 'Vehicles', icon: Car },
   { id: 'electronics', label: 'Electronics', icon: Smartphone },
   { id: 'services', label: 'Services', icon: Wrench },
-  { id: 'other', label: 'Other', icon: Package },
+  { id: 'events', label: 'Events', icon: CalendarDays },
+  { id: 'businesses', label: 'Businesses', icon: Store },
+  { id: 'tiffin', label: 'Tiffin / Food', icon: UtensilsCrossed },
+  { id: 'real-estate', label: 'Real Estate', icon: Home },
+  { id: 'furniture', label: 'Furniture', icon: Package },
+  { id: 'fashion', label: 'Fashion', icon: ShoppingBag },
+  { id: 'education', label: 'Education', icon: GraduationCap },
+  { id: 'doctors', label: 'Doctors', icon: Stethoscope },
 ];
 
 const BUDGETS = [
@@ -125,7 +138,7 @@ export default function OnboardingQuiz({ onClose }: Props) {
             </div>
 
             {/* Budget (show if PG selected) */}
-            {interests.includes('pg') && (
+            {interests.includes('pg-roommate') && (
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">Monthly budget</p>
                 <div className="grid grid-cols-2 gap-2">

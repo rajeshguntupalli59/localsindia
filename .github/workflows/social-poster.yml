@@ -1,0 +1,108 @@
+name: Social Poster
+
+on:
+  schedule:
+    # 4:00 AM UTC = 9:30 AM IST, daily — regular topic rotation (image posts)
+    - cron: '0 4 * * *'
+    # 13:30 UTC = 7:00 PM IST, daily — second slot, mixes in the ecosystem
+    # poster and occasional Facebook-only text updates for variety
+    - cron: '30 13 * * *'
+  workflow_dispatch:  # allow manual trigger + choosing what to run from the GitHub Actions UI
+    inputs:
+      agent:
+        description: 'Which post to generate'
+        required: false
+        type: choice
+        default: 'meta_poster'
+        options:
+          - meta_poster
+          - ecosystem_poster
+          - meta_poster_text
+      topic:
+        description: 'Force a topic for meta_poster (leave empty to rotate randomly)'
+        required: false
+        type: choice
+        options:
+          - ''
+          - app_feature
+          - category_tip
+          - safety_tip
+          - city_spotlight
+          - app_launch
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Python dependencies
+        run: pip install -r agents/requirements.txt
+
+      - name: Install frontend deps (Playwright lives here)
+        working-directory: frontend
+        run: npm ci
+
+      - name: Install Playwright browser
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
+
+      - name: Generate + post
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          META_PAGE_ID: ${{ secrets.META_PAGE_ID }}
+          META_PAGE_ACCESS_TOKEN: ${{ secrets.META_PAGE_ACCESS_TOKEN }}
+          META_IG_BUSINESS_ID: ${{ secrets.META_IG_BUSINESS_ID }}
+          META_IG_ACCESS_TOKEN: ${{ secrets.META_IG_ACCESS_TOKEN }}
+          CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
+          CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
+          CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
+        run: |
+          # Manual dispatch: use exactly what was picked in the UI.
+          if [ -n "${{ github.event.inputs.agent }}" ]; then
+            AGENT="${{ github.event.inputs.agent }}"
+          else
+            # Scheduled run: first daily slot always does a normal image
+            # post; the second slot randomly varies the format so two
+            # posts a day never look/read identical.
+            HOUR_UTC=$(date -u +%H)
+            if [ "$HOUR_UTC" = "04" ]; then
+              AGENT="meta_poster"
+            else
+              ROLL=$((RANDOM % 10))
+              if [ "$ROLL" -lt 5 ]; then AGENT="meta_poster"
+              elif [ "$ROLL" -lt 8 ]; then AGENT="ecosystem_poster"
+              else AGENT="meta_poster_text"
+              fi
+            fi
+          fi
+          echo "Selected agent: $AGENT"
+
+          TOPIC_ARG=""
+          if [ -n "${{ github.event.inputs.topic }}" ]; then
+            TOPIC_ARG="--topic ${{ github.event.inputs.topic }}"
+          fi
+
+          case "$AGENT" in
+            meta_poster) python agents/meta_poster.py --publish $TOPIC_ARG ;;
+            meta_poster_text) python agents/meta_poster.py --format text --publish $TOPIC_ARG ;;
+            ecosystem_poster) python agents/ecosystem_poster.py --publish ;;
+          esac
+
+      - name: Upload generated images as workflow artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: social-post-images
+          path: |
+            agents/output/social_posts/
+            marketing/generated/
+          retention-days: 14
