@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { CheckCircle, XCircle, Clock, Trash2, Tag, Search, X } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, Trash2, Tag, Search, X, ChevronDown, MapPin, Phone } from 'lucide-react';
 import Image from 'next/image';
 import { formatPrice, timeAgo } from '@/lib/utils';
 import type { Listing } from '@/lib/types';
@@ -27,6 +27,7 @@ export default function AdminListingsPage() {
   const [rejectReason, setRejectReason] = useState('');
   const [deleteModal, setDeleteModal] = useState<string | null>(null);
   const [search, setSearch] = useState('');
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const token = () => localStorage.getItem('access_token') ?? '';
 
@@ -200,12 +201,22 @@ export default function AdminListingsPage() {
               transition={{ delay: i * 0.03 }}
               className="bg-white rounded-xl shadow-sm overflow-hidden"
             >
-              <div className="flex gap-4 p-4">
+              <button
+                type="button"
+                onClick={() => setExpandedId(id => id === listing.id ? null : listing.id)}
+                className="flex gap-4 p-4 w-full text-left"
+                aria-expanded={expandedId === listing.id}
+              >
                 <div className="relative w-20 h-20 rounded-lg overflow-hidden bg-muted shrink-0">
                   {listing.images?.[0]?.url ? (
                     <Image src={listing.images[0].url} alt={listing.title ?? ''} fill className="object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-slate-300"><Tag size={28} /></div>
+                  )}
+                  {listing.images && listing.images.length > 1 && (
+                    <span className="absolute bottom-1 right-1 bg-black/60 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded">
+                      +{listing.images.length - 1}
+                    </span>
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -221,36 +232,86 @@ export default function AdminListingsPage() {
                     <span className="truncate">{listing.contact_phone}</span>
                   </div>
                 </div>
+                <ChevronDown
+                  className={`w-5 h-5 text-muted-foreground shrink-0 self-center transition-transform ${expandedId === listing.id ? 'rotate-180' : ''}`}
+                />
+              </button>
 
-                {/* Action buttons */}
-                <div className="flex flex-col gap-2 shrink-0">
-                  {tab === 'pending' && (
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => approve(listing.id)}
-                        disabled={actionId === listing.id}
-                        className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-green-50 text-green-700 text-xs font-semibold hover:bg-green-100 transition-colors disabled:opacity-50"
-                      >
-                        <CheckCircle className="w-3.5 h-3.5" /> Approve
-                      </button>
-                      <button
-                        onClick={() => { setRejectModal(listing.id); setRejectReason(''); }}
-                        disabled={actionId === listing.id}
-                        className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-red-50 text-red-700 text-xs font-semibold hover:bg-red-100 transition-colors disabled:opacity-50"
-                      >
-                        <XCircle className="w-3.5 h-3.5" /> Reject
-                      </button>
+              {expandedId === listing.id && (
+                <div className="border-t px-4 pb-4 pt-4 space-y-4">
+                  {listing.images && listing.images.length > 0 && (
+                    <div className="grid grid-cols-4 gap-2">
+                      {listing.images.map(img => (
+                        <div key={img.id} className="relative aspect-square rounded-lg overflow-hidden bg-muted">
+                          <Image src={img.url} alt={listing.title ?? ''} fill className="object-cover" />
+                        </div>
+                      ))}
                     </div>
                   )}
-                  <button
-                    onClick={() => setDeleteModal(listing.id)}
-                    disabled={actionId === listing.id}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-red-50 text-red-700 text-xs font-semibold hover:bg-red-100 transition-colors disabled:opacity-50 self-end"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" /> Delete
-                  </button>
+
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">Full description</p>
+                    <p className="text-sm whitespace-pre-wrap">{listing.description}</p>
+                  </div>
+
+                  {listing.category_details && Object.keys(listing.category_details).length > 0 && (
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1.5">
+                        {listing.category_name ?? 'Category'} details
+                      </p>
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-sm">
+                        {Object.entries(listing.category_details).map(([key, val]) => (
+                          val != null && val !== '' && (
+                            <div key={key} className="flex justify-between gap-2">
+                              <span className="text-muted-foreground">
+                                {key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                              </span>
+                              <span className="font-medium text-right">{String(val)}</span>
+                            </div>
+                          )
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex flex-wrap gap-x-5 gap-y-1.5 text-sm text-muted-foreground">
+                    {listing.area && (
+                      <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" /> {listing.area}</span>
+                    )}
+                    <span className="flex items-center gap-1"><Phone className="w-3.5 h-3.5" /> {listing.contact_phone}</span>
+                    {listing.seller_name && <span>Seller: {listing.seller_name}</span>}
+                  </div>
+
+                  {/* Action buttons */}
+                  <div className="flex gap-2 pt-2 border-t">
+                    {tab === 'pending' && (
+                      <>
+                        <button
+                          onClick={e => { e.stopPropagation(); approve(listing.id); }}
+                          disabled={actionId === listing.id}
+                          className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-green-50 text-green-700 text-xs font-semibold hover:bg-green-100 transition-colors disabled:opacity-50"
+                        >
+                          <CheckCircle className="w-3.5 h-3.5" /> Approve
+                        </button>
+                        <button
+                          onClick={e => { e.stopPropagation(); setRejectModal(listing.id); setRejectReason(''); }}
+                          disabled={actionId === listing.id}
+                          className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-red-50 text-red-700 text-xs font-semibold hover:bg-red-100 transition-colors disabled:opacity-50"
+                        >
+                          <XCircle className="w-3.5 h-3.5" /> Reject
+                        </button>
+                      </>
+                    )}
+                    <button
+                      onClick={e => { e.stopPropagation(); setDeleteModal(listing.id); }}
+                      disabled={actionId === listing.id}
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-red-50 text-red-700 text-xs font-semibold hover:bg-red-100 transition-colors disabled:opacity-50 ml-auto"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" /> Delete
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
             </motion.div>
           ))}
         </div>
