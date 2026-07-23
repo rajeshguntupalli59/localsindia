@@ -20,17 +20,10 @@ const INTERESTS: { id: string; label: string; icon: keyof typeof Ionicons.glyphM
   { id: 'other', label: 'Other', icon: 'ellipsis-horizontal-outline' },
 ];
 
-const ALERT_FREQ = [
-  { id: 'daily', label: 'Daily digest' },
-  { id: 'weekly', label: 'Weekly digest' },
-  { id: 'never', label: 'No emails' },
-];
-
 export default function AlertOnboardingSheet() {
   const insets = useSafeAreaInsets();
   const [visible, setVisible] = useState(false);
   const [interests, setInterests] = useState<string[]>([]);
-  const [alertFreq, setAlertFreq] = useState('weekly');
   const [saving, setSaving] = useState(false);
   const slideAnim = useRef(new Animated.Value(400)).current;
 
@@ -63,7 +56,6 @@ export default function AlertOnboardingSheet() {
     try {
       await preferencesApi.upsert({
         interests,
-        alert_frequency: alertFreq,
         onboarding_done: true,
       });
     } catch {}
@@ -130,26 +122,6 @@ export default function AlertOnboardingSheet() {
                 })}
               </View>
 
-              {/* Email alerts */}
-              <Text style={[styles.sectionLabel, { marginTop: 20 }]}>Email alerts</Text>
-              <View style={styles.freqRow}>
-                {ALERT_FREQ.map(f => (
-                  <TouchableOpacity
-                    key={f.id}
-                    style={[styles.freqBtn, alertFreq === f.id && styles.freqBtnActive]}
-                    onPress={() => setAlertFreq(f.id)}
-                    activeOpacity={0.75}
-                    accessibilityRole="radio"
-                    accessibilityLabel={f.label}
-                    accessibilityState={{ checked: alertFreq === f.id }}
-                  >
-                    <Text style={[styles.freqLabel, alertFreq === f.id && styles.freqLabelActive]}>
-                      {f.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-
               <View style={{ height: 16 }} />
             </ScrollView>
 
@@ -211,15 +183,6 @@ const styles = StyleSheet.create({
   chipEmoji: { fontSize: 16 },
   chipLabel: { fontSize: 13, fontWeight: '600', color: '#6b7280' },
   chipLabelActive: { color: '#ea580c' },
-
-  freqRow: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
-  freqBtn: {
-    borderWidth: 2, borderColor: '#e5e7eb', borderRadius: 20,
-    paddingHorizontal: 14, paddingVertical: 8,
-  },
-  freqBtnActive: { borderColor: '#f97316', backgroundColor: '#fff7ed' },
-  freqLabel: { fontSize: 13, fontWeight: '600', color: '#6b7280' },
-  freqLabelActive: { color: '#ea580c' },
 
   footer: { padding: 20, paddingBottom: 36 },
   saveBtn: {

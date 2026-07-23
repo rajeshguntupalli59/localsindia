@@ -28,12 +28,6 @@ const TIMELINES: { id: string; label: string; icon: LucideIcon }[] = [
   { id: 'browsing', label: 'Just browsing', icon: Eye },
 ];
 
-const ALERT_FREQ = [
-  { id: 'daily', label: 'Daily digest' },
-  { id: 'weekly', label: 'Weekly digest' },
-  { id: 'never', label: 'No emails' },
-];
-
 interface Props {
   onClose: () => void;
 }
@@ -42,7 +36,6 @@ export default function OnboardingQuiz({ onClose }: Props) {
   const [interests, setInterests] = useState<string[]>([]);
   const [budget, setBudget] = useState<string>('');
   const [timeline, setTimeline] = useState<string>('');
-  const [alertFreq, setAlertFreq] = useState<string>('weekly');
   const [saving, setSaving] = useState(false);
 
   const toggleInterest = (id: string) => {
@@ -68,7 +61,6 @@ export default function OnboardingQuiz({ onClose }: Props) {
           budget_min: selectedBudget?.min ?? null,
           budget_max: selectedBudget?.max ?? null,
           timeline: timeline || null,
-          alert_frequency: alertFreq,
           onboarding_done: true,
         }),
       });
@@ -176,26 +168,6 @@ export default function OnboardingQuiz({ onClose }: Props) {
                     </button>
                   );
                 })}
-              </div>
-            </div>
-
-            {/* Email alerts */}
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">Email alerts</p>
-              <div className="flex gap-2 flex-wrap">
-                {ALERT_FREQ.map(f => (
-                  <button
-                    key={f.id}
-                    type="button"
-                    onClick={() => setAlertFreq(f.id)}
-                    className={`px-4 py-2 rounded-full border-2 text-sm font-medium transition-all
-                      ${alertFreq === f.id
-                        ? 'border-[#F7921E] bg-[#FEF3E2] text-[#E07B0A]'
-                        : 'border-slate-200 text-slate-600 hover:border-slate-300'}`}
-                  >
-                    {f.label}
-                  </button>
-                ))}
               </div>
             </div>
           </div>
