@@ -123,13 +123,21 @@ async def chat(request: Request, req: ChatRequest, db: AsyncSession = Depends(ge
 
         response = chat_session.send_message(user_text)
 
-        fn_call = None
-        for part in response.candidates[0].content.parts:
-            if part.function_call and part.function_call.name == "search_listings":
-                fn_call = part.function_call
+        # Gemini may retry search_listings with narrower args when a search
+        # comes back empty, rather than replying with text - loop until it
+        # replies with text or gives up retrying.
+        reply_text = None
+        for _ in range(3):
+            fn_call = None
+            for part in response.candidates[0].content.parts:
+                if part.function_call and part.function_call.name == "search_listings":
+                    fn_call = part.function_call
+                    break
+
+            if not fn_call:
+                reply_text = response.text
                 break
 
-        if fn_call:
             args = dict(fn_call.args)
             resolved_city_slug = args.get("city_slug") or req.city_slug or "hyderabad"
             query = args.get("query", "")
@@ -153,15 +161,17 @@ async def chat(request: Request, req: ChatRequest, db: AsyncSession = Depends(ge
             else:
                 tool_result = f"City '{resolved_city_slug}' not found on LocalsIndia."
 
-            final = chat_session.send_message(
+            response = chat_session.send_message(
                 types.Part.from_function_response(
                     name="search_listings",
                     response={"result": tool_result},
                 )
             )
-            reply_text = final.text or "Here are the results!"
-        else:
-            reply_text = response.text or "How can I help you?"
+
+        reply_text = reply_text or response.text or (
+            "I couldn't find any matches for that search — try a broader search term, "
+            "or browse listings directly on the site."
+        )
 
     except Exception as e:
         logger.error("Gemini API error: %s %s", type(e).__name__, str(e))
