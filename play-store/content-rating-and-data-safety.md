@@ -25,13 +25,15 @@ Expected outcome: this profile should land on the **lowest/mildest rating tier**
 
 Fill this out in Play Console → Policy → App content → Data safety. Answer **"Does your app collect or share any of the required user data types?" → Yes**, then declare:
 
+**Account creation methods (updated 2026-07-23):** Google Sign-In was removed from the Android app entirely (checked `mobile/src` — zero references anywhere) and disabled on the website behind a `NEXT_PUBLIC_GOOGLE_AUTH_ENABLED` flag. For this form, which covers the Android app being submitted, check **only "Username and password"** (phone number as username + a password set at signup/reset) — do not check OAuth. The account-creation questions elsewhere in this doc that assume Google Sign-In is available (email collection below, third-party sharing) no longer apply to the Android app.
+
 ## Personal info
 
 | Data type | Collected? | Shared? | Purpose | Required or optional |
 |---|---|---|---|---|
 | Name | Yes | Yes — shown publicly on the user's listings and business reviews | App functionality | Required |
 | Phone number | Yes | Yes — shown on listings as the contact number / WhatsApp link | Account management, App functionality | Required |
-| Email address | Yes, only if signing in with Google | No — not shown publicly | Account management | Optional (only Google sign-in users) |
+| Email address | **No — not collected in the Android app** (Google Sign-In, the only way an email was ever collected, isn't present in this app) | — | — | — |
 
 ## Photos and videos
 
@@ -80,6 +82,6 @@ Fill this out in Play Console → Policy → App content → Data safety. Answer
 - **Cloudinary** — listing photo hosting
 - **Razorpay** — payment processing (featured listings, business badges)
 - **MSG91** — SMS delivery for OTP verification (receives phone number + OTP code only)
-- **Google** — only if the user chooses Google Sign-In (name, email, profile picture)
+- ~~Google — only if the user chooses Google Sign-In~~ **not applicable to the Android app** — Google Sign-In isn't present in it (see the account-creation note above)
 
 No data is sold, and no data is shared with advertising or analytics networks.
