@@ -1,0 +1,41 @@
+name: Interest Digest
+
+on:
+  schedule:
+    # 3:30 AM UTC = 9:00 AM IST daily — "daily" digest users
+    - cron: '30 3 * * *'
+    # 3:35 AM UTC Monday = 9:05 AM IST Monday — "weekly" digest users
+    - cron: '35 3 * * 1'
+  workflow_dispatch:
+    inputs:
+      frequency:
+        description: 'Which digest bucket to send (daily or weekly)'
+        required: true
+        type: choice
+        options: [daily, weekly]
+        default: daily
+
+jobs:
+  send-digest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Determine frequency for this run
+        id: freq
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "value=${{ inputs.frequency }}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event.schedule }}" = "35 3 * * 1" ]; then
+            echo "value=weekly" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=daily" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Send interest-matching push digest
+        run: |
+          HTTP_STATUS=$(curl -s -o /tmp/response.json -w "%{http_code}" \
+            "${{ secrets.BACKEND_URL }}/api/v1/cron/interest-digest?secret=${{ secrets.CRON_SECRET }}&frequency=${{ steps.freq.outputs.value }}")
+          cat /tmp/response.json
+          if [ "$HTTP_STATUS" != "200" ]; then
+            echo "Cron endpoint returned HTTP $HTTP_STATUS"
+            exit 1
+          fi

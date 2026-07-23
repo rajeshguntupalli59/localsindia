@@ -206,3 +206,173 @@ async def test_cron_sends_in_app_expiring_soon_notice_without_email(client, db, 
         )
     )
     assert notif_result.scalar_one_or_none() is not None
+
+
+# Regression coverage for a real product gap: onboarding asked users to pick a
+# daily/weekly digest frequency but never collected an email, and the
+# email-sending function was never called from anywhere - doubly dead. Fixed
+# by dropping the email choice and delivering via push instead, since device
+# tokens + a working send_push() already exist. These tests cover the new
+# interest-matching push digest cron.
+@pytest.mark.asyncio
+async def test_interest_digest_notifies_matching_daily_user(client, db, auth_client, city, category):
+    from sqlalchemy import select
+    from app.models.listing import Listing
+    from app.models.user_preference import UserPreference
+    from app.models.user_notification import UserNotification
+
+    ac, user = auth_client
+
+    pref = UserPreference(user_id=user.id, interests=[category.slug], alert_frequency="daily", push_enabled=True)
+    db.add(pref)
+    await db.commit()
+
+    create_resp = await ac.post("/api/v1/listings", json={
+        "title": "New listing matching this user's interest",
+        "description": "Posted just now, should be picked up by the daily digest",
+        "category_id": str(category.id),
+        "city_id": str(city.id),
+        "contact_phone": "+919876543210",
+    })
+    listing_id = create_resp.json()["id"]
+    result = await db.execute(select(Listing).where(Listing.id == listing_id))
+    listing = result.scalar_one()
+    listing.status = "active"  # new listings default to 'pending' (BL-11) - digest only counts active
+    await db.commit()
+
+    with patch.object(settings, "CRON_SECRET", CRON_SECRET):
+        resp = await client.get(f"/api/v1/cron/interest-digest?secret={CRON_SECRET}&frequency=daily")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["users_notified"] == 1
+    assert body["new_listings_in_window"] >= 1  # global count across all categories, not just this test's
+
+    notif_result = await db.execute(
+        select(UserNotification).where(
+            UserNotification.user_id == user.id,
+            UserNotification.type == "interest_digest",
+        )
+    )
+    assert notif_result.scalar_one_or_none() is not None
+
+
+@pytest.mark.asyncio
+async def test_interest_digest_skips_non_matching_category(client, db, auth_client, city, category):
+    from sqlalchemy import select
+    from app.models.listing import Listing
+    from app.models.user_preference import UserPreference
+    from app.models.user_notification import UserNotification
+
+    ac, user = auth_client
+
+    # User is only interested in an unrelated category - the listing below doesn't match.
+    pref = UserPreference(user_id=user.id, interests=["some-other-category-nobody-picked"], alert_frequency="daily", push_enabled=True)
+    db.add(pref)
+    await db.commit()
+
+    create_resp = await ac.post("/api/v1/listings", json={
+        "title": "Listing in an unrelated category",
+        "description": "User didn't pick this category as an interest",
+        "category_id": str(category.id),
+        "city_id": str(city.id),
+        "contact_phone": "+919876543210",
+    })
+    listing_id = create_resp.json()["id"]
+    result = await db.execute(select(Listing).where(Listing.id == listing_id))
+    listing = result.scalar_one()
+    listing.status = "active"
+    await db.commit()
+
+    with patch.object(settings, "CRON_SECRET", CRON_SECRET):
+        resp = await client.get(f"/api/v1/cron/interest-digest?secret={CRON_SECRET}&frequency=daily")
+    assert resp.status_code == 200
+
+    # Scoped to this test's own user - the aggregate users_notified count isn't
+    # reliable here since earlier tests in this file leave their own matching
+    # "daily" users + active listings in the shared test DB.
+    notif_result = await db.execute(
+        select(UserNotification).where(
+            UserNotification.user_id == user.id,
+            UserNotification.type == "interest_digest",
+        )
+    )
+    assert notif_result.scalar_one_or_none() is None
+
+
+@pytest.mark.asyncio
+async def test_interest_digest_skips_wrong_frequency_bucket(client, db, auth_client, city, category):
+    from sqlalchemy import select
+    from app.models.listing import Listing
+    from app.models.user_preference import UserPreference
+    from app.models.user_notification import UserNotification
+
+    ac, user = auth_client
+
+    # User opted into "weekly" - a "daily" run should never notify them.
+    pref = UserPreference(user_id=user.id, interests=[category.slug], alert_frequency="weekly", push_enabled=True)
+    db.add(pref)
+    await db.commit()
+
+    create_resp = await ac.post("/api/v1/listings", json={
+        "title": "Matches interest but user is weekly, not daily",
+        "description": "A daily run should skip this user entirely",
+        "category_id": str(category.id),
+        "city_id": str(city.id),
+        "contact_phone": "+919876543210",
+    })
+    listing_id = create_resp.json()["id"]
+    result = await db.execute(select(Listing).where(Listing.id == listing_id))
+    listing = result.scalar_one()
+    listing.status = "active"
+    await db.commit()
+
+    with patch.object(settings, "CRON_SECRET", CRON_SECRET):
+        resp = await client.get(f"/api/v1/cron/interest-digest?secret={CRON_SECRET}&frequency=daily")
+    assert resp.status_code == 200
+
+    notif_result = await db.execute(
+        select(UserNotification).where(
+            UserNotification.user_id == user.id,
+            UserNotification.type == "interest_digest",
+        )
+    )
+    assert notif_result.scalar_one_or_none() is None
+
+
+@pytest.mark.asyncio
+async def test_interest_digest_skips_push_disabled_user(client, db, auth_client, city, category):
+    from sqlalchemy import select
+    from app.models.listing import Listing
+    from app.models.user_preference import UserPreference
+    from app.models.user_notification import UserNotification
+
+    ac, user = auth_client
+
+    pref = UserPreference(user_id=user.id, interests=[category.slug], alert_frequency="daily", push_enabled=False)
+    db.add(pref)
+    await db.commit()
+
+    create_resp = await ac.post("/api/v1/listings", json={
+        "title": "Matches interest but user disabled push",
+        "description": "push_enabled=False should be respected",
+        "category_id": str(category.id),
+        "city_id": str(city.id),
+        "contact_phone": "+919876543210",
+    })
+    listing_id = create_resp.json()["id"]
+    result = await db.execute(select(Listing).where(Listing.id == listing_id))
+    listing = result.scalar_one()
+    listing.status = "active"
+    await db.commit()
+
+    with patch.object(settings, "CRON_SECRET", CRON_SECRET):
+        resp = await client.get(f"/api/v1/cron/interest-digest?secret={CRON_SECRET}&frequency=daily")
+    assert resp.status_code == 200
+
+    notif_result = await db.execute(
+        select(UserNotification).where(
+            UserNotification.user_id == user.id,
+            UserNotification.type == "interest_digest",
+        )
+    )
+    assert notif_result.scalar_one_or_none() is None
