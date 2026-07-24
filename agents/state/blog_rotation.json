@@ -1,6 +1,6 @@
 {
-  "lastCityIndex": 1,
-  "lastCategoryIndex": 1,
+  "lastCityIndex": 2,
+  "lastCategoryIndex": 2,
   "history": [
     {
       "citySlug": "bangalore",
@@ -13,6 +13,12 @@
       "category": "tiffin",
       "topicTemplateId": "dietary-needs",
       "publishedAt": "2026-07-24T20:37:40Z"
+    },
+    {
+      "citySlug": "chennai",
+      "category": "jobs",
+      "topicTemplateId": "spot-fake-listing",
+      "publishedAt": "2026-07-24T20:42:22Z"
     }
   ]
 }
