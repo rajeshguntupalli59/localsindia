@@ -393,18 +393,17 @@ async def get_platform_stats(
     today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
     week_start = now - timedelta(days=7)
 
-    # Users
-    users_total = await db.scalar(
-        select(func.count()).select_from(User).where(User.deleted_at.is_(None))
-    )
-    users_new_today = await db.scalar(
-        select(func.count()).select_from(User)
-        .where(User.created_at >= today_start, User.deleted_at.is_(None))
-    )
-    users_new_7d = await db.scalar(
-        select(func.count()).select_from(User)
-        .where(User.created_at >= week_start, User.deleted_at.is_(None))
-    )
+    # Users — one round trip for the 3 scalar aggregates, one for the by-day series
+    # (each was previously its own await db.scalar(), 21 round trips total across this
+    # endpoint; conditional COUNT/SUM via FILTER collapses same-table aggregates into
+    # a single query without changing any of the returned values)
+    users_row = (await db.execute(
+        select(
+            func.count().filter(User.deleted_at.is_(None)).label("total"),
+            func.count().filter(User.deleted_at.is_(None), User.created_at >= today_start).label("new_today"),
+            func.count().filter(User.deleted_at.is_(None), User.created_at >= week_start).label("new_7d"),
+        )
+    )).one()
     new_users_by_day_result = await db.execute(
         select(cast(User.created_at, Date).label("day"), func.count().label("count"))
         .where(User.created_at >= week_start, User.deleted_at.is_(None))
@@ -413,45 +412,39 @@ async def get_platform_stats(
     )
     new_users_by_day = [{"date": str(row.day), "count": row.count} for row in new_users_by_day_result]
 
-    # Listings by status
-    listing_counts_result = await db.execute(
-        select(Listing.status, func.count()).select_from(Listing)
-        .where(Listing.deleted_at.is_(None))
-        .group_by(Listing.status)
-    )
-    listing_by_status = {row[0]: row[1] for row in listing_counts_result}
+    # Listings — status breakdown + featured/views/contacts in one query
+    listing_row = (await db.execute(
+        select(
+            func.count().filter(Listing.status == "pending").label("pending"),
+            func.count().filter(Listing.status == "active").label("active"),
+            func.count().filter(Listing.status == "flagged").label("flagged"),
+            func.count().filter(Listing.status == "rejected").label("rejected"),
+            func.count().filter(Listing.status == "expired").label("expired"),
+            func.count().filter(Listing.status == "fulfilled").label("fulfilled"),
+            func.count().label("total"),
+            func.count().filter(Listing.is_featured.is_(True), Listing.expires_at > now).label("featured"),
+            func.coalesce(func.sum(Listing.view_count), 0).label("total_views"),
+            func.coalesce(func.sum(Listing.contact_click_count), 0).label("total_contacts"),
+        ).where(Listing.deleted_at.is_(None))
+    )).one()
 
-    featured_count = await db.scalar(
-        select(func.count()).select_from(Listing)
-        .where(Listing.is_featured.is_(True), Listing.deleted_at.is_(None), Listing.expires_at > now)
-    )
-    view_total = await db.scalar(
-        select(func.coalesce(func.sum(Listing.view_count), 0)).select_from(Listing)
-        .where(Listing.deleted_at.is_(None))
-    )
-    contact_total = await db.scalar(
-        select(func.coalesce(func.sum(Listing.contact_click_count), 0)).select_from(Listing)
-        .where(Listing.deleted_at.is_(None))
-    )
+    # Events — pending + active in one query
+    events_row = (await db.execute(
+        select(
+            func.count().filter(Event.status == "pending").label("pending"),
+            func.count().filter(Event.status == "active").label("active"),
+        ).where(Event.deleted_at.is_(None))
+    )).one()
 
-    # Events
-    events_pending = await db.scalar(
-        select(func.count()).select_from(Event)
-        .where(Event.status == "pending", Event.deleted_at.is_(None))
-    )
-    events_active = await db.scalar(
-        select(func.count()).select_from(Event)
-        .where(Event.status == "active", Event.deleted_at.is_(None))
-    )
-
-    # Cities
-    cities_total = await db.scalar(
-        select(func.count()).select_from(City).where(City.active.is_(True))
-    )
-    cities_with_listings = await db.scalar(
-        select(func.count(distinct(Listing.city_id))).select_from(Listing)
-        .where(Listing.deleted_at.is_(None), Listing.status == "active")
-    )
+    # Cities — total + with_listings span two tables, so combine as scalar subqueries
+    # (still one round trip, the DB evaluates both subqueries server-side)
+    cities_row = (await db.execute(
+        select(
+            select(func.count()).select_from(City).where(City.active.is_(True)).scalar_subquery().label("total"),
+            select(func.count(distinct(Listing.city_id))).select_from(Listing)
+            .where(Listing.deleted_at.is_(None), Listing.status == "active").scalar_subquery().label("with_listings"),
+        )
+    )).one()
     top_cities_result = await db.execute(
         select(City.name, City.state, func.count(Listing.id).label("listing_count"))
         .join(Listing, Listing.city_id == City.id)
@@ -462,74 +455,73 @@ async def get_platform_stats(
     )
     top_cities = [{"name": r.name, "state": r.state, "count": r.listing_count} for r in top_cities_result]
 
-    # OTP
-    otp_today_total = await db.scalar(
-        select(func.count()).select_from(OtpRequest).where(OtpRequest.created_at >= today_start)
-    )
-    otp_today_verified = await db.scalar(
-        select(func.count()).select_from(OtpRequest)
-        .where(OtpRequest.created_at >= today_start, OtpRequest.verified.is_(True))
-    )
+    # OTP — today's total + verified in one query
+    otp_row = (await db.execute(
+        select(
+            func.count().label("total"),
+            func.count().filter(OtpRequest.verified.is_(True)).label("verified"),
+        ).where(OtpRequest.created_at >= today_start)
+    )).one()
 
-    # Content
-    reports_total = await db.scalar(select(func.count()).select_from(Report))
-    saves_total = await db.scalar(select(func.count()).select_from(SavedListing))
-    reviews_total = await db.scalar(select(func.count()).select_from(ListingReview))
+    # Content — three different tables, combined as scalar subqueries (one round trip)
+    content_row = (await db.execute(
+        select(
+            select(func.count()).select_from(Report).scalar_subquery().label("reports"),
+            select(func.count()).select_from(SavedListing).scalar_subquery().label("saves"),
+            select(func.count()).select_from(ListingReview).scalar_subquery().label("reviews"),
+        )
+    )).one()
 
     # Referrals — only visibility into the referral system (no dashboard by design)
-    referred_signups_total = await db.scalar(
-        select(func.count()).select_from(User)
-        .where(User.referred_by_user_id.isnot(None), User.deleted_at.is_(None))
-    )
-    referral_rewards_total = await db.scalar(
-        select(func.coalesce(func.sum(User.referral_rewards_count), 0)).select_from(User)
-    )
-    referrers_at_cap = await db.scalar(
-        select(func.count()).select_from(User)
-        .where(User.referral_rewards_count >= REFERRAL_REWARD_CAP)
-    )
+    referral_row = (await db.execute(
+        select(
+            func.count().filter(User.referred_by_user_id.isnot(None), User.deleted_at.is_(None)).label("signups"),
+            func.coalesce(func.sum(User.referral_rewards_count), 0).label("rewards"),
+            func.count().filter(User.referral_rewards_count >= REFERRAL_REWARD_CAP).label("at_cap"),
+        )
+    )).one()
 
     return {
         "users": {
-            "total": users_total or 0,
-            "new_today": users_new_today or 0,
-            "new_7d": users_new_7d or 0,
+            "total": users_row.total or 0,
+            "new_today": users_row.new_today or 0,
+            "new_7d": users_row.new_7d or 0,
             "new_by_day": new_users_by_day,
         },
         "listings": {
-            "total": sum(listing_by_status.values()),
-            "pending": listing_by_status.get("pending", 0),
-            "active": listing_by_status.get("active", 0),
-            "flagged": listing_by_status.get("flagged", 0),
-            "rejected": listing_by_status.get("rejected", 0),
-            "expired": listing_by_status.get("expired", 0),
-            "fulfilled": listing_by_status.get("fulfilled", 0),
-            "featured": featured_count or 0,
-            "total_views": int(view_total or 0),
-            "total_contacts": int(contact_total or 0),
+            "total": listing_row.total or 0,
+            "pending": listing_row.pending or 0,
+            "active": listing_row.active or 0,
+            "flagged": listing_row.flagged or 0,
+            "rejected": listing_row.rejected or 0,
+            "expired": listing_row.expired or 0,
+            "fulfilled": listing_row.fulfilled or 0,
+            "featured": listing_row.featured or 0,
+            "total_views": int(listing_row.total_views or 0),
+            "total_contacts": int(listing_row.total_contacts or 0),
         },
         "events": {
-            "pending": events_pending or 0,
-            "active": events_active or 0,
+            "pending": events_row.pending or 0,
+            "active": events_row.active or 0,
         },
         "cities": {
-            "total": cities_total or 0,
-            "with_listings": cities_with_listings or 0,
+            "total": cities_row.total or 0,
+            "with_listings": cities_row.with_listings or 0,
             "top": top_cities,
         },
         "otp": {
-            "today_total": otp_today_total or 0,
-            "today_verified": otp_today_verified or 0,
+            "today_total": otp_row.total or 0,
+            "today_verified": otp_row.verified or 0,
         },
         "content": {
-            "reports": reports_total or 0,
-            "saves": saves_total or 0,
-            "reviews": reviews_total or 0,
+            "reports": content_row.reports or 0,
+            "saves": content_row.saves or 0,
+            "reviews": content_row.reviews or 0,
         },
         "referrals": {
-            "signups": referred_signups_total or 0,
-            "rewards_granted": int(referral_rewards_total or 0),
-            "referrers_at_cap": referrers_at_cap or 0,
+            "signups": referral_row.signups or 0,
+            "rewards_granted": int(referral_row.rewards or 0),
+            "referrers_at_cap": referral_row.at_cap or 0,
         },
         "system": {
             "chatbot_key_set": bool(settings.GOOGLE_AI_KEY),
