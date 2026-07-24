@@ -21,6 +21,7 @@ on:
 
 permissions:
   contents: write   # this workflow commits the generated post back to the repo
+  actions: write    # needed to trigger the frontend deploy workflow below
 
 jobs:
   publish:
@@ -49,13 +50,26 @@ jobs:
           fi
 
       - name: Commit and push generated post
+        id: commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add frontend/src/content/blog/ agents/state/blog_rotation.json
           if git diff --cached --quiet; then
             echo "No changes to commit"
+            echo "committed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           git commit -m "blog: auto-publish weekly guide article"
           git push
+          echo "committed=true" >> "$GITHUB_OUTPUT"
+
+      # A GITHUB_TOKEN-authored push does NOT trigger other workflows' `on:
+      # push` — a deliberate GitHub anti-recursion rule, not a bug — so the
+      # new post would otherwise sit committed but never actually deployed.
+      # Explicitly dispatch the existing deploy workflow instead.
+      - name: Trigger frontend deploy
+        if: steps.commit.outputs.committed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run "Deploy Frontend to Azure Static Web Apps" --ref master
