@@ -1,0 +1,18 @@
+{
+  "lastCityIndex": 1,
+  "lastCategoryIndex": 1,
+  "history": [
+    {
+      "citySlug": "bangalore",
+      "category": "pg-roommate",
+      "topicTemplateId": "avoid-scam",
+      "publishedAt": "2026-07-24T20:36:55Z"
+    },
+    {
+      "citySlug": "hyderabad",
+      "category": "tiffin",
+      "topicTemplateId": "dietary-needs",
+      "publishedAt": "2026-07-24T20:37:40Z"
+    }
+  ]
+}

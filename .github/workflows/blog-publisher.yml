@@ -1,0 +1,61 @@
+name: Blog Publisher
+
+on:
+  schedule:
+    # 3:00 AM UTC Sunday = 8:30 AM IST — weekly, one evergreen guide article
+    - cron: '0 3 * * 0'
+  workflow_dispatch:
+    inputs:
+      city:
+        description: 'Force a city (leave empty to auto-rotate)'
+        required: false
+        type: string
+      state:
+        description: 'State for the forced city (required if city is set)'
+        required: false
+        type: string
+      category:
+        description: 'Force a category (leave empty to auto-rotate)'
+        required: false
+        type: string
+
+permissions:
+  contents: write   # this workflow commits the generated post back to the repo
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Python dependencies
+        run: pip install -r agents/requirements.txt
+
+      - name: Generate blog post
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -n "${{ github.event.inputs.city }}" ]; then
+            python agents/blog_agent.py \
+              --city "${{ github.event.inputs.city }}" \
+              --state "${{ github.event.inputs.state }}" \
+              --category "${{ github.event.inputs.category }}"
+          else
+            python agents/blog_agent.py --auto-rotate
+          fi
+
+      - name: Commit and push generated post
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add frontend/src/content/blog/ agents/state/blog_rotation.json
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "blog: auto-publish weekly guide article"
+          git push

@@ -1,4 +1,5 @@
 import type { MetadataRoute } from 'next';
+import { listAllPosts } from '@/lib/blog';
 
 const BASE = 'https://www.localsindia.com';
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend-in.azurewebsites.net';
@@ -54,5 +55,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // sitemap still works with static routes if API is down at build time
   }
 
-  return [...staticRoutes, ...cityRoutes];
+  // Blog posts — local fs enumeration (no network fetch), independently
+  // guarded so a malformed content file can never break the whole sitemap.
+  const blogRoutes: MetadataRoute.Sitemap = [];
+  try {
+    blogRoutes.push({ url: `${BASE}/blog`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.6 });
+    for (const post of listAllPosts()) {
+      blogRoutes.push({
+        url: `${BASE}/blog/${post.citySlug}/${post.slug}`,
+        lastModified: new Date(post.publishedAt),
+        changeFrequency: 'monthly',
+        priority: 0.6,
+      });
+    }
+  } catch {
+    // sitemap still works without blog routes if content dir is malformed
+  }
+
+  return [...staticRoutes, ...cityRoutes, ...blogRoutes];
 }
