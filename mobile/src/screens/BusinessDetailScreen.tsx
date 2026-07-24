@@ -628,7 +628,7 @@ const styles = StyleSheet.create({
   },
   planCardActive: { borderColor: '#2563eb', backgroundColor: '#eff6ff' },
   popularBadge: {
-    position: 'absolute', top: 10, right: 10,
+    alignSelf: 'flex-start', marginBottom: 10,
     backgroundColor: '#2563eb', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3,
   },
   popularText: { color: 'white', fontSize: 10, fontWeight: '700' },
