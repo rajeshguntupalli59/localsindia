@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, Eye, MessageCircle, Star, MessagesSquare } from 'lucide-react';
+import { ArrowLeft, Eye, MessageCircle, Star, MessagesSquare, Megaphone } from 'lucide-react';
 import Link from 'next/link';
 import { api, ApiError } from '@/lib/api';
 import type { BusinessAnalytics } from '@/lib/types';
@@ -117,6 +117,22 @@ export default function BusinessDashboardClient() {
                   ))}
                 </div>
               )}
+            </div>
+
+            <div className="rounded-2xl border border-[#F7921E]/20 bg-[#F7921E]/5 p-4 mt-3">
+              <div className="flex items-center gap-1.5 text-[#F7921E] mb-1.5">
+                <Megaphone className="w-4 h-4" />
+                <span className="text-xs font-bold uppercase tracking-widest">Get more visibility</span>
+              </div>
+              <p className="text-sm text-slate-700 mb-3">
+                Feature your business with a banner ad on {citySlug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}&apos;s homepage — reach everyone browsing your city.
+              </p>
+              <a
+                href="mailto:support@localsindia.com?subject=Banner%20ad%20inquiry&body=Hi%2C%20I%27d%20like%20to%20advertise%20my%20business%20with%20a%20city%20banner."
+                className="inline-flex items-center text-sm font-semibold text-[#F7921E] hover:underline"
+              >
+                Contact us to advertise →
+              </a>
             </div>
           </>
         )}
