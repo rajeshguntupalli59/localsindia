@@ -17,6 +17,7 @@ import ListingDetailScreen from './src/screens/ListingDetailScreen';
 import SellerProfileScreen from './src/screens/SellerProfileScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import CityPickerScreen from './src/screens/CityPickerScreen';
+import MapPinPickerScreen from './src/screens/MapPinPickerScreen';
 import AdminScreen from './src/screens/AdminScreen';
 import ChatScreen from './src/screens/ChatScreen';
 import MyListingsScreen from './src/screens/MyListingsScreen';
@@ -217,6 +218,11 @@ export default function App() {
               <Stack.Screen
                 name="CityPicker"
                 component={CityPickerScreen}
+                options={{ presentation: 'modal' }}
+              />
+              <Stack.Screen
+                name="MapPinPicker"
+                component={MapPinPickerScreen}
                 options={{ presentation: 'modal' }}
               />
               <Stack.Screen name="Admin" component={AdminScreen} />

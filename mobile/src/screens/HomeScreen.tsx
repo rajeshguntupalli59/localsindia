@@ -10,6 +10,7 @@ import { storage } from '../lib/storage';
 import ListingCard from '../components/ListingCard';
 import NotificationBell from '../components/NotificationBell';
 import AlertOnboardingSheet from '../components/AlertOnboardingSheet';
+import CityAutoDetectPrompt from '../components/CityAutoDetectPrompt';
 
 const LOGO = require('../../assets/logo-mark-transparent.png');
 
@@ -350,6 +351,9 @@ export default function HomeScreen({ navigation }: any) {
 
       {/* Onboarding sheet — auto-shows once after first login */}
       <AlertOnboardingSheet />
+
+      {/* City auto-detect — auto-shows once on first-ever launch, any auth state */}
+      <CityAutoDetectPrompt navigation={navigation} onCitySelected={handleCitySelect} />
     </View>
   );
 }

@@ -49,3 +49,18 @@ export async function getApproxLocationWithArea(): Promise<
 
   return { ...location, areaGuess, cityGuess };
 }
+
+/**
+ * Fuzzy-matches a reverse-geocoded place name against our seeded city list.
+ * Same predicate as web's geolocate matcher — a plain `cityGuess` from
+ * expo-location's reverse geocode rarely equals a seeded city's name
+ * exactly (e.g. a village/suburb name vs. its district town), so this is
+ * looser than PostScreen's existing exact-match on purpose.
+ */
+export function matchCityByName<T extends { name: string }>(cities: T[], guess: string): T | null {
+  const lc = guess.toLowerCase();
+  return cities.find(c => {
+    const cn = c.name.toLowerCase();
+    return cn === lc || lc.startsWith(cn) || cn.startsWith(lc.split(' ')[0]);
+  }) ?? null;
+}

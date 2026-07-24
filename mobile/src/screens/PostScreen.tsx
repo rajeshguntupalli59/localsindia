@@ -345,6 +345,15 @@ export default function PostScreen({ navigation, route }: any) {
     }
   };
 
+  // For villages/areas GPS+reverse-geocode can't confidently place — a
+  // full-precision manual pin, deliberately bypassing getApproxLocation's
+  // ~110m rounding since the whole point here is exactness.
+  const handleMapPinConfirm = (result: { latitude: number; longitude: number; areaGuess: string | null }) => {
+    setLocation({ latitude: result.latitude, longitude: result.longitude });
+    setIncludeLocation(true);
+    if (result.areaGuess && !area.trim()) setArea(result.areaGuess);
+  };
+
   const pickImage = async () => {
     if (images.length >= 5) { Alert.alert('Max 5 photos allowed'); return; }
     const remaining = 5 - images.length;
@@ -773,6 +782,23 @@ export default function PostScreen({ navigation, route }: any) {
         <Text style={[styles.locationRowText, includeLocation && styles.locationRowTextActive]}>
           {includeLocation ? 'Location included — buyers nearby can find this' : 'Include my location (helps buyers find you nearby)'}
         </Text>
+      </TouchableOpacity>
+
+      {/* Manual pin — for villages/areas GPS+reverse-geocode can't place */}
+      <TouchableOpacity
+        style={styles.mapPinRow}
+        onPress={() => navigation.navigate('MapPinPicker', {
+          onConfirm: handleMapPinConfirm,
+          initialRegion: location ? {
+            latitude: location.latitude, longitude: location.longitude,
+            latitudeDelta: 0.02, longitudeDelta: 0.02,
+          } : undefined,
+        })}
+        accessibilityRole="button"
+        accessibilityLabel="Set exact location on a map"
+      >
+        <Ionicons name="map-outline" size={14} color="#6b7280" />
+        <Text style={styles.mapPinRowText}>Can't find your spot? Set exact location on map</Text>
       </TouchableOpacity>
 
       {/* Step bubbles */}
@@ -1274,6 +1300,18 @@ const styles = StyleSheet.create({
   },
   locationRowText: { fontSize: 12, color: '#6b7280' },
   locationRowTextActive: { color: '#16a34a', fontWeight: '600' },
+
+  mapPinRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 9,
+    backgroundColor: '#f9fafb',
+    borderBottomWidth: 1,
+    borderBottomColor: '#f3f4f6',
+  },
+  mapPinRowText: { fontSize: 12, color: '#6b7280' },
 
   // Step bubbles
   stepsRow: {
