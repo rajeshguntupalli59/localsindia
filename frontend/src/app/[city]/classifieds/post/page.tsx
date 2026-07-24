@@ -2,8 +2,9 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, X, CheckCircle, ArrowLeft, ArrowRight, Sparkles, Lightbulb, Camera, MapPin, Tag, UtensilsCrossed, Building2, Briefcase, Car, Smartphone, CalendarDays, Store, GraduationCap, Globe, Share2, Stethoscope, Wrench, Home, Package, ShoppingBag } from 'lucide-react';
+import { Upload, X, CheckCircle, ArrowLeft, ArrowRight, Sparkles, Lightbulb, Camera, MapPin, MapPinned, Tag, UtensilsCrossed, Building2, Briefcase, Car, Smartphone, CalendarDays, Store, GraduationCap, Globe, Share2, Stethoscope, Wrench, Home, Package, ShoppingBag } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import Link from 'next/link';
 import { api, ApiError } from '@/lib/api';
@@ -11,6 +12,10 @@ import type { Category } from '@/lib/types';
 import SiteHeader from '@/components/site-header/SiteHeader';
 import { toast } from 'sonner';
 import { usePrefs } from '@/context/PrefsContext';
+import { reverseGeocode } from '@/lib/geolocate';
+
+// Leaflet touches window/document at import time — must stay client-only.
+const MapPinPicker = dynamic(() => import('@/components/map-pin-picker/MapPinPicker'), { ssr: false });
 
 const CATEGORY_ICONS: Record<string, LucideIcon> = {
   tiffin: UtensilsCrossed,
@@ -223,6 +228,8 @@ interface FormData {
   website_url: string;
   social_url: string;
   area: string;
+  latitude?: number;
+  longitude?: number;
   category_details: Record<string, unknown>;
 }
 
@@ -242,7 +249,18 @@ export default function PostListingPage() {
   const [form, setForm] = useState<FormData>(EMPTY);
   const [errors, setErrors] = useState<Partial<FormData>>({});
   const [categories, setCategories] = useState<Category[]>([]);
+  const [showMapPicker, setShowMapPicker] = useState(false);
   const { cities } = usePrefs();
+
+  const handlePinConfirm = async (pos: { latitude: number; longitude: number }) => {
+    setShowMapPicker(false);
+    const areaGuess = await reverseGeocode(pos.latitude, pos.longitude);
+    save({
+      latitude: pos.latitude,
+      longitude: pos.longitude,
+      area: form.area.trim() ? form.area : (areaGuess ?? form.area),
+    });
+  };
   const city = cities.find(c => c.slug === citySlug) ?? null;
   const [photos, setPhotos] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
@@ -475,6 +493,8 @@ export default function PostListingPage() {
         website_url: form.website_url.trim() || undefined,
         social_url: form.social_url.trim() || undefined,
         area: form.area.trim() || undefined,
+        latitude: form.latitude,
+        longitude: form.longitude,
         category_details: buildCategoryDetailsPayload(),
       }, token);
 
@@ -898,6 +918,15 @@ export default function PostListingPage() {
                   <p className="text-xs mt-1.5" style={{ color: 'var(--li-muted)' }}>
                     Helps buyers find listings near them — beats city-only searches
                   </p>
+                  <button
+                    type="button"
+                    onClick={() => setShowMapPicker(true)}
+                    className="flex items-center gap-1.5 mt-2 text-xs font-semibold"
+                    style={{ color: 'var(--li-primary)' }}
+                  >
+                    <MapPinned className="w-3.5 h-3.5" />
+                    {form.latitude ? 'Location pinned — change it' : "Can't find your exact spot? Drop a pin"}
+                  </button>
                 </div>
 
                 <div>
@@ -1047,6 +1076,14 @@ export default function PostListingPage() {
           </motion.button>
         </div>
       </div>
+
+      {showMapPicker && (
+        <MapPinPicker
+          initialCenter={form.latitude && form.longitude ? { lat: form.latitude, lng: form.longitude } : undefined}
+          onClose={() => setShowMapPicker(false)}
+          onConfirm={handlePinConfirm}
+        />
+      )}
     </div>
   );
 }

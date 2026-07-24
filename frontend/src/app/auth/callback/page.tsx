@@ -39,13 +39,13 @@ function AuthCallbackInner() {
           toast.success(`Welcome, ${name ? decodeURIComponent(name) : 'back'}!`);
         }
         const city = localStorage.getItem('li_city');
-        router.replace(city ? `/${city}` : '/hyderabad');
+        router.replace(city ? `/${city}` : '/');
       })
       .catch(() => {
         if (name) localStorage.setItem('user', JSON.stringify({ name: decodeURIComponent(name) }));
         toast.success('Signed in successfully!');
         const city = localStorage.getItem('li_city');
-        router.replace(city ? `/${city}` : '/hyderabad');
+        router.replace(city ? `/${city}` : '/');
       });
   }, [router, searchParams]);
 

@@ -203,6 +203,8 @@ export interface CreateListingInput {
   website_url?: string;
   social_url?: string;
   area?: string;
+  latitude?: number;
+  longitude?: number;
   attributes?: Record<string, string>;
   category_details?: Record<string, unknown> | null;
 }

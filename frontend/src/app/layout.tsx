@@ -8,6 +8,7 @@ import ChatWidget from '@/components/chat-widget/ChatWidget';
 import OnboardingGate from '@/components/onboarding-quiz/OnboardingGate';
 import ContextualPrompt from '@/components/contextual-prompt/ContextualPrompt';
 import ReferralCapture from '@/components/referral-capture/ReferralCapture';
+import GeoDetectBanner from '@/components/geo-detect-banner/GeoDetectBanner';
 import { PrefsProvider } from '@/context/PrefsContext';
 import { cn } from '@/lib/utils';
 import Script from 'next/script';
@@ -102,6 +103,7 @@ export default async function RootLayout({
         )}
         <NextIntlClientProvider messages={messages}>
           <PrefsProvider>
+            <GeoDetectBanner />
             {children}
           </PrefsProvider>
           <Toaster richColors position="top-center" />

@@ -8,11 +8,11 @@ export default function CategoryRedirectPage() {
   const router = useRouter();
 
   useEffect(() => {
-    const city = (typeof window !== 'undefined' ? localStorage.getItem('li_city') : '') || 'hyderabad';
+    const city = typeof window !== 'undefined' ? localStorage.getItem('li_city') : null;
     if (slug) {
-      router.replace(`/${city}/search?category=${encodeURIComponent(slug)}`);
+      router.replace(city ? `/${city}/search?category=${encodeURIComponent(slug)}` : '/');
     } else {
-      router.replace(`/${city}/search`);
+      router.replace(city ? `/${city}/search` : '/');
     }
   }, [slug, router]);
 

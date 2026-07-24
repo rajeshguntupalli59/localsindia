@@ -18,6 +18,7 @@ import SiteFooter from '@/components/site-footer/SiteFooter';
 import LanguageSelector, { LANGUAGES } from '@/components/language-selector/LanguageSelector';
 import FreshListingsSection from '@/components/fresh-listings/FreshListingsSection';
 import SiteLogo from '@/components/site-logo/SiteLogo';
+import { geolocateAndMatch } from '@/lib/geolocate';
 
 // ─── types ───────────────────────────────────────────────────
 interface CategoryDef { icon: LucideIcon; name: string; slug: string; color: string; accent: string }
@@ -81,7 +82,7 @@ export default function HomePage() {
     [cityCount > 0 ? `${cityCount}+` : '—', 'Cities'],
     [String(LANGUAGES.length), 'Languages'],
   ];
-  const WHY_US = buildWhyUs(cityCount > 0 ? cityCount : 151);
+  const WHY_US = buildWhyUs(cityCount > 0 ? cityCount : 140);
 
   // Cycle hero category words
   useEffect(() => {
@@ -115,57 +116,30 @@ export default function HomePage() {
     }, status === 'located' ? 2800 : 3500);
   };
 
-  const handleGeoLocate = () => {
+  const handleGeoLocate = async () => {
     if (geoStatus === 'locating') return;
-    if (!('geolocation' in navigator)) {
-      flashMsg('Geolocation not supported by this browser', 'failed');
-      return;
-    }
     setGeoStatus('locating');
     setGeoMsg('');
 
-    navigator.geolocation.getCurrentPosition(
-      async ({ coords: { latitude, longitude } }) => {
-        try {
-          const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`,
-            { headers: { 'Accept-Language': 'en-IN,en' } }
-          );
-          const data = await res.json();
-          const raw: string = (
-            data.address?.city || data.address?.town || data.address?.county || ''
-          ).trim();
-          const lc = raw.toLowerCase();
-
-          // fuzzy match against our city list
-          const match = cities.find(c => {
-            const cn = c.name.toLowerCase();
-            return (
-              cn === lc ||
-              lc.startsWith(cn) ||
-              cn.startsWith(lc.split(' ')[0])
-            );
-          });
-
-          if (match) {
-            setCity(match);
-            flashMsg(`Located in ${match.name}`, 'located');
-          } else {
-            flashMsg(raw ? `"${raw}" isn't in our city list yet` : 'City not detected', 'failed');
-          }
-        } catch {
-          flashMsg('Location lookup failed — check your connection', 'failed');
-        }
-      },
-      (err) => {
-        if (err.code === err.PERMISSION_DENIED) {
-          flashMsg('Location access denied — enable it in browser settings', 'denied');
-        } else {
-          flashMsg("Couldn't get your location, please try again", 'failed');
-        }
-      },
-      { timeout: 10_000, maximumAge: 60_000 }
-    );
+    const result = await geolocateAndMatch(cities);
+    switch (result.status) {
+      case 'located':
+        setCity(result.match);
+        flashMsg(`Located in ${result.match.name}`, 'located');
+        break;
+      case 'no-match':
+        flashMsg(result.raw ? `"${result.raw}" isn't in our city list yet` : 'City not detected', 'failed');
+        break;
+      case 'denied':
+        flashMsg('Location access denied — enable it in browser settings', 'denied');
+        break;
+      case 'failed':
+        flashMsg(result.message, 'failed');
+        break;
+      case 'unsupported':
+        flashMsg('Geolocation not supported by this browser', 'failed');
+        break;
+    }
   };
 
   const handleSearch = (e: React.FormEvent) => {
@@ -722,7 +696,7 @@ export default function HomePage() {
               Your neighbourhood is already here
             </h2>
             <p className="text-[15px] text-slate-400 mt-4 leading-relaxed">
-              {cityCount > 0 ? cityCount : 151}+ cities, {LANGUAGES.length} languages, one free listing away.
+              {cityCount > 0 ? cityCount : 140}+ cities, {LANGUAGES.length} languages, one free listing away.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8">

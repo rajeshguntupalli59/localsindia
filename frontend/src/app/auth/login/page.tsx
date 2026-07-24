@@ -43,7 +43,7 @@ const VALUE_PROPS: { icon: LucideIcon; title: string; subtitle: string }[] = [
 function getPostLoginRedirect(redirectParam: string | null): string {
   if (redirectParam && redirectParam.startsWith('/')) return redirectParam;
   const city = typeof window !== 'undefined' ? localStorage.getItem('li_city') : null;
-  return city ? `/${city}` : '/hyderabad';
+  return city ? `/${city}` : '/';
 }
 
 const GoogleIcon = () => (

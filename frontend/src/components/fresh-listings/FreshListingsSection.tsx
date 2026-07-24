@@ -259,8 +259,8 @@ function FreshListingCard({
     if (listing.isReal) {
       router.push(`/listing/${listing.id}`);
     } else {
-      const city = citySlug || (typeof window !== 'undefined' ? (localStorage.getItem('li_city') || 'hyderabad') : 'hyderabad');
-      router.push(`/${city}/search?category=${encodeURIComponent(listing.categorySlug)}`);
+      const city = citySlug || (typeof window !== 'undefined' ? localStorage.getItem('li_city') : null);
+      router.push(city ? `/${city}/search?category=${encodeURIComponent(listing.categorySlug)}` : '/');
     }
   };
 
@@ -374,10 +374,11 @@ export default function FreshListingsSection({
   const [listings, setListings] = useState<DisplayListing[]>(FRESH_LISTINGS);
   const [fetchingReal, setFetchingReal] = useState(false);
 
-  // ── Fetch real listings — default to hyderabad for new visitors ──────────────
+  // ── Fetch real listings once a city is known; otherwise keep the mock preview ──
   useEffect(() => {
     const effectiveCity = citySlug ||
-      (typeof window !== 'undefined' ? (localStorage.getItem('li_city') || 'hyderabad') : 'hyderabad');
+      (typeof window !== 'undefined' ? localStorage.getItem('li_city') : null);
+    if (!effectiveCity) return;
     setFetchingReal(true);
     api.cities.listings(effectiveCity, { page_size: '6', sort: 'newest' })
       .then(data => {
@@ -465,8 +466,8 @@ export default function FreshListingsSection({
           <button
             type="button"
             onClick={() => {
-              const city = citySlug || (typeof window !== 'undefined' ? (localStorage.getItem('li_city') || 'hyderabad') : 'hyderabad');
-              router.push(`/${city}/search`);
+              const city = citySlug || (typeof window !== 'undefined' ? localStorage.getItem('li_city') : null);
+              router.push(city ? `/${city}/search` : '/');
             }}
             className="hidden sm:flex items-center gap-1.5 shrink-0 pb-0.5
               text-[13px] font-semibold text-[#F7921E] hover:text-[#E07B0A]
@@ -563,8 +564,8 @@ export default function FreshListingsSection({
           <button
             type="button"
             onClick={() => {
-              const city = citySlug || (typeof window !== 'undefined' ? (localStorage.getItem('li_city') || 'hyderabad') : 'hyderabad');
-              router.push(`/${city}/search`);
+              const city = citySlug || (typeof window !== 'undefined' ? localStorage.getItem('li_city') : null);
+              router.push(city ? `/${city}/search` : '/');
             }}
             className="flex items-center gap-2 px-8 py-[12px] rounded-full
               bg-[#F7921E] text-white text-[14px] font-semibold
