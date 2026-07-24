@@ -39,13 +39,19 @@ function AuthCallbackInner() {
           toast.success(`Welcome, ${name ? decodeURIComponent(name) : 'back'}!`);
         }
         const city = localStorage.getItem('li_city');
-        router.replace(city ? `/${city}` : '/');
+        // /profile (not /) — the home page's header never reflects auth
+        // state, so landing a freshly-logged-in user there with no city
+        // set makes login look like it silently failed.
+        router.replace(city ? `/${city}` : '/profile');
       })
       .catch(() => {
         if (name) localStorage.setItem('user', JSON.stringify({ name: decodeURIComponent(name) }));
         toast.success('Signed in successfully!');
         const city = localStorage.getItem('li_city');
-        router.replace(city ? `/${city}` : '/');
+        // /profile (not /) — the home page's header never reflects auth
+        // state, so landing a freshly-logged-in user there with no city
+        // set makes login look like it silently failed.
+        router.replace(city ? `/${city}` : '/profile');
       });
   }, [router, searchParams]);
 

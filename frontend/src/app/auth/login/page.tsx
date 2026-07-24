@@ -43,7 +43,11 @@ const VALUE_PROPS: { icon: LucideIcon; title: string; subtitle: string }[] = [
 function getPostLoginRedirect(redirectParam: string | null): string {
   if (redirectParam && redirectParam.startsWith('/')) return redirectParam;
   const city = typeof window !== 'undefined' ? localStorage.getItem('li_city') : null;
-  return city ? `/${city}` : '/';
+  // The home page's header never reflects auth state (it always shows "Sign
+  // In", unlike every other page's SiteHeader) — landing a freshly-logged-in
+  // user there with no city set makes login look like it silently failed.
+  // /profile needs no city context and unambiguously shows the signed-in state.
+  return city ? `/${city}` : '/profile';
 }
 
 const GoogleIcon = () => (
