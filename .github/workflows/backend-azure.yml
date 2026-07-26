@@ -60,13 +60,21 @@ jobs:
         id: deploy
         continue-on-error: true
         run: |
-          # Azure's zip-deploy has a real, recurring flakiness pattern on this
-          # app: the first attempt intermittently fails with "site failed to
-          # start within 10 mins" at the platform level (not a CLI timeout
-          # issue — confirmed via the actual error payload), while an
-          # immediate retry of the identical code typically succeeds within
-          # a minute or two. Retry automatically instead of requiring a human
-          # to notice and redeploy by hand every time this happens.
+          # `az webapp deploy` defaults to --track-status true, which makes
+          # the CLI block not just for the zip to upload/extract (Kudu itself
+          # confirms that in ~2-3 min every time, checked directly against
+          # the deployment log) but ALSO for the site to report a healthy
+          # startup afterward, up to --timeout. Site startup is the genuinely
+          # flaky part here — and we already wait for it properly, with real
+          # bounded retries, in the very next step ("Restart app and wait for
+          # health"). Tracking it here too meant a slow-to-warm-up site (not
+          # a failed deploy) silently ate the full --timeout, the CLI call
+          # returned as "failed", and this loop then re-uploaded and
+          # re-deployed a zip that had already deployed successfully —
+          # doubling wall-clock time for no reason (confirmed: two separate
+          # complete Kudu deployments, 11 minutes apart, from one push).
+          # --track-status false makes this step measure only what it can
+          # legitimately retry on: did the artifact actually deploy.
           MAX_ATTEMPTS=3
           for attempt in $(seq 1 "$MAX_ATTEMPTS"); do
             echo "::group::Deploy attempt $attempt/$MAX_ATTEMPTS"
@@ -76,7 +84,8 @@ jobs:
               --src-path backend.zip \
               --type zip \
               --restart false \
-              --timeout 600000; then
+              --track-status false \
+              --timeout 300000; then
               echo "::endgroup::"
               echo "Deploy succeeded on attempt $attempt"
               exit 0
