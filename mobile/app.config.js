@@ -16,5 +16,20 @@ module.exports = ({ config }) => ({
       googleMaps: { apiKey: process.env.GOOGLE_MAPS_ANDROID_API_KEY },
     },
   },
-  plugins: [...config.plugins, 'react-native-maps'],
+  plugins: [
+    ...config.plugins,
+    'react-native-maps',
+    // SDK 53+ dropped the legacy top-level `splash` key (still present in
+    // app.json below for older tooling, but no longer honored) in favor of
+    // this plugin — without it the app falls back to a default/unbranded
+    // splash screen on cold start instead of the real logo.
+    [
+      'expo-splash-screen',
+      {
+        image: './assets/splash-icon.png',
+        resizeMode: 'contain',
+        backgroundColor: '#F7921E',
+      },
+    ],
+  ],
 });

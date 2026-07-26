@@ -7,11 +7,6 @@
     "icon": "./assets/icon.png",
     "scheme": "localsindia",
     "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#F7921E"
-    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.localsindia.app",
