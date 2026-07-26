@@ -1,6 +1,6 @@
 {
-  "lastCityIndex": 3,
-  "lastCategoryIndex": 3,
+  "lastCityIndex": 4,
+  "lastCategoryIndex": 4,
   "history": [
     {
       "citySlug": "bangalore",
@@ -25,6 +25,12 @@
       "category": "vehicles",
       "topicTemplateId": "used-bike-checklist",
       "publishedAt": "2026-07-24T20:51:44Z"
+    },
+    {
+      "citySlug": "delhi",
+      "category": "electronics",
+      "topicTemplateId": "used-phone-check",
+      "publishedAt": "2026-07-26T05:53:14Z"
     }
   ]
 }
