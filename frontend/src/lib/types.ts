@@ -215,6 +215,7 @@ export interface BuyerRequestOut {
   budget: number | null;
   contact_phone: string;
   status: string;
+  report_count?: number;
   created_at: string;
   city_id: string;
   category_id: string;

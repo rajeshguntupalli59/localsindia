@@ -8,12 +8,18 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
 from app.core.deps import get_current_user
 from app.models.buyer_request import BuyerRequest
+from app.models.buyer_request_report import BuyerRequestReport
 from app.models.category import Category
 from app.models.city import City
 from app.models.user import User
 from app.schemas.buyer_request import BuyerRequestCreate, BuyerRequestOut
+from app.schemas.listing import ReportCreate
 
 router = APIRouter(prefix="/api/v1/buyer-requests", tags=["buyer-requests"])
+
+# BL-04-equivalent for buyer requests: 3 reports → flagged, hidden from the
+# public city feed — mirrors REPORT_FLAG_THRESHOLD in routers/listings.py.
+REPORT_FLAG_THRESHOLD = 3
 
 
 def _with_category(req: BuyerRequest, cat: Category | None) -> BuyerRequestOut:
@@ -96,6 +102,44 @@ async def create_buyer_request(
     await db.commit()
     await db.refresh(req)
     return _with_category(req, cat)
+
+
+@router.post("/{request_id}/report", status_code=201)
+async def report_buyer_request(
+    request_id: uuid.UUID,
+    body: ReportCreate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    result = await db.execute(
+        select(BuyerRequest).where(BuyerRequest.id == request_id, BuyerRequest.deleted_at.is_(None))
+    )
+    req = result.scalar_one_or_none()
+    if not req:
+        raise HTTPException(status_code=404, detail="Request not found.")
+
+    existing = await db.execute(
+        select(BuyerRequestReport).where(
+            BuyerRequestReport.buyer_request_id == request_id,
+            BuyerRequestReport.user_id == current_user.id,
+        )
+    )
+    if existing.scalar_one_or_none():
+        raise HTTPException(status_code=409, detail="Already reported.")
+
+    db.add(BuyerRequestReport(
+        buyer_request_id=request_id,
+        user_id=current_user.id,
+        reason=body.reason,
+        notes=body.notes,
+    ))
+
+    req.report_count += 1
+    if req.report_count >= REPORT_FLAG_THRESHOLD:
+        req.status = "flagged"
+
+    await db.commit()
+    return {"message": "Report submitted."}
 
 
 @router.patch("/{request_id}/fulfill", response_model=BuyerRequestOut)

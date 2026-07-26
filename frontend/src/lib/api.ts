@@ -261,6 +261,12 @@ export const api = {
       req<BuyerRequestOut>(`/api/v1/buyer-requests/${id}/fulfill`, { method: 'PATCH', token }),
     delete: (id: string, token: string) =>
       req<void>(`/api/v1/buyer-requests/${id}`, { method: 'DELETE', token }),
+    report: (id: string, reason: string, token: string) =>
+      req<{ message: string }>(`/api/v1/buyer-requests/${id}/report`, {
+        method: 'POST',
+        body: JSON.stringify({ reason }),
+        token,
+      }),
   },
   upload: {
     image: (listingId: string, file: File, token: string) => {

@@ -22,6 +22,10 @@ from app.core.database import get_db
 from app.core.deps import get_current_admin
 from app.models.app_error_log import AppErrorLog
 from app.models.business import Business
+from app.models.buyer_request import BuyerRequest
+from app.models.buyer_request_report import BuyerRequestReport
+from app.models.category import Category
+from app.models.city import City
 from app.models.city_banner import CityBanner
 from app.models.event import Event
 from app.models.listing import Listing
@@ -696,6 +700,85 @@ async def list_reports(
         }
         for r in reports
     ]
+
+
+@router.get("/buyer-requests")
+async def list_buyer_requests_admin(
+    status: str = "flagged",
+    page: int = 1,
+    page_size: int = 20,
+    db: AsyncSession = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+):
+    result = await db.execute(
+        select(BuyerRequest)
+        .where(BuyerRequest.status == status, BuyerRequest.deleted_at.is_(None))
+        .order_by(BuyerRequest.created_at.desc())
+        .offset((page - 1) * page_size)
+        .limit(page_size)
+    )
+    requests = result.scalars().all()
+    if not requests:
+        return []
+
+    request_ids = [r.id for r in requests]
+    reports_result = await db.execute(
+        select(BuyerRequestReport)
+        .where(BuyerRequestReport.buyer_request_id.in_(request_ids))
+        .order_by(BuyerRequestReport.created_at.desc())
+    )
+    reports_by_request: dict[uuid.UUID, list] = {}
+    for rep in reports_result.scalars().all():
+        reports_by_request.setdefault(rep.buyer_request_id, []).append({
+            "id": str(rep.id),
+            "reason": rep.reason,
+            "notes": rep.notes,
+            "created_at": rep.created_at.isoformat(),
+        })
+
+    cat_ids = {r.category_id for r in requests if r.category_id}
+    cat_map = {}
+    if cat_ids:
+        cat_result = await db.execute(select(Category).where(Category.id.in_(cat_ids)))
+        cat_map = {c.id: c for c in cat_result.scalars().all()}
+
+    city_ids = {r.city_id for r in requests}
+    city_result = await db.execute(select(City).where(City.id.in_(city_ids)))
+    city_map = {c.id: c for c in city_result.scalars().all()}
+
+    return [
+        {
+            "id": str(r.id),
+            "description": r.description,
+            "budget": r.budget,
+            "contact_phone": r.contact_phone,
+            "status": r.status,
+            "report_count": r.report_count,
+            "created_at": r.created_at.isoformat(),
+            "city_name": city_map[r.city_id].name if r.city_id in city_map else None,
+            "category_name": cat_map[r.category_id].name if r.category_id in cat_map else None,
+            "reports": reports_by_request.get(r.id, []),
+        }
+        for r in requests
+    ]
+
+
+@router.patch("/buyer-requests/{request_id}/restore")
+async def restore_buyer_request(
+    request_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+):
+    result = await db.execute(
+        select(BuyerRequest).where(BuyerRequest.id == request_id, BuyerRequest.deleted_at.is_(None))
+    )
+    req = result.scalar_one_or_none()
+    if not req:
+        raise HTTPException(status_code=404, detail="Request not found.")
+    req.status = "open"
+    req.report_count = 0
+    await db.commit()
+    return {"message": "Restored."}
 
 
 @router.post("/tickets/scan", response_model=TicketScanResponse)

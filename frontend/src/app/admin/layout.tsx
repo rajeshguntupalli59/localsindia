@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { ClipboardList, CalendarDays, Flag, Users, LayoutDashboard, LogOut, Activity, ShieldCheck, QrCode, Megaphone, Send } from 'lucide-react';
+import { ClipboardList, CalendarDays, Flag, Users, LayoutDashboard, LogOut, Activity, ShieldCheck, QrCode, Megaphone, Send, Search } from 'lucide-react';
 
 const NAV = [
   { href: '/admin', exact: true, icon: <LayoutDashboard className="w-4 h-4" />, label: 'Dashboard', badge: null },
@@ -11,6 +11,7 @@ const NAV = [
   { href: '/admin/events', exact: false, icon: <CalendarDays className="w-4 h-4" />, label: 'Events', badge: null },
   { href: '/admin/events/scan', exact: false, icon: <QrCode className="w-4 h-4" />, label: 'Scan Tickets', badge: null },
   { href: '/admin/reports', exact: false, icon: <Flag className="w-4 h-4" />, label: 'Flagged', badge: 'flagged' },
+  { href: '/admin/buyer-requests', exact: false, icon: <Search className="w-4 h-4" />, label: 'Flagged Requests', badge: null },
   { href: '/admin/users', exact: false, icon: <Users className="w-4 h-4" />, label: 'Users', badge: null },
   { href: '/admin/businesses', exact: false, icon: <ShieldCheck className="w-4 h-4" />, label: 'Businesses', badge: null },
   { href: '/admin/banners', exact: false, icon: <Megaphone className="w-4 h-4" />, label: 'Banners', badge: null },

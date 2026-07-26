@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime, timezone
-from sqlalchemy import String, Text, Float, ForeignKey, CheckConstraint, Index, DateTime
+from sqlalchemy import String, Text, Float, Integer, ForeignKey, CheckConstraint, Index, DateTime
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import UUID
 from app.core.database import Base
@@ -23,11 +23,12 @@ class BuyerRequest(Base):
     budget: Mapped[float | None] = mapped_column(Float, nullable=True)
     contact_phone: Mapped[str] = mapped_column(String(20), nullable=False)
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="open")
+    report_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     __table_args__ = (
-        CheckConstraint("status IN ('open','fulfilled')", name="ck_buyer_requests_status"),
+        CheckConstraint("status IN ('open','fulfilled','flagged')", name="ck_buyer_requests_status"),
         # Partial: only open, non-deleted requests — this is the hot query (city feed).
         Index(
             "idx_buyer_requests_active",

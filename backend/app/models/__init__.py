@@ -10,6 +10,7 @@ from app.models.report import Report
 from app.models.otp_request import OtpRequest
 from app.models.listing_review import ListingReview
 from app.models.buyer_request import BuyerRequest
+from app.models.buyer_request_report import BuyerRequestReport
 from app.models.app_error_log import AppErrorLog
 from app.models.device_token import DeviceToken
 from app.models.analytics_event import AnalyticsEvent
@@ -26,7 +27,7 @@ from app.models.listing_details import (
 __all__ = [
     "City", "User", "Category", "Listing", "ListingImage",
     "Event", "Business", "Review", "Report", "OtpRequest", "ListingReview",
-    "BuyerRequest", "AppErrorLog", "DeviceToken", "AnalyticsEvent", "Ticket",
+    "BuyerRequest", "BuyerRequestReport", "AppErrorLog", "DeviceToken", "AnalyticsEvent", "Ticket",
     "CityBanner", "BusinessImage", "EventImage",
     "VehicleDetails", "JobDetails", "PgRoommateDetails", "RealEstateDetails",
     "ElectronicsDetails", "FurnitureDetails", "FashionDetails", "EducationDetails",

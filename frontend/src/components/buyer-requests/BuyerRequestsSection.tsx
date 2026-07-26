@@ -4,10 +4,11 @@ import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   X, Send, MessageCircle, Search, Utensils, Home, Briefcase, Car,
-  Smartphone, Calendar, Store, GraduationCap, Wrench, Tag, Building2, Sofa, Shirt,
+  Smartphone, Calendar, Store, GraduationCap, Wrench, Tag, Building2, Sofa, Shirt, Flag,
   type LucideIcon,
 } from 'lucide-react';
-import { api } from '@/lib/api';
+import { useRouter } from 'next/navigation';
+import { api, ApiError } from '@/lib/api';
 import type { BuyerRequestOut, Category } from '@/lib/types';
 import { timeAgo, formatPrice } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -23,16 +24,30 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
 };
 
 export default function BuyerRequestsSection({ citySlug }: Props) {
+  const router = useRouter();
   const [requests, setRequests] = useState<BuyerRequestOut[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({ category_slug: '', description: '', budget: '' });
   const [submitting, setSubmitting] = useState(false);
+  const [reportedIds, setReportedIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     api.buyerRequests.list(citySlug).then(setRequests).catch(() => {});
     api.categories.list().then(setCategories).catch(() => {});
   }, [citySlug]);
+
+  const handleReport = async (id: string) => {
+    const token = localStorage.getItem('access_token');
+    if (!token) { router.push('/auth/login'); return; }
+    try {
+      await api.buyerRequests.report(id, 'spam', token);
+      setReportedIds(prev => new Set(prev).add(id));
+      toast.success('Report submitted');
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : 'Failed to report');
+    }
+  };
 
   const handlePost = async () => {
     if (!form.category_slug) { toast.error('Pick a category'); return; }
@@ -90,12 +105,25 @@ export default function BuyerRequestsSection({ citySlug }: Props) {
               className="shrink-0 w-52 bg-white rounded-2xl border p-3 snap-start"
               style={{ borderColor: 'var(--li-border)' }}
             >
-              <div className="flex items-center gap-2 mb-2">
-                {(() => {
-                  const Icon = CATEGORY_ICONS[r.category_slug ?? ''] ?? Search;
-                  return <Icon size={18} style={{ color: 'var(--li-primary)' }} />;
-                })()}
-                <span className="text-xs font-semibold" style={{ color: 'var(--li-muted)' }}>{r.category_name}</span>
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <div className="flex items-center gap-2">
+                  {(() => {
+                    const Icon = CATEGORY_ICONS[r.category_slug ?? ''] ?? Search;
+                    return <Icon size={18} style={{ color: 'var(--li-primary)' }} />;
+                  })()}
+                  <span className="text-xs font-semibold" style={{ color: 'var(--li-muted)' }}>{r.category_name}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleReport(r.id)}
+                  disabled={reportedIds.has(r.id)}
+                  aria-label="Report this request"
+                  title={reportedIds.has(r.id) ? 'Reported' : 'Report this request'}
+                  className="shrink-0 transition-colors disabled:cursor-default"
+                  style={{ color: reportedIds.has(r.id) ? '#EF4444' : 'var(--li-muted)' }}
+                >
+                  <Flag className="w-3.5 h-3.5" />
+                </button>
               </div>
               <p className="text-sm font-semibold line-clamp-2 mb-1" style={{ color: 'var(--li-text)' }}>
                 {r.description}
