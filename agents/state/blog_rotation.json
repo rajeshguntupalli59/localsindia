@@ -1,6 +1,6 @@
 {
-  "lastCityIndex": 2,
-  "lastCategoryIndex": 2,
+  "lastCityIndex": 4,
+  "lastCategoryIndex": 4,
   "history": [
     {
       "citySlug": "bangalore",
@@ -19,6 +19,18 @@
       "category": "jobs",
       "topicTemplateId": "spot-fake-listing",
       "publishedAt": "2026-07-24T20:42:22Z"
+    },
+    {
+      "citySlug": "mumbai",
+      "category": "vehicles",
+      "topicTemplateId": "used-bike-checklist",
+      "publishedAt": "2026-07-24T20:51:44Z"
+    },
+    {
+      "citySlug": "delhi",
+      "category": "electronics",
+      "topicTemplateId": "used-phone-check",
+      "publishedAt": "2026-07-26T05:53:14Z"
     }
   ]
 }

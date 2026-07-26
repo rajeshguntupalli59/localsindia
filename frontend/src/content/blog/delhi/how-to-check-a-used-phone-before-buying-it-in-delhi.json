@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "city": "Delhi",
+  "citySlug": "delhi",
+  "state": "Delhi",
+  "slug": "how-to-check-a-used-phone-before-buying-it-in-delhi",
+  "category": "electronics",
+  "topicTemplateId": "used-phone-check",
+  "title": "How to Check a Used Phone Before Buying It in Delhi",
+  "metaDescription": "Step-by-step guide to inspecting a secondhand phone in Delhi—test the display, battery, camera, and authenticity before handing over cash.",
+  "intro": "Buying a used phone in Delhi can save you thousands, but a bad purchase leaves you stuck with a brick or hidden damage. Whether you're browsing listings in Karol Bagh, meeting someone in Connaught Place, or checking out phones in South Delhi, knowing what to inspect in those first five minutes makes all the difference between a smart deal and a costly mistake.",
+  "sections": [
+    {
+      "heading": "Check the Physical Condition and Screen",
+      "body": "Start by holding the phone in good light—natural daylight is best. Look for scratches, dents, or discoloration on the body and screen. Tiny hairline scratches are normal wear; deep cracks or spiderwebbed glass are red flags. Turn the phone on and tap around the screen slowly—does it respond instantly or lag? Swipe left and right to spot dead zones. Look at the corners and edges for signs of water damage like discoloration or corrosion. Check the charging port and headphone jack (if present) for debris or bent pins. If the seller won't let you handle it or rushes you through inspection, walk away. A legitimate seller knows you need time to check your investment."
+    },
+    {
+      "heading": "Test the Battery and Charging",
+      "body": "Ask the seller to show you the battery percentage—not a claimed number, but what's actually on the screen. Then ask if you can charge it for 10-15 minutes while you're there. A healthy battery should charge noticeably. Once powered on, open Settings and look for battery health information (iPhones show this clearly; Android phones vary by brand, but check under Device or Battery). Beware of a phone that dies suddenly at 30% charge or won't hold power for more than a few hours—replacement batteries cost money you haven't budgeted for. Ask the seller for honest information about battery age and usage. If a phone is two years old and the battery is original, it's likely degraded."
+    },
+    {
+      "heading": "Verify the Phone Isn't Stolen or Blacklisted",
+      "body": "This is the most important check. Ask the seller to show you the original bill or invoice—a genuine seller should have it. Check that the IMEI number (dial *#06# to see it) matches the one on the bill. You can then check the phone's theft status on the official CEIR (Central Equipment Identity Register) database by visiting ceir.gov.in or using a dedicated IMEI checker app. For iPhones, ask the seller to disable Find My iPhone in Settings and let you verify the Apple ID is removed—a locked Apple ID means you can't use the phone. Ask to see the original receipt for added confidence. In Delhi, several markets like Nehru Place and Gaffar Market have verification kiosks; if the seller refuses to verify or seems evasive, don't proceed."
+    },
+    {
+      "heading": "Test the Camera, Mic, and Audio",
+      "body": "Open the camera app and take a few test photos indoors and in bright light. Check for blurriness, color distortion, or artifacts—a faulty camera is expensive to repair. Switch between the front and rear cameras. Record a short video and play it back to check audio quality. Tap the phone's speaker to test volume and clarity; ask the seller to play a song or video. Try the microphone by recording a voice memo and playing it back—muffled audio suggests internal issues. Test the earpiece by making a call (ask the seller to call you or try their voicemail). Check both SIM card slots if it's a dual-SIM phone. A seller who won't let you test these functions is hiding something."
+    },
+    {
+      "heading": "Look for Hidden Software Issues and Reset Status",
+      "body": "Ask the seller if the phone has been factory reset or if it's still in personal use. A phone that hasn't been reset might have the previous owner's accounts linked—this is risky for privacy and access. Ask them to factory reset it right there if you're buying, or at least show you that you can do it in Settings (this tests that the phone isn't locked to an account). Try opening a few apps to ensure they work smoothly without crashes. Check if the OS (Android version or iOS version) is current or dangerously outdated—old software won't receive security updates. Ask about water resistance or warranty status. Some sellers offer a brief replacement guarantee; ask about it, but don't rely on it if the phone looks neglected."
+    },
+    {
+      "heading": "Meet Safely and Use Payment Wisely",
+      "body": "Always meet in a crowded, well-lit public place—a coffee shop near your home, a metro station, or a busy market area is safer than a residential lane or isolated spot. Bring a trusted friend if possible. Use online payment options like bank transfer or UPI if you're comfortable; if you pay cash, count it carefully before handing it over. Never send money in advance unless you're using a platform like LocalsIndia where buyer protection exists. Ask for a receipt or WhatsApp message confirming the transaction and phone details. In Delhi, popular meeting spots for such transactions include food courts in malls, coffee chains in central areas, or dedicated classifieds meetup zones. If something feels off—the seller is pushy, the story keeps changing, or the price drops suddenly—trust your instinct and leave."
+    }
+  ],
+  "faqs": [
+    {
+      "question": "How do I know if a used phone is original and not a refurbished or duplicate?",
+      "answer": "Check the bill and IMEI number against official databases. Original phones have consistent build quality, proper packaging, and logos that aren't misaligned or blurry. Ask the seller directly about the phone's history. If they avoid the question or the bill is missing, it's a warning sign. Feel the weight and build—counterfeits often feel lighter or have poor finish quality."
+    },
+    {
+      "question": "What's a fair price for a used phone in Delhi?",
+      "answer": "Research the phone's original launch price, age, and condition. A well-maintained two-year-old flagship might sell for 40-50% of its original cost; older phones depreciate faster. Check multiple listings on platforms like LocalsIndia to see the market range. Don't assume a lower price means a bargain—it might mean hidden damage. Negotiate respectfully, but walk away if the deal feels too good to be true."
+    },
+    {
+      "question": "Can I return or exchange a used phone if I find problems later?",
+      "answer": "Most private sellers offer no returns—that's the risk of buying used. Some use platforms like LocalsIndia which offer buyer protections or dispute resolution. Always inspect thoroughly before payment and ask about a trial period if possible. After purchase, you're usually on your own unless you have a written agreement. This is why meeting in person and checking everything beforehand is critical."
+    },
+    {
+      "question": "What should I do if the phone is locked to an Apple ID or Google Account?",
+      "answer": "Don't buy it. A locked phone is essentially unusable without the original owner's password, and removing it illegally is complicated and risky. Ask the seller to sign out of their account in front of you, or avoid the phone entirely. iPhones are especially strict about this—Activation Lock makes a locked phone worthless to you."
+    },
+    {
+      "question": "How can I avoid buying a stolen phone?",
+      "answer": "Check the CEIR database using the phone's IMEI number before payment. Ask for the original bill and verify the seller's identity matches it. Meet in safe, public locations and trust your instincts if something feels off. If the seller seems nervous or won't provide documentation, walk away—it's not worth the legal or financial risk."
+    },
+    {
+      "question": "Should I buy from a shop or a private seller in Delhi?",
+      "answer": "Both have trade-offs. Shops offer consistency, some warranty, and less risk of fraud, but phones are usually pricier. Private sellers offer better prices but less protection. If buying from a private seller, use verified platforms like LocalsIndia where you can see ratings and contact history. Always meet safely and inspect carefully regardless of the source."
+    }
+  ],
+  "cta": {
+    "text": "Post your listing free on LocalsIndia — it takes 2 minutes",
+    "href": "/delhi/search?category=electronics"
+  },
+  "publishedAt": "2026-07-26T05:53:14Z",
+  "wordCount": 799
+}
