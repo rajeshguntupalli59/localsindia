@@ -8,6 +8,15 @@ on:
       - 'backend/**'
       - '.github/workflows/backend-azure.yml'
 
+# Two overlapping `az webapp deploy` calls against the same App Service were
+# observed causing/worsening the "site failed to start" flakiness (each
+# deploy's restart/extraction cycle stepping on the other's). Queue runs
+# instead of letting them race; don't cancel one mid-deploy since that can
+# leave the site in a half-deployed state.
+concurrency:
+  group: backend-azure-deploy
+  cancel-in-progress: false
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
