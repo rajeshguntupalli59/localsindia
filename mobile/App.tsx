@@ -75,6 +75,10 @@ function TabNavigator() {
         },
         tabBarLabelStyle: { fontSize: 11, fontWeight: '600', marginTop: -2 },
         tabBarLabel: route.name === 'Post' ? () => null : undefined,
+        // The Post tab hides its visible label (raised circular "+" button,
+        // text would look cramped underneath) but still needs an announced
+        // name for screen readers, since it has no text of its own.
+        tabBarAccessibilityLabel: route.name === 'Post' ? 'Post a new listing' : undefined,
         tabBarIcon: ({ color, size, focused }) => {
           const icons: Record<string, { on: string; off: string }> = {
             Home:    { on: 'home',            off: 'home-outline'    },
