@@ -220,7 +220,7 @@ function buildHtml({ tagline, benefitsHtml }) {
         </div>
         <div class="feature-row">
           <div class="feature-icon searching"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></div>
-          <div><div class="feature-title">Filter by Your City</div><div class="feature-sub">151 cities across South India</div></div>
+          <div><div class="feature-title">Filter by Your City</div><div class="feature-sub">140 cities across South India</div></div>
         </div>
         <div class="feature-row">
           <div class="feature-icon searching"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.6L3 20l1-5.4A8.5 8.5 0 1 1 21 11.5z"/></svg></div>
@@ -311,7 +311,7 @@ function buildHtml({ tagline, benefitsHtml }) {
       <div class="footer-title">ONE APP. ENDLESS POSSIBILITIES.</div>
     </div>
     <div class="stat-row">
-      <div class="stat"><div class="stat-num">151</div><div class="stat-label">Cities</div></div>
+      <div class="stat"><div class="stat-num">140</div><div class="stat-label">Cities</div></div>
       <div class="stat"><div class="stat-num">12</div><div class="stat-label">Categories</div></div>
       <div class="stat"><div class="stat-num">5</div><div class="stat-label">Languages</div></div>
       <div class="stat"><div class="stat-num">&#8377;0</div><div class="stat-label">To Post</div></div>

@@ -46,5 +46,5 @@ Some posts are `format: text` (Facebook-only plain status update, no image — I
 - No promises about features not yet built (check with the caller if unsure — do not guess)
 
 ## Scope Reference (current, as of 2026-07-22 — do not use older/larger numbers)
-- 151 cities, South India only: Telangana, Andhra Pradesh, Karnataka, Tamil Nadu, Kerala, Puducherry
+- 140 cities, South India only: Telangana, Andhra Pradesh, Karnataka, Tamil Nadu, Kerala, Puducherry
 - 5 languages: English, Telugu, Tamil, Kannada, Malayalam

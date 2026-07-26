@@ -47,6 +47,6 @@ Vary the 4 you pick between calls — don't always default to the same four.
 Avoid this style entirely: "Summer is here! ☀️ Looking for: 🏖️ A cozy PG... LocalsIndia has 1000+ verified listings... #HyderabadLove #BangaloreLove #DelhiDeals" — this fabricates a listing count, spams emoji per line, and tags cities outside our real scope (Delhi isn't served). Write the opposite of that: calm, honest, scoped to what's real.
 
 ## Scope Reference (current, do not use older/larger numbers)
-- 151 cities, South India only: Telangana, Andhra Pradesh, Karnataka, Tamil Nadu, Kerala, Puducherry
+- 140 cities, South India only: Telangana, Andhra Pradesh, Karnataka, Tamil Nadu, Kerala, Puducherry
 - 5 languages: English, Telugu, Tamil, Kannada, Malayalam
 - 12 categories total
