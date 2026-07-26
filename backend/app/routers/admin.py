@@ -1042,10 +1042,10 @@ async def get_azure_cost(_admin: User = Depends(get_current_admin)):
         return _azure_cost_cache["data"]
 
     try:
-        from azure.identity import DefaultAzureCredential
-        token = DefaultAzureCredential().get_token("https://management.azure.com/.default").token
+        from azure.identity import ManagedIdentityCredential
+        token = ManagedIdentityCredential().get_token("https://management.azure.com/.default").token
     except Exception as e:
-        logger.warning("Azure cost lookup unavailable (no managed identity / no token): %s", e)
+        logger.warning("Azure cost lookup: managed identity token acquisition failed (%s): %s", type(e).__name__, e)
         return {"configured": False, "reason": "Managed identity not set up yet, or lacks the Cost Management Reader role"}
 
     query_body = {

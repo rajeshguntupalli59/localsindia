@@ -555,19 +555,18 @@ async def test_admin_llm_usage_merges_gemini_db_and_claude_file(admin_client, db
 
 @pytest.mark.asyncio
 async def test_admin_azure_cost_not_configured_when_no_managed_identity(admin_client):
-    """When credential acquisition fails (no managed identity, or - as in
-    prod without one - every fallback in DefaultAzureCredential's chain
-    failing) the endpoint must degrade to configured=false, not 500. Mocked
-    explicitly rather than relying on this dev machine genuinely lacking
-    credentials - it doesn't, since an `az login` session is active here and
-    DefaultAzureCredential would happily pick that up as a fallback."""
+    """When credential acquisition fails (no managed identity available,
+    e.g. running anywhere other than the actual App Service) the endpoint
+    must degrade to configured=false, not 500. Mocked explicitly since this
+    dev machine has no managed identity endpoint at all - ManagedIdentityCredential
+    would raise on its own here, but mocking keeps the test's intent explicit."""
     from unittest.mock import patch
     import app.routers.admin as admin_module
 
     admin_module._azure_cost_cache["data"] = None
 
     ac, _admin = admin_client
-    with patch("azure.identity.DefaultAzureCredential", side_effect=Exception("no credential available")):
+    with patch("azure.identity.ManagedIdentityCredential", side_effect=Exception("no managed identity available")):
         resp = await ac.get("/api/v1/admin/azure-cost")
 
     assert resp.status_code == 200
@@ -607,7 +606,7 @@ async def test_admin_azure_cost_parses_a_successful_response(admin_client):
         return _FakeResponse()
 
     ac, _admin = admin_client
-    with patch("azure.identity.DefaultAzureCredential", return_value=fake_credential), \
+    with patch("azure.identity.ManagedIdentityCredential", return_value=fake_credential), \
          patch("httpx.AsyncClient.post", new=fake_post):
         resp = await ac.get("/api/v1/admin/azure-cost")
 
