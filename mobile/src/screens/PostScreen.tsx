@@ -11,7 +11,6 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { listingsApi, categoriesApi, citiesApi, businessesApi, eventsApi } from '../lib/api';
 import { storage } from '../lib/storage';
-import { getApproxLocationWithArea } from '../lib/location';
 
 const CATEGORY_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
   tiffin:        'restaurant-outline',
@@ -256,9 +255,7 @@ export default function PostScreen({ navigation, route }: any) {
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [socialUrl, setSocialUrl] = useState('');
   const [images, setImages] = useState<string[]>([]);
-  const [includeLocation, setIncludeLocation] = useState(false);
   const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
-  const [locationLoading, setLocationLoading] = useState(false);
 
   // Event-only fields
   const [venue, setVenue] = useState('');
@@ -308,50 +305,28 @@ export default function PostScreen({ navigation, route }: any) {
     if (route?.params?.presetCategory) setCategorySlug(route.params.presetCategory);
   }, []);
 
-  const toggleIncludeLocation = async () => {
-    if (includeLocation) {
-      setIncludeLocation(false);
-      setLocation(null);
-      return;
-    }
-    setLocationLoading(true);
-    const loc = await getApproxLocationWithArea();
-    setLocationLoading(false);
-    if (!loc) {
-      Alert.alert(
-        'Location unavailable',
-        'Turn on location permission for LocalsIndia in your phone settings to include your location.',
-      );
-      return;
-    }
-    setLocation({ latitude: loc.latitude, longitude: loc.longitude });
-    setIncludeLocation(true);
+  // Single location entry point — the map screen fetches GPS itself when
+  // opened without a prior fix, so there's no separate "auto" vs. "manual"
+  // toggle here; confirming the pin (wherever it ends up) is what sets this.
+  const handleMapPinConfirm = (result: {
+    latitude: number; longitude: number; areaGuess: string | null; cityGuess: string | null;
+  }) => {
+    setLocation({ latitude: result.latitude, longitude: result.longitude });
     // Only pre-fill Area if the user hasn't already typed something —
     // never overwrite what they entered themselves.
-    if (loc.areaGuess && !area.trim()) {
-      setArea(loc.areaGuess);
-    }
+    if (result.areaGuess && !area.trim()) setArea(result.areaGuess);
     // Auto-pick the posting city from the geocoded city/district name — only
     // if it exact-matches one of our actual seeded cities. No match (e.g. a
     // village we don't have) just leaves the city exactly as it was, so this
     // can never force the wrong city onto a listing; the "Posting in" chip
     // above is always there to change it manually either way.
-    if (loc.cityGuess) {
-      const match = cities.find(c => c.name.toLowerCase() === loc.cityGuess!.toLowerCase());
+    if (result.cityGuess) {
+      const match = cities.find(c => c.name.toLowerCase() === result.cityGuess!.toLowerCase());
       if (match) {
         setCitySlug(match.slug);
         setCityName(match.name);
       }
     }
-  };
-
-  // For villages/areas GPS+reverse-geocode can't confidently place — a
-  // full-precision manual pin, deliberately bypassing getApproxLocation's
-  // ~110m rounding since the whole point here is exactness.
-  const handleMapPinConfirm = (result: { latitude: number; longitude: number; areaGuess: string | null }) => {
-    setLocation({ latitude: result.latitude, longitude: result.longitude });
-    setIncludeLocation(true);
-    if (result.areaGuess && !area.trim()) setArea(result.areaGuess);
   };
 
   const pickImage = async () => {
@@ -761,45 +736,42 @@ export default function PostScreen({ navigation, route }: any) {
       </TouchableOpacity>
 
       {/* Optional location — helps buyers using "Near Me" find this listing.
-          Visible and opt-in, unlike a silent permission prompt at submit time. */}
-      <TouchableOpacity
-        style={styles.locationRow}
-        onPress={toggleIncludeLocation}
-        disabled={locationLoading}
-        accessibilityRole="button"
-        accessibilityLabel={includeLocation ? 'Location included — tap to remove it' : 'Include my location so nearby buyers can find this listing'}
-        accessibilityState={{ checked: includeLocation }}
-      >
-        {locationLoading ? (
-          <ActivityIndicator size="small" color="#f97316" />
-        ) : (
+          One entry point for both auto (GPS) and manual (village/area the
+          map can't confidently place): the map screen itself fetches GPS
+          when opened without a prior fix, so there's no separate toggle. */}
+      <View style={[styles.locationRow, location && styles.locationRowWithRemove]}>
+        <TouchableOpacity
+          style={styles.locationRowMain}
+          onPress={() => navigation.navigate('MapPinPicker', {
+            onConfirm: handleMapPinConfirm,
+            initialRegion: location ? {
+              latitude: location.latitude, longitude: location.longitude,
+              latitudeDelta: 0.02, longitudeDelta: 0.02,
+            } : undefined,
+          })}
+          accessibilityRole="button"
+          accessibilityLabel={location ? 'Location added — tap to change it' : 'Add your exact location so nearby buyers can find this listing'}
+        >
           <Ionicons
-            name={includeLocation ? 'checkmark-circle' : 'navigate-outline'}
+            name={location ? 'checkmark-circle' : 'navigate-outline'}
             size={16}
-            color={includeLocation ? '#16a34a' : '#6b7280'}
+            color={location ? '#16a34a' : '#6b7280'}
           />
+          <Text style={[styles.locationRowText, location && styles.locationRowTextActive]}>
+            {location ? 'Location added — buyers nearby can find this' : 'Add your exact location (helps buyers find you nearby)'}
+          </Text>
+        </TouchableOpacity>
+        {location && (
+          <TouchableOpacity
+            onPress={() => setLocation(null)}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            accessibilityRole="button"
+            accessibilityLabel="Remove location"
+          >
+            <Ionicons name="close-circle-outline" size={18} color="#9ca3af" />
+          </TouchableOpacity>
         )}
-        <Text style={[styles.locationRowText, includeLocation && styles.locationRowTextActive]}>
-          {includeLocation ? 'Location included — buyers nearby can find this' : 'Include my location (helps buyers find you nearby)'}
-        </Text>
-      </TouchableOpacity>
-
-      {/* Manual pin — for villages/areas GPS+reverse-geocode can't place */}
-      <TouchableOpacity
-        style={styles.mapPinRow}
-        onPress={() => navigation.navigate('MapPinPicker', {
-          onConfirm: handleMapPinConfirm,
-          initialRegion: location ? {
-            latitude: location.latitude, longitude: location.longitude,
-            latitudeDelta: 0.02, longitudeDelta: 0.02,
-          } : undefined,
-        })}
-        accessibilityRole="button"
-        accessibilityLabel="Set exact location on a map"
-      >
-        <Ionicons name="map-outline" size={14} color="#6b7280" />
-        <Text style={styles.mapPinRowText}>Can't find your spot? Set exact location on map</Text>
-      </TouchableOpacity>
+      </View>
 
       {/* Step bubbles */}
       <View style={styles.stepsRow}>
@@ -1292,26 +1264,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
+    gap: 10,
     paddingVertical: 9,
+    paddingHorizontal: 16,
     backgroundColor: '#f9fafb',
     borderBottomWidth: 1,
     borderBottomColor: '#f3f4f6',
+  },
+  locationRowWithRemove: { justifyContent: 'space-between' },
+  locationRowMain: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
   locationRowText: { fontSize: 12, color: '#6b7280' },
   locationRowTextActive: { color: '#16a34a', fontWeight: '600' },
-
-  mapPinRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 9,
-    backgroundColor: '#f9fafb',
-    borderBottomWidth: 1,
-    borderBottomColor: '#f3f4f6',
-  },
-  mapPinRowText: { fontSize: 12, color: '#6b7280' },
 
   // Step bubbles
   stepsRow: {
