@@ -22,6 +22,7 @@ async def test_regular_user_cannot_access_admin_endpoints(auth_client):
         ("GET",   "/api/v1/admin/events/pending"),
         ("GET",   "/api/v1/admin/events"),
         ("GET",   "/api/v1/admin/activity-feed"),
+        ("GET",   "/api/v1/admin/llm-usage"),
     ]
     for method, path in endpoints:
         resp = await (ac.get(path) if method == "GET" else ac.post(path))
@@ -500,3 +501,50 @@ async def test_admin_activity_feed_handles_missing_files_gracefully(admin_client
 
     assert resp.status_code == 200
     assert resp.json() == []
+
+
+# ── LLM usage / cost tracking ───────────────────────────────────────────────────
+
+@pytest.mark.asyncio
+async def test_admin_llm_usage_merges_gemini_db_and_claude_file(admin_client, db):
+    """Gemini rows (already in the DB, logged by chat.py) and Claude entries
+    (fetched from the repo file, logged by the marketing agents) both
+    contribute to one merged cost total."""
+    from unittest.mock import patch
+    from sqlalchemy import select, func
+    import app.routers.admin as admin_module
+    from app.models.llm_usage_log import LlmUsageLog
+
+    admin_module._llm_usage_cache["data"] = None
+
+    baseline = (await db.execute(
+        select(func.count(LlmUsageLog.id), func.coalesce(func.sum(LlmUsageLog.estimated_cost_usd), 0))
+        .where(LlmUsageLog.provider == "gemini")
+    )).one()
+
+    db.add(LlmUsageLog(
+        provider="gemini", model="gemini-flash-latest", context="chatbot",
+        input_tokens=1000, output_tokens=200, estimated_cost_usd=0.000135,
+    ))
+    await db.commit()
+
+    claude_log = (
+        '{"timestamp": "2026-07-26T10:00:00", "agent": "blog_agent", "model": "claude-haiku-4-5-20251001", '
+        '"input_tokens": 2000, "output_tokens": 500, "estimated_cost_usd": 0.0045}\n'
+    )
+
+    async def fake_fetch_raw(client, path):
+        assert "llm_usage_log" in path
+        return claude_log
+
+    ac, _admin = admin_client
+    with patch("app.routers.admin._fetch_raw", new=fake_fetch_raw):
+        resp = await ac.get("/api/v1/admin/llm-usage")
+
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["totals"]["gemini"]["calls"] == baseline[0] + 1
+    assert data["totals"]["claude"] == {"calls": 1, "input_tokens": 2000, "output_tokens": 500, "cost_usd": 0.0045}
+    assert data["totals"]["combined_cost_usd"] > 0
+    assert any(r["provider"] == "claude" and r["context"] == "blog_agent" for r in data["recent"])
+    assert any(r["provider"] == "gemini" and r["input_tokens"] == 1000 for r in data["recent"])

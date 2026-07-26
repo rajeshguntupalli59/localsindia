@@ -32,6 +32,7 @@ from app.models.city import City
 from app.models.city_banner import CityBanner
 from app.models.event import Event
 from app.models.listing import Listing
+from app.models.llm_usage_log import LlmUsageLog
 from app.models.report import Report
 from app.models.ticket import Ticket
 from app.models.user import User
@@ -932,4 +933,85 @@ async def get_activity_feed(_admin: User = Depends(get_current_admin)):
 
     _activity_cache["data"] = result
     _activity_cache["fetched_at"] = now
+    return result
+
+
+_llm_usage_cache: dict = {"data": None, "fetched_at": 0.0}
+
+
+@router.get("/llm-usage")
+async def get_llm_usage(db: AsyncSession = Depends(get_db), _admin: User = Depends(get_current_admin)):
+    """Real $ cost side of the spending dashboard (Tier B) - Gemini (chatbot,
+    logged straight to this DB from chat.py) and Claude (all 14 marketing
+    agents, logged to a file since they run on CI runners with no DB access -
+    see base_agent.py's generate()). Both are estimates based on manually-
+    maintained per-token pricing constants, not a live-fetched invoice."""
+    import time
+
+    now = time.time()
+    if _llm_usage_cache["data"] is not None and now - _llm_usage_cache["fetched_at"] < _ACTIVITY_CACHE_TTL_SECONDS:
+        return _llm_usage_cache["data"]
+
+    gemini_totals_row = (await db.execute(
+        select(
+            func.count(LlmUsageLog.id),
+            func.coalesce(func.sum(LlmUsageLog.input_tokens), 0),
+            func.coalesce(func.sum(LlmUsageLog.output_tokens), 0),
+            func.coalesce(func.sum(LlmUsageLog.estimated_cost_usd), 0),
+        ).where(LlmUsageLog.provider == "gemini")
+    )).one()
+    gemini_calls, gemini_in, gemini_out, gemini_cost = gemini_totals_row
+
+    recent_gemini_rows = (await db.execute(
+        select(LlmUsageLog).where(LlmUsageLog.provider == "gemini").order_by(LlmUsageLog.created_at.desc()).limit(50)
+    )).scalars().all()
+    recent = [
+        {
+            "provider": "gemini",
+            "context": row.context,
+            "model": row.model,
+            "input_tokens": row.input_tokens,
+            "output_tokens": row.output_tokens,
+            "estimated_cost_usd": float(row.estimated_cost_usd),
+            "timestamp": row.created_at.isoformat(),
+        }
+        for row in recent_gemini_rows
+    ]
+
+    claude_calls, claude_in, claude_out, claude_cost = 0, 0, 0, 0.0
+    async with httpx.AsyncClient() as client:
+        claude_log = await _fetch_raw(client, "agents/output/llm_usage_log.jsonl")
+
+    if isinstance(claude_log, str):
+        for line in claude_log.splitlines():
+            if not line.strip():
+                continue
+            entry = json.loads(line)
+            claude_calls += 1
+            claude_in += entry.get("input_tokens", 0)
+            claude_out += entry.get("output_tokens", 0)
+            claude_cost += entry.get("estimated_cost_usd", 0)
+            recent.append({
+                "provider": "claude",
+                "context": entry.get("agent"),
+                "model": entry.get("model"),
+                "input_tokens": entry.get("input_tokens", 0),
+                "output_tokens": entry.get("output_tokens", 0),
+                "estimated_cost_usd": entry.get("estimated_cost_usd", 0),
+                "timestamp": entry.get("timestamp"),
+            })
+
+    recent.sort(key=lambda i: i.get("timestamp") or "", reverse=True)
+
+    result = {
+        "totals": {
+            "gemini": {"calls": gemini_calls, "input_tokens": gemini_in, "output_tokens": gemini_out, "cost_usd": round(float(gemini_cost), 4)},
+            "claude": {"calls": claude_calls, "input_tokens": claude_in, "output_tokens": claude_out, "cost_usd": round(claude_cost, 4)},
+            "combined_cost_usd": round(float(gemini_cost) + claude_cost, 4),
+        },
+        "recent": recent[:50],
+    }
+
+    _llm_usage_cache["data"] = result
+    _llm_usage_cache["fetched_at"] = now
     return result

@@ -22,6 +22,7 @@ agents/output/*
 # record of FB/IG posting activity anywhere.
 !agents/output/social_posts_log.jsonl
 !agents/output/ecosystem_posts_log.jsonl
+!agents/output/llm_usage_log.jsonl
 
 # Node
 node_modules/

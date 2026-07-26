@@ -16,11 +16,19 @@ from app.core.config import settings
 from app.core.database import get_db
 from app.core.limiter import limiter
 from app.models.city import City
+from app.models.llm_usage_log import LlmUsageLog
 from app.services import search_svc
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/chat", tags=["chat"])
+
+# Estimated Gemini Flash pricing (per Google's public Gemini API pricing as of
+# this writing) - a manually-updated constant, not fetched live. Sanity-check
+# against https://ai.google.dev/gemini-api/docs/pricing if a real invoice ever
+# looks wildly different from what this dashboard estimates.
+_GEMINI_PRICE_PER_MILLION_INPUT_TOKENS = 0.075
+_GEMINI_PRICE_PER_MILLION_OUTPUT_TOKENS = 0.30
 
 _SYSTEM = """You are the LocalsIndia Assistant — a helpful guide for India's hyperlocal community platform at localsindia.com.
 
@@ -109,6 +117,15 @@ async def chat(request: Request, req: ChatRequest, db: AsyncSession = Depends(ge
 
     found_listings: list[dict] = []
     resolved_city_slug: str | None = None
+    total_input_tokens = 0
+    total_output_tokens = 0
+
+    def _track_usage(resp) -> None:
+        nonlocal total_input_tokens, total_output_tokens
+        usage = getattr(resp, "usage_metadata", None)
+        if usage:
+            total_input_tokens += usage.prompt_token_count or 0
+            total_output_tokens += usage.candidates_token_count or 0
 
     try:
         chat_session = client.chats.create(
@@ -121,6 +138,7 @@ async def chat(request: Request, req: ChatRequest, db: AsyncSession = Depends(ge
         )
 
         response = chat_session.send_message(user_text)
+        _track_usage(response)
 
         # Gemini may retry search_listings with narrower args when a search
         # comes back empty, rather than replying with text - loop until it
@@ -166,11 +184,27 @@ async def chat(request: Request, req: ChatRequest, db: AsyncSession = Depends(ge
                     response={"result": tool_result},
                 )
             )
+            _track_usage(response)
 
         reply_text = reply_text or response.text or (
             "I couldn't find any matches for that search — try a broader search term, "
             "or browse listings directly on the site."
         )
+
+        if total_input_tokens or total_output_tokens:
+            cost = (
+                total_input_tokens / 1_000_000 * _GEMINI_PRICE_PER_MILLION_INPUT_TOKENS
+                + total_output_tokens / 1_000_000 * _GEMINI_PRICE_PER_MILLION_OUTPUT_TOKENS
+            )
+            db.add(LlmUsageLog(
+                provider="gemini",
+                model="gemini-flash-latest",
+                context="chatbot",
+                input_tokens=total_input_tokens,
+                output_tokens=total_output_tokens,
+                estimated_cost_usd=round(cost, 6),
+            ))
+            await db.commit()
 
     except Exception as e:
         logger.error("Gemini API error: %s %s", type(e).__name__, str(e))
