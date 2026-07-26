@@ -104,6 +104,42 @@ async def test_set_password_after_otp_verify(client, db):
 
 
 @pytest.mark.asyncio
+async def test_set_password_reports_is_new_user_for_fresh_signup(client, db):
+    """Regression: this endpoint used to hardcode is_new_user=False always,
+    so the frontend's "what's your name" step never fired for anyone —
+    accounts stayed stuck with name==phone forever."""
+    phone = "+919444444446"
+    setup_token = await _verify_otp_get_setup_token(client, db, phone)
+
+    resp = await client.post("/api/v1/auth/password/set", json={
+        "setup_token": setup_token, "password": "supersecret1",
+    })
+    assert resp.json()["is_new_user"] is True
+
+
+@pytest.mark.asyncio
+async def test_set_password_reports_not_new_once_name_is_set(client, db):
+    phone = "+919444444447"
+    setup_token = await _verify_otp_get_setup_token(client, db, phone)
+    resp = await client.post("/api/v1/auth/password/set", json={
+        "setup_token": setup_token, "password": "supersecret1",
+    })
+    token = resp.json()["access_token"]
+
+    await client.patch(
+        "/api/v1/auth/me",
+        json={"name": "Real Name"},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    reset_token = await _verify_otp_get_setup_token(client, db, phone)
+    resp = await client.post("/api/v1/auth/password/set", json={
+        "setup_token": reset_token, "password": "newpassword1",
+    })
+    assert resp.json()["is_new_user"] is False
+
+
+@pytest.mark.asyncio
 async def test_set_password_rejects_short_password(client, db):
     phone = "+919444444445"
     setup_token = await _verify_otp_get_setup_token(client, db, phone)

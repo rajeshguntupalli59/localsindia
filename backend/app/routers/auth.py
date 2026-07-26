@@ -254,6 +254,13 @@ async def set_password(body: SetPasswordRequest, db: AsyncSession = Depends(get_
     if not user.is_active:
         raise HTTPException(status_code=403, detail="Your account has been deactivated. Contact support.")
 
+    # This endpoint serves both signup (fresh account, name still the
+    # phone-number placeholder from otp/verify's User(phone=phone, name=phone))
+    # and forgot-password reset (name already set for real) — name == phone
+    # is the actual signal for "has this account ever completed profile
+    # setup", not whether the row itself is brand new.
+    is_new = user.name == user.phone
+
     user.password_hash = hash_password(body.password)
     await db.commit()
     await db.refresh(user)
@@ -262,7 +269,7 @@ async def set_password(body: SetPasswordRequest, db: AsyncSession = Depends(get_
         access_token=create_access_token(str(user.id)),
         refresh_token=create_refresh_token(str(user.id)),
         user=UserOut.model_validate(user),
-        is_new_user=False,
+        is_new_user=is_new,
     )
 
 
