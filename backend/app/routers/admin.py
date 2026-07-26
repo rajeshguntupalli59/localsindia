@@ -1,5 +1,6 @@
 import asyncio
 import json
+import logging
 import uuid
 from datetime import datetime, timezone, timedelta
 
@@ -10,8 +11,12 @@ from sqlalchemy import select, func, distinct, cast, Date
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+logger = logging.getLogger(__name__)
+
 REFERRAL_REWARD_CAP = 20
 REFERRAL_FEATURED_DAYS = 3
+# Fixed to this one deployment - not meant to be reusable across subscriptions.
+_AZURE_SUBSCRIPTION_ID = "cece96ac-c7c0-49cf-956f-7f366b07a8af"
 
 PLACEHOLDER_URLS = [
     "https://placehold.co/400x300/f97316/white?text=LocalsIndia",
@@ -1014,4 +1019,66 @@ async def get_llm_usage(db: AsyncSession = Depends(get_db), _admin: User = Depen
 
     _llm_usage_cache["data"] = result
     _llm_usage_cache["fetched_at"] = now
+    return result
+
+
+_azure_cost_cache: dict = {"data": None, "fetched_at": 0.0}
+_AZURE_COST_CACHE_TTL_SECONDS = 3600  # billing data itself lags/updates slowly - no need to hit this hourly-limited API often
+
+
+@router.get("/azure-cost")
+async def get_azure_cost(_admin: User = Depends(get_current_admin)):
+    """Tier C of the spending dashboard - real Azure spend (App Service,
+    Postgres, bandwidth) via the Cost Management API. Authenticates with the
+    backend's own System-Assigned Managed Identity (must be granted the
+    'Cost Management Reader' role on the resource group) rather than a
+    stored client secret - if that isn't set up, or the token/API call fails
+    for any reason, returns configured=false instead of a 500, same pattern
+    as the chatbot's missing-API-key fallback."""
+    import time
+
+    now = time.time()
+    if _azure_cost_cache["data"] is not None and now - _azure_cost_cache["fetched_at"] < _AZURE_COST_CACHE_TTL_SECONDS:
+        return _azure_cost_cache["data"]
+
+    try:
+        from azure.identity import DefaultAzureCredential
+        token = DefaultAzureCredential().get_token("https://management.azure.com/.default").token
+    except Exception as e:
+        logger.warning("Azure cost lookup unavailable (no managed identity / no token): %s", e)
+        return {"configured": False, "reason": "Managed identity not set up yet, or lacks the Cost Management Reader role"}
+
+    query_body = {
+        "type": "ActualCost",
+        "timeframe": "MonthToDate",
+        "dataset": {
+            "granularity": "None",
+            "aggregation": {"totalCost": {"name": "PreTaxCost", "function": "Sum"}},
+            "grouping": [{"type": "Dimension", "name": "ResourceGroupName"}],
+        },
+    }
+    url = f"https://management.azure.com/subscriptions/{_AZURE_SUBSCRIPTION_ID}/providers/Microsoft.CostManagement/query?api-version=2023-11-01"
+
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(url, json=query_body, headers={"Authorization": f"Bearer {token}"}, timeout=20.0)
+        resp.raise_for_status()
+    except Exception as e:
+        logger.warning("Azure Cost Management API call failed: %s", e)
+        return {"configured": False, "reason": "Cost Management API call failed - see server logs"}
+
+    payload = resp.json()
+    columns = [c["name"] for c in payload.get("properties", {}).get("columns", [])]
+    rows = payload.get("properties", {}).get("rows", [])
+    cost_idx = columns.index("PreTaxCost") if "PreTaxCost" in columns else 0
+    rg_idx = columns.index("ResourceGroupName") if "ResourceGroupName" in columns else 1
+    currency_idx = columns.index("Currency") if "Currency" in columns else None
+
+    breakdown = [{"resource_group": row[rg_idx], "cost_usd": round(row[cost_idx], 2)} for row in rows]
+    total = round(sum(row[cost_idx] for row in rows), 2)
+    currency = rows[0][currency_idx] if rows and currency_idx is not None else "USD"
+
+    result = {"configured": True, "month_to_date_cost_usd": total, "currency": currency, "breakdown": breakdown}
+    _azure_cost_cache["data"] = result
+    _azure_cost_cache["fetched_at"] = now
     return result

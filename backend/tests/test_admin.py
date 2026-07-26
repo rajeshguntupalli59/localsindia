@@ -23,6 +23,7 @@ async def test_regular_user_cannot_access_admin_endpoints(auth_client):
         ("GET",   "/api/v1/admin/events"),
         ("GET",   "/api/v1/admin/activity-feed"),
         ("GET",   "/api/v1/admin/llm-usage"),
+        ("GET",   "/api/v1/admin/azure-cost"),
     ]
     for method, path in endpoints:
         resp = await (ac.get(path) if method == "GET" else ac.post(path))
@@ -548,3 +549,74 @@ async def test_admin_llm_usage_merges_gemini_db_and_claude_file(admin_client, db
     assert data["totals"]["combined_cost_usd"] > 0
     assert any(r["provider"] == "claude" and r["context"] == "blog_agent" for r in data["recent"])
     assert any(r["provider"] == "gemini" and r["input_tokens"] == 1000 for r in data["recent"])
+
+
+# ── Azure cost (Cost Management API) ────────────────────────────────────────────
+
+@pytest.mark.asyncio
+async def test_admin_azure_cost_not_configured_when_no_managed_identity(admin_client):
+    """When credential acquisition fails (no managed identity, or - as in
+    prod without one - every fallback in DefaultAzureCredential's chain
+    failing) the endpoint must degrade to configured=false, not 500. Mocked
+    explicitly rather than relying on this dev machine genuinely lacking
+    credentials - it doesn't, since an `az login` session is active here and
+    DefaultAzureCredential would happily pick that up as a fallback."""
+    from unittest.mock import patch
+    import app.routers.admin as admin_module
+
+    admin_module._azure_cost_cache["data"] = None
+
+    ac, _admin = admin_client
+    with patch("azure.identity.DefaultAzureCredential", side_effect=Exception("no credential available")):
+        resp = await ac.get("/api/v1/admin/azure-cost")
+
+    assert resp.status_code == 200
+    assert resp.json()["configured"] is False
+
+
+@pytest.mark.asyncio
+async def test_admin_azure_cost_parses_a_successful_response(admin_client):
+    """With a working token + a real Cost Management API response, the
+    endpoint correctly totals cost across resource groups."""
+    from unittest.mock import patch, MagicMock
+    import app.routers.admin as admin_module
+
+    admin_module._azure_cost_cache["data"] = None
+
+    fake_credential = MagicMock()
+    fake_credential.get_token.return_value = MagicMock(token="fake-token")
+
+    fake_api_response = {
+        "properties": {
+            "columns": [{"name": "PreTaxCost"}, {"name": "ResourceGroupName"}, {"name": "Currency"}],
+            "rows": [
+                [12.5, "localsindia-rg", "USD"],
+                [3.25, "localsindia-rg", "USD"],
+            ],
+        }
+    }
+
+    class _FakeResponse:
+        def json(self):
+            return fake_api_response
+
+        def raise_for_status(self):
+            pass
+
+    async def fake_post(self, url, json=None, headers=None, timeout=None):
+        return _FakeResponse()
+
+    ac, _admin = admin_client
+    with patch("azure.identity.DefaultAzureCredential", return_value=fake_credential), \
+         patch("httpx.AsyncClient.post", new=fake_post):
+        resp = await ac.get("/api/v1/admin/azure-cost")
+
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["configured"] is True
+    assert data["month_to_date_cost_usd"] == 15.75
+    assert data["currency"] == "USD"
+    assert data["breakdown"] == [
+        {"resource_group": "localsindia-rg", "cost_usd": 12.5},
+        {"resource_group": "localsindia-rg", "cost_usd": 3.25},
+    ]
