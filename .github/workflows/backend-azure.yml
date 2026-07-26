@@ -56,7 +56,8 @@ jobs:
             --name localsindia-backend-in \
             --src-path backend.zip \
             --type zip \
-            --restart false
+            --restart false \
+            --timeout 600000
 
       - name: Restart app and wait for health
         run: |
