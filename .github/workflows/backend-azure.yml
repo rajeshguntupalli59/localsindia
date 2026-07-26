@@ -83,7 +83,7 @@ jobs:
               --name localsindia-backend-in \
               --src-path backend.zip \
               --type zip \
-              --restart false \
+              --restart true \
               --track-status false \
               --timeout 300000; then
               echo "::endgroup::"
@@ -100,11 +100,19 @@ jobs:
           echo "All $MAX_ATTEMPTS deploy attempts failed."
           exit 1
 
-      - name: Restart app and wait for health
+      - name: Wait for health
         run: |
-          echo "Waiting 90s for Kudu to finish extracting zip in background..."
-          sleep 90
-          az webapp restart --name localsindia-backend-in --resource-group localsindia-rg
+          # OneDeploy (--restart true above) already recycles the container
+          # itself once extraction is genuinely complete — it writes
+          # restartTrigger.txt only after the venv/packages are fully in
+          # place, so it can't race the way a blind sleep-then-restart can.
+          # A prior version of this step used --restart false + a hardcoded
+          # `sleep 90` before manually forcing a restart; actual build times
+          # observed here range up to ~233s, so on slower deploys that manual
+          # restart fired while Kudu was still mid-extraction, booting the
+          # container against a half-written wwwroot (missing antenv/venv,
+          # "uvicorn: not found", exit code 127 crash loop). Just poll health
+          # now — no restart call needed here at all.
           echo "Waiting for app to start..."
           for i in $(seq 1 18); do
             sleep 10

@@ -16,6 +16,12 @@ agents/.env.agents
 # Agent output (generated content — don't commit)
 agents/output/*
 !agents/output/.gitkeep
+# Exceptions: these are small, durable activity logs (not generated media),
+# committed back to the repo by social-poster.yml so posting history survives
+# past the ephemeral CI runner it was generated on — otherwise there is no
+# record of FB/IG posting activity anywhere.
+!agents/output/social_posts_log.jsonl
+!agents/output/ecosystem_posts_log.jsonl
 
 # Node
 node_modules/

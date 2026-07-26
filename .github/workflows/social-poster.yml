@@ -30,6 +30,9 @@ on:
           - city_spotlight
           - app_launch
 
+permissions:
+  contents: write   # this workflow commits the posting log back to the repo
+
 jobs:
   post:
     runs-on: ubuntu-latest
@@ -106,3 +109,27 @@ jobs:
             agents/output/social_posts/
             marketing/generated/
           retention-days: 14
+
+      # Without this, the posting log lives only on this ephemeral runner and
+      # is discarded when the job ends — there'd be no durable record of FB/IG
+      # posting activity anywhere. Commit it back, same pattern as the blog
+      # publisher's rotation-state commit. Doesn't touch frontend/** or
+      # backend/**, so it never triggers either deploy workflow.
+      - name: Commit and push posting log
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # -f: these paths are gitignore-exempted already, but some runners
+          # of this job only touch one of the two log files (meta_poster vs
+          # ecosystem_poster), and a plain `git add` on a path that doesn't
+          # exist yet would fail the whole step.
+          [ -f agents/output/social_posts_log.jsonl ] && git add agents/output/social_posts_log.jsonl
+          [ -f agents/output/ecosystem_posts_log.jsonl ] && git add agents/output/ecosystem_posts_log.jsonl
+          if git diff --cached --quiet; then
+            echo "No log changes to commit"
+            exit 0
+          fi
+          git commit -m "chore: update social posting log"
+          git pull --rebase origin master
+          git push
