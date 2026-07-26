@@ -46,8 +46,9 @@ function getPostLoginRedirect(redirectParam: string | null): string {
   // The home page's header never reflects auth state (it always shows "Sign
   // In", unlike every other page's SiteHeader) — landing a freshly-logged-in
   // user there with no city set makes login look like it silently failed.
-  // /profile needs no city context and unambiguously shows the signed-in state.
-  return city ? `/${city}` : '/profile';
+  // /cities sidesteps that (its own header has no conflicting "Sign In" CTA)
+  // and moves the user straight to the actual next step: picking a city.
+  return city ? `/${city}` : '/cities';
 }
 
 const GoogleIcon = () => (

@@ -39,19 +39,21 @@ function AuthCallbackInner() {
           toast.success(`Welcome, ${name ? decodeURIComponent(name) : 'back'}!`);
         }
         const city = localStorage.getItem('li_city');
-        // /profile (not /) — the home page's header never reflects auth
+        // /cities (not /) — the home page's header never reflects auth
         // state, so landing a freshly-logged-in user there with no city
-        // set makes login look like it silently failed.
-        router.replace(city ? `/${city}` : '/profile');
+        // set makes login look like it silently failed. /cities moves
+        // them straight to the actual next step: picking a city.
+        router.replace(city ? `/${city}` : '/cities');
       })
       .catch(() => {
         if (name) localStorage.setItem('user', JSON.stringify({ name: decodeURIComponent(name) }));
         toast.success('Signed in successfully!');
         const city = localStorage.getItem('li_city');
-        // /profile (not /) — the home page's header never reflects auth
+        // /cities (not /) — the home page's header never reflects auth
         // state, so landing a freshly-logged-in user there with no city
-        // set makes login look like it silently failed.
-        router.replace(city ? `/${city}` : '/profile');
+        // set makes login look like it silently failed. /cities moves
+        // them straight to the actual next step: picking a city.
+        router.replace(city ? `/${city}` : '/cities');
       });
   }, [router, searchParams]);
 
