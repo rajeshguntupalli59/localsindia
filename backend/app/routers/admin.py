@@ -1,6 +1,9 @@
+import asyncio
+import json
 import uuid
 from datetime import datetime, timezone, timedelta
 
+import httpx
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy import select, func, distinct, cast, Date
@@ -844,3 +847,89 @@ async def send_broadcast(
         await send_push(tokens[i:i + 100], body.title, body.body, {"type": "admin_broadcast"})
 
     return BroadcastResult(users_notified=len(user_ids), devices_pushed=len(tokens))
+
+
+# The marketing agents (social poster, blog publisher) run on ephemeral
+# GitHub Actions runners and write their activity logs into the repo, not
+# into this app's own database — there's no other durable record of what's
+# been posted/published. Reading the repo's raw files over HTTP is simpler
+# than teaching every agent to call back into this API, and the repo is
+# public so no token is needed.
+_GITHUB_RAW_BASE = "https://raw.githubusercontent.com/rajeshguntupalli59/localsindia/master"
+_activity_cache: dict = {"data": None, "fetched_at": 0.0}
+_ACTIVITY_CACHE_TTL_SECONDS = 300
+
+
+async def _fetch_raw(client: httpx.AsyncClient, path: str) -> str | None:
+    resp = await client.get(f"{_GITHUB_RAW_BASE}/{path}", timeout=10.0)
+    if resp.status_code == 404:
+        return None
+    resp.raise_for_status()
+    return resp.text
+
+
+@router.get("/activity-feed")
+async def get_activity_feed(_admin: User = Depends(get_current_admin)):
+    """Merged, newest-first feed of marketing/content activity: Facebook/
+    Instagram posts and blog articles. Purely informational (no $ cost here -
+    posting and blog generation are free); the LLM usage that costs real
+    money is tracked separately."""
+    import time
+
+    now = time.time()
+    if _activity_cache["data"] is not None and now - _activity_cache["fetched_at"] < _ACTIVITY_CACHE_TTL_SECONDS:
+        return _activity_cache["data"]
+
+    items: list[dict] = []
+    async with httpx.AsyncClient() as client:
+        social_log, ecosystem_log, blog_state = await asyncio.gather(
+            _fetch_raw(client, "agents/output/social_posts_log.jsonl"),
+            _fetch_raw(client, "agents/output/ecosystem_posts_log.jsonl"),
+            _fetch_raw(client, "agents/state/blog_rotation.json"),
+            return_exceptions=True,
+        )
+
+    if isinstance(social_log, str):
+        for line in social_log.splitlines():
+            if not line.strip():
+                continue
+            entry = json.loads(line)
+            items.append({
+                "type": "social_post",
+                "timestamp": entry.get("timestamp"),
+                "title": entry.get("headline") or entry.get("topic", "Post"),
+                "detail": entry.get("format", "image"),
+                "facebook_post_id": entry.get("facebook_post_id"),
+                "instagram_feed_id": entry.get("instagram_feed_id"),
+            })
+
+    if isinstance(ecosystem_log, str):
+        for line in ecosystem_log.splitlines():
+            if not line.strip():
+                continue
+            entry = json.loads(line)
+            items.append({
+                "type": "ecosystem_post",
+                "timestamp": entry.get("timestamp"),
+                "title": entry.get("tagline", "Ecosystem post"),
+                "detail": ", ".join(entry.get("benefit_keys", [])),
+                "facebook_post_id": entry.get("facebook_post_id"),
+                "instagram_feed_id": entry.get("instagram_feed_id"),
+            })
+
+    if isinstance(blog_state, str):
+        state = json.loads(blog_state)
+        for entry in state.get("history", []):
+            items.append({
+                "type": "blog_article",
+                "timestamp": entry.get("publishedAt"),
+                "title": f"{entry.get('citySlug', '')} — {entry.get('category', '')}".strip(" —"),
+                "detail": entry.get("topicTemplateId"),
+            })
+
+    items.sort(key=lambda i: i.get("timestamp") or "", reverse=True)
+    result = items[:50]
+
+    _activity_cache["data"] = result
+    _activity_cache["fetched_at"] = now
+    return result

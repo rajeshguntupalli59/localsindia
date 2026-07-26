@@ -2,6 +2,7 @@
 Admin endpoint tests — approve/reject pipeline, event queue,
 user list, reports, and access-control guards.
 """
+import json
 import uuid
 import pytest
 from datetime import datetime, timezone, timedelta
@@ -20,6 +21,7 @@ async def test_regular_user_cannot_access_admin_endpoints(auth_client):
         ("GET",   "/api/v1/admin/reports"),
         ("GET",   "/api/v1/admin/events/pending"),
         ("GET",   "/api/v1/admin/events"),
+        ("GET",   "/api/v1/admin/activity-feed"),
     ]
     for method, path in endpoints:
         resp = await (ac.get(path) if method == "GET" else ac.post(path))
@@ -432,3 +434,69 @@ async def test_broadcast_chunks_over_100_tokens(db, admin_client, user_and_token
     for call in mock_send.call_args_list[:-1]:
         assert len(call.args[0]) == 100
     assert len(mock_send.call_args_list[-1].args[0]) == total - 100 * (expected_batches - 1)
+
+
+# ── Activity feed (marketing/content log merge) ────────────────────────────────
+
+@pytest.mark.asyncio
+async def test_admin_activity_feed_merges_and_sorts_sources(admin_client):
+    """Social posts, ecosystem posts, and blog history all appear in one
+    feed, newest first, regardless of which file they came from."""
+    from unittest.mock import AsyncMock, patch
+    import app.routers.admin as admin_module
+
+    admin_module._activity_cache["data"] = None  # avoid stale cache from another test
+
+    social_log = (
+        '{"timestamp": "2026-07-20T10:00:00", "topic": "jobs", "headline": "Find Jobs Fast", '
+        '"format": "image", "facebook_post_id": "fb1", "instagram_feed_id": "ig1"}\n'
+    )
+    ecosystem_log = (
+        '{"timestamp": "2026-07-22T10:00:00", "tagline": "One App, Every Need", '
+        '"benefit_keys": ["jobs", "pg"], "facebook_post_id": "fb2", "instagram_feed_id": "ig2"}\n'
+    )
+    blog_state = json.dumps({
+        "history": [
+            {"citySlug": "hyderabad", "category": "pg-roommate", "topicTemplateId": "avoid-scam", "publishedAt": "2026-07-25T08:30:00"},
+        ]
+    })
+
+    async def fake_fetch_raw(client, path):
+        if "social_posts_log" in path:
+            return social_log
+        if "ecosystem_posts_log" in path:
+            return ecosystem_log
+        if "blog_rotation" in path:
+            return blog_state
+        raise AssertionError(f"unexpected path: {path}")
+
+    ac, _admin = admin_client
+    with patch("app.routers.admin._fetch_raw", new=fake_fetch_raw):
+        resp = await ac.get("/api/v1/admin/activity-feed")
+
+    assert resp.status_code == 200
+    items = resp.json()
+    assert [i["type"] for i in items] == ["blog_article", "ecosystem_post", "social_post"]
+    assert items[0]["title"] == "hyderabad — pg-roommate"
+    assert items[1]["title"] == "One App, Every Need"
+    assert items[2]["title"] == "Find Jobs Fast"
+
+
+@pytest.mark.asyncio
+async def test_admin_activity_feed_handles_missing_files_gracefully(admin_client):
+    """A source file that's never been committed yet (404 from GitHub raw)
+    doesn't fail the whole request - it's just an empty contribution."""
+    from unittest.mock import patch
+    import app.routers.admin as admin_module
+
+    admin_module._activity_cache["data"] = None
+
+    async def fake_fetch_raw_404(client, path):
+        return None
+
+    ac, _admin = admin_client
+    with patch("app.routers.admin._fetch_raw", new=fake_fetch_raw_404):
+        resp = await ac.get("/api/v1/admin/activity-feed")
+
+    assert resp.status_code == 200
+    assert resp.json() == []
