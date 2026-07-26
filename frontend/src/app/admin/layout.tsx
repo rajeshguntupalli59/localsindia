@@ -18,7 +18,7 @@ const NAV = [
   { href: '/admin/announcements', exact: false, icon: <Send className="w-4 h-4" />, label: 'Announcements', badge: null },
   { href: '/admin/monitoring', exact: false, icon: <Activity className="w-4 h-4" />, label: 'Monitoring', badge: null },
   { href: '/admin/activity', exact: false, icon: <Rss className="w-4 h-4" />, label: 'Marketing Activity', badge: null },
-  { href: '/admin/llm-usage', exact: false, icon: <DollarSign className="w-4 h-4" />, label: 'LLM Usage & Cost', badge: null },
+  { href: '/admin/spending', exact: false, icon: <DollarSign className="w-4 h-4" />, label: 'Spending', badge: null },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
