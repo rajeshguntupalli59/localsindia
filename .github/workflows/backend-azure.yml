@@ -51,13 +51,36 @@ jobs:
         id: deploy
         continue-on-error: true
         run: |
-          az webapp deploy \
-            --resource-group localsindia-rg \
-            --name localsindia-backend-in \
-            --src-path backend.zip \
-            --type zip \
-            --restart false \
-            --timeout 600000
+          # Azure's zip-deploy has a real, recurring flakiness pattern on this
+          # app: the first attempt intermittently fails with "site failed to
+          # start within 10 mins" at the platform level (not a CLI timeout
+          # issue — confirmed via the actual error payload), while an
+          # immediate retry of the identical code typically succeeds within
+          # a minute or two. Retry automatically instead of requiring a human
+          # to notice and redeploy by hand every time this happens.
+          MAX_ATTEMPTS=3
+          for attempt in $(seq 1 "$MAX_ATTEMPTS"); do
+            echo "::group::Deploy attempt $attempt/$MAX_ATTEMPTS"
+            if az webapp deploy \
+              --resource-group localsindia-rg \
+              --name localsindia-backend-in \
+              --src-path backend.zip \
+              --type zip \
+              --restart false \
+              --timeout 600000; then
+              echo "::endgroup::"
+              echo "Deploy succeeded on attempt $attempt"
+              exit 0
+            fi
+            echo "::endgroup::"
+            echo "Deploy attempt $attempt failed."
+            if [ "$attempt" -lt "$MAX_ATTEMPTS" ]; then
+              echo "Retrying in 20s..."
+              sleep 20
+            fi
+          done
+          echo "All $MAX_ATTEMPTS deploy attempts failed."
+          exit 1
 
       - name: Restart app and wait for health
         run: |
