@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Mail, MessageCircle, Clock } from 'lucide-react';
+import { Mail, Clock } from 'lucide-react';
 
 export const metadata = { title: 'Contact Us — LocalsIndia' };
 
@@ -38,26 +38,6 @@ export default function ContactPage() {
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#F7921E] hover:bg-[#E07B0A] transition-colors"
           >
             support@localsindia.com
-          </a>
-        </div>
-
-        {/* WhatsApp card */}
-        <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
-          <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center mb-4">
-            <MessageCircle className="w-5 h-5 text-[#25D366]" strokeWidth={1.8} />
-          </div>
-          <h2 className="text-lg font-bold text-slate-900 mb-1">WhatsApp</h2>
-          <p className="text-sm text-slate-500 mb-4">
-            Quickest way to reach us for urgent listing or account issues.
-          </p>
-          <a
-            href="https://wa.me/919876543210"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors"
-            style={{ background: '#25D366' }}
-          >
-            Chat on WhatsApp
           </a>
         </div>
 
