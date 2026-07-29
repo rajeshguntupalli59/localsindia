@@ -1,17 +1,23 @@
 import { useEffect, useRef } from 'react';
 import { View, Text, Animated, Image, StyleSheet } from 'react-native';
 
+const NAME_LETTERS = 'LocalsIndia'.split('');
 const TAGLINE_WORDS = ['Buy', '·', 'Sell', '·', 'Connect'];
 
 export default function SplashScreen() {
   const logoAnim = useRef(new Animated.Value(0)).current;
-  const nameAnim = useRef(new Animated.Value(0)).current;
+  const letterAnims = useRef(NAME_LETTERS.map(() => new Animated.Value(0))).current;
   const wordAnims = useRef(TAGLINE_WORDS.map(() => new Animated.Value(0))).current;
 
   useEffect(() => {
     Animated.sequence([
       Animated.spring(logoAnim, { toValue: 1, friction: 5, tension: 60, useNativeDriver: true }),
-      Animated.timing(nameAnim, { toValue: 1, duration: 220, useNativeDriver: true }),
+      Animated.stagger(
+        45,
+        letterAnims.map((anim) =>
+          Animated.spring(anim, { toValue: 1, friction: 6, tension: 120, useNativeDriver: true })
+        )
+      ),
       Animated.stagger(
         90,
         wordAnims.map((anim) =>
@@ -24,7 +30,7 @@ export default function SplashScreen() {
   return (
     <View style={styles.container}>
       <Animated.Image
-        source={require('../../assets/logo-mark-transparent.png')}
+        source={require('../../assets/icon.png')}
         resizeMode="contain"
         style={[
           styles.logo,
@@ -35,18 +41,26 @@ export default function SplashScreen() {
         ]}
       />
 
-      <Animated.Text
-        style={[
-          styles.name,
-          {
-            opacity: nameAnim,
-            transform: [{ translateY: nameAnim.interpolate({ inputRange: [0, 1], outputRange: [8, 0] }) }],
-          },
-        ]}
-      >
-        <Text style={styles.nameLocals}>Locals</Text>
-        <Text style={styles.nameIndia}>India</Text>
-      </Animated.Text>
+      <View style={styles.nameRow}>
+        {NAME_LETTERS.map((letter, i) => (
+          <Animated.Text
+            key={i}
+            style={[
+              styles.nameLetter,
+              { color: i < 6 ? '#163D6B' : '#F7921E' },
+              {
+                opacity: letterAnims[i],
+                transform: [
+                  { translateY: letterAnims[i].interpolate({ inputRange: [0, 1], outputRange: [10, 0] }) },
+                  { scale: letterAnims[i].interpolate({ inputRange: [0, 1], outputRange: [0.7, 1] }) },
+                ],
+              },
+            ]}
+          >
+            {letter}
+          </Animated.Text>
+        ))}
+      </View>
 
       <View style={styles.taglineRow}>
         {TAGLINE_WORDS.map((word, i) => (
@@ -70,10 +84,9 @@ export default function SplashScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center' },
-  logo: { width: 96, height: 96, marginBottom: 16 },
-  name: { fontSize: 30, fontWeight: '900', letterSpacing: -0.5 },
-  nameLocals: { color: '#163D6B' },
-  nameIndia: { color: '#F7921E' },
+  logo: { width: 168, height: 168, marginBottom: 16 },
+  nameRow: { flexDirection: 'row' },
+  nameLetter: { fontSize: 32, fontWeight: '900', letterSpacing: -0.5 },
   taglineRow: { flexDirection: 'row', marginTop: 10, gap: 6 },
   taglineWord: { fontSize: 13, fontWeight: '600', letterSpacing: 1, color: '#6B7280', textTransform: 'uppercase' },
 });

@@ -573,8 +573,8 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: C.navBg },
 
   glowTR: {
-    position: 'absolute', top: -80, right: -60,
-    width: 260, height: 260, borderRadius: 130,
+    position: 'absolute', top: -140, right: -100,
+    width: 220, height: 220, borderRadius: 110,
     backgroundColor: C.orange, opacity: 0.09,
   },
   glowBL: {
