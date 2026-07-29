@@ -132,5 +132,7 @@ jobs:
             exit 0
           fi
           git commit -m "chore: update social posting + LLM usage logs"
+          echo "--- git status after commit, before pull ---"
+          git status
           git pull --rebase origin master
           git push
