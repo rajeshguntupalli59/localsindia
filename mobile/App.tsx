@@ -180,9 +180,20 @@ export default function App() {
   }, []);
 
   const checkAuth = async () => {
+    // checkAuth() itself is a local SecureStore read (no network) — it can
+    // resolve in a few ms, which would swap the splash for Login/Main before
+    // anyone could actually see the logo/name/tagline on it. Not an
+    // animation, just a floor so the static splash is on screen long enough
+    // to read.
+    const splashShownAt = Date.now();
+    const finish = (route: 'Main' | 'Login') => {
+      const remaining = 1000 - (Date.now() - splashShownAt);
+      setTimeout(() => setInitialRoute(route), Math.max(0, remaining));
+    };
+
     const token = await storage.getAccessToken();
     if (!token) {
-      setInitialRoute('Login');
+      finish('Login');
       return;
     }
     const biometricEnabled = await storage.getBiometricEnabled();
@@ -192,13 +203,13 @@ export default function App() {
         const ok = await authenticateWithBiometric();
         if (!ok) {
           await storage.clear();
-          setInitialRoute('Login');
+          finish('Login');
           return;
         }
       }
     }
     registerForPushNotificationsAsync();
-    setInitialRoute('Main');
+    finish('Main');
   };
 
   if (!initialRoute) {
