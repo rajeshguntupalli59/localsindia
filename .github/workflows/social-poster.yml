@@ -52,7 +52,7 @@ jobs:
 
       - name: Install frontend deps (Playwright lives here)
         working-directory: frontend
-        run: npm install
+        run: npm ci
 
       - name: Install Playwright browser
         working-directory: frontend
@@ -132,7 +132,5 @@ jobs:
             exit 0
           fi
           git commit -m "chore: update social posting + LLM usage logs"
-          echo "--- git status after commit, before pull ---"
-          git status
           git pull --rebase origin master
           git push
