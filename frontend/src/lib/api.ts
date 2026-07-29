@@ -244,6 +244,12 @@ export const api = {
     publicProfile: (userId: string) =>
       req<SellerProfile>(`/api/v1/users/${userId}/public-profile`),
   },
+  preferences: {
+    get: (token: string) =>
+      req<{ interests: string[] | null; alert_frequency: string; onboarding_done: boolean }>('/api/v1/preferences', { token }),
+    upsert: (data: { interests: string[]; alert_frequency: string; onboarding_done?: boolean }, token: string) =>
+      req<{ interests: string[] | null; alert_frequency: string; onboarding_done: boolean }>('/api/v1/preferences', { method: 'POST', body: JSON.stringify(data), token }),
+  },
   savedSearches: {
     list: (token: string) =>
       req<{ id: string; city_slug: string; query_text: string | null; category_slug: string | null; created_at: string }[]>('/api/v1/saved-searches', { token }),
