@@ -44,6 +44,23 @@ def post_to_facebook_page(image_url: str, caption: str) -> str:
     return resp.json().get("post_id") or resp.json().get("id")
 
 
+def post_to_facebook_link(message: str, link: str) -> str:
+    """Link post — Facebook crawls the URL itself and builds the preview
+    card (title/image/description) from its OG tags, no image upload
+    needed. Used for sharing blog articles."""
+    resp = httpx.post(
+        f"{GRAPH_API}/{os.environ['META_PAGE_ID']}/feed",
+        data={
+            "message": message,
+            "link": link,
+            "access_token": os.environ["META_PAGE_ACCESS_TOKEN"],
+        },
+        timeout=30.0,
+    )
+    resp.raise_for_status()
+    return resp.json()["id"]
+
+
 def post_to_facebook_text(message: str) -> str:
     """Plain text status update — no image. Facebook-only; Instagram's API
     has no equivalent (every IG post requires media)."""

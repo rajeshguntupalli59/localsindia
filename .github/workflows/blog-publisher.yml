@@ -74,3 +74,29 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh workflow run "Deploy Frontend to Azure Static Web Apps" --ref master
+
+      # Waits for the article to actually be live (polls the real URL, no
+      # blind sleep) before posting a link to it — see share_blog_post.py.
+      - name: Share new post to Facebook
+        if: steps.commit.outputs.committed == 'true'
+        env:
+          META_PAGE_ID: ${{ secrets.META_PAGE_ID }}
+          META_PAGE_ACCESS_TOKEN: ${{ secrets.META_PAGE_ACCESS_TOKEN }}
+        run: python agents/share_blog_post.py --publish
+
+      # share_blog_post.py logs to the same file the Social Poster workflow
+      # commits — but this is a different ephemeral runner, so that log
+      # entry needs its own commit here or it's lost when this job ends.
+      - name: Commit Facebook share log
+        if: steps.commit.outputs.committed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          [ -f agents/output/social_posts_log.jsonl ] && git add agents/output/social_posts_log.jsonl
+          if git diff --cached --quiet; then
+            echo "No log changes to commit"
+            exit 0
+          fi
+          git commit -m "chore: log blog post Facebook share"
+          git pull --rebase origin master
+          git push
