@@ -34,8 +34,7 @@
           "action": "VIEW",
           "autoVerify": true,
           "data": [
-            { "scheme": "https", "host": "www.localsindia.com" },
-            { "scheme": "https", "host": "localsindia.com" }
+            { "scheme": "https", "host": "www.localsindia.com" }
           ],
           "category": ["BROWSABLE", "DEFAULT"]
         }
