@@ -304,6 +304,19 @@ export default function BusinessDetailScreen({ route, navigation }: any) {
           </TouchableOpacity>
         )}
 
+        {/* Analytics dashboard — owner only */}
+        {isOwner && (
+          <TouchableOpacity
+            style={styles.analyticsBtn}
+            onPress={() => navigation.navigate('BusinessDashboard', { businessId, businessName: business.name })}
+            activeOpacity={0.85}
+            accessibilityRole="button"
+            accessibilityLabel="View Analytics"
+          >
+            <Text style={styles.analyticsBtnText}>View Analytics</Text>
+          </TouchableOpacity>
+        )}
+
         {/* Get Verified CTA — owner, not yet verified */}
         {isOwner && !business.verified && (
           <TouchableOpacity style={styles.verifyCta} onPress={() => setBadgeModal(true)} activeOpacity={0.85}>
@@ -559,6 +572,12 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 }, elevation: 5,
   },
   waBtnText: { color: 'white', fontWeight: '800', fontSize: 15 },
+
+  analyticsBtn: {
+    borderRadius: 14, borderWidth: 1, borderColor: '#e5e7eb', backgroundColor: 'white',
+    paddingVertical: 12, alignItems: 'center', justifyContent: 'center',
+  },
+  analyticsBtnText: { fontSize: 14, fontWeight: '700', color: '#374151' },
 
   verifyCta: {
     borderRadius: 14, borderWidth: 2, borderColor: '#bfdbfe', backgroundColor: '#eff6ff',

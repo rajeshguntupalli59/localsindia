@@ -241,6 +241,9 @@ export const businessesApi = {
 
   submitReview: (businessId: string, data: { rating: number; body: string }) =>
     api.post(`/businesses/${businessId}/reviews`, data).then(r => r.data),
+
+  analytics: (businessId: string) =>
+    api.get(`/analytics/business/${businessId}`).then(r => r.data),
 };
 
 export const eventsApi = {
