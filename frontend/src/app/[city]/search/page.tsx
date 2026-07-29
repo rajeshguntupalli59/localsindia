@@ -3,9 +3,10 @@
 import { Suspense, useEffect, useState, useCallback } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, SearchX, X, ChevronDown, ChevronUp, Tag, UtensilsCrossed, Building2, Briefcase, Car, Smartphone, CalendarDays, Store, GraduationCap, SlidersHorizontal } from 'lucide-react';
+import { Search, SearchX, X, ChevronDown, ChevronUp, Tag, UtensilsCrossed, Building2, Briefcase, Car, Smartphone, CalendarDays, Store, GraduationCap, SlidersHorizontal, Bookmark } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { api } from '@/lib/api';
+import { toast } from 'sonner';
+import { api, ApiError } from '@/lib/api';
 import type { Category, SearchResult } from '@/lib/types';
 import SiteHeader from '@/components/site-header/SiteHeader';
 import SiteFooter from '@/components/site-footer/SiteFooter';
@@ -50,6 +51,7 @@ function SearchInner() {
   const [priceExpanded, setPriceExpanded] = useState(true);
   const [dateExpanded, setDateExpanded] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [savingSearch, setSavingSearch] = useState(false);
 
   // live search box
   const [localQ, setLocalQ] = useState(q);
@@ -161,6 +163,28 @@ function SearchInner() {
   const totalPages = result ? Math.ceil(result.total / PAGE_SIZE) : 1;
   const hasActiveFilters = localCat || priceMin || priceMax || dateRange;
 
+  const activeCategorySlug = categories.find(c => c.id === localCat)?.slug
+    ?? (catParam && !isUUID(catParam) ? catParam : undefined);
+  const canSaveSearch = !!q.trim() || !!activeCategorySlug;
+
+  const saveSearch = async () => {
+    const token = localStorage.getItem('access_token');
+    if (!token) { router.push('/auth/login'); return; }
+    setSavingSearch(true);
+    try {
+      await api.savedSearches.create(
+        { city_slug: citySlug, query_text: q.trim() || undefined, category_slug: activeCategorySlug },
+        token,
+      );
+      toast.success('Search saved — find it under Profile → Saved Searches');
+    } catch (e) {
+      if (e instanceof ApiError && e.status === 409) toast('Already saved this search');
+      else toast.error('Could not save this search');
+    } finally {
+      setSavingSearch(false);
+    }
+  };
+
   // Active chips
   const activeChips: { label: string; key: string }[] = [];
   if (localCat) {
@@ -232,6 +256,17 @@ function SearchInner() {
                 style={{ color: 'var(--li-muted)' }}
               >
                 Clear all
+              </button>
+            )}
+            {canSaveSearch && (
+              <button
+                onClick={saveSearch}
+                disabled={savingSearch}
+                className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border transition-colors hover:border-orange-400 disabled:opacity-50 ml-auto"
+                style={{ borderColor: 'var(--li-border)', color: 'var(--li-primary)' }}
+              >
+                <Bookmark className="w-3.5 h-3.5" />
+                Save search
               </button>
             )}
           </div>

@@ -23,6 +23,7 @@ import ChatScreen from './src/screens/ChatScreen';
 import MyListingsScreen from './src/screens/MyListingsScreen';
 import PromoteScreen from './src/screens/PromoteScreen';
 import AlertsPrefsScreen from './src/screens/AlertsPrefsScreen';
+import SavedSearchesScreen from './src/screens/SavedSearchesScreen';
 import BusinessDetailScreen from './src/screens/BusinessDetailScreen';
 import BusinessesScreen from './src/screens/BusinessesScreen';
 import EditProfileScreen from './src/screens/EditProfileScreen';
@@ -234,6 +235,7 @@ export default function App() {
               <Stack.Screen name="MyListings" component={MyListingsScreen} />
               <Stack.Screen name="Promote" component={PromoteScreen} />
               <Stack.Screen name="AlertsPrefs" component={AlertsPrefsScreen} />
+              <Stack.Screen name="SavedSearches" component={SavedSearchesScreen} />
               <Stack.Screen name="BusinessDetail" component={BusinessDetailScreen} />
               <Stack.Screen name="Businesses" component={BusinessesScreen} />
               <Stack.Screen name="EditProfile" component={EditProfileScreen} />

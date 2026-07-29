@@ -276,6 +276,17 @@ export const ticketsApi = {
     api.get('/tickets/my').then(r => r.data),
 };
 
+export const savedSearchesApi = {
+  list: () =>
+    api.get('/saved-searches').then(r => r.data),
+
+  create: (data: { city_slug: string; query_text?: string; category_slug?: string }) =>
+    api.post('/saved-searches', data).then(r => r.data),
+
+  delete: (id: string) =>
+    api.delete(`/saved-searches/${id}`).then(r => r.data),
+};
+
 export const buyerRequestsApi = {
   list: (citySlug: string) =>
     api.get(`/buyer-requests/cities/${citySlug}`).then(r => r.data),

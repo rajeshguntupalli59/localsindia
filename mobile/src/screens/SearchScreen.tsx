@@ -5,8 +5,9 @@ import {
 import { useState, useEffect, useRef } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { listingsApi, categoriesApi } from '../lib/api';
+import { listingsApi, categoriesApi, savedSearchesApi } from '../lib/api';
 import { getApproxLocation } from '../lib/location';
+import { storage } from '../lib/storage';
 import ListingCard from '../components/ListingCard';
 import { C, RADIUS, SHADOW } from '../lib/theme';
 
@@ -38,6 +39,7 @@ export default function SearchScreen({ navigation, route }: any) {
   const [loading, setLoading] = useState(false);
   const [nearMe, setNearMe] = useState(false);
   const [nearMeLoading, setNearMeLoading] = useState(false);
+  const [savingSearch, setSavingSearch] = useState(false);
   const inputRef = useRef<TextInput>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const insets = useSafeAreaInsets();
@@ -89,7 +91,27 @@ export default function SearchScreen({ navigation, route }: any) {
     setNearMe(true);
   };
 
+  const handleSaveSearch = async () => {
+    const token = await storage.getAccessToken();
+    if (!token) { navigation.navigate('Login'); return; }
+    setSavingSearch(true);
+    try {
+      await savedSearchesApi.create({
+        city_slug: activeCity,
+        query_text: query.trim() || undefined,
+        category_slug: activeCat || undefined,
+      });
+      Alert.alert('Search saved', "You'll find it under Profile → Saved Searches.");
+    } catch (e: any) {
+      if (e?.response?.status === 409) Alert.alert('Already saved', 'This search is already in your saved list.');
+      else Alert.alert('Error', 'Could not save this search. Please try again.');
+    } finally {
+      setSavingSearch(false);
+    }
+  };
+
   const allCats: Category[] = [{ id: '', name: 'All', slug: '', icon: '' }, ...categories];
+  const canSaveSearch = !!query.trim() || !!activeCat;
 
   return (
     <View style={styles.container}>
@@ -166,6 +188,24 @@ export default function SearchScreen({ navigation, route }: any) {
           )}
           <Text style={[styles.nearMeText, nearMe && styles.nearMeTextActive]}>Near Me</Text>
         </TouchableOpacity>
+
+        {canSaveSearch && (
+          <TouchableOpacity
+            style={styles.saveSearchChip}
+            onPress={handleSaveSearch}
+            disabled={savingSearch}
+            activeOpacity={0.8}
+            accessibilityRole="button"
+            accessibilityLabel="Save this search to get alerts"
+          >
+            {savingSearch ? (
+              <ActivityIndicator size="small" color={C.orange} />
+            ) : (
+              <Ionicons name="bookmark-outline" size={14} color={C.orange} />
+            )}
+            <Text style={styles.saveSearchText}>Save search</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* ── Category chips ── */}
@@ -285,6 +325,7 @@ const styles = StyleSheet.create({
   // Near Me toggle
   nearMeRow: {
     backgroundColor: C.navBg,
+    flexDirection: 'row', gap: 8,
     paddingHorizontal: 14, paddingBottom: 12,
   },
   nearMeChip: {
@@ -300,6 +341,15 @@ const styles = StyleSheet.create({
   },
   nearMeText: { fontSize: 13, color: C.orange, fontWeight: '700' },
   nearMeTextActive: { color: 'white' },
+  saveSearchChip: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(247,146,30,0.12)',
+    borderRadius: RADIUS.pill,
+    paddingHorizontal: 13, paddingVertical: 8,
+    borderWidth: 1, borderColor: 'rgba(247,146,30,0.3)',
+  },
+  saveSearchText: { fontSize: 13, color: C.orange, fontWeight: '700' },
 
   // Categories
   catsContainer: {
