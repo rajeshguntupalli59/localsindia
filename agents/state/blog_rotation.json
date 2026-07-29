@@ -1,6 +1,6 @@
 {
-  "lastCityIndex": 4,
-  "lastCategoryIndex": 4,
+  "lastCityIndex": 5,
+  "lastCategoryIndex": 5,
   "history": [
     {
       "citySlug": "bangalore",
@@ -31,6 +31,12 @@
       "category": "electronics",
       "topicTemplateId": "used-phone-check",
       "publishedAt": "2026-07-26T05:53:14Z"
+    },
+    {
+      "citySlug": "pune",
+      "category": "services",
+      "topicTemplateId": "hire-reliable-help",
+      "publishedAt": "2026-07-29T13:14:04Z"
     }
   ]
 }
