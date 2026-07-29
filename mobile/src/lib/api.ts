@@ -275,3 +275,20 @@ export const ticketsApi = {
   my: () =>
     api.get('/tickets/my').then(r => r.data),
 };
+
+export const buyerRequestsApi = {
+  list: (citySlug: string) =>
+    api.get(`/buyer-requests/cities/${citySlug}`).then(r => r.data),
+
+  create: (data: { city_slug: string; category_slug: string; description: string; budget?: number; contact_phone: string }) =>
+    api.post('/buyer-requests', data).then(r => r.data),
+
+  report: (id: string, reason: string) =>
+    api.post(`/buyer-requests/${id}/report`, { reason }).then(r => r.data),
+
+  fulfill: (id: string) =>
+    api.patch(`/buyer-requests/${id}/fulfill`).then(r => r.data),
+
+  delete: (id: string) =>
+    api.delete(`/buyer-requests/${id}`).then(r => r.data),
+};

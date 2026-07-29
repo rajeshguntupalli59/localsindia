@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   X, Send, MessageCircle, Search, Utensils, Home, Briefcase, Car,
-  Smartphone, Calendar, Store, GraduationCap, Wrench, Tag, Building2, Sofa, Shirt, Flag,
+  Smartphone, Calendar, Store, GraduationCap, Wrench, Tag, Building2, Sofa, Shirt, Flag, Check, Trash2,
   type LucideIcon,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -28,14 +28,43 @@ export default function BuyerRequestsSection({ citySlug }: Props) {
   const [requests, setRequests] = useState<BuyerRequestOut[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [showModal, setShowModal] = useState(false);
-  const [form, setForm] = useState({ category_slug: '', description: '', budget: '' });
+  const [form, setForm] = useState({ category_slug: '', description: '', budget: '', contact_phone: '' });
   const [submitting, setSubmitting] = useState(false);
   const [reportedIds, setReportedIds] = useState<Set<string>>(new Set());
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   useEffect(() => {
     api.buyerRequests.list(citySlug).then(setRequests).catch(() => {});
     api.categories.list().then(setCategories).catch(() => {});
+    try {
+      const user = JSON.parse(localStorage.getItem('user') ?? 'null');
+      setCurrentUserId(user?.id ?? null);
+    } catch { /* no-op */ }
   }, [citySlug]);
+
+  const handleFulfill = async (id: string) => {
+    const token = localStorage.getItem('access_token');
+    if (!token) return;
+    try {
+      await api.buyerRequests.fulfill(id, token);
+      setRequests(prev => prev.filter(r => r.id !== id));
+      toast.success('Marked as fulfilled');
+    } catch {
+      toast.error('Could not update request');
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    const token = localStorage.getItem('access_token');
+    if (!token) return;
+    try {
+      await api.buyerRequests.delete(id, token);
+      setRequests(prev => prev.filter(r => r.id !== id));
+      toast.success('Request deleted');
+    } catch {
+      toast.error('Could not delete request');
+    }
+  };
 
   const handleReport = async (id: string) => {
     const token = localStorage.getItem('access_token');
@@ -49,13 +78,24 @@ export default function BuyerRequestsSection({ citySlug }: Props) {
     }
   };
 
+  const openModal = () => {
+    try {
+      const user = JSON.parse(localStorage.getItem('user') ?? 'null');
+      // Pre-fill from the account's phone as a starting suggestion, but this
+      // request may need a different number to reach the poster — always
+      // shown and editable, never silently sent behind the scenes.
+      const digits = (user?.phone ?? '').replace('+91', '');
+      setForm(f => ({ ...f, contact_phone: digits }));
+    } catch { /* no-op */ }
+    setShowModal(true);
+  };
+
   const handlePost = async () => {
     if (!form.category_slug) { toast.error('Pick a category'); return; }
     if (form.description.trim().length < 10) { toast.error('Describe what you need (10+ chars)'); return; }
+    if (!/^[6-9]\d{9}$/.test(form.contact_phone)) { toast.error('Enter a valid 10-digit mobile number for buyers to contact you'); return; }
     const token = localStorage.getItem('access_token');
     if (!token) { toast.error('Please login to post a request'); return; }
-    const user = JSON.parse(localStorage.getItem('user') ?? '{}');
-    if (!user.phone) { toast.error('Please add your phone number in profile'); return; }
 
     setSubmitting(true);
     try {
@@ -64,11 +104,11 @@ export default function BuyerRequestsSection({ citySlug }: Props) {
         category_slug: form.category_slug,
         description: form.description.trim(),
         budget: form.budget ? parseFloat(form.budget) : undefined,
-        contact_phone: user.phone,
+        contact_phone: `+91${form.contact_phone}`,
       }, token);
       setRequests(prev => [r, ...prev]);
       setShowModal(false);
-      setForm({ category_slug: '', description: '', budget: '' });
+      setForm({ category_slug: '', description: '', budget: '', contact_phone: '' });
       toast.success('Request posted! Sellers will reach out on WhatsApp.');
     } catch {
       toast.error('Could not post request');
@@ -88,7 +128,7 @@ export default function BuyerRequestsSection({ citySlug }: Props) {
           <p className="text-xs" style={{ color: 'var(--li-muted)' }}>People looking to buy — reach out if you have it</p>
         </div>
         <button
-          onClick={() => setShowModal(true)}
+          onClick={openModal}
           className="text-xs font-bold px-3 py-1.5 rounded-full text-white"
           style={{ background: 'var(--li-primary)' }}
         >
@@ -99,7 +139,9 @@ export default function BuyerRequestsSection({ citySlug }: Props) {
       {/* Request cards — horizontal scroll */}
       {requests.length > 0 ? (
         <div className="flex gap-3 overflow-x-auto px-4 pb-2 snap-x" style={{ scrollbarWidth: 'none' }}>
-          {requests.map(r => (
+          {requests.map(r => {
+            const isOwner = currentUserId !== null && r.user_id === currentUserId;
+            return (
             <div
               key={r.id}
               className="shrink-0 w-52 bg-white rounded-2xl border p-3 snap-start"
@@ -113,17 +155,19 @@ export default function BuyerRequestsSection({ citySlug }: Props) {
                   })()}
                   <span className="text-xs font-semibold" style={{ color: 'var(--li-muted)' }}>{r.category_name}</span>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => handleReport(r.id)}
-                  disabled={reportedIds.has(r.id)}
-                  aria-label="Report this request"
-                  title={reportedIds.has(r.id) ? 'Reported' : 'Report this request'}
-                  className="shrink-0 transition-colors disabled:cursor-default"
-                  style={{ color: reportedIds.has(r.id) ? '#EF4444' : 'var(--li-muted)' }}
-                >
-                  <Flag className="w-3.5 h-3.5" />
-                </button>
+                {!isOwner && (
+                  <button
+                    type="button"
+                    onClick={() => handleReport(r.id)}
+                    disabled={reportedIds.has(r.id)}
+                    aria-label="Report this request"
+                    title={reportedIds.has(r.id) ? 'Reported' : 'Report this request'}
+                    className="shrink-0 transition-colors disabled:cursor-default"
+                    style={{ color: reportedIds.has(r.id) ? '#EF4444' : 'var(--li-muted)' }}
+                  >
+                    <Flag className="w-3.5 h-3.5" />
+                  </button>
+                )}
               </div>
               <p className="text-sm font-semibold line-clamp-2 mb-1" style={{ color: 'var(--li-text)' }}>
                 {r.description}
@@ -134,17 +178,41 @@ export default function BuyerRequestsSection({ citySlug }: Props) {
                 </p>
               )}
               <p className="text-[10px] mb-2" style={{ color: 'var(--li-muted)' }}>{timeAgo(r.created_at)}</p>
-              <a
-                href={`https://wa.me/${r.contact_phone.replace('+', '')}?text=${encodeURIComponent(`Hi! I saw your request on LocalIndia for "${r.description.slice(0, 50)}" — I can help!`)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-1.5 w-full py-1.5 rounded-xl text-xs font-bold text-white"
-                style={{ background: '#25D366' }}
-              >
-                <MessageCircle className="w-3.5 h-3.5" /> I have this!
-              </a>
+              {isOwner ? (
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleFulfill(r.id)}
+                    className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-xl text-xs font-bold text-white"
+                    style={{ background: 'var(--li-primary)' }}
+                  >
+                    <Check className="w-3.5 h-3.5" /> Fulfilled
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(r.id)}
+                    aria-label="Delete request"
+                    title="Delete request"
+                    className="px-2.5 rounded-xl border"
+                    style={{ borderColor: 'var(--li-border)', color: 'var(--li-muted)' }}
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ) : (
+                <a
+                  href={`https://wa.me/${r.contact_phone.replace('+', '')}?text=${encodeURIComponent(`Hi! I saw your request on LocalIndia for "${r.description.slice(0, 50)}" — I can help!`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-1.5 w-full py-1.5 rounded-xl text-xs font-bold text-white"
+                  style={{ background: '#25D366' }}
+                >
+                  <MessageCircle className="w-3.5 h-3.5" /> I have this!
+                </a>
+              )}
             </div>
-          ))}
+            );
+          })}
         </div>
       ) : (
         <p className="px-4 text-sm" style={{ color: 'var(--li-muted)' }}>
@@ -211,7 +279,7 @@ export default function BuyerRequestsSection({ citySlug }: Props) {
 
               {/* Budget */}
               <p className="text-xs font-semibold mb-2" style={{ color: 'var(--li-muted)' }}>Budget (optional)</p>
-              <div className="relative mb-5">
+              <div className="relative mb-4">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold" style={{ color: 'var(--li-muted)' }}>₹</span>
                 <input
                   type="number"
@@ -223,6 +291,24 @@ export default function BuyerRequestsSection({ citySlug }: Props) {
                 />
               </div>
 
+              {/* Contact number — always shown and editable, never silently
+                  sent from the account's phone behind the scenes */}
+              <p className="text-xs font-semibold mb-2" style={{ color: 'var(--li-muted)' }}>Contact number</p>
+              <div className="flex items-center gap-2 rounded-xl px-4 mb-2" style={{ border: '2px solid var(--li-border)' }}>
+                <span className="text-sm font-bold" style={{ color: 'var(--li-text)' }}>🇮🇳 +91</span>
+                <input
+                  type="tel"
+                  value={form.contact_phone}
+                  onChange={e => setForm(f => ({ ...f, contact_phone: e.target.value.replace(/\D/g, '').slice(0, 10) }))}
+                  placeholder="10-digit number"
+                  className="flex-1 py-3 text-sm outline-none"
+                  style={{ color: 'var(--li-text)' }}
+                />
+              </div>
+              <p className="text-xs mb-5" style={{ color: 'var(--li-muted)' }}>
+                Buyers will see and message this number on WhatsApp — change it if you&apos;d rather they reach a different one.
+              </p>
+
               <button
                 onClick={handlePost}
                 disabled={submitting}
@@ -232,9 +318,6 @@ export default function BuyerRequestsSection({ citySlug }: Props) {
                 <Send className="w-4 h-4" />
                 {submitting ? 'Posting...' : 'Post Request'}
               </button>
-              <p className="text-xs text-center mt-3" style={{ color: 'var(--li-muted)' }}>
-                Sellers in your city will contact you on WhatsApp
-              </p>
             </motion.div>
           </motion.div>
         )}

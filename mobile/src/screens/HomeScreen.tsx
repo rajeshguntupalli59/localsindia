@@ -11,6 +11,7 @@ import ListingCard from '../components/ListingCard';
 import NotificationBell from '../components/NotificationBell';
 import AlertOnboardingSheet from '../components/AlertOnboardingSheet';
 import CityAutoDetectPrompt from '../components/CityAutoDetectPrompt';
+import BuyerRequestsSection from '../components/BuyerRequestsSection';
 
 const LOGO = require('../../assets/logo-mark-transparent.png');
 
@@ -334,6 +335,9 @@ export default function HomeScreen({ navigation }: any) {
             );
           })}
         </View>
+
+        {/* ── Wanted: buyer requests ── */}
+        <BuyerRequestsSection citySlug={citySlug} navigation={navigation} />
 
         <View style={{ height: 32 }} />
       </ScrollView>
