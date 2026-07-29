@@ -628,6 +628,16 @@ Also `GET /api/v1/admin/errors` (admin-only, see Admin section below) — lists 
 | DELETE | `/businesses/{id}` | Soft-delete business (admin or owner only) | Yes |
 | POST | `/businesses/{id}/claim` | Claim ownership of unclaimed business | Yes |
 | POST | `/businesses/{id}/reviews` | Add review (recalculates avg_rating) | Yes |
+| POST | `/businesses/{id}/view` | Fire-and-forget view-count event (feeds analytics below) | No |
+| POST | `/businesses/{id}/wa-click` | Fire-and-forget WhatsApp-click event (feeds analytics below) | No |
+
+### Business Analytics: `/api/v1/analytics` (Phase 3, 2026-07-18; mobile parity 2026-07-28)
+
+| Method | Path | What it does | Auth? |
+|--------|------|-------------|-------|
+| GET | `/analytics/business/{id}` | 30-day totals (views, WhatsApp taps, review count, avg rating) + a daily views/whatsapp-click trend, aggregated from `analytics_events` | Yes, owner or admin only (403 otherwise) |
+
+Web: `BusinessDashboardClient.tsx`, reached via a "View Analytics" link on `BusinessDetailClient.tsx` shown whenever `business.owner_id` is set (not narrowed to the *current* user client-side — the 403 above is what actually enforces it). Mobile (added 2026-07-28): `BusinessDashboardScreen.tsx`, same stat cards + a plain `View`-based bar chart, reached via an owner-gated "View Analytics" button on `BusinessDetailScreen.tsx` that checks the real current-user id client-side (stricter than web).
 
 ### Events: `/api/v1`
 
@@ -658,6 +668,20 @@ Also `GET /api/v1/admin/errors` (admin-only, see Admin section below) — lists 
 | GET | `/banners` | All city banners, newest first (added 2026-07-20) |
 | POST | `/banners` | Create a banner: `{city_id, advertiser_name, image_url, link_url, start_date, end_date}` — 400 if `end_date < start_date` |
 | DELETE | `/banners/{id}` | Remove a banner |
+| GET | `/buyer-requests` | Flagged buyer requests + their individual reports (added 2026-07-27) |
+| PATCH | `/buyer-requests/{id}/restore` | Un-flag a buyer request -> status='open' (added 2026-07-27) |
+
+### Buyer Requests ("Wanted"): `/api/v1/buyer-requests`
+
+| Method | Path | What it does | Auth? |
+|--------|------|-------------|-------|
+| GET | `/buyer-requests/cities/{slug}` | Open (non-flagged) requests for a city, newest first, limit 20 | No |
+| POST | `/buyer-requests` | Create request -> status='open' | Yes |
+| POST | `/buyer-requests/{id}/report` | Report a request — 3 reports auto-flags it (hidden from the public feed), same BL-04 pattern as listing reports (added 2026-07-27) | Yes |
+| PATCH | `/buyer-requests/{id}/fulfill` | Mark fulfilled -> drops out of public feed | Yes, owner/admin |
+| DELETE | `/buyer-requests/{id}` | Soft-delete | Yes, owner/admin |
+
+"Wanted" posts — a buyer describes what they're looking for (category, description, budget, contact number) instead of a seller posting a listing. Web: `BuyerRequestsSection.tsx` on `[city]/CityHomeClient.tsx`, plus `admin/buyer-requests/page.tsx` for moderation (mirrors `admin/reports/page.tsx`). Mobile (added 2026-07-27 — the feature didn't exist on mobile at all before this): `mobile/src/components/BuyerRequestsSection.tsx` on `HomeScreen.tsx`. The `fulfill`/`delete` endpoints existed since the feature's original build but neither platform's UI ever called them until 2026-07-27 — a posted request just sat "open" forever with no way to close it except getting flagged; both platforms now have "Mark fulfilled"/delete for the poster's own requests. Also added the same day: an explicit, editable "Contact number" field on the post form on both platforms — previously the contact number was silently pulled from the poster's account phone and never shown or editable.
 
 ### Payments: `/api/v1/payments`
 
@@ -701,8 +725,20 @@ Separately (not a cron change): "Mark as Sold" on `MyListingsScreen.tsx` is now 
 
 | Method | Path | What it does | Auth? |
 |--------|------|-------------|-------|
-| POST | `/saved-searches` | Save a search alert (`city_slug`, `query`, optional `category_slug`) | Yes |
-| GET | `/saved-searches` | List current user's saved searches | Yes |
+| POST | `/saved-searches` | Save a search alert (`city_slug`, `query_text`, optional `category_slug`) — 409 if an identical one is already saved | Yes |
+| GET | `/saved-searches` | List current user's saved searches, newest first | Yes |
+| DELETE | `/saved-searches/{id}` | Remove a saved search (owner only) | Yes |
+
+These endpoints existed long before there was any UI to call POST — the web `/profile/saved-searches` list/run/delete page was built first, with no "Save search" button anywhere, so the whole feature was inert on both platforms. Fixed 2026-07-28: a "Save search" trigger was added to both `[city]/search/page.tsx` (web) and `SearchScreen.tsx` (mobile), plus the mirroring `SavedSearchesScreen.tsx` list/run/delete page on mobile (`ProfileScreen.tsx` → "Saved Searches").
+
+### Preferences (interests + alert frequency): `/api/v1/preferences`
+
+| Method | Path | What it does | Auth? |
+|--------|------|-------------|-------|
+| GET | `/preferences` | Current user's `interests`, `budget_min/max`, `city_prefs`, `timeline`, `alert_frequency`, `push_enabled`, `onboarding_done` | Yes |
+| POST | `/preferences` | Upsert preferences (creates the row on first save) | Yes |
+
+Backs the "I'm looking for" interests + notification-cadence settings. Mobile has always had a persistent settings screen for this (`AlertsPrefsScreen.tsx`, reached from Profile). Web previously could only set `interests` once, via `OnboardingQuiz.tsx`'s one-time modal gate — it never set `alert_frequency` at all (silently stayed at the default `'never'`), and there was no way to revisit or change interests afterward. Fixed 2026-07-28: new persistent `/profile/alerts` page mirrors the mobile screen (interest chips + daily/weekly/never radio), reached via a Profile menu entry.
 
 ### Listing Engagement (added Alembic migration `f6a7b8c9d0e1`)
 
@@ -911,6 +947,8 @@ Wrapped in Suspense because it uses `useSearchParams()` (a Next.js requirement r
 
 Filter bar is always visible (no toggle) — sort (newest/price asc/price desc), min/max price, posted-within (24h/7d/30d), verified-only checkbox. Category tabs use `role="tab"` + `aria-selected` and resolve the URL slug → category UUID after categories load so the active tab highlights instantly.
 
+**"Save search" button (added 2026-07-28):** enabled whenever `q` or a category filter is set; calls `POST /api/v1/saved-searches` with the resolved category *slug* (not the UUID this page otherwise filters by — resolved via a lookup against the loaded `categories` list, since `saved_searches.category_slug` needs a slug to round-trip correctly through `/profile/saved-searches`'s "run" action). Prompts login if signed out; shows a distinct "already saved" toast on a 409. Mirrored on mobile's `SearchScreen.tsx`.
+
 ---
 
 ### `/[city]/[category]` — Category Browse
@@ -943,6 +981,17 @@ Yellow Pages style:
 - Review list (sorted newest first)
 - "Write a Review" form (requires login, 1 per user)
 - "Claim this business" button (if no owner set)
+- "View Analytics" link, shown whenever `business.owner_id` is set (client-side check isn't narrowed to the *current* user — `GET /analytics/business/{id}`'s 403 is what actually enforces ownership)
+
+---
+
+### `/[city]/businesses/[id]/dashboard` — Business Analytics Dashboard
+
+**Files:** `app/[city]/businesses/[id]/dashboard/page.tsx` + `BusinessDashboardClient.tsx`
+
+Owner-only (Phase 3, 2026-07-18). 4 stat cards (views/WhatsApp taps/reviews/avg rating, all 30-day), a daily-views bar chart (plain CSS bars, no charting library), and a banner-ad promo card (`mailto:` inquiry link). Backed by `GET /api/v1/analytics/business/{id}`.
+
+Mobile parity added 2026-07-28: `mobile/src/screens/BusinessDashboardScreen.tsx` — same stat cards/chart/promo, reached via an owner-gated "View Analytics" button on `BusinessDetailScreen.tsx` (checks the real current-user id, unlike the web link above).
 
 ---
 
@@ -1006,6 +1055,23 @@ User settings:
 - Set preferred language
 - Change home city
 - Delete account (2026-07-14) — double `confirm()` then `DELETE /api/v1/auth/me`
+- Menu entries: My Listings, Saved Listings, Saved Searches, My Tickets, Alerts & Preferences (added 2026-07-28)
+
+---
+
+### `/profile/saved-searches` — Saved Searches
+
+**File:** `app/profile/saved-searches/page.tsx`
+
+List/run/delete saved searches (`GET`/`DELETE /api/v1/saved-searches`). Tapping a row navigates to `[city]/search` with its `q`/`category` params restored. This page existed with real functionality since before 2026-07-28, but the create side had no UI trigger anywhere — see the "Save search" note on `/[city]/search` below.
+
+---
+
+### `/profile/alerts` — Alerts & Preferences (added 2026-07-28)
+
+**File:** `app/profile/alerts/page.tsx`
+
+Persistent settings for the interests-based feed + notification cadence: interest chips (14 categories, same slugs as the post-listing category picker) and a daily/weekly/never alert-frequency radio group. Reads/writes `GET`/`POST /api/v1/preferences`. Previously the only way to set `interests` on web was `OnboardingQuiz.tsx`'s one-time modal — no persistent page to revisit it, and `alert_frequency` was never set at all (stuck at the `'never'` default). Mirrors mobile's pre-existing `AlertsPrefsScreen.tsx`.
 
 ---
 
@@ -1259,6 +1325,12 @@ Google AdSense slot in the city page footer. Phase 3 monetization feature. Not t
 **File:** `components/city-banner/CityBanner.tsx`
 
 Fetches `GET /cities/{slug}/banner` on mount and renders nothing if the response is `null` — no skeleton, no placeholder, so an unsold city shows no gap. Rendered at the top of `[city]/CityHomeClient.tsx`, directly below the hero. Banners themselves are created and removed from `/admin/banners`, not by advertisers self-serving.
+
+### `BuyerRequestsSection` ("Wanted")
+
+**File:** `components/buyer-requests/BuyerRequestsSection.tsx`
+
+Horizontal "Wanted" row on `[city]/CityHomeClient.tsx` — buyers post what they're looking for (category, description, budget, contact number) instead of a seller posting a listing. Post modal, WhatsApp-contact CTA per request, one-click report (3 reports auto-flags, mirrors BL-04), and "Mark fulfilled"/delete for the poster's own requests. Mobile equivalent (didn't exist at all before 2026-07-27): `mobile/src/components/BuyerRequestsSection.tsx`, a card on `HomeScreen.tsx` after the category grid.
 
 ### `FreshListingsSection`
 
