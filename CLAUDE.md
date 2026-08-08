@@ -1,5 +1,9 @@
 ﻿# LocalIndia â€” Autonomous Build Spec
-> localsindia.com | India's hyperlocal community platform | Start by reading START_HERE.md
+> localsindia.com | India's hyperlocal community platform | Start by reading PROJECT_MAP.md
+
+## Orientation
+- **Read PROJECT_MAP.md first, every session** â€” what's where, which docs are current vs stale, what's actually scheduled (cron ground truth), and a dated changelog. Check it before grepping the repo cold.
+- **After any notable fix/change**: append a dated entry to PROJECT_MAP.md Â§6 (Changelog). Keep it short â€” a few lines, not a report.
 
 ---
 
