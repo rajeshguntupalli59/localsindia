@@ -40,17 +40,64 @@ from meta_client import (
 
 TOPICS = ["app_feature", "category_tip", "safety_tip", "city_spotlight", "app_launch"]
 SPOTLIGHT_CITIES = ["Hyderabad", "Bengaluru", "Chennai", "Kochi", "Vijayawada", "Coimbatore"]
+# category_tip has no default — without one, the model always falls back to
+# its "e.g. jobs" example in the instructions, so every category_tip post
+# ends up being the same fake-job-listing warning. Pick one explicitly.
+TIP_CATEGORIES = [
+    "classifieds", "services", "pg-roommate", "jobs", "vehicles", "electronics",
+    "events", "businesses", "tiffin", "real-estate", "furniture", "fashion",
+]
 
 OUTPUT_DIR = Path(__file__).parent / "output" / "social_posts"
 LOG_PATH = Path(__file__).parent / "output" / "social_posts_log.jsonl"
+ROTATION_STATE_FILE = Path(__file__).parent / "state" / "meta_poster_rotation.json"
 
 BASE_SYSTEM = build_system_prompt("meta_poster")
 
 
-def generate_post(topic: str) -> dict:
+def load_rotation_state() -> dict:
+    if ROTATION_STATE_FILE.exists():
+        return json.loads(ROTATION_STATE_FILE.read_text(encoding="utf-8"))
+    return {"lastTopicIndex": -1, "lastTipCategoryIndex": -1, "topicHistory": [], "tipCategoryHistory": []}
+
+
+def save_rotation_state(state: dict) -> None:
+    ROTATION_STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
+    ROTATION_STATE_FILE.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def pick_next(items: list[str], last_index: int, history: list[str], window: int) -> tuple[str, int]:
+    """Round-robin through items, skipping anything used in the last `window` picks."""
+    recent = set(history[-window:])
+    for _ in range(len(items)):
+        idx = (last_index + 1) % len(items)
+        last_index = idx
+        if items[idx] not in recent:
+            return items[idx], idx
+    # Every item was used recently (window >= len(items)) — take the next one anyway.
+    return items[last_index], last_index
+
+
+def pick_topic(state: dict) -> str:
+    topic, idx = pick_next(TOPICS, state["lastTopicIndex"], state["topicHistory"], window=3)
+    state["lastTopicIndex"] = idx
+    state["topicHistory"] = (state["topicHistory"] + [topic])[-10:]
+    return topic
+
+
+def pick_tip_category(state: dict) -> str:
+    category, idx = pick_next(TIP_CATEGORIES, state["lastTipCategoryIndex"], state["tipCategoryHistory"], window=6)
+    state["lastTipCategoryIndex"] = idx
+    state["tipCategoryHistory"] = (state["tipCategoryHistory"] + [category])[-10:]
+    return category
+
+
+def generate_post(topic: str, state: dict) -> dict:
     extra = ""
     if topic == "city_spotlight":
         extra = f"\n\nCity for this spotlight: {random.choice(SPOTLIGHT_CITIES)}"
+    elif topic == "category_tip":
+        extra = f"\n\nCategory for this tip: {pick_tip_category(state)}"
 
     prompt = f"""Generate one social post for topic: {topic}{extra}
 
@@ -90,10 +137,12 @@ def log_post(entry: dict) -> None:
 
 
 def run(topic: str | None, publish: bool, fmt: str) -> None:
-    topic = topic or random.choice(TOPICS)
+    state = load_rotation_state()
+    topic = topic or pick_topic(state)
     print(f"[MetaPoster] Topic: {topic} | Format: {fmt}")
 
-    post = generate_post(topic)
+    post = generate_post(topic, state)
+    save_rotation_state(state)
     print(f"[MetaPoster] Headline: {post['headline']}")
     print(f"[MetaPoster] Caption: {post['caption']}")
 

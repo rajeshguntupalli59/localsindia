@@ -127,6 +127,7 @@ jobs:
           [ -f agents/output/social_posts_log.jsonl ] && git add agents/output/social_posts_log.jsonl
           [ -f agents/output/ecosystem_posts_log.jsonl ] && git add agents/output/ecosystem_posts_log.jsonl
           [ -f agents/output/llm_usage_log.jsonl ] && git add agents/output/llm_usage_log.jsonl
+          [ -f agents/state/meta_poster_rotation.json ] && git add agents/state/meta_poster_rotation.json
           if git diff --cached --quiet; then
             echo "No log changes to commit"
             exit 0
