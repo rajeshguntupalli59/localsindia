@@ -1,6 +1,6 @@
 {
-  "lastCityIndex": 7,
-  "lastCategoryIndex": 0,
+  "lastCityIndex": 8,
+  "lastCategoryIndex": 1,
   "history": [
     {
       "citySlug": "bangalore",
@@ -49,6 +49,12 @@
       "category": "pg-roommate",
       "topicTemplateId": "negotiate-rent",
       "publishedAt": "2026-08-08T03:00:47Z"
+    },
+    {
+      "citySlug": "jaipur",
+      "category": "tiffin",
+      "topicTemplateId": "hygiene-check",
+      "publishedAt": "2026-08-09T04:12:31Z"
     }
   ]
 }
