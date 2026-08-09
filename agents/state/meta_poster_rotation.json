@@ -1,5 +1,5 @@
 {
-  "lastTopicIndex": 3,
+  "lastTopicIndex": 4,
   "lastTipCategoryIndex": -1,
   "topicHistory": [
     "safety_tip",
@@ -7,7 +7,8 @@
     "category_tip",
     "app_feature",
     "safety_tip",
-    "city_spotlight"
+    "city_spotlight",
+    "app_launch"
   ],
   "tipCategoryHistory": [
     "jobs",
