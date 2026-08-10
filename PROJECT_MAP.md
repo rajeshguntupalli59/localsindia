@@ -98,6 +98,13 @@ All 5 cron-scheduled workflows were manually triggered and verified working 2026
 
 ## 6. Changelog (dated, most recent first — append here after notable sessions)
 
+### 2026-08-08 — Social post visual redesign: topic theming + 5 rotating styles
+- The old `render_post_image.js` template was one flat dark card (navy bg, two blurry circles) reused for every post regardless of topic — founder flagged it as "too basic" / repetitive.
+- Added topic-aware theming: each of the 5 topics gets its own icon, accent color, and eyebrow label.
+- Added 5 independent layout styles — `glass` (frosted card over gradient), `bold` (oversized poster typography), `duotone` (diagonal color split), `quote` (light-background quote card), `spotlight` (solid billboard, headline in center-upper third) — rotated round-robin-no-repeat via `agents/state/meta_poster_rotation.json`, same pattern as the topic/category fix below, so style varies independently of topic.
+- Design informed by web research on scroll-stopping content: 1.7s attention window, value-contrast (light/dark) matters more than hue, center-upper-third eye placement, quote-cards as a high-share pattern.
+- Deliberately kept to CSS/SVG via the existing Playwright pipeline rather than per-post AI image generation (considered, but the connected image-gen account had 0.05 credits — plus per-post AI generation would add cost/latency/inconsistency to an unsupervised daily schedule anyway). Commit `e1a0d8f`.
+
 ### 2026-08-08 — Social Poster diagnosis, full scheduled-workflow health check, repeat-content fix
 - **Bug found**: `social-poster.yml` had been failing 401 (Anthropic auth error) on every scheduled run since 2026-08-05 15:37 UTC. Root cause was a bad/expired `ANTHROPIC_API_KEY` GitHub secret (self-resolved by the time of manual retest — no key rotation was actually needed).
 - **Health check**: manually triggered all 5 cron-scheduled workflows (`social-poster`, `blog-publisher`, `expiry-reminders`, `interest-digest`, `keepalive`) — all confirmed working. Real posts went out to Facebook/Instagram, a real blog article was published, real reminder/digest sends happened (user explicitly approved firing these off-schedule despite the near-term duplicate-send risk).
