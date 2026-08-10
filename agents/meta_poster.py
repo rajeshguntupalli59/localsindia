@@ -47,6 +47,12 @@ TIP_CATEGORIES = [
     "classifieds", "services", "pg-roommate", "jobs", "vehicles", "electronics",
     "events", "businesses", "tiffin", "real-estate", "furniture", "fashion",
 ]
+# Visual layout, independent of topic — rotated the same way as topic so two
+# consecutive posts don't look identical even when they land on the same
+# topic. "quote" is deliberately a light background — the other 4 are dark,
+# and value-contrast against the feed matters more than hue (see
+# render_post_image.js STYLE_RENDERERS for what each one looks like).
+STYLES = ["glass", "bold", "duotone", "quote", "spotlight"]
 
 OUTPUT_DIR = Path(__file__).parent / "output" / "social_posts"
 LOG_PATH = Path(__file__).parent / "output" / "social_posts_log.jsonl"
@@ -57,8 +63,14 @@ BASE_SYSTEM = build_system_prompt("meta_poster")
 
 def load_rotation_state() -> dict:
     if ROTATION_STATE_FILE.exists():
-        return json.loads(ROTATION_STATE_FILE.read_text(encoding="utf-8"))
-    return {"lastTopicIndex": -1, "lastTipCategoryIndex": -1, "topicHistory": [], "tipCategoryHistory": []}
+        state = json.loads(ROTATION_STATE_FILE.read_text(encoding="utf-8"))
+        state.setdefault("lastStyleIndex", -1)
+        state.setdefault("styleHistory", [])
+        return state
+    return {
+        "lastTopicIndex": -1, "lastTipCategoryIndex": -1, "lastStyleIndex": -1,
+        "topicHistory": [], "tipCategoryHistory": [], "styleHistory": [],
+    }
 
 
 def save_rotation_state(state: dict) -> None:
@@ -92,6 +104,13 @@ def pick_tip_category(state: dict) -> str:
     return category
 
 
+def pick_style(state: dict) -> str:
+    style, idx = pick_next(STYLES, state["lastStyleIndex"], state["styleHistory"], window=2)
+    state["lastStyleIndex"] = idx
+    state["styleHistory"] = (state["styleHistory"] + [style])[-10:]
+    return style
+
+
 def generate_post(topic: str, state: dict) -> dict:
     extra = ""
     if topic == "city_spotlight":
@@ -112,7 +131,7 @@ Return ONLY the JSON object described in your instructions — no markdown fence
     return json.loads(raw)
 
 
-def render_image(headline: str, tag: str, fmt: str, out_path: Path) -> Path:
+def render_image(headline: str, tag: str, topic: str, style: str, fmt: str, out_path: Path) -> Path:
     result = subprocess.run(
         [
             "node",
@@ -120,6 +139,8 @@ def render_image(headline: str, tag: str, fmt: str, out_path: Path) -> Path:
             "--format", fmt,
             "--headline", headline,
             "--tag", tag,
+            "--topic", topic,
+            "--style", style,
             "--out", str(out_path),
         ],
         capture_output=True,
@@ -139,7 +160,8 @@ def log_post(entry: dict) -> None:
 def run(topic: str | None, publish: bool, fmt: str) -> None:
     state = load_rotation_state()
     topic = topic or pick_topic(state)
-    print(f"[MetaPoster] Topic: {topic} | Format: {fmt}")
+    style = pick_style(state)
+    print(f"[MetaPoster] Topic: {topic} | Style: {style} | Format: {fmt}")
 
     post = generate_post(topic, state)
     save_rotation_state(state)
@@ -173,8 +195,8 @@ def run(topic: str | None, publish: bool, fmt: str) -> None:
     square_path = OUTPUT_DIR / f"{stamp}_square.png"
     story_path = OUTPUT_DIR / f"{stamp}_story.png"
 
-    render_image(post["headline"], tag, "square", square_path)
-    render_image(post["headline"], tag, "story", story_path)
+    render_image(post["headline"], tag, topic, style, "square", square_path)
+    render_image(post["headline"], tag, topic, style, "story", story_path)
     print(f"[MetaPoster] Rendered: {square_path}, {story_path}")
 
     if not publish:
