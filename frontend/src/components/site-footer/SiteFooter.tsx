@@ -26,6 +26,17 @@ const IconYouTube = () => (
   </svg>
 );
 
+const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.localsindia.app';
+
+const IconGooglePlay = () => (
+  <svg viewBox="0 0 24 24" className="w-6 h-6" aria-hidden>
+    <path d="M3.6 2.4a1.5 1.5 0 0 0-.6 1.2v16.8a1.5 1.5 0 0 0 .6 1.2l9.6-10.2-9.6-9z" fill="#00D2FF"/>
+    <path d="M16.8 8.4 3.6 2.4l9.6 9 3.6-3z" fill="#00F076"/>
+    <path d="M16.8 15.6 13.2 12l3.6-3 4.02 2.28a1.5 1.5 0 0 1 0 2.64L16.8 15.6z" fill="#FFCF00"/>
+    <path d="M3.6 21.6 13.2 12l3.6 3.6-9.6 9a1.5 1.5 0 0 1-3.6-3z" fill="#FF3A44"/>
+  </svg>
+);
+
 const SOCIALS = [
   { label: 'X (Twitter)',  Icon: IconX,         href: 'https://x.com/localsindia',         hover: 'hover:text-slate-200 hover:bg-white/[0.12]' },
   { label: 'Instagram',   Icon: IconInstagram,  href: 'https://www.instagram.com/localsindia1/',  hover: 'hover:text-pink-400  hover:bg-pink-500/[0.12]' },
@@ -83,6 +94,22 @@ export default function SiteFooter() {
                 </a>
               ))}
             </div>
+
+            {/* Google Play badge — live since 2026-08-11 */}
+            <a
+              href={PLAY_STORE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl
+                bg-white/[0.06] hover:bg-white/[0.10] border border-white/[0.08]
+                transition-all duration-200"
+            >
+              <IconGooglePlay />
+              <span className="flex flex-col leading-tight text-left">
+                <span className="text-[9px] text-slate-400 tracking-wide">GET IT ON</span>
+                <span className="text-[13px] font-semibold text-slate-100">Google Play</span>
+              </span>
+            </a>
           </div>
 
           {/* ── Link columns ── */}

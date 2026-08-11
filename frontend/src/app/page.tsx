@@ -726,6 +726,17 @@ export default function HomePage() {
                 <ArrowRight className="w-3.5 h-3.5" strokeWidth={2.2} />
               </button>
             </div>
+
+            <a
+              href="https://play.google.com/store/apps/details?id=com.localsindia.app"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 mt-5 text-[12.5px] font-medium
+                text-slate-500 hover:text-slate-300 transition-colors duration-150"
+            >
+              Now also on Google Play
+              <ArrowRight className="w-3 h-3" strokeWidth={2.2} />
+            </a>
           </div>
         </div>
       </section>
