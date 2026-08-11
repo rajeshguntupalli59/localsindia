@@ -44,12 +44,16 @@ const TOPIC_ICON_PATHS = {
 // Duotone gradient + accent per topic, built from brand colors only
 // (#F7921E orange, #F7B731 amber, #163D6B navy, #25D366 WhatsApp green) —
 // no off-brand hues, just different weighting so each topic feels distinct.
+// footer: the line every style shows at the bottom / cta: the button
+// label on styles that have one (glass) — both were previously hardcoded
+// to the same generic "Free to post..." line regardless of topic, so an
+// app_launch post never actually told anyone to download the app.
 const TOPIC_THEMES = {
-  app_feature: { eyebrow: 'APP FEATURE', accent: '#F7921E', glowA: '#F7921E', glowB: '#163D6B' },
-  category_tip: { eyebrow: 'QUICK TIP', accent: '#F7B731', glowA: '#163D6B', glowB: '#F7B731' },
-  safety_tip: { eyebrow: 'STAY SAFE', accent: '#FF7A45', glowA: '#FF7A45', glowB: '#163D6B' },
-  city_spotlight: { eyebrow: 'CITY SPOTLIGHT', accent: '#25D366', glowA: '#163D6B', glowB: '#25D366' },
-  app_launch: { eyebrow: 'GET STARTED', accent: '#F7921E', glowA: '#F7921E', glowB: '#F7B731' },
+  app_feature: { eyebrow: 'APP FEATURE', accent: '#F7921E', glowA: '#F7921E', glowB: '#163D6B', footer: 'Free to post · WhatsApp contact · localsindia.com', cta: 'Post free on LocalsIndia →' },
+  category_tip: { eyebrow: 'QUICK TIP', accent: '#F7B731', glowA: '#163D6B', glowB: '#F7B731', footer: 'Free to post · WhatsApp contact · localsindia.com', cta: 'Post free on LocalsIndia →' },
+  safety_tip: { eyebrow: 'STAY SAFE', accent: '#FF7A45', glowA: '#FF7A45', glowB: '#163D6B', footer: 'Browse safely · localsindia.com', cta: 'Browse LocalsIndia →' },
+  city_spotlight: { eyebrow: 'CITY SPOTLIGHT', accent: '#25D366', glowA: '#163D6B', glowB: '#25D366', footer: 'Free to post · WhatsApp contact · localsindia.com', cta: 'Post free on LocalsIndia →' },
+  app_launch: { eyebrow: 'GET STARTED', accent: '#F7921E', glowA: '#F7921E', glowB: '#F7B731', footer: 'Download on Google Play · localsindia.com', cta: 'Download on Google Play →' },
 };
 const DEFAULT_THEME = TOPIC_THEMES.app_feature;
 const STYLES = ['glass', 'bold', 'duotone'];
@@ -101,8 +105,8 @@ function renderGlass({ width, height, headline, tag, theme, iconPath, logoPath, 
       <div class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="#0A0C17" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${iconPath}</svg>${theme.eyebrow}</div>
       <div class="headline">${headline}</div>
       ${tag ? `<div class="subtext">${tag}</div>` : ''}
-      <div class="cta">Post free on LocalsIndia →</div>
-      <div class="footer"><div class="footer-dot"></div><div class="footer-text">Free to post · WhatsApp contact · localsindia.com</div></div>
+      <div class="cta">${theme.cta}</div>
+      <div class="footer"><div class="footer-dot"></div><div class="footer-text">${theme.footer}</div></div>
     </div>
   </div></body></html>`;
 }
@@ -136,7 +140,7 @@ function renderBold({ width, height, headline, tag, theme, iconPath, logoPath, i
     <div class="headline">${headline}</div>
     <div class="underline"></div>
     ${tag ? `<div class="tag-chip">${tag}</div>` : ''}
-    <div class="footer"><div class="footer-dot"></div><div class="footer-text">Free to post · WhatsApp contact · localsindia.com</div></div>
+    <div class="footer"><div class="footer-dot"></div><div class="footer-text">${theme.footer}</div></div>
   </div></body></html>`;
 }
 
@@ -166,7 +170,7 @@ function renderDuotone({ width, height, headline, tag, theme, iconPath, logoPath
     <div class="eyebrow-chip"><svg viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${iconPath}</svg>${theme.eyebrow}</div>
     <div class="headline">${headline}</div>
     ${tag ? `<div class="tag-chip">${tag}</div>` : ''}
-    <div class="footer"><div class="footer-dot"></div><div class="footer-text">Free to post · WhatsApp contact · localsindia.com</div></div>
+    <div class="footer"><div class="footer-dot"></div><div class="footer-text">${theme.footer}</div></div>
   </div></body></html>`;
 }
 
@@ -197,7 +201,7 @@ function renderQuote({ width, height, headline, tag, theme, iconPath, logoPath, 
     <div class="headline">${headline}</div>
     <div class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="${theme.accent}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${iconPath}</svg>${theme.eyebrow}</div>
     ${tag ? `<div class="tag-chip">${tag}</div>` : ''}
-    <div class="bottom-row"><img class="logo" src="file:///${logoPath}" /><div class="wordmark">LocalsIndia · localsindia.com</div></div>
+    <div class="bottom-row"><img class="logo" src="file:///${logoPath}" /><div class="wordmark">${theme.footer}</div></div>
   </div></body></html>`;
 }
 
@@ -224,7 +228,7 @@ function renderSpotlight({ width, height, headline, tag, theme, iconPath, logoPa
     <div class="eyebrow">${theme.eyebrow}</div>
     <div class="headline">${headline}</div>
     ${tag ? `<div class="tag-chip">${tag}</div>` : ''}
-    <div class="footer">Free to post · WhatsApp contact · localsindia.com</div>
+    <div class="footer">${theme.footer}</div>
   </div></body></html>`;
 }
 
