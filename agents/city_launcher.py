@@ -3,15 +3,22 @@
 CityLauncher — Seeds a new LocalIndia city with AI-generated content.
 
 Usage:
-  python agents/city_launcher.py --city "Vijayawada" --lang "te"
+  python agents/city_launcher.py --city "Vijayawada"                # single city, lang from DB's lang_default
   python agents/city_launcher.py --city "Mumbai" --lang "mr" --dry-run
-  python agents/city_launcher.py --city "Coimbatore" --lang "ta" --env-file .env.local
+  python agents/city_launcher.py --auto 10                          # daily batch: next 10 empty cities
+  python agents/city_launcher.py --auto 10 --dry-run
 
 What it does:
   1. Asks Claude to generate 20 seed listings + 10 businesses + launch content
-  2. POSTs listings to the live API (as admin) and auto-approves them
+  2. POSTs listings to the live API (as admin, is_seed=true — exempt from the
+     30-day expiry cron, see routers/cron.py) and auto-approves them
   3. POSTs businesses to the live API
   4. Saves all generated content to agents/output/{city_slug}/
+
+--auto N finds the next N cities with zero active listings (queried live,
+sorted state/name) and seeds each in turn — no separate rotation-state file,
+so it's self-correcting: a city that got seeded (or picked up a real user
+listing) just won't show up as "empty" again.
 
 Env vars required (set in .env or environment):
   ANTHROPIC_API_KEY          — Claude API key
@@ -252,140 +259,127 @@ def parse_claude_response(raw: str) -> dict:
 
 # ─── Main ──────────────────────────────────────────────────────────────────────
 
-async def run(city: str, lang: str, dry_run: bool, password: str | None, max_listings: int = 20):
-    print(f"\n[CityLauncher] {city} ({LANG_NAMES.get(lang, lang)})")
+async def determine_empty_cities(client: httpx.AsyncClient) -> list[dict]:
+    """Cities with zero active listings right now, queried live rather than
+    tracked in a state file — self-correcting as cities get seeded (or as
+    real users post in a previously-empty city), immune to the kind of
+    staleness that hit MARKETING_TASKS.md's hand-maintained seeding table."""
+    cities = await fetch_cities(client)
+    empty = []
+    for c in cities:
+        resp = await client.get(
+            f"{BACKEND_URL}/api/v1/cities/{c['slug']}/listings",
+            params={"page_size": 1, "status": "active"},
+            timeout=30,
+        )
+        resp.raise_for_status()
+        if len(resp.json()) == 0:
+            empty.append(c)
+    empty.sort(key=lambda c: (c["state"], c["name"]))
+    return empty
+
+
+async def seed_city(
+    client: httpx.AsyncClient,
+    tm: "TokenManager | None",
+    cat_map: dict,
+    fallback_cat_id: str | None,
+    city_obj: dict,
+    dry_run: bool,
+    max_listings: int = 20,
+) -> dict:
+    """Generates + posts content for one city (already resolved to a DB row).
+    Shared by both the single-city CLI path and the daily auto-batch."""
+    city = city_obj["name"]
+    state = city_obj["state"]
+    lang = city_obj.get("lang_default") or "en"
+    city_id = city_obj["id"]
+    city_slug = city_obj["slug"]
+
+    print(f"\n[CityLauncher] {city}, {state} ({LANG_NAMES.get(lang, lang)})")
     print("-" * 50)
 
-    # Step 1: Generate content with Claude
     print(">> Generating content with Claude...")
     system_prompt = build_system_prompt()
-    user_prompt = build_user_prompt(city, lang, lang)
-
+    user_prompt = build_user_prompt(city, state, lang)
     raw = generate(system_prompt, user_prompt, max_tokens=6000)
 
     try:
         data = parse_claude_response(raw)
     except json.JSONDecodeError as e:
-        print(f"ERROR: Claude returned invalid JSON: {e}")
-        print("Raw response saved to agents/output/debug_raw.txt")
+        print(f"ERROR: Claude returned invalid JSON for {city}: {e}")
         Path("agents/output/debug_raw.txt").write_text(raw, encoding="utf-8")
-        sys.exit(1)
+        return {"city": city, "status": "generation_failed"}
 
     listings = data.get("listings", [])[:max_listings]
     businesses = data.get("businesses", [])
-    launch = data.get("launch_content", {})
     print(f"OK Generated {len(listings)} listings, {len(businesses)} businesses")
 
     if dry_run:
-        city_slug = city.lower().replace(" ", "-")
         out_path = save_output("city_launcher", city_slug, json.dumps(data, ensure_ascii=False, indent=2), "json")
         print(f"\nDRY RUN -- content saved to {out_path}")
         _print_launch_preview(data)
-        return
+        return {"city": city, "status": "dry_run"}
 
-    # Step 2: Connect to live API
-    if not password:
-        print("ERROR: LOCALINDIA_ADMIN_PASSWORD not set. Use --dry-run or set the env var.")
-        sys.exit(1)
+    # Post listings
+    print(f"\n>> Posting {len(listings)} listings...")
+    posted_listing_ids = []
+    for i, listing in enumerate(listings):
+        raw_cat = listing.get("category", "")
+        cat_id = cat_map.get(raw_cat)
+        if not cat_id:
+            print(f"  [WARN] Unknown category slug '{raw_cat}' — using classifieds")
+            cat_id = cat_map.get("classifieds", fallback_cat_id)
+        phone = LISTING_PHONES[i % len(LISTING_PHONES)]
+        phone_digits = phone.replace("+91", "")
+        payload = {
+            "title": listing["title"][:150],
+            "description": listing.get("description", ""),
+            "category_id": cat_id,
+            "city_id": city_id,
+            "contact_phone": phone,
+            "whatsapp_url": f"https://wa.me/91{phone_digits}",
+            "price": listing.get("price"),
+            "area": listing.get("area"),
+            "is_seed": True,  # exempt from the expiry cron — see routers/cron.py
+        }
+        listing_id = await post_listing(client, tm, payload)
+        if listing_id:
+            approved = await approve_listing(client, tm, listing_id)
+            status = "OK" if approved else "WARN"
+            posted_listing_ids.append(listing_id)
+        else:
+            status = "FAIL"
+        title_preview = listing['title'][:55]
+        print(f"  [{status}] [{raw_cat}] {title_preview}")
+        await asyncio.sleep(1.0)
 
-    async with httpx.AsyncClient() as client:
-        # Login
-        print("\n>> Logging in as admin...")
-        tm = TokenManager(client, password)
-        await tm.get()  # validates credentials up-front
-        print("OK Admin JWT obtained")
+    print(f"\nOK {len(posted_listing_ids)}/{len(listings)} listings live")
 
-        # Fetch city
-        print(f"\n>> Looking up {city}...")
-        cities = await fetch_cities(client)
-        city_obj = next(
-            (c for c in cities if c["name"].lower() == city.lower()),
-            None
-        )
-        if not city_obj:
-            # Try partial match
-            city_obj = next(
-                (c for c in cities if city.lower() in c["name"].lower()),
-                None
-            )
-        if not city_obj:
-            print(f"ERROR: City '{city}' not found in DB. Available: {[c['name'] for c in cities[:10]]}")
-            sys.exit(1)
-        city_id = city_obj["id"]
-        city_slug = city_obj["slug"]
-        print(f"OK Found: {city_obj['name']} ({city_obj['state']}) id: {city_id}")
+    # Post businesses
+    print(f"\n>> Posting {len(businesses)} businesses...")
+    posted_biz_ids = []
+    for i, biz in enumerate(businesses):
+        cat_id = cat_map.get(biz.get("category", "businesses"), fallback_cat_id)
+        phone = BUSINESS_PHONES[i % len(BUSINESS_PHONES)]
+        payload = {
+            "name": biz["name"],
+            "description": biz.get("description"),
+            "address": biz.get("address"),
+            "phone": phone,
+            "whatsapp_url": f"https://wa.me/91{phone.replace('+91', '')}",
+            "city_id": city_id,
+            "category_id": cat_id,
+        }
+        biz_id = await post_business(client, tm, payload)
+        status = "OK" if biz_id else "FAIL"
+        if biz_id:
+            posted_biz_ids.append(biz_id)
+        print(f"  [{status}] {biz['name']}")
+        await asyncio.sleep(1.0)
 
-        # Fetch categories
-        print("\n>> Loading categories...")
-        cat_map = await fetch_categories(client)
-        fallback_cat_id = next(iter(cat_map.values()))  # first category as fallback
-        print(f"OK {len(cat_map)} categories loaded")
+    print(f"\nOK {len(posted_biz_ids)}/{len(businesses)} businesses posted")
 
-        # Verify category map — print what slugs resolved to
-        print("\n>> Category map (slug -> id):")
-        for slug, cid in cat_map.items():
-            print(f"   {slug:<15} {cid}")
-
-        # Post listings
-        print(f"\n>> Posting {len(listings)} listings...")
-        posted_listing_ids = []
-        for i, listing in enumerate(listings):
-            raw_cat = listing.get("category", "")
-            cat_id = cat_map.get(raw_cat)
-            if not cat_id:
-                print(f"  [WARN] Unknown category slug '{raw_cat}' — using classifieds")
-                cat_id = cat_map.get("classifieds", fallback_cat_id)
-            phone = LISTING_PHONES[i % len(LISTING_PHONES)]
-            phone_digits = phone.replace("+91", "")
-            payload = {
-                "title": listing["title"][:150],
-                "description": listing.get("description", ""),
-                "category_id": cat_id,
-                "city_id": city_id,
-                "contact_phone": phone,
-                "whatsapp_url": f"https://wa.me/91{phone_digits}",
-                "price": listing.get("price"),
-                "area": listing.get("area"),
-                "is_seed": True,  # exempt from the expiry cron — see routers/cron.py
-            }
-            listing_id = await post_listing(client, tm, payload)
-            if listing_id:
-                approved = await approve_listing(client, tm, listing_id)
-                status = "OK" if approved else "WARN"
-                posted_listing_ids.append(listing_id)
-            else:
-                status = "FAIL"
-            title_preview = listing['title'][:55]
-            print(f"  [{status}] [{raw_cat}] {title_preview}")
-            await asyncio.sleep(1.0)
-
-        print(f"\nOK {len(posted_listing_ids)}/{len(listings)} listings live")
-
-        # Post businesses
-        print(f"\n>> Posting {len(businesses)} businesses...")
-        posted_biz_ids = []
-        for i, biz in enumerate(businesses):
-            cat_id = cat_map.get(biz.get("category", "businesses"), fallback_cat_id)
-            phone = BUSINESS_PHONES[i % len(BUSINESS_PHONES)]
-            payload = {
-                "name": biz["name"],
-                "description": biz.get("description"),
-                "address": biz.get("address"),
-                "phone": phone,
-                "whatsapp_url": f"https://wa.me/91{phone.replace('+91', '')}",
-                "city_id": city_id,
-                "category_id": cat_id,
-            }
-            biz_id = await post_business(client, tm, payload)
-            status = "OK" if biz_id else "FAIL"
-            if biz_id:
-                posted_biz_ids.append(biz_id)
-            print(f"  [{status}] {biz['name']}")
-            await asyncio.sleep(1.0)
-
-        print(f"\nOK {len(posted_biz_ids)}/{len(businesses)} businesses posted")
-
-    # Save all output
     seed_data = {
         "city": city, "city_id": city_id, "city_slug": city_slug, "lang": lang,
         "listing_ids": posted_listing_ids, "business_ids": posted_biz_ids,
@@ -398,6 +392,89 @@ async def run(city: str, lang: str, dry_run: bool, password: str | None, max_lis
     print(f"  Launch kit: {out_md}")
 
     _print_launch_preview(data)
+    return {"city": city, "status": "ok", "listings": len(posted_listing_ids), "businesses": len(posted_biz_ids)}
+
+
+async def run(city: str, lang: str | None, dry_run: bool, password: str | None, max_listings: int = 20):
+    """Single-city mode (--city X): resolve the named city, then seed it."""
+    if not dry_run and not password:
+        print("ERROR: LOCALINDIA_ADMIN_PASSWORD not set. Use --dry-run or set the env var.")
+        sys.exit(1)
+
+    async with httpx.AsyncClient() as client:
+        tm = None
+        cat_map = {}
+        fallback_cat_id = None
+        if not dry_run:
+            print(">> Logging in as admin...")
+            tm = TokenManager(client, password)
+            await tm.get()  # validates credentials up-front
+            print("OK Admin JWT obtained")
+            cat_map = await fetch_categories(client)
+            fallback_cat_id = next(iter(cat_map.values()))
+
+        print(f"\n>> Looking up {city}...")
+        cities = await fetch_cities(client)
+        city_obj = next((c for c in cities if c["name"].lower() == city.lower()), None)
+        if not city_obj:
+            city_obj = next((c for c in cities if city.lower() in c["name"].lower()), None)
+        if not city_obj:
+            print(f"ERROR: City '{city}' not found in DB. Available: {[c['name'] for c in cities[:10]]}")
+            sys.exit(1)
+        if lang:
+            city_obj = {**city_obj, "lang_default": lang}  # explicit --lang overrides the DB default
+        print(f"OK Found: {city_obj['name']} ({city_obj['state']}) id: {city_obj['id']}")
+
+        await seed_city(client, tm, cat_map, fallback_cat_id, city_obj, dry_run, max_listings)
+
+
+async def run_batch(n: int, dry_run: bool, password: str | None, max_listings: int = 20):
+    """Auto mode (--auto N): finds the next N cities with zero active
+    listings (state/name order) and seeds each one in turn."""
+    if not dry_run and not password:
+        print("ERROR: LOCALINDIA_ADMIN_PASSWORD not set. Use --dry-run or set the env var.")
+        sys.exit(1)
+
+    async with httpx.AsyncClient() as client:
+        tm = None
+        cat_map = {}
+        fallback_cat_id = None
+        if not dry_run:
+            print(">> Logging in as admin...")
+            tm = TokenManager(client, password)
+            await tm.get()
+            print("OK Admin JWT obtained")
+            cat_map = await fetch_categories(client)
+            fallback_cat_id = next(iter(cat_map.values()))
+
+        print(f"\n>> Scanning cities for empty ones...")
+        empty = await determine_empty_cities(client)
+        print(f"OK {len(empty)} cities currently have zero active listings")
+
+        if not empty:
+            print("All cities already have at least one active listing — nothing to seed today.")
+            return
+
+        batch = empty[:n]
+        print(f"\n>> Seeding {len(batch)} cities today: {', '.join(c['name'] for c in batch)}")
+
+        results = []
+        for city_obj in batch:
+            try:
+                result = await seed_city(client, tm, cat_map, fallback_cat_id, city_obj, dry_run, max_listings)
+            except Exception as e:
+                print(f"ERROR seeding {city_obj['name']}: {e}")
+                result = {"city": city_obj["name"], "status": "error", "error": str(e)}
+            results.append(result)
+            await asyncio.sleep(2.0)
+
+        remaining = len(empty) - len(batch)
+        print("\n" + "=" * 50)
+        print("BATCH SUMMARY")
+        for r in results:
+            extra = f" ({r.get('listings', 0)} listings, {r.get('businesses', 0)} businesses)" if r["status"] == "ok" else ""
+            print(f"  {r['city']}: {r['status']}{extra}")
+        print(f"\n{remaining} cities still empty after this batch.")
 
 
 def _build_launch_doc(city: str, data: dict) -> str:
@@ -446,12 +523,18 @@ def _print_launch_preview(data: dict):
 
 def main():
     parser = argparse.ArgumentParser(description="CityLauncher — seed a LocalIndia city with AI content")
-    parser.add_argument("--city", required=True, help="City name exactly as in the DB (e.g. 'Vijayawada')")
-    parser.add_argument("--lang", required=True, help="Language code: te, hi, ta, kn, mr, bn, gu, pa, ml, or, en")
+    parser.add_argument("--city", help="City name exactly as in the DB (e.g. 'Vijayawada') — single-city mode")
+    parser.add_argument("--auto", type=int, metavar="N", help="Auto mode: seed the next N cities with zero active listings")
+    parser.add_argument("--lang", default=None, help="Language code override (default: the city's own lang_default from the DB)")
     parser.add_argument("--dry-run", action="store_true", help="Generate content only — skip API calls")
-    parser.add_argument("--max-listings", type=int, default=20, help="Max listings to post (default: 20)")
+    parser.add_argument("--max-listings", type=int, default=20, help="Max listings to post per city (default: 20)")
     parser.add_argument("--env-file", default=".env", help="Path to .env file (default: .env)")
     args = parser.parse_args()
+
+    if not args.city and not args.auto:
+        parser.error("either --city NAME or --auto N is required")
+    if args.city and args.auto:
+        parser.error("--city and --auto are mutually exclusive — pick one")
 
     # Load env
     env_path = Path(args.env_file)
@@ -462,13 +545,21 @@ def main():
 
     password = os.getenv("LOCALINDIA_ADMIN_PASSWORD")
 
-    asyncio.run(run(
-        city=args.city,
-        lang=args.lang,
-        dry_run=args.dry_run,
-        password=password,
-        max_listings=args.max_listings,
-    ))
+    if args.auto:
+        asyncio.run(run_batch(
+            n=args.auto,
+            dry_run=args.dry_run,
+            password=password,
+            max_listings=args.max_listings,
+        ))
+    else:
+        asyncio.run(run(
+            city=args.city,
+            lang=args.lang,
+            dry_run=args.dry_run,
+            password=password,
+            max_listings=args.max_listings,
+        ))
 
 
 if __name__ == "__main__":

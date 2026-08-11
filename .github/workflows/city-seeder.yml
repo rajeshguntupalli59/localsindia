@@ -1,0 +1,75 @@
+name: City Seeder
+
+on:
+  schedule:
+    # 5:00 AM UTC = 10:30 AM IST daily — after the 9am reminder/digest crons
+    # and the 9:30am social post slot, so it doesn't pile onto the same window
+    - cron: '0 5 * * *'
+  workflow_dispatch:  # allow manual trigger + choosing the batch size from the GitHub Actions UI
+    inputs:
+      count:
+        description: 'How many empty cities to seed'
+        required: false
+        default: '10'
+      dry_run:
+        description: 'Dry run (generate content only, no posting)'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write   # this workflow commits the LLM usage log back to the repo
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Python dependencies
+        run: pip install -r agents/requirements.txt
+
+      - name: Seed next batch of empty cities
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          LOCALINDIA_ADMIN_PASSWORD: ${{ secrets.LOCALINDIA_ADMIN_PASSWORD }}
+        run: |
+          COUNT="${{ github.event.inputs.count }}"
+          if [ -z "$COUNT" ]; then COUNT="10"; fi
+
+          DRY_RUN_FLAG=""
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            DRY_RUN_FLAG="--dry-run"
+          fi
+
+          python agents/city_launcher.py --auto "$COUNT" $DRY_RUN_FLAG
+
+      - name: Upload generated content as workflow artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: city-seeder-output
+          path: agents/output/**/city_launcher*
+          retention-days: 14
+
+      # Same pattern as social-poster.yml / blog-publisher.yml — the usage
+      # log lives only on this ephemeral runner otherwise. Per-city seed
+      # output (agents/output/{city}/*.json,*.md) stays gitignored, same as
+      # every other agent's generated content; only the usage log is tracked.
+      - name: Commit and push LLM usage log
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          [ -f agents/output/llm_usage_log.jsonl ] && git add agents/output/llm_usage_log.jsonl
+          if git diff --cached --quiet; then
+            echo "No log changes to commit"
+            exit 0
+          fi
+          git commit -m "chore: update LLM usage log (city seeder)"
+          git pull --rebase origin master
+          git push
