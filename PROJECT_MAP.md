@@ -98,6 +98,13 @@ All 5 cron-scheduled workflows were manually triggered and verified working 2026
 
 ## 6. Changelog (dated, most recent first — append here after notable sessions)
 
+### 2026-08-11 — Mobile app published to Google Play production
+- Play Console flagged the closed-testing eligibility gate (12 testers, 14 days) as satisfied — but the AAB sitting in that closed test was `localsindia-v1.0.0-vc4-20260715.aab` (2026-07-15), which predated several real fixes landed since: Firebase/FCM push notifications actually delivering (`a6c484f`), Google Maps API key reaching the Android manifest (`1ed7bc4`), referral deep links (`ce2ee31`), location-assisted posting (`733cdcf`), splash screen fixes (`c335e06`, `c63e8e0`), mobile event creation (`a914209`).
+- Cut a fresh EAS production build (`eas build --platform android --profile production`) from current `master` before submitting — versionCode 11 → 12, build id `b149241b-c6aa-4923-9d9c-7111ff72b9f9`, AAB includes all the above fixes. Production env vars (live Razorpay key, Maps key, Google Services JSON) were already correctly configured under the EAS `production` environment.
+- Applied for Google Play production access (closed-test questionnaire) 2026-08-11 ~8:45 AM; granted same day. IARC content rating completed and live same day.
+- Production release (submission #3) created with the fresh AAB, sent for review, and **published** 2026-08-11, ~9:21 AM — confirmed via Play Console Submission activity (status: Published) and the live Play Store listing responding. This is the app's first production release — previously internal/closed-testing only.
+- **Known gap for next update**: countries/regions and store listing details were set during this flow but not independently re-verified against ARCHITECTURE.md/FABLE_REVIEW_BRIEF.md, which still describe the app as "not yet launched" — those docs need a pass to reflect that the app is now live.
+
 ### 2026-08-08 — Social post visual redesign: topic theming + 5 rotating styles
 - The old `render_post_image.js` template was one flat dark card (navy bg, two blurry circles) reused for every post regardless of topic — founder flagged it as "too basic" / repetitive.
 - Added topic-aware theming: each of the 5 topics gets its own icon, accent color, and eyebrow label.
