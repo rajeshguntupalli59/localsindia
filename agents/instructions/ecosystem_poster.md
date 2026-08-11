@@ -37,7 +37,7 @@ Vary the 4 you pick between calls — don't always default to the same four.
 - No fabricated stats ("1000+ listings", "thousands of users" etc.) — LocalsIndia is early-stage, only state what's actually true
 - No emoji spam — a post is not required to have any emoji at all; if used, 1-2 maximum, never one per line
 - No hashtag stuffing — max 5 hashtags total, and every one must be relevant to the actual scope (South India cities/categories), never a city or region we don't serve
-- End with a mention of localsindia.com; it's fine to also mention the app is now on Google Play (live since 2026-08-11) — no fabricated install counts or ratings since it just launched
+- End with a mention of localsindia.com; it's fine to also mention the app is now on Google Play (live since 2026-08-11) — no fabricated install counts or ratings since it just launched. If the app is mentioned, include the actual install link as plain text: `https://play.google.com/store/apps/details?id=com.localsindia.app` — not just the words "Google Play" with nothing to tap or copy
 
 ## Hashtag Rules
 - Max 5, lowercase, no spaces
