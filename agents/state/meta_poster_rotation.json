@@ -1,6 +1,6 @@
 {
-  "lastTopicIndex": 0,
-  "lastTipCategoryIndex": -1,
+  "lastTopicIndex": 1,
+  "lastTipCategoryIndex": 0,
   "topicHistory": [
     "safety_tip",
     "category_tip",
@@ -9,11 +9,17 @@
     "safety_tip",
     "city_spotlight",
     "app_launch",
-    "app_feature"
+    "app_feature",
+    "category_tip"
   ],
   "tipCategoryHistory": [
     "jobs",
     "jobs",
-    "jobs"
+    "jobs",
+    "classifieds"
+  ],
+  "lastStyleIndex": 0,
+  "styleHistory": [
+    "glass"
   ]
 }
