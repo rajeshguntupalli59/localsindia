@@ -31,6 +31,10 @@ class Listing(Base):
     latitude: Mapped[float | None] = mapped_column(Numeric(9, 6), nullable=True)
     longitude: Mapped[float | None] = mapped_column(Numeric(9, 6), nullable=True)
     wa_verified: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    # Admin-seeded listing (city_launcher.py) — exempt from the expiry cron so a
+    # seeded city doesn't quietly go empty again 30 days after seeding. Only
+    # settable via POST /listings when the caller is an admin (see routers/listings.py).
+    is_seed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="pending")
     is_featured: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     featured_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

@@ -346,6 +346,7 @@ async def run(city: str, lang: str, dry_run: bool, password: str | None, max_lis
                 "whatsapp_url": f"https://wa.me/91{phone_digits}",
                 "price": listing.get("price"),
                 "area": listing.get("area"),
+                "is_seed": True,  # exempt from the expiry cron — see routers/cron.py
             }
             listing_id = await post_listing(client, tm, payload)
             if listing_id:

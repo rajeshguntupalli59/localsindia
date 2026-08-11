@@ -39,6 +39,9 @@ async def send_expiry_reminders(
     expires_at has already passed to status='expired' and notifies the owner,
     expires business badges past badge_expires_at, and un-features listings whose
     paid featured-boost window has passed.
+    Admin-seeded listings (is_seed=True, see city_launcher.py) are excluded from
+    both the reminder and expiry checks — they're meant to keep a seeded city
+    looking active indefinitely, not cycle out after 30 days like real listings.
     Called daily by GitHub Actions at 9am IST (3:30am UTC).
     """
     from app.services.email_svc import send_listing_expiry_email
@@ -55,6 +58,7 @@ async def send_expiry_reminders(
         .where(
             Listing.status == "active",
             Listing.deleted_at.is_(None),
+            Listing.is_seed.is_(False),
             Listing.expires_at > now,
             Listing.expires_at <= warn_cutoff,
             User.deleted_at.is_(None),
@@ -94,6 +98,7 @@ async def send_expiry_reminders(
         select(Listing).where(
             Listing.status == "active",
             Listing.deleted_at.is_(None),
+            Listing.is_seed.is_(False),
             Listing.expires_at <= now,
         )
     )

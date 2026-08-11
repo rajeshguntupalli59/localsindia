@@ -131,6 +131,44 @@ async def test_cron_expires_listing_past_due_date(client, db, auth_client, city,
     assert notif_result.scalar_one_or_none() is not None
 
 
+# Regression coverage: admin-seeded listings (city_launcher.py) must survive
+# the expiry cron indefinitely, or a seeded city quietly goes empty again 30
+# days after seeding with no signal anywhere that it happened.
+@pytest.mark.asyncio
+async def test_cron_leaves_seed_listing_active_past_expiry(client, db, admin_client, city, category):
+    from sqlalchemy import select
+    from app.models.listing import Listing
+
+    ac, _admin = admin_client
+    now = datetime.now(timezone.utc)
+
+    create_resp = await ac.post("/api/v1/listings", json={
+        "title": "Seed listing whose 30 days are long up",
+        "description": "is_seed=True — must never be flipped to expired",
+        "category_id": str(category.id),
+        "city_id": str(city.id),
+        "contact_phone": "+919876543210",
+        "is_seed": True,
+    })
+    listing_id = create_resp.json()["id"]
+
+    result = await db.execute(select(Listing).where(Listing.id == listing_id))
+    listing = result.scalar_one()
+    assert listing.is_seed is True
+    listing.status = "active"
+    listing.expires_at = now - timedelta(days=400)
+    await db.commit()
+
+    with patch.object(settings, "CRON_SECRET", CRON_SECRET):
+        resp = await client.get(f"/api/v1/cron/expiry-reminders?secret={CRON_SECRET}")
+    assert resp.status_code == 200
+    assert resp.json()["listings_expired"] == 0
+
+    db.expire_all()
+    result = await db.execute(select(Listing).where(Listing.id == listing_id))
+    assert result.scalar_one().status == "active"
+
+
 @pytest.mark.asyncio
 async def test_cron_leaves_not_yet_expired_listing_active(client, db, auth_client, city, category):
     from sqlalchemy import select

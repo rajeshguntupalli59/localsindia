@@ -334,6 +334,7 @@ async def create_listing(
         latitude=body.latitude,
         longitude=body.longitude,
         status="pending",  # BL-11: always pending on create
+        is_seed=body.is_seed and current_user.role == "admin",
     )
     db.add(listing)
     await db.commit()

@@ -293,3 +293,37 @@ async def test_category_details_absent_for_classifieds(auth_client, city, catego
     })
     assert resp.status_code == 201
     assert resp.json()["category_details"] is None
+
+
+# ── is_seed (city_launcher.py exemption from the expiry cron) ──────────────────
+
+@pytest.mark.asyncio
+async def test_regular_user_cannot_set_is_seed(auth_client, city, category):
+    """A non-admin sending is_seed=True must be silently ignored — otherwise
+    any user could mark their own listing as permanently non-expiring."""
+    ac, _user = auth_client
+    resp = await ac.post("/api/v1/listings", json={
+        "title": "Trying to self-mark as a seed listing",
+        "description": "Should be forced back to is_seed=False server-side.",
+        "category_id": str(category.id),
+        "city_id": str(city.id),
+        "contact_phone": "+919876543217",
+        "is_seed": True,
+    })
+    assert resp.status_code == 201
+    assert resp.json()["is_seed"] is False
+
+
+@pytest.mark.asyncio
+async def test_admin_can_set_is_seed(admin_client, city, category):
+    ac, _admin = admin_client
+    resp = await ac.post("/api/v1/listings", json={
+        "title": "City launcher seed listing",
+        "description": "Created by city_launcher.py as the admin user.",
+        "category_id": str(category.id),
+        "city_id": str(city.id),
+        "contact_phone": "+919876543218",
+        "is_seed": True,
+    })
+    assert resp.status_code == 201
+    assert resp.json()["is_seed"] is True

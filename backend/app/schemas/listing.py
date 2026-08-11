@@ -121,6 +121,7 @@ class ListingCreate(BaseModel):
     latitude: float | None = None
     longitude: float | None = None
     category_details: dict | None = None
+    is_seed: bool = False  # only honored server-side when the caller is an admin
     @field_validator("contact_phone")
     @classmethod
     def validate_phone(cls, v: str) -> str:
@@ -175,6 +176,7 @@ class ListingOut(BaseModel):
     longitude: float | None = None
     status: str
     is_featured: bool
+    is_seed: bool = False
     wa_verified: bool = False
     view_count: int = 0
     contact_click_count: int = 0
