@@ -84,7 +84,7 @@ Python scripts using the Anthropic API (`base_agent.py` is the shared runner) to
 | Workflow | Cron (UTC) | IST | What it does |
 |---|---|---|---|
 | `social-poster.yml` | `0 4 * * *`, `30 13 * * *` | 9:30am, 7pm daily | Runs `meta_poster.py` (mostly) or `ecosystem_poster.py`/text variant (2nd slot, randomized) |
-| `city-seeder.yml` | `0 5 * * *` | 10:30am daily | Seeds the next 10 empty cities (`city_launcher.py --auto 10`) — **blocked until `LOCALINDIA_ADMIN_PASSWORD` secret is added**, see §6 |
+| `city-seeder.yml` | `0 5 * * *` | 10:30am daily | Seeds the next 10 empty cities (`city_launcher.py --auto 10`). Live and verified 2026-08-11 — see §6 |
 | `blog-publisher.yml` | `0 3 * * 0` | 8:30am Sunday | Weekly evergreen blog article via `blog_agent.py` |
 | `expiry-reminders.yml` | `30 3 * * *` | 9am daily | Sends real reminders to users with expiring listings |
 | `interest-digest.yml` | `30 3 * * *`, `35 3 * * 1` | 9am daily / 9:05am Monday | Daily/weekly digest emails to users based on saved interests |
@@ -93,7 +93,7 @@ Python scripts using the Anthropic API (`base_agent.py` is the shared runner) to
 | `frontend-azure.yml` | push to master (`frontend/**`) + PR preview | — | Deploys frontend to Azure Static Web Apps |
 | `test.yml` | push/PR to master/develop (`frontend/**`) | — | Runs Vitest |
 
-The original 5 cron-scheduled workflows were manually triggered and verified working 2026-08-08 (see §6). `city-seeder.yml` is new and unverified end-to-end (dry-run only so far — real posting blocked on the missing secret).
+The original 5 cron-scheduled workflows were manually triggered and verified working 2026-08-08 (see §6). `city-seeder.yml` was added and verified live (real posting, not dry-run) 2026-08-11 — 16 cities seeded successfully that day across two manual batches.
 
 ---
 
@@ -102,8 +102,9 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 ### 2026-08-11 — Daily automated city seeding (10/day)
 - Added `--auto N` mode to `city_launcher.py`: queries the live backend for cities with zero active listings (no rotation-state file — self-correcting, since a city just stops being "empty" once it has a listing, seeded or real), takes the next N in `(state, name)` order, seeds each the same way `--city` always has. New `city-seeder.yml`, daily `0 5 * * *` (10:30am IST), `workflow_dispatch` with a configurable count + dry-run toggle.
 - Refactored the per-city POST/approve/save logic into a shared `seed_city()` used by both `--city` and `--auto`, rather than duplicating ~80 lines. While doing that, fixed a real pre-existing bug: `build_user_prompt(city, lang, lang)` was passing the language code where the state name belongs, so every generated prompt said e.g. "Adoni, te" instead of "Adoni, Andhra Pradesh." `--lang` is also no longer required — defaults to the city's own `lang_default` from the DB (`fetch_cities()` already returns it).
-- Verified live end-to-end with `--auto 2 --dry-run`: 106 empty cities detected (matches the manual audit earlier the same day), correct next-two selection (Adoni, Amalapuram), correct state name and language in the generated content.
-- **Blocked from actually posting**: `city-seeder.yml` needs a `LOCALINDIA_ADMIN_PASSWORD` GitHub secret that doesn't exist in the repo yet (only `ANTHROPIC_API_KEY` + the Meta/Cloudinary/Azure secrets are set) — the scheduled run will fail at admin login until it's added manually (repo Settings → Secrets and variables → Actions). Flagged to the founder, not something I can set myself.
+- Verified live end-to-end with `--auto 2 --dry-run` first (106 empty cities detected, matching the manual audit earlier the same day; correct next-two selection Adoni/Amalapuram; correct state name and language in the generated content).
+- `LOCALINDIA_ADMIN_PASSWORD` GitHub secret (missing at first — flagged, added by the founder directly, not by me) is now set, unblocking real runs. Ran two real (non-dry-run) manual batches the same day: 2 cities to confirm posting actually works (Adoni, Amalapuram — confirmed live via the public API, `is_seed=true` on all 20/20 listings), then 14 more at the founder's request to accelerate day one (Amaravati, Bhimavaram, Chilakaluripet, Chittoor, Dharmavaram, Eluru, Gudivada, Guntakal, Hindupur, Kadapa, Kadiri, Machilipatnam, Madanapalle, Mangalagiri). All 16 cities: 20/20 listings + 10/10 businesses each, zero failures. Empty-city count: 106 → 90.
+- Daily schedule (`0 5 * * *`, 10 cities/day) now runs unattended from here — no state file to babysit, it just picks the next 10 empty cities each morning. At 10/day, the remaining 90 clear in ~9 days.
 
 ### 2026-08-11 — App-launch promo push + seed listings now exempt from expiry
 - **Launch promotion**: `meta_poster.md`/`ecosystem_poster.md` still hard-forbade saying "download now" / Play Store claims (accurate before 08-11, false after) — corrected, and both now require the actual install URL as plain text in the caption (first live post said "Download on Google Play" with no link anywhere — nothing to tap on Facebook, nothing to copy on Instagram). Added a real Play Store presence to the website (footer badge site-wide, subtle homepage link). Fixed a second bug found the same day: the per-topic footer/CTA text in `render_post_image.js` was hardcoded identically across all 5 topics ("Free to post..."), so the app_launch image itself never mentioned downloading even though the headline said "app is live now" — now topic-aware (`TOPIC_THEMES[topic].footer`/`.cta`).
