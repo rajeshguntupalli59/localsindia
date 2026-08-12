@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import type { City, Listing } from '@/lib/types';
+import { regionalPhraseFor } from '@/lib/regionalSeo';
 import CityHomeClient from './CityHomeClient';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend-in.azurewebsites.net';
@@ -65,8 +66,17 @@ export async function generateMetadata(
   const city = await fetchCity(params.city);
   if (!city) return { title: 'LocalsIndia' };
 
-  const title = `${city.name} Classifieds — Tiffin, PG, Jobs & More | LocalsIndia`;
-  const description = `Buy, sell and find PGs, tiffin services, jobs and local services in ${city.name}, ${city.state}. Free to post, contact sellers directly on WhatsApp.`;
+  // Regional-language keyword appended for search matching in the city's own
+  // language (real, already-translated app phrase — see regionalSeo.ts).
+  // Not full multi-language SEO (no locale routing exists for hreflang) —
+  // just widening what this one URL can match on.
+  const regionalPhrase = regionalPhraseFor(city.lang_default);
+  const title = regionalPhrase
+    ? `${city.name} Classifieds — Tiffin, PG, Jobs & More | LocalsIndia · ${regionalPhrase}`
+    : `${city.name} Classifieds — Tiffin, PG, Jobs & More | LocalsIndia`;
+  const description = regionalPhrase
+    ? `Buy, sell and find PGs, tiffin services, jobs and local services in ${city.name}, ${city.state}. Free to post, contact sellers directly on WhatsApp. ${regionalPhrase}.`
+    : `Buy, sell and find PGs, tiffin services, jobs and local services in ${city.name}, ${city.state}. Free to post, contact sellers directly on WhatsApp.`;
   const fresh = await fetchFresh(params.city);
   const shouldIndex = fresh.length >= MIN_LISTINGS_FOR_INDEX;
 
