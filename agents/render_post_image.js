@@ -39,6 +39,7 @@ const TOPIC_ICON_PATHS = {
   safety_tip: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.79 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
   city_spotlight: '<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>',
   app_launch: '<path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>',
+  referral: '<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8"/><path d="M16.5 8a2.5 2.5 0 0 0 0-5C13 3 12 8 12 8"/>',
 };
 
 // Duotone gradient + accent per topic, built from brand colors only
@@ -54,9 +55,9 @@ const TOPIC_THEMES = {
   safety_tip: { eyebrow: 'STAY SAFE', accent: '#FF7A45', glowA: '#FF7A45', glowB: '#163D6B', footer: 'Browse safely · localsindia.com', cta: 'Browse LocalsIndia →' },
   city_spotlight: { eyebrow: 'CITY SPOTLIGHT', accent: '#25D366', glowA: '#163D6B', glowB: '#25D366', footer: 'Free to post · WhatsApp contact · localsindia.com', cta: 'Post free on LocalsIndia →' },
   app_launch: { eyebrow: 'GET STARTED', accent: '#F7921E', glowA: '#F7921E', glowB: '#F7B731', footer: 'Download on Google Play · localsindia.com', cta: 'Download on Google Play →' },
+  referral: { eyebrow: 'INVITE & EARN', accent: '#F7B731', glowA: '#F7921E', glowB: '#25D366', footer: 'localsindia.com/invite · both get featured', cta: 'Get your invite link →' },
 };
 const DEFAULT_THEME = TOPIC_THEMES.app_feature;
-const STYLES = ['glass', 'bold', 'duotone'];
 
 const SKYLINE_SVG = `<svg class="skyline" viewBox="0 0 1080 160" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
   <rect x="0" y="60" width="70" height="100"/><rect x="80" y="30" width="55" height="130"/>

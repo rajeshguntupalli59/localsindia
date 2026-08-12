@@ -38,7 +38,7 @@ from meta_client import (
     post_to_instagram_story,
 )
 
-TOPICS = ["app_feature", "category_tip", "safety_tip", "city_spotlight", "app_launch"]
+TOPICS = ["app_feature", "category_tip", "safety_tip", "city_spotlight", "app_launch", "referral"]
 SPOTLIGHT_CITIES = ["Hyderabad", "Bengaluru", "Chennai", "Kochi", "Vijayawada", "Coimbatore"]
 # category_tip has no default — without one, the model always falls back to
 # its "e.g. jobs" example in the instructions, so every category_tip post

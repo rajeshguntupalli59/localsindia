@@ -29,6 +29,7 @@ on:
           - safety_tip
           - city_spotlight
           - app_launch
+          - referral
 
 permissions:
   contents: write   # this workflow commits the posting log back to the repo

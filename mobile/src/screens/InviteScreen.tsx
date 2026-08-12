@@ -29,7 +29,7 @@ export default function InviteScreen({ navigation }: any) {
 
   const handleShare = () => {
     Share.share({
-      message: `Hey! I found this amazing free platform for local listings in ${cityName} 👇\n\n📢 LocalsIndia — India's free classifieds, WhatsApp-first\n✅ Post listings for free\n✅ No spam calls (WhatsApp only)\n✅ Works in Telugu, Hindi & more\n\nCheck it out: ${inviteUrl}`,
+      message: `Hey! I found this amazing free platform for local listings in ${cityName} 👇\n\n📢 LocalsIndia — India's free classifieds, WhatsApp-first\n✅ Post listings for free\n✅ No spam calls (WhatsApp only)\n✅ Works in Telugu, Tamil, Kannada, Malayalam & English\n\nCheck it out: ${inviteUrl}\n\nPost your first listing using my link and we both get 3 days featured, free.`,
       title: 'Invite to LocalsIndia',
     }).catch(() => {});
   };

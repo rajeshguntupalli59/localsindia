@@ -40,7 +40,7 @@ export default function InvitePage() {
     ? `https://www.localsindia.com/${selectedCity}?ref=${referralCode}`
     : `https://www.localsindia.com/${selectedCity}`;
 
-  const waMessage = `Hey! I found this amazing free platform for local listings in ${cityName} 👇\n\n📢 LocalsIndia — India's free classifieds, WhatsApp-first\n✅ Post listings for free\n✅ No spam calls (WhatsApp only)\n✅ Works in Telugu, Hindi & more\n\nCheck it out: ${cityUrl}\n\nYou can list your business, sell stuff, find PG rooms, post jobs — all free!`;
+  const waMessage = `Hey! I found this amazing free platform for local listings in ${cityName} 👇\n\n📢 LocalsIndia — India's free classifieds, WhatsApp-first\n✅ Post listings for free\n✅ No spam calls (WhatsApp only)\n✅ Works in Telugu, Tamil, Kannada, Malayalam & English\n\nCheck it out: ${cityUrl}\n\nYou can list your business, sell stuff, find PG rooms, post jobs — all free! Post your first listing using my link and we both get 3 days featured, free.`;
 
   const shareOnWhatsApp = () => {
     window.open(`https://wa.me/?text=${encodeURIComponent(waMessage)}`, '_blank');
@@ -66,14 +66,14 @@ export default function InvitePage() {
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-5 text-sm font-bold"
               style={{ background: 'rgba(247,183,49,0.15)', color: '#F7B731', border: '1px solid rgba(247,183,49,0.3)' }}
             >
-              <Star className="w-4 h-4" fill="currentColor" /> Founding Member Program
+              <Star className="w-4 h-4" fill="currentColor" /> Get 3 days featured — free
             </div>
 
             <h1 className="text-3xl md:text-4xl font-black text-white mb-3">
-              Invite a Business.<br />Build Your City.
+              Invite a friend.<br />You both get featured.
             </h1>
             <p className="text-base max-w-md mx-auto" style={{ color: 'rgba(255,255,255,0.55)' }}>
-              Every business you invite makes LocalsIndia more useful for everyone in your city. Zero fees, no spam — just community.
+              When someone you invite posts their first listing, you both get it featured at the top of your city for 3 days — free. Up to 20 rewards per account.
             </p>
           </motion.div>
         </div>
@@ -157,9 +157,9 @@ export default function InvitePage() {
         {/* Stats / social proof */}
         <div className="grid grid-cols-3 gap-4 mb-8">
           {[
-            { val: '100%', label: 'Free forever' },
+            { val: '3 days', label: 'Featured, both of you' },
             { val: '0', label: 'Spam calls' },
-            { val: '8+', label: 'Indian languages' },
+            { val: '20', label: 'Rewards per account' },
           ].map(s => (
             <div key={s.label} className="bg-white rounded-2xl p-4 border text-center" style={{ borderColor: 'var(--li-border)' }}>
               <p className="text-2xl font-black mb-0.5" style={{ color: 'var(--li-primary)' }}>{s.val}</p>
