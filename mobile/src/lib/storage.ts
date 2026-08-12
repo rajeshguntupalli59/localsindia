@@ -47,6 +47,15 @@ export const storage = {
   },
   setReferralRefCode: (code: string) => setItem('li_ref_code', code),
   getReferralRefCode: () => getItem('li_ref_code'),
+  // Store-review prompt: ask once at a genuine happy-path moment (first
+  // WhatsApp contact, or first listing approval), never on launch/onboarding.
+  // The OS itself throttles how often the actual dialog can show — this flag
+  // just stops the app from calling the API repeatedly once we've tried.
+  hasPromptedStoreReview: async (): Promise<boolean> => {
+    const val = await getItem('review_prompted');
+    return val === 'true';
+  },
+  setPromptedStoreReview: () => setItem('review_prompted', 'true'),
   recentlyViewed: {
     get: async (citySlug: string): Promise<any[]> => {
       try {

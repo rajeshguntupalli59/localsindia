@@ -9,6 +9,7 @@ import { listingsApi } from '../lib/api';
 import { formatPrice } from '../lib/format';
 import { useSavedContext } from '../context/SavedContext';
 import { storage } from '../lib/storage';
+import { maybePromptStoreReview } from '../lib/reviewPrompt';
 import { C, SHADOW, RADIUS } from '../lib/theme';
 
 const { width: SW } = Dimensions.get('window');
@@ -51,6 +52,9 @@ export default function ListingDetailScreen({ navigation, route }: any) {
       : listing.contact_phone.replace('+', '');
     const msg = encodeURIComponent(`Hi, I saw your listing "${listing.title}" on LocalsIndia. Is it still available?`);
     Linking.openURL(`https://wa.me/${phone}?text=${msg}`);
+    // Successfully finding + contacting a seller is the buyer-side "happy
+    // moment" — ask for a store review here, not on launch/onboarding.
+    maybePromptStoreReview();
   };
 
   const handleShare = () => {
