@@ -1,0 +1,52 @@
+{
+  "citySlug": "hyderabad",
+  "city": "Hyderabad",
+  "state": "Telangana",
+  "lang": "te",
+  "titleTag": "Hyderabad Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Find tiffin, PG rooms, jobs & classifieds in Hyderabad. Post free. Connect via WhatsApp. Buy, sell, hire locally.",
+  "ogTitle": "Hyderabad Local Classifieds — Your Neighborhood Marketplace",
+  "ogDescription": "Hyderabad's hyperlocal community board. Free tiffin listings, PG rooms, jobs, and more. Real neighbors, real deals.",
+  "h1": "Hyderabad Classifieds — Tiffin, PG Rooms, Jobs & Local Buy-Sell",
+  "focusKeyword": "hyderabad classifieds",
+  "secondaryKeywords": [
+    "hyderabad tiffin service",
+    "pg rooms in hyderabad",
+    "jobs in hyderabad",
+    "hyderabad buy sell"
+  ],
+  "longTailKeywords": [
+    "tiffin service near me hyderabad",
+    "pg rooms for boys in hyderabad",
+    "pg rooms for girls in hyderabad",
+    "part time jobs in hyderabad",
+    "second hand bikes in hyderabad",
+    "domestic help in hyderabad",
+    "used mobile phones hyderabad",
+    "carpool hyderabad to office",
+    "furniture buy sell hyderabad",
+    "tuition classes hyderabad",
+    "flatmate wanted hyderabad",
+    "mesrooms hyderabad"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Hyderabad Free Classifieds — Tiffin, PG, Jobs & More",
+    "description": "Find tiffin, PG rooms, jobs & classifieds in Hyderabad. Post free. Connect via WhatsApp. Buy, sell, hire locally.",
+    "url": "https://www.localsindia.com/hyderabad",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Hyderabad",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Telangana"
+      }
+    }
+  },
+  "generatedAt": "2026-08-13T15:44:38.833234+00:00"
+}

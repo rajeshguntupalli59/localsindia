@@ -1,0 +1,58 @@
+name: SEO Agent
+
+on:
+  schedule:
+    # 6:00 AM UTC = 11:30 AM IST daily — after city-seeder.yml (5:00 UTC)
+    # has had time to finish, though functionally independent since this
+    # checks live listing counts via API regardless of git state
+    - cron: '0 6 * * *'
+  workflow_dispatch:  # allow manual trigger + choosing the batch size from the GitHub Actions UI
+    inputs:
+      count:
+        description: 'How many eligible cities to generate SEO content for'
+        required: false
+        default: '10'
+
+permissions:
+  contents: write   # this workflow commits the generated SEO content + LLM usage log
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Python dependencies
+        run: pip install -r agents/requirements.txt
+
+      - name: Generate SEO content for next batch of eligible cities
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          COUNT="${{ github.event.inputs.count }}"
+          if [ -z "$COUNT" ]; then COUNT="10"; fi
+          python agents/seo_agent.py --auto "$COUNT"
+
+      # frontend/src/content/seo/*.json is what [city]/page.tsx actually
+      # reads (see frontend/src/lib/seo.ts) — this must be committed, unlike
+      # agents/output/ which is gitignored. Pushing here also triggers
+      # frontend-azure.yml (path filter on frontend/**), so new SEO content
+      # deploys automatically.
+      - name: Commit and push generated SEO content
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add frontend/src/content/seo/
+          [ -f agents/output/llm_usage_log.jsonl ] && git add agents/output/llm_usage_log.jsonl
+          if git diff --cached --quiet; then
+            echo "No new SEO content to commit"
+            exit 0
+          fi
+          git commit -m "chore: generate city SEO content (seo_agent.py)"
+          git pull --rebase origin master
+          git push

@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import type { City, Listing } from '@/lib/types';
 import { regionalPhraseFor } from '@/lib/regionalSeo';
+import { loadCitySeo } from '@/lib/seo';
 import CityHomeClient from './CityHomeClient';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend-in.azurewebsites.net';
@@ -66,26 +67,37 @@ export async function generateMetadata(
   const city = await fetchCity(params.city);
   if (!city) return { title: 'LocalsIndia' };
 
-  // Regional-language keyword appended for search matching in the city's own
-  // language (real, already-translated app phrase — see regionalSeo.ts).
-  // Not full multi-language SEO (no locale routing exists for hreflang) —
-  // just widening what this one URL can match on.
+  // agents/seo_agent.py generates richer, city-specific copy + keywords for
+  // cities that qualify for Google's index (see MIN_LISTINGS_FOR_INDEX) —
+  // use it when available. Most cities won't have one yet, so fall back to
+  // the plain template + regional-language keyword (regionalSeo.ts) below.
+  const citySeo = loadCitySeo(params.city);
   const regionalPhrase = regionalPhraseFor(city.lang_default);
-  const title = regionalPhrase
-    ? `${city.name} Classifieds — Tiffin, PG, Jobs & More | LocalsIndia · ${regionalPhrase}`
-    : `${city.name} Classifieds — Tiffin, PG, Jobs & More | LocalsIndia`;
-  const description = regionalPhrase
-    ? `Buy, sell and find PGs, tiffin services, jobs and local services in ${city.name}, ${city.state}. Free to post, contact sellers directly on WhatsApp. ${regionalPhrase}.`
-    : `Buy, sell and find PGs, tiffin services, jobs and local services in ${city.name}, ${city.state}. Free to post, contact sellers directly on WhatsApp.`;
+
+  const title = citySeo?.titleTag
+    || (regionalPhrase
+      ? `${city.name} Classifieds — Tiffin, PG, Jobs & More | LocalsIndia · ${regionalPhrase}`
+      : `${city.name} Classifieds — Tiffin, PG, Jobs & More | LocalsIndia`);
+  const description = citySeo?.metaDescription
+    || (regionalPhrase
+      ? `Buy, sell and find PGs, tiffin services, jobs and local services in ${city.name}, ${city.state}. Free to post, contact sellers directly on WhatsApp. ${regionalPhrase}.`
+      : `Buy, sell and find PGs, tiffin services, jobs and local services in ${city.name}, ${city.state}. Free to post, contact sellers directly on WhatsApp.`);
+  const ogTitle = citySeo?.ogTitle || title;
+  const ogDescription = citySeo?.ogDescription || description;
+  const keywords = citySeo
+    ? [citySeo.focusKeyword, ...citySeo.secondaryKeywords, ...citySeo.longTailKeywords].filter(Boolean)
+    : undefined;
+
   const fresh = await fetchFresh(params.city);
   const shouldIndex = fresh.length >= MIN_LISTINGS_FOR_INDEX;
 
   return {
     title,
     description,
+    keywords,
     openGraph: {
-      title,
-      description,
+      title: ogTitle,
+      description: ogDescription,
       url: `https://www.localsindia.com/${params.city}`,
       siteName: 'LocalsIndia',
       type: 'website',
@@ -121,12 +133,23 @@ export default async function CityHomePage({ params }: { params: { city: string 
     })),
   };
 
+  // Complements the ItemList block above (different @type — WebPage vs
+  // ItemList — multiple JSON-LD blocks per page is valid), only present for
+  // cities agents/seo_agent.py has generated content for.
+  const citySeo = loadCitySeo(params.city);
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      {citySeo?.jsonLd && Object.keys(citySeo.jsonLd).length > 0 && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(citySeo.jsonLd) }}
+        />
+      )}
       <CityHomeClient
         initialCity={city}
         initialTodayCount={todayCount}
