@@ -78,6 +78,16 @@ Python scripts using the Anthropic API (`base_agent.py` is the shared runner) to
 
 `agents/context/product_context.md` — shared product facts (voice, all 12 categories, scope) read by the posting agents. `agents/instructions/*.md` — per-agent system prompt instructions.
 
+### 4a. AI image/video pipeline (manual, not scheduled)
+
+`agents/assets/ai_generated/` (raw) and `ai_generated_branded/` (logo + `localsindia.com` + "Download Free App" CTA composited top/bottom via ffmpeg) — 23 images as of 2026-08-14, generated via ComfyUI (Stable Diffusion 1.5) running on a **free Google Colab T4 GPU**, driven directly through ComfyUI's REST API from chat (not a script in this repo). 5 promo videos (ffmpeg: real Play Store screenshots + these AI images + Pixabay royalty-free music, crossfade transitions) were delivered to the founder but not committed (large binaries).
+
+**Why this isn't scheduled**: Colab requires a manual browser session (~90min idle / ~12hr max timeout, new tunnel URL every session) — the GitHub Actions cron workflows can't reach it. Generating more images/videos is an on-request "hey Claude, generate N more" action, not automated.
+
+**Publishing is manual, on-request only** — founder's explicit call each time ("whenever I think is ok I will ask you to publish"), not a standing schedule. `agents/meta_client.py` gained real video support 2026-08-14 (`upload_video_to_cloudinary`, `post_to_facebook_video`, `post_to_instagram_reel` — Reels need a status-poll loop before `media_publish` will succeed, unlike images) since it previously only handled photos. First real posts 2026-08-14: 1 video (FB + IG Reel) + 2 branded images (FB + IG feed) — see `agents/output/video_posts_log.jsonl` (gitignored, local record only).
+
+**If you actually want AI-*generated* (motion, not slideshow) video**: needs ComfyUI's Wan2.2 14B image-to-video model downloaded onto the Colab instance first (~20-30GB, not downloaded as of 2026-08-14 — a cost/time tradeoff was flagged and the founder chose the ffmpeg-slideshow approach instead for speed/reliability on a free T4). The Z-Image-Turbo + Fun ControlNet Union models (~25.5GB) *are* downloaded and verified working, but that's for image **inpainting**, unrelated to video generation.
+
 ---
 
 ## 5. What's Actually Scheduled (ground truth — verified 2026-08-08 via `gh workflow list` + reading each `.yml`; `city-seeder.yml` added 2026-08-11)
@@ -100,6 +110,14 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 ---
 
 ## 6. Changelog (dated, most recent first — append here after notable sessions)
+
+### 2026-08-14 — AI image/video content pipeline via ComfyUI on free Colab GPU, first real video publish
+- Founder wanted to test whether their `github.com/rajeshguntupalli59/ComfyUI` fork could run on Google Colab's free tier for AI image generation, unrelated at first to LocalsIndia. Verified end-to-end: cloned the fork, downloaded SD1.5, launched with a `cloudflared` tunnel, generated a real image via direct REST API calls (`/prompt`, `/history`, `/view`) — bypassing the ComfyUI web UI's own client-side automation, which proved unreliable (Angular Material menus and the Monaco code editor didn't respond correctly to synthetic browser events). Also downloaded and verified Z-Image-Turbo + Fun ControlNet Union (~25.5GB) for image **inpainting** specifically — confirmed with a real masked edit (replaced a sun with a star in a test image, only the masked region changed).
+- Pivoted to actual marketing use: generated 23 images across city spotlights, all major categories, safety/trust, referral, and community themes (`agents/assets/ai_generated/`), then built an ffmpeg overlay template stamping the LocalsIndia logo + `localsindia.com` + a "Download Free App" CTA onto every one (`ai_generated_branded/`) — founder's explicit ask was that every asset carry visible LocalsIndia branding, not just be a generic stock-style photo needing further work.
+- Built 5 promo videos via ffmpeg (not ComfyUI — true AI video generation would need a ~20-30GB Wan2.2 model download, flagged as a cost/reliability tradeoff on free-tier Colab and the founder chose the faster slideshow approach): general promo, square/feed crop, a referral-program-specific cut (targets the "referral live but unpromoted" gap from 2026-08-11), a categories/community cut, and a version with the logo watermark persistent on every frame (not just intro/outro cards). Mixed in a Pixabay-licensed royalty-free track ("Upbeat Happy Corporate" by kornevmusic, free for commercial use).
+- **`agents/meta_client.py` previously had zero video-posting capability** (only Facebook photo posts + Instagram feed/story images). Added `upload_video_to_cloudinary`, `post_to_facebook_video`, `post_to_instagram_reel` — Instagram Reels specifically need a status-poll loop (`FINISHED` check) before `media_publish` succeeds, unlike the synchronous image flow.
+- **First real video post, ever**: published the main promo video to Facebook (post `1241827064722221`) and Instagram Reels (`17890955256602905`) — confirmed working end to end on the first real attempt. Later the same day, published 2 branded images (city market spotlight + happy customer) to both platforms at the founder's specific request.
+- **This is a manual, on-request capability, not scheduled** — see §4a for why (Colab session lifecycle) and the founder's explicit preference for calling each publish rather than a standing rotation.
 
 ### 2026-08-13 — Wired seo_agent.py into the live site (was completely disconnected)
 - Founder asked whether running `seo_agent.py` daily would help. Checked the code: it generated real SEO metadata via Claude but only ever wrote it to `agents/output/{city}/` — gitignored, nothing read it back into anything. The live city pages' metadata came entirely from `[city]/page.tsx`'s own hardcoded template (the one extended with regional keywords 2026-08-12). Running it daily as-built would have been pure API spend for zero live effect — said so plainly rather than just running it.
