@@ -1,0 +1,50 @@
+{
+  "citySlug": "bengaluru",
+  "city": "Bengaluru",
+  "state": "Karnataka",
+  "lang": "kn",
+  "titleTag": "Bengaluru Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, rent in Bengaluru. Tiffin delivery, PG rooms, jobs, furniture & more. Post free, connect via WhatsApp.",
+  "ogTitle": "Bengaluru's Neighbourhood Classifieds — Jobs, PG, Tiffin & Local Services",
+  "ogDescription": "Find tiffin, PG rooms, part-time jobs, and used items in Bengaluru. Free to post. Connect with neighbours instantly.",
+  "h1": "Bengaluru Classifieds — Buy, Sell, Rent & Find Local Services Free",
+  "focusKeyword": "bengaluru classifieds",
+  "secondaryKeywords": [
+    "bengaluru pg rooms",
+    "tiffin service in bengaluru",
+    "jobs in bengaluru",
+    "second hand items bengaluru"
+  ],
+  "longTailKeywords": [
+    "pg rooms in bengaluru for boys",
+    "pg rooms in bengaluru for girls",
+    "tiffin delivery near me bengaluru",
+    "home cooked meals bengaluru",
+    "part time jobs in bengaluru",
+    "work from home jobs bengaluru",
+    "buy second hand bike bengaluru",
+    "used furniture bengaluru",
+    "domestic help bengaluru",
+    "flatmate wanted bengaluru"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Bengaluru Free Classifieds — Local Buy, Sell, PG & Jobs",
+    "description": "Hyperlocal classifieds for Bengaluru. Find tiffin, PG rooms, jobs, vehicles, furniture and services. Post free.",
+    "url": "https://www.localsindia.com/bengaluru",
+    "inLanguage": [
+      "kn",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Bengaluru",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Karnataka"
+      }
+    }
+  },
+  "generatedAt": "2026-08-14T07:41:39.825634+00:00"
+}

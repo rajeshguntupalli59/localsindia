@@ -1,0 +1,56 @@
+{
+  "citySlug": "kurnool",
+  "city": "Kurnool",
+  "state": "Andhra Pradesh",
+  "lang": "te",
+  "titleTag": "Kurnool Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, find jobs & PG rooms in Kurnool for free. Tiffin services, used items, local services. Post instantly on LocalsIndia.",
+  "ogTitle": "Kurnool की सबसे आसान क्लासिफाइड — LocalsIndia",
+  "ogDescription": "కర్నూల్‌లో ఉచితంగా నిల్వలు పోస్ట్ చేయండి — టిఫిన్, PG, ఉద్యోగాలు, ఐటెమ్‌లు. వాట్సాప్‌లో తీసుకోండి.",
+  "h1": "Kurnool Local Classifieds — Free Tiffin, PG Rooms, Jobs & More",
+  "focusKeyword": "kurnool classifieds",
+  "secondaryKeywords": [
+    "kurnool tiffin service",
+    "pg rooms in kurnool",
+    "jobs in kurnool",
+    "kurnool second hand items"
+  ],
+  "longTailKeywords": [
+    "tiffin service near me kurnool",
+    "pg rooms for girls in kurnool",
+    "pg rooms for boys in kurnool",
+    "part time jobs in kurnool",
+    "home cook in kurnool",
+    "paying guest accommodation kurnool",
+    "second hand bikes kurnool",
+    "used mobile phones kurnool",
+    "domestic help in kurnool",
+    "flatmate wanted kurnool",
+    "kurnool free classified ads",
+    "buy sell items kurnool"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Kurnool Free Classifieds — Tiffin, PG, Jobs & More",
+    "description": "Buy, sell, find jobs & PG rooms in Kurnool for free. Tiffin services, used items, local services. Post instantly on LocalsIndia.",
+    "url": "https://www.localsindia.com/kurnool",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Kurnool",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Andhra Pradesh",
+        "containedInPlace": {
+          "@type": "Country",
+          "name": "India"
+        }
+      }
+    }
+  },
+  "generatedAt": "2026-08-14T07:41:46.653727+00:00"
+}

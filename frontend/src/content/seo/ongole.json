@@ -1,0 +1,52 @@
+{
+  "citySlug": "ongole",
+  "city": "Ongole",
+  "state": "Andhra Pradesh",
+  "lang": "te",
+  "titleTag": "Ongole Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, find PG rooms, tiffin services & jobs in Ongole. Post free classifieds instantly. Connect via WhatsApp with locals.",
+  "ogTitle": "Ongole Classifieds — Tiffin, PG & Local Jobs",
+  "ogDescription": "Your neighborhood marketplace for everything local in Ongole — tiffin delivery, paying guest rooms, second-hand items & jobs.",
+  "h1": "Free Classifieds & Community Listings in Ongole",
+  "focusKeyword": "ongole classifieds",
+  "secondaryKeywords": [
+    "ongole tiffin service",
+    "pg rooms in ongole",
+    "jobs in ongole",
+    "ongole second hand market"
+  ],
+  "longTailKeywords": [
+    "tiffin service near me ongole",
+    "pg rooms in ongole for boys",
+    "pg rooms in ongole for girls",
+    "part time jobs in ongole",
+    "paying guest accommodation ongole",
+    "second hand bikes in ongole",
+    "domestic help in ongole",
+    "home tuition in ongole",
+    "used mobile phones ongole",
+    "furniture buy sell ongole",
+    "carpool ongole",
+    "repair services ongole"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Ongole Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+    "description": "Buy, sell, find PG rooms, tiffin services & jobs in Ongole. Post free classifieds instantly. Connect via WhatsApp with locals.",
+    "url": "https://www.localsindia.com/ongole",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Ongole",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Andhra Pradesh"
+      }
+    }
+  },
+  "generatedAt": "2026-08-14T07:41:53.710527+00:00"
+}

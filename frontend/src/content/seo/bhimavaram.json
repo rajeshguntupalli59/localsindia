@@ -1,0 +1,54 @@
+{
+  "citySlug": "bhimavaram",
+  "city": "Bhimavaram",
+  "state": "Andhra Pradesh",
+  "lang": "te",
+  "titleTag": "Bhimavaram Classifieds — Tiffin, PG & Jobs | LocalsIndia",
+  "metaDescription": "Free classifieds in Bhimavaram. Post tiffin services, PG rooms, jobs, used items. Connect with locals via WhatsApp. No commission.",
+  "ogTitle": "Find Tiffin, PG Rooms & Jobs in Bhimavaram — LocalsIndia Community",
+  "ogDescription": "Bhimavaram's trusted hyperlocal classifieds. Post and browse tiffin delivery, paying guest rooms, part-time jobs, and local services for free.",
+  "h1": "Bhimavaram Free Classifieds — Tiffin, PG Rooms, Jobs & Local Services",
+  "focusKeyword": "bhimavaram classifieds",
+  "secondaryKeywords": [
+    "tiffin service bhimavaram",
+    "pg rooms bhimavaram",
+    "jobs in bhimavaram",
+    "buy sell bhimavaram"
+  ],
+  "longTailKeywords": [
+    "tiffin delivery in bhimavaram",
+    "pg rooms for boys bhimavaram",
+    "paying guest accommodation bhimavaram",
+    "part time jobs bhimavaram",
+    "second hand bikes bhimavaram",
+    "domestic help bhimavaram",
+    "used mobile phones bhimavaram",
+    "room rent bhimavaram",
+    "home tuition bhimavaram",
+    "roommate wanted bhimavaram"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Bhimavaram Free Classifieds — Tiffin, PG, Jobs & More",
+    "description": "Free local classifieds in Bhimavaram. Post and browse tiffin services, PG rooms, jobs, vehicles, and household items with direct WhatsApp contact.",
+    "url": "https://www.localsindia.com/bhimavaram",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Bhimavaram",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Andhra Pradesh",
+        "containedInPlace": {
+          "@type": "Country",
+          "name": "India"
+        }
+      }
+    }
+  },
+  "generatedAt": "2026-08-14T07:42:23.205956+00:00"
+}

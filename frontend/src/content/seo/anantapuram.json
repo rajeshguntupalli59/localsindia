@@ -1,0 +1,69 @@
+{
+  "citySlug": "anantapuram",
+  "city": "Anantapuram",
+  "state": "Andhra Pradesh",
+  "lang": "te",
+  "titleTag": "Anantapuram Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, rent in Anantapuram. Tiffin delivery, PG rooms, jobs, used bikes & more. Post free classifieds on LocalsIndia.",
+  "ogTitle": "Anantapuram Local Classifieds — Find What You Need, Free",
+  "ogDescription": "Connect with your Anantapuram community. Tiffin services, paying guest rooms, jobs, classifieds — all in one place.",
+  "h1": "Anantapuram Free Classifieds & Local Marketplace",
+  "focusKeyword": "anantapuram classifieds",
+  "secondaryKeywords": [
+    "anantapuram free classifieds",
+    "anantapuram tiffin service",
+    "pg rooms anantapuram",
+    "jobs anantapuram"
+  ],
+  "longTailKeywords": [
+    "tiffin service near me anantapuram",
+    "pg rooms for boys in anantapuram",
+    "pg rooms for girls in anantapuram",
+    "part time jobs in anantapuram",
+    "second hand bikes in anantapuram",
+    "used phones anantapuram",
+    "domestic help anantapuram",
+    "roommate wanted anantapuram",
+    "buy sell furniture anantapuram",
+    "paying guest accommodation anantapuram",
+    "online tuition anantapuram",
+    "home cooked meals anantapuram"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Anantapuram Free Classifieds & Local Marketplace | LocalsIndia",
+    "description": "Buy, sell, rent in Anantapuram. Tiffin delivery, PG rooms, jobs, used items & local services. Post free classifieds.",
+    "url": "https://www.localsindia.com/anantapuram",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "publisher": {
+      "@type": "Organization",
+      "name": "LocalsIndia",
+      "logo": "https://www.localsindia.com/logo.png"
+    },
+    "about": {
+      "@type": "City",
+      "name": "Anantapuram",
+      "alternateName": "అనంతపురం",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Andhra Pradesh",
+        "alternateName": "ఆంధ్ర ప్రదేశ్"
+      },
+      "country": "India"
+    },
+    "mainEntity": {
+      "@type": "LocalBusiness",
+      "name": "LocalsIndia — Anantapuram Community Classifieds",
+      "areaServed": "Anantapuram",
+      "availableLanguage": [
+        "te",
+        "en"
+      ]
+    }
+  },
+  "generatedAt": "2026-08-14T07:42:17.793448+00:00"
+}

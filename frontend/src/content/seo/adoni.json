@@ -1,0 +1,50 @@
+{
+  "citySlug": "adoni",
+  "city": "Adoni",
+  "state": "Andhra Pradesh",
+  "lang": "te",
+  "titleTag": "Adoni Classifieds — Free PG, Tiffin & Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, and hire locally in Adoni. Free classifieds for PG rooms, tiffin services, jobs, and secondhand goods. Post instantly on LocalsIndia.",
+  "ogTitle": "Adoni's Local Classifieds — Your Neighborhood Marketplace",
+  "ogDescription": "Connect with your Adoni community. Browse PG rooms, tiffin services, job listings, and classifieds. Free to post, easy to find.",
+  "h1": "Adoni Classifieds — Buy, Sell & Hire Locally",
+  "focusKeyword": "adoni classifieds",
+  "secondaryKeywords": [
+    "pg rooms in adoni",
+    "tiffin service adoni",
+    "jobs in adoni",
+    "second hand bikes adoni"
+  ],
+  "longTailKeywords": [
+    "pg rooms in adoni for girls",
+    "pg rooms in adoni for boys",
+    "adoni tiffin service near me",
+    "part time jobs in adoni",
+    "second hand mobiles in adoni",
+    "furniture buy sell adoni",
+    "domestic help adoni",
+    "paying guest adoni",
+    "carpool adoni",
+    "used bikes adoni"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Adoni Classifieds — Free PG, Tiffin & Jobs | LocalsIndia",
+    "description": "Buy, sell, and hire locally in Adoni. Free classifieds for PG rooms, tiffin services, jobs, and secondhand goods.",
+    "url": "https://www.localsindia.com/adoni",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Adoni",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Andhra Pradesh"
+      }
+    }
+  },
+  "generatedAt": "2026-08-14T07:41:58.506826+00:00"
+}

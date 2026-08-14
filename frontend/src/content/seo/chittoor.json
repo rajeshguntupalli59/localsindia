@@ -1,0 +1,52 @@
+{
+  "citySlug": "chittoor",
+  "city": "Chittoor",
+  "state": "Andhra Pradesh",
+  "lang": "te",
+  "titleTag": "Chittoor Classifieds — Free PG, Tiffin & Jobs | LocalsIndia",
+  "metaDescription": "Free classifieds in Chittoor. Post PG rooms, tiffin services, jobs, bikes & more. Connect with locals on WhatsApp. No fees.",
+  "ogTitle": "Chittoor Local Classifieds — Your Neighborhood Marketplace",
+  "ogDescription": "Find PG rooms, tiffin, part-time jobs, and secondhand items in Chittoor. Post for free, sell faster.",
+  "h1": "Chittoor Classifieds — Free Local Listings for PG, Tiffin, Jobs & More",
+  "focusKeyword": "chittoor classifieds",
+  "secondaryKeywords": [
+    "pg rooms in chittoor",
+    "tiffin service chittoor",
+    "jobs in chittoor",
+    "chittoor free classifieds"
+  ],
+  "longTailKeywords": [
+    "pg rooms in chittoor for boys",
+    "pg rooms in chittoor for girls",
+    "tiffin service near me chittoor",
+    "home-cooked meals chittoor",
+    "part time jobs in chittoor",
+    "second hand bikes in chittoor",
+    "flatmate wanted chittoor",
+    "domestic help in chittoor",
+    "tuition classes chittoor",
+    "car rental chittoor",
+    "used furniture chittoor",
+    "repair services chittoor"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Chittoor Classifieds — Free Local Listings",
+    "description": "Free classifieds in Chittoor, Andhra Pradesh. Post and browse PG rooms, tiffin services, jobs, vehicles, and more. Connect via WhatsApp.",
+    "url": "https://www.localsindia.com/chittoor",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Chittoor",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Andhra Pradesh"
+      }
+    }
+  },
+  "generatedAt": "2026-08-14T07:42:35.961471+00:00"
+}

@@ -1,0 +1,52 @@
+{
+  "citySlug": "amaravati",
+  "city": "Amaravati",
+  "state": "Andhra Pradesh",
+  "lang": "te",
+  "titleTag": "Amaravati Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Find tiffin, PG rooms, jobs & local deals in Amaravati. Post free classifieds on LocalsIndia. Buy, sell, hire locally via WhatsApp.",
+  "ogTitle": "Amaravati Local Classifieds — Your Neighborhood Marketplace",
+  "ogDescription": "Connect with your Amaravati community. Find tiffin services, roommates, jobs, and secondhand items. Free to post, easy to contact sellers.",
+  "h1": "Amaravati Classifieds — Tiffin, PG Rooms, Jobs & Local Deals",
+  "focusKeyword": "amaravati classifieds",
+  "secondaryKeywords": [
+    "amaravati tiffin service",
+    "pg rooms in amaravati",
+    "jobs in amaravati",
+    "amaravati local marketplace"
+  ],
+  "longTailKeywords": [
+    "tiffin service near me amaravati",
+    "pg rooms for boys in amaravati",
+    "pg rooms for girls in amaravati",
+    "part time jobs in amaravati",
+    "second hand bikes in amaravati",
+    "domestic help in amaravati",
+    "used furniture for sale amaravati",
+    "carpool from amaravati to hyderabad",
+    "paying guest accommodation amaravati",
+    "home tuition in amaravati",
+    "amaravati buy sell classifieds",
+    "apartments for rent amaravati"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Amaravati Classifieds — Tiffin, PG, Jobs & Local Deals | LocalsIndia",
+    "description": "Find tiffin, PG rooms, jobs & local deals in Amaravati. Post free classifieds on LocalsIndia. Buy, sell, hire locally via WhatsApp.",
+    "url": "https://www.localsindia.com/amaravati",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Amaravati",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Andhra Pradesh"
+      }
+    }
+  },
+  "generatedAt": "2026-08-14T07:42:09.046921+00:00"
+}

@@ -1,0 +1,50 @@
+{
+  "citySlug": "amalapuram",
+  "city": "Amalapuram",
+  "state": "Andhra Pradesh",
+  "lang": "te",
+  "titleTag": "Amalapuram Classifieds — Jobs, PG & Tiffin | LocalsIndia",
+  "metaDescription": "Buy, sell, rent in Amalapuram. Free classifieds for tiffin services, PG rooms, jobs, and local goods. Post for free on LocalsIndia.",
+  "ogTitle": "Amalapuram Local Classifieds — Your Neighbor's Marketplace",
+  "ogDescription": "Find tiffin services, PG accommodations, jobs, and secondhand items in Amalapuram. Post for free. Connect via WhatsApp instantly.",
+  "h1": "Amalapuram Classifieds — Buy, Sell, Rent & Jobs Free",
+  "focusKeyword": "amalapuram classifieds",
+  "secondaryKeywords": [
+    "pg rooms in amalapuram",
+    "tiffin service amalapuram",
+    "jobs in amalapuram",
+    "buy sell amalapuram"
+  ],
+  "longTailKeywords": [
+    "pg rooms in amalapuram for boys",
+    "pg rooms in amalapuram for girls",
+    "tiffin service near amalapuram",
+    "home cooked meals amalapuram",
+    "part time jobs amalapuram",
+    "second hand bikes amalapuram",
+    "furniture for sale amalapuram",
+    "domestic help amalapuram",
+    "tutoring classes amalapuram",
+    "carpool amalapuram"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Amalapuram Classifieds — Free Local Listings",
+    "description": "Hyperlocal classifieds for Amalapuram. Post and browse free listings for tiffin, PG rooms, jobs, vehicles, and everyday items.",
+    "url": "https://www.localsindia.com/amalapuram",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Amalapuram",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Andhra Pradesh"
+      }
+    }
+  },
+  "generatedAt": "2026-08-14T07:42:03.472289+00:00"
+}

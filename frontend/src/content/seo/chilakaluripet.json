@@ -1,0 +1,52 @@
+{
+  "citySlug": "chilakaluripet",
+  "city": "Chilakaluripet",
+  "state": "Andhra Pradesh",
+  "lang": "te",
+  "titleTag": "Chilakaluripet Classifieds — Tiffin, PG & Jobs | LocalsIndia",
+  "metaDescription": "Free classifieds in Chilakaluripet. Post PG rooms, tiffin services, jobs & used items. Connect via WhatsApp. No fees.",
+  "ogTitle": "Find Local Deals & Services in Chilakaluripet — LocalsIndia",
+  "ogDescription": "Chilakaluripet's community classifieds. Tiffin, PG accommodation, jobs, buy/sell items. Free to post.",
+  "h1": "Chilakaluripet Classifieds — Free Local Listings for Tiffin, PG, Jobs & More",
+  "focusKeyword": "chilakaluripet classifieds",
+  "secondaryKeywords": [
+    "pg rooms chilakaluripet",
+    "tiffin service chilakaluripet",
+    "jobs chilakaluripet",
+    "buy sell items chilakaluripet"
+  ],
+  "longTailKeywords": [
+    "pg rooms in chilakaluripet for boys",
+    "pg rooms in chilakaluripet for girls",
+    "tiffin service near chilakaluripet",
+    "home food delivery chilakaluripet",
+    "part time jobs chilakaluripet",
+    "full time jobs chilakaluripet",
+    "second hand bikes chilakaluripet",
+    "used mobile phones chilakaluripet",
+    "furniture buy sell chilakaluripet",
+    "domestic help services chilakaluripet",
+    "coaching classes chilakaluripet",
+    "room mate wanted chilakaluripet"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Chilakaluripet Classifieds — Free Local Listings",
+    "description": "Free community classifieds for Chilakaluripet. Post and browse PG rooms, tiffin services, jobs, vehicles, and more.",
+    "url": "https://www.localsindia.com/chilakaluripet",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Chilakaluripet",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Andhra Pradesh"
+      }
+    }
+  },
+  "generatedAt": "2026-08-14T07:42:28.485352+00:00"
+}
