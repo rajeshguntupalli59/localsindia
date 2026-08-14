@@ -66,3 +66,13 @@
 {"timestamp": "2026-08-13T06:31:12.947427", "agent": "city_launcher", "model": "claude-haiku-4-5-20251001", "input_tokens": 2090, "output_tokens": 4056, "estimated_cost_usd": 0.02237}
 {"timestamp": "2026-08-13T06:32:43.658653", "agent": "city_launcher", "model": "claude-haiku-4-5-20251001", "input_tokens": 2099, "output_tokens": 4023, "estimated_cost_usd": 0.022214}
 {"timestamp": "2026-08-14T05:37:41.065865", "agent": "meta_poster", "model": "claude-haiku-4-5-20251001", "input_tokens": 1988, "output_tokens": 158, "estimated_cost_usd": 0.002778}
+{"timestamp": "2026-08-14T06:16:40.853069", "agent": "city_launcher", "model": "claude-haiku-4-5-20251001", "input_tokens": 2099, "output_tokens": 4331, "estimated_cost_usd": 0.023754}
+{"timestamp": "2026-08-14T06:18:28.065980", "agent": "city_launcher", "model": "claude-haiku-4-5-20251001", "input_tokens": 2072, "output_tokens": 4317, "estimated_cost_usd": 0.023657}
+{"timestamp": "2026-08-14T06:20:06.838668", "agent": "city_launcher", "model": "claude-haiku-4-5-20251001", "input_tokens": 2090, "output_tokens": 4200, "estimated_cost_usd": 0.02309}
+{"timestamp": "2026-08-14T06:21:38.968630", "agent": "city_launcher", "model": "claude-haiku-4-5-20251001", "input_tokens": 2090, "output_tokens": 4066, "estimated_cost_usd": 0.02242}
+{"timestamp": "2026-08-14T06:23:18.467710", "agent": "city_launcher", "model": "claude-haiku-4-5-20251001", "input_tokens": 2090, "output_tokens": 4493, "estimated_cost_usd": 0.024555}
+{"timestamp": "2026-08-14T06:24:54.630135", "agent": "city_launcher", "model": "claude-haiku-4-5-20251001", "input_tokens": 2099, "output_tokens": 4642, "estimated_cost_usd": 0.025309}
+{"timestamp": "2026-08-14T06:26:42.890629", "agent": "city_launcher", "model": "claude-haiku-4-5-20251001", "input_tokens": 2108, "output_tokens": 5010, "estimated_cost_usd": 0.027158}
+{"timestamp": "2026-08-14T06:28:29.462410", "agent": "city_launcher", "model": "claude-haiku-4-5-20251001", "input_tokens": 2108, "output_tokens": 4480, "estimated_cost_usd": 0.024508}
+{"timestamp": "2026-08-14T06:30:05.702952", "agent": "city_launcher", "model": "claude-haiku-4-5-20251001", "input_tokens": 2108, "output_tokens": 4481, "estimated_cost_usd": 0.024513}
+{"timestamp": "2026-08-14T06:31:45.415440", "agent": "city_launcher", "model": "claude-haiku-4-5-20251001", "input_tokens": 2090, "output_tokens": 4561, "estimated_cost_usd": 0.024895}
