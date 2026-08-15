@@ -15,6 +15,7 @@ from app.core.database import get_db
 from app.core.deps import get_current_user
 from app.models.business import Business
 from app.models.listing import Listing
+from app.models.payment_order import PaymentOrder
 from app.models.user import User
 
 router = APIRouter(prefix="/api/v1/payments", tags=["payments"])
@@ -114,6 +115,20 @@ async def create_featured_order(
     except Exception as exc:
         raise HTTPException(status_code=502, detail=f"Payment gateway error: {exc}") from exc
 
+    # Record what this order is actually for server-side — verify reads
+    # plan/target back from here rather than trusting the verify request
+    # body, since the Razorpay signature alone only proves (order_id,
+    # payment_id) belong together, not what was paid for.
+    db.add(PaymentOrder(
+        razorpay_order_id=order["id"],
+        user_id=current_user.id,
+        kind="featured_listing",
+        target_id=body.listing_id,
+        plan=body.plan,
+        amount=plan["amount"],
+    ))
+    await db.commit()
+
     return CreateOrderResponse(
         order_id=order["id"],
         amount=plan["amount"],
@@ -139,13 +154,31 @@ async def verify_featured_payment(
     if not hmac.compare_digest(expected, body.razorpay_signature):
         raise HTTPException(status_code=400, detail="Payment verification failed.")
 
-    plan = PLANS.get(body.plan)
+    # The Razorpay signature only proves (order_id, payment_id) belong
+    # together — it says nothing about which plan or listing this was for.
+    # Source of truth is the order record we created ourselves, not the
+    # client-supplied plan/listing_id in this request (BL-payment-01).
+    order_result = await db.execute(
+        select(PaymentOrder).where(
+            PaymentOrder.razorpay_order_id == body.razorpay_order_id,
+            PaymentOrder.kind == "featured_listing",
+        )
+    )
+    order = order_result.scalar_one_or_none()
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found.")
+    if order.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not your order.")
+    if order.consumed:
+        raise HTTPException(status_code=400, detail="This payment has already been applied.")
+
+    plan = PLANS.get(order.plan)
     if not plan:
         raise HTTPException(status_code=400, detail="Invalid plan.")
 
     result = await db.execute(
         select(Listing).where(
-            Listing.id == body.listing_id,
+            Listing.id == order.target_id,
             Listing.deleted_at.is_(None),
         )
     )
@@ -155,6 +188,7 @@ async def verify_featured_payment(
     if listing.user_id != current_user.id and current_user.role != "admin":
         raise HTTPException(status_code=403, detail="Not your listing.")
 
+    order.consumed = True
     listing.is_featured = True
     listing.featured_at = datetime.now(timezone.utc)
     listing.featured_until = datetime.now(timezone.utc) + timedelta(days=plan["days"])
@@ -238,6 +272,16 @@ async def create_badge_order(
     except Exception as exc:
         raise HTTPException(status_code=502, detail=f"Payment gateway error: {exc}") from exc
 
+    db.add(PaymentOrder(
+        razorpay_order_id=order["id"],
+        user_id=current_user.id,
+        kind="business_badge",
+        target_id=body.business_id,
+        plan=body.plan,
+        amount=plan["amount"],
+    ))
+    await db.commit()
+
     return BadgeOrderResponse(
         order_id=order["id"],
         amount=plan["amount"],
@@ -262,12 +306,26 @@ async def verify_badge_payment(
     if not hmac.compare_digest(expected, body.razorpay_signature):
         raise HTTPException(status_code=400, detail="Payment verification failed.")
 
-    plan = BADGE_PLANS.get(body.plan)
+    order_result = await db.execute(
+        select(PaymentOrder).where(
+            PaymentOrder.razorpay_order_id == body.razorpay_order_id,
+            PaymentOrder.kind == "business_badge",
+        )
+    )
+    order = order_result.scalar_one_or_none()
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found.")
+    if order.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not your order.")
+    if order.consumed:
+        raise HTTPException(status_code=400, detail="This payment has already been applied.")
+
+    plan = BADGE_PLANS.get(order.plan)
     if not plan:
         raise HTTPException(status_code=400, detail="Invalid plan.")
 
     result = await db.execute(
-        select(Business).where(Business.id == body.business_id, Business.deleted_at.is_(None))
+        select(Business).where(Business.id == order.target_id, Business.deleted_at.is_(None))
     )
     business = result.scalar_one_or_none()
     if not business:
@@ -275,6 +333,7 @@ async def verify_badge_payment(
     if business.owner_id != current_user.id and current_user.role != "admin":
         raise HTTPException(status_code=403, detail="Not your business.")
 
+    order.consumed = True
     now = datetime.now(timezone.utc)
     # Extend from current expiry if badge is still active, else from now
     base = business.badge_expires_at if (business.badge_expires_at and business.badge_expires_at > now) else now

@@ -19,6 +19,7 @@ from app.models.ticket import Ticket
 from app.models.city_banner import CityBanner
 from app.models.business_image import BusinessImage
 from app.models.event_image import EventImage
+from app.models.payment_order import PaymentOrder
 from app.models.listing_details import (
     VehicleDetails, JobDetails, PgRoommateDetails, RealEstateDetails,
     ElectronicsDetails, FurnitureDetails, FashionDetails, EducationDetails,
@@ -29,7 +30,7 @@ __all__ = [
     "City", "User", "Category", "Listing", "ListingImage",
     "Event", "Business", "Review", "Report", "OtpRequest", "ListingReview",
     "BuyerRequest", "BuyerRequestReport", "AppErrorLog", "LlmUsageLog", "DeviceToken", "AnalyticsEvent", "Ticket",
-    "CityBanner", "BusinessImage", "EventImage",
+    "CityBanner", "BusinessImage", "EventImage", "PaymentOrder",
     "VehicleDetails", "JobDetails", "PgRoommateDetails", "RealEstateDetails",
     "ElectronicsDetails", "FurnitureDetails", "FashionDetails", "EducationDetails",
     "DoctorDetails", "ServiceDetails", "TiffinDetails", "DETAILS_BY_CATEGORY_SLUG",
