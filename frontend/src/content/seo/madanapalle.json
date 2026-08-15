@@ -1,0 +1,52 @@
+{
+  "citySlug": "madanapalle",
+  "city": "Madanapalle",
+  "state": "Andhra Pradesh",
+  "lang": "te",
+  "titleTag": "Madanapalle Classifieds — Tiffin, PG & Jobs | LocalsIndia",
+  "metaDescription": "Free classifieds in Madanapalle. Post tiffin, PG rooms, jobs, used items. Connect with locals via WhatsApp. Zero posting fees.",
+  "ogTitle": "Madanapalle Free Local Classifieds — Your Neighborhood Marketplace",
+  "ogDescription": "Buy, sell, rent, or find work in Madanapalle. Tiffin services, PG rooms, part-time jobs, used bikes & more. Connect instantly.",
+  "h1": "Madanapalle Local Classifieds — Tiffin, PG Rooms & Jobs",
+  "focusKeyword": "madanapalle classifieds",
+  "secondaryKeywords": [
+    "pg rooms in madanapalle",
+    "tiffin service madanapalle",
+    "jobs in madanapalle",
+    "madanapalle buy sell"
+  ],
+  "longTailKeywords": [
+    "pg rooms in madanapalle for boys",
+    "pg rooms in madanapalle for girls",
+    "tiffin service near madanapalle",
+    "home cooked meals madanapalle",
+    "part time jobs madanapalle",
+    "second hand bikes madanapalle",
+    "used mobiles madanapalle",
+    "domestic help madanapalle",
+    "furniture rent madanapalle",
+    "tuition classes madanapalle",
+    "carpool madanapalle",
+    "flat mate wanted madanapalle"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Madanapalle Free Local Classifieds",
+    "description": "Free classifieds platform for Madanapalle. Post tiffin services, PG rooms, jobs, and buy/sell items locally.",
+    "url": "https://www.localsindia.com/madanapalle",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Madanapalle",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Andhra Pradesh"
+      }
+    }
+  },
+  "generatedAt": "2026-08-15T06:49:16.756212+00:00"
+}

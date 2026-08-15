@@ -1,0 +1,50 @@
+{
+  "citySlug": "hindupur",
+  "city": "Hindupur",
+  "state": "Andhra Pradesh",
+  "lang": "te",
+  "titleTag": "Hindupur Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, and hire locally in Hindupur. Post tiffin, PG rooms, jobs, and services free. Connect with neighbors on WhatsApp.",
+  "ogTitle": "Hindupur's Neighborhood Classifieds — Tiffin, PG & Local Jobs",
+  "ogDescription": "Find tiffin services, PG accommodations, part-time jobs, and secondhand items in Hindupur. Post for free, connect via WhatsApp.",
+  "h1": "Hindupur Local Classifieds — Buy, Sell & Hire Free",
+  "focusKeyword": "hindupur classifieds",
+  "secondaryKeywords": [
+    "hindupur tiffin service",
+    "pg rooms in hindupur",
+    "jobs in hindupur",
+    "buy sell hindupur"
+  ],
+  "longTailKeywords": [
+    "tiffin service in hindupur",
+    "pg rooms in hindupur for boys",
+    "pg rooms in hindupur for girls",
+    "part time jobs in hindupur",
+    "secondhand bikes in hindupur",
+    "used mobile phones hindupur",
+    "furniture for sale hindupur",
+    "domestic help in hindupur",
+    "tuition classes in hindupur",
+    "carpool hindupur to bangalore"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Hindupur Free Classifieds & Local Listings",
+    "description": "Buy, sell, and hire locally in Hindupur. Post tiffin, PG rooms, jobs, and services free. Connect with neighbors on WhatsApp.",
+    "url": "https://www.localsindia.com/hindupur",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Hindupur",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Andhra Pradesh"
+      }
+    }
+  },
+  "generatedAt": "2026-08-15T06:48:47.966378+00:00"
+}

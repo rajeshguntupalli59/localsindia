@@ -1,0 +1,50 @@
+{
+  "citySlug": "dharmavaram",
+  "city": "Dharmavaram",
+  "state": "Andhra Pradesh",
+  "lang": "te",
+  "titleTag": "Dharmavaram Classifieds — Free Listings & Jobs | LocalsIndia",
+  "metaDescription": "Find tiffin, PG rooms, jobs & secondhand items in Dharmavaram. Post free classifieds. Connect with locals on WhatsApp.",
+  "ogTitle": "Dharmavaram's Local Classifieds — Where Your Neighbors Buy, Sell & Hire",
+  "ogDescription": "Tiffin services, paying guest rooms, job listings, and everyday items — all from Dharmavaram locals. Free to post, easy to reach.",
+  "h1": "Dharmavaram Classifieds — Local Buying, Selling & Services",
+  "focusKeyword": "dharmavaram classifieds",
+  "secondaryKeywords": [
+    "dharmavaram pg rooms",
+    "dharmavaram tiffin service",
+    "dharmavaram jobs",
+    "dharmavaram second hand items"
+  ],
+  "longTailKeywords": [
+    "pg rooms in dharmavaram for boys",
+    "pg rooms in dharmavaram for girls",
+    "tiffin service near me dharmavaram",
+    "home cooked meals dharmavaram",
+    "part time jobs dharmavaram",
+    "second hand bikes dharmavaram",
+    "rent room in dharmavaram",
+    "domestic help dharmavaram",
+    "used mobile phones dharmavaram",
+    "furniture buy sell dharmavaram"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Dharmavaram Classifieds — Free Listings & Jobs | LocalsIndia",
+    "description": "Find tiffin, PG rooms, jobs & secondhand items in Dharmavaram. Post free classifieds. Connect with locals on WhatsApp.",
+    "url": "https://www.localsindia.com/dharmavaram",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Dharmavaram",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Andhra Pradesh"
+      }
+    }
+  },
+  "generatedAt": "2026-08-15T06:48:28.620874+00:00"
+}

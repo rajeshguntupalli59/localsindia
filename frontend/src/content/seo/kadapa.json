@@ -1,0 +1,52 @@
+{
+  "citySlug": "kadapa",
+  "city": "Kadapa",
+  "state": "Andhra Pradesh",
+  "lang": "te",
+  "titleTag": "Kadapa Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, rent in Kadapa. Tiffin delivery, PG rooms, jobs & services. Post free classifieds. Connect on WhatsApp instantly.",
+  "ogTitle": "Kadapa Classifieds — Local Buy/Sell, Tiffin & PG Rooms",
+  "ogDescription": "Kadapa's hyperlocal community marketplace. Find tiffin, PG rooms, jobs, used items & services. Free to post, zero fees.",
+  "h1": "Kadapa Classifieds — Buy, Sell, Rent & Services Locally",
+  "focusKeyword": "kadapa classifieds",
+  "secondaryKeywords": [
+    "buy sell kadapa",
+    "kadapa tiffin service",
+    "pg rooms kadapa",
+    "jobs in kadapa"
+  ],
+  "longTailKeywords": [
+    "kadapa tiffin delivery near me",
+    "pg rooms in kadapa for boys",
+    "pg rooms in kadapa for girls",
+    "part time jobs in kadapa",
+    "second hand bikes kadapa",
+    "used furniture kadapa",
+    "domestic help kadapa",
+    "tuition classes kadapa",
+    "mobile repair kadapa",
+    "beauty services kadapa",
+    "flat rent kadapa",
+    "carpool kadapa"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Kadapa Free Classifieds & Local Marketplace",
+    "description": "Hyperlocal community classifieds platform for Kadapa. Buy, sell, rent tiffin, PG rooms, jobs, services.",
+    "url": "https://www.localsindia.com/kadapa",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Kadapa",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Andhra Pradesh"
+      }
+    }
+  },
+  "generatedAt": "2026-08-15T06:48:53.263382+00:00"
+}

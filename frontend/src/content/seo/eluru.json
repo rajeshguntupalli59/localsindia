@@ -1,0 +1,52 @@
+{
+  "citySlug": "eluru",
+  "city": "Eluru",
+  "state": "Andhra Pradesh",
+  "lang": "te",
+  "titleTag": "Eluru Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Post free classifieds in Eluru: tiffin delivery, PG rooms, jobs, used items & services. Connect with locals on WhatsApp instantly.",
+  "ogTitle": "Eluru Classifieds — Find Tiffin, PG & Jobs Near You",
+  "ogDescription": "Free local classifieds in Eluru, Andhra Pradesh. Buy, sell, rent or hire locally. Zero posting fees, WhatsApp contact on every listing.",
+  "h1": "Eluru Classifieds — Free Buy, Sell & Local Services",
+  "focusKeyword": "eluru classifieds",
+  "secondaryKeywords": [
+    "eluru free classifieds",
+    "buy sell eluru",
+    "eluru local services",
+    "eluru pg rooms"
+  ],
+  "longTailKeywords": [
+    "tiffin service in eluru",
+    "pg rooms in eluru for boys",
+    "pg rooms in eluru for girls",
+    "part time jobs in eluru",
+    "second hand bikes in eluru",
+    "used mobiles in eluru",
+    "domestic help in eluru",
+    "furniture buy sell eluru",
+    "carpool eluru",
+    "events in eluru",
+    "tuition classes in eluru",
+    "rental flats in eluru"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Eluru Free Classifieds",
+    "description": "Post and browse free classifieds in Eluru, Andhra Pradesh. Tiffin delivery, PG rooms, jobs, services, buy & sell locally.",
+    "url": "https://www.localsindia.com/eluru",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Eluru",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Andhra Pradesh"
+      }
+    }
+  },
+  "generatedAt": "2026-08-15T06:48:33.321353+00:00"
+}

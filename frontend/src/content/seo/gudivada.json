@@ -1,0 +1,50 @@
+{
+  "citySlug": "gudivada",
+  "city": "Gudivada",
+  "state": "Andhra Pradesh",
+  "lang": "te",
+  "titleTag": "Gudivada Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, rent in Gudivada. Post free classifieds: tiffin services, PG rooms, jobs, used items. Connect via WhatsApp instantly.",
+  "ogTitle": "Gudivada Local Classifieds & Community — Tiffin, PG, Jobs, Buy/Sell",
+  "ogDescription": "Your Gudivada neighborhood marketplace. Free classifieds for tiffin, paying guest rooms, jobs, and everyday items. Post instantly, contact sellers on WhatsApp.",
+  "h1": "Gudivada Free Classifieds — Local Tiffin, PG Rooms, Jobs & More",
+  "focusKeyword": "gudivada classifieds",
+  "secondaryKeywords": [
+    "gudivada free classified ads",
+    "tiffin service in gudivada",
+    "pg rooms gudivada",
+    "jobs in gudivada"
+  ],
+  "longTailKeywords": [
+    "gudivada tiffin service near me",
+    "pg rooms in gudivada for boys",
+    "pg rooms in gudivada for girls",
+    "part time jobs in gudivada",
+    "second hand bikes in gudivada",
+    "used electronics in gudivada",
+    "domestic help in gudivada",
+    "flatmate wanted gudivada",
+    "buy sell rent in gudivada",
+    "paying guest accommodation gudivada"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Gudivada Free Classifieds — Tiffin, PG, Jobs & More",
+    "description": "Buy, sell, rent in Gudivada. Post free classifieds: tiffin services, PG rooms, jobs, used items. Connect via WhatsApp instantly.",
+    "url": "https://www.localsindia.com/gudivada",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Gudivada",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Andhra Pradesh"
+      }
+    }
+  },
+  "generatedAt": "2026-08-15T06:48:38.180501+00:00"
+}

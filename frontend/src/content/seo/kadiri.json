@@ -1,0 +1,56 @@
+{
+  "citySlug": "kadiri",
+  "city": "Kadiri",
+  "state": "Andhra Pradesh",
+  "lang": "te",
+  "titleTag": "Kadiri Classifieds — Free PG, Tiffin & Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, find tiffin & PG rooms in Kadiri. Post free classifieds for jobs, vehicles & services. WhatsApp sellers instantly on LocalsIndia.",
+  "ogTitle": "Kadiri's Neighborhood Classifieds — Tiffin, Rooms & Jobs",
+  "ogDescription": "Your Kadiri community board. Free listings for local tiffin, paying guest rooms, jobs, secondhand items & services. Connect via WhatsApp.",
+  "h1": "Kadiri Classifieds — Buy, Sell, Find Jobs & Tiffin Service",
+  "focusKeyword": "kadiri classifieds",
+  "secondaryKeywords": [
+    "pg rooms in kadiri",
+    "tiffin service kadiri",
+    "jobs in kadiri",
+    "kadiri secondhand items"
+  ],
+  "longTailKeywords": [
+    "pg rooms in kadiri for boys",
+    "pg rooms in kadiri for girls",
+    "tiffin service near me kadiri",
+    "paying guest accommodation kadiri",
+    "part time jobs in kadiri",
+    "home cooked meals kadiri",
+    "secondhand bikes kadiri",
+    "furniture for sale kadiri",
+    "domestic help in kadiri",
+    "tuition classes in kadiri",
+    "electronics buy sell kadiri",
+    "carpool kadiri"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Kadiri Classifieds & Local Listings",
+    "description": "Free classifieds platform for Kadiri community. Buy, sell, find tiffin service, PG rooms, jobs and local services.",
+    "url": "https://www.localsindia.com/kadiri",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Kadiri",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Andhra Pradesh",
+        "containedInPlace": {
+          "@type": "Country",
+          "name": "India"
+        }
+      }
+    }
+  },
+  "generatedAt": "2026-08-15T06:48:58.462122+00:00"
+}

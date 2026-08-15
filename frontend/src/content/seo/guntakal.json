@@ -1,0 +1,50 @@
+{
+  "citySlug": "guntakal",
+  "city": "Guntakal",
+  "state": "Andhra Pradesh",
+  "lang": "te",
+  "titleTag": "Guntakal Classifieds — Free PG, Jobs & Tiffin | LocalsIndia",
+  "metaDescription": "Find PG rooms, tiffin services, jobs, and local classifieds in Guntakal. Post free on LocalsIndia — connect via WhatsApp instantly.",
+  "ogTitle": "Guntakal's Trusted Local Classifieds — PG, Tiffin & Jobs",
+  "ogDescription": "Discover affordable PG rooms, home-cooked meals, local jobs, and buy/sell items in Guntakal. Free to post, reach your neighbors today.",
+  "h1": "Guntakal Free Classifieds — PG Rooms, Tiffin, Jobs & More",
+  "focusKeyword": "guntakal classifieds",
+  "secondaryKeywords": [
+    "pg rooms in guntakal",
+    "tiffin service guntakal",
+    "jobs in guntakal",
+    "guntakal buy and sell"
+  ],
+  "longTailKeywords": [
+    "pg rooms in guntakal for boys",
+    "pg rooms in guntakal for girls",
+    "tiffin service near me guntakal",
+    "home cooked meals guntakal",
+    "part time jobs in guntakal",
+    "full time jobs guntakal",
+    "second hand bikes guntakal",
+    "used mobiles guntakal",
+    "furniture for sale guntakal",
+    "roommate wanted guntakal"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Guntakal Free Classifieds — PG, Tiffin, Jobs & Local Services",
+    "description": "LocalsIndia Guntakal — Free hyperlocal classifieds for PG rooms, tiffin services, jobs, and community buy/sell listings in Telugu.",
+    "url": "https://www.localsindia.com/guntakal",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Guntakal",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Andhra Pradesh"
+      }
+    }
+  },
+  "generatedAt": "2026-08-15T06:48:43.266840+00:00"
+}

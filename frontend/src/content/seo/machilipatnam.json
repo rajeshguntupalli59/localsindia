@@ -1,0 +1,57 @@
+{
+  "citySlug": "machilipatnam",
+  "city": "Machilipatnam",
+  "state": "Andhra Pradesh",
+  "lang": "te",
+  "titleTag": "Machilipatnam Classifieds — Free Tiffin, PG & Jobs",
+  "metaDescription": "Find tiffin services, PG rooms, jobs & classifieds in Machilipatnam. Post free listings on LocalsIndia. Connect via WhatsApp instantly.",
+  "ogTitle": "Machilipatnam Local Classifieds — Your Neighborhood Marketplace",
+  "ogDescription": "Post and find everything locally in Machilipatnam: tiffin, PG rooms, jobs, used items. Free. In your language. WhatsApp direct.",
+  "h1": "Machilipatnam Classifieds — Tiffin, PG Rooms, Jobs & More",
+  "focusKeyword": "machilipatnam classifieds",
+  "secondaryKeywords": [
+    "tiffin service machilipatnam",
+    "pg rooms machilipatnam",
+    "jobs in machilipatnam",
+    "second hand bikes machilipatnam"
+  ],
+  "longTailKeywords": [
+    "tiffin service near me machilipatnam",
+    "pg rooms for boys machilipatnam",
+    "pg rooms for girls machilipatnam",
+    "part time jobs machilipatnam",
+    "paying guest rooms machilipatnam",
+    "home cooked meals machilipatnam",
+    "used bikes sell machilipatnam",
+    "domestic help machilipatnam",
+    "tuition classes machilipatnam",
+    "flatmate wanted machilipatnam",
+    "carpool machilipatnam",
+    "second hand furniture machilipatnam"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Machilipatnam Classifieds on LocalsIndia",
+    "description": "Free local classifieds marketplace in Machilipatnam, Andhra Pradesh. Buy, sell, and find services: tiffin, PG rooms, jobs, and more.",
+    "url": "https://www.localsindia.com/machilipatnam",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Machilipatnam",
+      "alternateName": "Masulipatnam",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Andhra Pradesh",
+        "containedInPlace": {
+          "@type": "Country",
+          "name": "India"
+        }
+      }
+    }
+  },
+  "generatedAt": "2026-08-15T06:49:09.511539+00:00"
+}

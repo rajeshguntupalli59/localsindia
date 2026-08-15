@@ -1,0 +1,52 @@
+{
+  "citySlug": "kakinada",
+  "city": "Kakinada",
+  "state": "Andhra Pradesh",
+  "lang": "te",
+  "titleTag": "Kakinada Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, hire locally in Kakinada. Tiffin delivery, PG rooms, jobs, used bikes & more. Post free. Zero commission. Contact via WhatsApp.",
+  "ogTitle": "Kakinada Local Classifieds — Your Neighborhood Marketplace",
+  "ogDescription": "Connect with neighbors in Kakinada. Find tiffin services, PG rooms, local jobs, and second-hand items. Free to post and browse.",
+  "h1": "Kakinada Classifieds — Buy, Sell & Hire Locally, Free",
+  "focusKeyword": "kakinada classifieds",
+  "secondaryKeywords": [
+    "kakinada pg rooms",
+    "kakinada tiffin service",
+    "kakinada jobs",
+    "kakinada second hand bikes"
+  ],
+  "longTailKeywords": [
+    "pg rooms in kakinada for boys",
+    "pg rooms in kakinada for girls",
+    "kakinada tiffin service near me",
+    "home delivery tiffin kakinada",
+    "part time jobs in kakinada",
+    "used bikes for sale in kakinada",
+    "domestic help in kakinada",
+    "flatmate wanted kakinada",
+    "furniture buy sell kakinada",
+    "electronics second hand kakinada",
+    "kakinada job listings",
+    "kakinada classifieds free posting"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Kakinada Free Classifieds & Local Marketplace | LocalsIndia",
+    "description": "Buy, sell, and hire locally in Kakinada. Post free classifieds for tiffin, PG rooms, jobs, vehicles, and more.",
+    "url": "https://www.localsindia.com/kakinada",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Kakinada",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Andhra Pradesh"
+      }
+    }
+  },
+  "generatedAt": "2026-08-15T06:49:03.764555+00:00"
+}
