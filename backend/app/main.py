@@ -1,4 +1,5 @@
 # LocalIndia API — localsindia.com
+import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -8,6 +9,8 @@ from slowapi.errors import RateLimitExceeded
 from app.core.config import settings
 from app.core.limiter import limiter
 from app.routers import auth, cities, categories, listings, uploads, search, admin, events, businesses, payments, users, chat, saved_searches, favorites, notifications, preferences, cron, buyer_requests, errors, analytics, tickets
+
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
@@ -28,9 +31,10 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 @app.exception_handler(Exception)
 async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+    logger.exception(f"Unhandled exception on {request.method} {request.url.path}")
     return JSONResponse(
         status_code=500,
-        content={"detail": f"{type(exc).__name__}: {exc}"},
+        content={"detail": "Internal server error."},
     )
 
 _cors_origins = list({

@@ -275,7 +275,7 @@ async def set_password(body: SetPasswordRequest, db: AsyncSession = Depends(get_
 
 @router.post("/refresh", response_model=TokenResponse)
 async def refresh_token(body: RefreshRequest, db: AsyncSession = Depends(get_db)):
-    user_id = decode_token(body.refresh_token)
+    user_id = decode_token(body.refresh_token, expected_type="refresh")
     if not user_id:
         raise HTTPException(status_code=401, detail="Invalid or expired refresh token.")
 

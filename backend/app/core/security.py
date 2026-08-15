@@ -33,9 +33,11 @@ def create_refresh_token(subject: str) -> str:
     )
 
 
-def decode_token(token: str) -> str | None:
+def decode_token(token: str, expected_type: str = "access") -> str | None:
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+        if payload.get("type") != expected_type:
+            return None
         return payload.get("sub")
     except JWTError:
         return None
