@@ -1,6 +1,6 @@
 {
-  "lastCityIndex": 8,
-  "lastCategoryIndex": 1,
+  "lastCityIndex": 9,
+  "lastCategoryIndex": 2,
   "history": [
     {
       "citySlug": "bangalore",
@@ -55,6 +55,12 @@
       "category": "tiffin",
       "topicTemplateId": "hygiene-check",
       "publishedAt": "2026-08-09T04:12:31Z"
+    },
+    {
+      "citySlug": "lucknow",
+      "category": "jobs",
+      "topicTemplateId": "spot-fake-listing",
+      "publishedAt": "2026-08-16T03:42:09Z"
     }
   ]
 }
