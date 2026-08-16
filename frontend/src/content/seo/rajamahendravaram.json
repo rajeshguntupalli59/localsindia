@@ -1,0 +1,53 @@
+{
+  "citySlug": "rajamahendravaram",
+  "city": "Rajamahendravaram",
+  "state": "Andhra Pradesh",
+  "lang": "te",
+  "titleTag": "Rajamahendravaram Free Classifieds — Jobs, PG, Tiffin | LocalsIndia",
+  "metaDescription": "Buy, sell, hire in Rajamahendravaram. Free classifieds for tiffin, PG rooms, jobs, bikes & more. Post instantly, contact via WhatsApp.",
+  "ogTitle": "Your Rajamahendravaram Community Marketplace — LocalsIndia",
+  "ogDescription": "Connect with locals in Rajamahendravaram. Browse tiffin services, PG rooms, jobs, and used items. Free to post, easy to contact.",
+  "h1": "Rajamahendravaram Free Classifieds — Local Jobs, PG Rooms & Tiffin",
+  "focusKeyword": "rajamahendravaram classifieds",
+  "secondaryKeywords": [
+    "rajamahendravaram jobs",
+    "pg rooms rajamahendravaram",
+    "tiffin service rajamahendravaram",
+    "second hand bikes rajamahendravaram"
+  ],
+  "longTailKeywords": [
+    "part time jobs in rajamahendravaram",
+    "pg rooms for boys in rajamahendravaram",
+    "pg rooms for girls in rajamahendravaram",
+    "paying guest rajamahendravaram",
+    "tiffin delivery near me rajamahendravaram",
+    "home cooked meals rajamahendravaram",
+    "used bikes for sale rajamahendravaram",
+    "domestic help in rajamahendravaram",
+    "tuition classes rajamahendravaram",
+    "furniture for sale rajamahendravaram",
+    "रजमहेंद्रवरम classifieds",
+    "rajamundry pg rooms"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Rajamahendravaram Free Classifieds — Jobs, PG, Tiffin & More",
+    "description": "Buy, sell, hire in Rajamahendravaram. Free classifieds for tiffin, PG rooms, jobs, bikes & more. Post instantly, contact via WhatsApp.",
+    "url": "https://www.localsindia.com/rajamahendravaram",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Rajamahendravaram",
+      "alternateName": "Rajamundry",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Andhra Pradesh"
+      }
+    }
+  },
+  "generatedAt": "2026-08-16T06:50:35.393527+00:00"
+}

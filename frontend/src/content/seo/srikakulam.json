@@ -1,0 +1,52 @@
+{
+  "citySlug": "srikakulam",
+  "city": "Srikakulam",
+  "state": "Andhra Pradesh",
+  "lang": "te",
+  "titleTag": "Srikakulam Free Classifieds — Jobs, PG & More | LocalsIndia",
+  "metaDescription": "Find tiffin, PG rooms, jobs, and secondhand items in Srikakulam. Post free classifieds locally on LocalsIndia. Connect via WhatsApp.",
+  "ogTitle": "Srikakulam Local Classifieds — Your Neighborhood Marketplace",
+  "ogDescription": "Buy, sell, rent, and hire in Srikakulam. From tiffin services to PG accommodation to local jobs — all free, all hyperlocal.",
+  "h1": "Srikakulam Classifieds — Free Listings for Jobs, PG, Tiffin & More",
+  "focusKeyword": "srikakulam classifieds",
+  "secondaryKeywords": [
+    "pg rooms in srikakulam",
+    "tiffin service srikakulam",
+    "jobs in srikakulam",
+    "buy sell srikakulam"
+  ],
+  "longTailKeywords": [
+    "pg rooms in srikakulam for boys",
+    "pg rooms in srikakulam for girls",
+    "tiffin service near me srikakulam",
+    "home cooked meals srikakulam",
+    "part time jobs srikakulam",
+    "secondhand bikes srikakulam",
+    "used mobile phones srikakulam",
+    "flat rent srikakulam",
+    "domestic help srikakulam",
+    "furniture buy sell srikakulam",
+    "tuition classes srikakulam",
+    "carpool srikakulam"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Srikakulam Free Classifieds — Jobs, PG & More | LocalsIndia",
+    "description": "Find tiffin, PG rooms, jobs, and secondhand items in Srikakulam. Post free classifieds locally on LocalsIndia. Connect via WhatsApp.",
+    "url": "https://www.localsindia.com/srikakulam",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Srikakulam",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Andhra Pradesh"
+      }
+    }
+  },
+  "generatedAt": "2026-08-16T06:50:40.768927+00:00"
+}

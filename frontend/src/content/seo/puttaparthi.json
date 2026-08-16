@@ -1,0 +1,52 @@
+{
+  "citySlug": "puttaparthi",
+  "city": "Puttaparthi",
+  "state": "Andhra Pradesh",
+  "lang": "te",
+  "titleTag": "Puttaparthi Free Classifieds — Tiffin, PG & Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, rent in Puttaparthi. Free classifieds for tiffin, PG rooms, jobs, used items & services. Post instantly, connect via WhatsApp.",
+  "ogTitle": "Puttaparthi Community Classifieds — Your Neighborhood Marketplace",
+  "ogDescription": "Find tiffin services, PG rooms, jobs, and local deals in Puttaparthi. Post for free, connect with neighbors instantly.",
+  "h1": "Puttaparthi Classifieds — Free Buy, Sell & Services",
+  "focusKeyword": "puttaparthi classifieds",
+  "secondaryKeywords": [
+    "puttaparthi tiffin service",
+    "pg rooms puttaparthi",
+    "jobs in puttaparthi",
+    "used items puttaparthi"
+  ],
+  "longTailKeywords": [
+    "tiffin delivery puttaparthi",
+    "pg rooms for girls puttaparthi",
+    "pg rooms for boys puttaparthi",
+    "paying guest puttaparthi",
+    "part time jobs puttaparthi",
+    "domestic help puttaparthi",
+    "second hand bikes puttaparthi",
+    "furniture buy sell puttaparthi",
+    "mobile phones puttaparthi",
+    "flatmate wanted puttaparthi",
+    "carpool puttaparthi",
+    "home tuition puttaparthi"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Puttaparthi Free Classifieds — Tiffin, PG & Jobs | LocalsIndia",
+    "description": "Buy, sell, rent in Puttaparthi. Free classifieds for tiffin, PG rooms, jobs, used items & services. Post instantly, connect via WhatsApp.",
+    "url": "https://www.localsindia.com/puttaparthi",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Puttaparthi",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Andhra Pradesh"
+      }
+    }
+  },
+  "generatedAt": "2026-08-16T06:50:29.843751+00:00"
+}

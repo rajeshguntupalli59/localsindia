@@ -1,0 +1,50 @@
+{
+  "citySlug": "tadepalligudem",
+  "city": "Tadepalligudem",
+  "state": "Andhra Pradesh",
+  "lang": "te",
+  "titleTag": "Tadepalligudem Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Free classifieds in Tadepalligudem. Post & find tiffin services, PG rooms, jobs, used bikes & more. Connect on WhatsApp. No fees.",
+  "ogTitle": "Tadepalligudem Local Classifieds — Sell, Hire & Connect for Free",
+  "ogDescription": "Your neighborhood marketplace in Tadepalligudem. Tiffin, rooms, jobs, furniture — posted by locals, for locals. WhatsApp directly.",
+  "h1": "Tadepalligudem Free Classifieds & Local Marketplace",
+  "focusKeyword": "tadepalligudem classifieds",
+  "secondaryKeywords": [
+    "tadepalligudem tiffin service",
+    "pg rooms tadepalligudem",
+    "jobs tadepalligudem",
+    "second hand bikes tadepalligudem"
+  ],
+  "longTailKeywords": [
+    "tiffin service near me tadepalligudem",
+    "paying guest rooms tadepalligudem boys",
+    "pg accommodation tadepalligudem girls",
+    "part time jobs tadepalligudem",
+    "full time jobs tadepalligudem",
+    "used bikes for sale tadepalligudem",
+    "domestic help tadepalligudem",
+    "home tuition tadepalligudem",
+    "furniture buy sell tadepalligudem",
+    "local events tadepalligudem"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Tadepalligudem Free Classifieds & Local Marketplace",
+    "description": "Free classifieds in Tadepalligudem for tiffin, PG rooms, jobs, vehicles, and more. Post listings and connect with locals via WhatsApp.",
+    "url": "https://www.localsindia.com/tadepalligudem",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Tadepalligudem",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Andhra Pradesh"
+      }
+    }
+  },
+  "generatedAt": "2026-08-16T06:50:45.885263+00:00"
+}

@@ -1,0 +1,50 @@
+{
+  "citySlug": "narasapuram",
+  "city": "Narasapuram",
+  "state": "Andhra Pradesh",
+  "lang": "te",
+  "titleTag": "Narasapuram Classifieds — Free Tiffin, PG & Jobs",
+  "metaDescription": "Find tiffin services, PG rooms, jobs & secondhand items in Narasapuram. Post free classifieds locally on LocalsIndia.",
+  "ogTitle": "Buy, Sell & Connect in Narasapuram — Your Local Classifieds Hub",
+  "ogDescription": "Narasapuram's trusted community marketplace for tiffin, PG rooms, jobs, and local classifieds. Free to post, easy to find.",
+  "h1": "Narasapuram Classifieds — Tiffin, PG Rooms, Jobs & More",
+  "focusKeyword": "narasapuram classifieds",
+  "secondaryKeywords": [
+    "narasapuram tiffin service",
+    "pg rooms narasapuram",
+    "jobs in narasapuram",
+    "narasapuram second hand items"
+  ],
+  "longTailKeywords": [
+    "tiffin service near me narasapuram",
+    "pg rooms for boys in narasapuram",
+    "pg rooms for girls in narasapuram",
+    "part time jobs narasapuram",
+    "domestic help narasapuram",
+    "second hand bikes narasapuram",
+    "used furniture narasapuram",
+    "home tuition narasapuram",
+    "carpool narasapuram",
+    "beauty services narasapuram"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Narasapuram Classifieds on LocalsIndia",
+    "description": "Free local classifieds in Narasapuram for tiffin, PG rooms, jobs, services and secondhand items. Connect with your community.",
+    "url": "https://www.localsindia.com/narasapuram",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Narasapuram",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Andhra Pradesh"
+      }
+    }
+  },
+  "generatedAt": "2026-08-16T06:50:14.484742+00:00"
+}

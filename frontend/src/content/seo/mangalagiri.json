@@ -1,0 +1,52 @@
+{
+  "citySlug": "mangalagiri",
+  "city": "Mangalagiri",
+  "state": "Andhra Pradesh",
+  "lang": "te",
+  "titleTag": "Mangalagiri Classifieds — Free Tiffin, PG & Jobs",
+  "metaDescription": "Find tiffin services, PG rooms, jobs & classifieds in Mangalagiri. Post free. Connect via WhatsApp. Your local community marketplace.",
+  "ogTitle": "Mangalagiri's Trusted Classifieds — Tiffin, PG, Jobs & More",
+  "ogDescription": "Discover local deals, tiffin, PG rooms, and jobs in Mangalagiri. Free to post, easy to find. Connect with your neighbors.",
+  "h1": "Mangalagiri Classifieds — Free Local Listings & Community",
+  "focusKeyword": "mangalagiri classifieds",
+  "secondaryKeywords": [
+    "mangalagiri tiffin service",
+    "pg rooms in mangalagiri",
+    "jobs in mangalagiri",
+    "mangalagiri buy sell"
+  ],
+  "longTailKeywords": [
+    "tiffin service near mangalagiri",
+    "pg rooms in mangalagiri for boys",
+    "pg rooms in mangalagiri for girls",
+    "part time jobs in mangalagiri",
+    "full time jobs in mangalagiri",
+    "second hand bikes in mangalagiri",
+    "furniture for sale in mangalagiri",
+    "mangalagiri domestic help",
+    "mangalagiri home tuition",
+    "mangalagiri flatmate wanted",
+    "mangalagiri used electronics",
+    "mangalagiri local events"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Mangalagiri Classifieds — Free Local Listings",
+    "description": "Find tiffin services, PG rooms, jobs & classifieds in Mangalagiri. Post free. Connect via WhatsApp.",
+    "url": "https://www.localsindia.com/mangalagiri",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Mangalagiri",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Andhra Pradesh"
+      }
+    }
+  },
+  "generatedAt": "2026-08-16T06:50:03.402107+00:00"
+}

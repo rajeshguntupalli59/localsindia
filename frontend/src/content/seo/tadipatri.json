@@ -1,0 +1,52 @@
+{
+  "citySlug": "tadipatri",
+  "city": "Tadipatri",
+  "state": "Andhra Pradesh",
+  "lang": "te",
+  "titleTag": "Tadipatri Classifieds — Free PG, Tiffin & Jobs | LocalsIndia",
+  "metaDescription": "Tadipatri classifieds: post PG rooms, tiffin, jobs & buy/sell items free. Connect with locals via WhatsApp.",
+  "ogTitle": "Find PG Rooms, Tiffin & Jobs in Tadipatri — No Commission",
+  "ogDescription": "Tadipatri's hyperlocal community marketplace. Post free classifieds, browse tiffin services, find roommates & jobs.",
+  "h1": "Tadipatri Classifieds: Free Local Buy, Sell & Services",
+  "focusKeyword": "tadipatri classifieds",
+  "secondaryKeywords": [
+    "pg rooms tadipatri",
+    "tiffin service tadipatri",
+    "jobs in tadipatri",
+    "tadipatri roommate"
+  ],
+  "longTailKeywords": [
+    "pg rooms in tadipatri for boys",
+    "pg rooms in tadipatri for girls",
+    "tiffin service near tadipatri",
+    "paying guest accommodation tadipatri",
+    "part time jobs tadipatri",
+    "second hand bikes tadipatri",
+    "furniture for sale tadipatri",
+    "domestic help tadipatri",
+    "tuition classes tadipatri",
+    "flatmate wanted tadipatri",
+    "used mobile phones tadipatri",
+    "rental rooms tadipatri"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Tadipatri Classifieds | LocalsIndia",
+    "description": "Free local classifieds for Tadipatri: PG rooms, tiffin services, jobs, buy & sell items. Connect with neighbors on WhatsApp.",
+    "url": "https://www.localsindia.com/tadipatri",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Tadipatri",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Andhra Pradesh"
+      }
+    }
+  },
+  "generatedAt": "2026-08-16T06:50:50.814945+00:00"
+}

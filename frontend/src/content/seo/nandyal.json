@@ -1,0 +1,52 @@
+{
+  "citySlug": "nandyal",
+  "city": "Nandyal",
+  "state": "Andhra Pradesh",
+  "lang": "te",
+  "titleTag": "Nandyal Classifieds — Free PG, Tiffin & Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, rent in Nandyal. Post free classifieds for tiffin, PG rooms, jobs, bikes & more. Connect with locals via WhatsApp.",
+  "ogTitle": "Nandyal Free Classifieds — Your Neighborhood Marketplace",
+  "ogDescription": "Find PG rooms, tiffin services, jobs, and second-hand items in Nandyal. Post for free, connect instantly on WhatsApp.",
+  "h1": "Nandyal Free Classifieds — Buy, Sell, Rent & Hire Local",
+  "focusKeyword": "Nandyal classifieds",
+  "secondaryKeywords": [
+    "Nandyal PG rooms",
+    "tiffin service Nandyal",
+    "jobs in Nandyal",
+    "second hand bikes Nandyal"
+  ],
+  "longTailKeywords": [
+    "PG rooms in Nandyal for boys",
+    "PG rooms in Nandyal for girls",
+    "tiffin service near me Nandyal",
+    "home-cooked meals Nandyal",
+    "part time jobs Nandyal",
+    "full time jobs Nandyal",
+    "second hand bikes in Nandyal",
+    "used mobile phones Nandyal",
+    "furniture buy sell Nandyal",
+    "domestic help Nandyal",
+    "Nandyal roommate wanted",
+    "flatmate Nandyal"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Nandyal Free Classifieds — Buy, Sell, Rent & Hire Local",
+    "description": "Buy, sell, rent in Nandyal. Post free classifieds for tiffin, PG rooms, jobs, bikes & more. Connect with locals via WhatsApp.",
+    "url": "https://www.localsindia.com/nandyal",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Nandyal",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Andhra Pradesh"
+      }
+    }
+  },
+  "generatedAt": "2026-08-16T06:50:09.686335+00:00"
+}

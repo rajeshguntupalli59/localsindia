@@ -1,0 +1,52 @@
+{
+  "citySlug": "proddatur",
+  "city": "Proddatur",
+  "state": "Andhra Pradesh",
+  "lang": "te",
+  "titleTag": "Proddatur Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, hire locally in Proddatur. Free classifieds for tiffin, PG rooms, jobs, vehicles & more. Post instantly, connect on WhatsApp.",
+  "ogTitle": "Proddatur Classifieds — Find Tiffin, PG & Jobs Near You",
+  "ogDescription": "Your Proddatur community board. Free listings for tiffin services, PG rooms, local jobs, used items. Zero fees, direct WhatsApp contact.",
+  "h1": "Proddatur Free Classifieds — Local Tiffin, PG Rooms & Jobs",
+  "focusKeyword": "proddatur classifieds",
+  "secondaryKeywords": [
+    "proddatur free classifieds",
+    "pg rooms in proddatur",
+    "tiffin service proddatur",
+    "jobs in proddatur"
+  ],
+  "longTailKeywords": [
+    "pg rooms in proddatur for boys",
+    "pg rooms in proddatur for girls",
+    "tiffin service near me proddatur",
+    "home cooked tiffin in proddatur",
+    "part time jobs in proddatur",
+    "full time jobs proddatur",
+    "second hand bikes proddatur",
+    "used mobile phones proddatur",
+    "flat for rent proddatur",
+    "domestic help proddatur",
+    "tuition classes proddatur",
+    "buy sell classifieds proddatur"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Proddatur Free Classifieds — Tiffin, PG, Jobs & Local Listings",
+    "description": "Buy, sell, hire locally in Proddatur. Free classifieds for tiffin, PG rooms, jobs, vehicles & more. Post instantly, connect on WhatsApp.",
+    "url": "https://www.localsindia.com/proddatur",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Proddatur",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Andhra Pradesh"
+      }
+    }
+  },
+  "generatedAt": "2026-08-16T06:50:24.938492+00:00"
+}

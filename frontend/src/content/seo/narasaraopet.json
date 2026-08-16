@@ -1,0 +1,50 @@
+{
+  "citySlug": "narasaraopet",
+  "city": "Narasaraopet",
+  "state": "Andhra Pradesh",
+  "lang": "te",
+  "titleTag": "Narasaraopet Classifieds — Tiffin, PG & Jobs | LocalsIndia",
+  "metaDescription": "Free classifieds in Narasaraopet. Post tiffin services, PG rooms, jobs, and buy/sell locally. Connect via WhatsApp instantly.",
+  "ogTitle": "Find Local Services & Jobs in Narasaraopet — No Fees",
+  "ogDescription": "Narasaraopet's community marketplace. Tiffin delivery, paying guest rooms, part-time work, and more — all free to post.",
+  "h1": "Narasaraopet Local Classifieds — Tiffin, PG, Jobs & Buy/Sell",
+  "focusKeyword": "narasaraopet classifieds",
+  "secondaryKeywords": [
+    "tiffin service in narasaraopet",
+    "pg rooms narasaraopet",
+    "jobs in narasaraopet",
+    "buy sell narasaraopet"
+  ],
+  "longTailKeywords": [
+    "tiffin delivery near me narasaraopet",
+    "pg rooms for boys narasaraopet",
+    "pg rooms for girls narasaraopet",
+    "part time jobs narasaraopet",
+    "second hand bikes narasaraopet",
+    "domestic help narasaraopet",
+    "tuition classes narasaraopet",
+    "flat rent narasaraopet",
+    "roommate wanted narasaraopet",
+    "used furniture narasaraopet"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Narasaraopet Classifieds — Tiffin, PG, Jobs & Buy/Sell",
+    "description": "Free local classifieds marketplace in Narasaraopet. Post tiffin services, PG rooms, jobs, vehicles, electronics, and more. Connect sellers and buyers instantly via WhatsApp.",
+    "url": "https://www.localsindia.com/narasaraopet",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Narasaraopet",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Andhra Pradesh"
+      }
+    }
+  },
+  "generatedAt": "2026-08-16T06:50:19.984189+00:00"
+}
