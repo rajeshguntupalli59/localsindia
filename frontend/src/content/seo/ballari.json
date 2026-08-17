@@ -1,0 +1,52 @@
+{
+  "citySlug": "ballari",
+  "city": "Ballari",
+  "state": "Karnataka",
+  "lang": "kn",
+  "titleTag": "Ballari Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, hire locally in Ballari. Free classifieds for tiffin, PG rooms, jobs, vehicles & more. Post instantly, contact via WhatsApp.",
+  "ogTitle": "Ballari's Neighborhood Classifieds — Tiffin, PG & Local Jobs",
+  "ogDescription": "Find tiffin services, PG rooms, jobs, and secondhand items in Ballari. Post free classifieds, connect with neighbors on LocalsIndia.",
+  "h1": "Free Local Classifieds in Ballari — Tiffin, PG Rooms & Jobs",
+  "focusKeyword": "ballari classifieds",
+  "secondaryKeywords": [
+    "ballari tiffin service",
+    "pg rooms ballari",
+    "jobs in ballari",
+    "ballari buy sell"
+  ],
+  "longTailKeywords": [
+    "tiffin service near me ballari",
+    "pg rooms in ballari for boys",
+    "pg rooms in ballari for girls",
+    "part time jobs ballari",
+    "full time jobs ballari",
+    "secondhand bikes ballari",
+    "used phones ballari",
+    "domestic help ballari",
+    "home tuition ballari",
+    "furniture buy sell ballari",
+    "ballari roommate wanted",
+    "flatmate in ballari"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Free Local Classifieds in Ballari",
+    "description": "Hyperlocal classifieds platform for Ballari. Buy, sell, hire — tiffin services, PG rooms, jobs, vehicles, electronics, and more. Post free, connect via WhatsApp.",
+    "url": "https://www.localsindia.com/ballari",
+    "inLanguage": [
+      "kn",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Ballari",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Karnataka"
+      }
+    }
+  },
+  "generatedAt": "2026-08-17T07:07:16.151057+00:00"
+}

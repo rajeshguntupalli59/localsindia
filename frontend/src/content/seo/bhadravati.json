@@ -1,0 +1,52 @@
+{
+  "citySlug": "bhadravati",
+  "city": "Bhadravati",
+  "state": "Karnataka",
+  "lang": "kn",
+  "titleTag": "Bhadravati Classifieds — PG, Jobs & Tiffin | LocalsIndia",
+  "metaDescription": "Free classifieds in Bhadravati. Find PG rooms, tiffin services, jobs, used items & local services. Post free on LocalsIndia.",
+  "ogTitle": "Bhadravati Local Classifieds — Your Neighborhood Marketplace",
+  "ogDescription": "Connect with your Bhadravati community. Browse & post PG listings, job openings, tiffin services, and everyday items — free.",
+  "h1": "Bhadravati Free Classifieds & Local Marketplace",
+  "focusKeyword": "bhadravati classifieds",
+  "secondaryKeywords": [
+    "pg rooms in bhadravati",
+    "bhadravati jobs",
+    "tiffin service bhadravati",
+    "bhadravati local services"
+  ],
+  "longTailKeywords": [
+    "pg rooms in bhadravati for boys",
+    "pg rooms in bhadravati for girls",
+    "bhadravati tiffin service near me",
+    "home delivery tiffin bhadravati",
+    "part time jobs in bhadravati",
+    "full time jobs bhadravati",
+    "second hand bikes in bhadravati",
+    "used mobile phones bhadravati",
+    "domestic help bhadravati",
+    "tuition classes bhadravati",
+    "bhadravati furniture buy sell",
+    "carpool bhadravati"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Bhadravati Free Classifieds — PG, Jobs & Tiffin | LocalsIndia",
+    "description": "Free classifieds in Bhadravati. Find PG rooms, tiffin services, jobs, used items & local services. Post free on LocalsIndia.",
+    "url": "https://www.localsindia.com/bhadravati",
+    "inLanguage": [
+      "kn",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Bhadravati",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Karnataka"
+      }
+    }
+  },
+  "generatedAt": "2026-08-17T07:07:26.219622+00:00"
+}

@@ -1,0 +1,52 @@
+{
+  "citySlug": "chikkaballapur",
+  "city": "Chikkaballapur",
+  "state": "Karnataka",
+  "lang": "kn",
+  "titleTag": "Chikkaballapur Classifieds — Free PG, Tiffin & Jobs",
+  "metaDescription": "Find PG rooms, tiffin services, jobs & classifieds in Chikkaballapur. Post free listings. Connect via WhatsApp. LocalsIndia — your local marketplace.",
+  "ogTitle": "Chikkaballapur's Hyperlocal Classifieds — PG, Jobs, Tiffin & More",
+  "ogDescription": "Browse and post free classifieds in Chikkaballapur. From PG rooms for students to home-cooked meals and part-time jobs. Connect with neighbors instantly.",
+  "h1": "Chikkaballapur Classifieds — Free Local Listings for PG, Tiffin, Jobs & More",
+  "focusKeyword": "chikkaballapur classifieds",
+  "secondaryKeywords": [
+    "pg rooms chikkaballapur",
+    "tiffin service chikkaballapur",
+    "jobs in chikkaballapur",
+    "chikkaballapur buy sell"
+  ],
+  "longTailKeywords": [
+    "pg rooms in chikkaballapur for boys",
+    "pg rooms in chikkaballapur for girls",
+    "tiffin service near chikkaballapur",
+    "home cooked meal delivery chikkaballapur",
+    "part time jobs chikkaballapur",
+    "second hand bikes chikkaballapur",
+    "used phones chikkaballapur",
+    "flatmate wanted chikkaballapur",
+    "domestic help chikkaballapur",
+    "furniture buy sell chikkaballapur",
+    "carpool chikkaballapur",
+    "tuition classes chikkaballapur"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Chikkaballapur Classifieds — Free Local Marketplace",
+    "description": "Free classifieds platform for Chikkaballapur. Post and browse PG rooms, tiffin services, jobs, and local listings. Connect via WhatsApp.",
+    "url": "https://www.localsindia.com/chikkaballapur",
+    "inLanguage": [
+      "kn",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Chikkaballapur",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Karnataka"
+      }
+    }
+  },
+  "generatedAt": "2026-08-17T07:07:36.578326+00:00"
+}

@@ -1,0 +1,61 @@
+{
+  "citySlug": "vizianagaram",
+  "city": "Vizianagaram",
+  "state": "Andhra Pradesh",
+  "lang": "te",
+  "titleTag": "Vizianagaram Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Free classifieds in Vizianagaram. Post tiffin service, PG rooms, jobs & sell items locally. Connect on WhatsApp instantly.",
+  "ogTitle": "Find Local Deals & Services in Vizianagaram — No Fees",
+  "ogDescription": "Vizianagaram's community classifieds. Browse tiffin, PG rooms, jobs, used bikes & more. Free to post, free to browse.",
+  "h1": "Vizianagaram Classifieds & Local Services",
+  "focusKeyword": "vizianagaram classifieds",
+  "secondaryKeywords": [
+    "pg rooms vizianagaram",
+    "tiffin service vizianagaram",
+    "jobs in vizianagaram",
+    "second hand bikes vizianagaram"
+  ],
+  "longTailKeywords": [
+    "pg rooms in vizianagaram for girls",
+    "pg rooms in vizianagaram for boys",
+    "tiffin service near vizianagaram",
+    "part time jobs vizianagaram",
+    "paying guest vizianagaram",
+    "home cooked meals vizianagaram",
+    "flatmate wanted vizianagaram",
+    "used bikes for sale vizianagaram",
+    "domestic help vizianagaram",
+    "tuition classes vizianagaram",
+    "furniture buy sell vizianagaram",
+    "second hand electronics vizianagaram"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Vizianagaram Classifieds & Local Services — LocalsIndia",
+    "description": "Free hyperlocal classifieds in Vizianagaram. Post and browse tiffin, PG rooms, jobs, vehicles, and more.",
+    "url": "https://www.localsindia.com/vizianagaram",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": "LocalsIndia",
+      "url": "https://www.localsindia.com"
+    },
+    "about": {
+      "@type": "City",
+      "name": "Vizianagaram",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Andhra Pradesh",
+        "containedInPlace": {
+          "@type": "Country",
+          "name": "India"
+        }
+      }
+    }
+  },
+  "generatedAt": "2026-08-17T07:07:00.089884+00:00"
+}

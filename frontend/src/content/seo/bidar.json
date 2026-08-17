@@ -1,0 +1,50 @@
+{
+  "citySlug": "bidar",
+  "city": "Bidar",
+  "state": "Karnataka",
+  "lang": "kn",
+  "titleTag": "Bidar Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, and find services in Bidar. Free classifieds for tiffin, PG rooms, jobs, and more. Post instantly on LocalsIndia.",
+  "ogTitle": "Bidar Classifieds — Local Tiffin, Rooms & Jobs",
+  "ogDescription": "Your Bidar community marketplace. Find tiffin services, PG rooms, jobs, and secondhand items. Free to post, WhatsApp to connect.",
+  "h1": "Bidar Classifieds — Buy, Sell & Find Local Services",
+  "focusKeyword": "bidar classifieds",
+  "secondaryKeywords": [
+    "bidar tiffin service",
+    "pg rooms in bidar",
+    "jobs in bidar",
+    "bidar buy sell"
+  ],
+  "longTailKeywords": [
+    "tiffin service near me bidar",
+    "pg rooms for boys in bidar",
+    "pg rooms for girls in bidar",
+    "part time jobs in bidar",
+    "second hand bikes in bidar",
+    "used mobile phones bidar",
+    "domestic help in bidar",
+    "room mate in bidar",
+    "furniture for sale bidar",
+    "tuition classes in bidar"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Bidar Free Classifieds — Tiffin, PG, Jobs & More",
+    "description": "Buy, sell, and find services in Bidar. Free classifieds for tiffin, PG rooms, jobs, and more. Post instantly on LocalsIndia.",
+    "url": "https://www.localsindia.com/bidar",
+    "inLanguage": [
+      "kn",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Bidar",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Karnataka"
+      }
+    }
+  },
+  "generatedAt": "2026-08-17T07:07:30.962921+00:00"
+}

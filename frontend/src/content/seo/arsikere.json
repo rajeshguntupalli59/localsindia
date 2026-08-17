@@ -1,0 +1,57 @@
+{
+  "citySlug": "arsikere",
+  "city": "Arsikere",
+  "state": "Karnataka",
+  "lang": "kn",
+  "titleTag": "Arsikere Classifieds — Tiffin, PG & Jobs | LocalsIndia",
+  "metaDescription": "Free classifieds in Arsikere. Post tiffin, PG rooms, jobs, bikes & more. Connect with locals on WhatsApp instantly.",
+  "ogTitle": "Arsikere's Hyperlocal Classifieds — Buy, Sell & Connect Free",
+  "ogDescription": "Find tiffin delivery, PG rooms, job openings & secondhand items in Arsikere. Post for free. Chat sellers on WhatsApp.",
+  "h1": "Arsikere Classifieds — Buy, Sell & Connect with Your Community",
+  "focusKeyword": "arsikere classifieds",
+  "secondaryKeywords": [
+    "pg rooms in arsikere",
+    "tiffin service arsikere",
+    "jobs in arsikere",
+    "secondhand bikes arsikere"
+  ],
+  "longTailKeywords": [
+    "pg rooms for boys in arsikere",
+    "pg rooms for girls in arsikere",
+    "home-cooked tiffin delivery arsikere",
+    "dabba service in arsikere",
+    "part time jobs in arsikere",
+    "full time jobs arsikere",
+    "secondhand bikes for sale arsikere",
+    "used cars in arsikere",
+    "domestic help in arsikere",
+    "tuition classes arsikere",
+    "furniture for sale arsikere",
+    "electronic goods arsikere"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Arsikere Classifieds | LocalsIndia",
+    "description": "Free hyperlocal classifieds platform for Arsikere. Post and browse tiffin, PG rooms, jobs, vehicles and more.",
+    "url": "https://www.localsindia.com/arsikere",
+    "inLanguage": [
+      "kn",
+      "en"
+    ],
+    "publisher": {
+      "@type": "Organization",
+      "name": "LocalsIndia",
+      "url": "https://www.localsindia.com"
+    },
+    "about": {
+      "@type": "City",
+      "name": "Arsikere",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Karnataka"
+      }
+    }
+  },
+  "generatedAt": "2026-08-17T07:07:05.992723+00:00"
+}

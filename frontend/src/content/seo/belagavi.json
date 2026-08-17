@@ -1,0 +1,52 @@
+{
+  "citySlug": "belagavi",
+  "city": "Belagavi",
+  "state": "Karnataka",
+  "lang": "kn",
+  "titleTag": "Belagavi Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Belagavi classifieds for tiffin delivery, PG rooms, jobs & more. Post free, connect via WhatsApp. Your local marketplace.",
+  "ogTitle": "Belagavi Classifieds — Connect with Your Community",
+  "ogDescription": "Find tiffin services, PG accommodations, jobs, and local deals in Belagavi. Free to post, easy to reach sellers on WhatsApp.",
+  "h1": "Belagavi Classifieds & Local Marketplace",
+  "focusKeyword": "belagavi classifieds",
+  "secondaryKeywords": [
+    "pg rooms belagavi",
+    "tiffin service belagavi",
+    "jobs in belagavi",
+    "belagavi marketplace"
+  ],
+  "longTailKeywords": [
+    "pg rooms in belagavi for boys",
+    "pg rooms in belagavi for girls",
+    "tiffin service near me belagavi",
+    "home made tiffin belagavi",
+    "part time jobs belagavi",
+    "full time jobs belagavi",
+    "second hand bikes belagavi",
+    "used mobile phones belagavi",
+    "domestic help belagavi",
+    "tuition classes belagavi",
+    "belagavi roommate wanted",
+    "flat for rent belagavi"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Belagavi Free Classifieds & Local Marketplace",
+    "description": "Belagavi classifieds for tiffin delivery, PG rooms, jobs & more. Post free, connect via WhatsApp.",
+    "url": "https://www.localsindia.com/belagavi",
+    "inLanguage": [
+      "kn",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Belagavi",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Karnataka"
+      }
+    }
+  },
+  "generatedAt": "2026-08-17T07:07:21.329772+00:00"
+}

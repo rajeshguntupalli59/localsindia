@@ -1,0 +1,50 @@
+{
+  "citySlug": "tenali",
+  "city": "Tenali",
+  "state": "Andhra Pradesh",
+  "lang": "te",
+  "titleTag": "Tenali Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, rent in Tenali. Free classifieds for tiffin, PG rooms, jobs, vehicles & more. Post instantly, connect via WhatsApp.",
+  "ogTitle": "Tenali's Neighborhood Classifieds — Find Local Deals & Services",
+  "ogDescription": "Your Tenali community marketplace. Tiffin services, paying guest rooms, part-time jobs, used bikes — all free to post.",
+  "h1": "Tenali Classifieds: Buy, Sell & Connect Locally",
+  "focusKeyword": "tenali classifieds",
+  "secondaryKeywords": [
+    "tenali free classifieds",
+    "tenali pg rooms",
+    "tenali tiffin service",
+    "tenali jobs"
+  ],
+  "longTailKeywords": [
+    "pg rooms in tenali for boys",
+    "pg rooms in tenali for girls",
+    "tenali tiffin service near me",
+    "part time jobs in tenali",
+    "second hand bikes in tenali",
+    "tenali home tiffin service",
+    "flat roommate needed tenali",
+    "paying guest accommodation tenali",
+    "work from home jobs tenali",
+    "domestic help tenali"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Tenali Free Classifieds — Tiffin, PG, Jobs & More",
+    "description": "Buy, sell, rent in Tenali. Free classifieds for tiffin, PG rooms, jobs, vehicles & more. Post instantly, connect via WhatsApp.",
+    "url": "https://www.localsindia.com/tenali",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Tenali",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Andhra Pradesh"
+      }
+    }
+  },
+  "generatedAt": "2026-08-17T07:06:54.500726+00:00"
+}

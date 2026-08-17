@@ -1,0 +1,50 @@
+{
+  "citySlug": "bagalkot",
+  "city": "Bagalkot",
+  "state": "Karnataka",
+  "lang": "kn",
+  "titleTag": "Bagalkot Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, find tiffin & PG rooms in Bagalkot. Post free classifieds for jobs, services & more. Connect via WhatsApp.",
+  "ogTitle": "Bagalkot's Trusted Community Classifieds — Tiffin, PG & Jobs",
+  "ogDescription": "Your neighborhood marketplace in Bagalkot. Free listings for tiffin service, PG rooms, jobs, and everyday needs. Reach locals instantly.",
+  "h1": "Bagalkot Classifieds — Local Buy, Sell & Services",
+  "focusKeyword": "bagalkot classifieds",
+  "secondaryKeywords": [
+    "bagalkot free listings",
+    "pg rooms bagalkot",
+    "tiffin service bagalkot",
+    "jobs in bagalkot"
+  ],
+  "longTailKeywords": [
+    "pg rooms in bagalkot for girls",
+    "pg rooms in bagalkot for boys",
+    "tiffin service near me bagalkot",
+    "part time jobs in bagalkot",
+    "second hand bikes in bagalkot",
+    "used mobiles bagalkot",
+    "domestic help bagalkot",
+    "home tuition bagalkot",
+    "flatmate wanted bagalkot",
+    "buy sell furniture bagalkot"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Bagalkot Free Classifieds & Local Listings",
+    "description": "Hyperlocal classifieds marketplace in Bagalkot for tiffin, PG rooms, jobs, and community services.",
+    "url": "https://www.localsindia.com/bagalkot",
+    "inLanguage": [
+      "kn",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Bagalkot",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Karnataka"
+      }
+    }
+  },
+  "generatedAt": "2026-08-17T07:07:11.047138+00:00"
+}

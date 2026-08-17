@@ -1,0 +1,52 @@
+{
+  "citySlug": "chikkamagaluru",
+  "city": "Chikkamagaluru",
+  "state": "Karnataka",
+  "lang": "kn",
+  "titleTag": "Chikkamagaluru Classifieds — PG, Tiffin & Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, rent in Chikkamagaluru. PG rooms, tiffin delivery, jobs, used items — free posting. Connect via WhatsApp.",
+  "ogTitle": "Find Local Services & Classifieds in Chikkamagaluru — No Hidden Fees",
+  "ogDescription": "Chikkamagaluru's trusted hyperlocal classifieds. Post for free — tiffin, PG, jobs, buy/sell. Your neighborhood marketplace.",
+  "h1": "Chikkamagaluru Classifieds & Local Services — Free Posting",
+  "focusKeyword": "chikkamagaluru classifieds",
+  "secondaryKeywords": [
+    "pg rooms in chikkamagaluru",
+    "tiffin service chikkamagaluru",
+    "jobs in chikkamagaluru",
+    "buy sell chikkamagaluru"
+  ],
+  "longTailKeywords": [
+    "pg rooms in chikkamagaluru for girls",
+    "pg rooms in chikkamagaluru for boys",
+    "chikkamagaluru tiffin service near me",
+    "home cooked meals chikkamagaluru",
+    "paying guest chikkamagaluru",
+    "part time jobs chikkamagaluru",
+    "second hand bikes chikkamagaluru",
+    "furniture buy sell chikkamagaluru",
+    "domestic help chikkamagaluru",
+    "room mate wanted chikkamagaluru",
+    "used electronics chikkamagaluru",
+    "rental flats chikkamagaluru"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Chikkamagaluru Classifieds — PG, Tiffin & Jobs | LocalsIndia",
+    "description": "Buy, sell, rent in Chikkamagaluru. PG rooms, tiffin delivery, jobs, used items — free posting. Connect via WhatsApp.",
+    "url": "https://www.localsindia.com/chikkamagaluru",
+    "inLanguage": [
+      "kn",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Chikkamagaluru",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Karnataka"
+      }
+    }
+  },
+  "generatedAt": "2026-08-17T07:07:41.863821+00:00"
+}
