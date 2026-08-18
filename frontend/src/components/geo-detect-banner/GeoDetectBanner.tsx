@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { MapPin, X, Loader2 } from 'lucide-react';
 import { usePrefs } from '@/context/PrefsContext';
 import { geolocateAndMatch } from '@/lib/geolocate';
@@ -14,16 +15,19 @@ const ATTEMPTED_KEY = 'li_geo_attempted';
  * and an unprompted permission popup on page load feels intrusive.
  */
 export default function GeoDetectBanner() {
+  const pathname = usePathname();
+  const isAdmin = pathname?.startsWith('/admin');
   const { citySlug, citiesLoading, cities, setCity } = usePrefs();
   const [visible, setVisible] = useState(false);
   const [locating, setLocating] = useState(false);
 
   useEffect(() => {
+    if (isAdmin) return;
     if (citiesLoading || citySlug !== '') return;
     if (typeof window === 'undefined') return;
     if (localStorage.getItem(ATTEMPTED_KEY)) return;
     setVisible(true);
-  }, [citiesLoading, citySlug]);
+  }, [isAdmin, citiesLoading, citySlug]);
 
   const dismiss = () => {
     localStorage.setItem(ATTEMPTED_KEY, '1');

@@ -61,9 +61,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="min-h-screen flex">
-      {/* Sidebar */}
-      <aside className="w-56 shrink-0 flex flex-col" style={{ background: 'var(--li-nav-bg)' }}>
-        <div className="px-4 pt-6 pb-4 border-b border-white/10">
+      {/* Sidebar — pinned to the viewport height so "Sign out" stays reachable
+          without a full-page scroll no matter how long NAV grows; only the
+          nav list itself scrolls internally if it overflows. */}
+      <aside className="w-56 shrink-0 h-screen sticky top-0 flex flex-col" style={{ background: 'var(--li-nav-bg)' }}>
+        <div className="px-4 pt-6 pb-4 border-b border-white/10 shrink-0">
           <div className="flex items-center gap-2">
             <LayoutDashboard className="w-5 h-5 text-white/70" />
             <span className="text-white font-bold text-sm">Admin</span>
@@ -71,7 +73,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <p className="text-white/40 text-xs mt-1">localsindia.com</p>
         </div>
 
-        <nav className="flex-1 p-3 space-y-1">
+        <nav className="flex-1 min-h-0 overflow-y-auto p-3 space-y-1">
           {NAV.map(item => {
             const active = item.exact ? pathname === item.href : pathname.startsWith(item.href);
             return (
@@ -91,7 +93,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           })}
         </nav>
 
-        <div className="p-3 border-t border-white/10">
+        <div className="p-3 border-t border-white/10 shrink-0">
           <button
             onClick={handleLogout}
             className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-white/60 hover:text-white hover:bg-white/10 transition-colors"
