@@ -1,0 +1,52 @@
+{
+  "citySlug": "davanagere",
+  "city": "Davanagere",
+  "state": "Karnataka",
+  "lang": "kn",
+  "titleTag": "Davanagere Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, find jobs & tiffin in Davanagere. Free classifieds for PG rooms, used items, services. Post instantly on LocalsIndia.",
+  "ogTitle": "Davanagere Classifieds — Local Deals, Tiffin & Opportunities",
+  "ogDescription": "Connect with your Davanagere neighbors. Free classifieds for tiffin, PG, jobs, used items & services. All in Kannada & English.",
+  "h1": "Davanagere Free Classifieds — Buy, Sell, Jobs & Tiffin",
+  "focusKeyword": "davanagere classifieds",
+  "secondaryKeywords": [
+    "davanagere tiffin service",
+    "pg rooms in davanagere",
+    "davanagere jobs",
+    "davanagere used items"
+  ],
+  "longTailKeywords": [
+    "tiffin service in davanagere",
+    "pg rooms in davanagere for boys",
+    "pg rooms in davanagere for girls",
+    "part time jobs in davanagere",
+    "second hand bikes in davanagere",
+    "domestic help in davanagere",
+    "flat on rent in davanagere",
+    "used mobile phones davanagere",
+    "carpool davanagere",
+    "tuition classes davanagere",
+    "beauty salon davanagere",
+    "furniture for sale davanagere"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Davanagere Free Classifieds — Tiffin, PG, Jobs & Local Marketplace",
+    "description": "Buy, sell, find jobs & tiffin in Davanagere. Free classifieds for PG rooms, used items, services. Post instantly on LocalsIndia.",
+    "url": "https://www.localsindia.com/davanagere",
+    "inLanguage": [
+      "kn",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Davanagere",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Karnataka"
+      }
+    }
+  },
+  "generatedAt": "2026-08-18T06:54:01.463313+00:00"
+}

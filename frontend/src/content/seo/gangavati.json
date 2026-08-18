@@ -1,0 +1,50 @@
+{
+  "citySlug": "gangavati",
+  "city": "Gangavati",
+  "state": "Karnataka",
+  "lang": "kn",
+  "titleTag": "Gangavati Classifieds — PG, Tiffin, Jobs | LocalsIndia",
+  "metaDescription": "Free classifieds in Gangavati, Karnataka. Find PG rooms, tiffin services, jobs, and buy/sell items locally. Post for free, connect via WhatsApp.",
+  "ogTitle": "Gangavati's Local Community Classifieds — Free to Post",
+  "ogDescription": "Buy, sell, rent, and hire locally in Gangavati. Tiffin delivery, PG accommodation, jobs, vehicles, and more — all in one place.",
+  "h1": "Gangavati Free Local Classifieds & Community Listings",
+  "focusKeyword": "gangavati classifieds",
+  "secondaryKeywords": [
+    "gangavati pg rooms",
+    "gangavati tiffin service",
+    "jobs in gangavati",
+    "gangavati buy sell"
+  ],
+  "longTailKeywords": [
+    "pg rooms in gangavati for boys",
+    "pg rooms in gangavati for girls",
+    "tiffin service near gangavati",
+    "home cooked meals gangavati",
+    "part time jobs in gangavati",
+    "second hand bikes gangavati",
+    "furniture buy sell gangavati",
+    "domestic help gangavati",
+    "carpool gangavati",
+    "electronics gangavati"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Gangavati Free Classifieds | LocalsIndia",
+    "description": "Local community classifieds platform for Gangavati, Karnataka. Post free listings for PG, tiffin, jobs, vehicles, and more.",
+    "url": "https://www.localsindia.com/gangavati",
+    "inLanguage": [
+      "kn",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Gangavati",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Karnataka"
+      }
+    }
+  },
+  "generatedAt": "2026-08-18T06:54:17.592296+00:00"
+}

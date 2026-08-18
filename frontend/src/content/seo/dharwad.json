@@ -1,0 +1,52 @@
+{
+  "citySlug": "dharwad",
+  "city": "Dharwad",
+  "state": "Karnataka",
+  "lang": "kn",
+  "titleTag": "Dharwad Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, rent in Dharwad. Post free classifieds for tiffin, PG rooms, jobs, used items. Connect with locals via WhatsApp.",
+  "ogTitle": "Dharwad Local Classifieds & Community Marketplace | LocalsIndia",
+  "ogDescription": "Post free classifieds in Dharwad. Find tiffin services, PG rooms, jobs, furniture, vehicles & more. Connect with your neighbors.",
+  "h1": "Dharwad Free Classifieds & Local Marketplace",
+  "focusKeyword": "dharwad classifieds",
+  "secondaryKeywords": [
+    "dharwad pg rooms",
+    "tiffin service in dharwad",
+    "jobs in dharwad",
+    "dharwad buy sell"
+  ],
+  "longTailKeywords": [
+    "pg rooms in dharwad for boys",
+    "pg rooms in dharwad for girls",
+    "tiffin service near me dharwad",
+    "home cooked meals dharwad",
+    "part time jobs in dharwad",
+    "second hand bikes in dharwad",
+    "furniture for sale in dharwad",
+    "domestic help in dharwad",
+    "tuition classes in dharwad",
+    "flatmate wanted in dharwad",
+    "used mobile phones dharwad",
+    "carpool dharwad"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Dharwad Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+    "description": "Buy, sell, rent in Dharwad. Post free classifieds for tiffin, PG rooms, jobs, used items. Connect with locals via WhatsApp.",
+    "url": "https://www.localsindia.com/dharwad",
+    "inLanguage": [
+      "kn",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Dharwad",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Karnataka"
+      }
+    }
+  },
+  "generatedAt": "2026-08-18T06:54:07.176553+00:00"
+}

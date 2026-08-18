@@ -1,0 +1,50 @@
+{
+  "citySlug": "hassan",
+  "city": "Hassan",
+  "state": "Karnataka",
+  "lang": "kn",
+  "titleTag": "Hassan Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, hire locally in Hassan. Post free classifieds for tiffin, PG rooms, jobs, bikes & more. Connect via WhatsApp instantly.",
+  "ogTitle": "Hassan Classifieds — Find Tiffin, Rooms & Jobs Near You",
+  "ogDescription": "Your Hassan community marketplace. Post free, find local tiffin, paying guests, jobs, and everything else your neighborhood needs.",
+  "h1": "Hassan Classifieds — Local Buy, Sell & Services",
+  "focusKeyword": "hassan classifieds",
+  "secondaryKeywords": [
+    "hassan free classifieds",
+    "hassan pg rooms",
+    "hassan tiffin service",
+    "hassan jobs near me"
+  ],
+  "longTailKeywords": [
+    "pg rooms in hassan for boys",
+    "pg rooms in hassan for girls",
+    "tiffin service near hassan",
+    "home cooked meals hassan",
+    "part time jobs hassan",
+    "second hand bikes hassan",
+    "used mobile phones hassan",
+    "domestic help hassan",
+    "carpool hassan",
+    "furniture buy sell hassan"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Hassan Free Classifieds — Tiffin, PG, Jobs & More",
+    "description": "Buy, sell, hire locally in Hassan. Post free classifieds for tiffin, PG rooms, jobs, bikes & more. Connect via WhatsApp instantly.",
+    "url": "https://www.localsindia.com/hassan",
+    "inLanguage": [
+      "kn",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Hassan",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Karnataka"
+      }
+    }
+  },
+  "generatedAt": "2026-08-18T06:54:22.626096+00:00"
+}

@@ -1,0 +1,50 @@
+{
+  "citySlug": "chitradurga",
+  "city": "Chitradurga",
+  "state": "Karnataka",
+  "lang": "kn",
+  "titleTag": "Chitradurga Classifieds — Free PG, Tiffin & Jobs",
+  "metaDescription": "Post free classifieds in Chitradurga. Find PG rooms, tiffin services, jobs, used bikes & more. Connect via WhatsApp instantly.",
+  "ogTitle": "Chitradurga's Trusted Local Classifieds — Zero posting fees",
+  "ogDescription": "Your neighborhood marketplace. Buy, sell, rent, hire locally in Chitradurga — all on WhatsApp.",
+  "h1": "Chitradurga Free Classifieds — PG, Tiffin, Jobs & Local Services",
+  "focusKeyword": "chitradurga classifieds",
+  "secondaryKeywords": [
+    "pg rooms in chitradurga",
+    "tiffin service chitradurga",
+    "jobs in chitradurga",
+    "used bikes chitradurga"
+  ],
+  "longTailKeywords": [
+    "pg rooms in chitradurga for boys",
+    "pg rooms in chitradurga for girls",
+    "tiffin service near me chitradurga",
+    "home delivery tiffin chitradurga",
+    "paying guest accommodation chitradurga",
+    "part time jobs in chitradurga",
+    "second hand bikes chitradurga",
+    "furniture buy sell chitradurga",
+    "domestic help services chitradurga",
+    "tuition classes chitradurga"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Chitradurga Free Local Classifieds & Community Services",
+    "description": "Post and browse free classifieds in Chitradurga. Find PG rooms, tiffin delivery, jobs, vehicles, and local services. Contact sellers via WhatsApp.",
+    "url": "https://www.localsindia.com/chitradurga",
+    "inLanguage": [
+      "kn",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Chitradurga",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Karnataka"
+      }
+    }
+  },
+  "generatedAt": "2026-08-18T06:53:56.027791+00:00"
+}

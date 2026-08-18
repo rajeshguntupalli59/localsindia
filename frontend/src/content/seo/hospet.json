@@ -1,0 +1,50 @@
+{
+  "citySlug": "hospet",
+  "city": "Hospet",
+  "state": "Karnataka",
+  "lang": "kn",
+  "titleTag": "Hospet Classifieds — Tiffin, PG, Jobs & More",
+  "metaDescription": "Free classifieds in Hospet. Buy/sell items, find tiffin, PG rooms, jobs. Post for free. Connect via WhatsApp.",
+  "ogTitle": "Hospet Community Classifieds — Local Jobs, PG & Tiffin",
+  "ogDescription": "Post free classifieds in Hospet. Tiffin delivery, PG rooms, part-time jobs, used bikes & more. Your neighborhood marketplace.",
+  "h1": "Hospet Classifieds — Buy, Sell & Hire Locally",
+  "focusKeyword": "hospet classifieds",
+  "secondaryKeywords": [
+    "hospet tiffin service",
+    "pg rooms hospet",
+    "jobs in hospet",
+    "hospet buy sell"
+  ],
+  "longTailKeywords": [
+    "hospet tiffin service near me",
+    "pg rooms in hospet for boys",
+    "pg rooms in hospet for girls",
+    "part time jobs in hospet",
+    "second hand bikes in hospet",
+    "used mobiles in hospet",
+    "domestic help in hospet",
+    "tuition classes in hospet",
+    "furniture for sale in hospet",
+    "carpool hospet bangalore"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Hospet Free Classifieds",
+    "description": "Hyperlocal classifieds marketplace for Hospet, Karnataka. Buy, sell, hire & connect with your community.",
+    "url": "https://www.localsindia.com/hospet",
+    "inLanguage": [
+      "kn",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Hospet",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Karnataka"
+      }
+    }
+  },
+  "generatedAt": "2026-08-18T06:54:27.271455+00:00"
+}

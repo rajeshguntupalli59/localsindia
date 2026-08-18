@@ -1,0 +1,50 @@
+{
+  "citySlug": "kolar",
+  "city": "Kolar",
+  "state": "Karnataka",
+  "lang": "kn",
+  "titleTag": "Kolar Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, rent in Kolar. Post tiffin, PG rooms, jobs, services free. Connect with locals on WhatsApp instantly.",
+  "ogTitle": "Kolar Local Classifieds — Your Neighborhood Marketplace",
+  "ogDescription": "Find tiffin services, PG accommodations, jobs, and more in Kolar. Post free, sell fast, connect with neighbors.",
+  "h1": "Kolar Classifieds — Free Local Listings for Tiffin, PG & Jobs",
+  "focusKeyword": "kolar classifieds",
+  "secondaryKeywords": [
+    "kolar free classifieds",
+    "pg rooms in kolar",
+    "tiffin service kolar",
+    "jobs in kolar"
+  ],
+  "longTailKeywords": [
+    "pg rooms in kolar for girls",
+    "pg rooms in kolar for boys",
+    "tiffin service near me kolar",
+    "part time jobs in kolar",
+    "second hand bikes in kolar",
+    "flats for rent in kolar",
+    "home tuition in kolar",
+    "domestic help in kolar",
+    "used mobile phones kolar",
+    "carpool kolar"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Kolar Free Classifieds — Tiffin, PG, Jobs & Services",
+    "description": "Buy, sell, rent in Kolar. Post tiffin, PG rooms, jobs, services free. Connect with locals on WhatsApp instantly.",
+    "url": "https://www.localsindia.com/kolar",
+    "inLanguage": [
+      "kn",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Kolar",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Karnataka"
+      }
+    }
+  },
+  "generatedAt": "2026-08-18T06:54:45.970046+00:00"
+}

@@ -1,0 +1,52 @@
+{
+  "citySlug": "kalaburagi",
+  "city": "Kalaburagi",
+  "state": "Karnataka",
+  "lang": "kn",
+  "titleTag": "Kalaburagi Classifieds — PG, Tiffin, Jobs | LocalsIndia",
+  "metaDescription": "Free classifieds in Kalaburagi. Post & find PG rooms, tiffin services, jobs, used items. Connect on WhatsApp instantly.",
+  "ogTitle": "Discover Local Deals in Kalaburagi — Free Classifieds for Everything",
+  "ogDescription": "Join Kalaburagi's community marketplace. Browse PG rooms, tiffin services, jobs, and more. Post for free, connect via WhatsApp.",
+  "h1": "Kalaburagi Free Classifieds — PG Rooms, Tiffin, Jobs & Local Services",
+  "focusKeyword": "kalaburagi classifieds",
+  "secondaryKeywords": [
+    "pg rooms in kalaburagi",
+    "tiffin service kalaburagi",
+    "jobs in kalaburagi",
+    "kalaburagi services"
+  ],
+  "longTailKeywords": [
+    "pg rooms in kalaburagi for boys",
+    "pg rooms in kalaburagi for girls",
+    "best tiffin service in kalaburagi",
+    "home cooked meals kalaburagi",
+    "part time jobs in kalaburagi",
+    "second hand bikes in kalaburagi",
+    "used furniture kalaburagi",
+    "domestic help in kalaburagi",
+    "roommate wanted kalaburagi",
+    "freelance jobs kalaburagi",
+    "कलबुर्गी क्लासिफाइड्स",
+    "ಕಲಬುರ್ಗಿ ವರ್ಗೀಕೃತ ಜಾಹಿರಾತುಗಳು"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Kalaburagi Free Classifieds — PG, Tiffin, Jobs & Local Services",
+    "description": "Free classifieds in Kalaburagi. Post & find PG rooms, tiffin services, jobs, used items. Connect on WhatsApp instantly.",
+    "url": "https://www.localsindia.com/kalaburagi",
+    "inLanguage": [
+      "kn",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Kalaburagi",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Karnataka"
+      }
+    }
+  },
+  "generatedAt": "2026-08-18T06:54:40.199742+00:00"
+}

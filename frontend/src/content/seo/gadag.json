@@ -1,0 +1,50 @@
+{
+  "citySlug": "gadag",
+  "city": "Gadag",
+  "state": "Karnataka",
+  "lang": "kn",
+  "titleTag": "Gadag Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, hire locally in Gadag. Free classifieds for tiffin, PG rooms, jobs, furniture & more. Post for free, connect on WhatsApp.",
+  "ogTitle": "Gadag Classifieds — Your Neighborhood Marketplace",
+  "ogDescription": "Find tiffin services, PG rooms, jobs, and everything local in Gadag. Free to post, easy to connect.",
+  "h1": "Gadag Free Classifieds & Local Listings",
+  "focusKeyword": "gadag classifieds",
+  "secondaryKeywords": [
+    "gadag free classifieds",
+    "gadag local marketplace",
+    "gadag jobs listings",
+    "gadag pg rooms"
+  ],
+  "longTailKeywords": [
+    "tiffin service in gadag",
+    "pg rooms in gadag for boys",
+    "pg rooms in gadag for girls",
+    "part time jobs in gadag",
+    "second hand bikes in gadag",
+    "used furniture in gadag",
+    "domestic help in gadag",
+    "tuition classes in gadag",
+    "flat for rent in gadag",
+    "roommate wanted in gadag"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Gadag Free Classifieds — Tiffin, PG, Jobs & More",
+    "description": "Buy, sell, hire locally in Gadag. Free classifieds for tiffin, PG rooms, jobs, furniture & more. Post for free, connect on WhatsApp.",
+    "url": "https://www.localsindia.com/gadag",
+    "inLanguage": [
+      "kn",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Gadag",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Karnataka"
+      }
+    }
+  },
+  "generatedAt": "2026-08-18T06:54:12.397181+00:00"
+}

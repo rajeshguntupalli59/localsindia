@@ -1,0 +1,50 @@
+{
+  "citySlug": "hubballi",
+  "city": "Hubballi",
+  "state": "Karnataka",
+  "lang": "kn",
+  "titleTag": "Hubballi Classifieds — Tiffin, PG, Jobs & More | LocalsIndia",
+  "metaDescription": "Free classifieds in Hubballi. Post tiffin, PG rooms, jobs, bikes, furniture. Connect via WhatsApp. Local, simple, zero fees.",
+  "ogTitle": "Hubballi's Local Community Classifieds — Tiffin, Jobs & PG Rooms",
+  "ogDescription": "Find tiffin services, paying guest rooms, part-time jobs, and used items in Hubballi. Post for free, connect with locals instantly.",
+  "h1": "Hubballi Free Classifieds — Tiffin, PG Rooms, Jobs & Local Services",
+  "focusKeyword": "hubballi classifieds",
+  "secondaryKeywords": [
+    "hubballi tiffin service",
+    "pg rooms in hubballi",
+    "jobs in hubballi",
+    "hubballi buy sell items"
+  ],
+  "longTailKeywords": [
+    "tiffin service in hubballi for office",
+    "pg rooms in hubballi for boys",
+    "pg rooms in hubballi for girls",
+    "part time jobs in hubballi",
+    "second hand bikes in hubballi",
+    "domestic help in hubballi",
+    "furniture for sale in hubballi",
+    "used mobile phones in hubballi",
+    "carpool in hubballi",
+    "home tuition in hubballi"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Hubballi Free Classifieds — Tiffin, PG, Jobs & More | LocalsIndia",
+    "description": "Free classifieds in Hubballi. Post tiffin, PG rooms, jobs, bikes, furniture. Connect via WhatsApp. Local, simple, zero fees.",
+    "url": "https://www.localsindia.com/hubballi",
+    "inLanguage": [
+      "kn",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Hubballi",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Karnataka"
+      }
+    }
+  },
+  "generatedAt": "2026-08-18T06:54:34.344676+00:00"
+}
