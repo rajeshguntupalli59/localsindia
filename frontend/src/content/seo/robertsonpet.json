@@ -1,0 +1,50 @@
+{
+  "citySlug": "robertsonpet",
+  "city": "Robertsonpet",
+  "state": "Karnataka",
+  "lang": "kn",
+  "titleTag": "Robertsonpet Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Free classifieds in Robertsonpet. Buy/sell items, find tiffin, PG rooms, jobs & services. Post free, connect via WhatsApp.",
+  "ogTitle": "Robertsonpet Local Classifieds — Your Neighborhood Marketplace",
+  "ogDescription": "Discover local deals, tiffin services, PG accommodations & jobs in Robertsonpet. Free to post and browse. Real neighbors, real deals.",
+  "h1": "Robertsonpet Classifieds — Buy, Sell & Connect with Neighbors",
+  "focusKeyword": "robertsonpet classifieds",
+  "secondaryKeywords": [
+    "robertsonpet pg rooms",
+    "robertsonpet tiffin service",
+    "jobs in robertsonpet",
+    "robertsonpet second hand items"
+  ],
+  "longTailKeywords": [
+    "pg rooms in robertsonpet for boys",
+    "pg rooms in robertsonpet for girls",
+    "tiffin service near me robertsonpet",
+    "home cooked meals robertsonpet",
+    "part time jobs robertsonpet",
+    "full time jobs robertsonpet",
+    "second hand bikes robertsonpet",
+    "used furniture robertsonpet",
+    "domestic help robertsonpet",
+    "roommate wanted robertsonpet"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Robertsonpet Classifieds & Local Listings",
+    "description": "Free classifieds platform for Robertsonpet, Karnataka. Buy/sell items, find tiffin, PG, jobs & local services.",
+    "url": "https://www.localsindia.com/robertsonpet",
+    "inLanguage": [
+      "kn",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Robertsonpet",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Karnataka"
+      }
+    }
+  },
+  "generatedAt": "2026-08-19T06:54:22.456164+00:00"
+}

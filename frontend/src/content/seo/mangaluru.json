@@ -1,0 +1,50 @@
+{
+  "citySlug": "mangaluru",
+  "city": "Mangaluru",
+  "state": "Karnataka",
+  "lang": "kn",
+  "titleTag": "Mangaluru Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, rent in Mangaluru. Tiffin delivery, PG rooms, jobs, used items. Post free. Connect on WhatsApp.",
+  "ogTitle": "Mangaluru Local Classifieds & Community — Tiffin, PG, Jobs",
+  "ogDescription": "Your Mangaluru neighborhood marketplace. Find tiffin services, PG rooms, jobs, and buy/sell items locally. Free to post.",
+  "h1": "Mangaluru Classifieds — Local Buy, Sell & Services",
+  "focusKeyword": "mangaluru classifieds",
+  "secondaryKeywords": [
+    "mangaluru free classifieds",
+    "mangaluru pg rooms",
+    "mangaluru tiffin service",
+    "mangaluru jobs"
+  ],
+  "longTailKeywords": [
+    "mangaluru tiffin service near me",
+    "pg rooms in mangaluru for boys",
+    "pg rooms in mangaluru for girls",
+    "part time jobs in mangaluru",
+    "second hand bikes in mangaluru",
+    "furniture for sale mangaluru",
+    "domestic help mangaluru",
+    "mangaluru carpool ride share",
+    "used mobile phones mangaluru",
+    "flats for rent mangaluru"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Mangaluru Free Classifieds & Local Marketplace",
+    "description": "Buy, sell, rent, and find services in Mangaluru. Tiffin delivery, PG rooms, jobs, used items. Post free on LocalsIndia.",
+    "url": "https://www.localsindia.com/mangaluru",
+    "inLanguage": [
+      "kn",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Mangaluru",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Karnataka"
+      }
+    }
+  },
+  "generatedAt": "2026-08-19T06:53:57.247012+00:00"
+}

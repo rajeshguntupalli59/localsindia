@@ -1,0 +1,52 @@
+{
+  "citySlug": "ranebennuru",
+  "city": "Ranebennuru",
+  "state": "Karnataka",
+  "lang": "kn",
+  "titleTag": "Ranebennuru Classifieds — PG, Jobs & More | LocalsIndia",
+  "metaDescription": "Free classifieds in Ranebennuru. Post PG rooms, tiffin, jobs & buy/sell locally. Connect via WhatsApp. Zero fees.",
+  "ogTitle": "Ranebennuru's Local Classifieds — Find PG, Tiffin & Jobs Near You",
+  "ogDescription": "Your Ranebennuru community marketplace. Free listings for rooms, meals, jobs, and everyday items. Real neighbors, real deals.",
+  "h1": "Ranebennuru Classifieds — Free Local Listings for PG, Tiffin, Jobs & More",
+  "focusKeyword": "ranebennuru classifieds",
+  "secondaryKeywords": [
+    "pg rooms in ranebennuru",
+    "tiffin service ranebennuru",
+    "jobs in ranebennuru",
+    "buy sell ranebennuru"
+  ],
+  "longTailKeywords": [
+    "pg rooms in ranebennuru for boys",
+    "pg rooms in ranebennuru for girls",
+    "tiffin service near ranebennuru",
+    "home cooked meals ranebennuru",
+    "part time jobs in ranebennuru",
+    "second hand bikes in ranebennuru",
+    "flat rent ranebennuru",
+    "domestic help ranebennuru",
+    "used furniture ranebennuru",
+    "carpool ranebennuru",
+    "electronics buy sell ranebennuru",
+    "events and classes ranebennuru"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Ranebennuru Classifieds — Free Local Listings",
+    "description": "Free community classifieds platform in Ranebennuru, Karnataka. Post and browse PG rooms, tiffin services, jobs, and local items.",
+    "url": "https://www.localsindia.com/ranebennuru",
+    "inLanguage": [
+      "kn",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Ranebennuru",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Karnataka"
+      }
+    }
+  },
+  "generatedAt": "2026-08-19T06:54:17.675356+00:00"
+}

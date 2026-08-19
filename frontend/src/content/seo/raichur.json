@@ -1,0 +1,52 @@
+{
+  "citySlug": "raichur",
+  "city": "Raichur",
+  "state": "Karnataka",
+  "lang": "kn",
+  "titleTag": "Raichur Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, rent in Raichur. PG rooms, tiffin, jobs, vehicles & more. Free posting. Connect via WhatsApp.",
+  "ogTitle": "Raichur Classifieds — Your Neighborhood Marketplace",
+  "ogDescription": "Find PG rooms, tiffin services, jobs, and buy/sell items in Raichur. Post free, reach locals instantly.",
+  "h1": "Raichur Classifieds — Buy, Sell, Rent & Connect with Neighbors",
+  "focusKeyword": "raichur classifieds",
+  "secondaryKeywords": [
+    "raichur pg rooms",
+    "tiffin service in raichur",
+    "jobs in raichur",
+    "raichur buy sell items"
+  ],
+  "longTailKeywords": [
+    "pg rooms in raichur for boys",
+    "pg rooms in raichur for girls",
+    "paying guest raichur",
+    "tiffin delivery raichur near me",
+    "home cooked meals raichur",
+    "part time jobs raichur",
+    "full time jobs raichur",
+    "second hand bikes raichur",
+    "used mobile phones raichur",
+    "flat mates raichur",
+    "domestic help raichur",
+    "furniture buy sell raichur"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Raichur Free Classifieds — Tiffin, PG, Jobs & More",
+    "description": "Buy, sell, rent in Raichur. PG rooms, tiffin, jobs, vehicles & more. Free posting. Connect via WhatsApp.",
+    "url": "https://www.localsindia.com/raichur",
+    "inLanguage": [
+      "kn",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Raichur",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Karnataka"
+      }
+    }
+  },
+  "generatedAt": "2026-08-19T06:54:07.379133+00:00"
+}

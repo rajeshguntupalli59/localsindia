@@ -1,0 +1,52 @@
+{
+  "citySlug": "mysuru",
+  "city": "Mysuru",
+  "state": "Karnataka",
+  "lang": "kn",
+  "titleTag": "Mysuru Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, hire locally in Mysuru. Free classifieds for tiffin, PG rooms, jobs, bikes & more. Post instantly, connect on WhatsApp.",
+  "ogTitle": "Mysuru's Neighborhood Classifieds — Tiffin, PG & Local Jobs",
+  "ogDescription": "Your Mysuru community marketplace. Free listings for home-cooked meals, paying guest rooms, part-time work, used bikes & household items.",
+  "h1": "Mysuru Classifieds — Free Local Buy, Sell & Hire",
+  "focusKeyword": "mysuru classifieds free",
+  "secondaryKeywords": [
+    "mysuru local classifieds",
+    "tiffin service mysuru",
+    "pg rooms mysuru",
+    "jobs in mysuru"
+  ],
+  "longTailKeywords": [
+    "mysuru tiffin service near me",
+    "pg rooms for girls in mysuru",
+    "pg rooms for boys in mysuru",
+    "part time jobs in mysuru",
+    "second hand bikes in mysuru",
+    "home tuition in mysuru",
+    "domestic help mysuru city",
+    "furniture buy sell mysuru",
+    "carpool mysuru office",
+    "used mobile phones mysuru",
+    "mysuru online classifieds free",
+    "sell old items mysuru"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Mysuru Classifieds — Free Local Buy, Sell & Hire",
+    "description": "Buy, sell, hire locally in Mysuru. Free classifieds for tiffin, PG rooms, jobs, bikes & more. Post instantly, connect on WhatsApp.",
+    "url": "https://www.localsindia.com/mysuru",
+    "inLanguage": [
+      "kn",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Mysuru",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Karnataka"
+      }
+    }
+  },
+  "generatedAt": "2026-08-19T06:54:02.323353+00:00"
+}

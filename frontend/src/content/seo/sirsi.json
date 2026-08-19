@@ -1,0 +1,61 @@
+{
+  "citySlug": "sirsi",
+  "city": "Sirsi",
+  "state": "Karnataka",
+  "lang": "kn",
+  "titleTag": "Sirsi Classifieds — PG, Tiffin & Jobs | LocalsIndia",
+  "metaDescription": "Free classifieds in Sirsi, Karnataka. Post PG rooms, tiffin, jobs & more for free. Connect via WhatsApp instantly.",
+  "ogTitle": "Find PG Rooms, Tiffin & Jobs in Sirsi — LocalsIndia Community",
+  "ogDescription": "Sirsi's hyperlocal classifieds. Post your PG, tiffin service, or job listing free. Real people, real connections.",
+  "h1": "Sirsi Classifieds — Buy, Sell, Rent & Hire Free",
+  "focusKeyword": "sirsi classifieds",
+  "secondaryKeywords": [
+    "pg rooms in sirsi",
+    "tiffin service sirsi",
+    "jobs in sirsi",
+    "second hand bikes sirsi"
+  ],
+  "longTailKeywords": [
+    "pg rooms in sirsi for boys",
+    "pg rooms in sirsi for girls",
+    "tiffin service near me sirsi",
+    "home cooked meals sirsi",
+    "part time jobs sirsi",
+    "full time jobs sirsi",
+    "second hand bikes in sirsi",
+    "used bikes sirsi price",
+    "furniture buy sell sirsi",
+    "domestic help sirsi",
+    "tuition classes sirsi",
+    "flatmate wanted sirsi"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Sirsi Classifieds — Free Local Listings",
+    "description": "Hyperlocal classifieds for Sirsi, Karnataka. Post PG, tiffin, jobs, vehicles & more free.",
+    "url": "https://www.localsindia.com/sirsi",
+    "inLanguage": [
+      "kn",
+      "en"
+    ],
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": "LocalsIndia",
+      "url": "https://www.localsindia.com"
+    },
+    "about": {
+      "@type": "City",
+      "name": "Sirsi",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Karnataka",
+        "containedInPlace": {
+          "@type": "Country",
+          "name": "India"
+        }
+      }
+    }
+  },
+  "generatedAt": "2026-08-19T06:54:32.965327+00:00"
+}

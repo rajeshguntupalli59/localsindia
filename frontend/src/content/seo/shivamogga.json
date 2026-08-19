@@ -1,0 +1,52 @@
+{
+  "citySlug": "shivamogga",
+  "city": "Shivamogga",
+  "state": "Karnataka",
+  "lang": "kn",
+  "titleTag": "Shivamogga Classifieds — Tiffin, PG & Jobs | LocalsIndia",
+  "metaDescription": "Free classifieds in Shivamogga. Post tiffin, PG rooms, jobs, bikes & more. Connect via WhatsApp. No fees, hyperlocal.",
+  "ogTitle": "Shivamogga Local Classifieds — Your Neighborhood Marketplace",
+  "ogDescription": "Find tiffin services, PG rooms, jobs, and secondhand items in Shivamogga. Post free, sell fast, connect instantly.",
+  "h1": "Shivamogga Classifieds — Free Local Marketplace",
+  "focusKeyword": "shivamogga classifieds",
+  "secondaryKeywords": [
+    "shivamogga tiffin service",
+    "pg rooms shivamogga",
+    "jobs in shivamogga",
+    "shivamogga buy sell"
+  ],
+  "longTailKeywords": [
+    "tiffin service near me shivamogga",
+    "pg rooms in shivamogga for boys",
+    "pg rooms in shivamogga for girls",
+    "part time jobs in shivamogga",
+    "second hand bikes shivamogga",
+    "furniture for sale shivamogga",
+    "home tuition in shivamogga",
+    "domestic help shivamogga",
+    "used mobiles shivamogga",
+    "carpool shivamogga",
+    "shivamogga roommate wanted",
+    "shivamogga classifieds free posting"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Shivamogga Classifieds — Tiffin, PG & Jobs | LocalsIndia",
+    "description": "Free hyperlocal classifieds for Shivamogga. Post and browse tiffin, PG rooms, jobs, vehicles, electronics, and more.",
+    "url": "https://www.localsindia.com/shivamogga",
+    "inLanguage": [
+      "kn",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Shivamogga",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Karnataka"
+      }
+    }
+  },
+  "generatedAt": "2026-08-19T06:54:27.594469+00:00"
+}

@@ -1,0 +1,50 @@
+{
+  "citySlug": "ramanagara",
+  "city": "Ramanagara",
+  "state": "Karnataka",
+  "lang": "kn",
+  "titleTag": "Ramanagara Classifieds — Free PG, Tiffin & Jobs",
+  "metaDescription": "Buy, sell, rent in Ramanagara. Free classifieds for PG rooms, tiffin service, jobs, bikes & more. Post instantly on LocalsIndia.",
+  "ogTitle": "Ramanagara Local Classifieds — Your Neighborhood Marketplace",
+  "ogDescription": "Connect with your Ramanagara neighbors. Find PG rooms, home-cooked meals, jobs, secondhand items — all free to post.",
+  "h1": "Ramanagara Free Classifieds — PG, Tiffin, Jobs & Local Buy-Sell",
+  "focusKeyword": "ramanagara classifieds",
+  "secondaryKeywords": [
+    "pg rooms ramanagara",
+    "tiffin service ramanagara",
+    "jobs ramanagara",
+    "secondhand bikes ramanagara"
+  ],
+  "longTailKeywords": [
+    "pg rooms in ramanagara for boys",
+    "pg rooms in ramanagara for girls",
+    "tiffin service near me ramanagara",
+    "home delivery tiffin ramanagara",
+    "part time jobs ramanagara",
+    "full time jobs ramanagara",
+    "secondhand bikes ramanagara",
+    "used mobile phones ramanagara",
+    "flat rent ramanagara",
+    "roommate ramanagara"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Ramanagara Free Classifieds | LocalsIndia",
+    "description": "Buy, sell, rent in Ramanagara. Free classifieds for PG rooms, tiffin service, jobs, bikes & more.",
+    "url": "https://www.localsindia.com/ramanagara",
+    "inLanguage": [
+      "kn",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Ramanagara",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Karnataka"
+      }
+    }
+  },
+  "generatedAt": "2026-08-19T06:54:12.379429+00:00"
+}

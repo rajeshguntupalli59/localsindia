@@ -1,0 +1,52 @@
+{
+  "citySlug": "tumakuru",
+  "city": "Tumakuru",
+  "state": "Karnataka",
+  "lang": "kn",
+  "titleTag": "Tumakuru Classifieds — PG, Tiffin, Jobs | LocalsIndia",
+  "metaDescription": "Find PG rooms, tiffin services, jobs & buy/sell items in Tumakuru. Post free classifieds in Kannada. Connect via WhatsApp.",
+  "ogTitle": "Tumakuru's Hyperlocal Community — Free Classifieds & Local Services",
+  "ogDescription": "Post free classifieds in Tumakuru. PG rooms, home-cooked meals, job listings, secondhand items — all in your language, all hyperlocal.",
+  "h1": "Free Classifieds in Tumakuru — Find PG, Tiffin, Jobs & More",
+  "focusKeyword": "tumakuru classifieds",
+  "secondaryKeywords": [
+    "pg rooms in tumakuru",
+    "tiffin service tumakuru",
+    "jobs in tumakuru",
+    "buy sell tumakuru"
+  ],
+  "longTailKeywords": [
+    "pg rooms in tumakuru for boys",
+    "pg rooms in tumakuru for girls",
+    "tiffin service near me tumakuru",
+    "home delivery tiffin tumakuru",
+    "part time jobs in tumakuru",
+    "full time jobs tumakuru",
+    "second hand bikes tumakuru",
+    "used phones in tumakuru",
+    "domestic help tumakuru",
+    "tuition classes tumakuru",
+    "flatmate wanted tumakuru",
+    "carpool tumakuru"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Tumakuru Free Classifieds & Local Services | LocalsIndia",
+    "description": "Hyperlocal classifieds platform for Tumakuru. Post free listings for PG, tiffin, jobs, vehicles, and more. Connect with locals via WhatsApp.",
+    "url": "https://www.localsindia.com/tumakuru",
+    "inLanguage": [
+      "kn",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Tumakuru",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Karnataka"
+      }
+    }
+  },
+  "generatedAt": "2026-08-19T06:54:38.151963+00:00"
+}

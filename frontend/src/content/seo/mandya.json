@@ -1,0 +1,52 @@
+{
+  "citySlug": "mandya",
+  "city": "Mandya",
+  "state": "Karnataka",
+  "lang": "kn",
+  "titleTag": "Mandya Classifieds — Free PG, Tiffin, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, rent in Mandya. Free classifieds for PG rooms, tiffin service, jobs & more. Post listings instantly on LocalsIndia.",
+  "ogTitle": "Mandya's Neighborhood Marketplace — PG, Tiffin & Local Jobs",
+  "ogDescription": "Connect with your Mandya community. Free classifieds, zero commission. Find PG rooms, tiffin service, jobs, and used items near you.",
+  "h1": "Free Classifieds in Mandya — PG Rooms, Tiffin Service, Jobs & More",
+  "focusKeyword": "mandya classifieds",
+  "secondaryKeywords": [
+    "pg rooms in mandya",
+    "tiffin service mandya",
+    "jobs in mandya",
+    "buy sell mandya"
+  ],
+  "longTailKeywords": [
+    "pg rooms in mandya for boys",
+    "paying guest accommodation mandya",
+    "tiffin service near me mandya",
+    "home cooked meals delivery mandya",
+    "part time jobs mandya",
+    "second hand bikes mandya",
+    "used mobile phones mandya",
+    "domestic help in mandya",
+    "tuition classes mandya",
+    "furniture for sale mandya",
+    "mandya local classifieds free",
+    "sell old items mandya"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Mandya Free Classifieds — PG, Tiffin, Jobs & More",
+    "description": "Buy, sell, rent in Mandya. Free classifieds for PG rooms, tiffin service, jobs & more. Post listings instantly on LocalsIndia.",
+    "url": "https://www.localsindia.com/mandya",
+    "inLanguage": [
+      "kn",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Mandya",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Karnataka"
+      }
+    }
+  },
+  "generatedAt": "2026-08-19T06:53:52.355267+00:00"
+}
