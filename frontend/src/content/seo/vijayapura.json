@@ -1,0 +1,52 @@
+{
+  "citySlug": "vijayapura",
+  "city": "Vijayapura",
+  "state": "Karnataka",
+  "lang": "kn",
+  "titleTag": "Vijayapura Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, find tiffin & PG rooms in Vijayapura. Post jobs, classifieds free. Connect with locals via WhatsApp.",
+  "ogTitle": "Vijayapura Local Classifieds — Your Neighborhood Marketplace",
+  "ogDescription": "Discover tiffin services, PG accommodations, jobs & classifieds in Vijayapura. Post free, sell faster.",
+  "h1": "Vijayapura Classifieds — Free Buy, Sell & Local Services",
+  "focusKeyword": "vijayapura classifieds",
+  "secondaryKeywords": [
+    "pg rooms in vijayapura",
+    "tiffin service vijayapura",
+    "jobs in vijayapura",
+    "second hand bikes vijayapura"
+  ],
+  "longTailKeywords": [
+    "pg rooms in vijayapura for boys",
+    "pg rooms in vijayapura for girls",
+    "tiffin service near me vijayapura",
+    "home cooked food delivery vijayapura",
+    "part time jobs in vijayapura",
+    "full time jobs vijayapura",
+    "buy second hand bikes in vijayapura",
+    "rent furniture vijayapura",
+    "domestic help vijayapura",
+    "tuition classes vijayapura",
+    "flat mates in vijayapura",
+    "classifieds vijayapura free"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Vijayapura Classifieds — Free Buy, Sell & Local Services",
+    "description": "Buy, sell, find tiffin & PG rooms in Vijayapura. Post jobs, classifieds free. Connect with locals via WhatsApp.",
+    "url": "https://www.localsindia.com/vijayapura",
+    "inLanguage": [
+      "kn",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Vijayapura",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Karnataka"
+      }
+    }
+  },
+  "generatedAt": "2026-08-20T06:55:38.769521+00:00"
+}

@@ -1,0 +1,50 @@
+{
+  "citySlug": "kochi",
+  "city": "Kochi",
+  "state": "Kerala",
+  "lang": "ml",
+  "titleTag": "Kochi Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, hire locally in Kochi. Free classifieds for tiffin delivery, PG rooms, jobs, used bikes & more. Post instantly, connect via WhatsApp.",
+  "ogTitle": "Find Everything Local in Kochi — Free Classifieds on LocalsIndia",
+  "ogDescription": "Kochi's trusted community marketplace. Tiffin services, PG accommodation, part-time jobs, secondhand items. No fees, real neighbors.",
+  "h1": "Free Local Classifieds in Kochi — Tiffin, PG Rooms, Jobs & More",
+  "focusKeyword": "kochi classifieds free",
+  "secondaryKeywords": [
+    "kochi tiffin service",
+    "pg rooms in kochi",
+    "jobs in kochi",
+    "kochi buy sell local"
+  ],
+  "longTailKeywords": [
+    "kochi tiffin delivery near me",
+    "pg rooms in kochi for girls",
+    "part time jobs in kochi",
+    "secondhand bikes in kochi",
+    "domestic help in kochi",
+    "furniture buy sell kochi",
+    "carpool kochi",
+    "tuition classes in kochi",
+    "used mobile phones kochi",
+    "pg accommodation kochi boys"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Kochi Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+    "description": "Buy, sell, hire locally in Kochi. Free classifieds for tiffin delivery, PG rooms, jobs, used bikes & more. Post instantly, connect via WhatsApp.",
+    "url": "https://www.localsindia.com/kochi",
+    "inLanguage": [
+      "ml",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Kochi",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Kerala"
+      }
+    }
+  },
+  "generatedAt": "2026-08-20T06:56:18.917947+00:00"
+}

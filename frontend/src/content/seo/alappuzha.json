@@ -1,0 +1,50 @@
+{
+  "citySlug": "alappuzha",
+  "city": "Alappuzha",
+  "state": "Kerala",
+  "lang": "ml",
+  "titleTag": "Alappuzha Free Classifieds — Tiffin, PG & Jobs",
+  "metaDescription": "Post free classifieds in Alappuzha. Find tiffin, PG rooms, jobs, vehicles & more. Connect via WhatsApp instantly.",
+  "ogTitle": "Alappuzha Classifieds — Your Neighborhood Marketplace",
+  "ogDescription": "Browse & post free listings in Alappuzha. Tiffin, rooms, jobs, services — all hyperlocal, all Malayalam-friendly.",
+  "h1": "Free Classifieds in Alappuzha — Tiffin, PG, Jobs & Local Services",
+  "focusKeyword": "alappuzha classifieds",
+  "secondaryKeywords": [
+    "alappuzha tiffin service",
+    "pg rooms in alappuzha",
+    "jobs in alappuzha",
+    "alappuzha marketplace"
+  ],
+  "longTailKeywords": [
+    "tiffin delivery near alappuzha",
+    "pg rooms for girls in alappuzha",
+    "pg rooms for boys in alappuzha",
+    "part time jobs in alappuzha",
+    "second hand bikes alappuzha",
+    "roommate wanted alappuzha",
+    "domestic help alappuzha",
+    "tuition classes alappuzha",
+    "furniture sale alappuzha",
+    "used mobiles alappuzha"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Alappuzha Free Classifieds | LocalsIndia",
+    "description": "Hyperlocal classifieds for Alappuzha. Post free listings — tiffin, PG, jobs, vehicles, services. Connect on WhatsApp.",
+    "url": "https://www.localsindia.com/alappuzha",
+    "inLanguage": [
+      "ml",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Alappuzha",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Kerala"
+      }
+    }
+  },
+  "generatedAt": "2026-08-20T06:55:48.688368+00:00"
+}

@@ -1,0 +1,50 @@
+{
+  "citySlug": "guruvayur",
+  "city": "Guruvayur",
+  "state": "Kerala",
+  "lang": "ml",
+  "titleTag": "Guruvayur Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, rent in Guruvayur. Tiffin delivery, PG rooms, jobs, services. Post free classifieds in Malayalam & English.",
+  "ogTitle": "Guruvayur Classifieds — Local buying, selling & services on LocalsIndia",
+  "ogDescription": "Connect with your Guruvayur neighbors. Free classifieds for tiffin, PG rooms, jobs, furniture & more. Chat on WhatsApp.",
+  "h1": "Guruvayur Classifieds — Buy, Sell, Rent & Find Services Locally",
+  "focusKeyword": "guruvayur classifieds",
+  "secondaryKeywords": [
+    "guruvayur pg rooms",
+    "guruvayur tiffin service",
+    "guruvayur jobs",
+    "guruvayur buy sell"
+  ],
+  "longTailKeywords": [
+    "pg rooms in guruvayur for boys",
+    "pg rooms in guruvayur for girls",
+    "tiffin service near guruvayur",
+    "home cooked food delivery guruvayur",
+    "part time jobs in guruvayur",
+    "second hand bikes in guruvayur",
+    "furniture for sale in guruvayur",
+    "domestic help in guruvayur",
+    "tuition classes in guruvayur",
+    "flatmate wanted in guruvayur"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Guruvayur Free Classifieds & Local Marketplace",
+    "description": "Buy, sell, rent and find services in Guruvayur. Post free classifieds for tiffin, PG rooms, jobs and more.",
+    "url": "https://www.localsindia.com/guruvayur",
+    "inLanguage": [
+      "ml",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Guruvayur",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Kerala"
+      }
+    }
+  },
+  "generatedAt": "2026-08-20T06:55:53.669063+00:00"
+}

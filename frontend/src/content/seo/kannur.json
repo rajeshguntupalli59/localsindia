@@ -1,0 +1,52 @@
+{
+  "citySlug": "kannur",
+  "city": "Kannur",
+  "state": "Kerala",
+  "lang": "ml",
+  "titleTag": "Kannur Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, rent locally in Kannur. Post free classifieds for tiffin, PG rooms, jobs, services & more. Connect via WhatsApp instantly.",
+  "ogTitle": "Kannur Local Classifieds & Community — Free Listings",
+  "ogDescription": "Your neighborhood marketplace. Find tiffin, PG, jobs, and everyday essentials in Kannur. Post free, connect instantly on WhatsApp.",
+  "h1": "Kannur Free Classifieds — Tiffin, PG Rooms, Jobs & Local Services",
+  "focusKeyword": "kannur classifieds",
+  "secondaryKeywords": [
+    "kannur tiffin service",
+    "pg rooms kannur",
+    "jobs in kannur",
+    "kannur local marketplace"
+  ],
+  "longTailKeywords": [
+    "tiffin service near me kannur",
+    "pg rooms for girls in kannur",
+    "pg rooms for boys in kannur",
+    "part time jobs in kannur",
+    "home cooked meals kannur",
+    "paying guest accommodation kannur",
+    "domestic help kannur",
+    "second hand bikes kannur",
+    "tuition classes kannur",
+    "buy sell kannur free",
+    "kannur roommate wanted",
+    "carpool kannur"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Kannur Free Classifieds — Tiffin, PG, Jobs & Local Services",
+    "description": "Buy, sell, rent locally in Kannur. Post free classifieds for tiffin, PG rooms, jobs, services & more. Connect via WhatsApp instantly.",
+    "url": "https://www.localsindia.com/kannur",
+    "inLanguage": [
+      "ml",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Kannur",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Kerala"
+      }
+    }
+  },
+  "generatedAt": "2026-08-20T06:56:03.421985+00:00"
+}

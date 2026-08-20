@@ -1,0 +1,52 @@
+{
+  "citySlug": "irinjalakuda",
+  "city": "Irinjalakuda",
+  "state": "Kerala",
+  "lang": "ml",
+  "titleTag": "Irinjalakuda Classifieds — PG, Tiffin & Jobs | LocalsIndia",
+  "metaDescription": "Free classifieds in Irinjalakuda. Post & find tiffin, PG rooms, jobs, used items. Zero fees, WhatsApp connect.",
+  "ogTitle": "Irinjalakuda Free Community Classifieds — Your Neighborhood, Your Deals",
+  "ogDescription": "Discover local tiffin services, PG accommodations, jobs, and buy–sell listings in Irinjalakuda. Post free, connect on WhatsApp.",
+  "h1": "Irinjalakuda Classifieds — Local Buy, Sell & Services",
+  "focusKeyword": "irinjalakuda classifieds",
+  "secondaryKeywords": [
+    "pg rooms in irinjalakuda",
+    "tiffin service irinjalakuda",
+    "jobs in irinjalakuda",
+    "irinjalakuda free listings"
+  ],
+  "longTailKeywords": [
+    "pg rooms in irinjalakuda for girls",
+    "pg rooms in irinjalakuda for boys",
+    "tiffin service near irinjalakuda",
+    "home tiffin delivery irinjalakuda",
+    "part time jobs irinjalakuda",
+    "full time jobs irinjalakuda",
+    "second hand bikes irinjalakuda",
+    "used furniture irinjalakuda",
+    "domestic help irinjalakuda",
+    "cooking classes irinjalakuda",
+    "flat mates irinjalakuda",
+    "rental flats irinjalakuda"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Irinjalakuda Classifieds — Local Buy, Sell & Services",
+    "description": "Free classifieds in Irinjalakuda. Post & find tiffin, PG rooms, jobs, used items. Zero fees, WhatsApp connect.",
+    "url": "https://www.localsindia.com/irinjalakuda",
+    "inLanguage": [
+      "ml",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Irinjalakuda",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Kerala"
+      }
+    }
+  },
+  "generatedAt": "2026-08-20T06:55:58.476109+00:00"
+}

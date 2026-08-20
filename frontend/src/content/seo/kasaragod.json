@@ -1,0 +1,50 @@
+{
+  "citySlug": "kasaragod",
+  "city": "Kasaragod",
+  "state": "Kerala",
+  "lang": "ml",
+  "titleTag": "Kasaragod Classifieds — Tiffin, PG, Jobs & More | LocalsIndia",
+  "metaDescription": "Free classifieds in Kasaragod. Buy/sell, tiffin service, PG rooms, jobs, vehicles & more. Post for free, connect on WhatsApp.",
+  "ogTitle": "Kasaragod's Hyperlocal Classifieds — Connect with Your Neighbors",
+  "ogDescription": "Post and browse free classifieds in Kasaragod. Tiffin, PG rooms, jobs, secondhand items — all in Malayalam & English.",
+  "h1": "Kasaragod Classifieds — Free Buy, Sell & Local Services",
+  "focusKeyword": "kasaragod classifieds",
+  "secondaryKeywords": [
+    "kasaragod tiffin service",
+    "pg rooms kasaragod",
+    "jobs in kasaragod",
+    "secondhand items kasaragod"
+  ],
+  "longTailKeywords": [
+    "tiffin service near me kasaragod",
+    "pg rooms for boys kasaragod",
+    "pg rooms for girls kasaragod",
+    "part time jobs kasaragod",
+    "second hand bikes kasaragod",
+    "furniture buy sell kasaragod",
+    "domestic help kasaragod",
+    "tuition classes kasaragod",
+    "car rental kasaragod",
+    "used mobile phones kasaragod"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Kasaragod Classifieds — Tiffin, PG, Jobs & More | LocalsIndia",
+    "description": "Free classifieds in Kasaragod. Buy/sell, tiffin service, PG rooms, jobs, vehicles & more. Post for free, connect on WhatsApp.",
+    "url": "https://www.localsindia.com/kasaragod",
+    "inLanguage": [
+      "ml",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Kasaragod",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Kerala"
+      }
+    }
+  },
+  "generatedAt": "2026-08-20T06:56:08.297811+00:00"
+}

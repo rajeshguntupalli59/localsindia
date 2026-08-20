@@ -1,0 +1,52 @@
+{
+  "citySlug": "kayamkulam",
+  "city": "Kayamkulam",
+  "state": "Kerala",
+  "lang": "ml",
+  "titleTag": "Kayamkulam Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, rent in Kayamkulam. Tiffin delivery, PG rooms, jobs, secondhand items. Post free on LocalsIndia.",
+  "ogTitle": "Kayamkulam Classifieds — Local Tiffin, PG & Jobs Near You",
+  "ogDescription": "Your Kayamkulam neighborhood marketplace. Find tiffin services, PG rooms, job listings, and more. Connect via WhatsApp.",
+  "h1": "Kayamkulam Free Classifieds & Local Services",
+  "focusKeyword": "kayamkulam classifieds",
+  "secondaryKeywords": [
+    "tiffin service kayamkulam",
+    "pg rooms kayamkulam",
+    "jobs kayamkulam",
+    "buy sell kayamkulam"
+  ],
+  "longTailKeywords": [
+    "tiffin delivery kayamkulam",
+    "pg rooms for girls kayamkulam",
+    "pg rooms for boys kayamkulam",
+    "part time jobs kayamkulam",
+    "full time jobs kayamkulam",
+    "secondhand bikes kayamkulam",
+    "used mobiles kayamkulam",
+    "furniture for sale kayamkulam",
+    "domestic help kayamkulam",
+    "tuition classes kayamkulam",
+    "shared flat kayamkulam",
+    "car rental kayamkulam"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Kayamkulam Free Classifieds & Local Services",
+    "description": "Buy, sell, rent in Kayamkulam. Tiffin delivery, PG rooms, jobs, and secondhand items. Free posting, WhatsApp contact.",
+    "url": "https://www.localsindia.com/kayamkulam",
+    "inLanguage": [
+      "ml",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Kayamkulam",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Kerala"
+      }
+    }
+  },
+  "generatedAt": "2026-08-20T06:56:13.842679+00:00"
+}

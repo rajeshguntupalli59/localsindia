@@ -1,0 +1,52 @@
+{
+  "citySlug": "udupi",
+  "city": "Udupi",
+  "state": "Karnataka",
+  "lang": "kn",
+  "titleTag": "Udupi Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, and hire locally in Udupi. Free classifieds for tiffin, PG rooms, jobs, and more. Connect with neighbors on WhatsApp.",
+  "ogTitle": "Udupi Local Classifieds — Your Community Marketplace",
+  "ogDescription": "Find tiffin services, PG rooms, part-time jobs, and secondhand items in Udupi. Post for free, connect via WhatsApp.",
+  "h1": "Udupi Free Local Classifieds — Tiffin, PG Rooms & Jobs",
+  "focusKeyword": "udupi classifieds",
+  "secondaryKeywords": [
+    "udupi tiffin service",
+    "pg rooms in udupi",
+    "jobs in udupi",
+    "udupi buy sell"
+  ],
+  "longTailKeywords": [
+    "tiffin service in udupi",
+    "pg rooms for girls in udupi",
+    "pg rooms for boys in udupi",
+    "part time jobs in udupi",
+    "paying guest in udupi",
+    "secondhand bikes in udupi",
+    "domestic help in udupi",
+    "tuition classes in udupi",
+    "carpool in udupi",
+    "used furniture in udupi",
+    "electronics buy sell udupi",
+    "udupi roommate wanted"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Udupi Free Local Classifieds — Tiffin, PG, Jobs & More",
+    "description": "Buy, sell, and hire locally in Udupi. Free classifieds for tiffin, PG rooms, jobs, and more. Connect with neighbors on WhatsApp.",
+    "url": "https://www.localsindia.com/udupi",
+    "inLanguage": [
+      "kn",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Udupi",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Karnataka"
+      }
+    }
+  },
+  "generatedAt": "2026-08-20T06:55:33.843979+00:00"
+}

@@ -1,0 +1,50 @@
+{
+  "citySlug": "yadgir",
+  "city": "Yadgir",
+  "state": "Karnataka",
+  "lang": "kn",
+  "titleTag": "Yadgir Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Free classifieds in Yadgir. Post tiffin, PG rooms, jobs & more. Connect with locals on WhatsApp. No fees.",
+  "ogTitle": "Yadgir Local Classifieds & Community — Tiffin, PG, Jobs",
+  "ogDescription": "Find tiffin services, PG rooms, jobs, and local deals in Yadgir. Post for free, sell fast. Hyperlocal, community-driven.",
+  "h1": "Yadgir Classifieds — Free Buy, Sell & Services",
+  "focusKeyword": "yadgir classifieds",
+  "secondaryKeywords": [
+    "yadgir tiffin service",
+    "pg rooms yadgir",
+    "jobs in yadgir",
+    "second hand items yadgir"
+  ],
+  "longTailKeywords": [
+    "tiffin service near me yadgir",
+    "pg rooms for boys yadgir",
+    "pg rooms for girls yadgir",
+    "part time jobs yadgir",
+    "domestic help yadgir",
+    "tuition classes yadgir",
+    "second hand bikes yadgir",
+    "used furniture yadgir",
+    "home services yadgir",
+    "rental flats yadgir"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Yadgir Classifieds & Local Community — LocalsIndia",
+    "description": "Free hyperlocal classifieds in Yadgir. Buy, sell, and find services — tiffin, PG rooms, jobs, and more.",
+    "url": "https://www.localsindia.com/yadgir",
+    "inLanguage": [
+      "kn",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Yadgir",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Karnataka"
+      }
+    }
+  },
+  "generatedAt": "2026-08-20T06:55:43.719439+00:00"
+}
