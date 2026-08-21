@@ -1,0 +1,52 @@
+{
+  "citySlug": "thiruvananthapuram",
+  "city": "Thiruvananthapuram",
+  "state": "Kerala",
+  "lang": "ml",
+  "titleTag": "Thiruvananthapuram Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, find tiffin & PG rooms in Thiruvananthapuram. Post free classifieds for jobs, services & more. Connect via WhatsApp instantly.",
+  "ogTitle": "Thiruvananthapuram Local Classifieds — Tiffin, PG & Jobs Free",
+  "ogDescription": "Your neighborhood marketplace in Thiruvananthapuram. Find home-cooked meals, paying guest rooms, local jobs & second-hand items. Free to post.",
+  "h1": "Thiruvananthapuram Free Classifieds & Local Marketplace",
+  "focusKeyword": "thiruvananthapuram classifieds",
+  "secondaryKeywords": [
+    "thiruvananthapuram tiffin service",
+    "pg rooms thiruvananthapuram",
+    "jobs in thiruvananthapuram",
+    "second hand items thiruvananthapuram"
+  ],
+  "longTailKeywords": [
+    "tiffin service near me thiruvananthapuram",
+    "pg rooms for girls thiruvananthapuram",
+    "part time jobs thiruvananthapuram",
+    "paying guest accommodation thiruvananthapuram",
+    "home cooked meals thiruvananthapuram",
+    "used bikes thiruvananthapuram",
+    "domestic help thiruvananthapuram",
+    "tuition classes thiruvananthapuram",
+    "flat sharing thiruvananthapuram",
+    "freelance work thiruvananthapuram",
+    "സാധനങ്ങൾ വിൽക്കാൻ തിരുവനന്തപുരം",
+    "ഭക്ഷണ വിതരണ സേവനം തിരുവനന്തപുരം"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Thiruvananthapuram Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+    "description": "Buy, sell, find tiffin & PG rooms in Thiruvananthapuram. Post free classifieds for jobs, services & more. Connect via WhatsApp instantly.",
+    "url": "https://www.localsindia.com/thiruvananthapuram",
+    "inLanguage": [
+      "ml",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Thiruvananthapuram",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Kerala"
+      }
+    }
+  },
+  "generatedAt": "2026-08-21T06:57:19.982712+00:00"
+}

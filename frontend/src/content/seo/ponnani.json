@@ -1,0 +1,50 @@
+{
+  "citySlug": "ponnani",
+  "city": "Ponnani",
+  "state": "Kerala",
+  "lang": "ml",
+  "titleTag": "Ponnani Classifieds — Free Tiffin, PG & Jobs | LocalsIndia",
+  "metaDescription": "Free classifieds in Ponnani, Kerala. Post & find tiffin, PG rooms, jobs, bikes & more. Connect via WhatsApp instantly.",
+  "ogTitle": "Ponnani Local Classifieds — Your Neighborhood Marketplace",
+  "ogDescription": "Post free classifieds in Ponnani. Browse tiffin services, PG accommodations, jobs, second-hand items. Real neighbors, real deals.",
+  "h1": "Ponnani Classifieds & Local Marketplace",
+  "focusKeyword": "ponnani classifieds",
+  "secondaryKeywords": [
+    "ponnani free classifieds",
+    "ponnani pg rooms",
+    "ponnani tiffin service",
+    "ponnani jobs"
+  ],
+  "longTailKeywords": [
+    "pg rooms in ponnani for boys",
+    "pg rooms in ponnani for girls",
+    "tiffin service near ponnani",
+    "home cooked meals ponnani",
+    "part time jobs ponnani",
+    "second hand bikes ponnani",
+    "flatmate wanted ponnani",
+    "domestic help ponnani",
+    "tuition classes ponnani",
+    "furniture for sale ponnani"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Ponnani Classifieds — Free Tiffin, PG & Jobs",
+    "description": "Free classifieds in Ponnani, Kerala. Post & find tiffin, PG rooms, jobs, bikes & more. Connect via WhatsApp instantly.",
+    "url": "https://www.localsindia.com/ponnani",
+    "inLanguage": [
+      "ml",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Ponnani",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Kerala"
+      }
+    }
+  },
+  "generatedAt": "2026-08-21T06:57:08.696788+00:00"
+}

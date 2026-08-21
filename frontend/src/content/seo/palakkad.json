@@ -1,0 +1,50 @@
+{
+  "citySlug": "palakkad",
+  "city": "Palakkad",
+  "state": "Kerala",
+  "lang": "ml",
+  "titleTag": "Palakkad Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, rent in Palakkad. Post tiffin, PG rooms, jobs, services free. Connect via WhatsApp. Malayalam & English.",
+  "ogTitle": "Palakkad Classifieds — Your Neighborhood Marketplace",
+  "ogDescription": "Find tiffin services, PG rooms, jobs, and local deals in Palakkad. Post free. Talk directly on WhatsApp.",
+  "h1": "Palakkad Classifieds & Local Marketplace",
+  "focusKeyword": "palakkad classifieds",
+  "secondaryKeywords": [
+    "palakkad pg rooms",
+    "palakkad tiffin service",
+    "palakkad jobs",
+    "palakkad local marketplace"
+  ],
+  "longTailKeywords": [
+    "pg rooms in palakkad for girls",
+    "pg rooms in palakkad for boys",
+    "home tiffin delivery palakkad",
+    "tiffin service near me palakkad",
+    "part time jobs in palakkad",
+    "second hand bikes palakkad",
+    "used furniture palakkad",
+    "domestic help palakkad",
+    "tuition classes palakkad",
+    "carpool palakkad"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Palakkad Free Classifieds & Local Marketplace | LocalsIndia",
+    "description": "Hyperlocal classifieds for Palakkad. Buy, sell, rent, hire. Tiffin, PG, jobs, services. Post free in Malayalam or English.",
+    "url": "https://www.localsindia.com/palakkad",
+    "inLanguage": [
+      "ml",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Palakkad",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Kerala"
+      }
+    }
+  },
+  "generatedAt": "2026-08-21T06:56:59.040910+00:00"
+}

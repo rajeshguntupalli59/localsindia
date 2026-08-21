@@ -1,0 +1,50 @@
+{
+  "citySlug": "malappuram",
+  "city": "Malappuram",
+  "state": "Kerala",
+  "lang": "ml",
+  "titleTag": "Malappuram Free Classifieds — Tiffin, PG & Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, find tiffin & PG rooms in Malappuram. Post free classifieds for jobs, services & more. Connect with locals on WhatsApp.",
+  "ogTitle": "Malappuram Classifieds — Your Neighborhood Marketplace",
+  "ogDescription": "Discover tiffin services, PG accommodations, jobs & local deals in Malappuram. Free to post, easy to connect.",
+  "h1": "Malappuram Free Classifieds — Buy, Sell & Connect Locally",
+  "focusKeyword": "malappuram classifieds",
+  "secondaryKeywords": [
+    "malappuram free classifieds",
+    "pg rooms malappuram",
+    "tiffin service malappuram",
+    "jobs in malappuram"
+  ],
+  "longTailKeywords": [
+    "pg rooms in malappuram for boys",
+    "pg rooms in malappuram for girls",
+    "tiffin service near malappuram",
+    "home cooked meals malappuram",
+    "part time jobs malappuram",
+    "buy sell second hand items malappuram",
+    "domestic help services malappuram",
+    "tuition classes malappuram",
+    "furniture buy sell malappuram",
+    "used bikes malappuram"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Malappuram Free Classifieds — Tiffin, PG & Jobs",
+    "description": "Buy, sell, find tiffin & PG rooms in Malappuram. Post free classifieds for jobs, services & more.",
+    "url": "https://www.localsindia.com/malappuram",
+    "inLanguage": [
+      "ml",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Malappuram",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Kerala"
+      }
+    }
+  },
+  "generatedAt": "2026-08-21T06:56:44.521414+00:00"
+}

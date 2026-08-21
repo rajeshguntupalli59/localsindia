@@ -1,0 +1,50 @@
+{
+  "citySlug": "perinthalmanna",
+  "city": "Perinthalmanna",
+  "state": "Kerala",
+  "lang": "ml",
+  "titleTag": "Perinthalmanna Free Classifieds — PG, Tiffin & Jobs",
+  "metaDescription": "Free classifieds in Perinthalmanna. Post PG rooms, tiffin services, jobs & buy-sell items locally. Connect via WhatsApp. Malayalam & English.",
+  "ogTitle": "Perinthalmanna Local Classifieds — Your Neighborhood Marketplace",
+  "ogDescription": "Find PG rooms, home-cooked meals, jobs & used items in Perinthalmanna. Zero posting fees. Chat with locals on WhatsApp.",
+  "h1": "Perinthalmanna Local Classifieds — Free Listings for Jobs, PG & Tiffin",
+  "focusKeyword": "Perinthalmanna classifieds",
+  "secondaryKeywords": [
+    "PG rooms in Perinthalmanna",
+    "tiffin service Perinthalmanna",
+    "jobs in Perinthalmanna",
+    "buy sell Perinthalmanna"
+  ],
+  "longTailKeywords": [
+    "PG for girls in Perinthalmanna",
+    "paying guest rooms Perinthalmanna",
+    "home tiffin delivery Perinthalmanna",
+    "part time jobs Perinthalmanna",
+    "second hand bikes Perinthalmanna",
+    "used mobile phones Perinthalmanna",
+    "furniture for sale Perinthalmanna",
+    "domestic help near Perinthalmanna",
+    "tuition classes Perinthalmanna",
+    "flatmate wanted Perinthalmanna"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Perinthalmanna Free Classifieds & Local Listings",
+    "description": "Free hyperlocal classifieds in Perinthalmanna, Kerala. Buy, sell, rent PG rooms, tiffin services, find jobs and more.",
+    "url": "https://www.localsindia.com/perinthalmanna",
+    "inLanguage": [
+      "ml",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Perinthalmanna",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Kerala"
+      }
+    }
+  },
+  "generatedAt": "2026-08-21T06:57:04.092799+00:00"
+}

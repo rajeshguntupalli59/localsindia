@@ -1,0 +1,50 @@
+{
+  "citySlug": "kollam",
+  "city": "Kollam",
+  "state": "Kerala",
+  "lang": "ml",
+  "titleTag": "Kollam Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, find PG rooms, tiffin services & jobs in Kollam. Free classifieds. Connect via WhatsApp. Post anything in Malayalam or English.",
+  "ogTitle": "Kollam Classifieds — Local Jobs, PG Rooms & Tiffin Services",
+  "ogDescription": "Your neighbor's marketplace in Kollam. Find affordable PG rooms, home-cooked meals, part-time jobs & more. Free to post, free to browse.",
+  "h1": "Kollam Classifieds — Free Local Listings for Jobs, PG & Tiffin",
+  "focusKeyword": "kollam classifieds",
+  "secondaryKeywords": [
+    "pg rooms in kollam",
+    "tiffin service kollam",
+    "jobs in kollam",
+    "buy sell kollam"
+  ],
+  "longTailKeywords": [
+    "pg rooms in kollam for girls",
+    "pg rooms in kollam for boys",
+    "tiffin service near me kollam",
+    "paying guest kollam",
+    "part time jobs in kollam",
+    "second hand bikes in kollam",
+    "furniture for sale in kollam",
+    "domestic help in kollam",
+    "tuition classes in kollam",
+    "flat mate wanted kollam"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Kollam Free Classifieds — Tiffin, PG, Jobs & More | LocalsIndia",
+    "description": "Buy, sell, find PG rooms, tiffin services & jobs in Kollam. Free classifieds. Connect via WhatsApp. Post anything in Malayalam or English.",
+    "url": "https://www.localsindia.com/kollam",
+    "inLanguage": [
+      "ml",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Kollam",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Kerala"
+      }
+    }
+  },
+  "generatedAt": "2026-08-21T06:56:29.480513+00:00"
+}

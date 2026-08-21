@@ -1,0 +1,50 @@
+{
+  "citySlug": "kozhikode",
+  "city": "Kozhikode",
+  "state": "Kerala",
+  "lang": "ml",
+  "titleTag": "Kozhikode Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, rent in Kozhikode. Post free classifieds for tiffin, PG rooms, jobs, vehicles & more. Connect via WhatsApp instantly.",
+  "ogTitle": "Kozhikode's Trusted Classifieds — Find Tiffin, PG & Local Jobs Today",
+  "ogDescription": "Your neighborhood marketplace. Free listings for tiffin services, paying guest rooms, part-time jobs, second-hand items in Kozhikode. Malayalam & English.",
+  "h1": "Free Classifieds in Kozhikode — Tiffin, PG Rooms, Jobs & Local Services",
+  "focusKeyword": "kozhikode classifieds",
+  "secondaryKeywords": [
+    "kozhikode free listings",
+    "pg rooms in kozhikode",
+    "tiffin service kozhikode",
+    "jobs in kozhikode"
+  ],
+  "longTailKeywords": [
+    "pg rooms in kozhikode for girls",
+    "pg rooms in kozhikode for boys",
+    "tiffin service near me kozhikode",
+    "part time jobs in kozhikode",
+    "second hand bikes in kozhikode",
+    "used mobile phones kozhikode",
+    "domestic help kozhikode",
+    "shared flat kozhikode",
+    "tuition classes kozhikode",
+    "room for rent kozhikode"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Free Classifieds in Kozhikode — Tiffin, PG, Jobs & Local Services | LocalsIndia",
+    "description": "Buy, sell, rent, and find services in Kozhikode. Post free classifieds for tiffin, PG rooms, jobs, vehicles, furniture and more. Connect with locals via WhatsApp.",
+    "url": "https://www.localsindia.com/kozhikode",
+    "inLanguage": [
+      "ml",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Kozhikode",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Kerala"
+      }
+    }
+  },
+  "generatedAt": "2026-08-21T06:56:39.605299+00:00"
+}

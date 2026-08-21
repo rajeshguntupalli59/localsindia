@@ -1,0 +1,49 @@
+{
+  "citySlug": "manjeri",
+  "city": "Manjeri",
+  "state": "Kerala",
+  "lang": "ml",
+  "titleTag": "Manjeri Classifieds — Tiffin, PG & Jobs | LocalsIndia",
+  "metaDescription": "Free classifieds in Manjeri. Post tiffin, PG rooms, jobs, used items. Connect with locals via WhatsApp. No fees.",
+  "ogTitle": "Manjeri's Local Marketplace — Tiffin, Rooms & More",
+  "ogDescription": "Find tiffin services, paying guest rooms, jobs, and secondhand items in Manjeri. Post free. Connect real people.",
+  "h1": "Classifieds in Manjeri, Kerala — Tiffin, PG, Jobs & More",
+  "focusKeyword": "manjeri classifieds",
+  "secondaryKeywords": [
+    "tiffin service in manjeri",
+    "pg rooms manjeri",
+    "jobs in manjeri"
+  ],
+  "longTailKeywords": [
+    "tiffin service near me manjeri",
+    "pg rooms in manjeri for boys",
+    "pg rooms in manjeri for girls",
+    "part time jobs in manjeri",
+    "home cooked meals manjeri",
+    "paying guest accommodation manjeri",
+    "secondhand bikes manjeri",
+    "domestic help in manjeri",
+    "tuition classes manjeri",
+    "flat for rent manjeri"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Manjeri Classifieds — Tiffin, PG, Jobs & More | LocalsIndia",
+    "description": "Free classifieds in Manjeri, Kerala. Post and browse tiffin, PG rooms, jobs, and local services.",
+    "url": "https://www.localsindia.com/manjeri",
+    "inLanguage": [
+      "ml",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Manjeri",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Kerala"
+      }
+    }
+  },
+  "generatedAt": "2026-08-21T06:56:49.366317+00:00"
+}

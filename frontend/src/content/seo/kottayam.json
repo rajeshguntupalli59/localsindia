@@ -1,0 +1,52 @@
+{
+  "citySlug": "kottayam",
+  "city": "Kottayam",
+  "state": "Kerala",
+  "lang": "ml",
+  "titleTag": "Kottayam Free Classifieds — Tiffin, PG & Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, rent locally in Kottayam. Free classifieds for tiffin service, PG rooms, jobs, furniture & more. Post free on LocalsIndia.",
+  "ogTitle": "Find What You Need in Kottayam — Free Local Classifieds",
+  "ogDescription": "Kottayam's community marketplace. Tiffin delivery, PG rooms, local jobs, secondhand items — all free to post. Connect via WhatsApp.",
+  "h1": "Kottayam Classifieds — Free Local Buy, Sell & Services",
+  "focusKeyword": "kottayam classifieds",
+  "secondaryKeywords": [
+    "kottayam tiffin service",
+    "pg rooms in kottayam",
+    "jobs in kottayam",
+    "kottayam local marketplace"
+  ],
+  "longTailKeywords": [
+    "tiffin service near me kottayam",
+    "pg rooms for boys in kottayam",
+    "pg rooms for girls in kottayam",
+    "part time jobs in kottayam",
+    "secondhand bikes in kottayam",
+    "furniture buy sell kottayam",
+    "domestic help services kottayam",
+    "home tuition in kottayam",
+    "carpool kottayam",
+    "electronics buy sell kottayam",
+    "flat rent kottayam",
+    "beauty services kottayam"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Kottayam Free Classifieds — Tiffin, PG & Jobs | LocalsIndia",
+    "description": "Buy, sell, rent locally in Kottayam. Free classifieds for tiffin service, PG rooms, jobs, furniture & more.",
+    "url": "https://www.localsindia.com/kottayam",
+    "inLanguage": [
+      "ml",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Kottayam",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Kerala"
+      }
+    }
+  },
+  "generatedAt": "2026-08-21T06:56:34.631452+00:00"
+}

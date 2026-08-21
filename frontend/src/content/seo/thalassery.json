@@ -1,0 +1,50 @@
+{
+  "citySlug": "thalassery",
+  "city": "Thalassery",
+  "state": "Kerala",
+  "lang": "ml",
+  "titleTag": "Thalassery Classifieds — PG, Tiffin & Jobs | LocalsIndia",
+  "metaDescription": "Free classifieds in Thalassery. Post and find PG rooms, tiffin services, jobs, and more. WhatsApp sellers instantly. No posting fees.",
+  "ogTitle": "Thalassery's Trusted Local Classifieds — Find What You Need Today",
+  "ogDescription": "Thalassery residents post and buy for free. PG rooms, home-cooked meals, job listings, second-hand items — all hyperlocal, all on WhatsApp.",
+  "h1": "Thalassery Free Classifieds — PG, Tiffin, Jobs & Local Services",
+  "focusKeyword": "thalassery classifieds",
+  "secondaryKeywords": [
+    "pg rooms in thalassery",
+    "tiffin service thalassery",
+    "jobs in thalassery",
+    "thalassery buy and sell"
+  ],
+  "longTailKeywords": [
+    "pg rooms in thalassery for girls",
+    "pg rooms in thalassery for boys",
+    "tiffin service near me thalassery",
+    "home cooked meals thalassery",
+    "part time jobs in thalassery",
+    "second hand bikes thalassery",
+    "used mobile phones thalassery",
+    "flat mates wanted thalassery",
+    "tuition classes in thalassery",
+    "domestic help thalassery"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Thalassery Free Classifieds & Local Listings",
+    "description": "Free classifieds in Thalassery, Kerala. Post and find PG rooms, tiffin services, jobs, and local services with instant WhatsApp contact.",
+    "url": "https://www.localsindia.com/thalassery",
+    "inLanguage": [
+      "ml",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Thalassery",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Kerala"
+      }
+    }
+  },
+  "generatedAt": "2026-08-21T06:57:14.106002+00:00"
+}
