@@ -1,0 +1,50 @@
+{
+  "citySlug": "ariyalur",
+  "city": "Ariyalur",
+  "state": "Tamil Nadu",
+  "lang": "ta",
+  "titleTag": "Ariyalur Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, rent in Ariyalur. Free classifieds for tiffin service, PG rooms, jobs, used bikes & more. Post for free. WhatsApp sellers instantly.",
+  "ogTitle": "Ariyalur's Trusted Local Classifieds — Tiffin, PG & Jobs",
+  "ogDescription": "Connect with your Ariyalur community. Free listings for tiffin, paying guest rooms, part-time jobs, furniture & vehicles. Zero posting fees.",
+  "h1": "Free Local Classifieds in Ariyalur — Tiffin, PG Rooms & Jobs",
+  "focusKeyword": "ariyalur classifieds",
+  "secondaryKeywords": [
+    "ariyalur tiffin service",
+    "pg rooms in ariyalur",
+    "jobs in ariyalur",
+    "ariyalur used bikes"
+  ],
+  "longTailKeywords": [
+    "tiffin service near me ariyalur",
+    "pg rooms for boys in ariyalur",
+    "pg rooms for girls in ariyalur",
+    "part time jobs ariyalur",
+    "second hand bikes ariyalur",
+    "domestic help ariyalur",
+    "furniture for rent ariyalur",
+    "home tuition ariyalur",
+    "ariyalur carpool",
+    "ariyalur classifieds free"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Ariyalur Free Classifieds — Tiffin, PG, Jobs & More",
+    "description": "Buy, sell, rent in Ariyalur. Free classifieds for tiffin service, PG rooms, jobs, used bikes & more. Post for free. WhatsApp sellers instantly.",
+    "url": "https://www.localsindia.com/ariyalur",
+    "inLanguage": [
+      "ta",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Ariyalur",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Tamil Nadu"
+      }
+    }
+  },
+  "generatedAt": "2026-08-22T06:50:28.938363+00:00"
+}

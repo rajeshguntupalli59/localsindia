@@ -1,0 +1,52 @@
+{
+  "citySlug": "chennai",
+  "city": "Chennai",
+  "state": "Tamil Nadu",
+  "lang": "ta",
+  "titleTag": "Chennai Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, post jobs free in Chennai. Tiffin, PG rooms, used bikes, domestic help — connect via WhatsApp with locals near you.",
+  "ogTitle": "Chennai Classifieds: Tiffin, PG Rooms & Jobs — Posted by Neighbors",
+  "ogDescription": "Skip the middleman. Find tiffin, PG rooms, jobs, and buy/sell locally in Chennai. Free posting, WhatsApp chat.",
+  "h1": "Chennai Free Classifieds — Post Tiffin, PG, Jobs & Buy/Sell Locally",
+  "focusKeyword": "chennai classifieds",
+  "secondaryKeywords": [
+    "chennai tiffin service",
+    "pg rooms in chennai",
+    "jobs in chennai",
+    "buy sell chennai"
+  ],
+  "longTailKeywords": [
+    "tiffin service near me chennai",
+    "pg rooms for boys in chennai",
+    "pg rooms for girls in chennai",
+    "paying guest in chennai",
+    "part time jobs in chennai",
+    "second hand bikes in chennai",
+    "used mobile phones in chennai",
+    "domestic help in chennai",
+    "flatmate wanted in chennai",
+    "carpool in chennai",
+    "cooking classes in chennai",
+    "furniture for sale in chennai"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Chennai Free Classifieds — Tiffin, PG, Jobs & More | LocalsIndia",
+    "description": "Hyperlocal classifieds for Chennai. Post free: tiffin, PG rooms, jobs, buy/sell items. Connect with neighbors via WhatsApp.",
+    "url": "https://www.localsindia.com/chennai",
+    "inLanguage": [
+      "ta",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Chennai",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Tamil Nadu"
+      }
+    }
+  },
+  "generatedAt": "2026-08-22T06:50:33.899070+00:00"
+}

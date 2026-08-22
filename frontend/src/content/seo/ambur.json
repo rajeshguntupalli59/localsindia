@@ -1,0 +1,50 @@
+{
+  "citySlug": "ambur",
+  "city": "Ambur",
+  "state": "Tamil Nadu",
+  "lang": "ta",
+  "titleTag": "Ambur Classifieds — Tiffin, PG, Jobs & More | LocalsIndia",
+  "metaDescription": "Free classifieds in Ambur. Buy/sell items, find tiffin services, PG rooms, jobs & more. Post listings free. Connect via WhatsApp.",
+  "ogTitle": "Ambur's Trusted Local Classifieds — Tiffin, PG & Jobs",
+  "ogDescription": "Ambur residents buying, selling, and connecting locally. Tiffin delivery, PG rooms, jobs, vehicles & more — all free to post.",
+  "h1": "Ambur Free Local Classifieds — Tiffin, PG Rooms, Jobs & More",
+  "focusKeyword": "Ambur classifieds",
+  "secondaryKeywords": [
+    "Ambur tiffin service",
+    "PG rooms in Ambur",
+    "jobs in Ambur",
+    "buy sell Ambur"
+  ],
+  "longTailKeywords": [
+    "Ambur tiffin service near me",
+    "PG rooms in Ambur for boys",
+    "PG rooms in Ambur for girls",
+    "part time jobs in Ambur",
+    "second hand bikes in Ambur",
+    "domestic help in Ambur",
+    "furniture for sale in Ambur",
+    "electronics buy sell Ambur",
+    "carpool Ambur",
+    "tuition classes in Ambur"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Ambur Free Local Classifieds | LocalsIndia",
+    "description": "Free classifieds marketplace for Ambur residents. Buy, sell, and connect locally for tiffin, PG, jobs, vehicles, and more.",
+    "url": "https://www.localsindia.com/ambur",
+    "inLanguage": [
+      "ta",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Ambur",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Tamil Nadu"
+      }
+    }
+  },
+  "generatedAt": "2026-08-22T06:50:24.006512+00:00"
+}

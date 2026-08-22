@@ -1,0 +1,52 @@
+{
+  "citySlug": "thrissur",
+  "city": "Thrissur",
+  "state": "Kerala",
+  "lang": "ml",
+  "titleTag": "Thrissur Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, and rent locally in Thrissur. Post tiffin, PG rooms, jobs, and used items free. Connect with neighbors on WhatsApp instantly.",
+  "ogTitle": "Thrissur's Trusted Local Classifieds — Tiffin, PG & Jobs",
+  "ogDescription": "Your Thrissur community marketplace. Free listings for tiffin, PG rooms, jobs, second-hand goods. Real neighbors, real deals, WhatsApp direct.",
+  "h1": "Thrissur Free Classifieds — Tiffin, PG Rooms, Jobs & Local Deals",
+  "focusKeyword": "thrissur classifieds",
+  "secondaryKeywords": [
+    "thrissur tiffin service",
+    "pg rooms in thrissur",
+    "jobs in thrissur",
+    "buy sell thrissur"
+  ],
+  "longTailKeywords": [
+    "tiffin service near me thrissur",
+    "pg rooms in thrissur for girls",
+    "pg rooms in thrissur for boys",
+    "part time jobs in thrissur",
+    "second hand bikes in thrissur",
+    "used electronics thrissur",
+    "domestic help thrissur",
+    "carpool thrissur",
+    "furniture for rent thrissur",
+    "thrissur roommate wanted",
+    "thrissur free classifieds online",
+    "വെണ്ടി കേരളം തൃശ്ശൂർ"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Thrissur Free Classifieds — Tiffin, PG, Jobs & Local Deals",
+    "description": "Buy, sell, and rent locally in Thrissur. Post tiffin, PG rooms, jobs, and used items free. Connect with neighbors on WhatsApp instantly.",
+    "url": "https://www.localsindia.com/thrissur",
+    "inLanguage": [
+      "ml",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Thrissur",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Kerala"
+      }
+    }
+  },
+  "generatedAt": "2026-08-22T06:50:13.571059+00:00"
+}

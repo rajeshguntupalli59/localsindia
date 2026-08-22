@@ -1,0 +1,52 @@
+{
+  "citySlug": "coimbatore",
+  "city": "Coimbatore",
+  "state": "Tamil Nadu",
+  "lang": "ta",
+  "titleTag": "Coimbatore Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, rent in Coimbatore free. Tiffin services, PG rooms, jobs, used bikes & more. Post listings in Tamil or English. Connect via WhatsApp.",
+  "ogTitle": "Coimbatore's Neighborhood Classifieds — LocalsIndia",
+  "ogDescription": "Your city, your language, your deals. Find tiffin, PG, jobs, and secondhand items in Coimbatore — all free to post.",
+  "h1": "Coimbatore Classifieds & Local Deals",
+  "focusKeyword": "coimbatore classifieds",
+  "secondaryKeywords": [
+    "coimbatore free listings",
+    "coimbatore buy sell",
+    "coimbatore local marketplace",
+    "coimbatore community classifieds"
+  ],
+  "longTailKeywords": [
+    "coimbatore tiffin service near me",
+    "pg rooms in coimbatore for girls",
+    "pg rooms in coimbatore for boys",
+    "part time jobs in coimbatore",
+    "second hand bikes in coimbatore",
+    "used mobile phones coimbatore",
+    "home tuition in coimbatore",
+    "domestic help coimbatore",
+    "furniture buy sell coimbatore",
+    "carpool coimbatore office",
+    "flat rent coimbatore",
+    "events in coimbatore today"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Coimbatore Classifieds & Local Marketplace | LocalsIndia",
+    "description": "Free classifieds for Coimbatore. Post & browse tiffin, PG, jobs, vehicles, used goods in Tamil & English.",
+    "url": "https://www.localsindia.com/coimbatore",
+    "inLanguage": [
+      "ta",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Coimbatore",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Tamil Nadu"
+      }
+    }
+  },
+  "generatedAt": "2026-08-22T06:50:41.838926+00:00"
+}

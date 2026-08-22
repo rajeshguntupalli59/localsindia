@@ -1,0 +1,50 @@
+{
+  "citySlug": "puducherry",
+  "city": "Puducherry",
+  "state": "Puducherry",
+  "lang": "ta",
+  "titleTag": "Puducherry Classifieds — Tiffin, PG, Jobs & More",
+  "metaDescription": "Free classifieds in Puducherry. Post tiffin services, PG rooms, jobs, used items. Connect via WhatsApp. No fees.",
+  "ogTitle": "Find Tiffin, PG & Jobs in Puducherry — Community Classifieds",
+  "ogDescription": "Browse and post free classifieds in Puducherry. Tiffin delivery, paying guest rooms, local jobs, and more from your neighbors.",
+  "h1": "Puducherry Free Classifieds — Tiffin, PG, Jobs & Local Services",
+  "focusKeyword": "puducherry classifieds",
+  "secondaryKeywords": [
+    "puducherry tiffin service",
+    "pg rooms puducherry",
+    "jobs in puducherry",
+    "puducherry second hand items"
+  ],
+  "longTailKeywords": [
+    "tiffin service near me puducherry",
+    "pg rooms for girls in puducherry",
+    "part time jobs puducherry",
+    "paying guest puducherry near bus stand",
+    "home cooked meals puducherry dabba",
+    "second hand bikes puducherry",
+    "domestic help puducherry",
+    "used mobile phones puducherry",
+    "flatmate wanted puducherry",
+    "carpool puducherry to chennai"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Puducherry Free Classifieds — Tiffin, PG, Jobs & More",
+    "description": "Free classifieds in Puducherry. Post tiffin services, PG rooms, jobs, used items. Connect via WhatsApp. No fees.",
+    "url": "https://www.localsindia.com/puducherry",
+    "inLanguage": [
+      "ta",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Puducherry",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Puducherry"
+      }
+    }
+  },
+  "generatedAt": "2026-08-22T06:50:19.275842+00:00"
+}

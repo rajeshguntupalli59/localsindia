@@ -1,0 +1,50 @@
+{
+  "citySlug": "cuddalore",
+  "city": "Cuddalore",
+  "state": "Tamil Nadu",
+  "lang": "ta",
+  "titleTag": "Cuddalore Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, rent in Cuddalore. Tiffin service, PG rooms, jobs, vehicles & more. Post free. Connect via WhatsApp.",
+  "ogTitle": "Cuddalore's Neighborhood Classifieds — Local Tiffin, PG & Jobs",
+  "ogDescription": "Your hyperlocal Cuddalore community. Find tiffin, PG rooms, jobs, used bikes, furniture. Tamil-friendly. Free to post.",
+  "h1": "Cuddalore Free Classifieds & Local Services",
+  "focusKeyword": "cuddalore classifieds",
+  "secondaryKeywords": [
+    "cuddalore free classifieds",
+    "cuddalore tiffin service",
+    "pg rooms cuddalore",
+    "jobs in cuddalore"
+  ],
+  "longTailKeywords": [
+    "cuddalore tiffin service near me",
+    "pg rooms in cuddalore for girls",
+    "pg rooms in cuddalore for boys",
+    "part time jobs in cuddalore",
+    "second hand bikes in cuddalore",
+    "furniture for sale in cuddalore",
+    "domestic help in cuddalore",
+    "tuition classes in cuddalore",
+    "rooms for rent in cuddalore",
+    "car rental in cuddalore"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Cuddalore Free Classifieds — Tiffin, PG, Jobs & Local Services",
+    "description": "Hyperlocal classifieds platform for Cuddalore. Buy, sell, rent tiffin, PG rooms, jobs, vehicles, furniture and more. Free to post. Connect via WhatsApp.",
+    "url": "https://www.localsindia.com/cuddalore",
+    "inLanguage": [
+      "ta",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Cuddalore",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Tamil Nadu"
+      }
+    }
+  },
+  "generatedAt": "2026-08-22T06:50:46.857051+00:00"
+}

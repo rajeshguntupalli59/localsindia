@@ -1,0 +1,52 @@
+{
+  "citySlug": "thodupuzha",
+  "city": "Thodupuzha",
+  "state": "Kerala",
+  "lang": "ml",
+  "titleTag": "Thodupuzha Classifieds — Free Tiffin, PG & Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell & hire locally in Thodupuzha. Free classifieds for tiffin, PG rooms, jobs, bikes & more. Post for free, contact via WhatsApp.",
+  "ogTitle": "Thodupuzha Local Classifieds — Your Neighborhood Marketplace",
+  "ogDescription": "Discover free local classifieds in Thodupuzha. Find tiffin services, PG rooms, jobs, and secondhand items from neighbors near you.",
+  "h1": "Thodupuzha Free Classifieds — Tiffin, PG Rooms, Jobs & Local Services",
+  "focusKeyword": "thodupuzha classifieds",
+  "secondaryKeywords": [
+    "thodupuzha free classifieds",
+    "buy sell thodupuzha",
+    "thodupuzha local marketplace",
+    "thodupuzha community listings"
+  ],
+  "longTailKeywords": [
+    "tiffin service in thodupuzha",
+    "pg rooms in thodupuzha for girls",
+    "pg rooms in thodupuzha for boys",
+    "part time jobs in thodupuzha",
+    "second hand bikes in thodupuzha",
+    "used phones in thodupuzha",
+    "house help in thodupuzha",
+    "tuition classes in thodupuzha",
+    "furniture for sale in thodupuzha",
+    "carpool thodupuzha",
+    "domestic help thodupuzha",
+    "mess near thodupuzha"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Thodupuzha Free Classifieds & Local Marketplace",
+    "description": "Buy, sell, and hire locally in Thodupuzha, Kerala. Free classified listings for tiffin, PG rooms, jobs, vehicles, and services.",
+    "url": "https://www.localsindia.com/thodupuzha",
+    "inLanguage": [
+      "ml",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Thodupuzha",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Kerala"
+      }
+    }
+  },
+  "generatedAt": "2026-08-22T06:50:02.382153+00:00"
+}

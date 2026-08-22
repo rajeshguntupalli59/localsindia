@@ -1,0 +1,52 @@
+{
+  "citySlug": "dharmapuri",
+  "city": "Dharmapuri",
+  "state": "Tamil Nadu",
+  "lang": "ta",
+  "titleTag": "Dharmapuri Classifieds — Tiffin, PG & Jobs | LocalsIndia",
+  "metaDescription": "Free classifieds in Dharmapuri. Find tiffin services, PG rooms, jobs, used items & local services. Post free, connect on WhatsApp.",
+  "ogTitle": "Dharmapuri's Trusted Hyperlocal Classifieds — Tiffin, PG & More",
+  "ogDescription": "Buy, sell, or find services in Dharmapuri without fees. Tiffin delivery, paying guest rooms, part-time jobs, used bikes — all in Tamil.",
+  "h1": "Dharmapuri Classifieds & Local Services — Free Listings in Tamil",
+  "focusKeyword": "dharmapuri classifieds",
+  "secondaryKeywords": [
+    "dharmapuri tiffin service",
+    "pg rooms dharmapuri",
+    "jobs in dharmapuri",
+    "dharmapuri free listings"
+  ],
+  "longTailKeywords": [
+    "tiffin service near dharmapuri",
+    "pg rooms for boys in dharmapuri",
+    "pg rooms for girls in dharmapuri",
+    "paying guest dharmapuri tamil nadu",
+    "part time jobs dharmapuri",
+    "domestic help dharmapuri",
+    "used bikes dharmapuri",
+    "second hand mobile phones dharmapuri",
+    "home tuition dharmapuri",
+    "furniture buy sell dharmapuri",
+    "dharmapuri classified ads tamil",
+    "carpool dharmapuri to salem"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Dharmapuri Classifieds & Local Services",
+    "description": "Free hyperlocal classifieds in Dharmapuri, Tamil Nadu. Find tiffin services, PG rooms, jobs, and buy/sell items in your community.",
+    "url": "https://www.localsindia.com/dharmapuri",
+    "inLanguage": [
+      "ta",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Dharmapuri",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Tamil Nadu"
+      }
+    }
+  },
+  "generatedAt": "2026-08-22T06:50:52.354351+00:00"
+}

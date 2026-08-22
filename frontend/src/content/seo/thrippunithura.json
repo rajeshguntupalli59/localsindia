@@ -1,0 +1,52 @@
+{
+  "citySlug": "thrippunithura",
+  "city": "Thrippunithura",
+  "state": "Kerala",
+  "lang": "ml",
+  "titleTag": "Thrippunithura Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, find tiffin & PG rooms in Thrippunithura, Kerala. Post free classifieds for jobs, services & more. Real locals, WhatsApp contact.",
+  "ogTitle": "Thrippunithura's Neighborhood Classifieds — Tiffin, Rooms & Jobs",
+  "ogDescription": "Connect with neighbors in Thrippunithura for tiffin delivery, PG accommodations, part-time jobs & local services. Free to post & browse.",
+  "h1": "Thrippunithura Classifieds — Tiffin, PG Rooms, Jobs & Local Services",
+  "focusKeyword": "thrippunithura classifieds",
+  "secondaryKeywords": [
+    "thrippunithura tiffin service",
+    "pg rooms thrippunithura",
+    "jobs thrippunithura kerala",
+    "thrippunithura local services"
+  ],
+  "longTailKeywords": [
+    "tiffin delivery near thrippunithura",
+    "pg rooms for girls in thrippunithura",
+    "pg rooms for boys in thrippunithura",
+    "part time jobs thrippunithura",
+    "second hand bikes thrippunithura",
+    "domestic help thrippunithura",
+    "furniture buy sell thrippunithura",
+    "tuition classes thrippunithura",
+    "carpool thrippunithura",
+    "used mobile phones thrippunithura",
+    "room mate wanted thrippunithura",
+    "home cooked food thrippunithura"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Thrippunithura Free Classifieds & Local Listings",
+    "description": "Buy, sell, find tiffin & PG rooms in Thrippunithura. Post free classifieds for jobs, services, furniture & more.",
+    "url": "https://www.localsindia.com/thrippunithura",
+    "inLanguage": [
+      "ml",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Thrippunithura",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Kerala"
+      }
+    }
+  },
+  "generatedAt": "2026-08-22T06:50:08.162912+00:00"
+}
