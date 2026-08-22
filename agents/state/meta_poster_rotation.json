@@ -1,8 +1,7 @@
 {
-  "lastTopicIndex": 4,
+  "lastTopicIndex": 5,
   "lastTipCategoryIndex": 2,
   "topicHistory": [
-    "category_tip",
     "safety_tip",
     "city_spotlight",
     "app_launch",
@@ -11,7 +10,8 @@
     "category_tip",
     "safety_tip",
     "city_spotlight",
-    "app_launch"
+    "app_launch",
+    "referral"
   ],
   "tipCategoryHistory": [
     "jobs",
@@ -21,9 +21,8 @@
     "services",
     "pg-roommate"
   ],
-  "lastStyleIndex": 3,
+  "lastStyleIndex": 4,
   "styleHistory": [
-    "spotlight",
     "glass",
     "bold",
     "duotone",
@@ -32,6 +31,7 @@
     "glass",
     "bold",
     "duotone",
-    "quote"
+    "quote",
+    "spotlight"
   ]
 }
