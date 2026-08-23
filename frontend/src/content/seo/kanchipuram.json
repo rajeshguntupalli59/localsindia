@@ -1,0 +1,50 @@
+{
+  "citySlug": "kanchipuram",
+  "city": "Kanchipuram",
+  "state": "Tamil Nadu",
+  "lang": "ta",
+  "titleTag": "Kanchipuram Classifieds — Free PG, Tiffin & Jobs | LocalsIndia",
+  "metaDescription": "Free classifieds in Kanchipuram. Post and find PG rooms, tiffin services, jobs, bikes, and more. Zero posting fees. Tamil supported.",
+  "ogTitle": "Kanchipuram Local Classifieds — Connect with Your Neighbors",
+  "ogDescription": "Buy, sell, and hire locally in Kanchipuram without fees. Tiffin, PG, jobs, vehicles — all on one hyperlocal app.",
+  "h1": "Kanchipuram Classifieds — Free Local Listings for PG, Tiffin, Jobs & More",
+  "focusKeyword": "kanchipuram classifieds",
+  "secondaryKeywords": [
+    "pg rooms in kanchipuram",
+    "tiffin service kanchipuram",
+    "jobs in kanchipuram",
+    "kanchipuram local classifieds"
+  ],
+  "longTailKeywords": [
+    "pg rooms in kanchipuram for girls",
+    "pg rooms in kanchipuram for boys",
+    "kanchipuram tiffin service near me",
+    "part time jobs in kanchipuram",
+    "second hand bikes in kanchipuram",
+    "paying guest accommodation kanchipuram",
+    "home cooked meals kanchipuram",
+    "flatmate wanted kanchipuram",
+    "domestic help kanchipuram",
+    "furniture buy sell kanchipuram"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Kanchipuram Classifieds — Free PG, Tiffin & Jobs | LocalsIndia",
+    "description": "Free hyperlocal classifieds in Kanchipuram. Post and browse listings for PG rooms, tiffin services, jobs, vehicles, and more. Tamil and English supported.",
+    "url": "https://www.localsindia.com/kanchipuram",
+    "inLanguage": [
+      "ta",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Kanchipuram",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Tamil Nadu"
+      }
+    }
+  },
+  "generatedAt": "2026-08-23T06:51:22.610117+00:00"
+}

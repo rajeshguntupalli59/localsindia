@@ -1,0 +1,52 @@
+{
+  "citySlug": "dindigul",
+  "city": "Dindigul",
+  "state": "Tamil Nadu",
+  "lang": "ta",
+  "titleTag": "Dindigul Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, rent locally in Dindigul. Free classifieds for tiffin, PG rooms, jobs, used items. Post for free, contact via WhatsApp.",
+  "ogTitle": "Dindigul Local Classifieds — Free Tiffin, PG & Job Listings",
+  "ogDescription": "Your neighborhood marketplace in Dindigul. Find tiffin services, paying guest rooms, local jobs, and buy/sell items free.",
+  "h1": "Dindigul Classifieds — Free Local Listings for Tiffin, PG & More",
+  "focusKeyword": "dindigul classifieds",
+  "secondaryKeywords": [
+    "dindigul tiffin service",
+    "pg rooms dindigul",
+    "jobs in dindigul",
+    "dindigul local marketplace"
+  ],
+  "longTailKeywords": [
+    "tiffin service near me dindigul",
+    "pg rooms in dindigul for girls",
+    "pg rooms in dindigul for boys",
+    "paying guest accommodation dindigul",
+    "part time jobs dindigul",
+    "full time jobs in dindigul",
+    "second hand bikes dindigul",
+    "used phones dindigul",
+    "domestic help dindigul",
+    "furniture buy sell dindigul",
+    "carpool dindigul",
+    "flat for rent dindigul"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Dindigul Free Classifieds — Tiffin, PG, Jobs & More",
+    "description": "Buy, sell, rent locally in Dindigul. Free classifieds for tiffin, PG rooms, jobs, used items. Post for free, contact via WhatsApp.",
+    "url": "https://www.localsindia.com/dindigul",
+    "inLanguage": [
+      "ta",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Dindigul",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Tamil Nadu"
+      }
+    }
+  },
+  "generatedAt": "2026-08-23T06:51:05.400069+00:00"
+}

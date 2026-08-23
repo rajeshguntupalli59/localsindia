@@ -1,0 +1,52 @@
+{
+  "citySlug": "hosur",
+  "city": "Hosur",
+  "state": "Tamil Nadu",
+  "lang": "ta",
+  "titleTag": "Hosur Classifieds — Free PG, Tiffin & Jobs | LocalsIndia",
+  "metaDescription": "Find PG rooms, tiffin services, jobs, and used items in Hosur. Free to post. Connect via WhatsApp. Your local classifieds, Tamil Nadu.",
+  "ogTitle": "Hosur Local Classifieds — Post Free, Find Anything",
+  "ogDescription": "Need a PG room in Hosur? Looking for home-cooked meals? Hiring locally? Browse Hosur classifieds free. Post without fees. Connect real people.",
+  "h1": "Hosur Free Classifieds — PG Rooms, Tiffin, Jobs & More",
+  "focusKeyword": "hosur classifieds",
+  "secondaryKeywords": [
+    "pg rooms hosur",
+    "tiffin service hosur",
+    "jobs hosur tamil nadu",
+    "buy sell hosur"
+  ],
+  "longTailKeywords": [
+    "pg rooms in hosur for boys",
+    "pg rooms in hosur for girls",
+    "tiffin service near me hosur",
+    "home cooked meals hosur",
+    "part time jobs hosur",
+    "full time jobs hosur",
+    "second hand bikes hosur",
+    "used mobiles hosur",
+    "furniture for rent hosur",
+    "carpool hosur to bangalore",
+    "domestic help hosur",
+    "tuition classes hosur"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Hosur Free Classifieds — PG, Tiffin, Jobs & Local Services",
+    "description": "Hosur community classifieds. Post free. Buy, sell, rent PG rooms, tiffin, jobs, furniture, vehicles. Connect locals via WhatsApp.",
+    "url": "https://www.localsindia.com/hosur",
+    "inLanguage": [
+      "ta",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Hosur",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Tamil Nadu"
+      }
+    }
+  },
+  "generatedAt": "2026-08-23T06:51:17.385499+00:00"
+}

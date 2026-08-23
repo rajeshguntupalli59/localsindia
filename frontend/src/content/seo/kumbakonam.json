@@ -1,0 +1,52 @@
+{
+  "citySlug": "kumbakonam",
+  "city": "Kumbakonam",
+  "state": "Tamil Nadu",
+  "lang": "ta",
+  "titleTag": "Kumbakonam Classifieds — Tiffin, PG & Jobs | LocalsIndia",
+  "metaDescription": "Free classifieds in Kumbakonam. Post tiffin services, PG rooms, jobs & more. Connect with locals via WhatsApp. No fees.",
+  "ogTitle": "Kumbakonam Free Community Classifieds — Find Tiffin, Rooms & Work",
+  "ogDescription": "Buy, sell, hire & connect locally in Kumbakonam. Tiffin services, paying guest rooms, part-time jobs—all free to post.",
+  "h1": "Kumbakonam Free Classifieds — Tiffin, PG Rooms, Jobs & Local Services",
+  "focusKeyword": "kumbakonam classifieds",
+  "secondaryKeywords": [
+    "kumbakonam tiffin service",
+    "pg rooms in kumbakonam",
+    "jobs in kumbakonam",
+    "kumbakonam buy sell"
+  ],
+  "longTailKeywords": [
+    "tiffin service near kumbakonam",
+    "pg rooms for girls in kumbakonam",
+    "pg rooms for boys in kumbakonam",
+    "part time jobs in kumbakonam",
+    "paying guest accommodation kumbakonam",
+    "second hand bikes kumbakonam",
+    "domestic help kumbakonam",
+    "used furniture kumbakonam",
+    "home tuition kumbakonam",
+    "carpool kumbakonam",
+    "kitchen utensils kumbakonam",
+    "flatmate wanted kumbakonam"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Kumbakonam Classifieds on LocalsIndia",
+    "description": "Free hyperlocal classifieds for Kumbakonam, Tamil Nadu. Post and browse tiffin services, PG accommodations, jobs, and community services.",
+    "url": "https://www.localsindia.com/kumbakonam",
+    "inLanguage": [
+      "ta",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Kumbakonam",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Tamil Nadu"
+      }
+    }
+  },
+  "generatedAt": "2026-08-23T06:51:42.457608+00:00"
+}

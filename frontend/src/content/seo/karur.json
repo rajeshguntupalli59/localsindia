@@ -1,0 +1,50 @@
+{
+  "citySlug": "karur",
+  "city": "Karur",
+  "state": "Tamil Nadu",
+  "lang": "ta",
+  "titleTag": "Karur Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell & hire locally in Karur. Free classifieds for tiffin, PG rooms, jobs, bikes & more. Post for free, connect via WhatsApp.",
+  "ogTitle": "Find Your Next Tiffin, Room & Job in Karur — Free Local Classifieds",
+  "ogDescription": "Karur's hyperlocal classifieds. Tiffin services, PG rooms for boys & girls, part-time jobs, second-hand bikes. Browse & post free.",
+  "h1": "Karur Free Local Classifieds — Tiffin, PG Rooms, Jobs & More",
+  "focusKeyword": "karur classifieds",
+  "secondaryKeywords": [
+    "karur tiffin service",
+    "pg rooms in karur",
+    "jobs in karur",
+    "karur buy sell"
+  ],
+  "longTailKeywords": [
+    "karur tiffin service near me",
+    "pg rooms in karur for girls",
+    "pg rooms in karur for boys",
+    "part time jobs in karur",
+    "second hand bikes in karur",
+    "home cooked meals karur",
+    "domestic help in karur",
+    "flat mates karur",
+    "used furniture karur",
+    "carpool karur"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Karur Free Local Classifieds | LocalsIndia",
+    "description": "Browse & post free classifieds in Karur — tiffin, PG rooms, jobs, vehicles & more. Connect with locals via WhatsApp.",
+    "url": "https://www.localsindia.com/karur",
+    "inLanguage": [
+      "ta",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Karur",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Tamil Nadu"
+      }
+    }
+  },
+  "generatedAt": "2026-08-23T06:51:32.460959+00:00"
+}

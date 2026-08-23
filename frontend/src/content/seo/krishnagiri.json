@@ -1,0 +1,50 @@
+{
+  "citySlug": "krishnagiri",
+  "city": "Krishnagiri",
+  "state": "Tamil Nadu",
+  "lang": "ta",
+  "titleTag": "Krishnagiri Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Free classifieds in Krishnagiri. Post tiffin, PG rooms, jobs, buy/sell items. Connect with locals via WhatsApp.",
+  "ogTitle": "Find Tiffin, PG & Jobs in Krishnagiri — Free Community Classifieds",
+  "ogDescription": "Krishnagiri's hyperlocal classifieds. Tiffin services, paying guest rooms, local jobs, and more. Post free, connect on WhatsApp.",
+  "h1": "Krishnagiri Community Classifieds — Tiffin, PG Rooms & Local Jobs",
+  "focusKeyword": "krishnagiri classifieds",
+  "secondaryKeywords": [
+    "tiffin service in krishnagiri",
+    "pg rooms krishnagiri",
+    "jobs in krishnagiri",
+    "buy sell items krishnagiri"
+  ],
+  "longTailKeywords": [
+    "krishnagiri tiffin service near me",
+    "pg rooms in krishnagiri for boys",
+    "pg rooms in krishnagiri for girls",
+    "part time jobs in krishnagiri",
+    "second hand bikes in krishnagiri",
+    "domestic help in krishnagiri",
+    "paying guest accommodation krishnagiri",
+    "used furniture krishnagiri",
+    "local events krishnagiri tamil nadu",
+    "repair services krishnagiri"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Krishnagiri Classifieds — Tiffin, PG, Jobs & Local Listings",
+    "description": "Free community classifieds for Krishnagiri. Post and browse tiffin services, PG rooms, jobs, vehicles, and more.",
+    "url": "https://www.localsindia.com/krishnagiri",
+    "inLanguage": [
+      "ta",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Krishnagiri",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Tamil Nadu"
+      }
+    }
+  },
+  "generatedAt": "2026-08-23T06:51:37.448171+00:00"
+}

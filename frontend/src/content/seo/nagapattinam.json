@@ -1,0 +1,52 @@
+{
+  "citySlug": "nagapattinam",
+  "city": "Nagapattinam",
+  "state": "Tamil Nadu",
+  "lang": "ta",
+  "titleTag": "Nagapattinam Free Classifieds — Tiffin, PG & Jobs",
+  "metaDescription": "Post free classifieds in Nagapattinam. Buy/sell locally, find tiffin services, PG rooms, jobs & more. Connect via WhatsApp instantly.",
+  "ogTitle": "Nagapattinam Local Classifieds — Your Neighborhood Marketplace",
+  "ogDescription": "Free classifieds for Nagapattinam residents. Tiffin delivery, PG accommodations, job listings, used items & local services—all in one place.",
+  "h1": "Nagapattinam Classifieds — Post Free, Buy Local, Hire Nearby",
+  "focusKeyword": "nagapattinam classifieds",
+  "secondaryKeywords": [
+    "nagapattinam tiffin service",
+    "pg rooms nagapattinam",
+    "jobs in nagapattinam",
+    "buy sell nagapattinam"
+  ],
+  "longTailKeywords": [
+    "tiffin service near me nagapattinam",
+    "pg rooms for girls nagapattinam",
+    "pg rooms for boys nagapattinam",
+    "part time jobs nagapattinam",
+    "home cooked meals nagapattinam",
+    "second hand bikes nagapattinam",
+    "used mobile phones nagapattinam",
+    "domestic help nagapattinam",
+    "tuition classes nagapattinam",
+    "furniture buy sell nagapattinam",
+    "shared flat nagapattinam",
+    "carpool nagapattinam"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Nagapattinam Free Classifieds & Local Listings",
+    "description": "Post free classifieds in Nagapattinam. Buy/sell locally, find tiffin services, PG rooms, jobs & community listings with WhatsApp contact.",
+    "url": "https://www.localsindia.com/nagapattinam",
+    "inLanguage": [
+      "ta",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Nagapattinam",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Tamil Nadu"
+      }
+    }
+  },
+  "generatedAt": "2026-08-23T06:51:53.233795+00:00"
+}

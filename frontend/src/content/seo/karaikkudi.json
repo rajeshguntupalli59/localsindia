@@ -1,0 +1,52 @@
+{
+  "citySlug": "karaikkudi",
+  "city": "Karaikkudi",
+  "state": "Tamil Nadu",
+  "lang": "ta",
+  "titleTag": "Karaikkudi Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, find PG rooms, tiffin service & jobs in Karaikkudi. Post free classifieds in Tamil. Connect via WhatsApp.",
+  "ogTitle": "Karaikkudi Classifieds — Local Tiffin, Rooms & Work Opportunities",
+  "ogDescription": "Your neighborhood marketplace in Karaikkudi. Find tiffin delivery, paying guest rooms, part-time jobs, secondhand items — all free, all local.",
+  "h1": "Karaikkudi Free Local Classifieds — Tiffin, PG Rooms, Jobs & More",
+  "focusKeyword": "karaikkudi classifieds",
+  "secondaryKeywords": [
+    "karaikkudi tiffin service",
+    "pg rooms in karaikkudi",
+    "jobs in karaikkudi",
+    "karaikkudi buy sell online"
+  ],
+  "longTailKeywords": [
+    "karaikkudi tiffin service near me",
+    "pg rooms in karaikkudi for girls",
+    "pg rooms in karaikkudi for boys",
+    "part time jobs in karaikkudi",
+    "second hand bikes in karaikkudi",
+    "domestic help in karaikkudi",
+    "furniture for sale in karaikkudi",
+    "used mobile phones karaikkudi",
+    "flatmate wanted karaikkudi",
+    "cooking classes karaikkudi",
+    "home tuition karaikkudi",
+    "carpool karaikkudi"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Karaikkudi Free Classifieds — Tiffin, PG, Jobs & More",
+    "description": "Buy, sell, find PG rooms, tiffin service & jobs in Karaikkudi. Post free classifieds in Tamil. Connect via WhatsApp.",
+    "url": "https://www.localsindia.com/karaikkudi",
+    "inLanguage": [
+      "ta",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Karaikkudi",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Tamil Nadu"
+      }
+    }
+  },
+  "generatedAt": "2026-08-23T06:51:27.778158+00:00"
+}

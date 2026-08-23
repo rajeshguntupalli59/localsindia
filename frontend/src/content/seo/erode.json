@@ -1,0 +1,50 @@
+{
+  "citySlug": "erode",
+  "city": "Erode",
+  "state": "Tamil Nadu",
+  "lang": "ta",
+  "titleTag": "Erode Classifieds — Tiffin, PG, Jobs & More | LocalsIndia",
+  "metaDescription": "Free classifieds in Erode. Post tiffin, PG rooms, jobs, bikes & more. Connect with locals via WhatsApp. No fees.",
+  "ogTitle": "Erode's Community Classifieds — Tiffin, PG & Local Jobs",
+  "ogDescription": "Find tiffin services, PG rooms, part-time jobs & secondhand items in Erode. Post free. Chat sellers on WhatsApp.",
+  "h1": "Erode Classifieds — Buy, Sell & Connect with Locals",
+  "focusKeyword": "erode classifieds",
+  "secondaryKeywords": [
+    "erode tiffin service",
+    "pg rooms in erode",
+    "jobs in erode",
+    "erode second hand market"
+  ],
+  "longTailKeywords": [
+    "tiffin delivery near me erode",
+    "pg rooms for boys in erode",
+    "pg rooms for girls in erode",
+    "part time jobs in erode",
+    "second hand bikes in erode",
+    "used mobile phones erode",
+    "home tuition in erode",
+    "domestic help erode",
+    "flatmate wanted erode",
+    "furniture for sale erode"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Erode Classifieds & Local Community",
+    "description": "Free classifieds for buying, selling, and connecting with locals in Erode. Tiffin, PG rooms, jobs, and more.",
+    "url": "https://www.localsindia.com/erode",
+    "inLanguage": [
+      "ta",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Erode",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Tamil Nadu"
+      }
+    }
+  },
+  "generatedAt": "2026-08-23T06:51:11.845500+00:00"
+}

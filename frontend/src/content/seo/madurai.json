@@ -1,0 +1,52 @@
+{
+  "citySlug": "madurai",
+  "city": "Madurai",
+  "state": "Tamil Nadu",
+  "lang": "ta",
+  "titleTag": "Madurai Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, rent in Madurai. Find tiffin services, PG rooms, jobs, vehicles & more. Post free classifieds. WhatsApp sellers instantly.",
+  "ogTitle": "Madurai Classifieds — Connect with Your Neighbors",
+  "ogDescription": "Discover local deals on tiffin, PG rooms, jobs, and services in Madurai. Free to post, easy to contact sellers via WhatsApp.",
+  "h1": "Madurai Free Classifieds & Local Listings",
+  "focusKeyword": "madurai classifieds",
+  "secondaryKeywords": [
+    "madurai tiffin service",
+    "pg rooms madurai",
+    "jobs in madurai",
+    "buy sell madurai"
+  ],
+  "longTailKeywords": [
+    "tiffin service near me madurai",
+    "pg rooms in madurai for girls",
+    "pg rooms in madurai for boys",
+    "part time jobs in madurai",
+    "home tiffin delivery madurai",
+    "second hand bikes madurai",
+    "domestic help madurai",
+    "flat for rent madurai",
+    "carpool madurai",
+    "used mobile phones madurai",
+    "cooking classes madurai",
+    "furniture buy sell madurai"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Madurai Free Classifieds — Tiffin, PG, Jobs & More",
+    "description": "Buy, sell, rent in Madurai. Find tiffin services, PG rooms, jobs, vehicles & more. Post free classifieds. WhatsApp sellers instantly.",
+    "url": "https://www.localsindia.com/madurai",
+    "inLanguage": [
+      "ta",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Madurai",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Tamil Nadu"
+      }
+    }
+  },
+  "generatedAt": "2026-08-23T06:51:48.008418+00:00"
+}
