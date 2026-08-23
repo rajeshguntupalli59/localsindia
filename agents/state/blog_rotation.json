@@ -1,6 +1,6 @@
 {
-  "lastCityIndex": 9,
-  "lastCategoryIndex": 2,
+  "lastCityIndex": 10,
+  "lastCategoryIndex": 3,
   "history": [
     {
       "citySlug": "bangalore",
@@ -61,6 +61,12 @@
       "category": "jobs",
       "topicTemplateId": "spot-fake-listing",
       "publishedAt": "2026-08-16T03:42:09Z"
+    },
+    {
+      "citySlug": "surat",
+      "category": "vehicles",
+      "topicTemplateId": "used-bike-checklist",
+      "publishedAt": "2026-08-23T03:43:29Z"
     }
   ]
 }
