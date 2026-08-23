@@ -1,8 +1,7 @@
 {
-  "lastTopicIndex": 0,
-  "lastTipCategoryIndex": 2,
+  "lastTopicIndex": 1,
+  "lastTipCategoryIndex": 4,
   "topicHistory": [
-    "city_spotlight",
     "app_launch",
     "referral",
     "app_feature",
@@ -11,7 +10,8 @@
     "city_spotlight",
     "app_launch",
     "referral",
-    "app_feature"
+    "app_feature",
+    "category_tip"
   ],
   "tipCategoryHistory": [
     "jobs",
@@ -19,11 +19,11 @@
     "jobs",
     "classifieds",
     "services",
-    "pg-roommate"
+    "pg-roommate",
+    "vehicles"
   ],
-  "lastStyleIndex": 0,
+  "lastStyleIndex": 1,
   "styleHistory": [
-    "bold",
     "duotone",
     "quote",
     "spotlight",
@@ -32,6 +32,7 @@
     "duotone",
     "quote",
     "spotlight",
-    "glass"
+    "glass",
+    "bold"
   ]
 }
