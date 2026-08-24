@@ -1,0 +1,52 @@
+{
+  "citySlug": "nagercoil",
+  "city": "Nagercoil",
+  "state": "Tamil Nadu",
+  "lang": "ta",
+  "titleTag": "Nagercoil Free Classifieds — Tiffin, PG & Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, and hire locally in Nagercoil. Free classifieds for tiffin, PG rooms, jobs, and more. Post instantly, connect via WhatsApp.",
+  "ogTitle": "Find Everything Local in Nagercoil — Free Classifieds & Community",
+  "ogDescription": "Nagercoil's hyperlocal classifieds. Tiffin, PG, jobs, used items, services — all in Tamil. Free to post, WhatsApp to connect.",
+  "h1": "Nagercoil Free Classifieds — Tiffin, PG Rooms, Jobs & Local Services",
+  "focusKeyword": "nagercoil classifieds",
+  "secondaryKeywords": [
+    "nagercoil tiffin service",
+    "pg rooms nagercoil",
+    "jobs in nagercoil",
+    "nagercoil buy sell items"
+  ],
+  "longTailKeywords": [
+    "tiffin service near me nagercoil",
+    "pg rooms for girls nagercoil",
+    "pg rooms for boys nagercoil",
+    "part time jobs nagercoil",
+    "second hand bike nagercoil",
+    "domestic help nagercoil",
+    "flat for rent nagercoil",
+    "used mobile phones nagercoil",
+    "tuition classes nagercoil",
+    "furniture for sale nagercoil",
+    "carpool nagercoil",
+    "beauty parlour nagercoil"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Nagercoil Free Classifieds — Tiffin, PG, Jobs & More | LocalsIndia",
+    "description": "Buy, sell, hire, and find local services in Nagercoil. Free classifieds for tiffin, PG rooms, jobs, and everything else your community needs.",
+    "url": "https://www.localsindia.com/nagercoil",
+    "inLanguage": [
+      "ta",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Nagercoil",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Tamil Nadu"
+      }
+    }
+  },
+  "generatedAt": "2026-08-24T07:09:27.616505+00:00"
+}

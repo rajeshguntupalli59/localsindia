@@ -1,0 +1,50 @@
+{
+  "citySlug": "ranipet",
+  "city": "Ranipet",
+  "state": "Tamil Nadu",
+  "lang": "ta",
+  "titleTag": "Ranipet Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, rent in Ranipet. Tiffin delivery, PG rooms, jobs, used items. Post free. Connect via WhatsApp. Tamil Nadu classifieds.",
+  "ogTitle": "Ranipet Classifieds — Your Neighborhood Marketplace",
+  "ogDescription": "Find tiffin, PG rooms, jobs, and more in Ranipet. Free listings. Real neighbors. Real deals.",
+  "h1": "Ranipet Classifieds & Community Marketplace",
+  "focusKeyword": "ranipet classifieds",
+  "secondaryKeywords": [
+    "ranipet tiffin service",
+    "pg rooms in ranipet",
+    "jobs in ranipet",
+    "buy sell ranipet tamil nadu"
+  ],
+  "longTailKeywords": [
+    "tiffin delivery in ranipet near me",
+    "pg rooms for boys in ranipet",
+    "pg rooms for girls in ranipet",
+    "part time jobs in ranipet",
+    "second hand bikes in ranipet",
+    "used furniture ranipet",
+    "domestic help services ranipet",
+    "roommate wanted ranipet",
+    "electronics buy sell ranipet",
+    "events in ranipet tamil nadu"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Ranipet Free Classifieds — Tiffin, PG, Jobs & More",
+    "description": "Buy, sell, rent in Ranipet. Tiffin delivery, PG rooms, jobs, used items. Post free. Connect via WhatsApp.",
+    "url": "https://www.localsindia.com/ranipet",
+    "inLanguage": [
+      "ta",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Ranipet",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Tamil Nadu"
+      }
+    }
+  },
+  "generatedAt": "2026-08-24T07:10:00.819311+00:00"
+}

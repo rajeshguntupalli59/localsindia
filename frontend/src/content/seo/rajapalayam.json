@@ -1,0 +1,50 @@
+{
+  "citySlug": "rajapalayam",
+  "city": "Rajapalayam",
+  "state": "Tamil Nadu",
+  "lang": "ta",
+  "titleTag": "Rajapalayam Classifieds — Free PG, Tiffin & Jobs",
+  "metaDescription": "Post free classifieds in Rajapalayam. Find PG rooms, tiffin services, jobs, and local deals. Connect via WhatsApp instantly.",
+  "ogTitle": "Rajapalayam Community Classifieds — Your Neighborhood Marketplace",
+  "ogDescription": "Discover local PG accommodations, home-cooked meals, job opportunities, and secondhand items in Rajapalayam. Post for free, connect with neighbors.",
+  "h1": "Rajapalayam Free Classifieds & Local Community Marketplace",
+  "focusKeyword": "rajapalayam classifieds",
+  "secondaryKeywords": [
+    "pg rooms in rajapalayam",
+    "tiffin service rajapalayam",
+    "jobs in rajapalayam",
+    "rajapalayam buy sell"
+  ],
+  "longTailKeywords": [
+    "pg rooms for boys in rajapalayam",
+    "pg rooms for girls in rajapalayam",
+    "paying guest accommodation rajapalayam",
+    "home cooked tiffin in rajapalayam",
+    "dabba service rajapalayam",
+    "part time jobs rajapalayam",
+    "full time jobs rajapalayam",
+    "second hand bikes rajapalayam",
+    "used furniture rajapalayam",
+    "domestic help rajapalayam"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Rajapalayam Free Classifieds",
+    "description": "Hyperlocal community classifieds for Rajapalayam — PG rooms, tiffin, jobs, and local marketplace",
+    "url": "https://www.localsindia.com/rajapalayam",
+    "inLanguage": [
+      "ta",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Rajapalayam",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Tamil Nadu"
+      }
+    }
+  },
+  "generatedAt": "2026-08-24T07:09:53.766009+00:00"
+}

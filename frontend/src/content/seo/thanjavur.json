@@ -1,0 +1,50 @@
+{
+  "citySlug": "thanjavur",
+  "city": "Thanjavur",
+  "state": "Tamil Nadu",
+  "lang": "ta",
+  "titleTag": "Thanjavur Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Thanjavur classifieds for tiffin, PG rooms, jobs & used items. Post free, connect via WhatsApp. Local buyers & sellers near you.",
+  "ogTitle": "Thanjavur Community Classifieds — Find Tiffin, PG & Jobs Locally",
+  "ogDescription": "Your Thanjavur neighbors buying, selling, hiring & sharing. Tiffin delivery, PG rooms for students, part-time jobs — all free to post.",
+  "h1": "Thanjavur Classifieds — Tiffin, PG Rooms, Jobs & Local Deals",
+  "focusKeyword": "thanjavur classifieds",
+  "secondaryKeywords": [
+    "thanjavur tiffin service",
+    "pg rooms thanjavur",
+    "jobs in thanjavur",
+    "buy sell thanjavur"
+  ],
+  "longTailKeywords": [
+    "tiffin service near me thanjavur",
+    "pg rooms for girls in thanjavur",
+    "pg rooms for boys in thanjavur",
+    "part time jobs in thanjavur",
+    "second hand bikes thanjavur",
+    "used mobile phones thanjavur",
+    "domestic help services thanjavur",
+    "furniture for sale in thanjavur",
+    "carpool thanjavur",
+    "events in thanjavur"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Thanjavur Free Classifieds — Tiffin, PG, Jobs & More",
+    "description": "Thanjavur classifieds for tiffin, PG rooms, jobs & used items. Post free, connect via WhatsApp.",
+    "url": "https://www.localsindia.com/thanjavur",
+    "inLanguage": [
+      "ta",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Thanjavur",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Tamil Nadu"
+      }
+    }
+  },
+  "generatedAt": "2026-08-24T07:10:18.291964+00:00"
+}

@@ -1,0 +1,52 @@
+{
+  "citySlug": "pudukkottai",
+  "city": "Pudukkottai",
+  "state": "Tamil Nadu",
+  "lang": "ta",
+  "titleTag": "Pudukkottai Classifieds — Tiffin, PG & Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, find tiffin & PG rooms in Pudukkottai. Post free classifieds for jobs, services & more. Connect via WhatsApp instantly.",
+  "ogTitle": "Pudukkottai Free Classifieds — Your Neighborhood Marketplace",
+  "ogDescription": "Discover local tiffin services, PG accommodations, job listings & classifieds in Pudukkottai. Connect with your community for free.",
+  "h1": "Pudukkottai Classifieds & Local Listings — Free Posting",
+  "focusKeyword": "pudukkottai classifieds",
+  "secondaryKeywords": [
+    "pudukkottai tiffin service",
+    "pg rooms in pudukkottai",
+    "jobs in pudukkottai",
+    "pudukkottai buy sell"
+  ],
+  "longTailKeywords": [
+    "pudukkottai tiffin service near me",
+    "pg rooms in pudukkottai for girls",
+    "pg rooms in pudukkottai for boys",
+    "part time jobs in pudukkottai",
+    "domestic help in pudukkottai",
+    "second hand bikes pudukkottai",
+    "used mobile phones pudukkottai",
+    "flat roommate pudukkottai",
+    "coaching classes pudukkottai",
+    "tuition classes in pudukkottai",
+    "furniture buy sell pudukkottai",
+    "car rental pudukkottai"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Pudukkottai Classifieds & Local Listings",
+    "description": "Free classifieds for tiffin, PG rooms, jobs and services in Pudukkottai. Post and search listings in Tamil.",
+    "url": "https://www.localsindia.com/pudukkottai",
+    "inLanguage": [
+      "ta",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Pudukkottai",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Tamil Nadu"
+      }
+    }
+  },
+  "generatedAt": "2026-08-24T07:09:48.332091+00:00"
+}

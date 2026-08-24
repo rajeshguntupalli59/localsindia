@@ -1,0 +1,52 @@
+{
+  "citySlug": "thoothukudi",
+  "city": "Thoothukudi",
+  "state": "Tamil Nadu",
+  "lang": "ta",
+  "titleTag": "Thoothukudi Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Free classifieds in Thoothukudi. Buy/sell items, find tiffin service, PG rooms, jobs & more. Post listings free. Connect on WhatsApp.",
+  "ogTitle": "Thoothukudi's Community Classifieds — Tiffin, PG & Local Jobs",
+  "ogDescription": "Browse free classifieds in Thoothukudi. Tiffin delivery, paying guest rooms, part-time jobs, secondhand items — all hyperlocal, all free to post.",
+  "h1": "Thoothukudi Classifieds — Free Local Listings for Tiffin, PG, Jobs & More",
+  "focusKeyword": "thoothukudi classifieds",
+  "secondaryKeywords": [
+    "thoothukudi free classifieds",
+    "tiffin service thoothukudi",
+    "pg rooms thoothukudi",
+    "jobs in thoothukudi"
+  ],
+  "longTailKeywords": [
+    "thoothukudi tiffin delivery near me",
+    "pg rooms in thoothukudi for boys",
+    "pg rooms in thoothukudi for girls",
+    "part time jobs thoothukudi",
+    "second hand bikes thoothukudi",
+    "used mobile phones thoothukudi",
+    "flat mates thoothukudi",
+    "domestic help thoothukudi",
+    "tuition classes thoothukudi",
+    "buy sell furniture thoothukudi",
+    "carpool thoothukudi",
+    "events thoothukudi"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Thoothukudi Classifieds — Tiffin, PG, Jobs & More | LocalsIndia",
+    "description": "Free hyperlocal classifieds in Thoothukudi, Tamil Nadu. Post tiffin services, PG rooms, jobs, buy/sell items — connect directly on WhatsApp.",
+    "url": "https://www.localsindia.com/thoothukudi",
+    "inLanguage": [
+      "ta",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Thoothukudi",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Tamil Nadu"
+      }
+    }
+  },
+  "generatedAt": "2026-08-24T07:10:23.638432+00:00"
+}

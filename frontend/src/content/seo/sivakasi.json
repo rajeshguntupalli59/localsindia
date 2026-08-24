@@ -1,0 +1,50 @@
+{
+  "citySlug": "sivakasi",
+  "city": "Sivakasi",
+  "state": "Tamil Nadu",
+  "lang": "ta",
+  "titleTag": "Sivakasi Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, rent in Sivakasi. Post free classifieds for tiffin, PG rooms, jobs, vehicles & more. Connect with locals on WhatsApp.",
+  "ogTitle": "Sivakasi Classifieds — Find Tiffin, PG & Jobs Near You",
+  "ogDescription": "Sivakasi's community classifieds. Free listings for tiffin delivery, paying guest rooms, jobs, furniture & local services. Zero commission.",
+  "h1": "Sivakasi Free Classifieds — Tiffin, PG Rooms, Jobs & More",
+  "focusKeyword": "sivakasi classifieds",
+  "secondaryKeywords": [
+    "sivakasi tiffin service",
+    "pg rooms in sivakasi",
+    "jobs in sivakasi",
+    "used items for sale sivakasi"
+  ],
+  "longTailKeywords": [
+    "tiffin delivery near me sivakasi",
+    "pg rooms for girls in sivakasi",
+    "paying guest accommodation sivakasi",
+    "part time jobs in sivakasi",
+    "second hand bikes sivakasi",
+    "domestic help in sivakasi",
+    "furniture for sale sivakasi",
+    "tuition classes in sivakasi",
+    "carpool sivakasi to madurai",
+    "local events sivakasi"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Sivakasi Free Classifieds — Tiffin, PG, Jobs & More",
+    "description": "Buy, sell, rent in Sivakasi. Post free classifieds for tiffin, PG rooms, jobs, vehicles & more. Connect with locals on WhatsApp.",
+    "url": "https://www.localsindia.com/sivakasi",
+    "inLanguage": [
+      "ta",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Sivakasi",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Tamil Nadu"
+      }
+    }
+  },
+  "generatedAt": "2026-08-24T07:10:11.806568+00:00"
+}

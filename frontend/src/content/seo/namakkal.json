@@ -1,0 +1,50 @@
+{
+  "citySlug": "namakkal",
+  "city": "Namakkal",
+  "state": "Tamil Nadu",
+  "lang": "ta",
+  "titleTag": "Namakkal Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, find tiffin & PG rooms in Namakkal. Post free classifieds for jobs, services & more. Connect via WhatsApp.",
+  "ogTitle": "Namakkal Local Classifieds — Your Neighborhood Marketplace",
+  "ogDescription": "Free classifieds for Namakkal residents. Tiffin delivery, PG accommodations, jobs, used items & local services. Post today.",
+  "h1": "Namakkal Classifieds — Buy, Sell & Find Local Services Free",
+  "focusKeyword": "namakkal classifieds",
+  "secondaryKeywords": [
+    "namakkal tiffin service",
+    "pg rooms in namakkal",
+    "jobs in namakkal",
+    "namakkal buy sell"
+  ],
+  "longTailKeywords": [
+    "namakkal tiffin delivery near me",
+    "pg rooms in namakkal for girls",
+    "pg rooms in namakkal for boys",
+    "part time jobs in namakkal",
+    "second hand bikes in namakkal",
+    "used mobile phones namakkal",
+    "domestic help in namakkal",
+    "tuition classes namakkal",
+    "furniture buy sell namakkal",
+    "carpool namakkal daily commute"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Namakkal Free Classifieds & Local Listings",
+    "description": "Buy, sell, find tiffin & PG rooms in Namakkal. Post free classifieds for jobs, services & more.",
+    "url": "https://www.localsindia.com/namakkal",
+    "inLanguage": [
+      "ta",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Namakkal",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Tamil Nadu"
+      }
+    }
+  },
+  "generatedAt": "2026-08-24T07:09:34.125906+00:00"
+}

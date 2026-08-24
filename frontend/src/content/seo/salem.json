@@ -1,0 +1,50 @@
+{
+  "citySlug": "salem",
+  "city": "Salem",
+  "state": "Tamil Nadu",
+  "lang": "ta",
+  "titleTag": "Salem Classifieds — Tiffin, PG, Jobs & More | LocalsIndia",
+  "metaDescription": "Find tiffin services, PG rooms, jobs & secondhand items in Salem. Post free classifieds. Connect via WhatsApp.",
+  "ogTitle": "Salem Local Classifieds — Your Neighborhood Marketplace",
+  "ogDescription": "Discover tiffin, PG accommodations, jobs, and everyday items from neighbors in Salem. Free to post and browse.",
+  "h1": "Salem Classifieds — Tiffin, PG Rooms, Jobs & Local Services",
+  "focusKeyword": "salem classifieds",
+  "secondaryKeywords": [
+    "salem tiffin service",
+    "pg rooms in salem",
+    "jobs in salem tamil nadu",
+    "second hand items salem"
+  ],
+  "longTailKeywords": [
+    "tiffin delivery near me salem",
+    "pg rooms for girls in salem",
+    "pg rooms for boys in salem",
+    "part time jobs in salem",
+    "second hand bikes in salem",
+    "used cars in salem",
+    "domestic help salem",
+    "tuition classes salem",
+    "furniture for sale salem",
+    "electronics in salem"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Salem Classifieds on LocalsIndia",
+    "description": "Free local classifieds for Salem — post and browse tiffin, PG rooms, jobs, vehicles, and services.",
+    "url": "https://www.localsindia.com/salem",
+    "inLanguage": [
+      "ta",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Salem",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Tamil Nadu"
+      }
+    }
+  },
+  "generatedAt": "2026-08-24T07:10:06.879028+00:00"
+}

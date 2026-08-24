@@ -1,0 +1,50 @@
+{
+  "citySlug": "neyveli",
+  "city": "Neyveli",
+  "state": "Tamil Nadu",
+  "lang": "ta",
+  "titleTag": "Neyveli Classifieds — Free PG, Tiffin & Jobs | LocalsIndia",
+  "metaDescription": "Post free classifieds in Neyveli: PG rooms, tiffin service, jobs, used bikes & more. Connect with locals via WhatsApp. Tamil-friendly.",
+  "ogTitle": "Find Your Community in Neyveli — Free Local Classifieds",
+  "ogDescription": "Neyveli locals posting PG rooms, home-cooked meals, part-time work & secondhand goods. No fees. Chat instantly on WhatsApp.",
+  "h1": "Neyveli Free Local Classifieds — PG, Tiffin, Jobs & More",
+  "focusKeyword": "neyveli classifieds",
+  "secondaryKeywords": [
+    "pg rooms in neyveli",
+    "tiffin service neyveli",
+    "jobs in neyveli",
+    "neyveli second hand"
+  ],
+  "longTailKeywords": [
+    "pg rooms in neyveli for boys",
+    "pg rooms in neyveli for girls",
+    "tiffin service near me neyveli",
+    "home cooked meals neyveli",
+    "part time jobs in neyveli",
+    "second hand bikes neyveli",
+    "domestic help neyveli",
+    "paying guest neyveli",
+    "flatmate wanted neyveli",
+    "used mobile phones neyveli"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Neyveli Free Local Classifieds",
+    "description": "Post and browse free classifieds in Neyveli: PG rooms, tiffin services, jobs, vehicles, and more. Connect with locals via WhatsApp.",
+    "url": "https://www.localsindia.com/neyveli",
+    "inLanguage": [
+      "ta",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Neyveli",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Tamil Nadu"
+      }
+    }
+  },
+  "generatedAt": "2026-08-24T07:09:40.959339+00:00"
+}
