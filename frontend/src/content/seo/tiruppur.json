@@ -1,0 +1,52 @@
+{
+  "citySlug": "tiruppur",
+  "city": "Tiruppur",
+  "state": "Tamil Nadu",
+  "lang": "ta",
+  "titleTag": "Tiruppur Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, and hire locally in Tiruppur. Free classifieds for tiffin services, PG rooms, jobs, and more. Post for free, contact via WhatsApp.",
+  "ogTitle": "Tiruppur Community Classifieds — Find Tiffin, Rooms & Jobs Near You",
+  "ogDescription": "Connect with your Tiruppur neighbors. Browse tiffin services, PG accommodations, job listings, and local classifieds — all free to post.",
+  "h1": "Tiruppur Classifieds — Local Jobs, Tiffin & PG Rooms",
+  "focusKeyword": "tiruppur classifieds",
+  "secondaryKeywords": [
+    "tiruppur jobs",
+    "pg rooms tiruppur",
+    "tiffin service tiruppur",
+    "buy sell tiruppur"
+  ],
+  "longTailKeywords": [
+    "pg rooms in tiruppur for boys",
+    "pg rooms in tiruppur for girls",
+    "tiffin service near me tiruppur",
+    "part time jobs in tiruppur",
+    "full time jobs tiruppur",
+    "second hand bikes tiruppur",
+    "used mobile phones tiruppur",
+    "domestic help tiruppur",
+    "carpool tiruppur",
+    "furniture buy sell tiruppur",
+    "tiruppur classifieds free posting",
+    "hire locally tiruppur"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Tiruppur Free Classifieds — Local Jobs, Tiffin & PG Rooms",
+    "description": "Buy, sell, hire, and connect locally in Tiruppur. Free classifieds for tiffin, PG rooms, jobs, and more.",
+    "url": "https://www.localsindia.com/tiruppur",
+    "inLanguage": [
+      "ta",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Tiruppur",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Tamil Nadu"
+      }
+    }
+  },
+  "generatedAt": "2026-08-25T06:57:58.952995+00:00"
+}

@@ -1,0 +1,52 @@
+{
+  "citySlug": "villupuram",
+  "city": "Villupuram",
+  "state": "Tamil Nadu",
+  "lang": "ta",
+  "titleTag": "Villupuram Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Free classifieds in Villupuram. Post tiffin services, PG rooms, jobs, used items—reach locals instantly via WhatsApp. No fees, no hassle.",
+  "ogTitle": "Villupuram's Hyperlocal Classifieds — Buy, Sell, Hire Locally",
+  "ogDescription": "Connect with your Villupuram neighbors. Free listings for tiffin, rooms, jobs, services. Chat on WhatsApp, get things done fast.",
+  "h1": "Free Local Classifieds in Villupuram — Tiffin, PG, Jobs & More",
+  "focusKeyword": "villupuram classifieds",
+  "secondaryKeywords": [
+    "tiffin service in villupuram",
+    "pg rooms villupuram",
+    "jobs in villupuram",
+    "buy sell villupuram"
+  ],
+  "longTailKeywords": [
+    "tiffin service near me villupuram",
+    "pg rooms for girls in villupuram",
+    "pg rooms for boys in villupuram",
+    "part time jobs in villupuram",
+    "second hand bikes in villupuram",
+    "used mobiles in villupuram",
+    "domestic help in villupuram",
+    "flat sharing villupuram",
+    "furniture buy sell villupuram",
+    "tuition classes in villupuram",
+    "carpool villupuram",
+    "villa rooms villupuram"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Villupuram Free Classifieds",
+    "description": "Hyperlocal classifieds platform in Villupuram. Post tiffin, PG rooms, jobs, and services for free. Connect locally via WhatsApp.",
+    "url": "https://www.localsindia.com/villupuram",
+    "inLanguage": [
+      "ta",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Villupuram",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Tamil Nadu"
+      }
+    }
+  },
+  "generatedAt": "2026-08-25T06:58:26.326338+00:00"
+}

@@ -1,0 +1,52 @@
+{
+  "citySlug": "tiruchirappalli",
+  "city": "Tiruchirappalli",
+  "state": "Tamil Nadu",
+  "lang": "ta",
+  "titleTag": "Tiruchirappalli Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, find PG rooms, tiffin services & jobs in Tiruchirappalli. Post free classifieds. Connect via WhatsApp. Tamil Nadu's local community marketplace.",
+  "ogTitle": "Tiruchirappalli Classifieds — Find What You Need Locally",
+  "ogDescription": "Free classifieds for Tiruchirappalli: tiffin delivery, paying guest rooms, part-time jobs, used bikes & more. Post & connect with locals instantly.",
+  "h1": "Tiruchirappalli Free Classifieds & Local Marketplace",
+  "focusKeyword": "tiruchirappalli classifieds",
+  "secondaryKeywords": [
+    "tiruchirappalli free classifieds",
+    "pg rooms tiruchirappalli",
+    "tiffin service tiruchirappalli",
+    "jobs in tiruchirappalli"
+  ],
+  "longTailKeywords": [
+    "pg rooms in tiruchirappalli for girls",
+    "pg rooms in tiruchirappalli for boys",
+    "tiffin service near me tiruchirappalli",
+    "home cooked meals tiruchirappalli",
+    "part time jobs tiruchirappalli",
+    "full time jobs tiruchirappalli",
+    "second hand bikes in tiruchirappalli",
+    "used mobile phones tiruchirappalli",
+    "flat mates wanted tiruchirappalli",
+    "domestic help tiruchirappalli",
+    "tuition classes tiruchirappalli",
+    "furniture for sale tiruchirappalli"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Tiruchirappalli Free Classifieds — LocalsIndia",
+    "description": "Free classifieds marketplace for Tiruchirappalli. Buy, sell, find PG rooms, tiffin services, jobs and more.",
+    "url": "https://www.localsindia.com/tiruchirappalli",
+    "inLanguage": [
+      "ta",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Tiruchirappalli",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Tamil Nadu"
+      }
+    }
+  },
+  "generatedAt": "2026-08-25T06:57:47.853401+00:00"
+}

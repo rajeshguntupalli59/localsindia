@@ -1,0 +1,52 @@
+{
+  "citySlug": "tiruvallur",
+  "city": "Tiruvallur",
+  "state": "Tamil Nadu",
+  "lang": "ta",
+  "titleTag": "Tiruvallur Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, hire locally in Tiruvallur. Free tiffin services, PG rooms, jobs & more. Post instantly, connect via WhatsApp.",
+  "ogTitle": "Tiruvallur's Neighborhood Classifieds — Tiffin, PG & Jobs",
+  "ogDescription": "Your Tiruvallur community marketplace. Post free. Find tiffin, PG rooms, jobs, services, and secondhand items from neighbors.",
+  "h1": "Tiruvallur Classifieds — Free Local Listings for Tiffin, PG & Jobs",
+  "focusKeyword": "tiruvallur classifieds",
+  "secondaryKeywords": [
+    "tiruvallur pg rooms",
+    "tiffin service tiruvallur",
+    "jobs in tiruvallur",
+    "tiruvallur buy sell"
+  ],
+  "longTailKeywords": [
+    "pg rooms in tiruvallur for boys",
+    "pg rooms in tiruvallur for girls",
+    "tiffin service near me tiruvallur",
+    "home cooked meals tiruvallur",
+    "part time jobs tiruvallur",
+    "second hand bikes tiruvallur",
+    "used mobiles tiruvallur",
+    "domestic help tiruvallur",
+    "tuition classes tiruvallur",
+    "flatmate wanted tiruvallur",
+    "tirupallur veedu varai",
+    "tirupallur tiffin sevai"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Tiruvallur Free Classifieds — Tiffin, PG, Jobs & Local Services",
+    "description": "Buy, sell, hire locally in Tiruvallur. Free tiffin services, PG rooms, jobs & more. Post instantly, connect via WhatsApp.",
+    "url": "https://www.localsindia.com/tiruvallur",
+    "inLanguage": [
+      "ta",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Tiruvallur",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Tamil Nadu"
+      }
+    }
+  },
+  "generatedAt": "2026-08-25T06:58:09.738707+00:00"
+}

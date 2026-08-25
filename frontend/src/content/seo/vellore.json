@@ -1,0 +1,50 @@
+{
+  "citySlug": "vellore",
+  "city": "Vellore",
+  "state": "Tamil Nadu",
+  "lang": "ta",
+  "titleTag": "Vellore Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, hire locally in Vellore. Free classifieds for tiffin, PG rooms, jobs, bikes & more. Post instantly, connect on WhatsApp.",
+  "ogTitle": "Vellore's Trusted Local Classifieds — Tiffin, PG & Jobs",
+  "ogDescription": "Your neighborhood marketplace in Vellore. Find tiffin services, PG rooms, job offers, secondhand bikes — all free, all local.",
+  "h1": "Vellore Classifieds — Local Buy, Sell & Hire",
+  "focusKeyword": "vellore classifieds",
+  "secondaryKeywords": [
+    "vellore free classifieds",
+    "pg rooms vellore",
+    "tiffin service vellore",
+    "jobs in vellore"
+  ],
+  "longTailKeywords": [
+    "pg rooms in vellore for boys",
+    "pg rooms in vellore for girls",
+    "tiffin service near me vellore",
+    "home delivery tiffin vellore",
+    "part time jobs in vellore",
+    "second hand bikes in vellore",
+    "used mobiles in vellore",
+    "domestic help vellore",
+    "flatmate wanted vellore",
+    "carpool vellore to bangalore"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Vellore Free Classifieds — Tiffin, PG, Jobs & More",
+    "description": "Hyperlocal classifieds marketplace in Vellore, Tamil Nadu. Free listings for tiffin, PG rooms, jobs, vehicles, furniture and services.",
+    "url": "https://www.localsindia.com/vellore",
+    "inLanguage": [
+      "ta",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Vellore",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Tamil Nadu"
+      }
+    }
+  },
+  "generatedAt": "2026-08-25T06:58:20.578778+00:00"
+}

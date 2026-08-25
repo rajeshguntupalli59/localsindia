@@ -1,0 +1,52 @@
+{
+  "citySlug": "tirupur",
+  "city": "Tirupur",
+  "state": "Tamil Nadu",
+  "lang": "ta",
+  "titleTag": "Tirupur Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, hire locally in Tirupur. Tiffin delivery, PG rooms, part-time jobs, used bikes & more. Post free on LocalsIndia.",
+  "ogTitle": "Tirupur's Neighborhood Classifieds — Find What You Need Locally",
+  "ogDescription": "Connect with your Tirupur community. Tiffin, roommates, jobs, secondhand items — all in Tamil, all free to post.",
+  "h1": "Tirupur Classifieds — Local Buy, Sell & Services",
+  "focusKeyword": "tirupur classifieds",
+  "secondaryKeywords": [
+    "tirupur tiffin service",
+    "pg rooms tirupur",
+    "jobs in tirupur",
+    "tirupur used bikes"
+  ],
+  "longTailKeywords": [
+    "tiffin delivery in tirupur",
+    "pg rooms for girls in tirupur",
+    "part time jobs tirupur",
+    "paying guest tirupur textile workers",
+    "secondhand bikes tirupur",
+    "domestic help tirupur",
+    "furniture buy sell tirupur",
+    "carpool tirupur to coimbatore",
+    "tuition classes tirupur",
+    "phone repair tirupur",
+    "tiruppur classified ads free",
+    "tiruppur roommate wanted"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Tirupur Classifieds — Free Local Listings",
+    "description": "Hyperlocal buy, sell, and services marketplace for Tirupur, Tamil Nadu. Tiffin, PG, jobs, vehicles, and more.",
+    "url": "https://www.localsindia.com/tirupur",
+    "inLanguage": [
+      "ta",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Tirupur",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Tamil Nadu"
+      }
+    }
+  },
+  "generatedAt": "2026-08-25T06:58:04.404146+00:00"
+}

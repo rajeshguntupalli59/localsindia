@@ -1,0 +1,50 @@
+{
+  "citySlug": "adilabad",
+  "city": "Adilabad",
+  "state": "Telangana",
+  "lang": "te",
+  "titleTag": "Adilabad Free Classifieds — Tiffin, PG & Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell & hire in Adilabad. Free classifieds for tiffin, PG rooms, jobs, bikes & more. Post listings instantly on LocalsIndia.",
+  "ogTitle": "Adilabad's Neighborhood Classifieds — LocalsIndia",
+  "ogDescription": "Your city, your community. Find tiffin services, PG rooms, jobs & secondhand items in Adilabad — 100% free to post.",
+  "h1": "Adilabad Classifieds — Free Tiffin, PG Rooms & Local Jobs",
+  "focusKeyword": "adilabad classifieds",
+  "secondaryKeywords": [
+    "pg rooms in adilabad",
+    "tiffin service adilabad",
+    "jobs in adilabad",
+    "buy sell adilabad"
+  ],
+  "longTailKeywords": [
+    "pg rooms in adilabad for boys",
+    "pg rooms in adilabad for girls",
+    "tiffin service near me adilabad",
+    "home cooked food delivery adilabad",
+    "part time jobs in adilabad",
+    "full time jobs adilabad",
+    "second hand bikes in adilabad",
+    "used mobile phones adilabad",
+    "domestic help adilabad",
+    "room mate wanted adilabad"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Adilabad Free Classifieds — Tiffin, PG & Jobs | LocalsIndia",
+    "description": "Buy, sell & hire in Adilabad. Free classifieds for tiffin, PG rooms, jobs, bikes & more. Post listings instantly on LocalsIndia.",
+    "url": "https://www.localsindia.com/adilabad",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Adilabad",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Telangana"
+      }
+    }
+  },
+  "generatedAt": "2026-08-25T06:58:31.312095+00:00"
+}

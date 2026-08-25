@@ -1,0 +1,52 @@
+{
+  "citySlug": "tirunelveli",
+  "city": "Tirunelveli",
+  "state": "Tamil Nadu",
+  "lang": "ta",
+  "titleTag": "Tirunelveli Classifieds — Free PG, Tiffin & Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, find PG rooms & tiffin in Tirunelveli. Free classifieds for jobs, services & more. Post listings instantly on LocalsIndia.",
+  "ogTitle": "Tirunelveli's Trusted Community Classifieds — PG, Tiffin, Jobs & More",
+  "ogDescription": "Connect with your Tirunelveli neighbors. Browse & post free classifieds: PG rooms, tiffin delivery, jobs, furniture, vehicles & services.",
+  "h1": "Free Classifieds in Tirunelveli — PG, Tiffin, Jobs & Local Services",
+  "focusKeyword": "tirunelveli classifieds",
+  "secondaryKeywords": [
+    "pg rooms in tirunelveli",
+    "tiffin service tirunelveli",
+    "jobs in tirunelveli",
+    "buy sell tirunelveli"
+  ],
+  "longTailKeywords": [
+    "pg rooms in tirunelveli for boys",
+    "pg rooms in tirunelveli for girls",
+    "tiffin service near me tirunelveli",
+    "home cooked tiffin tirunelveli",
+    "part time jobs tirunelveli",
+    "full time jobs tirunelveli",
+    "second hand bikes tirunelveli",
+    "furniture for sale tirunelveli",
+    "domestic help tirunelveli",
+    "tuition classes tirunelveli",
+    "flatmate wanted tirunelveli",
+    "paying guest tirunelveli"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Tirunelveli Classifieds — Free PG, Tiffin & Jobs | LocalsIndia",
+    "description": "Free community classifieds in Tirunelveli. Post & browse PG rooms, tiffin services, jobs, vehicles, furniture & local services.",
+    "url": "https://www.localsindia.com/tirunelveli",
+    "inLanguage": [
+      "ta",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Tirunelveli",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Tamil Nadu"
+      }
+    }
+  },
+  "generatedAt": "2026-08-25T06:57:53.221912+00:00"
+}

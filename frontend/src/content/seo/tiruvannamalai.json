@@ -1,0 +1,52 @@
+{
+  "citySlug": "tiruvannamalai",
+  "city": "Tiruvannamalai",
+  "state": "Tamil Nadu",
+  "lang": "ta",
+  "titleTag": "Tiruvannamalai Classifieds — Free PG, Tiffin & Jobs | LocalsIndia",
+  "metaDescription": "Post free classifieds in Tiruvannamalai. Find PG rooms, tiffin services, jobs, used items & local services. Connect via WhatsApp instantly.",
+  "ogTitle": "Find Your Community in Tiruvannamalai — Free Local Classifieds",
+  "ogDescription": "Tiruvannamalai's trusted hyperlocal marketplace. PG rooms, home-cooked meals, part-time jobs, buy/sell items — all in Tamil & English.",
+  "h1": "Tiruvannamalai Free Classifieds — Post & Find Local Deals",
+  "focusKeyword": "tiruvannamalai classifieds",
+  "secondaryKeywords": [
+    "pg rooms tiruvannamalai",
+    "tiffin service tiruvannamalai",
+    "jobs in tiruvannamalai",
+    "used items tiruvannamalai"
+  ],
+  "longTailKeywords": [
+    "pg rooms in tiruvannamalai for boys",
+    "pg rooms in tiruvannamalai for girls",
+    "tiffin service near me tiruvannamalai",
+    "home cooked meals tiruvannamalai",
+    "part time jobs tiruvannamalai",
+    "full time jobs tiruvannamalai",
+    "second hand bikes tiruvannamalai",
+    "rent room tiruvannamalai",
+    "flatmate wanted tiruvannamalai",
+    "domestic help tiruvannamalai",
+    "tuition classes tiruvannamalai",
+    "buy sell electronics tiruvannamalai"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Tiruvannamalai Free Classifieds — PG, Tiffin, Jobs & More",
+    "description": "Post free classifieds in Tiruvannamalai. Find PG rooms, tiffin services, jobs, used items & local services. Connect via WhatsApp.",
+    "url": "https://www.localsindia.com/tiruvannamalai",
+    "inLanguage": [
+      "ta",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Tiruvannamalai",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Tamil Nadu"
+      }
+    }
+  },
+  "generatedAt": "2026-08-25T06:58:15.623356+00:00"
+}

@@ -1,0 +1,50 @@
+{
+  "citySlug": "bhadrachalam",
+  "city": "Bhadrachalam",
+  "state": "Telangana",
+  "lang": "te",
+  "titleTag": "Bhadrachalam Classifieds — Free PG, Tiffin & Jobs",
+  "metaDescription": "Find PG rooms, tiffin services, jobs & local classifieds in Bhadrachalam. Post free on LocalsIndia. Connect via WhatsApp.",
+  "ogTitle": "Bhadrachalam Local Classifieds — Your Neighborhood Marketplace",
+  "ogDescription": "Browse and post free classifieds in Bhadrachalam — PG accommodations, home-cooked meals, jobs, and more. Hyperlocal, community-first.",
+  "h1": "Bhadrachalam Classifieds — Free Local Marketplace",
+  "focusKeyword": "bhadrachalam classifieds",
+  "secondaryKeywords": [
+    "pg rooms in bhadrachalam",
+    "tiffin service bhadrachalam",
+    "jobs in bhadrachalam",
+    "bhadrachalam free classifieds"
+  ],
+  "longTailKeywords": [
+    "pg rooms in bhadrachalam for girls",
+    "pg rooms in bhadrachalam for boys",
+    "bhadrachalam tiffin service near me",
+    "home cooked meals bhadrachalam",
+    "part time jobs in bhadrachalam",
+    "second hand bikes bhadrachalam",
+    "roommate wanted bhadrachalam",
+    "paying guest accommodation bhadrachalam",
+    "domestic help bhadrachalam",
+    "furniture buy sell bhadrachalam"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Bhadrachalam Classifieds — Free PG, Tiffin & Jobs",
+    "description": "Find PG rooms, tiffin services, jobs and local classifieds in Bhadrachalam. Post free on LocalsIndia.",
+    "url": "https://www.localsindia.com/bhadrachalam",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Bhadrachalam",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Telangana"
+      }
+    }
+  },
+  "generatedAt": "2026-08-25T06:58:36.460723+00:00"
+}
