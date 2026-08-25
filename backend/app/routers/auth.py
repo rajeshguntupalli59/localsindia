@@ -5,7 +5,7 @@ import urllib.parse
 from datetime import datetime, timezone, timedelta
 
 import httpx
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 
 logger = logging.getLogger(__name__)
 from fastapi.responses import RedirectResponse
@@ -14,6 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.database import get_db
+from app.core.limiter import limiter
 from app.core.security import (
     hash_password, verify_password, generate_otp,
     create_access_token, create_refresh_token, decode_token,
@@ -101,11 +102,13 @@ async def login(body: LoginRequest, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("/phone/check")
-async def check_phone(body: OtpSendRequest, db: AsyncSession = Depends(get_db)):
+@limiter.limit("15/minute")
+async def check_phone(request: Request, body: OtpSendRequest, db: AsyncSession = Depends(get_db)):
     """Check whether a phone number already has a password-set account.
 
     Lets the signup flow warn the user before sending an OTP SMS, instead of
     burning a real SMS credit only to tell them afterwards to sign in instead.
+    Per-IP rate limited to block phone-number enumeration by bots.
     """
     result = await db.execute(
         select(User).where(User.phone == body.phone, User.deleted_at.is_(None))
@@ -115,9 +118,14 @@ async def check_phone(body: OtpSendRequest, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("/otp/send", status_code=200)
-async def send_otp(body: OtpSendRequest, db: AsyncSession = Depends(get_db)):
+@limiter.limit("3/minute")
+@limiter.limit("10/hour")
+async def send_otp(request: Request, body: OtpSendRequest, db: AsyncSession = Depends(get_db)):
     phone = body.phone
     now = datetime.now(timezone.utc)
+
+    # Per-IP rate limit (above) stops a bot rotating through many phone numbers
+    # to burn SMS credits — the per-phone limit below only protects one number.
 
     # Rate limit: max 5 OTPs per phone per hour (BL-07)
     window_start = now - timedelta(minutes=OTP_WINDOW_MINUTES)
@@ -174,7 +182,8 @@ async def _generate_referral_code(db: AsyncSession) -> str:
 
 
 @router.post("/otp/verify", response_model=OtpVerifyResponse)
-async def verify_otp(body: OtpVerifyRequest, db: AsyncSession = Depends(get_db)):
+@limiter.limit("10/minute")
+async def verify_otp(request: Request, body: OtpVerifyRequest, db: AsyncSession = Depends(get_db)):
     phone = body.phone
     now = datetime.now(timezone.utc)
 

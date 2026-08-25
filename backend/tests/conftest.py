@@ -8,6 +8,7 @@ from sqlalchemy.pool import NullPool
 
 from app.main import app
 from app.core.database import Base, get_db
+from app.core.limiter import limiter
 
 TEST_DB_URL = "postgresql+asyncpg://postgres:postgres@localhost:5432/localindia_test"
 
@@ -38,6 +39,11 @@ async def client():
                 await session.close()
 
     app.dependency_overrides[get_db] = override_get_db
+    # slowapi's Limiter keeps in-memory counters across the whole process,
+    # keyed by client IP — every test client hits the ASGI app as 127.0.0.1,
+    # so without a reset each test's requests would count against limits
+    # left over from earlier tests.
+    limiter.reset()
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         yield ac
     app.dependency_overrides.clear()

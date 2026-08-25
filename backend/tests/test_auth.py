@@ -407,6 +407,30 @@ async def test_otp_rate_limit_per_hour(client):
     assert resp.status_code == 429
 
 
+# Per-IP rate limit stops a bot rotating through many phone numbers to burn
+# SMS credits — the per-phone limit above only protects one number at a time.
+@pytest.mark.asyncio
+async def test_otp_send_ip_rate_limit_blocks_bot_across_phones(client):
+    # 3/minute per IP — 4th distinct-phone request in the same minute is blocked
+    for i in range(3):
+        resp = await client.post("/api/v1/auth/otp/send", json={"phone": f"+91900000000{i}"})
+        assert resp.status_code == 200
+
+    resp = await client.post("/api/v1/auth/otp/send", json={"phone": "+919000000009"})
+    assert resp.status_code == 429
+
+
+@pytest.mark.asyncio
+async def test_phone_check_ip_rate_limit(client):
+    # 15/minute per IP — protects against phone-number enumeration
+    for i in range(15):
+        resp = await client.post("/api/v1/auth/phone/check", json={"phone": f"+91911111{i:04d}"})
+        assert resp.status_code == 200
+
+    resp = await client.post("/api/v1/auth/phone/check", json={"phone": "+919111115000"})
+    assert resp.status_code == 429
+
+
 # Health check sanity
 @pytest.mark.asyncio
 async def test_health(client):
