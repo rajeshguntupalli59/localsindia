@@ -1,0 +1,52 @@
+{
+  "citySlug": "mancherial",
+  "city": "Mancherial",
+  "state": "Telangana",
+  "lang": "te",
+  "titleTag": "Mancherial Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, hire locally in Mancherial. Free classifieds for tiffin, PG rooms, jobs, bikes & more. Post free on LocalsIndia.",
+  "ogTitle": "Mancherial Classifieds — Find Tiffin, PG & Jobs Near You",
+  "ogDescription": "Connect with your Mancherial community. Browse free classifieds for services, jobs, roommates & secondhand items. No signup needed.",
+  "h1": "Mancherial Free Classifieds — Local Buy, Sell & Services",
+  "focusKeyword": "mancherial classifieds",
+  "secondaryKeywords": [
+    "mancherial tiffin service",
+    "pg rooms in mancherial",
+    "jobs in mancherial",
+    "mancherial local classifieds"
+  ],
+  "longTailKeywords": [
+    "mancherial tiffin service near me",
+    "pg rooms in mancherial for boys",
+    "pg rooms in mancherial for girls",
+    "part time jobs in mancherial",
+    "second hand bikes in mancherial",
+    "domestic help in mancherial",
+    "furniture for sale in mancherial",
+    "tuition classes in mancherial",
+    "mobile phones mancherial",
+    "flatmate wanted mancherial",
+    "home delivery tiffin mancherial",
+    "electronics mancherial buy sell"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Mancherial Free Classifieds — Tiffin, PG, Jobs & More",
+    "description": "Buy, sell, hire locally in Mancherial. Free classifieds for tiffin, PG rooms, jobs, bikes & more. Post free on LocalsIndia.",
+    "url": "https://www.localsindia.com/mancherial",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Mancherial",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Telangana"
+      }
+    }
+  },
+  "generatedAt": "2026-08-26T06:58:58.342219+00:00"
+}

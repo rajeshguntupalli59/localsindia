@@ -1,0 +1,50 @@
+{
+  "citySlug": "karimnagar",
+  "city": "Karimnagar",
+  "state": "Telangana",
+  "lang": "te",
+  "titleTag": "Karimnagar Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, rent in Karimnagar. Post tiffin services, PG rooms, jobs, second-hand items free. Connect via WhatsApp instantly.",
+  "ogTitle": "Karimnagar Classifieds & Community Listings — LocalsIndia",
+  "ogDescription": "Find tiffin delivery, paying guest rooms, local jobs, and classifieds in Karimnagar. Post for free, no commission.",
+  "h1": "Karimnagar Classifieds — Tiffin, PG Rooms, Jobs & Local Listings",
+  "focusKeyword": "karimnagar classifieds",
+  "secondaryKeywords": [
+    "tiffin service in karimnagar",
+    "pg rooms in karimnagar",
+    "jobs in karimnagar",
+    "buy sell second hand karimnagar"
+  ],
+  "longTailKeywords": [
+    "tiffin service near me karimnagar",
+    "pg rooms in karimnagar for boys",
+    "paying guest accommodation karimnagar",
+    "part time jobs in karimnagar",
+    "second hand bikes in karimnagar",
+    "domestic help in karimnagar",
+    "furniture buy sell karimnagar",
+    "carpool/commute in karimnagar",
+    "home tuition in karimnagar",
+    "used mobiles in karimnagar"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Karimnagar Classifieds & Local Listings",
+    "description": "Free community classifieds platform for Karimnagar. Post and browse tiffin, PG rooms, jobs, services, and second-hand items.",
+    "url": "https://www.localsindia.com/karimnagar",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Karimnagar",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Telangana"
+      }
+    }
+  },
+  "generatedAt": "2026-08-26T06:58:42.491544+00:00"
+}

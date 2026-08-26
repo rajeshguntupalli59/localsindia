@@ -1,0 +1,54 @@
+{
+  "citySlug": "medak",
+  "city": "Medak",
+  "state": "Telangana",
+  "lang": "te",
+  "titleTag": "Medak Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, find jobs & tiffin in Medak. Free local classifieds. Post without fees. Connect via WhatsApp.",
+  "ogTitle": "Medak Local Classifieds — Your Community Marketplace",
+  "ogDescription": "Discover tiffin services, PG rooms, jobs, and used items in Medak. Post free. Connect with neighbors instantly.",
+  "h1": "Medak Classifieds — Buy, Sell, Find Jobs & Services Locally",
+  "focusKeyword": "medak classifieds",
+  "secondaryKeywords": [
+    "medak tiffin service",
+    "pg rooms in medak",
+    "jobs in medak",
+    "buy sell medak"
+  ],
+  "longTailKeywords": [
+    "tiffin delivery in medak",
+    "pg rooms for boys in medak",
+    "part time jobs in medak",
+    "second hand bikes in medak",
+    "flat for rent in medak",
+    "used mobile phones medak",
+    "domestic help medak",
+    "tuition classes medak",
+    "carpool medak",
+    "furniture buy sell medak"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Medak Free Classifieds — Tiffin, PG, Jobs & More",
+    "description": "Buy, sell, find jobs and tiffin services in Medak. Post free local classifieds and connect via WhatsApp.",
+    "url": "https://www.localsindia.com/medak",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Medak",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Telangana",
+        "containedInPlace": {
+          "@type": "Country",
+          "name": "India"
+        }
+      }
+    }
+  },
+  "generatedAt": "2026-08-26T06:59:03.633051+00:00"
+}

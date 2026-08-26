@@ -1,0 +1,50 @@
+{
+  "citySlug": "kamareddy",
+  "city": "Kamareddy",
+  "state": "Telangana",
+  "lang": "te",
+  "titleTag": "Kamareddy Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, rent in Kamareddy. Tiffin service, PG rooms, jobs, secondhand items. Post free. Connect on WhatsApp.",
+  "ogTitle": "Kamareddy Local Classifieds — Your Neighborhood Marketplace",
+  "ogDescription": "Find tiffin, PG rooms, jobs, and local services in Kamareddy. Free to post, easy to reach sellers on WhatsApp.",
+  "h1": "Kamareddy Classifieds — Tiffin, PG, Jobs & Local Services",
+  "focusKeyword": "kamareddy classifieds",
+  "secondaryKeywords": [
+    "kamareddy tiffin service",
+    "pg rooms in kamareddy",
+    "jobs in kamareddy",
+    "secondhand items kamareddy"
+  ],
+  "longTailKeywords": [
+    "tiffin delivery near kamareddy",
+    "pg rooms in kamareddy for boys",
+    "part time jobs in kamareddy",
+    "paying guest accommodation kamareddy",
+    "home cooked meals kamareddy",
+    "buy sell used items kamareddy",
+    "domestic help kamareddy",
+    "furniture for sale kamareddy",
+    "tuition classes near kamareddy",
+    "bike sale kamareddy"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Kamareddy Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+    "description": "Buy, sell, rent in Kamareddy. Tiffin service, PG rooms, jobs, secondhand items. Post free. Connect on WhatsApp.",
+    "url": "https://www.localsindia.com/kamareddy",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Kamareddy",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Telangana"
+      }
+    }
+  },
+  "generatedAt": "2026-08-26T06:58:37.420124+00:00"
+}

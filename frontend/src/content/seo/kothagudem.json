@@ -1,0 +1,52 @@
+{
+  "citySlug": "kothagudem",
+  "city": "Kothagudem",
+  "state": "Telangana",
+  "lang": "te",
+  "titleTag": "Kothagudem Classifieds — Free PG, Tiffin & Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, rent in Kothagudem. Free PG listings, tiffin services, jobs & more. Post for free. Connect via WhatsApp.",
+  "ogTitle": "Kothagudem Community Classifieds — Your Neighborhood Marketplace",
+  "ogDescription": "Free classifieds in Kothagudem. Find PG rooms, tiffin services, jobs, used items & local services. Post listings instantly.",
+  "h1": "Kothagudem Classifieds — Buy, Sell, Rent & Find Local Services Free",
+  "focusKeyword": "kothagudem classifieds",
+  "secondaryKeywords": [
+    "pg rooms kothagudem",
+    "tiffin service kothagudem",
+    "jobs in kothagudem",
+    "buy sell kothagudem"
+  ],
+  "longTailKeywords": [
+    "pg rooms in kothagudem for boys",
+    "pg rooms in kothagudem for girls",
+    "tiffin service near me kothagudem",
+    "home cooked meals kothagudem",
+    "part time jobs kothagudem",
+    "full time jobs kothagudem",
+    "second hand bikes kothagudem",
+    "flat for rent kothagudem",
+    "roommate wanted kothagudem",
+    "domestic help kothagudem",
+    "tuition classes kothagudem",
+    "used electronics kothagudem"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Kothagudem Classifieds | LocalsIndia",
+    "description": "Free hyperlocal classifieds in Kothagudem, Telangana. Buy, sell, rent PG rooms, find tiffin services, jobs and local services.",
+    "url": "https://www.localsindia.com/kothagudem",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Kothagudem",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Telangana"
+      }
+    }
+  },
+  "generatedAt": "2026-08-26T06:58:53.244869+00:00"
+}

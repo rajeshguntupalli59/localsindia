@@ -1,0 +1,50 @@
+{
+  "citySlug": "khammam",
+  "city": "Khammam",
+  "state": "Telangana",
+  "lang": "te",
+  "titleTag": "Khammam Classifieds — Free Tiffin, PG & Jobs | LocalsIndia",
+  "metaDescription": "Post free classifieds in Khammam. Find tiffin services, PG rooms, jobs, bikes & more from locals near you. Connect via WhatsApp instantly.",
+  "ogTitle": "Khammam Classifieds & Local Deals — Your Neighborhood Marketplace",
+  "ogDescription": "Discover what locals in Khammam are selling, renting & offering. Tiffin, rooms, jobs, vehicles — post free, connect direct.",
+  "h1": "Khammam Free Classifieds — Tiffin, PG Rooms, Jobs & Local Deals",
+  "focusKeyword": "khammam classifieds",
+  "secondaryKeywords": [
+    "khammam tiffin service",
+    "pg rooms in khammam",
+    "jobs in khammam",
+    "second hand bikes khammam"
+  ],
+  "longTailKeywords": [
+    "tiffin service near me khammam",
+    "pg rooms for girls in khammam",
+    "paying guest accommodation khammam",
+    "part time jobs khammam",
+    "used bikes for sale khammam",
+    "domestic help in khammam",
+    "furniture buy sell khammam",
+    "flats for rent khammam",
+    "electronics second hand khammam",
+    "carpool khammam"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Khammam Classifieds & Local Listings",
+    "description": "Post free classifieds and browse local deals in Khammam, Telangana. Tiffin, PG rooms, jobs, vehicles, furniture and services from neighbors.",
+    "url": "https://www.localsindia.com/khammam",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Khammam",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Telangana"
+      }
+    }
+  },
+  "generatedAt": "2026-08-26T06:58:48.133167+00:00"
+}

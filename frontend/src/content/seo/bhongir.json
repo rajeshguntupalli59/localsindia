@@ -1,0 +1,50 @@
+{
+  "citySlug": "bhongir",
+  "city": "Bhongir",
+  "state": "Telangana",
+  "lang": "te",
+  "titleTag": "Bhongir Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Find tiffin services, PG rooms, jobs & more in Bhongir. Post free classifieds on LocalsIndia. Connect with locals via WhatsApp.",
+  "ogTitle": "Bhongir Local Classifieds — Jobs, Tiffin & Community",
+  "ogDescription": "Your neighborhood classifieds in Bhongir. Free to post, easy to find. Tiffin, PG rooms, jobs, and more from people nearby.",
+  "h1": "Bhongir Classifieds — Post & Find Local Listings Free",
+  "focusKeyword": "bhongir classifieds",
+  "secondaryKeywords": [
+    "bhongir tiffin service",
+    "pg rooms in bhongir",
+    "jobs in bhongir",
+    "bhongir second hand buy sell"
+  ],
+  "longTailKeywords": [
+    "tiffin service in bhongir near me",
+    "pg rooms for boys in bhongir",
+    "pg rooms for girls in bhongir",
+    "part time jobs in bhongir",
+    "full time jobs in bhongir",
+    "second hand bikes in bhongir",
+    "used furniture bhongir",
+    "domestic help in bhongir",
+    "tuition classes in bhongir",
+    "mobile phones second hand bhongir"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Bhongir Classifieds | LocalsIndia",
+    "description": "Free classifieds for Bhongir, Telangana. Post & find tiffin, PG rooms, jobs, buy/sell items, and local services.",
+    "url": "https://www.localsindia.com/bhongir",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Bhongir",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Telangana"
+      }
+    }
+  },
+  "generatedAt": "2026-08-26T06:58:22.267720+00:00"
+}

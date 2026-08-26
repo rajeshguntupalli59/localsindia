@@ -1,0 +1,50 @@
+{
+  "citySlug": "miryalaguda",
+  "city": "Miryalaguda",
+  "state": "Telangana",
+  "lang": "te",
+  "titleTag": "Miryalaguda Classifieds — PG, Tiffin, Jobs | LocalsIndia",
+  "metaDescription": "Free classifieds in Miryalaguda. Find PG rooms, tiffin services, jobs, used bikes & more. Post listings free. Connect via WhatsApp.",
+  "ogTitle": "Miryalaguda Local Classifieds — Your Neighborhood Marketplace",
+  "ogDescription": "Buy, sell, hire locally in Miryalaguda. Tiffin, PG rooms, jobs, furniture — all free. Real people, real deals.",
+  "h1": "Free Local Classifieds in Miryalaguda — Tiffin, PG, Jobs & More",
+  "focusKeyword": "miryalaguda classifieds",
+  "secondaryKeywords": [
+    "pg rooms in miryalaguda",
+    "tiffin service miryalaguda",
+    "jobs in miryalaguda",
+    "second hand bikes miryalaguda"
+  ],
+  "longTailKeywords": [
+    "pg rooms in miryalaguda for boys",
+    "pg rooms in miryalaguda for girls",
+    "tiffin service near miryalaguda",
+    "home tiffin delivery miryalaguda",
+    "part time jobs miryalaguda",
+    "full time jobs in miryalaguda",
+    "used bikes for sale miryalaguda",
+    "furniture buy sell miryalaguda",
+    "domestic help miryalaguda",
+    "flatmate wanted miryalaguda"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Miryalaguda Free Local Classifieds — Tiffin, PG, Jobs & More",
+    "description": "Free classifieds in Miryalaguda. Find and post PG rooms, tiffin services, jobs, vehicles, furniture and more. Connect with locals via WhatsApp.",
+    "url": "https://www.localsindia.com/miryalaguda",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Miryalaguda",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Telangana"
+      }
+    }
+  },
+  "generatedAt": "2026-08-26T06:59:09.106182+00:00"
+}

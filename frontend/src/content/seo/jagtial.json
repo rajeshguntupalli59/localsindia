@@ -1,0 +1,52 @@
+{
+  "citySlug": "jagtial",
+  "city": "Jagtial",
+  "state": "Telangana",
+  "lang": "te",
+  "titleTag": "Jagtial Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, hire locally in Jagtial. Free classifieds for tiffin, PG rooms, jobs, bikes & more. Post instantly, connect via WhatsApp.",
+  "ogTitle": "Jagtial Classifieds — Your Neighborhood Marketplace",
+  "ogDescription": "Discover local deals, tiffin services, PG rooms & jobs in Jagtial. Post for free. Real neighbors, real deals.",
+  "h1": "Jagtial Classifieds — Buy, Sell & Connect Locally",
+  "focusKeyword": "jagtial classifieds",
+  "secondaryKeywords": [
+    "jagtial free classifieds",
+    "jagtial tiffin service",
+    "pg rooms jagtial",
+    "jobs jagtial telangana"
+  ],
+  "longTailKeywords": [
+    "tiffin service in jagtial",
+    "pg rooms in jagtial for boys",
+    "pg rooms in jagtial for girls",
+    "paying guest jagtial",
+    "part time jobs in jagtial",
+    "second hand bikes jagtial",
+    "used mobile phones jagtial",
+    "domestic help jagtial",
+    "tuition classes jagtial",
+    "furniture buy sell jagtial",
+    "jagtial roommate wanted",
+    "home cooked meals jagtial"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Jagtial Classifieds — LocalsIndia",
+    "description": "Free local classifieds marketplace for Jagtial, Telangana. Buy, sell, hire locally without commission.",
+    "url": "https://www.localsindia.com/jagtial",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Jagtial",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Telangana"
+      }
+    }
+  },
+  "generatedAt": "2026-08-26T06:58:32.438017+00:00"
+}

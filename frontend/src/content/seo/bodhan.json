@@ -1,0 +1,50 @@
+{
+  "citySlug": "bodhan",
+  "city": "Bodhan",
+  "state": "Telangana",
+  "lang": "te",
+  "titleTag": "Bodhan Classifieds — Tiffin, PG & Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, rent in Bodhan. Tiffin delivery, PG rooms, jobs & services — post free on LocalsIndia.",
+  "ogTitle": "Bodhan Local Classifieds — Your Neighborhood Marketplace",
+  "ogDescription": "Connect with neighbors in Bodhan. Find tiffin, PG rooms, jobs, secondhand items & local services.",
+  "h1": "Bodhan Classifieds — Tiffin, PG Rooms, Jobs & Local Services",
+  "focusKeyword": "bodhan classifieds",
+  "secondaryKeywords": [
+    "bodhan tiffin service",
+    "pg rooms bodhan",
+    "jobs bodhan telangana",
+    "bodhan local marketplace"
+  ],
+  "longTailKeywords": [
+    "bodhan tiffin delivery near me",
+    "pg rooms in bodhan for girls",
+    "part time jobs bodhan telangana",
+    "secondhand bikes bodhan",
+    "domestic help bodhan",
+    "flat rent bodhan",
+    "electronics buy sell bodhan",
+    "bodhan carpool share",
+    "used furniture bodhan",
+    "bodhan services classifieds"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Bodhan Classifieds & Local Marketplace",
+    "description": "Free classifieds in Bodhan, Telangana — tiffin, PG, jobs, services & more on LocalsIndia.",
+    "url": "https://www.localsindia.com/bodhan",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Bodhan",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Telangana"
+      }
+    }
+  },
+  "generatedAt": "2026-08-26T06:58:27.342684+00:00"
+}
