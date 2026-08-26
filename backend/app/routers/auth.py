@@ -119,7 +119,7 @@ async def check_phone(request: Request, body: OtpSendRequest, db: AsyncSession =
 
 @router.post("/otp/send", status_code=200)
 @limiter.limit("3/minute")
-@limiter.limit("10/hour")
+@limiter.limit("6/hour")
 async def send_otp(request: Request, body: OtpSendRequest, db: AsyncSession = Depends(get_db)):
     phone = body.phone
     now = datetime.now(timezone.utc)
