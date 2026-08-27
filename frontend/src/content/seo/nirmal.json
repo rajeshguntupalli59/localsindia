@@ -1,0 +1,50 @@
+{
+  "citySlug": "nirmal",
+  "city": "Nirmal",
+  "state": "Telangana",
+  "lang": "te",
+  "titleTag": "Nirmal Classifieds — Tiffin, PG & Jobs | LocalsIndia",
+  "metaDescription": "Free classifieds in Nirmal. Post tiffin services, PG rooms, jobs & more. Connect with locals via WhatsApp. No fees.",
+  "ogTitle": "Nirmal's Neighborhood Classifieds — Buy, Sell, Hire Locally",
+  "ogDescription": "Nirmal residents buying tiffin, renting PG rooms, hiring help, selling bikes? LocalsIndia is your free community board.",
+  "h1": "Nirmal Classifieds — Local Buy, Sell & Services",
+  "focusKeyword": "nirmal classifieds",
+  "secondaryKeywords": [
+    "nirmal telangana buy sell",
+    "pg rooms nirmal",
+    "tiffin service nirmal",
+    "jobs in nirmal telangana"
+  ],
+  "longTailKeywords": [
+    "tiffin service near me nirmal",
+    "pg rooms in nirmal for boys",
+    "pg rooms in nirmal for girls",
+    "paying guest nirmal telangana",
+    "part time jobs in nirmal",
+    "second hand bikes nirmal",
+    "used furniture nirmal",
+    "domestic help nirmal",
+    "tuition classes nirmal",
+    "flat for rent nirmal telangana"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Nirmal Classifieds — Free Local Buy, Sell & Services",
+    "description": "Community classifieds for Nirmal, Telangana. Post tiffin, PG rooms, jobs, vehicles & more free. Connect via WhatsApp.",
+    "url": "https://www.localsindia.com/nirmal",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Nirmal",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Telangana"
+      }
+    }
+  },
+  "generatedAt": "2026-08-27T17:31:58.724159+00:00"
+}

@@ -1,0 +1,50 @@
+{
+  "citySlug": "tandur",
+  "city": "Tandur",
+  "state": "Telangana",
+  "lang": "te",
+  "titleTag": "Tandur Classifieds — Tiffin, PG, Jobs & More | LocalsIndia",
+  "metaDescription": "Free classifieds in Tandur, Telangana. Post tiffin services, PG rooms, jobs & buy/sell items locally. Connect on WhatsApp instantly.",
+  "ogTitle": "Tandur Local Classifieds — Jobs, Tiffin & Community Listings",
+  "ogDescription": "Your neighborhood marketplace in Tandur. Find tiffin, PG rooms, jobs, and more from locals near you. Post free.",
+  "h1": "Tandur Classifieds & Local Marketplace",
+  "focusKeyword": "tandur classifieds",
+  "secondaryKeywords": [
+    "tandur tiffin service",
+    "pg rooms in tandur",
+    "jobs in tandur telangana",
+    "buy sell tandur"
+  ],
+  "longTailKeywords": [
+    "tiffin service near me tandur",
+    "pg rooms for boys in tandur",
+    "pg rooms for girls in tandur",
+    "part time jobs in tandur",
+    "full time jobs tandur telangana",
+    "second hand bikes in tandur",
+    "used phones in tandur",
+    "domestic help tandur",
+    "tuition classes tandur",
+    "furniture buy sell tandur"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Tandur Classifieds & Local Marketplace | LocalsIndia",
+    "description": "Free hyperlocal classifieds in Tandur, Telangana. Post and find tiffin, PG rooms, jobs, and community listings.",
+    "url": "https://www.localsindia.com/tandur",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Tandur",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Telangana"
+      }
+    }
+  },
+  "generatedAt": "2026-08-27T17:32:34.956298+00:00"
+}

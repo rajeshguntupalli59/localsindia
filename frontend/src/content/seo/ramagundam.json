@@ -1,0 +1,52 @@
+{
+  "citySlug": "ramagundam",
+  "city": "Ramagundam",
+  "state": "Telangana",
+  "lang": "te",
+  "titleTag": "Ramagundam Classifieds — PG, Tiffin, Jobs | LocalsIndia",
+  "metaDescription": "Free classifieds in Ramagundam. Post PG rooms, tiffin services, jobs, and second-hand items. Connect with locals on WhatsApp.",
+  "ogTitle": "Ramagundam Local Classifieds — Find PG, Tiffin & Jobs Near You",
+  "ogDescription": "Ramagundam's community marketplace. Free posting for PG rooms, home-cooked meals, jobs, vehicles, and more. No fees, just neighbors helping neighbors.",
+  "h1": "Ramagundam Local Classifieds — Free PG, Tiffin, Jobs & More",
+  "focusKeyword": "ramagundam classifieds",
+  "secondaryKeywords": [
+    "pg rooms in ramagundam",
+    "tiffin service ramagundam",
+    "jobs in ramagundam",
+    "second hand items ramagundam"
+  ],
+  "longTailKeywords": [
+    "pg rooms in ramagundam for boys",
+    "pg rooms in ramagundam for girls",
+    "tiffin service near me ramagundam",
+    "home cooked meals ramagundam",
+    "part time jobs in ramagundam",
+    "full time jobs ramagundam",
+    "second hand bikes ramagundam",
+    "used mobile phones ramagundam",
+    "domestic help ramagundam",
+    "flatmate wanted ramagundam",
+    "paying guest ramagundam",
+    "carpool ramagundam"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Ramagundam Classifieds — PG, Tiffin, Jobs | LocalsIndia",
+    "description": "Free hyperlocal classifieds for Ramagundam. Post and browse PG rooms, tiffin services, jobs, vehicles, and local services.",
+    "url": "https://www.localsindia.com/ramagundam",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Ramagundam",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Telangana"
+      }
+    }
+  },
+  "generatedAt": "2026-08-27T17:32:09.614001+00:00"
+}

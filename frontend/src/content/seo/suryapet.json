@@ -1,0 +1,52 @@
+{
+  "citySlug": "suryapet",
+  "city": "Suryapet",
+  "state": "Telangana",
+  "lang": "te",
+  "titleTag": "Suryapet Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Find tiffin, PG rooms, jobs & secondhand items in Suryapet. Post free classifieds locally. Connect via WhatsApp.",
+  "ogTitle": "Suryapet Local Classifieds — Your Neighborhood Marketplace",
+  "ogDescription": "Tiffin services, PG accommodations, jobs, and everyday items. Buy, sell, or hire locally in Suryapet without fees.",
+  "h1": "Suryapet Free Local Classifieds — Tiffin, PG Rooms, Jobs & More",
+  "focusKeyword": "suryapet classifieds",
+  "secondaryKeywords": [
+    "suryapet tiffin service",
+    "pg rooms suryapet",
+    "jobs suryapet",
+    "buy sell suryapet"
+  ],
+  "longTailKeywords": [
+    "tiffin service near me suryapet",
+    "pg rooms in suryapet for boys",
+    "pg rooms in suryapet for girls",
+    "part time jobs suryapet",
+    "secondhand bikes suryapet",
+    "paying guest suryapet",
+    "home cooked meals suryapet",
+    "domestic help suryapet",
+    "used furniture suryapet",
+    "roommate wanted suryapet",
+    "carpool suryapet",
+    "tuition classes suryapet"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Suryapet Free Local Classifieds",
+    "description": "Find tiffin, PG rooms, jobs & secondhand items in Suryapet. Post free classifieds locally.",
+    "url": "https://www.localsindia.com/suryapet",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Suryapet",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Telangana"
+      }
+    }
+  },
+  "generatedAt": "2026-08-27T17:32:29.765690+00:00"
+}

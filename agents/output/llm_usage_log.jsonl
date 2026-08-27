@@ -296,3 +296,13 @@
 {"timestamp": "2026-08-26T06:59:09.106019", "agent": "seo_agent", "model": "claude-haiku-4-5-20251001", "input_tokens": 1609, "output_tokens": 813, "estimated_cost_usd": 0.005674}
 {"timestamp": "2026-08-26T14:12:51.994105", "agent": "meta_poster", "model": "claude-haiku-4-5-20251001", "input_tokens": 1985, "output_tokens": 159, "estimated_cost_usd": 0.00278}
 {"timestamp": "2026-08-27T15:00:00.730289", "agent": "meta_poster", "model": "claude-haiku-4-5-20251001", "input_tokens": 1978, "output_tokens": 142, "estimated_cost_usd": 0.002688}
+{"timestamp": "2026-08-27T17:31:47.648307", "agent": "seo_agent", "model": "claude-haiku-4-5-20251001", "input_tokens": 1604, "output_tokens": 769, "estimated_cost_usd": 0.005449}
+{"timestamp": "2026-08-27T17:31:52.725767", "agent": "seo_agent", "model": "claude-haiku-4-5-20251001", "input_tokens": 1599, "output_tokens": 757, "estimated_cost_usd": 0.005384}
+{"timestamp": "2026-08-27T17:31:58.724010", "agent": "seo_agent", "model": "claude-haiku-4-5-20251001", "input_tokens": 1594, "output_tokens": 780, "estimated_cost_usd": 0.005494}
+{"timestamp": "2026-08-27T17:32:04.011183", "agent": "seo_agent", "model": "claude-haiku-4-5-20251001", "input_tokens": 1599, "output_tokens": 774, "estimated_cost_usd": 0.005469}
+{"timestamp": "2026-08-27T17:32:09.613839", "agent": "seo_agent", "model": "claude-haiku-4-5-20251001", "input_tokens": 1604, "output_tokens": 816, "estimated_cost_usd": 0.005684}
+{"timestamp": "2026-08-27T17:32:14.585149", "agent": "seo_agent", "model": "claude-haiku-4-5-20251001", "input_tokens": 1599, "output_tokens": 733, "estimated_cost_usd": 0.005264}
+{"timestamp": "2026-08-27T17:32:19.792438", "agent": "seo_agent", "model": "claude-haiku-4-5-20251001", "input_tokens": 1599, "output_tokens": 721, "estimated_cost_usd": 0.005204}
+{"timestamp": "2026-08-27T17:32:24.877534", "agent": "seo_agent", "model": "claude-haiku-4-5-20251001", "input_tokens": 1604, "output_tokens": 788, "estimated_cost_usd": 0.005544}
+{"timestamp": "2026-08-27T17:32:29.765545", "agent": "seo_agent", "model": "claude-haiku-4-5-20251001", "input_tokens": 1599, "output_tokens": 752, "estimated_cost_usd": 0.005359}
+{"timestamp": "2026-08-27T17:32:34.956131", "agent": "seo_agent", "model": "claude-haiku-4-5-20251001", "input_tokens": 1594, "output_tokens": 755, "estimated_cost_usd": 0.005369}

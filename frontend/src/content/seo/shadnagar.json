@@ -1,0 +1,50 @@
+{
+  "citySlug": "shadnagar",
+  "city": "Shadnagar",
+  "state": "Telangana",
+  "lang": "te",
+  "titleTag": "Shadnagar Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, rent in Shadnagar. Tiffin delivery, PG rooms, jobs, vehicles & more. Free classifieds. Post now on LocalsIndia.",
+  "ogTitle": "Shadnagar's Trusted Local Classifieds — PG, Tiffin & Jobs",
+  "ogDescription": "Connect with neighbors in Shadnagar. Find tiffin, PG rooms, part-time jobs, used bikes. Post free. Reply on WhatsApp.",
+  "h1": "Shadnagar Classifieds — Buy, Sell, Rent & Hire Locally",
+  "focusKeyword": "shadnagar classifieds",
+  "secondaryKeywords": [
+    "pg rooms shadnagar",
+    "tiffin service shadnagar",
+    "jobs in shadnagar",
+    "second hand bikes shadnagar"
+  ],
+  "longTailKeywords": [
+    "pg rooms in shadnagar for girls",
+    "pg rooms in shadnagar for boys",
+    "tiffin delivery near shadnagar",
+    "part time jobs in shadnagar",
+    "paying guest shadnagar",
+    "roommate shadnagar",
+    "used bikes for sale shadnagar",
+    "home tuition shadnagar",
+    "domestic help shadnagar",
+    "furniture buy sell shadnagar"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Shadnagar Classifieds — Free Local Listings",
+    "description": "Hyperlocal classifieds for Shadnagar. Post and browse tiffin, PG rooms, jobs, vehicles and more. Free. WhatsApp-enabled.",
+    "url": "https://www.localsindia.com/shadnagar",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Shadnagar",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Telangana"
+      }
+    }
+  },
+  "generatedAt": "2026-08-27T17:32:19.792586+00:00"
+}

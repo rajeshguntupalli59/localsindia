@@ -1,0 +1,52 @@
+{
+  "citySlug": "nagarkurnool",
+  "city": "Nagarkurnool",
+  "state": "Telangana",
+  "lang": "te",
+  "titleTag": "Nagarkurnool Classifieds — Tiffin, PG & Jobs | LocalsIndia",
+  "metaDescription": "Free classifieds in Nagarkurnool. Post tiffin services, PG rooms, jobs, bikes & more. Connect with locals via WhatsApp instantly.",
+  "ogTitle": "Nagarkurnool Community Classifieds — Buy, Sell, Hire Locally",
+  "ogDescription": "Nagarkurnool's hyperlocal marketplace. Free listings for tiffin, PG, jobs, vehicles & services. Connect with neighbors on WhatsApp.",
+  "h1": "Nagarkurnool Classifieds — Buy, Sell, Hire & Services Locally",
+  "focusKeyword": "nagarkurnool classifieds",
+  "secondaryKeywords": [
+    "nagarkurnool pg rooms",
+    "nagarkurnool tiffin service",
+    "jobs in nagarkurnool",
+    "nagarkurnool second hand bikes"
+  ],
+  "longTailKeywords": [
+    "pg rooms in nagarkurnool for boys",
+    "pg rooms in nagarkurnool for girls",
+    "tiffin service near nagarkurnool",
+    "home cooked meals nagarkurnool",
+    "part time jobs nagarkurnool",
+    "full time jobs nagarkurnool",
+    "second hand bikes nagarkurnool",
+    "used bikes for sale nagarkurnool",
+    "flatmate wanted nagarkurnool",
+    "paying guest nagarkurnool",
+    "domestic help nagarkurnool",
+    "tuition classes nagarkurnool"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Nagarkurnool Free Classifieds — Tiffin, PG, Jobs & More",
+    "description": "Nagarkurnool's community classifieds marketplace. Post free listings for tiffin, PG rooms, jobs, vehicles and local services.",
+    "url": "https://www.localsindia.com/nagarkurnool",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Nagarkurnool",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Telangana"
+      }
+    }
+  },
+  "generatedAt": "2026-08-27T17:31:47.648451+00:00"
+}

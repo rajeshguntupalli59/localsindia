@@ -1,0 +1,52 @@
+{
+  "citySlug": "sangareddy",
+  "city": "Sangareddy",
+  "state": "Telangana",
+  "lang": "te",
+  "titleTag": "Sangareddy Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, hire locally in Sangareddy. Free classifieds for tiffin, PG rooms, jobs, vehicles & more. Post instantly, connect on WhatsApp.",
+  "ogTitle": "Sangareddy Local Classifieds — Your Neighborhood Marketplace",
+  "ogDescription": "Find tiffin services, PG rooms, jobs, and secondhand items in Sangareddy. Free to post, local community, instant WhatsApp contact.",
+  "h1": "Sangareddy Classifieds — Buy, Sell & Hire Locally",
+  "focusKeyword": "sangareddy classifieds",
+  "secondaryKeywords": [
+    "sangareddy tiffin service",
+    "pg rooms sangareddy",
+    "jobs in sangareddy",
+    "sangareddy marketplace"
+  ],
+  "longTailKeywords": [
+    "tiffin delivery in sangareddy",
+    "pg rooms for boys in sangareddy",
+    "pg rooms for girls in sangareddy",
+    "part time jobs sangareddy",
+    "second hand bikes sangareddy",
+    "used furniture sangareddy",
+    "carpool sangareddy",
+    "domestic help sangareddy",
+    "tuition classes sangareddy",
+    "flats for rent sangareddy",
+    "home services sangareddy",
+    "buy sell online sangareddy free"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Sangareddy Free Classifieds — Tiffin, PG, Jobs & More",
+    "description": "Hyperlocal classifieds marketplace for Sangareddy. Free listings for tiffin, PG, jobs, vehicles, furniture, services. Connect instantly via WhatsApp.",
+    "url": "https://www.localsindia.com/sangareddy",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Sangareddy",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Telangana"
+      }
+    }
+  },
+  "generatedAt": "2026-08-27T17:32:14.585289+00:00"
+}

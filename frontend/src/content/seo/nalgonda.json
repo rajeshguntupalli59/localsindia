@@ -1,0 +1,52 @@
+{
+  "citySlug": "nalgonda",
+  "city": "Nalgonda",
+  "state": "Telangana",
+  "lang": "te",
+  "titleTag": "Nalgonda Classifieds — PG, Jobs & Tiffin | LocalsIndia",
+  "metaDescription": "Buy, sell & hire locally in Nalgonda. PG rooms, tiffin services, jobs, used items — post free, contact via WhatsApp.",
+  "ogTitle": "Nalgonda's Neighborhood Classifieds — Find What You Need Locally",
+  "ogDescription": "Your Nalgonda community marketplace. Tiffin, rooms, jobs, used goods — all in one place, all free to post.",
+  "h1": "Nalgonda Classifieds — Buy, Sell, Hire & Connect Locally",
+  "focusKeyword": "nalgonda classifieds",
+  "secondaryKeywords": [
+    "pg rooms in nalgonda",
+    "tiffin service nalgonda",
+    "jobs in nalgonda",
+    "nalgonda buy sell"
+  ],
+  "longTailKeywords": [
+    "pg rooms in nalgonda for boys",
+    "paying guest nalgonda near me",
+    "tiffin delivery in nalgonda",
+    "home cooked meals nalgonda",
+    "part time jobs nalgonda",
+    "second hand bikes nalgonda",
+    "used mobiles nalgonda",
+    "domestic help nalgonda",
+    "flatmate wanted nalgonda",
+    "rental furniture nalgonda",
+    "tuition classes nalgonda",
+    "carpool nalgonda"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Nalgonda Classifieds — PG, Jobs & Tiffin | LocalsIndia",
+    "description": "Buy, sell & hire locally in Nalgonda. PG rooms, tiffin services, jobs, used items — post free, contact via WhatsApp.",
+    "url": "https://www.localsindia.com/nalgonda",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Nalgonda",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Telangana"
+      }
+    }
+  },
+  "generatedAt": "2026-08-27T17:31:52.725909+00:00"
+}

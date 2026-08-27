@@ -1,0 +1,52 @@
+{
+  "citySlug": "siddipet",
+  "city": "Siddipet",
+  "state": "Telangana",
+  "lang": "te",
+  "titleTag": "Siddipet Free Classifieds — Jobs, PG & More | LocalsIndia",
+  "metaDescription": "Buy, sell, hire & rent in Siddipet. Free classifieds for jobs, PG rooms, tiffin, furniture & local services. Post instantly on LocalsIndia.",
+  "ogTitle": "Siddipet Classifieds — Your Neighborhood Marketplace",
+  "ogDescription": "Find jobs, PG rooms, tiffin services & more in Siddipet. Connect with locals via WhatsApp. Free to post, free to browse.",
+  "h1": "Siddipet Classifieds — Buy, Sell, Hire & Rent Locally",
+  "focusKeyword": "siddipet classifieds",
+  "secondaryKeywords": [
+    "siddipet jobs",
+    "pg rooms in siddipet",
+    "siddipet tiffin service",
+    "siddipet local marketplace"
+  ],
+  "longTailKeywords": [
+    "pg rooms in siddipet for boys",
+    "pg rooms in siddipet for girls",
+    "part time jobs in siddipet",
+    "tiffin service near siddipet",
+    "home cooked meals siddipet",
+    "second hand furniture siddipet",
+    "bikes for sale in siddipet",
+    "domestic help in siddipet",
+    "tuition classes in siddipet",
+    "flatmate wanted siddipet",
+    "freelance work siddipet",
+    "used electronics siddipet"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Siddipet Free Classifieds | LocalsIndia",
+    "description": "Hyperlocal classifieds marketplace for Siddipet. Buy, sell, hire & rent. Free listings. WhatsApp connect.",
+    "url": "https://www.localsindia.com/siddipet",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Siddipet",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Telangana"
+      }
+    }
+  },
+  "generatedAt": "2026-08-27T17:32:24.877673+00:00"
+}

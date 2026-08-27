@@ -1,0 +1,50 @@
+{
+  "citySlug": "nizamabad",
+  "city": "Nizamabad",
+  "state": "Telangana",
+  "lang": "te",
+  "titleTag": "Nizamabad Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, hire in Nizamabad. Free classifieds for tiffin services, PG rooms, jobs, vehicles & more. Post instantly on LocalsIndia.",
+  "ogTitle": "Nizamabad's Trusted Community Classifieds — LocalsIndia",
+  "ogDescription": "Find local tiffin, PG rooms, jobs, and secondhand items in Nizamabad. Connect with neighbors via WhatsApp. Free to post.",
+  "h1": "Nizamabad Free Classifieds — Tiffin, PG Rooms, Jobs & Local Services",
+  "focusKeyword": "nizamabad classifieds",
+  "secondaryKeywords": [
+    "nizamabad tiffin service",
+    "pg rooms in nizamabad",
+    "jobs in nizamabad",
+    "second hand items nizamabad"
+  ],
+  "longTailKeywords": [
+    "tiffin service near me nizamabad",
+    "pg rooms for boys in nizamabad",
+    "pg rooms for girls in nizamabad",
+    "part time jobs in nizamabad",
+    "second hand bikes in nizamabad",
+    "domestic help in nizamabad",
+    "home tuition in nizamabad",
+    "bike rental nizamabad",
+    "used mobile phones nizamabad",
+    "furniture for sale nizamabad"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Nizamabad Free Classifieds — Tiffin, PG, Jobs & Local Services",
+    "description": "Buy, sell, hire in Nizamabad. Free classifieds for tiffin services, PG rooms, jobs, vehicles & more. Post instantly on LocalsIndia.",
+    "url": "https://www.localsindia.com/nizamabad",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Nizamabad",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Telangana"
+      }
+    }
+  },
+  "generatedAt": "2026-08-27T17:32:04.011323+00:00"
+}
