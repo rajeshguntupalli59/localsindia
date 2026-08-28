@@ -1,8 +1,7 @@
 {
-  "lastTopicIndex": 4,
+  "lastTopicIndex": 5,
   "lastTipCategoryIndex": 5,
   "topicHistory": [
-    "category_tip",
     "safety_tip",
     "city_spotlight",
     "app_launch",
@@ -11,7 +10,8 @@
     "category_tip",
     "safety_tip",
     "city_spotlight",
-    "app_launch"
+    "app_launch",
+    "referral"
   ],
   "tipCategoryHistory": [
     "jobs",
@@ -23,9 +23,8 @@
     "vehicles",
     "electronics"
   ],
-  "lastStyleIndex": 0,
+  "lastStyleIndex": 1,
   "styleHistory": [
-    "bold",
     "duotone",
     "quote",
     "spotlight",
@@ -34,6 +33,7 @@
     "duotone",
     "quote",
     "spotlight",
-    "glass"
+    "glass",
+    "bold"
   ]
 }
