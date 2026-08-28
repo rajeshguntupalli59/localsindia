@@ -1,0 +1,52 @@
+{
+  "citySlug": "warangal",
+  "city": "Warangal",
+  "state": "Telangana",
+  "lang": "te",
+  "titleTag": "Warangal Classifieds — Tiffin, PG, Jobs & More | LocalsIndia",
+  "metaDescription": "Buy, sell & find services in Warangal. Free classifieds for tiffin, PG rooms, jobs, used items & local services. Post instantly on LocalsIndia.",
+  "ogTitle": "Warangal's Neighborhood Classifieds — Connect Locally, Post Free",
+  "ogDescription": "Your Warangal community marketplace. Tiffin delivery, PG rooms, jobs, secondhand deals — all hyperlocal, all free to post.",
+  "h1": "Warangal Classifieds & Local Services — Free Community Marketplace",
+  "focusKeyword": "warangal classifieds",
+  "secondaryKeywords": [
+    "warangal tiffin service",
+    "pg rooms in warangal",
+    "jobs in warangal",
+    "warangal buy sell"
+  ],
+  "longTailKeywords": [
+    "tiffin service near me warangal",
+    "pg rooms in warangal for boys",
+    "pg rooms in warangal for girls",
+    "part time jobs in warangal",
+    "second hand bikes in warangal",
+    "used mobiles in warangal",
+    "domestic help in warangal",
+    "home tuition in warangal",
+    "carpool warangal",
+    "furniture for sale in warangal",
+    "warangal local classifieds free",
+    "warangal community marketplace"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Warangal Classifieds & Local Services",
+    "description": "Hyperlocal classifieds marketplace for Warangal. Buy, sell, and find local services including tiffin, PG rooms, jobs, and more. Free to post.",
+    "url": "https://www.localsindia.com/warangal",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Warangal",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Telangana"
+      }
+    }
+  },
+  "generatedAt": "2026-08-28T18:27:59.169328+00:00"
+}

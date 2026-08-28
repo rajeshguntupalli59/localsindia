@@ -1,0 +1,53 @@
+{
+  "citySlug": "visakhapatnam",
+  "city": "Visakhapatnam",
+  "state": "Andhra Pradesh",
+  "lang": "te",
+  "titleTag": "Visakhapatnam Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Free classifieds in Visakhapatnam. Post tiffin, PG rooms, jobs, used bikes & more. Connect with locals via WhatsApp. No fees.",
+  "ogTitle": "Visakhapatnam Local Classifieds — Find Tiffin, Roommates & Jobs Near You",
+  "ogDescription": "Buy, sell, and connect with your Visakhapatnam community. Tiffin delivery, PG rooms, part-time jobs, and more — all free.",
+  "h1": "Visakhapatnam Free Classifieds — Local Buy, Sell & Services",
+  "focusKeyword": "visakhapatnam classifieds",
+  "secondaryKeywords": [
+    "visakhapatnam tiffin service",
+    "pg rooms visakhapatnam",
+    "jobs in visakhapatnam",
+    "visakhapatnam local marketplace"
+  ],
+  "longTailKeywords": [
+    "tiffin service near me visakhapatnam",
+    "pg rooms for boys visakhapatnam",
+    "pg rooms for girls visakhapatnam",
+    "part time jobs visakhapatnam",
+    "second hand bikes visakhapatnam",
+    "used mobile phones visakhapatnam",
+    "flatmate wanted visakhapatnam",
+    "domestic help visakhapatnam",
+    "tuition classes visakhapatnam",
+    "furniture buy sell visakhapatnam",
+    "carpool visakhapatnam",
+    "events in visakhapatnam"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Visakhapatnam Free Classifieds | LocalsIndia",
+    "description": "Free classifieds in Visakhapatnam. Post and find tiffin, PG rooms, jobs, vehicles, and local services. Connect via WhatsApp.",
+    "url": "https://www.localsindia.com/visakhapatnam",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Visakhapatnam",
+      "alternateName": "Vizag",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Andhra Pradesh"
+      }
+    }
+  },
+  "generatedAt": "2026-08-28T18:28:44.293781+00:00"
+}

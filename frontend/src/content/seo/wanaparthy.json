@@ -1,0 +1,50 @@
+{
+  "citySlug": "wanaparthy",
+  "city": "Wanaparthy",
+  "state": "Telangana",
+  "lang": "te",
+  "titleTag": "Wanaparthy Classifieds — Free PG, Tiffin & Jobs",
+  "metaDescription": "Buy, sell, find PG rooms and tiffin in Wanaparthy. Free classifieds for jobs, services, and local deals. Post today on LocalsIndia.",
+  "ogTitle": "Wanaparthy's Neighborhood Classifieds — Connect Locally",
+  "ogDescription": "Find PG rooms, home-cooked meals, part-time jobs, and secondhand items in Wanaparthy. Zero posting fees. Direct WhatsApp contact.",
+  "h1": "Wanaparthy Free Classifieds & Local Listings",
+  "focusKeyword": "wanaparthy classifieds",
+  "secondaryKeywords": [
+    "pg rooms wanaparthy",
+    "tiffin service wanaparthy",
+    "jobs wanaparthy",
+    "buy sell wanaparthy"
+  ],
+  "longTailKeywords": [
+    "pg rooms in wanaparthy for boys",
+    "pg rooms in wanaparthy for girls",
+    "tiffin service near me wanaparthy",
+    "home delivery food wanaparthy",
+    "part time jobs wanaparthy",
+    "secondhand bikes wanaparthy",
+    "used mobile phones wanaparthy",
+    "domestic help wanaparthy",
+    "tuition classes wanaparthy",
+    "furniture for sale wanaparthy"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Wanaparthy Free Classifieds — Local Listings",
+    "description": "Hyperlocal classifieds for Wanaparthy. Post and find PG rooms, tiffin, jobs, and services for free.",
+    "url": "https://www.localsindia.com/wanaparthy",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Wanaparthy",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Telangana"
+      }
+    }
+  },
+  "generatedAt": "2026-08-28T18:27:52.093656+00:00"
+}

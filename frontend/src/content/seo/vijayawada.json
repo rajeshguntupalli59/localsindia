@@ -1,0 +1,52 @@
+{
+  "citySlug": "vijayawada",
+  "city": "Vijayawada",
+  "state": "Andhra Pradesh",
+  "lang": "te",
+  "titleTag": "Vijayawada Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Post and find free classifieds in Vijayawada. Tiffin services, PG rooms, jobs, bikes, and more. Connect with locals via WhatsApp instantly.",
+  "ogTitle": "Vijayawada Local Classifieds — Tiffin, PG & Jobs Near You",
+  "ogDescription": "Discover local deals, tiffin services, and PG rooms in Vijayawada. Post for free, connect directly via WhatsApp. Your neighborhood marketplace.",
+  "h1": "Free Local Classifieds in Vijayawada — Tiffin, PG, Jobs & More",
+  "focusKeyword": "vijayawada classifieds",
+  "secondaryKeywords": [
+    "vijayawada tiffin service",
+    "pg rooms in vijayawada",
+    "jobs in vijayawada",
+    "second hand bikes vijayawada"
+  ],
+  "longTailKeywords": [
+    "vijayawada tiffin service near me",
+    "pg rooms in vijayawada for boys",
+    "pg rooms in vijayawada for girls",
+    "part time jobs in vijayawada",
+    "second hand bikes in vijayawada",
+    "domestic help in vijayawada",
+    "flat mate wanted vijayawada",
+    "home cooked food delivery vijayawada",
+    "used furniture vijayawada",
+    "carpool vijayawada to hyderabad",
+    "బిజయవాడ క్లాసిఫైడ్స్",
+    "విజయవాడ పిజీ రూమ్‌లు"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Vijayawada Free Classifieds — Tiffin, PG, Jobs & More | LocalsIndia",
+    "description": "Post and find free classifieds in Vijayawada. Tiffin services, PG rooms, jobs, bikes, and more. Connect with locals via WhatsApp instantly.",
+    "url": "https://www.localsindia.com/vijayawada",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Vijayawada",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Andhra Pradesh"
+      }
+    }
+  },
+  "generatedAt": "2026-08-28T18:28:36.927248+00:00"
+}

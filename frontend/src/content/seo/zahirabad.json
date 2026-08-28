@@ -1,0 +1,50 @@
+{
+  "citySlug": "zahirabad",
+  "city": "Zahirabad",
+  "state": "Telangana",
+  "lang": "te",
+  "titleTag": "Zahirabad Classifieds — Tiffin, PG & Jobs | LocalsIndia",
+  "metaDescription": "Free classifieds in Zahirabad. Post & browse tiffin services, PG rooms, jobs, bikes & more. Connect via WhatsApp. No fees.",
+  "ogTitle": "Find Everything Local in Zahirabad — Tiffin, Rooms & Jobs",
+  "ogDescription": "Zahirabad's hyperlocal classifieds. Tiffin delivery, PG accommodation, part-time jobs, used bikes. Post free, sell fast.",
+  "h1": "Zahirabad Free Classifieds — Tiffin, PG Rooms, Jobs & Local Deals",
+  "focusKeyword": "zahirabad classifieds",
+  "secondaryKeywords": [
+    "zahirabad tiffin service",
+    "pg rooms in zahirabad",
+    "jobs in zahirabad",
+    "zahirabad second hand bikes"
+  ],
+  "longTailKeywords": [
+    "tiffin service near me zahirabad",
+    "pg rooms for girls in zahirabad",
+    "pg rooms for boys in zahirabad",
+    "part time jobs in zahirabad",
+    "second hand bikes in zahirabad",
+    "used mobile phones zahirabad",
+    "domestic help zahirabad",
+    "furniture for sale zahirabad",
+    "home tuition in zahirabad",
+    "carpool zahirabad to hyderabad"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Zahirabad Free Classifieds — Tiffin, PG, Jobs & More",
+    "description": "Hyperlocal classifieds platform for Zahirabad, Telangana. Post and browse free listings for tiffin, PG rooms, jobs, vehicles, and everyday items.",
+    "url": "https://www.localsindia.com/zahirabad",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Zahirabad",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Telangana"
+      }
+    }
+  },
+  "generatedAt": "2026-08-28T18:28:04.467693+00:00"
+}

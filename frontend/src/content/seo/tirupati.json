@@ -1,0 +1,50 @@
+{
+  "citySlug": "tirupati",
+  "city": "Tirupati",
+  "state": "Andhra Pradesh",
+  "lang": "te",
+  "titleTag": "Tirupati Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Find tiffin services, PG rooms, jobs, and local classifieds in Tirupati. Post free on LocalsIndia — your neighborhood marketplace.",
+  "ogTitle": "Tirupati Classifieds & Local Marketplace — LocalsIndia",
+  "ogDescription": "Discover tiffin delivery, paying guest rooms, part-time jobs, and secondhand items in Tirupati. Connect with locals via WhatsApp.",
+  "h1": "Tirupati Local Classifieds — Tiffin, PG Rooms & Jobs Near You",
+  "focusKeyword": "tirupati classifieds",
+  "secondaryKeywords": [
+    "tirupati free classifieds",
+    "tirupati tiffin service",
+    "tirupati pg rooms",
+    "tirupati jobs"
+  ],
+  "longTailKeywords": [
+    "tirupati tiffin service near me",
+    "pg rooms in tirupati for girls",
+    "pg rooms in tirupati for boys",
+    "part time jobs in tirupati",
+    "second hand bikes in tirupati",
+    "tirupati domestic help",
+    "tirupati tuition classes",
+    "tirupati used mobile phones",
+    "tirupati carpool",
+    "tirupati furniture buy sell"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Tirupati Free Classifieds — Tiffin, PG, Jobs & More",
+    "description": "Find tiffin services, PG rooms, jobs, and local classifieds in Tirupati. Post free on LocalsIndia — your neighborhood marketplace.",
+    "url": "https://www.localsindia.com/tirupati",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Tirupati",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Andhra Pradesh"
+      }
+    }
+  },
+  "generatedAt": "2026-08-28T18:28:29.205735+00:00"
+}

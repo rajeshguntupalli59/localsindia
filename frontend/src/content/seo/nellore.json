@@ -1,0 +1,52 @@
+{
+  "citySlug": "nellore",
+  "city": "Nellore",
+  "state": "Andhra Pradesh",
+  "lang": "te",
+  "titleTag": "Nellore Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, hire locally in Nellore. Free classifieds for tiffin, PG rooms, jobs, bikes & more. Post for free, connect on WhatsApp.",
+  "ogTitle": "Nellore Local Classifieds — Your Neighborhood Marketplace",
+  "ogDescription": "Find tiffin services, PG rooms, part-time jobs & secondhand items in Nellore. Free to post. Real neighbors, real deals.",
+  "h1": "Nellore Classifieds — Free Local Buy, Sell & Services",
+  "focusKeyword": "nellore classifieds",
+  "secondaryKeywords": [
+    "nellore tiffin service",
+    "pg rooms in nellore",
+    "jobs in nellore",
+    "nellore buy sell"
+  ],
+  "longTailKeywords": [
+    "nellore tiffin service near me",
+    "pg rooms in nellore for boys",
+    "pg rooms in nellore for girls",
+    "part time jobs in nellore",
+    "full time jobs in nellore",
+    "secondhand bikes in nellore",
+    "used bikes for sale nellore",
+    "nellore domestic help services",
+    "nellore tuition classes",
+    "nellore furniture buy sell",
+    "nellore electronics classifieds",
+    "nellore carpool roommate"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Nellore Free Classifieds — Tiffin, PG, Jobs & More",
+    "description": "Buy, sell, hire locally in Nellore. Free classifieds for tiffin, PG rooms, jobs, bikes & more. Post for free, connect on WhatsApp.",
+    "url": "https://www.localsindia.com/nellore",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Nellore",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Andhra Pradesh"
+      }
+    }
+  },
+  "generatedAt": "2026-08-28T18:28:24.392671+00:00"
+}

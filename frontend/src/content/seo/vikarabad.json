@@ -1,0 +1,50 @@
+{
+  "citySlug": "vikarabad",
+  "city": "Vikarabad",
+  "state": "Telangana",
+  "lang": "te",
+  "titleTag": "Vikarabad Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, hire in Vikarabad. Free classifieds for tiffin, PG rooms, jobs, used bikes & more. Post instantly, contact on WhatsApp.",
+  "ogTitle": "Vikarabad Classifieds — Find Tiffin, PG & Jobs Near You",
+  "ogDescription": "Your neighborhood classifieds in Vikarabad. Tiffin delivery, paying guest rooms, local jobs, used items — all free to post.",
+  "h1": "Vikarabad Classifieds — Tiffin, PG Rooms, Jobs & Local Listings",
+  "focusKeyword": "vikarabad classifieds",
+  "secondaryKeywords": [
+    "vikarabad tiffin service",
+    "pg rooms vikarabad",
+    "jobs in vikarabad",
+    "vikarabad buy sell"
+  ],
+  "longTailKeywords": [
+    "tiffin service near me vikarabad",
+    "pg rooms in vikarabad for girls",
+    "pg rooms in vikarabad for boys",
+    "part time jobs vikarabad",
+    "full time jobs vikarabad",
+    "second hand bikes vikarabad",
+    "used mobile phones vikarabad",
+    "domestic help vikarabad",
+    "tuition classes vikarabad",
+    "furniture for sale vikarabad"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Vikarabad Free Classifieds — Tiffin, PG, Jobs & More | LocalsIndia",
+    "description": "Buy, sell, hire in Vikarabad. Free classifieds for tiffin, PG rooms, jobs, used bikes & more. Post instantly, contact on WhatsApp.",
+    "url": "https://www.localsindia.com/vikarabad",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Vikarabad",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Telangana"
+      }
+    }
+  },
+  "generatedAt": "2026-08-28T18:27:47.284700+00:00"
+}

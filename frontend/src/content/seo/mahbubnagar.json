@@ -1,0 +1,50 @@
+{
+  "citySlug": "mahbubnagar",
+  "city": "Mahbubnagar",
+  "state": "Telangana",
+  "lang": "te",
+  "titleTag": "Mahbubnagar Free Classifieds — Tiffin, PG & Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, hire in Mahbubnagar. Tiffin delivery, PG rooms, jobs, bikes & more. Post free on LocalsIndia.",
+  "ogTitle": "Mahbubnagar Local Classifieds — Connect With Your Neighbors",
+  "ogDescription": "Find trusted tiffin, PG rooms, part-time jobs, and used items in Mahbubnagar. WhatsApp sellers directly.",
+  "h1": "Mahbubnagar Local Classifieds & Community Listings",
+  "focusKeyword": "mahbubnagar classifieds",
+  "secondaryKeywords": [
+    "mahbubnagar tiffin service",
+    "pg rooms in mahbubnagar",
+    "jobs in mahbubnagar",
+    "used bikes mahbubnagar"
+  ],
+  "longTailKeywords": [
+    "tiffin service near me mahbubnagar",
+    "pg rooms for boys in mahbubnagar",
+    "pg rooms for girls in mahbubnagar",
+    "part time jobs in mahbubnagar",
+    "second hand bikes in mahbubnagar",
+    "domestic help mahbubnagar",
+    "tuition classes mahbubnagar",
+    "flatmate wanted mahbubnagar",
+    "home cooked food delivery mahbubnagar",
+    "furniture for sale mahbubnagar"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Mahbubnagar Free Classifieds | LocalsIndia",
+    "description": "Local community classifieds for Mahbubnagar. Buy, sell, hire tiffin, PG rooms, jobs, and services.",
+    "url": "https://www.localsindia.com/mahbubnagar",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Mahbubnagar",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Telangana"
+      }
+    }
+  },
+  "generatedAt": "2026-08-28T18:28:11.111532+00:00"
+}

@@ -1,0 +1,52 @@
+{
+  "citySlug": "guntur",
+  "city": "Guntur",
+  "state": "Andhra Pradesh",
+  "lang": "te",
+  "titleTag": "Guntur Free Classifieds — Tiffin, PG, Jobs | LocalsIndia",
+  "metaDescription": "Buy, sell, rent in Guntur. Free classifieds for tiffin, PG rooms, jobs, bikes & more. Connect via WhatsApp instantly.",
+  "ogTitle": "Guntur Classifieds — Your Neighborhood Marketplace",
+  "ogDescription": "Find tiffin services, PG rooms, jobs, and local deals in Guntur. Post free, connect with neighbors on WhatsApp.",
+  "h1": "Guntur Free Classifieds — Local Buy, Sell & Services",
+  "focusKeyword": "guntur classifieds",
+  "secondaryKeywords": [
+    "guntur tiffin service",
+    "pg rooms in guntur",
+    "jobs in guntur",
+    "second hand bikes guntur"
+  ],
+  "longTailKeywords": [
+    "guntur tiffin service near me",
+    "pg rooms in guntur for boys",
+    "pg rooms in guntur for girls",
+    "part time jobs in guntur",
+    "full time jobs in guntur",
+    "second hand bikes in guntur",
+    "guntur classifieds buy sell",
+    "domestic help in guntur",
+    "carpool guntur",
+    "used furniture guntur",
+    "guntur tuition classes",
+    "rental flats in guntur"
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Guntur Free Classifieds — Tiffin, PG, Jobs & More",
+    "description": "Buy, sell, rent in Guntur. Free classifieds for tiffin, PG rooms, jobs, bikes & more. Connect via WhatsApp instantly.",
+    "url": "https://www.localsindia.com/guntur",
+    "inLanguage": [
+      "te",
+      "en"
+    ],
+    "about": {
+      "@type": "City",
+      "name": "Guntur",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Andhra Pradesh"
+      }
+    }
+  },
+  "generatedAt": "2026-08-28T18:28:17.541023+00:00"
+}
