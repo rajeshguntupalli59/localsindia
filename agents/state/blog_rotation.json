@@ -1,6 +1,6 @@
 {
-  "lastCityIndex": 10,
-  "lastCategoryIndex": 3,
+  "lastCityIndex": 11,
+  "lastCategoryIndex": 4,
   "history": [
     {
       "citySlug": "bangalore",
@@ -67,6 +67,12 @@
       "category": "vehicles",
       "topicTemplateId": "used-bike-checklist",
       "publishedAt": "2026-08-23T03:43:29Z"
+    },
+    {
+      "citySlug": "kanpur",
+      "category": "electronics",
+      "topicTemplateId": "used-phone-check",
+      "publishedAt": "2026-08-30T08:46:42Z"
     }
   ]
 }
