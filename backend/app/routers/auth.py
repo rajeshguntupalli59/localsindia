@@ -117,6 +117,15 @@ async def check_phone(request: Request, body: OtpSendRequest, db: AsyncSession =
     return {"has_account": bool(user and user.password_hash)}
 
 
+def _is_browser_request(request: Request) -> bool:
+    """Browsers send Origin/Referer on cross-origin fetch/XHR calls; native
+    mobile HTTP clients (React Native's fetch/axios, used by mobile/src/lib/api.ts)
+    do not. Used to scope the reCAPTCHA requirement to the web frontend — the
+    mobile app has no reCAPTCHA integration (RN can't run the JS widget as-is),
+    so enforcing it unconditionally silently breaks every mobile OTP send."""
+    return bool(request.headers.get("origin") or request.headers.get("referer"))
+
+
 @router.post("/otp/send", status_code=200)
 @limiter.limit("3/minute")
 @limiter.limit("6/hour")
@@ -126,7 +135,10 @@ async def send_otp(request: Request, body: OtpSendRequest, db: AsyncSession = De
 
     # Blocks distributed bots the per-IP limit can't catch (many source IPs,
     # each under the cap) — requires human interaction regardless of source IP.
-    if not await recaptcha.verify_otp_send(body.recaptcha_token):
+    # Scoped to browser requests only — see _is_browser_request. Mobile falls
+    # back to the per-IP rate limit alone until it has its own verification
+    # (Play Integrity API or similar — not built yet).
+    if _is_browser_request(request) and not await recaptcha.verify_otp_send(body.recaptcha_token):
         raise HTTPException(status_code=400, detail="Verification failed. Please try again.")
 
     # Per-IP rate limit (above) stops a bot rotating through many phone numbers

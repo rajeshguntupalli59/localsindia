@@ -411,8 +411,13 @@ async def test_otp_rate_limit_per_hour(client):
 # MSG91 mock-mode pattern so tests and local dev work without real keys.
 @pytest.mark.asyncio
 async def test_otp_send_rejected_without_token_when_recaptcha_configured(client, monkeypatch):
+    # Origin header simulates a browser (fetch/XHR) call — see _is_browser_request.
     monkeypatch.setattr("app.core.config.settings.RECAPTCHA_SECRET_KEY", "test-secret")
-    resp = await client.post("/api/v1/auth/otp/send", json={"phone": "+919888800001"})
+    resp = await client.post(
+        "/api/v1/auth/otp/send",
+        json={"phone": "+919888800001"},
+        headers={"Origin": "https://www.localsindia.com"},
+    )
     assert resp.status_code == 400
 
 
@@ -423,7 +428,18 @@ async def test_otp_send_accepted_with_valid_recaptcha_token(client, monkeypatch)
         resp = await client.post(
             "/api/v1/auth/otp/send",
             json={"phone": "+919888800002", "recaptcha_token": "valid-token"},
+            headers={"Origin": "https://www.localsindia.com"},
         )
+    assert resp.status_code == 200
+
+
+@pytest.mark.asyncio
+async def test_otp_send_mobile_request_bypasses_recaptcha(client, monkeypatch):
+    # Mobile's native HTTP client sends no Origin/Referer — regression test for
+    # the incident where enforcing reCAPTCHA unconditionally broke every real
+    # mobile OTP send, since mobile has no reCAPTCHA integration of its own.
+    monkeypatch.setattr("app.core.config.settings.RECAPTCHA_SECRET_KEY", "test-secret")
+    resp = await client.post("/api/v1/auth/otp/send", json={"phone": "+919888800003"})
     assert resp.status_code == 200
 
 
