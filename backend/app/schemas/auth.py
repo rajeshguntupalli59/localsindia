@@ -8,6 +8,7 @@ PHONE_RE = re.compile(r"^\+91[6-9]\d{9}$")
 
 class OtpSendRequest(BaseModel):
     phone: str
+    recaptcha_token: str | None = None
 
     @field_validator("phone")
     @classmethod

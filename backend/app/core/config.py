@@ -13,6 +13,9 @@ class Settings(BaseSettings):
     MSG91_TEMPLATE_ID: str = ""
     MSG91_DLT_TEMPLATE_ID: str = ""  # DLT template ID from Jio Connect portal
 
+    RECAPTCHA_SECRET_KEY: str = ""  # from google.com/recaptcha/admin — unset skips verification (dev/mock mode)
+    RECAPTCHA_MIN_SCORE: float = 0.5
+
     GOOGLE_CLIENT_ID: str = ""
     GOOGLE_CLIENT_SECRET: str = ""
     BACKEND_URL: str = "http://localhost:8000"

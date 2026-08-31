@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock
 from sqlalchemy import select
 
 from app.models.user import User
@@ -405,6 +405,26 @@ async def test_otp_rate_limit_per_hour(client):
     # 6th should be rate-limited
     resp = await client.post("/api/v1/auth/otp/send", json={"phone": phone})
     assert resp.status_code == 429
+
+
+# reCAPTCHA is skipped by default (RECAPTCHA_SECRET_KEY unset) — mirrors the
+# MSG91 mock-mode pattern so tests and local dev work without real keys.
+@pytest.mark.asyncio
+async def test_otp_send_rejected_without_token_when_recaptcha_configured(client, monkeypatch):
+    monkeypatch.setattr("app.core.config.settings.RECAPTCHA_SECRET_KEY", "test-secret")
+    resp = await client.post("/api/v1/auth/otp/send", json={"phone": "+919888800001"})
+    assert resp.status_code == 400
+
+
+@pytest.mark.asyncio
+async def test_otp_send_accepted_with_valid_recaptcha_token(client, monkeypatch):
+    monkeypatch.setattr("app.core.config.settings.RECAPTCHA_SECRET_KEY", "test-secret")
+    with patch("app.services.recaptcha.verify_otp_send", new_callable=AsyncMock, return_value=True):
+        resp = await client.post(
+            "/api/v1/auth/otp/send",
+            json={"phone": "+919888800002", "recaptcha_token": "valid-token"},
+        )
+    assert resp.status_code == 200
 
 
 # Per-IP rate limit stops a bot rotating through many phone numbers to burn

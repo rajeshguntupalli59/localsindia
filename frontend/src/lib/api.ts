@@ -171,10 +171,10 @@ export const api = {
         method: 'POST',
         body: JSON.stringify({ phone, password }),
       }),
-    sendOtp: (phone: string) =>
+    sendOtp: (phone: string, recaptchaToken?: string) =>
       req<{ message: string; otp?: string }>('/api/v1/auth/otp/send', {
         method: 'POST',
-        body: JSON.stringify({ phone }),
+        body: JSON.stringify({ phone, recaptcha_token: recaptchaToken }),
       }),
     verifyOtp: (data: { phone: string; otp: string; ref_code?: string }) =>
       req<OtpVerifyResult>('/api/v1/auth/otp/verify', {

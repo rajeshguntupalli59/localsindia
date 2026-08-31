@@ -29,7 +29,7 @@ from app.schemas.auth import (
     RefreshRequest, TokenResponse, UserOut, ProfileUpdate, AdminLoginRequest,
     OtpVerifyResponse, LoginRequest, SetPasswordRequest,
 )
-from app.services import msg91
+from app.services import msg91, recaptcha
 
 router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 
@@ -123,6 +123,11 @@ async def check_phone(request: Request, body: OtpSendRequest, db: AsyncSession =
 async def send_otp(request: Request, body: OtpSendRequest, db: AsyncSession = Depends(get_db)):
     phone = body.phone
     now = datetime.now(timezone.utc)
+
+    # Blocks distributed bots the per-IP limit can't catch (many source IPs,
+    # each under the cap) — requires human interaction regardless of source IP.
+    if not await recaptcha.verify_otp_send(body.recaptcha_token):
+        raise HTTPException(status_code=400, detail="Verification failed. Please try again.")
 
     # Per-IP rate limit (above) stops a bot rotating through many phone numbers
     # to burn SMS credits — the per-phone limit below only protects one number.

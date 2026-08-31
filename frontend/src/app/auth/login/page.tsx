@@ -8,10 +8,12 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { api, ApiError } from '@/lib/api';
 import Link from 'next/link';
+import Script from 'next/script';
 import { useRouter, useSearchParams } from 'next/navigation';
 import SiteLogo from '@/components/site-logo/SiteLogo';
 import { usePrefs } from '@/context/PrefsContext';
 import { LANGUAGES } from '@/components/language-selector/LanguageSelector';
+import { RECAPTCHA_SITE_KEY, getRecaptchaToken } from '@/lib/recaptcha';
 
 // "English, Telugu, Tamil, Kannada & Malayalam" — built from the same
 // LANGUAGES registry the picker uses, so this can't drift out of sync.
@@ -164,7 +166,8 @@ function LoginInner() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await api.auth.sendOtp(phone);
+      const recaptchaToken = await getRecaptchaToken('otp_send');
+      const res = await api.auth.sendOtp(phone, recaptchaToken);
       setStep('otp');
       if (res?.otp) {
         toast.info(`OTP: ${res.otp}`, { duration: 60000 });
@@ -243,7 +246,8 @@ function LoginInner() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await api.auth.sendOtp(phone);
+      const recaptchaToken = await getRecaptchaToken('otp_send');
+      const res = await api.auth.sendOtp(phone, recaptchaToken);
       setStep('forgot-otp');
       if (res?.otp) toast.info(`OTP: ${res.otp}`, { duration: 60000 });
       else toast.success('OTP sent to your mobile!');
@@ -304,6 +308,18 @@ function LoginInner() {
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
+
+      {RECAPTCHA_SITE_KEY && (
+        <>
+          <Script
+            src={`https://www.google.com/recaptcha/api.js?render=${RECAPTCHA_SITE_KEY}`}
+            strategy="afterInteractive"
+          />
+          {/* Google's terms allow hiding the floating badge only if this attribution
+              is shown instead — added to the footer notice below. */}
+          <style>{`.grecaptcha-badge { visibility: hidden; }`}</style>
+        </>
+      )}
 
       {/* Brand panel — desktop only (lg+); mobile gets just the form, unchanged */}
       <div className="hidden lg:flex lg:w-[44%] xl:w-1/2 relative overflow-hidden flex-col justify-between px-12 xl:px-16 py-16" style={{ background: 'var(--li-nav-bg)' }}>
@@ -703,6 +719,15 @@ function LoginInner() {
             <a href="/terms" className="underline underline-offset-2 hover:text-slate-700">Terms of Service</a>
             {' '}and{' '}
             <a href="/privacy" className="underline underline-offset-2 hover:text-slate-700">Privacy Policy</a>.
+            {RECAPTCHA_SITE_KEY && (
+              <>
+                {' '}This site is protected by reCAPTCHA and the Google{' '}
+                <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-slate-700">Privacy Policy</a>
+                {' '}and{' '}
+                <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-slate-700">Terms of Service</a>
+                {' '}apply.
+              </>
+            )}
           </p>
         </div>
       </div>
