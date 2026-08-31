@@ -135,10 +135,19 @@ async def send_otp(request: Request, body: OtpSendRequest, db: AsyncSession = De
 
     # Blocks distributed bots the per-IP limit can't catch (many source IPs,
     # each under the cap) — requires human interaction regardless of source IP.
-    # Scoped to browser requests only — see _is_browser_request. Mobile falls
-    # back to the per-IP rate limit alone until it has its own verification
-    # (Play Integrity API or similar — not built yet).
-    if _is_browser_request(request) and not await recaptcha.verify_otp_send(body.recaptcha_token):
+    # Any caller that supplies a token must pass verification (web always
+    # sends one; the mobile app does too now, via a WebView-embedded widget —
+    # see mobile/src/lib/recaptcha.tsx). A token-less request is only allowed
+    # through when it doesn't look like a browser: mobile app installs from
+    # before the WebView widget shipped can't produce a token at all, and
+    # rejecting them would repeat the outage this replaced — see
+    # _is_browser_request and the 2026-08-31 incident writeup in
+    # PROJECT_MAP.md. Browsers always send one, so a token-less browser
+    # request is either a bug or a bot skipping the widget outright.
+    if body.recaptcha_token:
+        if not await recaptcha.verify_otp_send(body.recaptcha_token):
+            raise HTTPException(status_code=400, detail="Verification failed. Please try again.")
+    elif _is_browser_request(request):
         raise HTTPException(status_code=400, detail="Verification failed. Please try again.")
 
     # Per-IP rate limit (above) stops a bot rotating through many phone numbers

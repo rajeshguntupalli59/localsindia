@@ -10,6 +10,7 @@ import { registerForPushNotificationsAsync } from '../lib/pushNotifications';
 import { isBiometricAvailable } from '../hooks/useBiometric';
 import { Ionicons } from '@expo/vector-icons';
 import { C, RADIUS, SHADOW } from '../lib/theme';
+import RecaptchaWebView, { RecaptchaHandle } from '../lib/recaptcha';
 
 const LOGO = require('../../assets/logo-mark-transparent.png');
 
@@ -37,6 +38,7 @@ export default function LoginScreen({ navigation }: any) {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const logoTapCount = useRef(0);
   const logoTapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const recaptchaRef = useRef<RecaptchaHandle>(null);
 
   const handleLogoTap = () => {
     logoTapCount.current += 1;
@@ -101,7 +103,8 @@ export default function LoginScreen({ navigation }: any) {
         setMode('signin');
         return;
       }
-      const data = await authApi.sendOtp(`+91${phone}`);
+      const recaptchaToken = await recaptchaRef.current?.getToken('otp_send');
+      const data = await authApi.sendOtp(`+91${phone}`, recaptchaToken);
       if (data.otp) setDebugOtp(data.otp);
       setStep('otp');
     } catch {
@@ -165,7 +168,8 @@ export default function LoginScreen({ navigation }: any) {
     if (!/^[6-9]\d{9}$/.test(phone)) { Alert.alert('Invalid number', 'Enter a valid 10-digit Indian mobile number.'); return; }
     setLoading(true);
     try {
-      const data = await authApi.sendOtp(`+91${phone}`);
+      const recaptchaToken = await recaptchaRef.current?.getToken('otp_send');
+      const data = await authApi.sendOtp(`+91${phone}`, recaptchaToken);
       if (data.otp) setDebugOtp(data.otp);
       setStep('forgot-otp');
     } catch {
@@ -229,6 +233,9 @@ export default function LoginScreen({ navigation }: any) {
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}>
+
+      {/* Invisible — generates a reCAPTCHA token for sendOtp, no UI of its own */}
+      <RecaptchaWebView ref={recaptchaRef} />
 
       {/* Atmospheric glow blobs */}
       <View style={styles.glowTR} pointerEvents="none" />

@@ -435,12 +435,27 @@ async def test_otp_send_accepted_with_valid_recaptcha_token(client, monkeypatch)
 
 @pytest.mark.asyncio
 async def test_otp_send_mobile_request_bypasses_recaptcha(client, monkeypatch):
-    # Mobile's native HTTP client sends no Origin/Referer — regression test for
-    # the incident where enforcing reCAPTCHA unconditionally broke every real
-    # mobile OTP send, since mobile has no reCAPTCHA integration of its own.
+    # Mobile's native HTTP client sends no Origin/Referer, and old app installs
+    # predating the WebView captcha widget can't supply a token at all —
+    # regression test for the incident where enforcing reCAPTCHA unconditionally
+    # broke every real mobile OTP send.
     monkeypatch.setattr("app.core.config.settings.RECAPTCHA_SECRET_KEY", "test-secret")
     resp = await client.post("/api/v1/auth/otp/send", json={"phone": "+919888800003"})
     assert resp.status_code == 200
+
+
+@pytest.mark.asyncio
+async def test_otp_send_rejects_invalid_token_even_without_browser_headers(client, monkeypatch):
+    # A provided token is always verified regardless of Origin/Referer — mobile
+    # now sends a real one via the WebView captcha widget, and this closes the
+    # gap a bot could otherwise exploit by omitting Origin while passing junk.
+    monkeypatch.setattr("app.core.config.settings.RECAPTCHA_SECRET_KEY", "test-secret")
+    with patch("app.services.recaptcha.verify_otp_send", new_callable=AsyncMock, return_value=False):
+        resp = await client.post(
+            "/api/v1/auth/otp/send",
+            json={"phone": "+919888800004", "recaptcha_token": "bad-token"},
+        )
+    assert resp.status_code == 400
 
 
 # Per-IP rate limit stops a bot rotating through many phone numbers to burn

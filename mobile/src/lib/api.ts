@@ -86,8 +86,8 @@ export const authApi = {
   checkPhone: (phone: string) =>
     api.post('/auth/phone/check', { phone }).then(r => r.data),
 
-  sendOtp: (phone: string) =>
-    api.post('/auth/otp/send', { phone }).then(r => r.data),
+  sendOtp: (phone: string, recaptchaToken?: string) =>
+    api.post('/auth/otp/send', { phone, recaptcha_token: recaptchaToken }).then(r => r.data),
 
   verifyOtp: (phone: string, otp: string, refCode?: string | null) =>
     api.post('/auth/otp/verify', { phone, otp, ref_code: refCode ?? undefined }).then(r => r.data),
