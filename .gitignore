@@ -55,3 +55,6 @@ pgdata/
 # Local dev tool caches (generated, not source)
 .codegraph/
 graphify-out/
+
+# Claude Code agent-isolation worktrees (transient scratch, not source)
+.claude/worktrees/
