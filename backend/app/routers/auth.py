@@ -117,15 +117,6 @@ async def check_phone(request: Request, body: OtpSendRequest, db: AsyncSession =
     return {"has_account": bool(user and user.password_hash)}
 
 
-def _is_browser_request(request: Request) -> bool:
-    """Browsers send Origin/Referer on cross-origin fetch/XHR calls; native
-    mobile HTTP clients (React Native's fetch/axios, used by mobile/src/lib/api.ts)
-    do not. Used to scope the reCAPTCHA requirement to the web frontend — the
-    mobile app has no reCAPTCHA integration (RN can't run the JS widget as-is),
-    so enforcing it unconditionally silently breaks every mobile OTP send."""
-    return bool(request.headers.get("origin") or request.headers.get("referer"))
-
-
 @router.post("/otp/send", status_code=200)
 @limiter.limit("3/minute")
 @limiter.limit("6/hour")
@@ -135,19 +126,18 @@ async def send_otp(request: Request, body: OtpSendRequest, db: AsyncSession = De
 
     # Blocks distributed bots the per-IP limit can't catch (many source IPs,
     # each under the cap) — requires human interaction regardless of source IP.
-    # Any caller that supplies a token must pass verification (web always
-    # sends one; the mobile app does too now, via a WebView-embedded widget —
-    # see mobile/src/lib/recaptcha.tsx). A token-less request is only allowed
-    # through when it doesn't look like a browser: mobile app installs from
-    # before the WebView widget shipped can't produce a token at all, and
-    # rejecting them would repeat the outage this replaced — see
-    # _is_browser_request and the 2026-08-31 incident writeup in
-    # PROJECT_MAP.md. Browsers always send one, so a token-less browser
-    # request is either a bug or a bot skipping the widget outright.
-    if body.recaptcha_token:
-        if not await recaptcha.verify_otp_send(body.recaptcha_token):
-            raise HTTPException(status_code=400, detail="Verification failed. Please try again.")
-    elif _is_browser_request(request):
+    # Enforced unconditionally: an earlier version of this check skipped
+    # verification for any request that didn't "look like a browser" (no
+    # Origin/Referer header), to avoid breaking the mobile app before it had
+    # its own reCAPTCHA integration. That was the wrong signal — omitting
+    # those headers is also the *default* behavior of any bare bot script
+    # (curl, requests, etc.), so bots walked straight through the same door
+    # meant for mobile, and OTP volume never actually dropped. Mobile now
+    # sends a real token too (WebView-embedded widget, shipped in v14,
+    # 2026-08-31 — see mobile/src/lib/recaptcha.tsx), so there's no longer a
+    # legitimate client this would break. See PROJECT_MAP.md for the
+    # incident this replaced and the gap that reopened it.
+    if not await recaptcha.verify_otp_send(body.recaptcha_token):
         raise HTTPException(status_code=400, detail="Verification failed. Please try again.")
 
     # Per-IP rate limit (above) stops a bot rotating through many phone numbers
