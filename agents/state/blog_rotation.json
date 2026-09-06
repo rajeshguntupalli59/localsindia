@@ -1,6 +1,6 @@
 {
-  "lastCityIndex": 11,
-  "lastCategoryIndex": 4,
+  "lastCityIndex": 12,
+  "lastCategoryIndex": 5,
   "history": [
     {
       "citySlug": "bangalore",
@@ -73,6 +73,12 @@
       "category": "electronics",
       "topicTemplateId": "used-phone-check",
       "publishedAt": "2026-08-30T08:46:42Z"
+    },
+    {
+      "citySlug": "nagpur",
+      "category": "services",
+      "topicTemplateId": "hire-reliable-help",
+      "publishedAt": "2026-09-06T07:29:04Z"
     }
   ]
 }
