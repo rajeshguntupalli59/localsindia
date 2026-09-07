@@ -1,8 +1,7 @@
 {
-  "lastTopicIndex": 0,
-  "lastTipCategoryIndex": 7,
+  "lastTopicIndex": 1,
+  "lastTipCategoryIndex": 8,
   "topicHistory": [
-    "city_spotlight",
     "app_launch",
     "referral",
     "app_feature",
@@ -11,10 +10,10 @@
     "city_spotlight",
     "app_launch",
     "referral",
-    "app_feature"
+    "app_feature",
+    "category_tip"
   ],
   "tipCategoryHistory": [
-    "jobs",
     "jobs",
     "jobs",
     "classifieds",
@@ -23,11 +22,11 @@
     "vehicles",
     "electronics",
     "events",
-    "businesses"
+    "businesses",
+    "tiffin"
   ],
-  "lastStyleIndex": 4,
+  "lastStyleIndex": 0,
   "styleHistory": [
-    "glass",
     "bold",
     "duotone",
     "quote",
@@ -36,6 +35,7 @@
     "bold",
     "duotone",
     "quote",
-    "spotlight"
+    "spotlight",
+    "glass"
   ]
 }
