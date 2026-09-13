@@ -1,6 +1,6 @@
 {
-  "lastCityIndex": 12,
-  "lastCategoryIndex": 5,
+  "lastCityIndex": 13,
+  "lastCategoryIndex": 6,
   "history": [
     {
       "citySlug": "bangalore",
@@ -79,6 +79,12 @@
       "category": "services",
       "topicTemplateId": "hire-reliable-help",
       "publishedAt": "2026-09-06T07:29:04Z"
+    },
+    {
+      "citySlug": "indore",
+      "category": "real-estate",
+      "topicTemplateId": "flat-vs-pg",
+      "publishedAt": "2026-09-13T07:51:51Z"
     }
   ]
 }
