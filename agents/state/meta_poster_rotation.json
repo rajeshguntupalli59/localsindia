@@ -1,8 +1,7 @@
 {
-  "lastTopicIndex": 3,
+  "lastTopicIndex": 4,
   "lastTipCategoryIndex": 9,
   "topicHistory": [
-    "app_feature",
     "category_tip",
     "safety_tip",
     "city_spotlight",
@@ -11,7 +10,8 @@
     "app_feature",
     "category_tip",
     "safety_tip",
-    "city_spotlight"
+    "city_spotlight",
+    "app_launch"
   ],
   "tipCategoryHistory": [
     "jobs",
@@ -25,9 +25,8 @@
     "tiffin",
     "real-estate"
   ],
-  "lastStyleIndex": 3,
+  "lastStyleIndex": 4,
   "styleHistory": [
-    "spotlight",
     "glass",
     "bold",
     "duotone",
@@ -36,6 +35,7 @@
     "glass",
     "bold",
     "duotone",
-    "quote"
+    "quote",
+    "spotlight"
   ]
 }
