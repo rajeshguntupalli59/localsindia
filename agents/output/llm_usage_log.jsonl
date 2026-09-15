@@ -357,3 +357,4 @@
 {"timestamp": "2026-09-13T17:02:21.232678", "agent": "meta_poster", "model": "claude-haiku-4-5-20251001", "input_tokens": 1988, "output_tokens": 150, "estimated_cost_usd": 0.002738}
 {"timestamp": "2026-09-14T09:35:12.517437", "agent": "meta_poster", "model": "claude-haiku-4-5-20251001", "input_tokens": 1978, "output_tokens": 154, "estimated_cost_usd": 0.002748}
 {"timestamp": "2026-09-14T18:49:25.289614", "agent": "meta_poster", "model": "claude-haiku-4-5-20251001", "input_tokens": 1977, "output_tokens": 147, "estimated_cost_usd": 0.002712}
+{"timestamp": "2026-09-15T09:12:49.669931", "agent": "ecosystem_poster", "model": "claude-haiku-4-5-20251001", "input_tokens": 1680, "output_tokens": 188, "estimated_cost_usd": 0.00262}
