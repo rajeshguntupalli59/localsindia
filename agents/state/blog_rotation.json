@@ -1,6 +1,6 @@
 {
-  "lastCityIndex": 13,
-  "lastCategoryIndex": 6,
+  "lastCityIndex": 14,
+  "lastCategoryIndex": 0,
   "history": [
     {
       "citySlug": "bangalore",
@@ -85,6 +85,12 @@
       "category": "real-estate",
       "topicTemplateId": "flat-vs-pg",
       "publishedAt": "2026-09-13T07:51:51Z"
+    },
+    {
+      "citySlug": "bhopal",
+      "category": "pg-roommate",
+      "topicTemplateId": "avoid-scam",
+      "publishedAt": "2026-09-21T14:28:14Z"
     }
   ]
 }
