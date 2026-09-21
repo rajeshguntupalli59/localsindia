@@ -12,6 +12,13 @@ import httpx
 GRAPH_API = "https://graph.facebook.com/v21.0"
 
 
+def _raise_for_status(resp: httpx.Response) -> None:
+    """raise_for_status(), but print Meta's error body first (it holds the real reason for a 400)."""
+    if resp.is_error:
+        print(f"[MetaClient] {resp.request.method} {resp.request.url.path} -> {resp.status_code}: {resp.text[:1000]}")
+    resp.raise_for_status()
+
+
 def upload_to_cloudinary(image_path, public_id: str, folder: str = "localsindia/social_posts") -> str:
     import cloudinary
     import cloudinary.uploader
@@ -58,7 +65,7 @@ def post_to_facebook_page(image_url: str, caption: str) -> str:
         },
         timeout=30.0,
     )
-    resp.raise_for_status()
+    _raise_for_status(resp)
     return resp.json().get("post_id") or resp.json().get("id")
 
 
@@ -75,7 +82,7 @@ def post_to_facebook_link(message: str, link: str) -> str:
         },
         timeout=30.0,
     )
-    resp.raise_for_status()
+    _raise_for_status(resp)
     return resp.json()["id"]
 
 
@@ -90,7 +97,7 @@ def post_to_facebook_text(message: str) -> str:
         },
         timeout=30.0,
     )
-    resp.raise_for_status()
+    _raise_for_status(resp)
     return resp.json()["id"]
 
 
@@ -102,7 +109,7 @@ def _ig_create_and_publish(image_url: str, access_token: str, ig_id: str, media_
         data["caption"] = caption
 
     create = httpx.post(f"{GRAPH_API}/{ig_id}/media", data=data, timeout=30.0)
-    create.raise_for_status()
+    _raise_for_status(create)
     creation_id = create.json()["id"]
 
     # Instagram needs a moment to process the media before it can be published.
@@ -113,7 +120,7 @@ def _ig_create_and_publish(image_url: str, access_token: str, ig_id: str, media_
         data={"creation_id": creation_id, "access_token": access_token},
         timeout=30.0,
     )
-    publish.raise_for_status()
+    _raise_for_status(publish)
     return publish.json()["id"]
 
 
@@ -148,7 +155,7 @@ def post_to_facebook_video(video_url: str, caption: str) -> str:
         },
         timeout=60.0,
     )
-    resp.raise_for_status()
+    _raise_for_status(resp)
     return resp.json()["id"]
 
 
@@ -169,7 +176,7 @@ def post_to_instagram_reel(video_url: str, caption: str, max_wait_s: int = 180) 
         },
         timeout=30.0,
     )
-    create.raise_for_status()
+    _raise_for_status(create)
     creation_id = create.json()["id"]
 
     waited = 0
@@ -182,7 +189,7 @@ def post_to_instagram_reel(video_url: str, caption: str, max_wait_s: int = 180) 
             params={"fields": "status_code,status", "access_token": access_token},
             timeout=30.0,
         )
-        status.raise_for_status()
+        _raise_for_status(status)
         code = status.json().get("status_code")
         if code == "FINISHED":
             break
@@ -196,5 +203,5 @@ def post_to_instagram_reel(video_url: str, caption: str, max_wait_s: int = 180) 
         data={"creation_id": creation_id, "access_token": access_token},
         timeout=30.0,
     )
-    publish.raise_for_status()
+    _raise_for_status(publish)
     return publish.json()["id"]
