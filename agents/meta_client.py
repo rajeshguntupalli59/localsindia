@@ -101,14 +101,27 @@ def post_to_facebook_text(message: str) -> str:
     return resp.json()["id"]
 
 
+def _ig_jpeg_url(image_url: str) -> str:
+    """Ask Cloudinary for a JPEG rendition — Instagram officially supports only JPEG, and
+    fetching our PNGs failed intermittently (error 9004/2207052, "media could not be fetched")."""
+    if "res.cloudinary.com" in image_url and "/upload/" in image_url:
+        return image_url.replace("/upload/", "/upload/f_jpg,q_90/", 1)
+    return image_url
+
+
 def _ig_create_and_publish(image_url: str, access_token: str, ig_id: str, media_type: str = None, caption: str = None) -> str:
-    data = {"image_url": image_url, "access_token": access_token}
+    data = {"image_url": _ig_jpeg_url(image_url), "access_token": access_token}
     if media_type:
         data["media_type"] = media_type
     if caption:
         data["caption"] = caption
 
     create = httpx.post(f"{GRAPH_API}/{ig_id}/media", data=data, timeout=30.0)
+    if create.status_code == 400 and '"error_subcode":2207052' in create.text:
+        # Instagram couldn't download the image yet — give the CDN a moment and try once more.
+        print("[MetaClient] Instagram could not fetch the image; retrying once in 10s")
+        time.sleep(10)
+        create = httpx.post(f"{GRAPH_API}/{ig_id}/media", data=data, timeout=30.0)
     _raise_for_status(create)
     creation_id = create.json()["id"]
 
