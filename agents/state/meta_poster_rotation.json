@@ -1,8 +1,7 @@
 {
-  "lastTopicIndex": 3,
+  "lastTopicIndex": 4,
   "lastTipCategoryIndex": 10,
   "topicHistory": [
-    "app_feature",
     "category_tip",
     "safety_tip",
     "city_spotlight",
@@ -11,7 +10,8 @@
     "app_feature",
     "category_tip",
     "safety_tip",
-    "city_spotlight"
+    "city_spotlight",
+    "referral"
   ],
   "tipCategoryHistory": [
     "classifieds",
@@ -25,9 +25,8 @@
     "real-estate",
     "furniture"
   ],
-  "lastStyleIndex": 2,
+  "lastStyleIndex": 3,
   "styleHistory": [
-    "quote",
     "spotlight",
     "glass",
     "bold",
@@ -36,6 +35,7 @@
     "spotlight",
     "glass",
     "bold",
-    "duotone"
+    "duotone",
+    "quote"
   ]
 }
