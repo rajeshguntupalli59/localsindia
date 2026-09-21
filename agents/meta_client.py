@@ -110,7 +110,15 @@ def _ig_jpeg_url(image_url: str) -> str:
 
 
 def _ig_create_and_publish(image_url: str, access_token: str, ig_id: str, media_type: str = None, caption: str = None) -> str:
-    data = {"image_url": _ig_jpeg_url(image_url), "access_token": access_token}
+    jpeg_url = _ig_jpeg_url(image_url)
+    # Cloudinary builds a rendition on its first request; if Instagram is the first to ask it can
+    # time out mid-build and report "media could not be fetched". Fetch it once ourselves so it's
+    # built and cached before Instagram downloads it.
+    try:
+        httpx.get(jpeg_url, timeout=60.0, follow_redirects=True).raise_for_status()
+    except httpx.HTTPError as e:
+        print(f"[MetaClient] Image pre-warm failed ({e}); continuing anyway")
+    data = {"image_url": jpeg_url, "access_token": access_token}
     if media_type:
         data["media_type"] = media_type
     if caption:
