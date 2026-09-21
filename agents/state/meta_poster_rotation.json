@@ -25,9 +25,8 @@
     "real-estate",
     "furniture"
   ],
-  "lastStyleIndex": 1,
+  "lastStyleIndex": 2,
   "styleHistory": [
-    "duotone",
     "quote",
     "spotlight",
     "glass",
@@ -36,6 +35,7 @@
     "quote",
     "spotlight",
     "glass",
-    "bold"
+    "bold",
+    "duotone"
   ]
 }
