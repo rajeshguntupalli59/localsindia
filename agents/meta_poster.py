@@ -39,6 +39,12 @@ from meta_client import (
 )
 
 TOPICS = ["app_feature", "category_tip", "safety_tip", "city_spotlight", "app_launch", "referral"]
+# app_launch is still selectable with --topic, but it's out of the automatic
+# rotation: 15 of the first 80 posts were "the app is live" and the audience
+# had already seen it.
+ROTATION_TOPICS = [t for t in TOPICS if t != "app_launch"]
+# How many recent posts the model is shown so it doesn't repeat itself.
+RECENT_POSTS_SHOWN = 20
 SPOTLIGHT_CITIES = ["Hyderabad", "Bengaluru", "Chennai", "Kochi", "Vijayawada", "Coimbatore"]
 # category_tip has no default — without one, the model always falls back to
 # its "e.g. jobs" example in the instructions, so every category_tip post
@@ -91,7 +97,7 @@ def pick_next(items: list[str], last_index: int, history: list[str], window: int
 
 
 def pick_topic(state: dict) -> str:
-    topic, idx = pick_next(TOPICS, state["lastTopicIndex"], state["topicHistory"], window=3)
+    topic, idx = pick_next(ROTATION_TOPICS, state["lastTopicIndex"], state["topicHistory"], window=3)
     state["lastTopicIndex"] = idx
     state["topicHistory"] = (state["topicHistory"] + [topic])[-10:]
     return topic
@@ -111,12 +117,37 @@ def pick_style(state: dict) -> str:
     return style
 
 
+def recent_posts() -> list[str]:
+    """Headline (or caption start, for text-only posts) of the last few posts, oldest first."""
+    if not LOG_PATH.exists():
+        return []
+    lines = LOG_PATH.read_text(encoding="utf-8").splitlines()[-RECENT_POSTS_SHOWN:]
+    seen = []
+    for line in lines:
+        try:
+            entry = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        text = entry.get("headline") or (entry.get("caption") or "")[:90]
+        if text:
+            seen.append(text)
+    return seen
+
+
 def generate_post(topic: str, state: dict) -> dict:
     extra = ""
     if topic == "city_spotlight":
         extra = f"\n\nCity for this spotlight: {random.choice(SPOTLIGHT_CITIES)}"
     elif topic == "category_tip":
         extra = f"\n\nCategory for this tip: {pick_tip_category(state)}"
+
+    recent = recent_posts()
+    if recent:
+        extra += (
+            "\n\nRecent posts already published - do NOT reuse or lightly reword any of these "
+            "headlines, hooks or angles; take a clearly different one:\n"
+            + "\n".join(f"- {r}" for r in recent)
+        )
 
     prompt = f"""Generate one social post for topic: {topic}{extra}
 
