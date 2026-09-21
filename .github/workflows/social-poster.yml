@@ -30,6 +30,7 @@ on:
           - city_spotlight
           - app_launch
           - referral
+          - seller_call
 
 permissions:
   contents: write   # this workflow commits the posting log back to the repo

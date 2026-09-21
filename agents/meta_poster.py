@@ -38,7 +38,7 @@ from meta_client import (
     post_to_instagram_story,
 )
 
-TOPICS = ["app_feature", "category_tip", "safety_tip", "city_spotlight", "app_launch", "referral"]
+TOPICS = ["app_feature", "category_tip", "safety_tip", "city_spotlight", "app_launch", "referral", "seller_call"]
 # app_launch is still selectable with --topic, but it's out of the automatic
 # rotation: 15 of the first 80 posts were "the app is live" and the audience
 # had already seen it.
@@ -46,6 +46,14 @@ ROTATION_TOPICS = [t for t in TOPICS if t != "app_launch"]
 # How many recent posts the model is shown so it doesn't repeat itself.
 RECENT_POSTS_SHOWN = 20
 SPOTLIGHT_CITIES = ["Hyderabad", "Bengaluru", "Chennai", "Kochi", "Vijayawada", "Coimbatore"]
+# seller_call recruits real sellers in one launch city (Hyderabad has the most
+# listings) instead of spreading thin across all 150. Swap the city here to move focus.
+SELLER_CALL_CITY = "Hyderabad"
+SELLER_TYPES = [
+    "PG and hostel owners", "tiffin and home-food services", "tutors and coaching centres",
+    "electricians, plumbers and repair services", "used-furniture and electronics sellers",
+    "small shop and business owners", "event organisers", "bike and car sellers",
+]
 # category_tip has no default — without one, the model always falls back to
 # its "e.g. jobs" example in the instructions, so every category_tip post
 # ends up being the same fake-job-listing warning. Pick one explicitly.
@@ -140,6 +148,8 @@ def generate_post(topic: str, state: dict) -> dict:
         extra = f"\n\nCity for this spotlight: {random.choice(SPOTLIGHT_CITIES)}"
     elif topic == "category_tip":
         extra = f"\n\nCategory for this tip: {pick_tip_category(state)}"
+    elif topic == "seller_call":
+        extra = f"\n\nCity: {SELLER_CALL_CITY}\nSeller type to invite: {random.choice(SELLER_TYPES)}"
 
     recent = recent_posts()
     if recent:
