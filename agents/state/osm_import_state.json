@@ -7,5 +7,50 @@
   "removed_by_cleanup": 1,
   "skipped_existing": 0,
   "unknown_category": 0
+ },
+ "chennai": {
+  "clean": true,
+  "created": 1835,
+  "date": "2026-09-24",
+  "found": 1835,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
+ "hyderabad": {
+  "clean": true,
+  "created": 27,
+  "date": "2026-09-24",
+  "found": 2430,
+  "removed_by_cleanup": 77,
+  "skipped_existing": 2403,
+  "unknown_category": 0
+ },
+ "puducherry": {
+  "clean": true,
+  "created": 556,
+  "date": "2026-09-24",
+  "found": 556,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
+ "thiruvananthapuram": {
+  "clean": true,
+  "created": 1720,
+  "date": "2026-09-24",
+  "found": 1720,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
+ "visakhapatnam": {
+  "clean": true,
+  "created": 437,
+  "date": "2026-09-24",
+  "found": 437,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
  }
 }
