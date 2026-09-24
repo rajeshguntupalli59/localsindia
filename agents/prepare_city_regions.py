@@ -12,6 +12,7 @@ Usage:  python agents/prepare_city_regions.py
 Nominatim policy: identify ourselves, max 1 request/second — respected below.
 """
 import json
+import math
 import re
 import time
 from pathlib import Path
@@ -88,6 +89,54 @@ def wikidata_population(client: httpx.Client, qid: str | None, name: str) -> int
     return max(values, default=0)
 
 
+# Towns Wikidata can't match by name (spelling) — verified centre by hand.
+MANUAL_CENTRES = {"gangavati": (15.431, 76.529)}
+TOWN_HALF = 0.06   # ~13 km box around a corrected town centre
+TOWN_WORDS = re.compile(r"\b(city|town|municipal|municipality|corporation|census|village|suburb|metropolis|capital|headquarters)\b")
+
+
+def wikidata_town_coord(client: httpx.Client, name: str, state: str) -> tuple[float, float] | None:
+    """Coordinates of the city/town itself (never the district) from Wikidata."""
+    r = client.get("https://www.wikidata.org/w/api.php", params={
+        "action": "wbsearchentities", "search": name, "language": "en", "format": "json", "limit": 10})
+    for h in r.json().get("search", []):
+        desc = (h.get("description") or "").lower()
+        if not ("india" in desc and state.lower() in desc and not desc.startswith("district")
+                and TOWN_WORDS.search(desc)):
+            continue
+        e = next(iter(client.get(f"https://www.wikidata.org/wiki/Special:EntityData/{h['id']}.json",
+                                 follow_redirects=True).json()["entities"].values()))
+        p625 = e.get("claims", {}).get("P625")
+        if p625 and p625[0]["mainsnak"].get("datavalue"):
+            v = p625[0]["mainsnak"]["datavalue"]["value"]
+            return v["latitude"], v["longitude"]
+    return None
+
+
+def cross_check(client: httpx.Client, slug: str, name: str, g: dict, state: str) -> None:
+    """Nominatim sometimes matches a building, a same-named village elsewhere,
+    or a district. If Wikidata's town coordinates disagree by >5 km (or the box
+    is tiny), re-centre on the real town."""
+    centre = MANUAL_CENTRES.get(slug)
+    if not centre:
+        try:
+            centre = wikidata_town_coord(client, name, state)
+        except Exception as exc:
+            print(f"  wikidata check failed for {name}: {exc}")
+            return
+    if not centre:
+        return
+    s_, w_, n_, e_ = g["bbox"]
+    clat, clon = (s_ + n_) / 2, (w_ + e_) / 2
+    km = math.hypot((centre[0] - clat) * 111, (centre[1] - clon) * 111 * math.cos(math.radians(clat)))
+    if slug in MANUAL_CENTRES or km > 5 or max(n_ - s_, e_ - w_) < 0.03:
+        lat, lon = centre
+        g["bbox"] = [round(lat - TOWN_HALF, 4), round(lon - TOWN_HALF, 4),
+                     round(lat + TOWN_HALF, 4), round(lon + TOWN_HALF, 4)]
+        g["corrected"] = "manual" if slug in MANUAL_CENTRES else f"wikidata ({km:.0f} km off)"
+        print(f"  corrected {name}: {g['corrected']}")
+
+
 def main() -> None:
     cities = httpx.get(f"{BACKEND_URL}/api/v1/cities", timeout=30).json()
     regions, missing = {}, []
@@ -99,6 +148,8 @@ def main() -> None:
                 missing.append(c["slug"])
                 print(f"  not found: {c['name']}, {c['state']}")
                 continue
+            cross_check(client, c["slug"], c["name"], g, c["state"])
+            time.sleep(0.3)
             if g["population"] < 20000:
                 try:
                     g["population"] = max(g["population"], wikidata_population(client, g["wikidata"], c["name"]))

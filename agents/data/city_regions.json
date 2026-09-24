@@ -198,15 +198,16 @@
    "name": "Anantapuram",
    "state": "Andhra Pradesh",
    "bbox": [
-    14.6598,
-    78.623,
-    14.6998,
-    78.663
+    14.6233,
+    77.54,
+    14.7433,
+    77.66
    ],
    "population": 0,
    "osm": "node/3387487057",
    "wikidata": null,
-   "tier": 35
+   "tier": 35,
+   "corrected": "wikidata"
   },
   "bhimavaram": {
    "name": "Bhimavaram",
@@ -562,15 +563,16 @@
    "name": "Tadepalligudem",
    "state": "Andhra Pradesh",
    "bbox": [
-    16.8052,
-    81.5216,
-    16.8152,
-    81.5316
+    16.75,
+    81.467,
+    16.87,
+    81.587
    ],
    "population": 0,
    "osm": "node/708921070",
    "wikidata": "Q24944471",
-   "tier": 36
+   "tier": 36,
+   "corrected": "wikidata"
   },
   "tadipatri": {
    "name": "Tadipatri",
@@ -660,29 +662,31 @@
    "name": "Arsikere",
    "state": "Karnataka",
    "bbox": [
-    13.3088,
-    76.2482,
-    13.3188,
-    76.2582
+    13.25,
+    76.2,
+    13.37,
+    76.32
    ],
    "population": 0,
    "osm": "node/1153239883",
    "wikidata": "Q24947920",
-   "tier": 26
+   "tier": 26,
+   "corrected": "wikidata"
   },
   "bagalkot": {
    "name": "Bagalkot",
    "state": "Karnataka",
    "bbox": [
-    16.1746,
-    75.6781,
-    16.1805,
-    75.6837
+    16.1233,
+    75.64,
+    16.2433,
+    75.76
    ],
    "population": 0,
    "osm": "way/252071055",
    "wikidata": null,
-   "tier": 27
+   "tier": 27,
+   "corrected": "wikidata"
   },
   "ballari": {
    "name": "Ballari",
@@ -758,15 +762,16 @@
    "name": "Chikkaballapur",
    "state": "Karnataka",
    "bbox": [
-    13.0982,
-    77.3865,
-    13.1,
-    77.3912
+    13.3742,
+    77.6642,
+    13.4942,
+    77.7842
    ],
    "population": 0,
    "osm": "way/192886293",
    "wikidata": null,
-   "tier": 28
+   "tier": 28,
+   "corrected": "wikidata"
   },
   "chikkamagaluru": {
    "name": "Chikkamagaluru",
@@ -842,15 +847,16 @@
    "name": "Gangavati",
    "state": "Karnataka",
    "bbox": [
-    15.5062,
-    76.7624,
-    15.5462,
-    76.8024
+    15.371,
+    76.469,
+    15.491,
+    76.589
    ],
    "population": 0,
    "osm": "node/12966259604",
    "wikidata": null,
-   "tier": 30
+   "tier": 30,
+   "corrected": "manual"
   },
   "hassan": {
    "name": "Hassan",
@@ -1094,15 +1100,16 @@
    "name": "Yadgir",
    "state": "Karnataka",
    "bbox": [
-    16.3744,
-    76.7254,
-    16.7744,
-    77.1254
+    16.7067,
+    77.0733,
+    16.8267,
+    77.1933
    ],
    "population": 0,
    "osm": "relation/3686856",
    "wikidata": "Q1786949",
-   "tier": 32
+   "tier": 32,
+   "corrected": "wikidata"
   },
   "alappuzha": {
    "name": "Alappuzha",
@@ -1262,15 +1269,16 @@
    "name": "Manjeri",
    "state": "Kerala",
    "bbox": [
-    11.1068,
-    76.1109,
-    11.1273,
-    76.1307
+    11.06,
+    76.06,
+    11.18,
+    76.18
    ],
    "population": 10000,
    "osm": "way/22825957",
    "wikidata": "Q2568380",
-   "tier": 13
+   "tier": 13,
+   "corrected": "wikidata"
   },
   "palakkad": {
    "name": "Palakkad",
@@ -1416,15 +1424,16 @@
    "name": "Ariyalur",
    "state": "Tamil Nadu",
    "bbox": [
-    13.1719,
-    80.2307,
-    13.2119,
-    80.2707
+    11.0733,
+    79.0233,
+    11.1933,
+    79.1433
    ],
    "population": 0,
    "osm": "node/403065034",
    "wikidata": "Q30595228",
-   "tier": 31
+   "tier": 31,
+   "corrected": "wikidata"
   },
   "chennai": {
    "name": "Chennai",
@@ -1654,15 +1663,16 @@
    "name": "Neyveli",
    "state": "Tamil Nadu",
    "bbox": [
-    11.496,
-    79.4424,
-    11.576,
-    79.5224
+    11.54,
+    79.42,
+    11.66,
+    79.54
    ],
    "population": 105700,
    "osm": "node/984171124",
    "wikidata": "Q2326755",
-   "tier": 21
+   "tier": 21,
+   "corrected": "wikidata"
   },
   "pudukkottai": {
    "name": "Pudukkottai",
@@ -1850,15 +1860,16 @@
    "name": "Villupuram",
    "state": "Tamil Nadu",
    "bbox": [
-    11.9398,
-    79.4945,
-    11.9399,
-    79.4946
+    11.8733,
+    79.4233,
+    11.9933,
+    79.5433
    ],
    "population": 0,
    "osm": "node/3351827388",
    "wikidata": null,
-   "tier": 33
+   "tier": 33,
+   "corrected": "wikidata"
   },
   "adilabad": {
    "name": "Adilabad",
@@ -2186,15 +2197,16 @@
    "name": "Tandur",
    "state": "Telangana",
    "bbox": [
-    19.132,
-    79.4289,
-    19.172,
-    79.4689
+    17.17,
+    77.52,
+    17.29,
+    77.64
    ],
    "population": 0,
    "osm": "node/245678773",
    "wikidata": null,
-   "tier": 26
+   "tier": 26,
+   "corrected": "wikidata"
   },
   "vikarabad": {
    "name": "Vikarabad",

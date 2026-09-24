@@ -390,10 +390,14 @@ def verify(city: str) -> list[str]:
         if items:
             problems.append(f"{len(items)} {reason} live, e.g. {[b['name'] for b in items[:4]]}")
     regions = load_regions()["regions"]
-    misfiled = [b["name"] for b in osm if b.get("latitude") and not b.get("owner_id")
-                and nearest_city(b["latitude"], b["longitude"], regions) not in (city, None)]
+    homes = {b["id"]: nearest_city(b["latitude"], b["longitude"], regions)
+             for b in osm if b.get("latitude") and not b.get("owner_id")}
+    misfiled = [b["name"] for b in osm if homes.get(b["id"], city) not in (city, None)]
     if misfiled:
         problems.append(f"{len(misfiled)} are nearer another city, e.g. {misfiled[:4]}")
+    outside = [b["name"] for b in osm if b["id"] in homes and homes[b["id"]] is None]
+    if outside:
+        problems.append(f"{len(outside)} are outside the city area, e.g. {outside[:4]}")
     miscat = [b["name"] for b in osm if b.get("category_slug") == DEFAULT_SHOP_CATEGORY
               and category_from_name(b["name"]) and not b.get("owner_id")]
     if miscat:
@@ -489,14 +493,22 @@ def rehome_city(city: str, regions: dict) -> int:
     """Move this city's unclaimed imports that are nearer another city there."""
     osm = [b for b in fetch_live(city) if b.get("source") == "osm" and b.get("latitude") and not b.get("owner_id")]
     moves: dict[str, list[str]] = {}
+    outside = []   # not inside ANY city's area (e.g. imported while a city's location was wrong)
     for b in osm:
         home = nearest_city(b["latitude"], b["longitude"], regions)
-        if home and home != city:
+        if home is None:
+            outside.append(b)
+        elif home != city:
             moves.setdefault(home, []).append(b["id"])
     moved = 0
-    if moves:
+    if moves or outside:
         with httpx.Client(timeout=60) as client:
             headers = admin_headers(client)
+            if outside:
+                r = client.post(f"{BACKEND_URL}/api/v1/admin/businesses/import/remove", headers=headers,
+                                json={"business_ids": [b["id"] for b in outside][:500], "reason": "outside the city"})
+                r.raise_for_status()
+                print(f"  removed {r.json()['removed']} outside the city area, e.g. {[b['name'] for b in outside[:3]]}")
             for home, ids in moves.items():
                 for i in range(0, len(ids), 500):
                     r = client.post(f"{BACKEND_URL}/api/v1/admin/businesses/import/move", headers=headers,
