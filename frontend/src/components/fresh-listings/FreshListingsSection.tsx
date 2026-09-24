@@ -12,7 +12,10 @@ import {
   BadgeCheck, type LucideIcon,
 } from 'lucide-react';
 import { api } from '@/lib/api';
-import { timeAgo, listingPath } from '@/lib/utils';
+import { timeAgo, listingPath, realImages } from '@/lib/utils';
+import Image from 'next/image';
+import { categoryCover } from '@/lib/categoryCover';
+import RepresentativeLabel from '@/components/representative-label/RepresentativeLabel';
 import type { Listing } from '@/lib/types';
 
 // ─── Types ────────────────────────────────────────────────
@@ -28,6 +31,8 @@ interface DisplayListing {
   badge: 'New' | 'Verified';
   gradient: [string, string];
   Icon: LucideIcon;
+  image: string;             // own photo, or the category cover
+  representative: boolean;   // true when `image` is the category cover
   waUrl: string;
   isReal: boolean;
 }
@@ -63,6 +68,8 @@ function realListingToDisplay(l: Listing): DisplayListing {
     badge: l.wa_verified ? 'Verified' : 'New',
     gradient: vis.gradient,
     Icon: vis.Icon,
+    image: realImages(l.images)[0]?.url ?? categoryCover(slug),
+    representative: realImages(l.images).length === 0,
     waUrl: l.whatsapp_url ?? `https://wa.me/${l.contact_phone.replace('+', '')}`,
     isReal: true,
   };
@@ -75,42 +82,42 @@ const FRESH_LISTINGS: DisplayListing[] = [
     category: 'Tiffin & Food', categorySlug: 'tiffin',
     price: 1800, priceUnit: '/mo', location: 'Koramangala, Bangalore',
     postedAt: '2h ago', badge: 'New',
-    gradient: ['#FF9A3C', '#FF6B35'], Icon: Utensils, waUrl: '#', isReal: false,
+    gradient: ['#FF9A3C', '#FF6B35'], Icon: Utensils, waUrl: '#', isReal: false, image: categoryCover('tiffin'), representative: true,
   },
   {
     id: 'mock-2', title: 'PG for Girls — AC Furnished, All-Inclusive',
     category: 'PG / Rooms', categorySlug: 'pg-roommate',
     price: 8500, priceUnit: '/mo', location: 'HSR Layout, Bangalore',
     postedAt: '5h ago', badge: 'Verified',
-    gradient: ['#4F8EF7', '#1D4ED8'], Icon: Home, waUrl: '#', isReal: false,
+    gradient: ['#4F8EF7', '#1D4ED8'], Icon: Home, waUrl: '#', isReal: false, image: categoryCover('pg-roommate'), representative: true,
   },
   {
     id: 'mock-3', title: 'iPhone 14 · 256 GB · Midnight · Box Open',
     category: 'Electronics', categorySlug: 'electronics',
     price: 54000, priceUnit: '', location: 'Jubilee Hills, Hyderabad',
     postedAt: '1h ago', badge: 'New',
-    gradient: ['#8B5CF6', '#4F46E5'], Icon: Smartphone, waUrl: '#', isReal: false,
+    gradient: ['#8B5CF6', '#4F46E5'], Icon: Smartphone, waUrl: '#', isReal: false, image: categoryCover('electronics'), representative: true,
   },
   {
     id: 'mock-4', title: 'Honda Activa 6G · 2022 · 12,000 km Only',
     category: 'Vehicles', categorySlug: 'vehicles',
     price: 68000, priceUnit: '', location: 'Madhapur, Hyderabad',
     postedAt: '3h ago', badge: 'Verified',
-    gradient: ['#F97316', '#DC2626'], Icon: Car, waUrl: '#', isReal: false,
+    gradient: ['#F97316', '#DC2626'], Icon: Car, waUrl: '#', isReal: false, image: categoryCover('vehicles'), representative: true,
   },
   {
     id: 'mock-5', title: 'CBSE Maths + Science Tutor (Grades 8–12)',
     category: 'Education', categorySlug: 'education',
     price: 2500, priceUnit: '/mo', location: 'Anna Nagar, Chennai',
     postedAt: '6h ago', badge: 'New',
-    gradient: ['#10B981', '#047857'], Icon: GraduationCap, waUrl: '#', isReal: false,
+    gradient: ['#10B981', '#047857'], Icon: GraduationCap, waUrl: '#', isReal: false, image: categoryCover('education'), representative: true,
   },
   {
     id: 'mock-6', title: '2 BHK Semi-Furnished · Ready to Move In',
     category: 'PG / Rooms', categorySlug: 'pg-roommate',
     price: 22000, priceUnit: '/mo', location: 'Banjara Hills, Hyderabad',
     postedAt: '4h ago', badge: 'Verified',
-    gradient: ['#06B6D4', '#0284C7'], Icon: Building2, waUrl: '#', isReal: false,
+    gradient: ['#06B6D4', '#0284C7'], Icon: Building2, waUrl: '#', isReal: false, image: categoryCover('real-estate'), representative: true,
   },
 ];
 
@@ -282,6 +289,12 @@ function FreshListingCard({
     >
       {/* ── 3px category colour strip ────────────────── */}
       <div className="h-[3px] shrink-0" style={{ backgroundColor: solidColor }} aria-hidden />
+
+      {/* ── Photo (own, or labelled category cover) ──── */}
+      <div className="relative h-36 shrink-0 bg-slate-100">
+        <Image src={listing.image} alt={listing.representative ? '' : listing.title} fill className="object-cover" sizes="(max-width: 768px) 80vw, 25vw" />
+        {listing.representative && <RepresentativeLabel className="bottom-2 left-2" />}
+      </div>
 
       {/* ── Category header row ──────────────────────── */}
       <div className="flex items-center gap-2.5 px-4 pt-4 pb-3 shrink-0">

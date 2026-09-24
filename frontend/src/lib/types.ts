@@ -163,6 +163,7 @@ export interface Business {
   review_count: number;
   city_id: string;
   category_id: string | null;
+  category_slug?: string | null;
   owner_id: string | null;
   source?: string | null;      // 'osm' = imported from OpenStreetMap (needs attribution)
   latitude?: number | null;

@@ -10,6 +10,9 @@ import type { Business, Category } from '@/lib/types';
 import SiteHeader from '@/components/site-header/SiteHeader';
 import SiteFooter from '@/components/site-footer/SiteFooter';
 import OsmAttribution from '@/components/osm-attribution/OsmAttribution';
+import RepresentativeLabel from '@/components/representative-label/RepresentativeLabel';
+import { categoryCover } from '@/lib/categoryCover';
+import Image from 'next/image';
 import BottomNav from '@/components/bottom-nav/BottomNav';
 
 const PAGE_SIZE = 20;
@@ -41,8 +44,19 @@ function BusinessCard({ business, citySlug }: { business: Business; citySlug: st
   return (
     <motion.div
       whileHover={{ y: -2 }}
-      className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm hover:shadow-md transition-shadow"
+      className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm hover:shadow-md transition-shadow overflow-hidden"
     >
+      {/* Own photo, or the labelled category cover */}
+      <Link href={`/${citySlug}/businesses/${business.id}`} className="block relative h-36 -mx-5 -mt-5 mb-4 bg-slate-100">
+        <Image
+          src={business.images?.[0]?.url ?? categoryCover(business.category_slug)}
+          alt={business.images?.[0] ? business.name : ''}
+          fill
+          className="object-cover"
+          sizes="(max-width: 640px) 100vw, 50vw"
+        />
+        {!business.images?.[0] && <RepresentativeLabel className="bottom-2 left-2" />}
+      </Link>
       <div className="flex items-start justify-between gap-2 mb-2">
         <div className="flex items-center gap-2">
           <h3 className="font-bold text-slate-900">{business.name}</h3>

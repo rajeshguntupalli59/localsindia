@@ -3,35 +3,15 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
+import { categoryCover } from '@/lib/categoryCover';
+import RepresentativeLabel from '@/components/representative-label/RepresentativeLabel';
 import Link from 'next/link';
-import { MapPin, Clock, Heart, Eye, Utensils, Home, Briefcase, Car, Smartphone, Calendar, Store, GraduationCap, Tag, Star, MessageCircle, type LucideIcon } from 'lucide-react';
+import { MapPin, Clock, Heart, Eye, Star, MessageCircle } from 'lucide-react';
 import { formatPrice, timeAgo, fulfillLabel, listingPath, realImages } from '@/lib/utils';
 import { api } from '@/lib/api';
 import type { Listing } from '@/lib/types';
 import { usePrefs } from '@/context/PrefsContext';
 import { useSaved } from '@/hooks/useSaved';
-
-const CATEGORY_ICON: Record<string, LucideIcon> = {
-  'tiffin':       Utensils,
-  'pg-roommate':  Home,
-  'jobs':         Briefcase,
-  'vehicles':     Car,
-  'electronics':  Smartphone,
-  'events':       Calendar,
-  'businesses':   Store,
-  'education':    GraduationCap,
-};
-
-const CATEGORY_COLOR: Record<string, string> = {
-  'tiffin':       '#f97316',
-  'pg-roommate':  '#3b82f6',
-  'jobs':         '#10b981',
-  'vehicles':     '#ef4444',
-  'electronics':  '#8b5cf6',
-  'education':    '#f59e0b',
-  'events':       '#ec4899',
-  'businesses':   '#06b6d4',
-};
 
 interface Props {
   listing: Listing;
@@ -48,8 +28,6 @@ export default function ListingCard({ listing }: Props) {
   const waUrl      = listing.whatsapp_url ?? `https://wa.me/${listing.contact_phone.replace('+', '')}`;
   const href       = listingPath(listing);
   const saved      = isSaved(listing.id);
-  const catColor   = CATEGORY_COLOR[listing.category_slug ?? ''] ?? '#94a3b8';
-  const CatIcon    = CATEGORY_ICON[listing.category_slug ?? ''] ?? Tag;
   const isFeatured = listing.is_featured;
 
   const handleHeartClick = (e: React.MouseEvent) => {
@@ -89,33 +67,24 @@ export default function ListingCard({ listing }: Props) {
         {/* ── Image area ───────────────────────────────── */}
         <div className="relative h-48 bg-[#F1F3F6] overflow-hidden">
 
-          {image ? (
-            <>
-              <Image
-                src={image.url}
-                alt={listing.title}
-                fill
-                className="object-cover transition-transform duration-500 group-hover:scale-[1.05]"
-                sizes="(max-width: 768px) 50vw, 25vw"
-              />
-              {/* Bottom gradient overlay */}
-              <div
-                className="absolute inset-x-0 bottom-0 h-[76px] pointer-events-none z-[1]"
-                style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.3) 55%, transparent 100%)' }}
-                aria-hidden
-              />
-            </>
-          ) : (
-            <div
-              className="absolute inset-0 flex items-center justify-center"
-              style={{ background: `linear-gradient(135deg, ${catColor}1A 0%, ${catColor}08 100%)` }}
-            >
-              <CatIcon size={48} style={{ opacity: 0.25, color: catColor }} />
-            </div>
-          )}
+          {/* Own photo, or the category cover (labelled) when the listing has none */}
+          <Image
+            src={image?.url ?? categoryCover(listing.category_slug)}
+            alt={image ? listing.title : ''}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-[1.05]"
+            sizes="(max-width: 768px) 50vw, 25vw"
+          />
+          {!image && <RepresentativeLabel className="top-3 left-3" />}
+          {/* Bottom gradient overlay */}
+          <div
+            className="absolute inset-x-0 bottom-0 h-[76px] pointer-events-none z-[1]"
+            style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.3) 55%, transparent 100%)' }}
+            aria-hidden
+          />
 
           {/* Price badge — ON the image (bottom-left over gradient) */}
-          {image && (
+          {(
             <div className="absolute bottom-2.5 left-2.5 z-10">
               {listing.price !== null ? (
                 <span
@@ -189,26 +158,6 @@ export default function ListingCard({ listing }: Props) {
       {/* ── Body ─────────────────────────────────────── */}
       <div className="px-4 pt-4 pb-5">
         <Link href={href}>
-          {/* Price pill — only when NO image */}
-          {!image && (
-            listing.price !== null ? (
-              <p className="mb-3">
-                <span className="inline-flex items-center px-3 py-[6px] rounded-full
-                  text-[13px] font-black tabular-nums leading-none
-                  bg-orange-50 text-[#E07B0A]">
-                  {formatPrice(listing.price)}
-                </span>
-              </p>
-            ) : (
-              <p className="mb-2">
-                <span className="inline-flex items-center px-2.5 py-[5px] rounded-full
-                  text-[10.5px] font-medium bg-slate-100 text-slate-500">
-                  Price on request
-                </span>
-              </p>
-            )
-          )}
-
           {/* Title */}
           <p
             className="text-[14px] leading-[1.45] line-clamp-2 mb-3"

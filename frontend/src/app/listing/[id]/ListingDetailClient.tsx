@@ -5,7 +5,9 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import SafetyTips from '@/components/safety-tips/SafetyTips';
-import { ArrowLeft, MapPin, Clock, ChevronDown, ChevronUp, Flag, Tag, User, ExternalLink, Heart, Star, ChevronLeft, ChevronRight, Eye, AlertCircle, Utensils, Home, Briefcase, Car, Smartphone, Calendar, Store, GraduationCap, MessageCircle, Share2, type LucideIcon } from 'lucide-react';
+import RepresentativeLabel from '@/components/representative-label/RepresentativeLabel';
+import { categoryCover } from '@/lib/categoryCover';
+import { ArrowLeft, MapPin, Clock, ChevronDown, ChevronUp, Flag, Tag, User, ExternalLink, Heart, Star, ChevronLeft, ChevronRight, Eye, AlertCircle, MessageCircle, Share2 } from 'lucide-react';
 import { api, ApiError } from '@/lib/api';
 import type { Listing, ListingReview } from '@/lib/types';
 import { formatPrice, timeAgo, listingPath, realImages } from '@/lib/utils';
@@ -18,11 +20,6 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend
 function Skeleton({ className }: { className?: string }) {
   return <div className={`animate-pulse bg-slate-100 rounded-lg ${className ?? ''}`} />;
 }
-
-const CATEGORY_ICON: Record<string, LucideIcon> = {
-  tiffin: Utensils, 'pg-roommate': Home, jobs: Briefcase, vehicles: Car,
-  electronics: Smartphone, events: Calendar, businesses: Store, education: GraduationCap,
-};
 
 export default function ListingDetailClient({ id, initialListing = null }: { id: string; initialListing?: Listing | null }) {
   const router = useRouter();
@@ -201,25 +198,18 @@ export default function ListingDetailClient({ id, initialListing = null }: { id:
           {/* Image carousel */}
           <div
             className="relative w-full bg-slate-100"
-            style={images[0] ? { aspectRatio: '16/9', maxHeight: '380px' } : { height: '96px' }}
+            style={{ aspectRatio: '16/9', maxHeight: '380px' }}
           >
-            {images[0] ? (
-              <Image
-                src={images[activeImg]?.url ?? images[0].url}
-                alt={listing.title}
-                fill
-                className="object-cover transition-opacity duration-200"
-                sizes="100vw"
-                priority
-              />
-            ) : (
-              <div className="absolute inset-0 flex items-center justify-center opacity-20 select-none">
-                {(() => {
-                  const Icon = CATEGORY_ICON[listing.category_slug ?? ''] ?? Tag;
-                  return <Icon size={56} />;
-                })()}
-              </div>
-            )}
+            {/* Own photos, or the labelled category cover when there are none */}
+            <Image
+              src={images[activeImg]?.url ?? images[0]?.url ?? categoryCover(listing.category_slug)}
+              alt={images[0] ? listing.title : ''}
+              fill
+              className="object-cover transition-opacity duration-200"
+              sizes="100vw"
+              priority
+            />
+            {!images[0] && <RepresentativeLabel className="bottom-3 left-3" />}
 
             {/* Prev / Next arrows — only when multiple images */}
             {images.length > 1 && (

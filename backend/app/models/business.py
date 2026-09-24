@@ -57,6 +57,12 @@ class Business(Base):
         order_by="BusinessImage.display_order",
         lazy="selectin",
     )
+    category: Mapped["Category | None"] = relationship("Category", lazy="selectin")
+
+    @property
+    def category_slug(self) -> str | None:
+        # Lets the frontend pick the category cover photo without a second lookup
+        return self.category.slug if self.category else None
 
     __table_args__ = (
         Index("idx_businesses_city", "city_id", "category_id"),

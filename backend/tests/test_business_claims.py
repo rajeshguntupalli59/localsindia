@@ -233,6 +233,7 @@ async def test_admin_import_creates_unclaimed_and_is_idempotent(auth_client, adm
     listed = (await client.get("/api/v1/businesses", params={"city_slug": "hyderabad", "page_size": 50})).json()
     mine = [b for b in listed if b["name"] == "Ramu Tiffins" and b["source"] == "osm"]
     assert mine and mine[0]["owner_id"] is None and mine[0]["latitude"] == 17.4
+    assert mine[0]["category_slug"] == slug
 
 
 @pytest.mark.asyncio

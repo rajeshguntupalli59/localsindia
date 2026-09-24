@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { MapPin, Phone, Store, ArrowRight } from 'lucide-react';
+import Image from 'next/image';
+import { MapPin, Phone, ArrowRight } from 'lucide-react';
+import { categoryCover } from '@/lib/categoryCover';
 import { api } from '@/lib/api';
 import type { Business } from '@/lib/types';
 import OsmAttribution from '@/components/osm-attribution/OsmAttribution';
@@ -55,8 +57,11 @@ export default function CategoryBusinesses({
             style={{ borderColor: 'var(--li-border)' }}
           >
             <div className="flex items-start gap-3">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'var(--li-primary-light)' }}>
-                <Store className="w-4 h-4" style={{ color: 'var(--li-primary)' }} />
+              <div className="relative w-14 h-14 rounded-xl overflow-hidden shrink-0 bg-slate-100">
+                <Image
+                  src={b.images?.[0]?.url ?? categoryCover(b.category_slug ?? categorySlug)}
+                  alt="" fill className="object-cover" sizes="56px"
+                />
               </div>
               <div className="min-w-0">
                 <p className="font-bold text-sm line-clamp-1" style={{ color: 'var(--li-text)' }}>{b.name}</p>

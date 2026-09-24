@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft, Flag, ChevronLeft, ChevronRight, MapPin, Clock, MessageCircle, Tag, Star, User, Globe, Share2, CheckCircle2, X } from 'lucide-react';
+import { ArrowLeft, Flag, ChevronLeft, ChevronRight, MapPin, Clock, MessageCircle, Star, User, Globe, Share2, CheckCircle2, X } from 'lucide-react';
 import { formatPrice, timeAgo, realImages } from '@/lib/utils';
 import { api, ApiError } from '@/lib/api';
 
@@ -14,6 +14,8 @@ import SiteHeader from '@/components/site-header/SiteHeader';
 import SiteFooter from '@/components/site-footer/SiteFooter';
 import AdBanner from '@/components/ad-banner/AdBanner';
 import SafetyTips from '@/components/safety-tips/SafetyTips';
+import RepresentativeLabel from '@/components/representative-label/RepresentativeLabel';
+import { categoryCover } from '@/lib/categoryCover';
 import { toast } from 'sonner';
 
 export default function ListingDetailPage() {
@@ -180,8 +182,9 @@ export default function ListingDetailPage() {
                     />
                   </motion.div>
                 ) : (
-                  <div className="absolute inset-0 flex items-center justify-center opacity-10">
-                    <Tag className="w-24 h-24 text-white" strokeWidth={1} />
+                  <div className="absolute inset-0">
+                    <Image src={categoryCover(listing.category_slug)} alt="" fill className="object-cover" sizes="800px" />
+                    <RepresentativeLabel className="bottom-3 left-3" />
                   </div>
                 )}
               </AnimatePresence>

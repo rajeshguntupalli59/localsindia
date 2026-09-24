@@ -99,3 +99,12 @@ describe('realImages', () => {
     expect(realImages(undefined)).toEqual([]);
   });
 });
+
+describe('categoryCover', () => {
+  it('uses the category photo, falling back to classifieds', async () => {
+    const { categoryCover } = await import('./categoryCover');
+    expect(categoryCover('tiffin')).toBe('/category-covers/tiffin.jpg');
+    expect(categoryCover('unknown')).toBe('/category-covers/classifieds.jpg');
+    expect(categoryCover(null)).toBe('/category-covers/classifieds.jpg');
+  });
+});
