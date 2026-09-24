@@ -37,6 +37,7 @@ What gets imported (quality filter):
 import argparse
 import csv
 import json
+import math
 import os
 import re
 import sys
@@ -65,6 +66,25 @@ SITE_URL = "https://www.localsindia.com"
 
 def load_regions() -> dict:
     return json.loads(REGIONS_FILE.read_text(encoding="utf-8"))
+
+
+def centre(region: dict) -> tuple[float, float]:
+    s_, w_, n_, e_ = region["bbox"]
+    return (s_ + n_) / 2, (w_ + e_) / 2
+
+
+def nearest_city(lat: float, lon: float, regions: dict) -> str | None:
+    """Among cities whose box contains the point, the one whose centre is
+    closest — neighbouring cities' boxes overlap (e.g. Guntur/Vijayawada)."""
+    best, best_d = None, None
+    for slug, r in regions.items():
+        s_, w_, n_, e_ = r["bbox"]
+        if s_ <= lat <= n_ and w_ <= lon <= e_:
+            clat, clon = centre(r)
+            d = (lat - clat) ** 2 + ((lon - clon) * math.cos(math.radians(lat))) ** 2
+            if best_d is None or d < best_d:
+                best, best_d = slug, d
+    return best
 
 
 def load_state() -> dict:
@@ -229,10 +249,37 @@ JUNK_RE = re.compile(r"\b(test(?!\s*tube)|demo|sample|placeholder|dummy|unknown|
 CHAIN_MIN_BRANCHES = 3   # same name 3+ times in one city = a chain (brand tag missing) — skip it
 
 
+# Well-known chains that are often mapped without a brand tag. A branch of a
+# chain isn't something a local owner can claim.
+KNOWN_CHAINS = [
+    "apollo", "medplus", "med plus", "dmart", "d-mart", "d mart", "reliance", "more supermarket", "more megastore",
+    "spencer", "big bazaar", "kfc", "mcdonald", "domino", "pizza hut", "subway", "starbucks", "cafe coffee day",
+    "burger king", "baskin robbins", "heritage fresh", "vijetha supermarket", "vijetha super market", "ratnadeep",
+    "bata", "titan world", "titan eye", "tanishq",
+    "malabar gold", "kalyan jewellers", "joyalukkas", "lenskart", "croma", "vijay sales", "sangeetha mobiles",
+    "poorvika", "big c ", "lot mobiles", "happi mobiles", "reliance trends", "max fashion", "pantaloons", "westside",
+    "haldiram", "bikanervala", "chai point", "chaayos", "naturals salon", "naturals unisex", "naturals ice cream",
+    "green trends", "frank ross",
+    "wellness forever", "netmeds", "aavin", "nandini milk", "vijaya dairy", "amul", "karachi bakery",
+    "chennai silks", "pothys", "saravana stores", "nilgiris", "zudio", "decathlon", "ikea",
+]
+ADDRESS_RE = re.compile(r"^\s*\d+[-/]\d+|\d.*,.*\b(road|rd|street|st|nagar|colony|cross|main|layout|lane)\b", re.I)
+
+
+def is_chain(name: str) -> bool:
+    n = name.lower().strip()
+    return any(n == c.strip() or n.startswith(c if c.endswith(" ") else c + " ") or n.startswith(c + "'")
+               or n.startswith(c + "-") for c in KNOWN_CHAINS)
+
+
 def junk_reason(name: str) -> str | None:
     words = re.findall(r"[a-z&]+", name.lower())
     if len(name.strip()) < 3 or not re.search(r"[A-Za-z]", name):
         return "junk name"
+    if ADDRESS_RE.search(name):
+        return "address as name"
+    if is_chain(name):
+        return "known chain"
     if JUNK_RE.search(name):
         return "junk name"
     if words and all(w in GENERIC_WORDS for w in words):
@@ -342,6 +389,11 @@ def verify(city: str) -> list[str]:
     for reason, items in bad_live_businesses(osm).items():
         if items:
             problems.append(f"{len(items)} {reason} live, e.g. {[b['name'] for b in items[:4]]}")
+    regions = load_regions()["regions"]
+    misfiled = [b["name"] for b in osm if b.get("latitude") and not b.get("owner_id")
+                and nearest_city(b["latitude"], b["longitude"], regions) not in (city, None)]
+    if misfiled:
+        problems.append(f"{len(misfiled)} are nearer another city, e.g. {misfiled[:4]}")
     miscat = [b["name"] for b in osm if b.get("category_slug") == DEFAULT_SHOP_CATEGORY
               and category_from_name(b["name"]) and not b.get("owner_id")]
     if miscat:
@@ -366,13 +418,16 @@ def verify(city: str) -> list[str]:
     return problems
 
 
-def build_rows(bbox: list) -> tuple[list[dict], Counter]:
-    elements = fetch_osm(tuple(bbox))
+def build_rows(city: str, regions: dict) -> tuple[list[dict], Counter]:
+    elements = fetch_osm(tuple(regions[city]["bbox"]))
     rows, skipped, seen_names = [], Counter(), set()
     for el in elements:
         biz, reason = to_business(el)
         if not biz:
             skipped[reason] += 1
+            continue
+        if biz["latitude"] and nearest_city(biz["latitude"], biz["longitude"], regions) not in (city, None):
+            skipped["nearer another city"] += 1
             continue
         # Same place mapped twice (e.g. a node and a building outline)
         key = (biz["name"].lower(), biz["phone"] or biz["address"])
@@ -430,6 +485,28 @@ def admin_headers(client: httpx.Client) -> dict:
     return {"Authorization": f"Bearer {r.json()['access_token']}"}
 
 
+def rehome_city(city: str, regions: dict) -> int:
+    """Move this city's unclaimed imports that are nearer another city there."""
+    osm = [b for b in fetch_live(city) if b.get("source") == "osm" and b.get("latitude") and not b.get("owner_id")]
+    moves: dict[str, list[str]] = {}
+    for b in osm:
+        home = nearest_city(b["latitude"], b["longitude"], regions)
+        if home and home != city:
+            moves.setdefault(home, []).append(b["id"])
+    moved = 0
+    if moves:
+        with httpx.Client(timeout=60) as client:
+            headers = admin_headers(client)
+            for home, ids in moves.items():
+                for i in range(0, len(ids), 500):
+                    r = client.post(f"{BACKEND_URL}/api/v1/admin/businesses/import/move", headers=headers,
+                                    json={"business_ids": ids[i:i + 500], "city_slug": home})
+                    r.raise_for_status()
+                    moved += r.json()["moved"]
+        print(f"  moved {moved} to their nearest city: " + ", ".join(f"{k} {len(v)}" for k, v in moves.items()))
+    return moved
+
+
 def clean_city(city: str) -> int:
     """Soft-delete this city's imported businesses that fail the quality rules
     (the server only ever removes unclaimed imports), and move unclaimed
@@ -465,11 +542,12 @@ def clean_city(city: str) -> int:
 
 def run_city(city: str, regions: dict, live_categories: list[str], do_apply: bool, state: dict) -> None:
     print(f"\n=== {regions[city]['name']} (tier {regions[city].get('tier')}) ===")
-    rows, skipped = build_rows(regions[city]["bbox"])
+    rows, skipped = build_rows(city, regions)
     write_preview(city, rows, skipped, live_categories)
     if not do_apply:
         return
     totals = apply(city, rows) if rows else {"created": 0}
+    totals["moved_to_nearest_city"] = rehome_city(city, regions)
     totals["removed_by_cleanup"] = clean_city(city)
     problems = verify(city)
     state[city] = {"date": time.strftime("%Y-%m-%d"), "found": len(rows), **totals, "clean": not problems}
@@ -486,12 +564,25 @@ def main() -> None:
     ap.add_argument("--apply", action="store_true", help="upload to the live site (default: dry run)")
     ap.add_argument("--verify", action="store_true", help="only run the live checks for --city")
     ap.add_argument("--fix", action="store_true", help="with --verify: soft-delete imports that fail the checks first")
+    ap.add_argument("--fix-done", action="store_true", help="re-home, clean and verify every city already imported")
     args = ap.parse_args()
 
     data = load_regions()
     regions, order = data["regions"], data["order"]
+    if args.fix_done:
+        failed = []
+        for city in load_state():
+            print(f"\n=== fixing {city} ===")
+            rehome_city(city, regions)
+            clean_city(city)
+            problems = verify(city)
+            if problems:
+                failed.append(city)
+                print("  still: " + " | ".join(problems))
+        raise SystemExit(f"Needs a look: {failed}" if failed else 0)
     if args.verify:
         if args.fix:
+            rehome_city(args.city, regions)
             clean_city(args.city)
         problems = verify(args.city)
         raise SystemExit("\n".join(problems) if problems else 0)

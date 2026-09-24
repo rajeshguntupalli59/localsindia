@@ -117,3 +117,35 @@ async def remove_imported_businesses(
         b.deleted_at = now
     await db.commit()
     return {"removed": len(rows), "skipped": len(body.business_ids) - len(rows), "reason": body.reason}
+
+
+class MoveRequest(BaseModel):
+    business_ids: list[uuid.UUID] = Field(max_length=500)
+    city_slug: str
+
+
+@router.post("/businesses/import/move")
+async def move_imported_businesses(
+    body: MoveRequest,
+    db: AsyncSession = Depends(get_db),
+    admin: User = Depends(get_current_admin),
+):
+    """Re-file imported businesses under the city they're actually nearest to
+    (neighbouring cities' map boxes overlap). Unclaimed imports only."""
+    city = (await db.execute(
+        select(City).where(City.slug == body.city_slug, City.active == True)
+    )).scalar_one_or_none()
+    if not city:
+        raise HTTPException(status_code=404, detail="City not found.")
+    rows = (await db.execute(
+        select(Business).where(
+            Business.id.in_(body.business_ids),
+            Business.source.is_not(None),
+            Business.owner_id.is_(None),
+            Business.deleted_at.is_(None),
+        )
+    )).scalars().all()
+    for b in rows:
+        b.city_id = city.id
+    await db.commit()
+    return {"moved": len(rows), "skipped": len(body.business_ids) - len(rows)}

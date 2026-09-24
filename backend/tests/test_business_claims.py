@@ -311,3 +311,27 @@ async def test_business_keyword_search_and_sitemap(auth_client, city):
     assert [b["name"] for b in hits] == [f"Paradise Biryani {tag}"]
     entries = (await client.get("/api/v1/businesses/sitemap-entries")).json()
     assert entries and {"id", "city_slug", "updated_at"} <= set(entries[0])
+
+
+@pytest.mark.asyncio
+async def test_move_imported_business_to_nearest_city(auth_client, admin_client, city):
+    from app.models.category import Category
+    from app.models.city import City
+    client, _ = auth_client
+    admin, _ = admin_client
+    engine = _make_engine()
+    Session = async_sessionmaker(engine, expire_on_commit=False)
+    slug, cslug = f"mv-{uuid.uuid4().hex[:6]}", f"town-{uuid.uuid4().hex[:6]}"
+    async with Session() as s:
+        s.add(Category(name=slug, slug=slug, sort_order=0))
+        s.add(City(name="Town", state="Telangana", slug=cslug, lang_default="te"))
+        await s.commit()
+    await engine.dispose()
+    await admin.post("/api/v1/admin/businesses/import", json={"city_slug": "hyderabad", "businesses": [
+        {"name": "Edge Clinic", "category_slug": slug, "source_ref": f"node/{uuid.uuid4().int % 10**9}"}]})
+    b = (await client.get("/api/v1/businesses", params={"city_slug": "hyderabad", "category_slug": slug})).json()[0]
+    res = (await admin.post("/api/v1/admin/businesses/import/move",
+                            json={"business_ids": [b["id"]], "city_slug": cslug})).json()
+    assert res["moved"] == 1
+    moved = (await client.get("/api/v1/businesses", params={"city_slug": cslug, "category_slug": slug})).json()
+    assert [x["name"] for x in moved] == ["Edge Clinic"]

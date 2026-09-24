@@ -27,6 +27,11 @@ on:
         required: false
         type: boolean
         default: false
+      fix_done:
+        description: 'Re-home, clean and verify every city already imported (no import)'
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: write   # commits the import progress file
@@ -50,6 +55,10 @@ jobs:
           LOCALINDIA_ADMIN_PASSWORD: ${{ secrets.LOCALINDIA_ADMIN_PASSWORD }}
         run: |
           CITY="${{ github.event.inputs.city }}"
+          if [ "${{ github.event.inputs.fix_done }}" = "true" ]; then
+            python agents/osm_business_import.py --fix-done
+            exit $?
+          fi
           if [ "${{ github.event.inputs.fix_only }}" = "true" ]; then
             python agents/osm_business_import.py --city "$CITY" --verify --fix
             exit $?
