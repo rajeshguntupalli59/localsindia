@@ -14,11 +14,21 @@ const nextConfig = {
       { protocol: 'http', hostname: '**' },
     ],
   },
-  // 'tirupur' was a duplicate of 'tiruppur' (merged 2026-09-24) — keep old links working
   async redirects() {
     return [
+      // 'tirupur' was a duplicate of 'tiruppur' (merged 2026-09-24) — keep old links working
       { source: '/tirupur', destination: '/tiruppur', permanent: true },
       { source: '/tirupur/:path*', destination: '/tiruppur/:path*', permanent: true },
+      // Blog posts moved from the wrong 'bangalore' slug to the real city (2026-09-25)
+      { source: '/blog/bangalore', destination: '/blog/bengaluru', permanent: true },
+      { source: '/blog/bangalore/:path*', destination: '/blog/bengaluru/:path*', permanent: true },
+      // Posts about cities LocalsIndia doesn't serve were unpublished (kept in
+      // src/content/blog-archive/) — send old links to the blog home
+      {
+        source: '/blog/:city(ahmedabad|bhopal|delhi|indore|jaipur|kanpur|kolkata|lucknow|mumbai|nagpur|pune|surat)/:path*',
+        destination: '/blog',
+        permanent: true,
+      },
     ];
   },
   webpack: (config) => {

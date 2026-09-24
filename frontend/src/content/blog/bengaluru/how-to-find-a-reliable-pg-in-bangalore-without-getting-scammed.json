@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "city": "Bangalore",
-  "citySlug": "bangalore",
+  "city": "Bengaluru",
+  "citySlug": "bengaluru",
   "state": "Karnataka",
   "slug": "how-to-find-a-reliable-pg-in-bangalore-without-getting-scammed",
   "category": "pg-roommate",
@@ -63,7 +63,7 @@
   ],
   "cta": {
     "text": "Post your listing free on LocalsIndia — it takes 2 minutes",
-    "href": "/bangalore/search?category=pg-roommate"
+    "href": "/bengaluru/search?category=pg-roommate"
   },
   "publishedAt": "2026-07-24T20:36:55Z",
   "wordCount": 807
