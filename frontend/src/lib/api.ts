@@ -1,5 +1,6 @@
 import type {
   City,
+  ClaimOptions,
   CityBanner,
   Category,
   Listing,
@@ -229,8 +230,14 @@ export const api = {
       req<Business>('/api/v1/businesses', { method: 'POST', body: JSON.stringify(data), token }),
     update: (id: string, data: object, token: string) =>
       req<Business>(`/api/v1/businesses/${id}`, { method: 'PATCH', body: JSON.stringify(data), token }),
-    claim: (id: string, token: string) =>
-      req<Business>(`/api/v1/businesses/${id}/claim`, { method: 'POST', token }),
+    claimOptions: (id: string, token: string) =>
+      req<ClaimOptions>(`/api/v1/businesses/${id}/claim-options`, { token }),
+    sendClaimOtp: (id: string, token: string) =>
+      req<{ message: string; masked_phone: string; otp?: string }>(`/api/v1/businesses/${id}/claim/otp/send`, { method: 'POST', token }),
+    verifyClaimOtp: (id: string, otp: string, token: string) =>
+      req<{ status: string }>(`/api/v1/businesses/${id}/claim/otp/verify`, { method: 'POST', body: JSON.stringify({ otp }), token }),
+    submitClaimDocuments: (id: string, form: FormData, token: string) =>
+      req<{ status: string; id: string }>(`/api/v1/businesses/${id}/claim/documents`, { method: 'POST', body: form, token }),
     addReview: (id: string, data: { rating: number; body?: string }, token: string) =>
       req<Review>(`/api/v1/businesses/${id}/reviews`, { method: 'POST', body: JSON.stringify(data), token }),
     view: (id: string) =>

@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { api, ApiError } from '@/lib/api';
 import type { Business } from '@/lib/types';
 import GetVerifiedModal from '@/components/get-verified-modal/GetVerifiedModal';
+import ClaimBusinessModal from '@/components/claim-business/ClaimBusinessModal';
 
 function StarPicker({ value, onChange }: { value: number; onChange: (v: number) => void }) {
   return (
@@ -45,8 +46,13 @@ export default function BusinessDetailPage() {
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewBody, setReviewBody] = useState('');
   const [submittingReview, setSubmittingReview] = useState(false);
-  const [claiming, setClaiming] = useState(false);
+  const [claimModal, setClaimModal] = useState(false);
+  const [myId, setMyId] = useState<string | null>(null);
   const [badgeModal, setBadgeModal] = useState(false);
+
+  useEffect(() => {
+    try { setMyId(JSON.parse(localStorage.getItem('user') ?? 'null')?.id ?? null); } catch { /* ignore */ }
+  }, []);
 
   useEffect(() => {
     api.businesses.get(businessId)
@@ -77,19 +83,9 @@ export default function BusinessDetailPage() {
     }
   };
 
-  const claimBusiness = async () => {
-    const token = localStorage.getItem('access_token');
-    if (!token) { router.push('/auth/login'); return; }
-    setClaiming(true);
-    try {
-      const updated = await api.businesses.claim(businessId, token);
-      setBusiness(updated);
-      toast.success('Business claimed! Our team will verify it soon.');
-    } catch (err) {
-      toast.error(err instanceof ApiError ? err.message : 'Failed to claim business');
-    } finally {
-      setClaiming(false);
-    }
+  const openClaim = () => {
+    if (!localStorage.getItem('access_token')) { router.push('/auth/login'); return; }
+    setClaimModal(true);
   };
 
   if (loading) {
@@ -205,19 +201,20 @@ export default function BusinessDetailPage() {
               </a>
             )}
             {!business.owner_id && (
-              <Button
-                variant="outline"
-                className="flex-1"
-                onClick={claimBusiness}
-                disabled={claiming}
-              >
-                {claiming ? 'Claiming...' : 'Claim this Business'}
+              <Button variant="outline" className="flex-1" onClick={openClaim}>
+                Claim this Business
               </Button>
             )}
           </div>
 
-          {/* Analytics dashboard link — shown once the business has an owner on record */}
-          {business.owner_id && (
+          {business.owner_id && business.owner_id !== myId && (
+            <button onClick={openClaim} className="mt-3 text-xs font-semibold underline text-slate-500 hover:text-slate-800">
+              Is this your business? Request an ownership review
+            </button>
+          )}
+
+          {/* Analytics dashboard link — owner only */}
+          {business.owner_id && business.owner_id === myId && (
             <Link
               href={`/${citySlug}/businesses/${businessId}/dashboard`}
               className="mt-3 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
@@ -227,7 +224,7 @@ export default function BusinessDetailPage() {
           )}
 
           {/* Get Verified CTA — shown to owner if not yet verified */}
-          {business.owner_id && !business.verified && (
+          {business.owner_id && business.owner_id === myId && !business.verified && (
             <div className="mt-4 p-4 rounded-xl border-2 border-blue-100 bg-blue-50 flex items-start gap-3">
               <ShieldCheck className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
               <div className="flex-1">
@@ -310,6 +307,14 @@ export default function BusinessDetailPage() {
       </div>
 
       {/* Badge plan selection modal */}
+      {claimModal && (
+        <ClaimBusinessModal
+          businessId={businessId}
+          businessName={business.name}
+          onClose={() => setClaimModal(false)}
+          onClaimed={() => api.businesses.get(businessId).then(setBusiness).catch(() => {})}
+        />
+      )}
       {badgeModal && (
         <GetVerifiedModal
           businessId={businessId}

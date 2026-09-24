@@ -126,20 +126,9 @@ async def delete_business(
     await db.commit()
 
 
-@router.post("/businesses/{business_id}/claim", response_model=BusinessOut)
-async def claim_business(
-    business_id: uuid.UUID,
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    business = await _get_active_business(business_id, db)
-    if business.owner_id is not None:
-        raise HTTPException(status_code=409, detail="Business already claimed.")
-
-    business.owner_id = current_user.id
-    await db.commit()
-    await db.refresh(business)
-    return await _get_active_business(business.id, db)
+# Claiming lives in routers/business_claims.py (SMS OTP to the business's own
+# number, or admin-reviewed documents). The old instant first-come claim let
+# any signed-in user take over any business and was removed 2026-09-24.
 
 
 @router.post("/businesses/{business_id}/reviews", response_model=ReviewOut, status_code=201)

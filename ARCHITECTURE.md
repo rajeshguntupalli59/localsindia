@@ -626,7 +626,14 @@ Also `GET /api/v1/admin/errors` (admin-only, see Admin section below) — lists 
 | GET | `/businesses/{id}` | Business detail + reviews | No |
 | PATCH | `/businesses/{id}` | Update business (owner/admin) | Yes |
 | DELETE | `/businesses/{id}` | Soft-delete business (admin or owner only) | Yes |
-| POST | `/businesses/{id}/claim` | Claim ownership of unclaimed business | Yes |
+| GET | `/businesses/{id}/claim-options` | OTP availability, masked phone, document types | Yes |
+| POST | `/businesses/{id}/claim/otp/send` | SMS code to the business's listed mobile | Yes |
+| POST | `/businesses/{id}/claim/otp/verify` | Correct code makes caller the owner | Yes |
+| POST | `/businesses/{id}/claim/documents` | Document + shop photo (+ visiting card) + callback phone → admin queue | Yes |
+| GET | `/admin/business-claims` | Pending document claims with 10-min signed image URLs | Admin |
+| POST | `/admin/business-claims/{id}/approve` | Transfer ownership, reject rival claims, notify | Admin |
+| POST | `/admin/business-claims/{id}/reject` | Reject with reason, notify | Admin |
+| POST | `/admin/business-claims/email` | Grant ownership for a claim proven by email (business ID + claimant account phone) | Admin |
 | POST | `/businesses/{id}/reviews` | Add review (recalculates avg_rating) | Yes |
 | POST | `/businesses/{id}/view` | Fire-and-forget view-count event (feeds analytics below) | No |
 | POST | `/businesses/{id}/wa-click` | Fire-and-forget WhatsApp-click event (feeds analytics below) | No |
@@ -1134,6 +1141,12 @@ Lists flagged listings with report reasons. Admin can then reject the listing.
 ### `/privacy`, `/terms` — Legal Pages
 
 Static content pages. Pre-built HTML.
+
+---
+
+### `/trust` — Trust & Safety
+
+Static page. Explains listing review, "Active on WhatsApp" (`wa_verified` — set on first WhatsApp tap, not an ID check), the paid business "Verified" badge (OTP-signed-in owner + active subscription, no document check), 3-report auto-hide, and per-category safety tips from `lib/safety.ts`. Linked from the footer and from `components/safety-tips/SafetyTips.tsx` on both listing detail pages.
 
 ---
 
@@ -1787,6 +1800,7 @@ Side services (called from backend):
 | `app/admin/users/page.tsx` | User management |
 | `app/admin/reports/page.tsx` | Abuse reports |
 | `app/privacy/page.tsx` | Privacy policy |
+| `app/trust/page.tsx` | Trust & Safety explainer |
 | `app/terms/page.tsx` | Terms of service |
 | `app/offline/page.tsx` | PWA offline fallback |
 | `app/invite/page.tsx` | Invite friends |

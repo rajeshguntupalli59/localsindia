@@ -115,6 +115,21 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 
 ## 6. Changelog (dated, most recent first — append here after notable sessions)
 
+### 2026-09-24 — Verified business claiming (prep for importing real businesses)
+- Old `POST /businesses/{id}/claim` let any signed-in user instantly own any business — removed. New `routers/business_claims.py`: SMS OTP to the business's own listed mobile (instant), or document + shopfront photo + optional visiting card + callback phone → `/admin/business-claims` queue (approve/reject with reason, in-app + push notification). No field visits needed. Owners can also email proof to support@localsindia.com (pre-filled mailto in the claim modal); admin grants it via the "Approve an email claim" box (`POST /admin/business-claims/email`).
+- Docs are Cloudinary `type=private`; admin sees 10-min signed URLs. Privacy policy updated. `mobile/src/lib/api.ts` still has an unused `claim()` pointing at the removed endpoint.
+- Owner-only UI fix: "View Analytics" / "Get Verified" on a business page were shown to every visitor once it had an owner.
+
+### 2026-09-24 — Website review fixes (trust, SEO, i18n, posting)
+- Duplicate city merged: `tirupur` → `tiruppur` via data migration `a9c1d2e3f4b5` (runs on next backend deploy; deactivates, doesn't delete); removed from `seed_cities_full.py`, SEO file deleted, `/tirupur/*` 301s to `/tiruppur/*`.
+- Hindi claims removed (About, city launch page, chatbot prompt — which also wrongly listed Mumbai/Delhi/Goa coverage — and CRO agent brief). Homepage "no waiting for approval" corrected (listings are reviewed).
+- `/post` with no saved city went to `/?openPost=1`, which nothing handled — every no-city "Post" dead-ended on the homepage. Fixed; floating promo now links `/post` and hides on listing detail/post pages.
+- Homepage hero + section headings now translate (new `home.*` keys, te/ta/kn/ml — machine-written, worth a native check).
+- SEO listing URLs `/listing/{uuid}-{title-slug}` (canonical); search pages get an h1 ("tiffin in Hyderabad"); listing breadcrumbs include category.
+- Seed `placehold.co` covers treated as no photo; photo-skip confirm in post form; "Verified" label on fresh listings (really `wa_verified`, set on first WA tap) renamed "Active on WA"; new `/trust` page + per-category safety tips.
+- No-city visitors browse Hyderabad (`DEFAULT_CITY_SLUG`) instead of example cards / forced picker. "New this morning" now only says "Posted today" when true.
+- Not done: contact phone/address (none real to show), real users per city (outreach, not code), seller ratings.
+
 ### 2026-09-21 — Social/blog automation was dead for a week (invalid ANTHROPIC_API_KEY); posts also repeating
 - Social Poster failed every run since 09-15 and Blog Publisher on 09-13/09-20: `401 API key is invalid` from the `ANTHROPIC_API_KEY` GitHub secret. Founder supplied a new key, secret re-set 09-21. Verified: manual Social Poster run posted to FB page + IG feed + IG story, Blog Publisher run green.
 - One manual Social Poster run hit a transient Instagram `/media` 400 (not reproduced). `meta_client.py` now prints the Graph API error body on any failed call (`8b66fb0`) so it's diagnosable next time.

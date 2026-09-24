@@ -224,3 +224,28 @@ export interface BuyerRequestOut {
   category_slug: string | null;
   category_icon: string | null;
 }
+
+export interface ClaimOptions {
+  claimed: boolean;
+  is_owner: boolean;
+  otp_available: boolean;
+  masked_phone: string | null;
+  pending_claim: boolean;
+  doc_types: { key: string; label: string }[];
+}
+
+export interface AdminBusinessClaim {
+  id: string;
+  status: string;
+  created_at: string;
+  business: { id: string; name: string; address: string | null; phone: string | null; city_slug: string; already_claimed: boolean };
+  claimant: { id: string; name: string | null; phone: string | null };
+  contact_phone: string | null;
+  doc_type: string | null;
+  doc_label: string | null;
+  note: string | null;
+  document_url: string | null;
+  shop_photo_url: string | null;
+  visiting_card_url: string | null;
+  reject_reason: string | null;
+}

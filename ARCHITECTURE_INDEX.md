@@ -56,7 +56,7 @@
 | Listing search filters | §6-Listings | `routers/listings.py` | `search/page.tsx` | `listings` | GET /cities/{slug}/listings?min_price=&max_price=&sort=&verified_only=&within= |
 | Business directory (mobile parity added 2026-07-17) | §8-Businesses | `routers/businesses.py` | Web: `[city]/businesses/page.tsx`, `BusinessDetailClient.tsx`. Mobile (new): `mobile/src/screens/BusinessesScreen.tsx` (directory browse for the user's city), reached via a dedicated "Own a Business?" promo banner on `HomeScreen.tsx` (separate from the category grid — the existing "Businesses" category tile still goes to normal classifieds search, unchanged) | `businesses`, `reviews` | GET /businesses, POST /businesses |
 | Business profile | §8-BusinessProfile | `routers/businesses.py` | `[city]/businesses/[id]/page.tsx`, `BusinessDetailClient.tsx` (web); `mobile/src/screens/BusinessDetailScreen.tsx` (mobile — existed since Phase 2 but was completely unreachable until the 2026-07-17 fix above; zero code anywhere linked to it) | `businesses`, `reviews` | GET /businesses/{id} |
-| Claim business | §8-BusinessProfile | `routers/businesses.py` | `BusinessDetailClient.tsx` | `businesses` (owner_id) | POST /businesses/{id}/claim |
+| Claim business (2026-09-24: SMS OTP to the business's listed mobile = instant; or document + shopfront photo + optional visiting card + callback phone → admin review; old instant first-come claim removed) | §8-BusinessProfile | `routers/business_claims.py`, `services/cloudinary_svc.py` (`upload_private_image`/`private_image_url` — Cloudinary type=private, 10-min signed download URLs) | `components/claim-business/ClaimBusinessModal.tsx`, `BusinessDetailClient.tsx`, `app/admin/business-claims/page.tsx` | `business_claims`, `businesses.owner_id` | GET /businesses/{id}/claim-options, POST /businesses/{id}/claim/otp/send, POST /businesses/{id}/claim/otp/verify, POST /businesses/{id}/claim/documents, GET /admin/business-claims, POST /admin/business-claims/{id}/approve, POST /admin/business-claims/{id}/reject |
 | Business reviews | §5-reviews | `routers/businesses.py` | `BusinessDetailClient.tsx` | `reviews` | POST /businesses/{id}/reviews |
 | Business analytics dashboard (Phase 3, 2026-07-18; mobile parity 2026-07-28) | §6-Businesses, §12 | `routers/analytics.py` (owner/admin-only, aggregates 30-day totals + a daily views/whatsapp-click trend from `analytics_events`; no change for mobile parity — same endpoint, real 403 for non-owners), `routers/businesses.py` (`/view`, `/wa-click`), `models/analytics_event.py` (table, migration `e1a2b3c4d5f6`) | Web: `BusinessDetailClient.tsx` ("View Analytics" link, shown whenever `business.owner_id` is set — not strictly gated to the *current* user, relies on the backend 403 to actually enforce ownership), `[city]/businesses/[id]/dashboard/BusinessDashboardClient.tsx` (4 stat cards + plain CSS bar chart). Mobile (new): `mobile/src/screens/BusinessDashboardScreen.tsx` (same stat cards/bar chart/banner-ad promo, RN `View`-based bars instead of divs), entry point is an owner-only "View Analytics" button on `BusinessDetailScreen.tsx` gated on the screen's own real `isOwner` check (current user id === business.owner_id), stricter than web's owner_id-only check | `analytics_events` (business_id, event_type, created_at) | GET /analytics/business/{id} [AUTH, owner or admin only], POST /businesses/{id}/view, POST /businesses/{id}/wa-click |
 | City banner ads (Phase 3, 2026-07-20) | §5-city_banners, §6-Cities, §12 | `models/city_banner.py` (new — `city_id`, `advertiser_name`, `image_url`, `link_url`, `start_date`, `end_date`), migration `b4c5d6e7f8a9`, `routers/cities.py` (`GET /cities/{slug}/banner` — public, returns the newest banner whose date range covers today, or `null`), `routers/admin.py` (`GET/POST /admin/banners`, `DELETE /admin/banners/{id}`) | `admin/banners/page.tsx` (new — city picker + advertiser/image/link fields + start/end date, list with Active/Scheduled/Expired status pill), `components/city-banner/CityBanner.tsx` (new — fetches the active banner for the current city, renders nothing if none; wired into `[city]/CityHomeClient.tsx` right below the hero) | `city_banners` (new) | GET /cities/{slug}/banner (public), GET/POST /admin/banners, DELETE /admin/banners/{id} [ADMIN] — last remaining piece of the original Phase 3 monetization plan (Rs.999–2,999/mo per city slot, admin-assigned/manually-invoiced, not self-serve Razorpay). Built as its own small table rather than "a listing with category=advertisement" (the original plan-doc sketch) — a banner has no price/WhatsApp/photos/moderation-queue semantics a classifieds listing carries, so overloading `listings` would have polluted search/reporting with non-classified rows for no benefit. Distinct from the pre-existing `AdBanner.tsx` (Google AdSense, `[city]/CityHomeClient.tsx` footer) — that's third-party programmatic ad inventory; this is a directly-sold, admin-controlled local sponsor slot. |
@@ -220,6 +220,7 @@
 | `app/admin/buyer-requests/page.tsx` | `/admin/buyer-requests` | (2026-07-27) Buyer-request moderation queue — mirrors `admin/reports/page.tsx`; review/restore flagged "Wanted" posts |
 | `app/admin/banners/page.tsx` | `/admin/banners` | (new, 2026-07-20) City banner ads: create form (city picker + advertiser/image/link + date range), list with Active/Scheduled/Expired status pill, remove |
 | `app/privacy/page.tsx` | `/privacy` | Privacy policy (static) |
+| `app/trust/page.tsx` | `/trust` | Trust & Safety: what "Active on WhatsApp" and business "Verified" really mean, listing review, reporting, per-category safety tips (static) |
 | `app/terms/page.tsx` | `/terms` | Terms of service (static) |
 | `app/offline/page.tsx` | `/offline` | PWA offline fallback |
 | `app/invite/page.tsx` | `/invite` | Invite friends page — fetches own `referral_code` via `getMe()`, builds a real `?ref=` share link; guests without a token see a login-gate card instead of the share section (2026-07-18) |
@@ -244,6 +245,7 @@
 | `components/listing-card/ListingCardSkeleton.tsx` | Animated placeholder — same size as ListingCard |
 | `components/site-header/SiteHeader.tsx` | Sticky top nav: logo, city chip, language, sign in, post CTA |
 | `components/site-footer/SiteFooter.tsx` | Footer: links, social icons |
+| `components/safety-tips/SafetyTips.tsx` | Per-category "Stay Safe" box on both listing detail pages, links to `/trust` |
 | `components/site-logo/SiteLogo.tsx` | Brand logo (light/dark/size variants) |
 | `components/city-picker/CityPickerModal.tsx` | City search modal with geolocation + recent cities |
 | `components/language-selector/LanguageSelector.tsx` | 11-language dropdown |
@@ -265,7 +267,8 @@
 |------|-----------------|
 | `lib/api.ts` | Typed fetch wrapper — every API call (50+) with auto JWT refresh |
 | `lib/types.ts` | TypeScript interfaces: City, Listing, Business, Event, User, etc. |
-| `lib/utils.ts` | `cn()`, `formatPrice()`, `timeAgo()` |
+| `lib/utils.ts` | `cn()`, `formatPrice()`, `timeAgo()`, `searchHeading()`, `listingPath()`/`listingIdFromParam()` (SEO `/listing/{uuid}-{slug}` URLs, bare UUID still works), `realImages()` (drops placehold.co seed covers) |
+| `lib/safety.ts` | `SAFETY_TIPS` per category + `safetyTips(slug)` — used by `SafetyTips` and `/trust` |
 | `lib/prefs.ts` | localStorage helpers for city/language preferences |
 | `lib/razorpay.ts` | Razorpay checkout open/close helper |
 | `lib/translations.ts` | i18n key type definitions |
@@ -391,7 +394,14 @@ POST   /api/v1/businesses                 Create business [AUTH]
 GET    /api/v1/businesses/{id}            Business detail + reviews
 PATCH  /api/v1/businesses/{id}            Update [AUTH, owner/admin]
 DELETE /api/v1/businesses/{id}            Soft-delete [AUTH, owner/admin]
-POST   /api/v1/businesses/{id}/claim      Claim ownership [AUTH]
+GET    /api/v1/businesses/{id}/claim-options   OTP availability + masked phone + doc types [AUTH]
+POST   /api/v1/businesses/{id}/claim/otp/send  SMS code to business's listed mobile (3/hr per business) [AUTH]
+POST   /api/v1/businesses/{id}/claim/otp/verify  Correct code → owner_id set (3 attempts) [AUTH]
+POST   /api/v1/businesses/{id}/claim/documents  multipart: doc_type, contact_phone, document, shop_photo, visiting_card? → pending [AUTH]
+GET    /api/v1/admin/business-claims?status=  Review queue with signed doc URLs [ADMIN]
+POST   /api/v1/admin/business-claims/{id}/approve  Sets owner (overrides), rejects rival pending claims, notifies [ADMIN]
+POST   /api/v1/admin/business-claims/{id}/reject   {reason} required, notifies [ADMIN]
+POST   /api/v1/admin/business-claims/email  {business_id, phone, note?} — owner emailed proof to support; grants ownership to that account (method='email') [ADMIN]
 POST   /api/v1/businesses/{id}/reviews    Add review (recalcs avg_rating) [AUTH]
 ```
 
@@ -504,6 +514,7 @@ GET    /api/v1/health                     {"status":"ok"} — keepalive probe
 | `listing_images` | id, listing_id, url, cloudinary_id, display_order | Max 5; Cloudinary CDN |
 | `listing_reviews` | id, listing_id, user_id, rating, body | Unique(listing_id, user_id) |
 | `businesses` | id, city_id, owner_id, name, address, phone, whatsapp_url, verified, avg_rating, review_count, deleted_at | avg_rating recalculated on review |
+| `business_claims` | id, business_id, user_id, method (otp/documents), status (otp_sent/approved/expired/pending/rejected), otp_hash, otp_expires_at, otp_attempts, contact_phone, doc_type, document_id, shop_photo_id, visiting_card_id (Cloudinary private public_ids), note, reject_reason, reviewed_by, reviewed_at | Migration `b3d4e5f6a7c8`. Claim OTPs live here, not `otp_requests`, so they can't be used to log in |
 | `reviews` | id, business_id, user_id, rating, body | Unique(business_id, user_id) |
 | `events` | id, city_id, user_id, title, venue, event_date, is_free, ticket_url, ticket_price, status, deleted_at | status: pending/active/cancelled/completed. `ticket_price` (nullable, added migration `f2b3c4d5e6a7`, 2026-07-18) — if set, event sells tickets in-app instead of linking to `ticket_url` |
 | `reports` | id, listing_id, user_id, reason, notes | Unique(listing_id, user_id); 3 = auto-flag |
@@ -561,6 +572,7 @@ GET    /api/v1/health                     {"status":"ok"} — keepalive probe
 | `errors.*` | Form validation across all forms |
 | `categories.*` | `[city]/page.tsx`, category chips |
 | `hero.*` | `app/page.tsx` |
+| `home.*` | `app/page.tsx` — why-us cards, day sections, closing CTA |
 | `sort.*` | Listing grid sort dropdown |
 
 ---
