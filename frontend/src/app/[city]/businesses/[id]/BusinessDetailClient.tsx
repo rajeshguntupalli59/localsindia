@@ -11,6 +11,7 @@ import { api, ApiError } from '@/lib/api';
 import type { Business } from '@/lib/types';
 import GetVerifiedModal from '@/components/get-verified-modal/GetVerifiedModal';
 import ClaimBusinessModal from '@/components/claim-business/ClaimBusinessModal';
+import OsmAttribution from '@/components/osm-attribution/OsmAttribution';
 
 function StarPicker({ value, onChange }: { value: number; onChange: (v: number) => void }) {
   return (
@@ -175,6 +176,17 @@ export default function BusinessDetailPage() {
                 <a href={`tel:${business.phone}`} className="hover:underline">{business.phone}</a>
               </div>
             )}
+            {business.latitude != null && business.longitude != null && (
+              <div className="flex items-center gap-2 text-slate-600">
+                <MapPin className="w-4 h-4 flex-shrink-0" />
+                <a
+                  href={`https://www.openstreetmap.org/?mlat=${business.latitude}&mlon=${business.longitude}#map=18/${business.latitude}/${business.longitude}`}
+                  target="_blank" rel="noopener noreferrer" className="hover:underline"
+                >
+                  View on map
+                </a>
+              </div>
+            )}
             {business.website_url && (
               <div className="flex items-center gap-2 text-slate-600">
                 <Globe className="w-4 h-4 flex-shrink-0" />
@@ -206,6 +218,13 @@ export default function BusinessDetailPage() {
               </Button>
             )}
           </div>
+
+          {!business.owner_id && (
+            <p className="mt-3 text-xs text-slate-500">
+              Unclaimed listing — details may be out of date. Own this business? Claim it to update it.
+            </p>
+          )}
+          {business.source === 'osm' && <OsmAttribution className="mt-2" />}
 
           {business.owner_id && business.owner_id !== myId && (
             <button onClick={openClaim} className="mt-3 text-xs font-semibold underline text-slate-500 hover:text-slate-800">

@@ -1,0 +1,47 @@
+name: OSM Business Import
+
+# Manual only. Imports real businesses from OpenStreetMap as UNCLAIMED
+# directory listings (see agents/osm_business_import.py). Dry run by default —
+# download the preview artifact, check it, then re-run with apply ticked.
+# Re-running with apply is safe: already-imported businesses are skipped.
+on:
+  workflow_dispatch:
+    inputs:
+      city:
+        description: 'City slug (must be in CITY_BBOX in the script)'
+        required: true
+        default: 'hyderabad'
+      apply:
+        description: 'Upload to the live site (unticked = preview only)'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Python dependencies
+        run: pip install -r agents/requirements.txt
+
+      - name: Import businesses
+        env:
+          LOCALINDIA_ADMIN_PASSWORD: ${{ secrets.LOCALINDIA_ADMIN_PASSWORD }}
+        run: |
+          APPLY_FLAG=""
+          if [ "${{ github.event.inputs.apply }}" = "true" ]; then APPLY_FLAG="--apply"; fi
+          python agents/osm_business_import.py --city "${{ github.event.inputs.city }}" $APPLY_FLAG
+
+      - name: Upload preview as workflow artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: osm-import-${{ github.event.inputs.city }}
+          path: agents/output/osm/
+          retention-days: 30

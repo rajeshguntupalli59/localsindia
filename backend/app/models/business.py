@@ -31,6 +31,13 @@ class Business(Base):
     avg_rating: Mapped[float | None] = mapped_column(Numeric(3, 2), default=0)
     review_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    # Where an admin-imported business came from, e.g. source='osm',
+    # source_ref='node/123456' — lets re-runs skip what's already imported and
+    # lets the site show the OpenStreetMap attribution the ODbL licence requires.
+    source: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    source_ref: Mapped[str | None] = mapped_column(String(40), nullable=True, unique=True)
+    latitude: Mapped[float | None] = mapped_column(Numeric(9, 6), nullable=True)
+    longitude: Mapped[float | None] = mapped_column(Numeric(9, 6), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

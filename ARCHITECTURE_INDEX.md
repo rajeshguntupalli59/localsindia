@@ -401,6 +401,7 @@ POST   /api/v1/businesses/{id}/claim/documents  multipart: doc_type, contact_pho
 GET    /api/v1/admin/business-claims?status=  Review queue with signed doc URLs [ADMIN]
 POST   /api/v1/admin/business-claims/{id}/approve  Sets owner (overrides), rejects rival pending claims, notifies [ADMIN]
 POST   /api/v1/admin/business-claims/{id}/reject   {reason} required, notifies [ADMIN]
+POST   /api/v1/admin/businesses/import       {city_slug, source, businesses[≤500]} → unclaimed businesses; skips existing source_ref [ADMIN]
 POST   /api/v1/admin/business-claims/email  {business_id, phone, note?} — owner emailed proof to support; grants ownership to that account (method='email') [ADMIN]
 POST   /api/v1/businesses/{id}/reviews    Add review (recalcs avg_rating) [AUTH]
 ```
@@ -513,7 +514,7 @@ GET    /api/v1/health                     {"status":"ok"} — keepalive probe
 | `listings` | id, user_id, city_id, category_id, title, description, price, contact_phone, whatsapp_url, status, is_featured, featured_at, featured_until, report_count, expires_at, view_count, contact_click_count, last_renewed_at, search_vector, latitude, longitude, deleted_at | Core product; tsvector search; view/click counters added migration `f6a7b8c9d0e1`; `featured_until` added migration `c5d6e7f8a9b0` (2026-07-15) — dedicated featured-boost expiry, decoupled from the listing's own `expires_at` lifecycle field; `latitude`/`longitude` (both nullable `Numeric(9,6)`) added migration `f906010e814a` (2026-07-16) — optional, captured only if the seller grants location permission when posting, drives Haversine distance ordering on `GET /cities/{slug}/listings` and `GET /search` |
 | `listing_images` | id, listing_id, url, cloudinary_id, display_order | Max 5; Cloudinary CDN |
 | `listing_reviews` | id, listing_id, user_id, rating, body | Unique(listing_id, user_id) |
-| `businesses` | id, city_id, owner_id, name, address, phone, whatsapp_url, verified, avg_rating, review_count, deleted_at | avg_rating recalculated on review |
+| `businesses` | id, city_id, owner_id, name, address, phone, whatsapp_url, verified, avg_rating, review_count, deleted_at, source, source_ref (unique), latitude, longitude | avg_rating recalculated on review. source='osm' rows come from `agents/osm_business_import.py` (migration `c5e6f7a8b9d0`) and must show `OsmAttribution` (ODbL) |
 | `business_claims` | id, business_id, user_id, method (otp/documents), status (otp_sent/approved/expired/pending/rejected), otp_hash, otp_expires_at, otp_attempts, contact_phone, doc_type, document_id, shop_photo_id, visiting_card_id (Cloudinary private public_ids), note, reject_reason, reviewed_by, reviewed_at | Migration `b3d4e5f6a7c8`. Claim OTPs live here, not `otp_requests`, so they can't be used to log in |
 | `reviews` | id, business_id, user_id, rating, body | Unique(business_id, user_id) |
 | `events` | id, city_id, user_id, title, venue, event_date, is_free, ticket_url, ticket_price, status, deleted_at | status: pending/active/cancelled/completed. `ticket_price` (nullable, added migration `f2b3c4d5e6a7`, 2026-07-18) — if set, event sells tickets in-app instead of linking to `ticket_url` |

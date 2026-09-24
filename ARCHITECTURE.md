@@ -633,6 +633,7 @@ Also `GET /api/v1/admin/errors` (admin-only, see Admin section below) — lists 
 | GET | `/admin/business-claims` | Pending document claims with 10-min signed image URLs | Admin |
 | POST | `/admin/business-claims/{id}/approve` | Transfer ownership, reject rival claims, notify | Admin |
 | POST | `/admin/business-claims/{id}/reject` | Reject with reason, notify | Admin |
+| POST | `/admin/businesses/import` | Bulk-create unclaimed directory businesses (OSM import), idempotent on source_ref | Admin |
 | POST | `/admin/business-claims/email` | Grant ownership for a claim proven by email (business ID + claimant account phone) | Admin |
 | POST | `/businesses/{id}/reviews` | Add review (recalculates avg_rating) | Yes |
 | POST | `/businesses/{id}/view` | Fire-and-forget view-count event (feeds analytics below) | No |

@@ -164,6 +164,9 @@ export interface Business {
   city_id: string;
   category_id: string | null;
   owner_id: string | null;
+  source?: string | null;      // 'osm' = imported from OpenStreetMap (needs attribution)
+  latitude?: number | null;
+  longitude?: number | null;
   created_at: string;
   reviews?: Review[];
   images?: ListingImage[];

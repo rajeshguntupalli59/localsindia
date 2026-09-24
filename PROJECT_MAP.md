@@ -115,6 +115,11 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 
 ## 6. Changelog (dated, most recent first — append here after notable sessions)
 
+### 2026-09-24 — OpenStreetMap business import (Hyderabad first)
+- `agents/osm_business_import.py` + manual workflow `osm-import.yml` (dry run by default; artifact = preview CSV/JSON/summary; tick "apply" to upload via `POST /admin/businesses/import`). Filter: named, mapped category, phone OR real address, not a chain (`brand` tag). Hyderabad dry run: 2,407 businesses, 386 with a mobile (SMS-claimable).
+- businesses gained source/source_ref/latitude/longitude (migration `c5e6f7a8b9d0`); imported rows are unclaimed, show "Unclaimed", "View on map", and the required © OpenStreetMap/ODbL attribution.
+- Note: businesses created earlier by `city_launcher.py` use fictional phones (+9164000000xx) and are owned by the admin account.
+
 ### 2026-09-24 — Verified business claiming (prep for importing real businesses)
 - Old `POST /businesses/{id}/claim` let any signed-in user instantly own any business — removed. New `routers/business_claims.py`: SMS OTP to the business's own listed mobile (instant), or document + shopfront photo + optional visiting card + callback phone → `/admin/business-claims` queue (approve/reject with reason, in-app + push notification). No field visits needed. Owners can also email proof to support@localsindia.com (pre-filled mailto in the claim modal); admin grants it via the "Approve an email claim" box (`POST /admin/business-claims/email`).
 - Docs are Cloudinary `type=private`; admin sees 10-min signed URLs. Privacy policy updated. `mobile/src/lib/api.ts` still has an unused `claim()` pointing at the removed endpoint.

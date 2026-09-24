@@ -9,6 +9,7 @@ import { api } from '@/lib/api';
 import type { Business } from '@/lib/types';
 import SiteHeader from '@/components/site-header/SiteHeader';
 import SiteFooter from '@/components/site-footer/SiteFooter';
+import OsmAttribution from '@/components/osm-attribution/OsmAttribution';
 import BottomNav from '@/components/bottom-nav/BottomNav';
 
 function BusinessCardSkeleton() {
@@ -47,6 +48,11 @@ function BusinessCard({ business, citySlug }: { business: Business; citySlug: st
             <BadgeCheck className="w-4 h-4 text-blue-500 flex-shrink-0" />
           )}
         </div>
+        {!business.owner_id && (
+          <span className="shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-500">
+            Unclaimed
+          </span>
+        )}
       </div>
 
       {business.avg_rating && business.review_count > 0 && (
@@ -160,11 +166,14 @@ export default function BusinessesPage() {
             </Link>
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2">
-            {businesses.map(biz => (
-              <BusinessCard key={biz.id} business={biz} citySlug={citySlug} />
-            ))}
-          </div>
+          <>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {businesses.map(biz => (
+                <BusinessCard key={biz.id} business={biz} citySlug={citySlug} />
+              ))}
+            </div>
+            {businesses.some(b => b.source === 'osm') && <OsmAttribution className="mt-6 text-center" />}
+          </>
         )}
       </div>
 

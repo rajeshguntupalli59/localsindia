@@ -70,6 +70,9 @@ class BusinessOut(BaseModel):
     city_id: uuid.UUID
     category_id: uuid.UUID | None
     owner_id: uuid.UUID | None
+    source: str | None = None
+    latitude: float | None = None
+    longitude: float | None = None
     created_at: datetime
     reviews: list[ReviewOut] = []
     images: list[BusinessImageOut] = []

@@ -201,3 +201,35 @@ async def test_documents_reject_bad_input(auth_client, city):
         data={"doc_type": "gst", "contact_phone": "12345"}, files=_doc_files(),
     )
     assert bad_phone.status_code == 400
+
+
+@pytest.mark.asyncio
+async def test_admin_import_creates_unclaimed_and_is_idempotent(auth_client, admin_client, city):
+    from app.models.category import Category
+    client, _ = auth_client
+    admin, _ = admin_client
+
+    engine = _make_engine()
+    Session = async_sessionmaker(engine, expire_on_commit=False)
+    slug = f"imp-{uuid.uuid4().hex[:6]}"
+    async with Session() as s:
+        s.add(Category(name="Import Cat", slug=slug, sort_order=0))
+        await s.commit()
+    await engine.dispose()
+
+    ref = f"node/{uuid.uuid4().int % 10**9}"
+    payload = {"city_slug": "hyderabad", "businesses": [
+        {"name": "Ramu Tiffins", "category_slug": slug, "source_ref": ref, "phone": "+919848022338",
+         "latitude": 17.4, "longitude": 78.5},
+        {"name": "Bad Cat", "category_slug": "no-such-cat", "source_ref": ref + "x"},
+    ]}
+    assert (await client.post("/api/v1/admin/businesses/import", json=payload)).status_code == 403
+
+    first = (await admin.post("/api/v1/admin/businesses/import", json=payload)).json()
+    assert first == {"created": 1, "skipped_existing": 0, "unknown_category": 1}
+    again = (await admin.post("/api/v1/admin/businesses/import", json=payload)).json()
+    assert again["created"] == 0 and again["skipped_existing"] == 1
+
+    listed = (await client.get("/api/v1/businesses", params={"city_slug": "hyderabad", "page_size": 50})).json()
+    mine = [b for b in listed if b["name"] == "Ramu Tiffins" and b["source"] == "osm"]
+    assert mine and mine[0]["owner_id"] is None and mine[0]["latitude"] == 17.4
