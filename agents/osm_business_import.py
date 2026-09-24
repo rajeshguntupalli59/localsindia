@@ -290,7 +290,7 @@ def junk_reason(name: str) -> str | None:
 def to_business(el: dict) -> tuple[dict | None, str]:
     """Returns (business, '') or (None, reason_skipped)."""
     tags = el.get("tags", {})
-    name = (tags.get("name:en") or tags.get("name") or "").strip()
+    name = re.sub(r"\s+", " ", tags.get("name:en") or tags.get("name") or "").strip()
     if not name:
         return None, "no name"
     if junk_reason(name):
