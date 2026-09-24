@@ -14,6 +14,7 @@ import ListingCard from '@/components/listing-card/ListingCard';
 import ListingCardSkeleton from '@/components/listing-card/ListingCardSkeleton';
 import EmptyState from '@/components/empty-state/EmptyState';
 import { searchHeading } from '@/lib/utils';
+import CategoryBusinesses from '@/components/category-businesses/CategoryBusinesses';
 
 const PAGE_SIZE = 12;
 const CATEGORY_ICONS: Record<string, LucideIcon> = {
@@ -624,6 +625,14 @@ function SearchInner() {
                     Next →
                   </button>
                 </div>
+              )}
+
+              {activeCategorySlug && (
+                <CategoryBusinesses
+                  citySlug={citySlug}
+                  categorySlug={activeCategorySlug}
+                  categoryName={categories.find(c => c.id === localCat)?.name}
+                />
               )}
             </>
           ) : (

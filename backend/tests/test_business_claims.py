@@ -233,3 +233,24 @@ async def test_admin_import_creates_unclaimed_and_is_idempotent(auth_client, adm
     listed = (await client.get("/api/v1/businesses", params={"city_slug": "hyderabad", "page_size": 50})).json()
     mine = [b for b in listed if b["name"] == "Ramu Tiffins" and b["source"] == "osm"]
     assert mine and mine[0]["owner_id"] is None and mine[0]["latitude"] == 17.4
+
+
+@pytest.mark.asyncio
+async def test_list_businesses_by_category_slug(auth_client, admin_client, city):
+    from app.models.category import Category
+    client, _ = auth_client
+    admin, _ = admin_client
+    engine = _make_engine()
+    Session = async_sessionmaker(engine, expire_on_commit=False)
+    slugs = [f"c1-{uuid.uuid4().hex[:6]}", f"c2-{uuid.uuid4().hex[:6]}"]
+    async with Session() as s:
+        for sl in slugs:
+            s.add(Category(name=sl, slug=sl, sort_order=0))
+        await s.commit()
+    await engine.dispose()
+    await admin.post("/api/v1/admin/businesses/import", json={"city_slug": "hyderabad", "businesses": [
+        {"name": "Only In One", "category_slug": slugs[0], "source_ref": f"node/{uuid.uuid4().int % 10**9}"},
+        {"name": "Only In Two", "category_slug": slugs[1], "source_ref": f"node/{uuid.uuid4().int % 10**9}"},
+    ]})
+    res = await client.get("/api/v1/businesses", params={"city_slug": "hyderabad", "category_slug": slugs[0]})
+    assert [b["name"] for b in res.json()] == ["Only In One"]

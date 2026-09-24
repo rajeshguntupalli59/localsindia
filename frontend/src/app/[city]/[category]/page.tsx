@@ -1,4 +1,5 @@
 import { listingPath } from '@/lib/utils';
+import CategoryBusinesses from '@/components/category-businesses/CategoryBusinesses';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
@@ -291,7 +292,7 @@ export default async function SeoCategoryPage({
                   {meta.description} LocalsIndia connects buyers and sellers directly via WhatsApp —
                   no middlemen, no commissions, zero platform fees.
                   Post your {meta.title.toLowerCase()} listing for free and start receiving enquiries today.
-                  All listings in {cityName} are verified and contact sellers directly on WhatsApp.
+                  Every listing in {cityName} is reviewed before it goes live, and you contact sellers directly on WhatsApp.
                 </p>
                 {/* Related category links */}
                 <div className="flex flex-wrap gap-2">
@@ -331,6 +332,8 @@ export default async function SeoCategoryPage({
               </div>
             </>
           )}
+
+          <CategoryBusinesses citySlug={params.city} categorySlug={params.category} categoryName={meta.title} />
         </div>
 
         <SiteFooter />

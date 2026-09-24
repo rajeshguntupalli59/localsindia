@@ -12,6 +12,7 @@ import CityPickerModal from '@/components/city-picker/CityPickerModal';
 import { usePrefs } from '@/context/PrefsContext';
 import { DEFAULT_CITY_SLUG } from '@/lib/prefs';
 import { searchHeading } from '@/lib/utils';
+import CategoryBusinesses from '@/components/category-businesses/CategoryBusinesses';
 
 const CITY_ALIASES: Record<string, string> = {
   bangalore: 'bengaluru', bombay: 'mumbai', madras: 'chennai',
@@ -326,6 +327,10 @@ function SearchInner() {
                 )
             }
           </div>
+        )}
+
+        {cityParam && activeCat && (
+          <CategoryBusinesses citySlug={cityParam} categorySlug={activeCat.slug} categoryName={activeCat.name} />
         )}
       </div>
 

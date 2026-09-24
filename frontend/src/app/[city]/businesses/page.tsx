@@ -6,11 +6,13 @@ import { motion } from 'framer-motion';
 import { Store, Star, MapPin, Phone, Plus, BadgeCheck } from 'lucide-react';
 import Link from 'next/link';
 import { api } from '@/lib/api';
-import type { Business } from '@/lib/types';
+import type { Business, Category } from '@/lib/types';
 import SiteHeader from '@/components/site-header/SiteHeader';
 import SiteFooter from '@/components/site-footer/SiteFooter';
 import OsmAttribution from '@/components/osm-attribution/OsmAttribution';
 import BottomNav from '@/components/bottom-nav/BottomNav';
+
+const PAGE_SIZE = 20;
 
 function BusinessCardSkeleton() {
   return (
@@ -107,24 +109,55 @@ export default function BusinessesPage() {
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [loading, setLoading] = useState(true);
   const [cityName, setCityName] = useState('');
+  const [categories, setCategories] = useState<Category[]>([]);
+  // ?category=<slug> — set by the "View all" link on category pages
+  const [category, setCategory] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   useEffect(() => {
-    async function load() {
-      try {
-        const [bizData, cityData] = await Promise.all([
-          api.businesses.list(citySlug),
-          api.cities.get(citySlug),
-        ]);
-        setBusinesses(bizData);
-        setCityName(cityData.name);
-      } catch {
-        // ignore
-      } finally {
-        setLoading(false);
-      }
-    }
-    load();
+    setCategory(new URLSearchParams(window.location.search).get('category') || '');
+    api.cities.get(citySlug).then(c => setCityName(c.name)).catch(() => {});
+    api.categories.list().then(setCategories).catch(() => {});
   }, [citySlug]);
+
+  const fetchPage = (pg: number) =>
+    api.businesses.list(citySlug, {
+      page: String(pg), page_size: String(PAGE_SIZE), ...(category ? { category_slug: category } : {}),
+    });
+
+  // Reload from page 1 whenever the category changes
+  useEffect(() => {
+    if (category === null) return;   // wait until the URL has been read
+    setLoading(true);
+    fetchPage(1)
+      .then(data => { setBusinesses(data); setPage(1); setHasMore(data.length === PAGE_SIZE); })
+      .catch(() => setBusinesses([]))
+      .finally(() => setLoading(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [citySlug, category]);
+
+  const loadMore = async () => {
+    setLoadingMore(true);
+    try {
+      const data = await fetchPage(page + 1);
+      setBusinesses(b => [...b, ...data]);
+      setPage(page + 1);
+      setHasMore(data.length === PAGE_SIZE);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
+  const pickCategory = (slug: string) => {
+    setCategory(slug);
+    const url = slug ? `?category=${slug}` : window.location.pathname;
+    window.history.replaceState(null, '', url);
+  };
+
+  // Every category except the listing-only "Classifieds"
+  const chipCategories = categories.filter(c => c.slug !== 'classifieds');
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--li-page-bg)' }}>
@@ -147,6 +180,24 @@ export default function BusinessesPage() {
             Add Business
           </Link>
         </div>
+
+        {/* Category chips */}
+        {chipCategories.length > 0 && (
+          <div className="flex gap-2 overflow-x-auto scrollbar-none pb-2 mb-5 -mx-4 px-4">
+            {[{ slug: '', name: 'All' }, ...chipCategories].map(c => (
+              <button
+                key={c.slug || 'all'}
+                onClick={() => pickCategory(c.slug)}
+                className={`shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors ${
+                  (category ?? '') === c.slug ? 'text-white' : 'bg-white border text-slate-600 hover:border-orange-300'
+                }`}
+                style={(category ?? '') === c.slug ? { background: 'var(--li-primary)' } : { borderColor: 'var(--li-border)' }}
+              >
+                {c.name}
+              </button>
+            ))}
+          </div>
+        )}
 
         {loading ? (
           <div className="grid gap-4 sm:grid-cols-2">
@@ -172,6 +223,18 @@ export default function BusinessesPage() {
                 <BusinessCard key={biz.id} business={biz} citySlug={citySlug} />
               ))}
             </div>
+            {hasMore && (
+              <div className="flex justify-center mt-6">
+                <button
+                  onClick={loadMore}
+                  disabled={loadingMore}
+                  className="px-6 py-2.5 rounded-xl border text-sm font-semibold hover:border-orange-400 disabled:opacity-50"
+                  style={{ borderColor: 'var(--li-border)', color: 'var(--li-text)' }}
+                >
+                  {loadingMore ? 'Loading…' : 'Load more'}
+                </button>
+              </div>
+            )}
             {businesses.some(b => b.source === 'osm') && <OsmAttribution className="mt-6 text-center" />}
           </>
         )}

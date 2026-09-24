@@ -9,6 +9,7 @@ from sqlalchemy.orm import selectinload
 from app.core.database import get_db
 from app.core.deps import get_current_user
 from app.models.business import Business
+from app.models.category import Category
 from app.models.city import City
 from app.models.review import Review
 from app.models.user import User
@@ -34,6 +35,7 @@ async def _get_active_business(business_id: uuid.UUID, db: AsyncSession) -> Busi
 async def list_businesses(
     city_slug: str = Query(...),
     category_id: uuid.UUID | None = Query(default=None),
+    category_slug: str | None = Query(default=None),
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, le=50),
     db: AsyncSession = Depends(get_db),
@@ -47,12 +49,22 @@ async def list_businesses(
         select(Business)
         .options(selectinload(Business.reviews))
         .where(Business.city_id == city.id, Business.deleted_at.is_(None))
-        .order_by(Business.verified.desc(), Business.avg_rating.desc())
+        # Verified, then owner-managed, then best rated, then contactable —
+        # so thousands of imported unclaimed rows don't bury real owners
+        .order_by(
+            Business.verified.desc(),
+            Business.owner_id.is_(None),
+            Business.avg_rating.desc().nulls_last(),
+            Business.phone.is_(None),
+            Business.name,
+        )
         .offset((page - 1) * page_size)
         .limit(page_size)
     )
     if category_id:
         q = q.where(Business.category_id == category_id)
+    elif category_slug:
+        q = q.join(Category, Category.id == Business.category_id).where(Category.slug == category_slug)
 
     result = await db.execute(q)
     return result.scalars().all()

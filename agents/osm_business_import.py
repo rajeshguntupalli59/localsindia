@@ -14,6 +14,13 @@ Env:
 Data licence: OpenStreetMap data is © OpenStreetMap contributors, available
 under the ODbL. The site shows that attribution on every imported business.
 
+Category rule: every business must land in one of OUR categories via an
+explicit tag mapping below (AMENITY_MAP / SHOP_MAP / OFFICE_MAP / TOURISM_MAP).
+The script refuses to run if a mapping points at a category the site doesn't
+have, and the summary lists our categories that got no businesses so gaps get
+a new mapping rather than being ignored. When adding a new category to the
+site, add its OSM tags here too.
+
 What gets imported (quality filter):
   - has a name, maps to one of our categories
   - has a phone number OR an address (a bare name isn't findable/contactable)
@@ -54,7 +61,9 @@ AMENITY_MAP = {
     "school": "education", "college": "education", "kindergarten": "education",
     "driving_school": "education", "language_school": "education", "training": "education",
     "veterinary": "services", "car_wash": "vehicles",
+    "events_venue": "events", "community_centre": "events", "conference_centre": "events",
 }
+TOURISM_MAP = {"hostel": "pg-roommate", "guest_house": "pg-roommate"}
 SHOP_MAP = {
     "bakery": "tiffin", "confectionery": "tiffin", "sweets": "tiffin", "pastry": "tiffin", "deli": "tiffin",
     "electronics": "electronics", "mobile_phone": "electronics", "computer": "electronics",
@@ -68,7 +77,10 @@ SHOP_MAP = {
     "optician": "services", "copyshop": "services", "photo": "services",
     "medical_supply": "doctors", "chemist": "doctors",
 }
-OFFICE_MAP = {"estate_agent": "real-estate", "educational_institution": "education"}
+OFFICE_MAP = {
+    "estate_agent": "real-estate", "property_management": "real-estate",
+    "educational_institution": "education", "employment_agency": "jobs",
+}
 DEFAULT_SHOP_CATEGORY = "businesses"   # supermarket, hardware, stationery, general, ...
 PHONE_KEYS = ("phone", "contact:phone", "mobile", "contact:mobile")
 
@@ -78,11 +90,13 @@ def overpass_query(bbox: tuple) -> str:
     b = f"({s},{w},{n},{e})"
     amenities = "|".join(AMENITY_MAP)
     offices = "|".join(OFFICE_MAP)
+    tourism = "|".join(TOURISM_MAP)
     return f"""[out:json][timeout:180];
 (
   nwr["name"]["shop"]{b};
   nwr["name"]["amenity"~"^({amenities})$"]{b};
   nwr["name"]["office"~"^({offices})$"]{b};
+  nwr["name"]["tourism"~"^({tourism})$"]{b};
 );
 out tags center;"""
 
@@ -90,15 +104,18 @@ out tags center;"""
 def fetch_osm(bbox: tuple) -> list[dict]:
     query = overpass_query(bbox)
     last_err = None
-    for url in OVERPASS_URLS:
-        try:
-            r = httpx.post(url, data={"data": query}, headers={"User-Agent": USER_AGENT}, timeout=240)
-            r.raise_for_status()
-            return r.json()["elements"]
-        except Exception as exc:   # Overpass servers fail transiently — try the mirror
-            last_err = exc
-            print(f"  Overpass {url} failed: {exc}", file=sys.stderr)
-            time.sleep(5)
+    # Public Overpass servers are often overloaded (504s, timeouts) — retry
+    # both servers for a few rounds with growing waits before giving up.
+    for attempt in range(4):
+        for url in OVERPASS_URLS:
+            try:
+                r = httpx.post(url, data={"data": query}, headers={"User-Agent": USER_AGENT}, timeout=240)
+                r.raise_for_status()
+                return r.json()["elements"]
+            except Exception as exc:
+                last_err = exc
+                print(f"  Overpass {url} failed (round {attempt + 1}): {exc}", file=sys.stderr)
+        time.sleep(30 * (attempt + 1))
     raise SystemExit(f"All Overpass servers failed: {last_err}")
 
 
@@ -107,6 +124,8 @@ def category_for(tags: dict) -> str | None:
         return AMENITY_MAP[tags["amenity"]]
     if tags.get("office") in OFFICE_MAP:
         return OFFICE_MAP[tags["office"]]
+    if tags.get("tourism") in TOURISM_MAP:
+        return TOURISM_MAP[tags["tourism"]]
     if "shop" in tags:
         return SHOP_MAP.get(tags["shop"], DEFAULT_SHOP_CATEGORY)
     return None
@@ -167,7 +186,21 @@ def to_business(el: dict) -> tuple[dict | None, str]:
     }, ""
 
 
-def write_preview(city: str, rows: list[dict], skipped: Counter) -> None:
+def check_category_mapping() -> list[str]:
+    """Every mapping target must be a real LocalsIndia category — stop before
+    importing anything into a category that doesn't exist. Returns the live
+    category slugs so the summary can flag categories left empty."""
+    targets = set(AMENITY_MAP.values()) | set(SHOP_MAP.values()) | set(OFFICE_MAP.values())         | set(TOURISM_MAP.values()) | {DEFAULT_SHOP_CATEGORY}
+    r = httpx.get(f"{BACKEND_URL}/api/v1/categories", timeout=30)
+    r.raise_for_status()
+    live = [c["slug"] for c in r.json()]
+    missing = sorted(targets - set(live))
+    if missing:
+        raise SystemExit(f"Mapping points at categories that don't exist on the site: {missing} — fix the maps first.")
+    return live
+
+
+def write_preview(city: str, rows: list[dict], skipped: Counter, live_categories: list[str]) -> None:
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     (OUTPUT_DIR / f"{city}_preview.json").write_text(json.dumps(rows, ensure_ascii=False, indent=1), encoding="utf-8")
     with open(OUTPUT_DIR / f"{city}_preview.csv", "w", newline="", encoding="utf-8-sig") as f:
@@ -184,6 +217,9 @@ def write_preview(city: str, rows: list[dict], skipped: Counter) -> None:
         f"  with an address: {sum(1 for r in rows if r['address'])}",
         "By category: " + ", ".join(f"{k} {v}" for k, v in by_cat.most_common()),
         "Skipped: " + ", ".join(f"{k} {v}" for k, v in skipped.most_common()),
+        # Listing-only categories (classifieds) are expected to be empty
+        "Our categories with NO businesses found: "
+        + (", ".join(c for c in live_categories if c not in by_cat and c != "classifieds") or "none"),
     ]
     (OUTPUT_DIR / f"{city}_summary.txt").write_text("\n".join(summary) + "\n", encoding="utf-8")
     print("\n".join(summary))
@@ -216,6 +252,7 @@ def main() -> None:
     ap.add_argument("--apply", action="store_true", help="upload to the live site (default: dry run)")
     args = ap.parse_args()
 
+    live_categories = check_category_mapping()
     print(f"Fetching OpenStreetMap businesses for {args.city}…")
     elements = fetch_osm(CITY_BBOX[args.city])
     rows, skipped, seen_names = [], Counter(), set()
@@ -232,7 +269,7 @@ def main() -> None:
         seen_names.add(key)
         rows.append(biz)
 
-    write_preview(args.city, rows, skipped)
+    write_preview(args.city, rows, skipped, live_categories)
     if args.apply:
         apply(args.city, rows)
 
