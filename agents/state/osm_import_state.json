@@ -44,6 +44,16 @@
   "skipped_existing": 111,
   "unknown_category": 0
  },
+ "hubballi": {
+  "clean": true,
+  "created": 112,
+  "date": "2026-09-24",
+  "found": 112,
+  "moved_to_nearest_city": 0,
+  "removed_by_cleanup": 1,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
  "hyderabad": {
   "clean": true,
   "created": 27,
@@ -51,6 +61,16 @@
   "found": 2430,
   "removed_by_cleanup": 77,
   "skipped_existing": 2403,
+  "unknown_category": 0
+ },
+ "jagtial": {
+  "clean": true,
+  "created": 104,
+  "date": "2026-09-24",
+  "found": 104,
+  "moved_to_nearest_city": 0,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
   "unknown_category": 0
  },
  "khammam": {
@@ -71,11 +91,31 @@
   "skipped_existing": 0,
   "unknown_category": 0
  },
+ "kollam": {
+  "clean": true,
+  "created": 1070,
+  "date": "2026-09-24",
+  "found": 1070,
+  "moved_to_nearest_city": 0,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
  "kozhikode": {
   "clean": true,
   "created": 793,
   "date": "2026-09-24",
   "found": 793,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
+ "kurnool": {
+  "clean": true,
+  "created": 199,
+  "date": "2026-09-24",
+  "found": 199,
+  "moved_to_nearest_city": 0,
   "removed_by_cleanup": 0,
   "skipped_existing": 0,
   "unknown_category": 0
@@ -89,11 +129,41 @@
   "skipped_existing": 0,
   "unknown_category": 0
  },
+ "mahbubnagar": {
+  "clean": true,
+  "created": 124,
+  "date": "2026-09-24",
+  "found": 124,
+  "moved_to_nearest_city": 0,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
+ "mangaluru": {
+  "clean": true,
+  "created": 193,
+  "date": "2026-09-24",
+  "found": 193,
+  "moved_to_nearest_city": 0,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
  "mysuru": {
   "clean": true,
   "created": 431,
   "date": "2026-09-24",
   "found": 431,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
+ "nellore": {
+  "clean": true,
+  "created": 177,
+  "date": "2026-09-24",
+  "found": 177,
+  "moved_to_nearest_city": 0,
   "removed_by_cleanup": 0,
   "skipped_existing": 0,
   "unknown_category": 0
@@ -107,11 +177,41 @@
   "skipped_existing": 0,
   "unknown_category": 0
  },
+ "salem": {
+  "clean": true,
+  "created": 334,
+  "date": "2026-09-24",
+  "found": 334,
+  "moved_to_nearest_city": 0,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
  "thiruvananthapuram": {
   "clean": true,
   "created": 1720,
   "date": "2026-09-24",
   "found": 1720,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
+ "thrissur": {
+  "clean": true,
+  "created": 1242,
+  "date": "2026-09-24",
+  "found": 1242,
+  "moved_to_nearest_city": 0,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
+ "tiruchirappalli": {
+  "clean": true,
+  "created": 189,
+  "date": "2026-09-24",
+  "found": 189,
+  "moved_to_nearest_city": 0,
   "removed_by_cleanup": 0,
   "skipped_existing": 0,
   "unknown_category": 0
