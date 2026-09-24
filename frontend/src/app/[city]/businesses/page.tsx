@@ -57,7 +57,7 @@ function BusinessCard({ business, citySlug }: { business: Business; citySlug: st
         )}
       </div>
 
-      {business.avg_rating && business.review_count > 0 && (
+      {business.review_count > 0 && !!business.avg_rating && (
         <div className="flex items-center gap-2 mb-2">
           <StarRating rating={business.avg_rating} />
           <span className="text-xs text-slate-500">

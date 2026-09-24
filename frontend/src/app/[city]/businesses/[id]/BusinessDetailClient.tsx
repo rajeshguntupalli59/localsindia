@@ -141,7 +141,7 @@ export default function BusinessDetailPage() {
                   <BadgeCheck className="w-5 h-5 text-blue-500" />
                 )}
               </div>
-              {business.avg_rating && business.review_count > 0 && (
+              {business.review_count > 0 && !!business.avg_rating && (
                 <div className="flex items-center gap-2 mt-1">
                   <div className="flex gap-0.5">
                     {[1, 2, 3, 4, 5].map(i => (

@@ -61,8 +61,8 @@ export default function CategoryBusinesses({
               <div className="min-w-0">
                 <p className="font-bold text-sm line-clamp-1" style={{ color: 'var(--li-text)' }}>{b.name}</p>
                 {b.address && (
-                  <p className="flex items-center gap-1 text-xs mt-0.5 line-clamp-1" style={{ color: 'var(--li-muted)' }}>
-                    <MapPin className="w-3 h-3 shrink-0" /> {b.address}
+                  <p className="flex items-center gap-1 text-xs mt-0.5" style={{ color: 'var(--li-muted)' }}>
+                    <MapPin className="w-3 h-3 shrink-0" /> <span className="truncate">{b.address}</span>
                   </p>
                 )}
                 {b.phone && (

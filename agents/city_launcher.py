@@ -12,7 +12,8 @@ What it does:
   1. Asks Claude to generate 20 seed listings + 10 businesses + launch content
   2. POSTs listings to the live API (as admin, is_seed=true — exempt from the
      30-day expiry cron, see routers/cron.py) and auto-approves them
-  3. POSTs businesses to the live API
+  3. (Businesses are generated for the launch kit only — no longer posted;
+     real ones come from osm_business_import.py)
   4. Saves all generated content to agents/output/{city_slug}/
 
 --auto N finds the next N cities with zero active listings (queried live,
@@ -54,7 +55,6 @@ LANG_NAMES = {
 
 # Seed phone numbers — valid format (+91[6-9]\d{9}) but clearly fictional
 LISTING_PHONES = [f"+9163{str(i).zfill(8)}" for i in range(1, 21)]
-BUSINESS_PHONES = [f"+9164{str(i).zfill(8)}" for i in range(1, 11)]
 
 # ─── API helpers ───────────────────────────────────────────────────────────────
 
@@ -146,118 +146,6 @@ async def approve_listing(client: httpx.AsyncClient, tm: TokenManager, listing_i
             print(f"    [WARN] approve failed for {listing_id}: {e}")
     return False
 
-
-async def post_business(client: httpx.AsyncClient, tm: TokenManager, payload: dict) -> str | None:
-    for attempt in range(3):
-        try:
-            token = await tm.get()
-            resp = await client.post(
-                f"{BACKEND_URL}/api/v1/businesses",
-                json=payload,
-                headers={"Authorization": f"Bearer {token}"},
-                timeout=30,
-            )
-            if resp.status_code == 429:
-                print(f"    [WAIT] Rate limited — pausing 65s before retry...")
-                await asyncio.sleep(65)
-                continue
-            if resp.status_code == 401:
-                print(f"    [WAIT] Token expired — refreshing auth...")
-                await tm.refresh()
-                continue
-            resp.raise_for_status()
-            return resp.json()["id"]
-        except httpx.HTTPStatusError:
-            raise
-        except Exception as e:
-            print(f"    [WARN] business POST attempt {attempt+1} failed: {e}")
-            if attempt < 2:
-                await asyncio.sleep(5)
-    return None
-
-
-# ─── Claude content generation ─────────────────────────────────────────────────
-
-def build_system_prompt() -> str:
-    return _build_sp("city_launcher")
-
-
-def build_user_prompt(city: str, state: str, lang: str) -> str:
-    lang_name = LANG_NAMES.get(lang, lang)
-    return f"""Generate a complete City Launch Kit for: {city}, {state}
-Regional language: {lang_name} (script code: {lang})
-
-Return this exact JSON structure:
-
-{{
-  "landing_copy": {{
-    "hero_headline_en": "short benefit-led headline for {city} (under 10 words)",
-    "hero_headline_lang": "same headline in {lang_name} Unicode script",
-    "sub_headline_en": "who it's for and what they get (1 sentence)",
-    "features_en": ["feature 1", "feature 2", "feature 3"],
-    "cta_en": "Post Free Listing",
-    "cta_lang": "Post Free Listing in {lang_name} Unicode script"
-  }},
-  "listings": [
-    {{
-      "title": "listing title IN ENGLISH ONLY",
-      "description": "2-3 sentence description IN ENGLISH ONLY. Mention specific area in {city}.",
-      "category": "one of: classifieds|services|pg-roommate|jobs|vehicles|electronics|tiffin|real-estate|furniture|fashion",
-      "price": 1500,
-      "area": "real neighborhood in {city}"
-    }}
-  ],
-  "businesses": [
-    {{
-      "name": "business name IN ENGLISH ONLY",
-      "description": "what they do, where they are in {city} — IN ENGLISH ONLY",
-      "category": "businesses",
-      "address": "street, area, {city}"
-    }}
-  ],
-  "launch_content": {{
-    "reddit_title": "honest founder-voice Reddit post title (no exclamation, no hype)",
-    "reddit_body": "300-400 word authentic Reddit post. Relatable problem → what you built → honest limitations → open question.",
-    "whatsapp_en": "under 280 chars. Helpful tip about finding things locally in {city}. Natural mention of LocalIndia.",
-    "whatsapp_lang": "same in {lang_name} Unicode script, under 300 chars",
-    "instagram_captions": [
-      "caption 1: community-focused about {city} life. 6 hashtags.",
-      "caption 2: problem-solution format. 6 hashtags.",
-      "caption 3: social proof format. 6 hashtags."
-    ]
-  }}
-}}
-
-Generate exactly 20 listings covering these categories (mix them naturally):
-- 4 tiffin (home-cooked meal delivery, tiffin services — use category "tiffin")
-- 3 services (tuition, repair, beauty — NOT tiffin, use category "services")
-- 4 pg-roommate (PG rooms, flatmates — use category "pg-roommate")
-- 3 jobs (part-time, freelance — use category "jobs")
-- 2 classifieds (used goods, books — use category "classifieds")
-- 1 furniture (tables, chairs, sofas — use category "furniture")
-- 2 vehicles (bikes, cars — use category "vehicles")
-- 1 electronics (phones, laptops — use category "electronics")
-
-Generate exactly 10 businesses (mix of restaurants, salons, clinics, coaching centres, shops).
-
-Use real area names from {city}. All listing titles, descriptions, business names, and addresses must be in English.
-Regional language is only for whatsapp_lang and instagram_captions."""
-
-
-# ─── Content parsing ───────────────────────────────────────────────────────────
-
-def parse_claude_response(raw: str) -> dict:
-    raw = raw.strip()
-    # Strip markdown code fences if Claude added them despite instructions
-    if raw.startswith("```"):
-        raw = raw.split("```", 2)[1]
-        if raw.startswith("json"):
-            raw = raw[4:]
-        raw = raw.rsplit("```", 1)[0]
-    return json.loads(raw.strip())
-
-
-# ─── Main ──────────────────────────────────────────────────────────────────────
 
 async def determine_empty_cities(client: httpx.AsyncClient) -> list[dict]:
     """Cities with zero active listings right now, queried live rather than
@@ -356,29 +244,11 @@ async def seed_city(
 
     print(f"\nOK {len(posted_listing_ids)}/{len(listings)} listings live")
 
-    # Post businesses
-    print(f"\n>> Posting {len(businesses)} businesses...")
-    posted_biz_ids = []
-    for i, biz in enumerate(businesses):
-        cat_id = cat_map.get(biz.get("category", "businesses"), fallback_cat_id)
-        phone = BUSINESS_PHONES[i % len(BUSINESS_PHONES)]
-        payload = {
-            "name": biz["name"],
-            "description": biz.get("description"),
-            "address": biz.get("address"),
-            "phone": phone,
-            "whatsapp_url": f"https://wa.me/91{phone.replace('+91', '')}",
-            "city_id": city_id,
-            "category_id": cat_id,
-        }
-        biz_id = await post_business(client, tm, payload)
-        status = "OK" if biz_id else "FAIL"
-        if biz_id:
-            posted_biz_ids.append(biz_id)
-        print(f"  [{status}] {biz['name']}")
-        await asyncio.sleep(1.0)
-
-    print(f"\nOK {len(posted_biz_ids)}/{len(businesses)} businesses posted")
+    # Businesses are no longer seeded here: they used fictional phone numbers
+    # (+9164...) and outranked real businesses. Real ones now come from
+    # agents/osm_business_import.py as unclaimed listings owners can claim.
+    # Generated business ideas stay in the saved launch kit only.
+    posted_biz_ids: list[str] = []
 
     seed_data = {
         "city": city, "city_id": city_id, "city_slug": city_slug, "lang": lang,
