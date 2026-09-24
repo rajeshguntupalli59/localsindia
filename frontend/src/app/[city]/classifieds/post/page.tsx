@@ -263,6 +263,7 @@ export default function PostListingPage() {
   };
   const city = cities.find(c => c.slug === citySlug) ?? null;
   const [photos, setPhotos] = useState<File[]>([]);
+  const [skipPhotosAsked, setSkipPhotosAsked] = useState(false);
   const [previews, setPreviews] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
@@ -451,6 +452,11 @@ export default function PostListingPage() {
   const handleNext = () => {
     if (step === STEP_CATEGORY && !validateCategoryStep()) return;
     if (step === STEP_LISTING && !validateListingStep()) return;
+    // Photo-first: ask once before letting someone continue with no photos
+    if (step === STEP_PHOTOS && photos.length === 0 && !skipPhotosAsked) {
+      setSkipPhotosAsked(true);
+      return;
+    }
     if (step === STEP_CONTACT) { handleSubmit(); return; }
     setStep(s => s + 1);
   };
@@ -796,8 +802,20 @@ export default function PostListingPage() {
               <div className="bg-white rounded-3xl p-6 border" style={{ borderColor: 'var(--li-border)' }}>
                 <h2 className="text-lg font-black mb-2" style={{ color: 'var(--li-text)' }}>Add photos</h2>
                 <p className="text-sm mb-6" style={{ color: 'var(--li-muted)' }}>
-                  Listings with photos get 5× more inquiries. Add up to 5 — first photo is the cover.
+                  Buyers scroll past listings without real photos. Add up to 5 — first photo is the cover,
+                  and listings with photos get a Photos badge.
                 </p>
+
+                {skipPhotosAsked && photos.length === 0 && (
+                  <div
+                    role="alert"
+                    className="rounded-2xl p-4 mb-5 border text-sm"
+                    style={{ background: '#FFFBEB', borderColor: '#FDE68A', color: '#78350F' }}
+                  >
+                    <p className="font-bold">Continue without photos?</p>
+                    <p className="mt-1">A photo from your phone is enough. Or tap Next again to skip.</p>
+                  </div>
+                )}
 
                 {photos.length < 5 && (
                   <button

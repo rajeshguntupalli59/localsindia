@@ -5,22 +5,16 @@ import { useParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft, Flag, ChevronLeft, ChevronRight, MapPin, Clock, Shield, MessageCircle, Tag, Star, User, Globe, Share2, CheckCircle2, X } from 'lucide-react';
-import { formatPrice, timeAgo } from '@/lib/utils';
+import { ArrowLeft, Flag, ChevronLeft, ChevronRight, MapPin, Clock, MessageCircle, Tag, Star, User, Globe, Share2, CheckCircle2, X } from 'lucide-react';
+import { formatPrice, timeAgo, realImages } from '@/lib/utils';
 import { api, ApiError } from '@/lib/api';
 
 import type { Listing, ListingReview } from '@/lib/types';
 import SiteHeader from '@/components/site-header/SiteHeader';
 import SiteFooter from '@/components/site-footer/SiteFooter';
 import AdBanner from '@/components/ad-banner/AdBanner';
+import SafetyTips from '@/components/safety-tips/SafetyTips';
 import { toast } from 'sonner';
-
-const SAFETY_TIPS = [
-  'Meet in a public place for exchanges',
-  'Never share your OTP or banking details',
-  'Inspect the item before payment',
-  'Report suspicious listings immediately',
-];
 
 export default function ListingDetailPage() {
   const { city: citySlug, id } = useParams<{ city: string; id: string }>();
@@ -118,7 +112,7 @@ export default function ListingDetailPage() {
   if (loading) return <SkeletonPage />;
   if (!listing) return null;
 
-  const images = listing.images ?? [];
+  const images = realImages(listing.images);
   const waUrl = listing.whatsapp_url ?? `https://wa.me/${listing.contact_phone.replace('+', '')}`;
   const mainImg = images[imgIdx];
 
@@ -132,8 +126,16 @@ export default function ListingDetailPage() {
           <nav className="flex items-center gap-2 text-xs" style={{ color: 'var(--li-muted)' }}>
             <Link href="/" className="hover:text-orange-500 transition-colors">Home</Link>
             <span>/</span>
-            <Link href={`/${citySlug}`} className="hover:text-orange-500 transition-colors capitalize">{citySlug}</Link>
+            <Link href={`/${citySlug}`} className="hover:text-orange-500 transition-colors capitalize">{citySlug.replace(/-/g, ' ')}</Link>
             <span>/</span>
+            {listing.category_slug && listing.category_name && (
+              <>
+                <Link href={`/search?city=${citySlug}&category=${listing.category_slug}`} className="hover:text-orange-500 transition-colors shrink-0">
+                  {listing.category_name}
+                </Link>
+                <span>/</span>
+              </>
+            )}
             <span className="line-clamp-1" style={{ color: 'var(--li-text)' }}>{listing.title}</span>
           </nav>
         </div>
@@ -485,23 +487,7 @@ export default function ListingDetailPage() {
             )}
 
             {/* Safety tips */}
-            <div
-              className="rounded-3xl p-5 border"
-              style={{ background: '#FFFBEB', borderColor: '#FDE68A' }}
-            >
-              <div className="flex items-center gap-2 mb-3">
-                <Shield className="w-4 h-4" style={{ color: '#D97706' }} />
-                <p className="text-sm font-bold" style={{ color: '#92400E' }}>Stay Safe</p>
-              </div>
-              <ul className="space-y-2">
-                {SAFETY_TIPS.map(tip => (
-                  <li key={tip} className="flex items-start gap-2 text-xs leading-relaxed" style={{ color: '#78350F' }}>
-                    <span className="mt-0.5 shrink-0">•</span>
-                    {tip}
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <SafetyTips categorySlug={listing.category_slug} />
 
             {/* Map placeholder */}
             <div

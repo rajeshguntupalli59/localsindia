@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { MapPin, MessageCircle, Globe, Users } from 'lucide-react';
-
 export const metadata = { title: 'About — LocalsIndia' };
 
 const PILLARS = [
@@ -16,8 +15,8 @@ const PILLARS = [
   },
   {
     Icon: Globe,
-    title: '11 Languages',
-    body: 'India speaks hundreds of languages. LocalsIndia currently supports 11 — Telugu, Tamil, Kannada, Hindi, Marathi, Bengali, Gujarati, Punjabi, Malayalam, Odia, and English — with more on the way.',
+    title: '5 Languages',
+    body: 'India speaks hundreds of languages. LocalsIndia currently supports 5 — Telugu, Tamil, Kannada, Malayalam, and English — with more on the way as we expand to new states.',
   },
   {
     Icon: Users,

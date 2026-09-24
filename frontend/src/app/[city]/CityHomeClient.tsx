@@ -274,12 +274,11 @@ export default function CityHomeClient({
           <section>
             <div className="flex items-center justify-between mb-3">
               <h2 className="section-title">
-                {mounted
-                  ? (() => {
-                      const h = new Date().getHours();
-                      return h < 12 ? 'New this morning ☀️' : h < 17 ? 'Posted today' : 'Fresh tonight 🌙';
-                    })()
-                  : 'Fresh listings'}
+                {/* Only claim "today" when the newest listing really is from the last 24h */}
+                {mounted && freshListings[0] &&
+                  Date.now() - new Date(freshListings[0].created_at).getTime() < 24 * 60 * 60 * 1000
+                  ? 'Posted today'
+                  : 'Latest listings'}
               </h2>
               {!loading && (
                 <Link

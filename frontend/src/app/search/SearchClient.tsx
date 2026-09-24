@@ -10,6 +10,8 @@ import ListingCard from '@/components/listing-card/ListingCard';
 import ListingCardSkeleton from '@/components/listing-card/ListingCardSkeleton';
 import CityPickerModal from '@/components/city-picker/CityPickerModal';
 import { usePrefs } from '@/context/PrefsContext';
+import { DEFAULT_CITY_SLUG } from '@/lib/prefs';
+import { searchHeading } from '@/lib/utils';
 
 const CITY_ALIASES: Record<string, string> = {
   bangalore: 'bengaluru', bombay: 'mumbai', madras: 'chennai',
@@ -28,7 +30,8 @@ function SearchInner() {
   const { citySlug: prefCity, cityName: prefCityName, setCity } = usePrefs();
 
   const q            = sp.get('q') ?? '';
-  const rawCity      = sp.get('city') ?? prefCity ?? '';
+  // No city chosen yet → browse the default city rather than forcing the picker
+  const rawCity      = sp.get('city') || prefCity || DEFAULT_CITY_SLUG;
   const cityParam    = normaliseCity(rawCity);
   const categorySlug = sp.get('category') ?? '';
 
@@ -52,15 +55,6 @@ function SearchInner() {
     setMinPrice(''); setMaxPrice(''); setPostedWithin('');
     setVerifiedOnly(false); setSortBy('newest');
   };
-
-  // Auto-open city picker on mount only if no city anywhere and no category active
-  useEffect(() => {
-    const urlCity = sp.get('city');
-    const urlCat = sp.get('category');
-    const savedCity = typeof window !== 'undefined' ? localStorage.getItem('li_city') : '';
-    if (!urlCity && !savedCity && !urlCat) setShowPicker(true);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   // Keep input in sync when URL q changes
   useEffect(() => { setInputQ(q); }, [q]);
@@ -281,6 +275,12 @@ function SearchInner() {
               Choose your city
             </button>
           </div>
+        )}
+
+        {cityParam && (
+          <h1 className="text-xl md:text-2xl font-extrabold text-slate-900 mb-1">
+            {searchHeading(q, activeCat?.name, cityName)}
+          </h1>
         )}
 
         {/* Results summary */}

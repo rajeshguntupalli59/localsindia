@@ -23,7 +23,7 @@ function detectPrompt(): Prompt | null {
     if (!token) {
       const id = 'post_cta';
       if (!dismissed.includes(id)) {
-        return { id, message: 'Ready to sell something? Post a free listing — takes 2 minutes.', cta: 'Post for Free', href: '/' };
+        return { id, message: 'Ready to sell something? Post a free listing — takes 2 minutes.', cta: 'Post for Free', href: '/post' };
       }
     }
 
@@ -43,6 +43,17 @@ function detectPrompt(): Prompt | null {
   return null;
 }
 
+// Listing detail pages have their own sticky WhatsApp bar the prompt would
+// cover, and the post form is where the CTA points — don't show it on either.
+export function isHiddenPath(pathname: string | null): boolean {
+  if (!pathname) return false;
+  return pathname.startsWith('/auth')
+    || pathname.startsWith('/listing/')
+    || pathname === '/post'
+    || /^\/[^/]+\/[^/]+\/(?!post$)[^/]+$/.test(pathname)   // /{city}/{category}/{id}
+    || /\/post$/.test(pathname);
+}
+
 export default function ContextualPrompt() {
   const pathname = usePathname();
   const [prompt, setPrompt] = useState<Prompt | null>(null);
@@ -53,7 +64,7 @@ export default function ContextualPrompt() {
     return () => clearTimeout(t);
   }, []);
 
-  if (!prompt || pathname?.startsWith('/auth')) return null;
+  if (!prompt || isHiddenPath(pathname)) return null;
 
   const dismiss = () => {
     try {

@@ -47,12 +47,13 @@ const SOCIALS = [
 const FOOTER_LINKS: Record<string, { label: string; href: string }[]> = {
   Platform: [
     { label: 'Browse Listings', href: '/search' },
-    { label: 'Post Listing', href: '/auth/login?mode=signup' },
+    { label: 'Post Listing', href: '/post' },
     { label: 'All Cities', href: '/cities' },
-    { label: 'Invite a Business', href: '/invite' },
+    { label: 'Invite a Friend', href: '/invite' },
   ],
   Company: [
     { label: 'About Us', href: '/about' },
+    { label: 'Trust & Safety', href: '/trust' },
     { label: 'Contact', href: '/contact' },
   ],
   Legal: [

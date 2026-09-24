@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import type { Listing } from '@/lib/types';
 import ListingDetailClient from './ListingDetailClient';
+import { listingIdFromParam, listingPath, realImages } from '@/lib/utils';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend-in.azurewebsites.net';
 
@@ -22,14 +23,14 @@ function truncate(text: string, max: number): string {
 export async function generateMetadata(
   { params }: { params: { id: string } }
 ): Promise<Metadata> {
-  const listing = await fetchListing(params.id);
+  const listing = await fetchListing(listingIdFromParam(params.id));
   if (!listing) return { title: 'Listing not found | LocalsIndia' };
 
   const locality = [listing.area, listing.city_slug].filter(Boolean).join(', ');
   const title = `${listing.title}${locality ? ` — ${locality}` : ''} | LocalsIndia`;
   const description = truncate(listing.description, 155);
-  const url = `https://www.localsindia.com/listing/${listing.id}`;
-  const image = listing.images?.[0]?.url;
+  const url = `https://www.localsindia.com${listingPath(listing)}`;
+  const image = realImages(listing.images)[0]?.url;
 
   return {
     title,
@@ -57,21 +58,22 @@ export async function generateMetadata(
 }
 
 export default async function ListingPage({ params }: { params: { id: string } }) {
-  const listing = await fetchListing(params.id);
+  const id = listingIdFromParam(params.id);
+  const listing = await fetchListing(id);
 
   const jsonLd = listing ? {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: listing.title,
     description: listing.description,
-    ...(listing.images?.[0]?.url ? { image: listing.images[0].url } : {}),
+    ...(realImages(listing.images)[0] ? { image: realImages(listing.images)[0].url } : {}),
     ...(listing.price !== null ? {
       offers: {
         '@type': 'Offer',
         price: listing.price,
         priceCurrency: 'INR',
         availability: 'https://schema.org/InStock',
-        url: `https://www.localsindia.com/listing/${listing.id}`,
+        url: `https://www.localsindia.com${listingPath(listing)}`,
       },
     } : {}),
   } : null;
@@ -84,7 +86,7 @@ export default async function ListingPage({ params }: { params: { id: string } }
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       )}
-      <ListingDetailClient id={params.id} initialListing={listing} />
+      <ListingDetailClient id={id} initialListing={listing} />
     </>
   );
 }

@@ -163,7 +163,6 @@ CITIES = [
     ("Namakkal",            "Tamil Nadu",       "namakkal",              "ta"),
     ("Tiruvallur",          "Tamil Nadu",       "tiruvallur",            "ta"),
     ("Villupuram",          "Tamil Nadu",       "villupuram",            "ta"),
-    ("Tirupur",             "Tamil Nadu",       "tirupur",               "ta"),
     ("Dharmapuri",          "Tamil Nadu",       "dharmapuri",            "ta"),
     ("Ranipet",             "Tamil Nadu",       "ranipet",               "ta"),
     ("Ariyalur",            "Tamil Nadu",       "ariyalur",              "ta"),

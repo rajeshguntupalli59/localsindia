@@ -16,7 +16,7 @@ Clean markdown with structured recommendations. No JSON.
 - **Indian user behaviors**:
   - WhatsApp is the primary communication layer — any friction before WA tap = lost contact
   - Users scroll fast but tap slowly (large tap targets matter)
-  - Hindi/regional language in CTA increases conversion in Tier 2/3 cities
+  - Regional language in CTA (Telugu/Tamil/Kannada/Malayalam only — Hindi is not served) increases conversion in Tier 2/3 cities
   - Price sensitivity: "free" must be stated explicitly and repeatedly
 
 ## Recommendation Format

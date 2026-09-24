@@ -4,10 +4,11 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
+import SafetyTips from '@/components/safety-tips/SafetyTips';
 import { ArrowLeft, MapPin, Clock, ChevronDown, ChevronUp, Flag, Tag, User, ExternalLink, Heart, Star, ChevronLeft, ChevronRight, Eye, AlertCircle, Utensils, Home, Briefcase, Car, Smartphone, Calendar, Store, GraduationCap, MessageCircle, Share2, type LucideIcon } from 'lucide-react';
 import { api, ApiError } from '@/lib/api';
 import type { Listing, ListingReview } from '@/lib/types';
-import { formatPrice, timeAgo } from '@/lib/utils';
+import { formatPrice, timeAgo, listingPath, realImages } from '@/lib/utils';
 import { useSaved } from '@/hooks/useSaved';
 import { toast } from 'sonner';
 import ListingCard from '@/components/listing-card/ListingCard';
@@ -80,7 +81,7 @@ export default function ListingDetailClient({ id, initialListing = null }: { id:
 
   const handleShare = async () => {
     if (!listing) return;
-    const url = `https://www.localsindia.com/listing/${listing.id}`;
+    const url = `https://www.localsindia.com${listingPath(listing)}`;
     const price = listing.price !== null ? ` — ${formatPrice(listing.price)}` : '';
     const shareData = { title: listing.title, text: `${listing.title}${price}`, url };
     if (navigator.share) {
@@ -109,6 +110,8 @@ export default function ListingDetailClient({ id, initialListing = null }: { id:
   const waUrl = listing
     ? listing.whatsapp_url ?? `https://wa.me/${listing.contact_phone.replace('+', '')}`
     : null;
+
+  const images = realImages(listing?.images);
 
   const desc = listing?.description ?? '';
   const isLong = desc.length > 200;
@@ -198,11 +201,11 @@ export default function ListingDetailClient({ id, initialListing = null }: { id:
           {/* Image carousel */}
           <div
             className="relative w-full bg-slate-100"
-            style={listing.images?.[0] ? { aspectRatio: '16/9', maxHeight: '380px' } : { height: '96px' }}
+            style={images[0] ? { aspectRatio: '16/9', maxHeight: '380px' } : { height: '96px' }}
           >
-            {listing.images?.[0] ? (
+            {images[0] ? (
               <Image
-                src={listing.images[activeImg]?.url ?? listing.images[0].url}
+                src={images[activeImg]?.url ?? images[0].url}
                 alt={listing.title}
                 fill
                 className="object-cover transition-opacity duration-200"
@@ -219,7 +222,7 @@ export default function ListingDetailClient({ id, initialListing = null }: { id:
             )}
 
             {/* Prev / Next arrows — only when multiple images */}
-            {(listing.images?.length ?? 0) > 1 && (
+            {images.length > 1 && (
               <>
                 <button
                   type="button"
@@ -232,8 +235,8 @@ export default function ListingDetailClient({ id, initialListing = null }: { id:
                 </button>
                 <button
                   type="button"
-                  onClick={() => setActiveImg(i => Math.min((listing.images!.length - 1), i + 1))}
-                  disabled={activeImg === (listing.images!.length - 1)}
+                  onClick={() => setActiveImg(i => Math.min((images.length - 1), i + 1))}
+                  disabled={activeImg === (images.length - 1)}
                   className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center disabled:opacity-0 transition-all"
                   aria-label="Next image"
                 >
@@ -241,7 +244,7 @@ export default function ListingDetailClient({ id, initialListing = null }: { id:
                 </button>
                 {/* Dot indicators */}
                 <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
-                  {listing.images!.map((_, i) => (
+                  {images.map((_, i) => (
                     <button
                       key={i}
                       type="button"
@@ -267,9 +270,9 @@ export default function ListingDetailClient({ id, initialListing = null }: { id:
           </div>
 
           {/* Thumbnail strip — clickable, active highlighted */}
-          {(listing.images?.length ?? 0) > 1 && (
+          {images.length > 1 && (
             <div className="flex gap-2 px-4 py-2 overflow-x-auto bg-white border-b border-slate-100">
-              {listing.images!.map((img, i) => (
+              {images.map((img, i) => (
                 <button
                   key={img.id}
                   type="button"
@@ -408,6 +411,7 @@ export default function ListingDetailClient({ id, initialListing = null }: { id:
                 style={{ background: '#dcfce7', color: '#16a34a' }}>
                 <span className="w-1.5 h-1.5 rounded-full bg-[#25D366] inline-block" />
                 Seller active on WhatsApp
+                <Link href="/trust#active-on-whatsapp" className="font-semibold underline ml-1">What&apos;s this?</Link>
               </span>
             )}
 
@@ -431,6 +435,8 @@ export default function ListingDetailClient({ id, initialListing = null }: { id:
               </div>
             )}
 
+
+            <SafetyTips categorySlug={listing.category_slug} />
             {/* Reviews */}
             <div>
               {reviews.length > 0 && (

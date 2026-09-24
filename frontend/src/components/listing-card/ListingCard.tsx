@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import { MapPin, Clock, Heart, Eye, Utensils, Home, Briefcase, Car, Smartphone, Calendar, Store, GraduationCap, Tag, Star, MessageCircle, type LucideIcon } from 'lucide-react';
-import { formatPrice, timeAgo, fulfillLabel } from '@/lib/utils';
+import { formatPrice, timeAgo, fulfillLabel, listingPath, realImages } from '@/lib/utils';
 import { api } from '@/lib/api';
 import type { Listing } from '@/lib/types';
 import { usePrefs } from '@/context/PrefsContext';
@@ -43,9 +43,10 @@ export default function ListingCard({ listing }: Props) {
   const { toggle, isSaved } = useSaved();
   const [heartBounce, setHeartBounce] = useState(false);
 
-  const image      = listing.images?.[0];
+  const photos     = realImages(listing.images);
+  const image      = photos[0];
   const waUrl      = listing.whatsapp_url ?? `https://wa.me/${listing.contact_phone.replace('+', '')}`;
-  const href       = `/listing/${listing.id}`;
+  const href       = listingPath(listing);
   const saved      = isSaved(listing.id);
   const catColor   = CATEGORY_COLOR[listing.category_slug ?? ''] ?? '#94a3b8';
   const CatIcon    = CATEGORY_ICON[listing.category_slug ?? ''] ?? Tag;

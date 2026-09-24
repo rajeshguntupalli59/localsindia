@@ -1,3 +1,4 @@
+import { listingPath } from '@/lib/utils';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import type { City, Listing } from '@/lib/types';
@@ -129,7 +130,7 @@ export default async function CityHomePage({ params }: { params: { city: string 
       '@type': 'ListItem',
       position: i + 1,
       name: l.title,
-      url: `https://www.localsindia.com/${params.city}/classifieds/${l.id}`,
+      url: `https://www.localsindia.com${listingPath(l)}`,
     })),
   };
 

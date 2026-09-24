@@ -17,6 +17,10 @@ export const VALID_LANGS = ['en', 'te', 'ta', 'kn', 'ml'] as const;
 
 export type LangCode = (typeof VALID_LANGS)[number];
 
+// Visitors who haven't picked a city browse this one instead of being forced
+// through the city picker first (largest active city by listings).
+export const DEFAULT_CITY_SLUG = 'hyderabad';
+
 // ── Guards ────────────────────────────────────────────────────────────────────
 function hasStorage(): boolean {
   return typeof window !== 'undefined' && typeof localStorage !== 'undefined';

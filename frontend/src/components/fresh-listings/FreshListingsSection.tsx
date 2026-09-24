@@ -3,6 +3,7 @@
 import { useRef, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { usePrefs } from '@/context/PrefsContext';
+import { DEFAULT_CITY_SLUG } from '@/lib/prefs';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   MapPin, ArrowRight, ChevronLeft, ChevronRight,
@@ -11,7 +12,7 @@ import {
   BadgeCheck, type LucideIcon,
 } from 'lucide-react';
 import { api } from '@/lib/api';
-import { timeAgo } from '@/lib/utils';
+import { timeAgo, listingPath } from '@/lib/utils';
 import type { Listing } from '@/lib/types';
 
 // ─── Types ────────────────────────────────────────────────
@@ -257,7 +258,7 @@ function FreshListingCard({
 
   const handleCardClick = () => {
     if (listing.isReal) {
-      router.push(`/listing/${listing.id}`);
+      router.push(listingPath(listing));
     } else {
       const city = citySlug || (typeof window !== 'undefined' ? localStorage.getItem('li_city') : null);
       router.push(city ? `/${city}/search?category=${encodeURIComponent(listing.categorySlug)}` : '/');
@@ -371,14 +372,15 @@ export default function FreshListingsSection({
   const trackRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft,  setCanScrollLeft]  = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
-  const [listings, setListings] = useState<DisplayListing[]>(FRESH_LISTINGS);
-  const [fetchingReal, setFetchingReal] = useState(false);
+  const [listings, setListings] = useState<DisplayListing[]>([]);
+  const [fetchingReal, setFetchingReal] = useState(true);
 
-  // ── Fetch real listings once a city is known; otherwise keep the mock preview ──
+  // ── Fetch real listings for the chosen city, or the default city; the
+  //    labelled "Example listings" mock is only a fallback if the API fails ──
   useEffect(() => {
     const effectiveCity = citySlug ||
-      (typeof window !== 'undefined' ? localStorage.getItem('li_city') : null);
-    if (!effectiveCity) return;
+      (typeof window !== 'undefined' ? localStorage.getItem('li_city') : null) ||
+      DEFAULT_CITY_SLUG;
     setFetchingReal(true);
     api.cities.listings(effectiveCity, { page_size: '6', sort: 'newest' })
       .then(data => {
@@ -466,8 +468,8 @@ export default function FreshListingsSection({
           <button
             type="button"
             onClick={() => {
-              const city = citySlug || (typeof window !== 'undefined' ? localStorage.getItem('li_city') : null);
-              router.push(city ? `/${city}/search` : '/');
+              const city = citySlug || (typeof window !== 'undefined' ? localStorage.getItem('li_city') : null) || DEFAULT_CITY_SLUG;
+              router.push(`/${city}/search`);
             }}
             className="hidden sm:flex items-center gap-1.5 shrink-0 pb-0.5
               text-[13px] font-semibold text-[#F7921E] hover:text-[#E07B0A]
@@ -522,7 +524,7 @@ export default function FreshListingsSection({
                       listing={listing}
                       index={i}
                       labelNew={t('fresh.badgeNew')}
-                      labelVerified={t('fresh.badgeVerified')}
+                      labelVerified={t('listing.activeOnWA')}
                       labelChatOnWA={t('listing.chatOnWA')}
                       citySlug={citySlug}
                     />
@@ -564,8 +566,8 @@ export default function FreshListingsSection({
           <button
             type="button"
             onClick={() => {
-              const city = citySlug || (typeof window !== 'undefined' ? localStorage.getItem('li_city') : null);
-              router.push(city ? `/${city}/search` : '/');
+              const city = citySlug || (typeof window !== 'undefined' ? localStorage.getItem('li_city') : null) || DEFAULT_CITY_SLUG;
+              router.push(`/${city}/search`);
             }}
             className="flex items-center gap-2 px-8 py-[12px] rounded-full
               bg-[#F7921E] text-white text-[14px] font-semibold

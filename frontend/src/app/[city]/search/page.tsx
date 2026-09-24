@@ -13,6 +13,7 @@ import SiteFooter from '@/components/site-footer/SiteFooter';
 import ListingCard from '@/components/listing-card/ListingCard';
 import ListingCardSkeleton from '@/components/listing-card/ListingCardSkeleton';
 import EmptyState from '@/components/empty-state/EmptyState';
+import { searchHeading } from '@/lib/utils';
 
 const PAGE_SIZE = 12;
 const CATEGORY_ICONS: Record<string, LucideIcon> = {
@@ -194,13 +195,20 @@ function SearchInner() {
   if (priceMin || priceMax) activeChips.push({ label: `₹${priceMin || '0'} – ₹${priceMax || '∞'}`, key: 'price' });
   if (dateRange) activeChips.push({ label: DATE_OPTIONS.find(d => d.value === dateRange)?.label ?? dateRange, key: 'date' });
 
+  const cityLabel = citySlug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  const heading = searchHeading(q, categories.find(c => c.id === localCat)?.name, cityLabel);
+
   return (
     <div style={{ background: 'var(--li-page-bg)', minHeight: '100vh' }}>
-      <SiteHeader citySlug={citySlug} cityName={citySlug.charAt(0).toUpperCase() + citySlug.slice(1)} />
+      <title>{`${heading} | LocalsIndia`}</title>
+      <SiteHeader citySlug={citySlug} cityName={cityLabel} />
 
       {/* Search bar strip */}
       <div className="bg-white border-b" style={{ borderColor: 'var(--li-border)' }}>
         <div className="page-wrap py-4">
+          <h1 className="text-xl md:text-2xl font-extrabold mb-3" style={{ color: 'var(--li-text)' }}>
+            {heading}
+          </h1>
           <form onSubmit={applySearch} className="flex items-center gap-4">
             <div
               className="flex items-center gap-3 flex-1 rounded-xl px-4 h-12 border transition-colors focus-within:border-orange-400"

@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePrefs } from '@/context/PrefsContext';
+import type { TranslationKey } from '@/lib/translations';
 import CityPickerModal from '@/components/city-picker/CityPickerModal';
 import SiteFooter from '@/components/site-footer/SiteFooter';
 import LanguageSelector, { LANGUAGES } from '@/components/language-selector/LanguageSelector';
@@ -21,44 +22,44 @@ import SiteLogo from '@/components/site-logo/SiteLogo';
 import { geolocateAndMatch } from '@/lib/geolocate';
 
 // ─── types ───────────────────────────────────────────────────
-interface CategoryDef { icon: LucideIcon; name: string; slug: string; color: string; accent: string }
+interface CategoryDef { icon: LucideIcon; name: string; slug: string; color: string; accent: string; key: TranslationKey }
 interface WhyDef { icon: LucideIcon; title: string; body: string }
-interface DaySection { time: string; tagline: string; slugs: string[] }
+interface DaySection { time: TranslationKey; tagline: TranslationKey; slugs: string[] }
 type GeoStatus = 'idle' | 'locating' | 'located' | 'denied' | 'failed';
 
 // ─── static data ─────────────────────────────────────────────
 const CATEGORIES: CategoryDef[] = [
-  { icon: Utensils,      name: 'Tiffin & Food', slug: 'tiffin',       color: 'text-white bg-orange-500',     accent: 'bg-orange-500'    },
-  { icon: Home,          name: 'PG / Rooms',    slug: 'pg-roommate',  color: 'text-white bg-blue-500',       accent: 'bg-blue-500'      },
-  { icon: Briefcase,     name: 'Jobs',          slug: 'jobs',         color: 'text-white bg-emerald-500',    accent: 'bg-emerald-500'   },
-  { icon: Car,           name: 'Vehicles',      slug: 'vehicles',     color: 'text-white bg-red-500',        accent: 'bg-red-500'       },
-  { icon: Smartphone,    name: 'Electronics',   slug: 'electronics',  color: 'text-white bg-purple-500',     accent: 'bg-purple-500'    },
-  { icon: Calendar,      name: 'Events',        slug: 'events',       color: 'text-white bg-rose-500',       accent: 'bg-rose-500'      },
-  { icon: Store,         name: 'Businesses',    slug: 'businesses',   color: 'text-white bg-cyan-500',       accent: 'bg-cyan-500'      },
-  { icon: GraduationCap, name: 'Education',     slug: 'education',    color: 'text-white bg-indigo-500',     accent: 'bg-indigo-500'    },
+  { icon: Utensils,      name: 'Tiffin & Food', slug: 'tiffin',       color: 'text-white bg-orange-500',     accent: 'bg-orange-500', key: 'categories.tiffin' },
+  { icon: Home,          name: 'PG / Rooms',    slug: 'pg-roommate',  color: 'text-white bg-blue-500',       accent: 'bg-blue-500', key: 'categories.pgRooms' },
+  { icon: Briefcase,     name: 'Jobs',          slug: 'jobs',         color: 'text-white bg-emerald-500',    accent: 'bg-emerald-500', key: 'categories.jobs' },
+  { icon: Car,           name: 'Vehicles',      slug: 'vehicles',     color: 'text-white bg-red-500',        accent: 'bg-red-500', key: 'categories.vehicles' },
+  { icon: Smartphone,    name: 'Electronics',   slug: 'electronics',  color: 'text-white bg-purple-500',     accent: 'bg-purple-500', key: 'categories.electronics' },
+  { icon: Calendar,      name: 'Events',        slug: 'events',       color: 'text-white bg-rose-500',       accent: 'bg-rose-500', key: 'categories.events' },
+  { icon: Store,         name: 'Businesses',    slug: 'businesses',   color: 'text-white bg-cyan-500',       accent: 'bg-cyan-500', key: 'categories.businesses' },
+  { icon: GraduationCap, name: 'Education',     slug: 'education',    color: 'text-white bg-indigo-500',     accent: 'bg-indigo-500', key: 'categories.education' },
 ];
 
 // Category browsing organized around actual daily life instead of a flat
 // icon grid — the same 8 categories, grouped by when someone typically
 // needs them, each with a one-line editorial frame.
 const DAY_SECTIONS: DaySection[] = [
-  { time: 'Morning',  tagline: 'Start the day sorted', slugs: ['tiffin', 'pg-roommate'] },
-  { time: 'Midday',   tagline: 'Get things done',      slugs: ['jobs', 'electronics'] },
-  { time: 'Evening',  tagline: "See what's on",        slugs: ['events', 'businesses'] },
-  { time: 'Anytime',  tagline: 'The bigger stuff',     slugs: ['vehicles', 'education'] },
+  { time: 'home.morning', tagline: 'home.morningTag', slugs: ['tiffin', 'pg-roommate'] },
+  { time: 'home.midday',  tagline: 'home.middayTag',  slugs: ['jobs', 'electronics'] },
+  { time: 'home.evening', tagline: 'home.eveningTag', slugs: ['events', 'businesses'] },
+  { time: 'home.anytime', tagline: 'home.anytimeTag', slugs: ['vehicles', 'education'] },
 ];
 
 const POPULAR_TAGS = ['Tiffin Service', 'PG for Boys', 'Used Laptop', 'Honda Activa', 'Home Tutor', '2BHK Flat'];
 
 // The direct answer to "why LocalsIndia" — concrete differentiators, not
-// vague trust badges. City/language counts are real, derived from the live
-// `cities` list (usePrefs) and the LANGUAGES registry at render time.
-function buildWhyUs(cityCount: number): WhyDef[] {
+// vague trust badges. The city count is real, derived from the live `cities`
+// list (usePrefs) at render time.
+function buildWhyUs(cityCount: number, t: (k: TranslationKey, v?: Record<string, string>) => string): WhyDef[] {
   return [
-    { icon: Layers,        title: 'Everything in one place', body: 'Tiffin, jobs, rooms, vehicles, events, businesses — stop juggling five different apps.' },
-    { icon: MessageCircle, title: 'Talk directly, no middlemen', body: 'Every listing connects straight to WhatsApp. No commission, no waiting for approval.' },
-    { icon: MapPin,        title: 'Built for your neighbourhood', body: `Search by area, not just city — live across ${cityCount}+ cities in South India.` },
-    { icon: Languages,     title: 'In your language',        body: `Browse and post in ${LANGUAGES.length} South Indian languages, not just English.` },
+    { icon: Layers,        title: t('home.why1t'), body: t('home.why1b') },
+    { icon: MessageCircle, title: t('home.why2t'), body: t('home.why2b') },
+    { icon: MapPin,        title: t('home.why3t'), body: t('home.why3b', { count: String(cityCount) }) },
+    { icon: Languages,     title: t('home.why4t'), body: t('home.why4b') },
   ];
 }
 
@@ -70,11 +71,28 @@ const SPRING = { duration: 0.3, ease: [0.22, 1, 0.36, 1] } as const;
 // ─── component ───────────────────────────────────────────────
 export default function HomePage() {
   const router = useRouter();
-  const { citySlug, cityName, setCity, cities, t } = usePrefs();
+  const { citySlug, cityName, setCity, cities, t, lang } = usePrefs();
   const [q, setQ] = useState('');
   const [showCityPicker, setShowCityPicker] = useState(false);
   const [pendingCategory, setPendingCategory] = useState<string | null>(null);
+  // Set when the visitor wanted to post but has no city yet — the picker then
+  // continues to the post form instead of search.
+  const [pendingPost, setPendingPost] = useState(false);
   const [heroWordIdx, setHeroWordIdx] = useState(0);
+
+  const startPost = () => {
+    if (citySlug) { router.push(`/${citySlug}/classifieds/post`); return; }
+    setPendingPost(true);
+    setShowCityPicker(true);
+  };
+
+  // /post redirects here with ?openPost=1 when no city is saved
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('openPost') === '1') {
+      setPendingPost(true);
+      setShowCityPicker(true);
+    }
+  }, []);
 
   // Real, live counts — never a hardcoded number that can drift from what's actually active
   const cityCount = cities.length;
@@ -82,7 +100,7 @@ export default function HomePage() {
     [cityCount > 0 ? `${cityCount}+` : '—', 'Cities'],
     [String(LANGUAGES.length), 'Languages'],
   ];
-  const WHY_US = buildWhyUs(cityCount > 0 ? cityCount : 140);
+  const WHY_US = buildWhyUs(cityCount > 0 ? cityCount : 150, t);
 
   // Cycle hero category words
   useEffect(() => {
@@ -206,10 +224,7 @@ export default function HomePage() {
             {/* Post Listing — primary CTA */}
             <button
               type="button"
-              onClick={() => citySlug
-                ? router.push(`/${citySlug}/classifieds/post`)
-                : setShowCityPicker(true)
-              }
+              onClick={startPost}
               className="ml-2 flex items-center gap-1.5 shrink-0
                 pl-5 pr-6 py-[10px] rounded-full
                 text-[13px] font-semibold tracking-tight text-white
@@ -268,8 +283,8 @@ export default function HomePage() {
             {/* ── Dynamic Headline ──────────────────────── */}
             <h1 className="text-4xl sm:text-5xl md:text-[3.75rem] font-extrabold text-white
               leading-[1.08] tracking-[-0.03em] mb-5">
-              {'Find '}
-              <AnimatePresence mode="wait" initial={false}>
+              {lang !== 'en' ? t('hero.headline1') : 'Find '}
+              {lang === 'en' && <AnimatePresence mode="wait" initial={false}>
                 <motion.span
                   key={heroWordIdx}
                   initial={{ opacity: 0, y: 14, filter: 'blur(4px)' }}
@@ -279,7 +294,7 @@ export default function HomePage() {
                 >
                   {HERO_WORDS[heroWordIdx]}
                 </motion.span>
-              </AnimatePresence>
+              </AnimatePresence>}
               <br />
               <AnimatePresence mode="wait" initial={false}>
                 <motion.span
@@ -289,7 +304,7 @@ export default function HomePage() {
                   exit={{ opacity: 0, y: -10, transition: { duration: 0.16, ease: 'easeIn' } }}
                   className="text-orange-500 inline-block"
                 >
-                  {cityName ? `in ${cityName}` : t('hero.inYourCity')}
+                  {cityName ? (lang === 'en' ? `in ${cityName}` : t('hero.inCity', { city: cityName })) : t('hero.inYourCity')}
                 </motion.span>
               </AnimatePresence>
             </h1>
@@ -538,15 +553,14 @@ export default function HomePage() {
             className="max-w-2xl mb-14 sm:mb-16"
           >
             <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#F7921E]">
-              Why LocalsIndia
+              {t('home.eyebrow')}
             </span>
             <h2 className="text-[2rem] sm:text-[2.5rem] font-extrabold text-slate-900
               tracking-[-0.04em] leading-tight mt-3">
-              One app, not five
+              {t('home.whyTitle')}
             </h2>
             <p className="text-[15px] text-slate-500 mt-3 leading-relaxed">
-              Every other option means a different app for jobs, a different one for rooms, a
-              different one for the market. LocalsIndia is the one your neighbourhood actually uses.
+              {t('home.whySub')}
             </p>
           </motion.div>
 
@@ -584,10 +598,10 @@ export default function HomePage() {
           <div className="mb-14 sm:mb-16">
             <h2 className="text-[2rem] sm:text-[2.5rem] font-extrabold text-slate-900
               tracking-[-0.04em] leading-tight">
-              A day in {cityName || 'your city'}
+              {cityName ? t('home.dayTitle', { city: cityName }) : t('home.dayTitleDefault')}
             </h2>
             <p className="text-[14px] text-slate-400 mt-3 font-normal leading-relaxed">
-              Whatever you need, whenever you need it
+              {t('home.daySub')}
             </p>
           </div>
 
@@ -604,9 +618,9 @@ export default function HomePage() {
                 {/* Time label — the organizing device */}
                 <div className="md:pt-2">
                   <h3 className="text-[13px] font-bold uppercase tracking-[0.1em]" style={{ color: 'var(--li-primary)' }}>
-                    {section.time}
+                    {t(section.time)}
                   </h3>
-                  <p className="text-[13.5px] text-slate-400 mt-1">{section.tagline}</p>
+                  <p className="text-[13.5px] text-slate-400 mt-1">{t(section.tagline)}</p>
                 </div>
 
                 {/* The 2 categories for this time of day */}
@@ -632,7 +646,7 @@ export default function HomePage() {
                           <Icon className="w-5 h-5" strokeWidth={2} />
                         </div>
                         <span className="text-[14.5px] font-semibold text-slate-800 group-hover:text-[#F7921E] transition-colors duration-200">
-                          {cat.name}
+                          {t(cat.key)}
                         </span>
                         <ArrowRight className="w-3.5 h-3.5 text-slate-300 ml-auto shrink-0
                           opacity-0 group-hover:opacity-100 -translate-x-1 group-hover:translate-x-0 transition-all duration-200" />
@@ -656,10 +670,13 @@ export default function HomePage() {
       ══════════════════════════════════════════════ */}
       {showCityPicker && (
         <CityPickerModal
-          onClose={() => setShowCityPicker(false)}
+          onClose={() => { setShowCityPicker(false); setPendingPost(false); }}
           onSelect={city => {
             setShowCityPicker(false);
-            if (pendingCategory) {
+            if (pendingPost) {
+              setPendingPost(false);
+              router.push(`/${city.slug}/classifieds/post`);
+            } else if (pendingCategory) {
               router.push(`/search?category=${pendingCategory}&city=${city.slug}`);
               setPendingCategory(null);
             } else if (q.trim()) {
@@ -687,25 +704,22 @@ export default function HomePage() {
                 <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
               </svg>
               <span className="text-[12.5px] font-semibold text-emerald-400">
-                Every listing talks straight to WhatsApp — zero commission
+                {t('home.closingBadge')}
               </span>
             </div>
 
             <h2 className="text-[2rem] sm:text-[2.75rem] font-extrabold text-white
               tracking-[-0.04em] leading-tight">
-              Your neighbourhood is already here
+              {t('home.closingTitle')}
             </h2>
             <p className="text-[15px] text-slate-400 mt-4 leading-relaxed">
-              {cityCount > 0 ? cityCount : 140}+ cities, {LANGUAGES.length} languages, one free listing away.
+              {t('home.closingSub', { count: String(cityCount > 0 ? cityCount : 150), langs: String(LANGUAGES.length) })}
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8">
               <button
                 type="button"
-                onClick={() => citySlug
-                  ? router.push(`/${citySlug}/classifieds/post`)
-                  : setShowCityPicker(true)
-                }
+                onClick={startPost}
                 className="flex items-center gap-2 px-8 py-[13px] rounded-full
                   text-[14px] font-semibold text-white bg-[#F7921E]
                   shadow-[0_4px_20px_rgba(247,146,30,0.32),inset_0_1px_0_rgba(255,255,255,0.14)]
@@ -713,7 +727,7 @@ export default function HomePage() {
                   active:scale-[0.96] transition-all duration-200"
               >
                 <Plus className="w-4 h-4" strokeWidth={2.6} />
-                Post for free
+                {t('home.postFree')}
               </button>
               <button
                 type="button"
@@ -722,7 +736,7 @@ export default function HomePage() {
                   text-[14px] font-semibold text-white/90 border border-white/15
                   hover:bg-white/[0.06] transition-all duration-200"
               >
-                Browse {cityName || 'your city'}
+                {cityName ? t('home.browse', { city: cityName }) : t('home.browseDefault')}
                 <ArrowRight className="w-3.5 h-3.5" strokeWidth={2.2} />
               </button>
             </div>

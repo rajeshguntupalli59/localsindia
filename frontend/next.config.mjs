@@ -14,6 +14,13 @@ const nextConfig = {
       { protocol: 'http', hostname: '**' },
     ],
   },
+  // 'tirupur' was a duplicate of 'tiruppur' (merged 2026-09-24) — keep old links working
+  async redirects() {
+    return [
+      { source: '/tirupur', destination: '/tiruppur', permanent: true },
+      { source: '/tirupur/:path*', destination: '/tiruppur/:path*', permanent: true },
+    ];
+  },
   webpack: (config) => {
     config.cache = false;
     return config;

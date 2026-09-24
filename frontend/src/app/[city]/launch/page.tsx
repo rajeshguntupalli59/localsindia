@@ -11,10 +11,10 @@ import SiteHeader from '@/components/site-header/SiteHeader';
 import SiteFooter from '@/components/site-footer/SiteFooter';
 
 const PERKS: { icon: LucideIcon; title: string; desc: string }[] = [
-  { icon: IndianRupee, title: 'Completely Free', desc: 'No listing fees ever. No subscription. Post as many listings as you want.' },
+  { icon: IndianRupee, title: 'Completely Free', desc: 'No listing fees ever. No subscription. Up to 10 active listings per city, all free.' },
   { icon: Lock, title: 'No Spam Calls', desc: 'Your number stays private. Buyers contact you on WhatsApp only — no cold calls.' },
   { icon: MessageCircle, title: 'WhatsApp-First', desc: '90% of Indians use WhatsApp. Every listing has a chat button — deals happen faster.' },
-  { icon: Globe, title: 'Your Language', desc: 'Browse in Telugu, Hindi, Tamil, Kannada, and 7 more Indian languages.' },
+  { icon: Globe, title: 'Your Language', desc: 'Browse in Telugu, Tamil, Kannada, Malayalam, or English.' },
 ];
 
 export default function CityLaunchPage() {
