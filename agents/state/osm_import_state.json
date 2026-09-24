@@ -1,0 +1,11 @@
+{
+ "bengaluru": {
+  "clean": true,
+  "created": 5407,
+  "date": "2026-09-24",
+  "found": 5407,
+  "removed_by_cleanup": 1,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ }
+}
