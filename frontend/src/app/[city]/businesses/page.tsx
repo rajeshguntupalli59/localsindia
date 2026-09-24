@@ -126,19 +126,22 @@ export default function BusinessesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   // ?category=<slug> — set by the "View all" link on category pages
   const [category, setCategory] = useState<string | null>(null);
+  const [q, setQ] = useState('');   // ?q= from a search page's "View all"
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
 
   useEffect(() => {
-    setCategory(new URLSearchParams(window.location.search).get('category') || '');
+    const sp = new URLSearchParams(window.location.search);
+    setQ(sp.get('q') || '');
+    setCategory(sp.get('category') || '');
     api.cities.get(citySlug).then(c => setCityName(c.name)).catch(() => {});
     api.categories.list().then(setCategories).catch(() => {});
   }, [citySlug]);
 
   const fetchPage = (pg: number) =>
     api.businesses.list(citySlug, {
-      page: String(pg), page_size: String(PAGE_SIZE), ...(category ? { category_slug: category } : {}),
+      page: String(pg), page_size: String(PAGE_SIZE), ...(category ? { category_slug: category } : {}), ...(q ? { q } : {}),
     });
 
   // Reload from page 1 whenever the category changes
@@ -150,7 +153,7 @@ export default function BusinessesPage() {
       .catch(() => setBusinesses([]))
       .finally(() => setLoading(false));
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [citySlug, category]);
+  }, [citySlug, category, q]);
 
   const loadMore = async () => {
     setLoadingMore(true);
@@ -164,11 +167,12 @@ export default function BusinessesPage() {
     }
   };
 
-  const pickCategory = (slug: string) => {
-    setCategory(slug);
-    const url = slug ? `?category=${slug}` : window.location.pathname;
-    window.history.replaceState(null, '', url);
+  const syncUrl = (cat: string, query: string) => {
+    const sp = new URLSearchParams({ ...(cat ? { category: cat } : {}), ...(query ? { q: query } : {}) }).toString();
+    window.history.replaceState(null, '', sp ? `?${sp}` : window.location.pathname);
   };
+  const pickCategory = (slug: string) => { setCategory(slug); syncUrl(slug, q); };
+  const clearQuery = () => { setQ(''); syncUrl(category ?? '', ''); };
 
   // Every category except the listing-only "Classifieds"
   const chipCategories = categories.filter(c => c.slug !== 'classifieds');
@@ -183,7 +187,16 @@ export default function BusinessesPage() {
             <h1 className="text-2xl font-black" style={{ color: 'var(--li-text)' }}>
               Businesses in {cityName || citySlug}
             </h1>
-            <p className="text-sm text-slate-500 mt-0.5">Find trusted local businesses</p>
+            {q ? (
+              <p className="text-sm text-slate-500 mt-0.5">
+                Matching &ldquo;{q}&rdquo; ·{' '}
+                <button onClick={clearQuery} className="font-semibold underline" style={{ color: 'var(--li-primary)' }}>
+                  Show all
+                </button>
+              </p>
+            ) : (
+              <p className="text-sm text-slate-500 mt-0.5">Find trusted local businesses</p>
+            )}
           </div>
           <Link
             href={`/${citySlug}/businesses/add`}

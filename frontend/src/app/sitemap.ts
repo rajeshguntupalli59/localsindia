@@ -56,6 +56,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // sitemap still works with static routes if API is down at build time
   }
 
+  // Every business page (real, mostly OpenStreetMap-imported) so Google can
+  // surface them. Capped server-side below the 50,000-URL sitemap limit.
+  const businessRoutes: MetadataRoute.Sitemap = [];
+  try {
+    const res = await fetch(`${API_BASE}/api/v1/businesses/sitemap-entries`, { next: { revalidate: 86400 } });
+    if (res.ok) {
+      const entries: { id: string; city_slug: string; updated_at: string }[] = await res.json();
+      for (const e of entries) {
+        businessRoutes.push({
+          url: `${BASE}/${e.city_slug}/businesses/${e.id}`,
+          lastModified: new Date(e.updated_at),
+          changeFrequency: 'weekly',
+          priority: 0.5,
+        });
+      }
+    }
+  } catch {
+    // business pages are optional in the sitemap
+  }
+
   // Blog posts — local fs enumeration (no network fetch), independently
   // guarded so a malformed content file can never break the whole sitemap.
   const blogRoutes: MetadataRoute.Sitemap = [];
@@ -73,5 +93,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // sitemap still works without blog routes if content dir is malformed
   }
 
-  return [...staticRoutes, ...cityRoutes, ...blogRoutes];
+  return [...staticRoutes, ...cityRoutes, ...blogRoutes, ...businessRoutes];
 }

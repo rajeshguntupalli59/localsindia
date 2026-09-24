@@ -115,6 +115,12 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 
 ## 6. Changelog (dated, most recent first — append here after notable sessions)
 
+### 2026-09-24 — All-city business import, quality rules, search + SEO for businesses
+- `agents/prepare_city_regions.py` → `agents/data/city_regions.json`: Nominatim bbox (clipped ±0.2°) + population (OSM, else Wikidata city/town record — never a district) for all 150 cities; import order = every state's #1 city, then #2, ... (35 small towns lack population → last).
+- `osm_business_import.py --auto N --apply`: next N cities; per city: import → `clean_city` (soft-delete generic names like "Bakery", junk/test names, chains with 3+ same-name branches, true duplicates via `POST /admin/businesses/import/remove` — unclaimed imports only; re-categorise generic-bucket rows whose name says otherwise via PATCH) → `verify` (live checks + pages 200) — STOPS on any problem. Progress in `agents/state/osm_import_state.json` (committed by the workflow). Name-keyword category only overrides the generic "businesses" fallback, never a specific OSM tag.
+- Owners can now change their business category (`category_id` in PATCH).
+- Search: `GET /businesses?q=` (all words in name); search pages show "Businesses matching …" strip. SEO: business pages get server-side title/description + LocalBusiness JSON-LD; `GET /businesses/sitemap-entries` feeds all business URLs into sitemap.xml (cap 45k — split into multiple sitemaps if exceeded).
+
 ### 2026-09-24 — OpenStreetMap business import (Hyderabad first)
 - `agents/osm_business_import.py` + manual workflow `osm-import.yml` (dry run by default; artifact = preview CSV/JSON/summary; tick "apply" to upload via `POST /admin/businesses/import`). Filter: named, mapped category, phone OR real address, not a chain (`brand` tag). Hyderabad dry run: 2,407 businesses, 386 with a mobile (SMS-claimable).
 - businesses gained source/source_ref/latitude/longitude (migration `c5e6f7a8b9d0`); imported rows are unclaimed, show "Unclaimed", "View on map", and the required © OpenStreetMap/ODbL attribution.

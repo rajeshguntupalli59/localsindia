@@ -1,0 +1,2257 @@
+{
+ "order": [
+  "bengaluru",
+  "hyderabad",
+  "chennai",
+  "visakhapatnam",
+  "thiruvananthapuram",
+  "puducherry",
+  "madurai",
+  "vijayawada",
+  "mysuru",
+  "warangal",
+  "kochi",
+  "coimbatore",
+  "guntur",
+  "belagavi",
+  "kozhikode",
+  "khammam",
+  "salem",
+  "nellore",
+  "hubballi",
+  "kollam",
+  "jagtial",
+  "mangaluru",
+  "tiruchirappalli",
+  "kurnool",
+  "thrissur",
+  "mahbubnagar",
+  "ballari",
+  "tiruppur",
+  "kakinada",
+  "alappuzha",
+  "nalgonda",
+  "davanagere",
+  "kadapa",
+  "sivakasi",
+  "palakkad",
+  "adilabad",
+  "kalaburagi",
+  "rajamahendravaram",
+  "nagercoil",
+  "suryapet",
+  "malappuram",
+  "shivamogga",
+  "vizianagaram",
+  "thanjavur",
+  "miryalaguda",
+  "thalassery",
+  "vijayapura",
+  "tirupati",
+  "dindigul",
+  "nizamabad",
+  "kannur",
+  "bidar",
+  "ongole",
+  "vellore",
+  "kasaragod",
+  "bhongir",
+  "hospet",
+  "eluru",
+  "cuddalore",
+  "medak",
+  "perinthalmanna",
+  "nandyal",
+  "raichur",
+  "kanchipuram",
+  "shadnagar",
+  "manjeri",
+  "adoni",
+  "erode",
+  "bhadravati",
+  "bhadrachalam",
+  "guruvayur",
+  "machilipatnam",
+  "tiruvannamalai",
+  "chitradurga",
+  "bodhan",
+  "irinjalakuda",
+  "tenali",
+  "kumbakonam",
+  "kolar",
+  "siddipet",
+  "kayamkulam",
+  "proddatur",
+  "mandya",
+  "rajapalayam",
+  "kamareddy",
+  "kottayam",
+  "chittoor",
+  "hassan",
+  "pudukkottai",
+  "nirmal",
+  "ponnani",
+  "hindupur",
+  "udupi",
+  "hosur",
+  "sangareddy",
+  "thodupuzha",
+  "bhimavaram",
+  "chikkamagaluru",
+  "ambur",
+  "wanaparthy",
+  "thrippunithura",
+  "srikakulam",
+  "ranebennuru",
+  "neyveli",
+  "nagarkurnool",
+  "madanapalle",
+  "nagapattinam",
+  "dharwad",
+  "karimnagar",
+  "guntakal",
+  "tumakuru",
+  "thoothukudi",
+  "kothagudem",
+  "dharmavaram",
+  "tirunelveli",
+  "ramanagara",
+  "mancherial",
+  "gudivada",
+  "krishnagiri",
+  "sirsi",
+  "ramagundam",
+  "narasaraopet",
+  "dharmapuri",
+  "arsikere",
+  "tandur",
+  "tadipatri",
+  "namakkal",
+  "bagalkot",
+  "vikarabad",
+  "amaravati",
+  "tiruvallur",
+  "chikkaballapur",
+  "zahirabad",
+  "chilakaluripet",
+  "ranipet",
+  "gadag",
+  "kadiri",
+  "karur",
+  "gangavati",
+  "mangalagiri",
+  "robertsonpet",
+  "ariyalur",
+  "narasapuram",
+  "yadgir",
+  "karaikkudi",
+  "amalapuram",
+  "villupuram",
+  "puttaparthi",
+  "anantapuram",
+  "tadepalligudem"
+ ],
+ "regions": {
+  "adoni": {
+   "name": "Adoni",
+   "state": "Andhra Pradesh",
+   "bbox": [
+    15.5861,
+    77.2324,
+    15.6661,
+    77.3124
+   ],
+   "population": 184625,
+   "osm": "node/245632505",
+   "wikidata": "Q490906",
+   "tier": 14
+  },
+  "amalapuram": {
+   "name": "Amalapuram",
+   "state": "Andhra Pradesh",
+   "bbox": [
+    16.5377,
+    81.9633,
+    16.6177,
+    82.0433
+   ],
+   "population": 53231,
+   "osm": "node/2857106989",
+   "wikidata": "Q588625",
+   "tier": 33
+  },
+  "amaravati": {
+   "name": "Amaravati",
+   "state": "Andhra Pradesh",
+   "bbox": [
+    16.3497,
+    80.3585,
+    16.6697,
+    80.6785
+   ],
+   "population": 103000,
+   "osm": "node/8434044218",
+   "wikidata": "Q19881964",
+   "tier": 28
+  },
+  "anantapuram": {
+   "name": "Anantapuram",
+   "state": "Andhra Pradesh",
+   "bbox": [
+    14.6598,
+    78.623,
+    14.6998,
+    78.663
+   ],
+   "population": 0,
+   "osm": "node/3387487057",
+   "wikidata": null,
+   "tier": 35
+  },
+  "bhimavaram": {
+   "name": "Bhimavaram",
+   "state": "Andhra Pradesh",
+   "bbox": [
+    16.5028,
+    81.4873,
+    16.5828,
+    81.5673
+   ],
+   "population": 142184,
+   "osm": "node/245636751",
+   "wikidata": "Q757853",
+   "tier": 20
+  },
+  "chilakaluripet": {
+   "name": "Chilakaluripet",
+   "state": "Andhra Pradesh",
+   "bbox": [
+    16.055,
+    80.1259,
+    16.135,
+    80.2059
+   ],
+   "population": 101398,
+   "osm": "node/7003730622",
+   "wikidata": "Q1105252",
+   "tier": 29
+  },
+  "chittoor": {
+   "name": "Chittoor",
+   "state": "Andhra Pradesh",
+   "bbox": [
+    13.0561,
+    78.9373,
+    13.3761,
+    79.2573
+   ],
+   "population": 160722,
+   "osm": "node/245619134",
+   "wikidata": "Q11198998",
+   "tier": 18
+  },
+  "dharmavaram": {
+   "name": "Dharmavaram",
+   "state": "Andhra Pradesh",
+   "bbox": [
+    14.3738,
+    77.6808,
+    14.4538,
+    77.7608
+   ],
+   "population": 121874,
+   "osm": "node/245627273",
+   "wikidata": "Q1948238",
+   "tier": 24
+  },
+  "eluru": {
+   "name": "Eluru",
+   "state": "Andhra Pradesh",
+   "bbox": [
+    16.5504,
+    80.9554,
+    16.8704,
+    81.2754
+   ],
+   "population": 203780,
+   "osm": "node/571470318",
+   "wikidata": "Q1003496",
+   "tier": 12
+  },
+  "gudivada": {
+   "name": "Gudivada",
+   "state": "Andhra Pradesh",
+   "bbox": [
+    16.393,
+    80.9537,
+    16.473,
+    81.0337
+   ],
+   "population": 118167,
+   "osm": "node/245636099",
+   "wikidata": "Q2350125",
+   "tier": 25
+  },
+  "guntakal": {
+   "name": "Guntakal",
+   "state": "Andhra Pradesh",
+   "bbox": [
+    15.123,
+    77.3369,
+    15.203,
+    77.4169
+   ],
+   "population": 126270,
+   "osm": "node/245630496",
+   "wikidata": "Q586397",
+   "tier": 23
+  },
+  "guntur": {
+   "name": "Guntur",
+   "state": "Andhra Pradesh",
+   "bbox": [
+    16.1315,
+    80.2942,
+    16.4515,
+    80.6142
+   ],
+   "population": 647508,
+   "osm": "node/571469929",
+   "wikidata": "Q3120966",
+   "tier": 3
+  },
+  "hindupur": {
+   "name": "Hindupur",
+   "state": "Andhra Pradesh",
+   "bbox": [
+    13.7906,
+    77.4526,
+    13.8706,
+    77.5326
+   ],
+   "population": 151677,
+   "osm": "node/245625010",
+   "wikidata": "Q760056",
+   "tier": 19
+  },
+  "kadapa": {
+   "name": "Kadapa",
+   "state": "Andhra Pradesh",
+   "bbox": [
+    14.3153,
+    78.6617,
+    14.6353,
+    78.9817
+   ],
+   "population": 344893,
+   "osm": "node/2476343447",
+   "wikidata": "Q30651",
+   "tier": 7
+  },
+  "kadiri": {
+   "name": "Kadiri",
+   "state": "Andhra Pradesh",
+   "bbox": [
+    14.0682,
+    78.1211,
+    14.1482,
+    78.2011
+   ],
+   "population": 89429,
+   "osm": "node/2476581514",
+   "wikidata": "Q2351757",
+   "tier": 30
+  },
+  "kakinada": {
+   "name": "Kakinada",
+   "state": "Andhra Pradesh",
+   "bbox": [
+    16.7837,
+    82.0751,
+    17.1037,
+    82.3951
+   ],
+   "population": 384182,
+   "osm": "node/3665399128",
+   "wikidata": "Q59018",
+   "tier": 6
+  },
+  "kurnool": {
+   "name": "Kurnool",
+   "state": "Andhra Pradesh",
+   "bbox": [
+    15.6709,
+    77.8825,
+    15.9909,
+    78.2025
+   ],
+   "population": 457633,
+   "osm": "node/603465549",
+   "wikidata": "Q3635276",
+   "tier": 5
+  },
+  "machilipatnam": {
+   "name": "Machilipatnam",
+   "state": "Andhra Pradesh",
+   "bbox": [
+    16.0217,
+    80.9748,
+    16.3417,
+    81.2948
+   ],
+   "population": 169892,
+   "osm": "node/3478288118",
+   "wikidata": "Q845662",
+   "tier": 15
+  },
+  "madanapalle": {
+   "name": "Madanapalle",
+   "state": "Andhra Pradesh",
+   "bbox": [
+    13.5158,
+    78.4615,
+    13.5958,
+    78.5415
+   ],
+   "population": 136000,
+   "osm": "node/3264135244",
+   "wikidata": "Q1017723",
+   "tier": 22
+  },
+  "mangalagiri": {
+   "name": "Mangalagiri",
+   "state": "Andhra Pradesh",
+   "bbox": [
+    16.4118,
+    80.5488,
+    16.4518,
+    80.5888
+   ],
+   "population": 73613,
+   "osm": "node/245636315",
+   "wikidata": "Q2349939",
+   "tier": 31
+  },
+  "nandyal": {
+   "name": "Nandyal",
+   "state": "Andhra Pradesh",
+   "bbox": [
+    15.4336,
+    78.4407,
+    15.5136,
+    78.5207
+   ],
+   "population": 200516,
+   "osm": "node/245632119",
+   "wikidata": "Q1772751",
+   "tier": 13
+  },
+  "narasapuram": {
+   "name": "Narasapuram",
+   "state": "Andhra Pradesh",
+   "bbox": [
+    16.3986,
+    81.6615,
+    16.4786,
+    81.7415
+   ],
+   "population": 58770,
+   "osm": "node/245636198",
+   "wikidata": "Q379516",
+   "tier": 32
+  },
+  "narasaraopet": {
+   "name": "Narasaraopet",
+   "state": "Andhra Pradesh",
+   "bbox": [
+    16.1989,
+    80.0073,
+    16.2789,
+    80.0873
+   ],
+   "population": 116250,
+   "osm": "node/6789177864",
+   "wikidata": "Q2483789",
+   "tier": 26
+  },
+  "nellore": {
+   "name": "Nellore",
+   "state": "Andhra Pradesh",
+   "bbox": [
+    14.2894,
+    79.8274,
+    14.6094,
+    80.1474
+   ],
+   "population": 547621,
+   "osm": "node/1598973198",
+   "wikidata": "Q61434",
+   "tier": 4
+  },
+  "ongole": {
+   "name": "Ongole",
+   "state": "Andhra Pradesh",
+   "bbox": [
+    15.3459,
+    79.8899,
+    15.6659,
+    80.2099
+   ],
+   "population": 204746,
+   "osm": "node/3999505428",
+   "wikidata": "Q1920249",
+   "tier": 11
+  },
+  "proddatur": {
+   "name": "Proddatur",
+   "state": "Andhra Pradesh",
+   "bbox": [
+    14.7156,
+    78.5102,
+    14.7956,
+    78.5902
+   ],
+   "population": 163970,
+   "osm": "node/3647299291",
+   "wikidata": "Q2349966",
+   "tier": 17
+  },
+  "puttaparthi": {
+   "name": "Puttaparthi",
+   "state": "Andhra Pradesh",
+   "bbox": [
+    14.1237,
+    77.7725,
+    14.2037,
+    77.8525
+   ],
+   "population": 15088,
+   "osm": "node/1184155485",
+   "wikidata": "Q1068595",
+   "tier": 34
+  },
+  "rajamahendravaram": {
+   "name": "Rajamahendravaram",
+   "state": "Andhra Pradesh",
+   "bbox": [
+    16.845,
+    81.6205,
+    17.165,
+    81.9405
+   ],
+   "population": 341831,
+   "osm": "node/2408119848",
+   "wikidata": "Q1639492",
+   "tier": 8
+  },
+  "srikakulam": {
+   "name": "Srikakulam",
+   "state": "Andhra Pradesh",
+   "bbox": [
+    18.1349,
+    83.7339,
+    18.4549,
+    84.0539
+   ],
+   "population": 137944,
+   "osm": "node/245644077",
+   "wikidata": "Q671757",
+   "tier": 21
+  },
+  "tadepalligudem": {
+   "name": "Tadepalligudem",
+   "state": "Andhra Pradesh",
+   "bbox": [
+    16.8052,
+    81.5216,
+    16.8152,
+    81.5316
+   ],
+   "population": 0,
+   "osm": "node/708921070",
+   "wikidata": "Q24944471",
+   "tier": 36
+  },
+  "tadipatri": {
+   "name": "Tadipatri",
+   "state": "Andhra Pradesh",
+   "bbox": [
+    14.867,
+    77.9697,
+    14.947,
+    78.0497
+   ],
+   "population": 108171,
+   "osm": "node/2953119719",
+   "wikidata": "Q2336339",
+   "tier": 27
+  },
+  "tenali": {
+   "name": "Tenali",
+   "state": "Andhra Pradesh",
+   "bbox": [
+    16.1978,
+    80.6064,
+    16.2778,
+    80.6864
+   ],
+   "population": 164937,
+   "osm": "node/245635123",
+   "wikidata": "Q1929712",
+   "tier": 16
+  },
+  "tirupati": {
+   "name": "Tirupati",
+   "state": "Andhra Pradesh",
+   "bbox": [
+    13.4716,
+    79.2632,
+    13.7916,
+    79.5832
+   ],
+   "population": 287482,
+   "osm": "node/335868152",
+   "wikidata": "Q1436816",
+   "tier": 10
+  },
+  "vijayawada": {
+   "name": "Vijayawada",
+   "state": "Andhra Pradesh",
+   "bbox": [
+    16.3515,
+    80.456,
+    16.6715,
+    80.776
+   ],
+   "population": 1048240,
+   "osm": "node/1880441437",
+   "wikidata": "Q200017",
+   "tier": 2
+  },
+  "visakhapatnam": {
+   "name": "Visakhapatnam",
+   "state": "Andhra Pradesh",
+   "bbox": [
+    17.5336,
+    83.1321,
+    17.8536,
+    83.4521
+   ],
+   "population": 2526000,
+   "osm": "node/245641840",
+   "wikidata": "Q200016",
+   "tier": 1
+  },
+  "vizianagaram": {
+   "name": "Vizianagaram",
+   "state": "Andhra Pradesh",
+   "bbox": [
+    17.9541,
+    83.2514,
+    18.2741,
+    83.5714
+   ],
+   "population": 332000,
+   "osm": "node/245643279",
+   "wikidata": "Q3619248",
+   "tier": 9
+  },
+  "arsikere": {
+   "name": "Arsikere",
+   "state": "Karnataka",
+   "bbox": [
+    13.3088,
+    76.2482,
+    13.3188,
+    76.2582
+   ],
+   "population": 0,
+   "osm": "node/1153239883",
+   "wikidata": "Q24947920",
+   "tier": 26
+  },
+  "bagalkot": {
+   "name": "Bagalkot",
+   "state": "Karnataka",
+   "bbox": [
+    16.1746,
+    75.6781,
+    16.1805,
+    75.6837
+   ],
+   "population": 0,
+   "osm": "way/252071055",
+   "wikidata": null,
+   "tier": 27
+  },
+  "ballari": {
+   "name": "Ballari",
+   "state": "Karnataka",
+   "bbox": [
+    14.983,
+    76.7573,
+    15.303,
+    77.0773
+   ],
+   "population": 475000,
+   "osm": "node/3944758059",
+   "wikidata": "Q429063",
+   "tier": 6
+  },
+  "belagavi": {
+   "name": "Belagavi",
+   "state": "Karnataka",
+   "bbox": [
+    15.6973,
+    74.3469,
+    16.0173,
+    74.6669
+   ],
+   "population": 600000,
+   "osm": "node/343333679",
+   "wikidata": "Q270176",
+   "tier": 3
+  },
+  "bengaluru": {
+   "name": "Bengaluru",
+   "state": "Karnataka",
+   "bbox": [
+    12.8335,
+    77.4599,
+    13.1426,
+    77.7841
+   ],
+   "population": 10839725,
+   "osm": "relation/7902476",
+   "wikidata": "Q1355",
+   "tier": 1
+  },
+  "bhadravati": {
+   "name": "Bhadravati",
+   "state": "Karnataka",
+   "bbox": [
+    13.6902,
+    75.5438,
+    14.0102,
+    75.8638
+   ],
+   "population": 151100,
+   "osm": "node/245625138",
+   "wikidata": "Q2284099",
+   "tier": 14
+  },
+  "bidar": {
+   "name": "Bidar",
+   "state": "Karnataka",
+   "bbox": [
+    17.7566,
+    77.3513,
+    18.0766,
+    77.6713
+   ],
+   "population": 214400,
+   "osm": "node/245642463",
+   "wikidata": "Q461922",
+   "tier": 11
+  },
+  "chikkaballapur": {
+   "name": "Chikkaballapur",
+   "state": "Karnataka",
+   "bbox": [
+    13.0982,
+    77.3865,
+    13.1,
+    77.3912
+   ],
+   "population": 0,
+   "osm": "way/192886293",
+   "wikidata": null,
+   "tier": 28
+  },
+  "chikkamagaluru": {
+   "name": "Chikkamagaluru",
+   "state": "Karnataka",
+   "bbox": [
+    13.158,
+    75.6139,
+    13.478,
+    75.9339
+   ],
+   "population": 118400,
+   "osm": "node/245619852",
+   "wikidata": "Q980917",
+   "tier": 20
+  },
+  "chitradurga": {
+   "name": "Chitradurga",
+   "state": "Karnataka",
+   "bbox": [
+    14.0666,
+    76.2405,
+    14.3866,
+    76.5605
+   ],
+   "population": 140200,
+   "osm": "node/571409087",
+   "wikidata": "Q46415",
+   "tier": 15
+  },
+  "davanagere": {
+   "name": "Davanagere",
+   "state": "Karnataka",
+   "bbox": [
+    14.3061,
+    75.7606,
+    14.6261,
+    76.0806
+   ],
+   "population": 434971,
+   "osm": "node/571395225",
+   "wikidata": "Q519486",
+   "tier": 7
+  },
+  "dharwad": {
+   "name": "Dharwad",
+   "state": "Karnataka",
+   "bbox": [
+    15.2941,
+    74.8467,
+    15.6141,
+    75.1667
+   ],
+   "population": 100000,
+   "osm": "node/245631974",
+   "wikidata": "Q3852743",
+   "tier": 22
+  },
+  "gadag": {
+   "name": "Gadag",
+   "state": "Karnataka",
+   "bbox": [
+    15.2167,
+    75.4816,
+    15.6167,
+    75.8816
+   ],
+   "population": 0,
+   "osm": "relation/2020669",
+   "wikidata": "Q2353931",
+   "tier": 29
+  },
+  "gangavati": {
+   "name": "Gangavati",
+   "state": "Karnataka",
+   "bbox": [
+    15.5062,
+    76.7624,
+    15.5462,
+    76.8024
+   ],
+   "population": 0,
+   "osm": "node/12966259604",
+   "wikidata": null,
+   "tier": 30
+  },
+  "hassan": {
+   "name": "Hassan",
+   "state": "Karnataka",
+   "bbox": [
+    12.8471,
+    75.9393,
+    13.1671,
+    76.2593
+   ],
+   "population": 133400,
+   "osm": "node/340748436",
+   "wikidata": "Q47264",
+   "tier": 18
+  },
+  "hospet": {
+   "name": "Hospet",
+   "state": "Karnataka",
+   "bbox": [
+    15.1065,
+    76.2272,
+    15.4265,
+    76.5472
+   ],
+   "population": 206200,
+   "osm": "node/571418235",
+   "wikidata": "Q33414",
+   "tier": 12
+  },
+  "hubballi": {
+   "name": "Hubballi",
+   "state": "Karnataka",
+   "bbox": [
+    15.1918,
+    74.978,
+    15.5118,
+    75.298
+   ],
+   "population": 500000,
+   "osm": "node/670289984",
+   "wikidata": "Q33412",
+   "tier": 4
+  },
+  "kalaburagi": {
+   "name": "Kalaburagi",
+   "state": "Karnataka",
+   "bbox": [
+    17.171,
+    76.6734,
+    17.491,
+    76.9934
+   ],
+   "population": 400000,
+   "osm": "node/245640372",
+   "wikidata": "Q37112",
+   "tier": 8
+  },
+  "kolar": {
+   "name": "Kolar",
+   "state": "Karnataka",
+   "bbox": [
+    12.9767,
+    77.9737,
+    13.2967,
+    78.2937
+   ],
+   "population": 140000,
+   "osm": "node/245618507",
+   "wikidata": "Q135617761",
+   "tier": 16
+  },
+  "mandya": {
+   "name": "Mandya",
+   "state": "Karnataka",
+   "bbox": [
+    12.3639,
+    76.7362,
+    12.6839,
+    77.0562
+   ],
+   "population": 137400,
+   "osm": "node/652721136",
+   "wikidata": "Q1006277",
+   "tier": 17
+  },
+  "mangaluru": {
+   "name": "Mangaluru",
+   "state": "Karnataka",
+   "bbox": [
+    12.7098,
+    74.683,
+    13.0298,
+    75.003
+   ],
+   "population": 500000,
+   "osm": "node/245612641",
+   "wikidata": "Q127041",
+   "tier": 5
+  },
+  "mysuru": {
+   "name": "Mysuru",
+   "state": "Karnataka",
+   "bbox": [
+    12.1452,
+    76.4954,
+    12.4652,
+    76.8154
+   ],
+   "population": 887446,
+   "osm": "node/2068274800",
+   "wikidata": "Q10086",
+   "tier": 2
+  },
+  "raichur": {
+   "name": "Raichur",
+   "state": "Karnataka",
+   "bbox": [
+    16.0383,
+    77.1927,
+    16.3583,
+    77.5127
+   ],
+   "population": 200000,
+   "osm": "node/245634966",
+   "wikidata": "Q916838",
+   "tier": 13
+  },
+  "ramanagara": {
+   "name": "Ramanagara",
+   "state": "Karnataka",
+   "bbox": [
+    12.6853,
+    77.2405,
+    12.7653,
+    77.3205
+   ],
+   "population": 80000,
+   "osm": "node/245609255",
+   "wikidata": "Q13371953",
+   "tier": 24
+  },
+  "ranebennuru": {
+   "name": "Ranebennuru",
+   "state": "Karnataka",
+   "bbox": [
+    14.4566,
+    75.4742,
+    14.7766,
+    75.7942
+   ],
+   "population": 106400,
+   "osm": "node/245628328",
+   "wikidata": "Q2737504",
+   "tier": 21
+  },
+  "robertsonpet": {
+   "name": "Robertsonpet",
+   "state": "Karnataka",
+   "bbox": [
+    12.9381,
+    78.2544,
+    12.9781,
+    78.2944
+   ],
+   "population": 0,
+   "osm": "node/1844248846",
+   "wikidata": "Q2557879",
+   "tier": 31
+  },
+  "shivamogga": {
+   "name": "Shivamogga",
+   "state": "Karnataka",
+   "bbox": [
+    13.7726,
+    75.415,
+    14.0926,
+    75.735
+   ],
+   "population": 400000,
+   "osm": "node/245625473",
+   "wikidata": "Q281796",
+   "tier": 9
+  },
+  "sirsi": {
+   "name": "Sirsi",
+   "state": "Karnataka",
+   "bbox": [
+    14.5792,
+    74.7989,
+    14.6592,
+    74.8789
+   ],
+   "population": 62882,
+   "osm": "node/245628312",
+   "wikidata": "Q959109",
+   "tier": 25
+  },
+  "tumakuru": {
+   "name": "Tumakuru",
+   "state": "Karnataka",
+   "bbox": [
+    13.1801,
+    76.9406,
+    13.5001,
+    77.2606
+   ],
+   "population": 100000,
+   "osm": "node/571400151",
+   "wikidata": "Q911310",
+   "tier": 23
+  },
+  "udupi": {
+   "name": "Udupi",
+   "state": "Karnataka",
+   "bbox": [
+    13.1819,
+    74.5873,
+    13.5019,
+    74.9073
+   ],
+   "population": 125300,
+   "osm": "node/245620117",
+   "wikidata": "Q584295",
+   "tier": 19
+  },
+  "vijayapura": {
+   "name": "Vijayapura",
+   "state": "Karnataka",
+   "bbox": [
+    16.667,
+    75.5575,
+    16.987,
+    75.8775
+   ],
+   "population": 327427,
+   "osm": "node/245638671",
+   "wikidata": "Q3636023",
+   "tier": 10
+  },
+  "yadgir": {
+   "name": "Yadgir",
+   "state": "Karnataka",
+   "bbox": [
+    16.3744,
+    76.7254,
+    16.7744,
+    77.1254
+   ],
+   "population": 0,
+   "osm": "relation/3686856",
+   "wikidata": "Q1786949",
+   "tier": 32
+  },
+  "alappuzha": {
+   "name": "Alappuzha",
+   "state": "Kerala",
+   "bbox": [
+    9.3323,
+    76.1691,
+    9.6523,
+    76.4891
+   ],
+   "population": 177000,
+   "osm": "node/245584105",
+   "wikidata": "Q585026",
+   "tier": 6
+  },
+  "guruvayur": {
+   "name": "Guruvayur",
+   "state": "Kerala",
+   "bbox": [
+    10.555,
+    76.0018,
+    10.635,
+    76.0818
+   ],
+   "population": 0,
+   "osm": "node/1981613388",
+   "wikidata": "Q720084",
+   "tier": 14
+  },
+  "irinjalakuda": {
+   "name": "Irinjalakuda",
+   "state": "Kerala",
+   "bbox": [
+    10.3054,
+    76.1758,
+    10.3854,
+    76.2558
+   ],
+   "population": 0,
+   "osm": "node/7137292722",
+   "wikidata": "Q1754141",
+   "tier": 15
+  },
+  "kannur": {
+   "name": "Kannur",
+   "state": "Kerala",
+   "bbox": [
+    11.7164,
+    75.2138,
+    12.0364,
+    75.5338
+   ],
+   "population": 56823,
+   "osm": "node/290180981",
+   "wikidata": "Q4789666",
+   "tier": 10
+  },
+  "kasaragod": {
+   "name": "Kasaragod",
+   "state": "Kerala",
+   "bbox": [
+    12.4636,
+    74.9507,
+    12.5436,
+    75.0307
+   ],
+   "population": 54172,
+   "osm": "node/8779650703",
+   "wikidata": "Q317217",
+   "tier": 11
+  },
+  "kayamkulam": {
+   "name": "Kayamkulam",
+   "state": "Kerala",
+   "bbox": [
+    9.1324,
+    76.4601,
+    9.2124,
+    76.5401
+   ],
+   "population": 0,
+   "osm": "node/281358588",
+   "wikidata": "Q672672",
+   "tier": 16
+  },
+  "kochi": {
+   "name": "Kochi",
+   "state": "Kerala",
+   "bbox": [
+    9.8079,
+    76.0844,
+    10.1279,
+    76.4044
+   ],
+   "population": 677381,
+   "osm": "node/3862624198",
+   "wikidata": "Q1800",
+   "tier": 2
+  },
+  "kollam": {
+   "name": "Kollam",
+   "state": "Kerala",
+   "bbox": [
+    8.7271,
+    76.4307,
+    9.0471,
+    76.7507
+   ],
+   "population": 397419,
+   "osm": "node/245582090",
+   "wikidata": "Q321475",
+   "tier": 4
+  },
+  "kottayam": {
+   "name": "Kottayam",
+   "state": "Kerala",
+   "bbox": [
+    9.4316,
+    76.3622,
+    9.7516,
+    76.6822
+   ],
+   "population": 0,
+   "osm": "node/297681854",
+   "wikidata": "Q659887",
+   "tier": 17
+  },
+  "kozhikode": {
+   "name": "Kozhikode",
+   "state": "Kerala",
+   "bbox": [
+    11.0851,
+    75.6155,
+    11.4051,
+    75.9355
+   ],
+   "population": 431560,
+   "osm": "node/1348192542",
+   "wikidata": "Q28729",
+   "tier": 3
+  },
+  "malappuram": {
+   "name": "Malappuram",
+   "state": "Kerala",
+   "bbox": [
+    11.0263,
+    76.0339,
+    11.0964,
+    76.1033
+   ],
+   "population": 101330,
+   "osm": "way/84635269",
+   "wikidata": "Q956893",
+   "tier": 8
+  },
+  "manjeri": {
+   "name": "Manjeri",
+   "state": "Kerala",
+   "bbox": [
+    11.1068,
+    76.1109,
+    11.1273,
+    76.1307
+   ],
+   "population": 10000,
+   "osm": "way/22825957",
+   "wikidata": "Q2568380",
+   "tier": 13
+  },
+  "palakkad": {
+   "name": "Palakkad",
+   "state": "Kerala",
+   "bbox": [
+    10.6082,
+    76.4921,
+    10.9282,
+    76.8121
+   ],
+   "population": 131000,
+   "osm": "node/345267997",
+   "wikidata": "Q1006240",
+   "tier": 7
+  },
+  "perinthalmanna": {
+   "name": "Perinthalmanna",
+   "state": "Kerala",
+   "bbox": [
+    10.9357,
+    76.1863,
+    11.0157,
+    76.2663
+   ],
+   "population": 44613,
+   "osm": "node/355845180",
+   "wikidata": "Q720812",
+   "tier": 12
+  },
+  "ponnani": {
+   "name": "Ponnani",
+   "state": "Kerala",
+   "bbox": [
+    10.7401,
+    75.8789,
+    10.8201,
+    75.9589
+   ],
+   "population": 0,
+   "osm": "node/1804884838",
+   "wikidata": "Q2568315",
+   "tier": 18
+  },
+  "thalassery": {
+   "name": "Thalassery",
+   "state": "Kerala",
+   "bbox": [
+    11.7091,
+    75.4532,
+    11.7891,
+    75.5332
+   ],
+   "population": 92558,
+   "osm": "node/304002887",
+   "wikidata": "Q367354",
+   "tier": 9
+  },
+  "thiruvananthapuram": {
+   "name": "Thiruvananthapuram",
+   "state": "Kerala",
+   "bbox": [
+    8.3282,
+    76.7876,
+    8.6482,
+    77.1076
+   ],
+   "population": 744983,
+   "osm": "node/245581432",
+   "wikidata": "Q167715",
+   "tier": 1
+  },
+  "thodupuzha": {
+   "name": "Thodupuzha",
+   "state": "Kerala",
+   "bbox": [
+    9.8577,
+    76.6734,
+    9.9377,
+    76.7534
+   ],
+   "population": 0,
+   "osm": "node/4568072460",
+   "wikidata": "Q2568281",
+   "tier": 19
+  },
+  "thrippunithura": {
+   "name": "Thrippunithura",
+   "state": "Kerala",
+   "bbox": [
+    9.904,
+    76.309,
+    9.984,
+    76.389
+   ],
+   "population": 0,
+   "osm": "node/594922335",
+   "wikidata": "Q2554855",
+   "tier": 20
+  },
+  "thrissur": {
+   "name": "Thrissur",
+   "state": "Kerala",
+   "bbox": [
+    10.367,
+    76.0546,
+    10.687,
+    76.3746
+   ],
+   "population": 315596,
+   "osm": "node/4430328343",
+   "wikidata": "Q163798",
+   "tier": 5
+  },
+  "puducherry": {
+   "name": "Puducherry",
+   "state": "Puducherry",
+   "bbox": [
+    11.7741,
+    79.6706,
+    12.0941,
+    79.9906
+   ],
+   "population": 100000,
+   "osm": "node/245600130",
+   "wikidata": "Q639421",
+   "tier": 1
+  },
+  "ambur": {
+   "name": "Ambur",
+   "state": "Tamil Nadu",
+   "bbox": [
+    12.7474,
+    78.6788,
+    12.8274,
+    78.7588
+   ],
+   "population": 114600,
+   "osm": "node/263014886",
+   "wikidata": "Q584854",
+   "tier": 20
+  },
+  "ariyalur": {
+   "name": "Ariyalur",
+   "state": "Tamil Nadu",
+   "bbox": [
+    13.1719,
+    80.2307,
+    13.2119,
+    80.2707
+   ],
+   "population": 0,
+   "osm": "node/403065034",
+   "wikidata": "Q30595228",
+   "tier": 31
+  },
+  "chennai": {
+   "name": "Chennai",
+   "state": "Tamil Nadu",
+   "bbox": [
+    12.8837,
+    80.1402,
+    13.2352,
+    80.3329
+   ],
+   "population": 4681087,
+   "osm": "relation/1766358",
+   "wikidata": "Q1352",
+   "tier": 1
+  },
+  "coimbatore": {
+   "name": "Coimbatore",
+   "state": "Tamil Nadu",
+   "bbox": [
+    10.8418,
+    76.8028,
+    11.1618,
+    77.1228
+   ],
+   "population": 1050000,
+   "osm": "node/245589078",
+   "wikidata": "Q9885",
+   "tier": 3
+  },
+  "cuddalore": {
+   "name": "Cuddalore",
+   "state": "Tamil Nadu",
+   "bbox": [
+    11.7262,
+    79.7231,
+    11.7581,
+    79.7697
+   ],
+   "population": 173676,
+   "osm": "way/164051966",
+   "wikidata": "Q279951",
+   "tier": 12
+  },
+  "dharmapuri": {
+   "name": "Dharmapuri",
+   "state": "Tamil Nadu",
+   "bbox": [
+    11.9748,
+    77.999,
+    12.2948,
+    78.319
+   ],
+   "population": 64444,
+   "osm": "node/353317573",
+   "wikidata": "Q9894",
+   "tier": 26
+  },
+  "dindigul": {
+   "name": "Dindigul",
+   "state": "Tamil Nadu",
+   "bbox": [
+    10.2056,
+    77.8093,
+    10.5256,
+    78.1293
+   ],
+   "population": 207300,
+   "osm": "node/245586375",
+   "wikidata": "Q853945",
+   "tier": 10
+  },
+  "erode": {
+   "name": "Erode",
+   "state": "Tamil Nadu",
+   "bbox": [
+    11.1706,
+    77.5677,
+    11.4906,
+    77.8877
+   ],
+   "population": 157100,
+   "osm": "node/314626472",
+   "wikidata": "Q9824",
+   "tier": 14
+  },
+  "hosur": {
+   "name": "Hosur",
+   "state": "Tamil Nadu",
+   "bbox": [
+    12.5729,
+    77.6709,
+    12.8929,
+    77.9909
+   ],
+   "population": 116800,
+   "osm": "node/983364958",
+   "wikidata": "Q297967",
+   "tier": 19
+  },
+  "kanchipuram": {
+   "name": "Kanchipuram",
+   "state": "Tamil Nadu",
+   "bbox": [
+    12.6764,
+    79.5453,
+    12.9964,
+    79.8653
+   ],
+   "population": 164400,
+   "osm": "node/256777854",
+   "wikidata": "Q212332",
+   "tier": 13
+  },
+  "karaikkudi": {
+   "name": "Karaikkudi",
+   "state": "Tamil Nadu",
+   "bbox": [
+    9.8775,
+    78.5625,
+    10.2115,
+    78.9434
+   ],
+   "population": 0,
+   "osm": "relation/10308040",
+   "wikidata": "Q6367994",
+   "tier": 32
+  },
+  "karur": {
+   "name": "Karur",
+   "state": "Tamil Nadu",
+   "bbox": [
+    10.9223,
+    78.0288,
+    11.0001,
+    78.1169
+   ],
+   "population": 50000,
+   "osm": "way/82623598",
+   "wikidata": "Q817218",
+   "tier": 30
+  },
+  "krishnagiri": {
+   "name": "Krishnagiri",
+   "state": "Tamil Nadu",
+   "bbox": [
+    12.4978,
+    78.1925,
+    12.5395,
+    78.2314
+   ],
+   "population": 71323,
+   "osm": "way/84652866",
+   "wikidata": "Q1020681",
+   "tier": 25
+  },
+  "kumbakonam": {
+   "name": "Kumbakonam",
+   "state": "Tamil Nadu",
+   "bbox": [
+    10.8004,
+    79.2221,
+    11.1204,
+    79.5421
+   ],
+   "population": 140100,
+   "osm": "node/245588875",
+   "wikidata": "Q913399",
+   "tier": 16
+  },
+  "madurai": {
+   "name": "Madurai",
+   "state": "Tamil Nadu",
+   "bbox": [
+    9.8245,
+    78.0156,
+    9.9934,
+    78.203
+   ],
+   "population": 1700000,
+   "osm": "relation/11268397",
+   "wikidata": "Q228405",
+   "tier": 2
+  },
+  "nagapattinam": {
+   "name": "Nagapattinam",
+   "state": "Tamil Nadu",
+   "bbox": [
+    10.7248,
+    79.8031,
+    10.8048,
+    79.8831
+   ],
+   "population": 102900,
+   "osm": "node/891394162",
+   "wikidata": "Q695585",
+   "tier": 22
+  },
+  "nagercoil": {
+   "name": "Nagercoil",
+   "state": "Tamil Nadu",
+   "bbox": [
+    8.024,
+    77.2715,
+    8.344,
+    77.5915
+   ],
+   "population": 225000,
+   "osm": "node/245580128",
+   "wikidata": "Q847606",
+   "tier": 8
+  },
+  "namakkal": {
+   "name": "Namakkal",
+   "state": "Tamil Nadu",
+   "bbox": [
+    11.1792,
+    78.1279,
+    11.2592,
+    78.2079
+   ],
+   "population": 55145,
+   "osm": "node/3473202651",
+   "wikidata": "Q9923",
+   "tier": 27
+  },
+  "neyveli": {
+   "name": "Neyveli",
+   "state": "Tamil Nadu",
+   "bbox": [
+    11.496,
+    79.4424,
+    11.576,
+    79.5224
+   ],
+   "population": 105700,
+   "osm": "node/984171124",
+   "wikidata": "Q2326755",
+   "tier": 21
+  },
+  "pudukkottai": {
+   "name": "Pudukkottai",
+   "state": "Tamil Nadu",
+   "bbox": [
+    10.3541,
+    78.7995,
+    10.3968,
+    78.839
+   ],
+   "population": 117630,
+   "osm": "way/84749701",
+   "wikidata": "Q921719",
+   "tier": 18
+  },
+  "rajapalayam": {
+   "name": "Rajapalayam",
+   "state": "Tamil Nadu",
+   "bbox": [
+    9.4221,
+    77.542,
+    9.4711,
+    77.5814
+   ],
+   "population": 130400,
+   "osm": "way/908146743",
+   "wikidata": "Q2237707",
+   "tier": 17
+  },
+  "ranipet": {
+   "name": "Ranipet",
+   "state": "Tamil Nadu",
+   "bbox": [
+    12.8892,
+    79.2922,
+    12.9692,
+    79.3722
+   ],
+   "population": 50764,
+   "osm": "node/263014503",
+   "wikidata": "Q1421308",
+   "tier": 29
+  },
+  "salem": {
+   "name": "Salem",
+   "state": "Tamil Nadu",
+   "bbox": [
+    11.4952,
+    77.9982,
+    11.8152,
+    78.3182
+   ],
+   "population": 831038,
+   "osm": "node/3780703409",
+   "wikidata": "Q9863",
+   "tier": 4
+  },
+  "sivakasi": {
+   "name": "Sivakasi",
+   "state": "Tamil Nadu",
+   "bbox": [
+    9.2908,
+    77.6377,
+    9.6108,
+    77.9577
+   ],
+   "population": 260047,
+   "osm": "node/3415500140",
+   "wikidata": "Q2061870",
+   "tier": 7
+  },
+  "thanjavur": {
+   "name": "Thanjavur",
+   "state": "Tamil Nadu",
+   "bbox": [
+    10.626,
+    78.9781,
+    10.946,
+    79.2981
+   ],
+   "population": 223000,
+   "osm": "node/245587589",
+   "wikidata": "Q41496",
+   "tier": 9
+  },
+  "thoothukudi": {
+   "name": "Thoothukudi",
+   "state": "Tamil Nadu",
+   "bbox": [
+    8.6453,
+    77.9853,
+    8.9653,
+    78.3053
+   ],
+   "population": 100000,
+   "osm": "node/5443775116",
+   "wikidata": "Q41562",
+   "tier": 23
+  },
+  "tiruchirappalli": {
+   "name": "Tiruchirappalli",
+   "state": "Tamil Nadu",
+   "bbox": [
+    10.7273,
+    78.6461,
+    10.8458,
+    78.7427
+   ],
+   "population": 500000,
+   "osm": "relation/10318360",
+   "wikidata": "Q207754",
+   "tier": 5
+  },
+  "tirunelveli": {
+   "name": "Tirunelveli",
+   "state": "Tamil Nadu",
+   "bbox": [
+    8.5732,
+    77.5503,
+    8.8932,
+    77.8703
+   ],
+   "population": 100000,
+   "osm": "node/245581857",
+   "wikidata": "Q213248",
+   "tier": 24
+  },
+  "tiruppur": {
+   "name": "Tiruppur",
+   "state": "Tamil Nadu",
+   "bbox": [
+    10.9418,
+    77.1852,
+    11.2618,
+    77.5052
+   ],
+   "population": 440000,
+   "osm": "node/4437851490",
+   "wikidata": "Q836527",
+   "tier": 6
+  },
+  "tiruvallur": {
+   "name": "Tiruvallur",
+   "state": "Tamil Nadu",
+   "bbox": [
+    13.0994,
+    79.8671,
+    13.1794,
+    79.9471
+   ],
+   "population": 54416,
+   "osm": "node/335885603",
+   "wikidata": "Q608181",
+   "tier": 28
+  },
+  "tiruvannamalai": {
+   "name": "Tiruvannamalai",
+   "state": "Tamil Nadu",
+   "bbox": [
+    12.2124,
+    79.0534,
+    12.2641,
+    79.0889
+   ],
+   "population": 145200,
+   "osm": "way/84649892",
+   "wikidata": "Q162830",
+   "tier": 15
+  },
+  "vellore": {
+   "name": "Vellore",
+   "state": "Tamil Nadu",
+   "bbox": [
+    12.7472,
+    78.971,
+    13.0672,
+    79.291
+   ],
+   "population": 186000,
+   "osm": "node/243713144",
+   "wikidata": "Q300577",
+   "tier": 11
+  },
+  "villupuram": {
+   "name": "Villupuram",
+   "state": "Tamil Nadu",
+   "bbox": [
+    11.9398,
+    79.4945,
+    11.9399,
+    79.4946
+   ],
+   "population": 0,
+   "osm": "node/3351827388",
+   "wikidata": null,
+   "tier": 33
+  },
+  "adilabad": {
+   "name": "Adilabad",
+   "state": "Telangana",
+   "bbox": [
+    19.5159,
+    78.374,
+    19.8359,
+    78.694
+   ],
+   "population": 117200,
+   "osm": "node/3735940253",
+   "wikidata": "Q494281",
+   "tier": 7
+  },
+  "bhadrachalam": {
+   "name": "Bhadrachalam",
+   "state": "Telangana",
+   "bbox": [
+    17.6288,
+    80.854,
+    17.7088,
+    80.934
+   ],
+   "population": 42650,
+   "osm": "node/571122172",
+   "wikidata": "Q759204",
+   "tier": 14
+  },
+  "bhongir": {
+   "name": "Bhongir",
+   "state": "Telangana",
+   "bbox": [
+    17.4773,
+    78.8463,
+    17.5573,
+    78.9263
+   ],
+   "population": 50000,
+   "osm": "node/660695854",
+   "wikidata": "Q797132",
+   "tier": 11
+  },
+  "bodhan": {
+   "name": "Bodhan",
+   "state": "Telangana",
+   "bbox": [
+    18.6137,
+    77.8537,
+    18.6937,
+    77.9337
+   ],
+   "population": 10000,
+   "osm": "node/245650192",
+   "wikidata": "Q859167",
+   "tier": 15
+  },
+  "hyderabad": {
+   "name": "Hyderabad",
+   "state": "Telangana",
+   "bbox": [
+    17.2916,
+    78.2741,
+    17.5606,
+    78.6224
+   ],
+   "population": 6809970,
+   "osm": "relation/7868535",
+   "wikidata": "Q1361",
+   "tier": 1
+  },
+  "jagtial": {
+   "name": "Jagtial",
+   "state": "Telangana",
+   "bbox": [
+    18.7557,
+    78.8762,
+    18.8357,
+    78.9562
+   ],
+   "population": 171825,
+   "osm": "node/245651836",
+   "wikidata": "Q2016650",
+   "tier": 4
+  },
+  "kamareddy": {
+   "name": "Kamareddy",
+   "state": "Telangana",
+   "bbox": [
+    18.2822,
+    78.2987,
+    18.3622,
+    78.3787
+   ],
+   "population": 5000,
+   "osm": "node/2242382035",
+   "wikidata": "Q2564921",
+   "tier": 17
+  },
+  "karimnagar": {
+   "name": "Karimnagar",
+   "state": "Telangana",
+   "bbox": [
+    18.2748,
+    78.9728,
+    18.5948,
+    79.2928
+   ],
+   "population": 0,
+   "osm": "node/2885001471",
+   "wikidata": "Q25563078",
+   "tier": 22
+  },
+  "khammam": {
+   "name": "Khammam",
+   "state": "Telangana",
+   "bbox": [
+    17.0865,
+    79.99,
+    17.4065,
+    80.31
+   ],
+   "population": 184200,
+   "osm": "node/571122168",
+   "wikidata": "Q1921496",
+   "tier": 3
+  },
+  "kothagudem": {
+   "name": "Kothagudem",
+   "state": "Telangana",
+   "bbox": [
+    17.5077,
+    80.5737,
+    17.5877,
+    80.6537
+   ],
+   "population": 0,
+   "osm": "node/12996145192",
+   "wikidata": null,
+   "tier": 23
+  },
+  "mahbubnagar": {
+   "name": "Mahbubnagar",
+   "state": "Telangana",
+   "bbox": [
+    16.5835,
+    77.8323,
+    16.9035,
+    78.1523
+   ],
+   "population": 157700,
+   "osm": "node/245638257",
+   "wikidata": "Q2768192",
+   "tier": 5
+  },
+  "mancherial": {
+   "name": "Mancherial",
+   "state": "Telangana",
+   "bbox": [
+    18.8362,
+    79.405,
+    18.9162,
+    79.485
+   ],
+   "population": 0,
+   "osm": "node/1422336791",
+   "wikidata": "Q720842",
+   "tier": 24
+  },
+  "medak": {
+   "name": "Medak",
+   "state": "Telangana",
+   "bbox": [
+    18.0059,
+    78.2252,
+    18.0859,
+    78.3052
+   ],
+   "population": 46000,
+   "osm": "node/3803815389",
+   "wikidata": "Q2330577",
+   "tier": 12
+  },
+  "miryalaguda": {
+   "name": "Miryalaguda",
+   "state": "Telangana",
+   "bbox": [
+    16.711,
+    79.4017,
+    17.031,
+    79.7217
+   ],
+   "population": 103900,
+   "osm": "node/245638776",
+   "wikidata": "Q15528101",
+   "tier": 9
+  },
+  "nagarkurnool": {
+   "name": "Nagarkurnool",
+   "state": "Telangana",
+   "bbox": [
+    16.447,
+    78.2769,
+    16.527,
+    78.3569
+   ],
+   "population": 1000,
+   "osm": "node/2721900280",
+   "wikidata": null,
+   "tier": 21
+  },
+  "nalgonda": {
+   "name": "Nalgonda",
+   "state": "Telangana",
+   "bbox": [
+    16.8904,
+    79.1069,
+    17.2104,
+    79.4269
+   ],
+   "population": 135163,
+   "osm": "node/245639494",
+   "wikidata": "Q1949850",
+   "tier": 6
+  },
+  "nirmal": {
+   "name": "Nirmal",
+   "state": "Telangana",
+   "bbox": [
+    19.0525,
+    78.3086,
+    19.1325,
+    78.3886
+   ],
+   "population": 5000,
+   "osm": "node/2948417483",
+   "wikidata": "Q2087729",
+   "tier": 18
+  },
+  "nizamabad": {
+   "name": "Nizamabad",
+   "state": "Telangana",
+   "bbox": [
+    18.5132,
+    77.9378,
+    18.8332,
+    78.2578
+   ],
+   "population": 100000,
+   "osm": "node/245650150",
+   "wikidata": "Q41473",
+   "tier": 10
+  },
+  "ramagundam": {
+   "name": "Ramagundam",
+   "state": "Telangana",
+   "bbox": [
+    18.6015,
+    79.3188,
+    18.9215,
+    79.6388
+   ],
+   "population": 0,
+   "osm": "node/774646132",
+   "wikidata": "Q1780338",
+   "tier": 25
+  },
+  "sangareddy": {
+   "name": "Sangareddy",
+   "state": "Telangana",
+   "bbox": [
+    17.5536,
+    78.0404,
+    17.6733,
+    78.1664
+   ],
+   "population": 5000,
+   "osm": "relation/9766644",
+   "wikidata": "Q2341381",
+   "tier": 19
+  },
+  "shadnagar": {
+   "name": "Shadnagar",
+   "state": "Telangana",
+   "bbox": [
+    17.0272,
+    78.1646,
+    17.1072,
+    78.2446
+   ],
+   "population": 45000,
+   "osm": "node/571398145",
+   "wikidata": "Q7460412",
+   "tier": 13
+  },
+  "siddipet": {
+   "name": "Siddipet",
+   "state": "Telangana",
+   "bbox": [
+    17.9418,
+    78.692,
+    18.2618,
+    79.012
+   ],
+   "population": 10000,
+   "osm": "node/3786264278",
+   "wikidata": "Q260547",
+   "tier": 16
+  },
+  "suryapet": {
+   "name": "Suryapet",
+   "state": "Telangana",
+   "bbox": [
+    16.9805,
+    79.4625,
+    17.3005,
+    79.7825
+   ],
+   "population": 105500,
+   "osm": "node/571122167",
+   "wikidata": "Q2573090",
+   "tier": 8
+  },
+  "tandur": {
+   "name": "Tandur",
+   "state": "Telangana",
+   "bbox": [
+    19.132,
+    79.4289,
+    19.172,
+    79.4689
+   ],
+   "population": 0,
+   "osm": "node/245678773",
+   "wikidata": null,
+   "tier": 26
+  },
+  "vikarabad": {
+   "name": "Vikarabad",
+   "state": "Telangana",
+   "bbox": [
+    17.2979,
+    77.864,
+    17.3779,
+    77.944
+   ],
+   "population": 0,
+   "osm": "node/5890602185",
+   "wikidata": "Q568778",
+   "tier": 27
+  },
+  "wanaparthy": {
+   "name": "Wanaparthy",
+   "state": "Telangana",
+   "bbox": [
+    16.3218,
+    78.0211,
+    16.4018,
+    78.1011
+   ],
+   "population": 5000,
+   "osm": "node/3035311747",
+   "wikidata": "Q2563513",
+   "tier": 20
+  },
+  "warangal": {
+   "name": "Warangal",
+   "state": "Telangana",
+   "bbox": [
+    17.8221,
+    79.4371,
+    18.1421,
+    79.7571
+   ],
+   "population": 811844,
+   "osm": "node/2885001475",
+   "wikidata": "Q25563103",
+   "tier": 2
+  },
+  "zahirabad": {
+   "name": "Zahirabad",
+   "state": "Telangana",
+   "bbox": [
+    17.5459,
+    77.4714,
+    17.7474,
+    77.7136
+   ],
+   "population": 0,
+   "osm": "relation/9765231",
+   "wikidata": "Q2577644",
+   "tier": 28
+  }
+ },
+ "not_found": []
+}

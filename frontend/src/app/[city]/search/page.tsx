@@ -627,11 +627,12 @@ function SearchInner() {
                 </div>
               )}
 
-              {activeCategorySlug && (
+              {(activeCategorySlug || q) && (
                 <CategoryBusinesses
                   citySlug={citySlug}
                   categorySlug={activeCategorySlug}
                   categoryName={categories.find(c => c.id === localCat)?.name}
+                  q={q}
                 />
               )}
             </>

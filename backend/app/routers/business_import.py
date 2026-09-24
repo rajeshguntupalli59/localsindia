@@ -4,6 +4,9 @@ Imported businesses have no owner — they're claimed later through
 routers/business_claims.py. Re-running an import is safe: rows whose
 source_ref already exists are skipped, never duplicated or overwritten
 (an owner may have edited them since)."""
+import uuid
+from datetime import datetime, timezone
+
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy import select
@@ -84,3 +87,33 @@ async def import_businesses(
         created += 1
     await db.commit()
     return {"created": created, "skipped_existing": skipped_existing, "unknown_category": unknown_category}
+
+
+class RemoveRequest(BaseModel):
+    business_ids: list[uuid.UUID] = Field(max_length=500)
+    reason: str
+
+
+@router.post("/businesses/import/remove")
+async def remove_imported_businesses(
+    body: RemoveRequest,
+    db: AsyncSession = Depends(get_db),
+    admin: User = Depends(get_current_admin),
+):
+    """Soft-delete imported businesses that failed the import's quality checks
+    (generic names, chain branches, duplicates). Only touches rows that came
+    from an import AND nobody has claimed — a real owner's listing is never
+    removed this way."""
+    rows = (await db.execute(
+        select(Business).where(
+            Business.id.in_(body.business_ids),
+            Business.source.is_not(None),
+            Business.owner_id.is_(None),
+            Business.deleted_at.is_(None),
+        )
+    )).scalars().all()
+    now = datetime.now(timezone.utc)
+    for b in rows:
+        b.deleted_at = now
+    await db.commit()
+    return {"removed": len(rows), "skipped": len(body.business_ids) - len(rows), "reason": body.reason}

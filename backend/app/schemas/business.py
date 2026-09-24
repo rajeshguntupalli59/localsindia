@@ -16,6 +16,7 @@ class BusinessCreate(BaseModel):
 
 class BusinessUpdate(BaseModel):
     name: str | None = None
+    category_id: uuid.UUID | None = None
     description: str | None = None
     address: str | None = None
     phone: str | None = None

@@ -36,6 +36,7 @@ async def list_businesses(
     city_slug: str = Query(...),
     category_id: uuid.UUID | None = Query(default=None),
     category_slug: str | None = Query(default=None),
+    q: str | None = Query(default=None, max_length=100),
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, le=50),
     db: AsyncSession = Depends(get_db),
@@ -45,7 +46,7 @@ async def list_businesses(
     if not city:
         raise HTTPException(status_code=404, detail="City not found.")
 
-    q = (
+    stmt = (
         select(Business)
         .options(selectinload(Business.reviews))
         .where(Business.city_id == city.id, Business.deleted_at.is_(None))
@@ -62,11 +63,15 @@ async def list_businesses(
         .limit(page_size)
     )
     if category_id:
-        q = q.where(Business.category_id == category_id)
+        stmt = stmt.where(Business.category_id == category_id)
     elif category_slug:
-        q = q.join(Category, Category.id == Business.category_id).where(Category.slug == category_slug)
+        stmt = stmt.join(Category, Category.id == Business.category_id).where(Category.slug == category_slug)
+    if q and q.strip():
+        # Every word must appear in the name (e.g. "dental hospital")
+        for word in q.strip().split()[:5]:
+            stmt = stmt.where(Business.name.ilike(f"%{word}%"))
 
-    result = await db.execute(q)
+    result = await db.execute(stmt)
     return result.scalars().all()
 
 
@@ -96,6 +101,23 @@ async def create_business(
     await db.refresh(business)
     # reload with reviews
     return await _get_active_business(business.id, db)
+
+
+@router.get("/businesses/sitemap-entries")
+async def business_sitemap_entries(
+    limit: int = Query(default=45000, le=45000),
+    db: AsyncSession = Depends(get_db),
+):
+    """Lightweight list of every live business page for the sitemap, so
+    Google can index them (a sitemap file holds at most 50,000 URLs)."""
+    rows = await db.execute(
+        select(Business.id, City.slug, Business.updated_at)
+        .join(City, City.id == Business.city_id)
+        .where(Business.deleted_at.is_(None), City.active == True)
+        .order_by(Business.updated_at.desc())
+        .limit(limit)
+    )
+    return [{"id": str(i), "city_slug": c, "updated_at": u} for i, c, u in rows.all()]
 
 
 @router.get("/businesses/{business_id}", response_model=BusinessOut)

@@ -402,6 +402,9 @@ GET    /api/v1/admin/business-claims?status=  Review queue with signed doc URLs 
 POST   /api/v1/admin/business-claims/{id}/approve  Sets owner (overrides), rejects rival pending claims, notifies [ADMIN]
 POST   /api/v1/admin/business-claims/{id}/reject   {reason} required, notifies [ADMIN]
 POST   /api/v1/admin/businesses/import       {city_slug, source, businesses[≤500]} → unclaimed businesses; skips existing source_ref [ADMIN]
+POST   /api/v1/admin/businesses/import/remove  {business_ids, reason} → soft-deletes imported + unclaimed only [ADMIN]
+GET    /api/v1/businesses/sitemap-entries    id, city_slug, updated_at for sitemap.xml (≤45k)
+GET    /api/v1/businesses?q=&category_slug=  name keyword search (all words) + category filter
 POST   /api/v1/admin/business-claims/email  {business_id, phone, note?} — owner emailed proof to support; grants ownership to that account (method='email') [ADMIN]
 POST   /api/v1/businesses/{id}/reviews    Add review (recalcs avg_rating) [AUTH]
 ```

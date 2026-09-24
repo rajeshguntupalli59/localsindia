@@ -329,8 +329,8 @@ function SearchInner() {
           </div>
         )}
 
-        {cityParam && activeCat && (
-          <CategoryBusinesses citySlug={cityParam} categorySlug={activeCat.slug} categoryName={activeCat.name} />
+        {cityParam && (activeCat || q) && (
+          <CategoryBusinesses citySlug={cityParam} categorySlug={activeCat?.slug} categoryName={activeCat?.name} q={q} />
         )}
       </div>
 

@@ -255,3 +255,59 @@ async def test_list_businesses_by_category_slug(auth_client, admin_client, city)
     ]})
     res = await client.get("/api/v1/businesses", params={"city_slug": "hyderabad", "category_slug": slugs[0]})
     assert [b["name"] for b in res.json()] == ["Only In One"]
+
+
+@pytest.mark.asyncio
+async def test_remove_imported_only_touches_unclaimed_imports(auth_client, admin_client, city):
+    from app.models.category import Category
+    client, _ = auth_client
+    admin, _ = admin_client
+    engine = _make_engine()
+    Session = async_sessionmaker(engine, expire_on_commit=False)
+    slug = f"rm-{uuid.uuid4().hex[:6]}"
+    async with Session() as s:
+        s.add(Category(name=slug, slug=slug, sort_order=0))
+        await s.commit()
+    await engine.dispose()
+    await admin.post("/api/v1/admin/businesses/import", json={"city_slug": "hyderabad", "businesses": [
+        {"name": "Bakery", "category_slug": slug, "source_ref": f"node/{uuid.uuid4().int % 10**9}"},
+    ]})
+    imported = (await client.get("/api/v1/businesses", params={"city_slug": "hyderabad", "category_slug": slug})).json()[0]
+    own = (await client.post("/api/v1/businesses", json={"name": "My Own Shop", "city_id": str(city.id)})).json()
+
+    body = {"business_ids": [imported["id"], own["id"]], "reason": "generic name"}
+    assert (await client.post("/api/v1/admin/businesses/import/remove", json=body)).status_code == 403
+    res = (await admin.post("/api/v1/admin/businesses/import/remove", json=body)).json()
+    assert res["removed"] == 1 and res["skipped"] == 1
+    assert (await client.get(f"/api/v1/businesses/{own['id']}")).status_code == 200
+    assert (await client.get(f"/api/v1/businesses/{imported['id']}")).status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_owner_can_change_business_category(auth_client, city):
+    from app.models.category import Category
+    client, _ = auth_client
+    engine = _make_engine()
+    Session = async_sessionmaker(engine, expire_on_commit=False)
+    slug = f"cat-{uuid.uuid4().hex[:6]}"
+    async with Session() as s:
+        c = Category(name=slug, slug=slug, sort_order=0)
+        s.add(c)
+        await s.commit()
+        await s.refresh(c)
+    await engine.dispose()
+    own = (await client.post("/api/v1/businesses", json={"name": "Das Motors", "city_id": str(city.id)})).json()
+    res = await client.patch(f"/api/v1/businesses/{own['id']}", json={"category_id": str(c.id)})
+    assert res.status_code == 200 and res.json()["category_slug"] == slug
+
+
+@pytest.mark.asyncio
+async def test_business_keyword_search_and_sitemap(auth_client, city):
+    client, _ = auth_client
+    tag = uuid.uuid4().hex[:6]
+    await client.post("/api/v1/businesses", json={"name": f"Paradise Biryani {tag}", "city_id": str(city.id)})
+    await client.post("/api/v1/businesses", json={"name": f"Dental Care {tag}", "city_id": str(city.id)})
+    hits = (await client.get("/api/v1/businesses", params={"city_slug": "hyderabad", "q": f"biryani {tag}"})).json()
+    assert [b["name"] for b in hits] == [f"Paradise Biryani {tag}"]
+    entries = (await client.get("/api/v1/businesses/sitemap-entries")).json()
+    assert entries and {"id", "city_slug", "updated_at"} <= set(entries[0])

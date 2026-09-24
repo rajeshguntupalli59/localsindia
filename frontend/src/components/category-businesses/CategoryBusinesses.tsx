@@ -10,27 +10,39 @@ import type { Business } from '@/lib/types';
 import OsmAttribution from '@/components/osm-attribution/OsmAttribution';
 
 /**
- * "Local businesses" strip for a category page — the directory businesses
- * (many imported from OpenStreetMap) filed under the same category as the
- * listings being browsed. Renders nothing when the category has none.
+ * "Related businesses" strip for category and search pages — directory
+ * businesses (many imported from OpenStreetMap) in the category being
+ * browsed and/or whose name matches the search. Renders nothing when none.
  */
 export default function CategoryBusinesses({
   citySlug,
   categorySlug,
   categoryName,
+  q,
 }: {
   citySlug: string;
-  categorySlug: string;
+  categorySlug?: string;
   categoryName?: string;
+  q?: string;
 }) {
   const [items, setItems] = useState<Business[]>([]);
+  const query = (q ?? '').trim();
 
   useEffect(() => {
-    if (!citySlug || !categorySlug) { setItems([]); return; }
-    api.businesses.list(citySlug, { category_slug: categorySlug, page_size: '6' })
+    if (!citySlug || (!categorySlug && !query)) { setItems([]); return; }
+    api.businesses.list(citySlug, {
+      page_size: '6',
+      ...(categorySlug ? { category_slug: categorySlug } : {}),
+      ...(query ? { q: query } : {}),
+    })
       .then(setItems)
       .catch(() => setItems([]));
-  }, [citySlug, categorySlug]);
+  }, [citySlug, categorySlug, query]);
+
+  const viewAll = new URLSearchParams({
+    ...(categorySlug ? { category: categorySlug } : {}),
+    ...(query ? { q: query } : {}),
+  }).toString();
 
   if (items.length === 0) return null;
 
@@ -38,10 +50,12 @@ export default function CategoryBusinesses({
     <section className="mt-10">
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-lg font-extrabold" style={{ color: 'var(--li-text)' }}>
-          Local {categoryName ? categoryName.toLowerCase() : 'businesses'} nearby
+          {query
+            ? <>Businesses matching &ldquo;{query}&rdquo;</>
+            : <>Local {categoryName ? categoryName.toLowerCase() : 'businesses'} nearby</>}
         </h2>
         <Link
-          href={`/${citySlug}/businesses?category=${categorySlug}`}
+          href={`/${citySlug}/businesses?${viewAll}`}
           className="flex items-center gap-1 text-sm font-semibold hover:underline"
           style={{ color: 'var(--li-primary)' }}
         >

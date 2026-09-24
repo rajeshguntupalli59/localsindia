@@ -1,25 +1,40 @@
 name: OSM Business Import
 
 # Manual only. Imports real businesses from OpenStreetMap as UNCLAIMED
-# directory listings (see agents/osm_business_import.py). Dry run by default —
-# download the preview artifact, check it, then re-run with apply ticked.
-# Re-running with apply is safe: already-imported businesses are skipped.
+# directory listings (see agents/osm_business_import.py), city by city in
+# priority order (main city of every state first). After each city it
+# removes imports that fail the quality rules and verifies the live pages;
+# the run STOPS on any problem. Progress is committed to
+# agents/state/osm_import_state.json so the next run carries on.
 on:
   workflow_dispatch:
     inputs:
       city:
-        description: 'City slug (must be in CITY_BBOX in the script)'
-        required: true
-        default: 'hyderabad'
+        description: 'One city slug (leave empty to use "count")'
+        required: false
+        default: ''
+      count:
+        description: 'Or: how many next cities in priority order'
+        required: false
+        default: '1'
       apply:
         description: 'Upload to the live site (unticked = preview only)'
         required: false
         type: boolean
         default: false
+      fix_only:
+        description: 'Only clean + verify the given city (no import)'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write   # commits the import progress file
 
 jobs:
   import:
     runs-on: ubuntu-latest
+    timeout-minutes: 300
     steps:
       - uses: actions/checkout@v4
 
@@ -34,14 +49,33 @@ jobs:
         env:
           LOCALINDIA_ADMIN_PASSWORD: ${{ secrets.LOCALINDIA_ADMIN_PASSWORD }}
         run: |
+          CITY="${{ github.event.inputs.city }}"
+          if [ "${{ github.event.inputs.fix_only }}" = "true" ]; then
+            python agents/osm_business_import.py --city "$CITY" --verify --fix
+            exit $?
+          fi
           APPLY_FLAG=""
           if [ "${{ github.event.inputs.apply }}" = "true" ]; then APPLY_FLAG="--apply"; fi
-          python agents/osm_business_import.py --city "${{ github.event.inputs.city }}" $APPLY_FLAG
+          if [ -n "$CITY" ]; then
+            python agents/osm_business_import.py --city "$CITY" $APPLY_FLAG
+          else
+            python agents/osm_business_import.py --auto "${{ github.event.inputs.count }}" $APPLY_FLAG
+          fi
 
-      - name: Upload preview as workflow artifact
+      - name: Upload previews as workflow artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: osm-import-${{ github.event.inputs.city }}
+          name: osm-import-previews
           path: agents/output/osm/
           retention-days: 30
+
+      - name: Commit import progress
+        if: always()
+        run: |
+          git config user.name "localsindia-bot"
+          git config user.email "support@localsindia.com"
+          git add agents/state/osm_import_state.json 2>/dev/null || exit 0
+          git diff --cached --quiet && exit 0
+          git commit -m "chore: OSM import progress"
+          git pull --rebase origin master && git push origin HEAD:master
