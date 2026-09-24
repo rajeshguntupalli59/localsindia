@@ -1,4 +1,34 @@
 {
+ "adilabad": {
+  "clean": true,
+  "created": 69,
+  "date": "2026-09-24",
+  "found": 69,
+  "moved_to_nearest_city": 0,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
+ "alappuzha": {
+  "clean": true,
+  "created": 169,
+  "date": "2026-09-24",
+  "found": 169,
+  "moved_to_nearest_city": 0,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
+ "ballari": {
+  "clean": true,
+  "created": 120,
+  "date": "2026-09-24",
+  "found": 120,
+  "moved_to_nearest_city": 0,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
  "belagavi": {
   "clean": true,
   "created": 201,
@@ -31,6 +61,16 @@
   "created": 529,
   "date": "2026-09-24",
   "found": 529,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
+ "davanagere": {
+  "clean": true,
+  "created": 178,
+  "date": "2026-09-24",
+  "found": 178,
+  "moved_to_nearest_city": 0,
   "removed_by_cleanup": 0,
   "skipped_existing": 0,
   "unknown_category": 0
@@ -68,6 +108,36 @@
   "created": 104,
   "date": "2026-09-24",
   "found": 104,
+  "moved_to_nearest_city": 0,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
+ "kadapa": {
+  "clean": true,
+  "created": 135,
+  "date": "2026-09-24",
+  "found": 135,
+  "moved_to_nearest_city": 0,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
+ "kakinada": {
+  "clean": true,
+  "created": 145,
+  "date": "2026-09-24",
+  "found": 145,
+  "moved_to_nearest_city": 0,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
+ "kalaburagi": {
+  "clean": true,
+  "created": 223,
+  "date": "2026-09-24",
+  "found": 223,
   "moved_to_nearest_city": 0,
   "removed_by_cleanup": 0,
   "skipped_existing": 0,
@@ -139,6 +209,16 @@
   "skipped_existing": 0,
   "unknown_category": 0
  },
+ "malappuram": {
+  "clean": true,
+  "created": 63,
+  "date": "2026-09-24",
+  "found": 63,
+  "moved_to_nearest_city": 0,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
  "mangaluru": {
   "clean": true,
   "created": 193,
@@ -158,11 +238,41 @@
   "skipped_existing": 0,
   "unknown_category": 0
  },
+ "nagercoil": {
+  "clean": true,
+  "created": 165,
+  "date": "2026-09-24",
+  "found": 165,
+  "moved_to_nearest_city": 0,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
+ "nalgonda": {
+  "clean": true,
+  "created": 85,
+  "date": "2026-09-24",
+  "found": 85,
+  "moved_to_nearest_city": 0,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
  "nellore": {
   "clean": true,
   "created": 177,
   "date": "2026-09-24",
   "found": 177,
+  "moved_to_nearest_city": 0,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
+ "palakkad": {
+  "clean": true,
+  "created": 544,
+  "date": "2026-09-24",
+  "found": 544,
   "moved_to_nearest_city": 0,
   "removed_by_cleanup": 0,
   "skipped_existing": 0,
@@ -177,11 +287,41 @@
   "skipped_existing": 0,
   "unknown_category": 0
  },
+ "rajamahendravaram": {
+  "clean": true,
+  "created": 522,
+  "date": "2026-09-24",
+  "found": 522,
+  "moved_to_nearest_city": 0,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
  "salem": {
   "clean": true,
   "created": 334,
   "date": "2026-09-24",
   "found": 334,
+  "moved_to_nearest_city": 0,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
+ "sivakasi": {
+  "clean": true,
+  "created": 64,
+  "date": "2026-09-24",
+  "found": 64,
+  "moved_to_nearest_city": 0,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
+ "suryapet": {
+  "clean": true,
+  "created": 95,
+  "date": "2026-09-24",
+  "found": 95,
   "moved_to_nearest_city": 0,
   "removed_by_cleanup": 0,
   "skipped_existing": 0,
@@ -211,6 +351,16 @@
   "created": 189,
   "date": "2026-09-24",
   "found": 189,
+  "moved_to_nearest_city": 0,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
+ "tiruppur": {
+  "clean": true,
+  "created": 144,
+  "date": "2026-09-24",
+  "found": 144,
   "moved_to_nearest_city": 0,
   "removed_by_cleanup": 0,
   "skipped_existing": 0,
