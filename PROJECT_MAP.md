@@ -115,6 +115,10 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 
 ## 6. Changelog (dated, most recent first — append here after notable sessions)
 
+### 2026-09-25 — Business import finished (150/150 cities, 32,516 businesses); SEO step 1
+- All cities imported via `osm-import.yml` batches, each city auto-verified + screenshot-checked. Later rules added mid-run: nearest-city assignment (+ `POST /admin/businesses/import/move`), address-as-name, known-chain list (`KNOWN_CHAINS`), whitespace-normalised names; `--fix-done` re-cleaned early cities.
+- SEO: `/[city]/[category]` now 404s for cities we don't serve (was rendering /mumbai/tiffin etc.), server-renders up to 24 real businesses (names/addresses/phones/links + ItemList JSON-LD), indexes on ≥1 real listing OR ≥3 businesses (fallback "all city listings" no longer counts), new pages doctors / fashion / event-venues / real-estate / shops (sitemap CATEGORY_SLUGS updated), cross-links go to same-state cities instead of a hardcoded list of cities we don't serve. City home indexes on ≥3 listings OR ≥10 businesses; seo_agent.py candidates count businesses too.
+
 ### 2026-09-24 — All-city business import, quality rules, search + SEO for businesses
 - `agents/prepare_city_regions.py` → `agents/data/city_regions.json`: Nominatim bbox (clipped ±0.2°) + population (OSM, else Wikidata city/town record — never a district) for all 150 cities; import order = every state's #1 city, then #2, ... (35 small towns lack population → last).
 - `osm_business_import.py --auto N --apply`: next N cities; per city: import → `clean_city` (soft-delete generic names like "Bakery", junk/test names, chains with 3+ same-name branches, true duplicates via `POST /admin/businesses/import/remove` — unclaimed imports only; re-categorise generic-bucket rows whose name says otherwise via PATCH) → `verify` (live checks + pages 200) — STOPS on any problem. Progress in `agents/state/osm_import_state.json` (committed by the workflow). Name-keyword category only overrides the generic "businesses" fallback, never a specific OSM tag.

@@ -47,6 +47,7 @@ BACKEND_URL = os.getenv("LOCALINDIA_API_URL", "https://localsindia-backend-in.az
 # Must match [city]/page.tsx's own MIN_LISTINGS_FOR_INDEX — generating rich
 # SEO copy for a city Google won't even index yet is wasted API spend.
 MIN_LISTINGS_FOR_INDEX = 3
+MIN_BUSINESSES_FOR_INDEX = 10   # [city]/page.tsx also indexes cities with this many real businesses
 
 SEO_DIR = Path(__file__).parent.parent / "frontend" / "src" / "content" / "seo"
 
@@ -77,6 +78,13 @@ async def fetch_listing_count(client: httpx.AsyncClient, slug: str) -> int:
     return len(resp.json())
 
 
+async def fetch_business_count(client: httpx.AsyncClient, slug: str) -> int:
+    resp = await client.get(f"{BACKEND_URL}/api/v1/businesses",
+                            params={"city_slug": slug, "page_size": 50}, timeout=30)
+    resp.raise_for_status()
+    return len(resp.json())
+
+
 def has_seo_file(slug: str) -> bool:
     return (SEO_DIR / f"{slug}.json").exists()
 
@@ -91,8 +99,9 @@ async def determine_candidates(client: httpx.AsyncClient) -> list[tuple[dict, in
         if has_seo_file(c["slug"]):
             continue
         count = await fetch_listing_count(client, c["slug"])
-        if count >= MIN_LISTINGS_FOR_INDEX:
-            candidates.append((c, count))
+        businesses = await fetch_business_count(client, c["slug"])
+        if count >= MIN_LISTINGS_FOR_INDEX or businesses >= MIN_BUSINESSES_FOR_INDEX:
+            candidates.append((c, count + businesses))
     candidates.sort(key=lambda pair: -pair[1])
     return candidates
 

@@ -15,6 +15,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend
 // listings today. This just keeps the ~410 completely unseeded (0-listing)
 // cities out of the index — raise this once inventory per city grows.
 const MIN_LISTINGS_FOR_INDEX = 3;
+const MIN_BUSINESSES_FOR_INDEX = 10;
 
 async function fetchCity(citySlug: string): Promise<City | null> {
   try {
@@ -62,6 +63,17 @@ async function fetchFresh(citySlug: string): Promise<Listing[]> {
   }
 }
 
+async function fetchBusinessSample(slug: string): Promise<unknown[]> {
+  try {
+    const res = await fetch(`${API_BASE}/api/v1/businesses?city_slug=${slug}&page_size=${MIN_BUSINESSES_FOR_INDEX}`,
+      { next: { revalidate: 3600 } });
+    const data = res.ok ? await res.json() : [];
+    return Array.isArray(data) ? data : [];
+  } catch {
+    return [];
+  }
+}
+
 export async function generateMetadata(
   { params }: { params: { city: string } }
 ): Promise<Metadata> {
@@ -89,8 +101,10 @@ export async function generateMetadata(
     ? [citySeo.focusKeyword, ...citySeo.secondaryKeywords, ...citySeo.longTailKeywords].filter(Boolean)
     : undefined;
 
-  const fresh = await fetchFresh(params.city);
-  const shouldIndex = fresh.length >= MIN_LISTINGS_FOR_INDEX;
+  // Index once the city has real content: a few listings, or enough real
+  // local businesses (the business directory is linked from the city page).
+  const [fresh, businesses] = await Promise.all([fetchFresh(params.city), fetchBusinessSample(params.city)]);
+  const shouldIndex = fresh.length >= MIN_LISTINGS_FOR_INDEX || businesses.length >= MIN_BUSINESSES_FOR_INDEX;
 
   return {
     title,

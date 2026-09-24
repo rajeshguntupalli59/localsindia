@@ -10,6 +10,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend
 const CATEGORY_SLUGS = [
   'tiffin', 'pg-roommate', 'jobs', 'vehicles',
   'electronics', 'services', 'furniture', 'tutors',
+  'doctors', 'fashion', 'event-venues', 'real-estate', 'shops',
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
