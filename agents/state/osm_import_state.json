@@ -1,4 +1,13 @@
 {
+ "belagavi": {
+  "clean": true,
+  "created": 201,
+  "date": "2026-09-24",
+  "found": 201,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
  "bengaluru": {
   "clean": true,
   "created": 5407,
@@ -17,6 +26,24 @@
   "skipped_existing": 0,
   "unknown_category": 0
  },
+ "coimbatore": {
+  "clean": true,
+  "created": 529,
+  "date": "2026-09-24",
+  "found": 529,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
+ "guntur": {
+  "clean": true,
+  "created": 301,
+  "date": "2026-09-24",
+  "found": 412,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 111,
+  "unknown_category": 0
+ },
  "hyderabad": {
   "clean": true,
   "created": 27,
@@ -24,6 +51,51 @@
   "found": 2430,
   "removed_by_cleanup": 77,
   "skipped_existing": 2403,
+  "unknown_category": 0
+ },
+ "khammam": {
+  "clean": true,
+  "created": 223,
+  "date": "2026-09-24",
+  "found": 223,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
+ "kochi": {
+  "clean": true,
+  "created": 1721,
+  "date": "2026-09-24",
+  "found": 1721,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
+ "kozhikode": {
+  "clean": true,
+  "created": 793,
+  "date": "2026-09-24",
+  "found": 793,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
+ "madurai": {
+  "clean": true,
+  "created": 413,
+  "date": "2026-09-24",
+  "found": 413,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
+ "mysuru": {
+  "clean": true,
+  "created": 431,
+  "date": "2026-09-24",
+  "found": 431,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
   "unknown_category": 0
  },
  "puducherry": {
@@ -44,11 +116,29 @@
   "skipped_existing": 0,
   "unknown_category": 0
  },
+ "vijayawada": {
+  "clean": true,
+  "created": 1342,
+  "date": "2026-09-24",
+  "found": 1342,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
  "visakhapatnam": {
   "clean": true,
   "created": 437,
   "date": "2026-09-24",
   "found": 437,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
+ "warangal": {
+  "clean": true,
+  "created": 288,
+  "date": "2026-09-24",
+  "found": 288,
   "removed_by_cleanup": 0,
   "skipped_existing": 0,
   "unknown_category": 0
