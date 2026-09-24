@@ -8,7 +8,16 @@ Next.js /blog routes pick it up on the next build.
 Usage:
   python agents/blog_agent.py --city "Hyderabad" --state "Telangana" --category pg-roommate
   python agents/blog_agent.py --city "Hyderabad" --state "Telangana" --category pg-roommate --topic-id avoid-scam
-  python agents/blog_agent.py --auto-rotate   # picks city/category/topic itself, advances rotation state
+  python agents/blog_agent.py --directory guntur doctors   # real-business directory article
+  python agents/blog_agent.py --auto-rotate   # alternates directory articles and guides, real cities only
+
+Two article types:
+  - guide: evergreen how-to (topic templates below)
+  - directory: "Dental Clinics in Guntur: Addresses & Phone Numbers" — the
+    business list comes straight from the LocalsIndia API (real, mostly
+    OpenStreetMap-imported businesses). The title is fixed by code and the
+    LLM only writes general advice around it; it is told never to name,
+    rank or describe specific businesses, so nothing about them is invented.
 
 Output:
   frontend/src/content/blog/{city_slug}/{slug}.json
@@ -16,12 +25,14 @@ Output:
 
 import argparse
 import json
+import os
 import random
 import re
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+import httpx
 from dotenv import load_dotenv
 
 sys.path.insert(0, str(Path(__file__).parent))
@@ -40,18 +51,35 @@ VALID_CATEGORIES = {
     "furniture", "fashion",
 }
 
-# Kept in sync manually with TOP_CITIES in
-# frontend/src/app/[city]/[category]/page.tsx — no automatic import across
-# the Python/TypeScript boundary, so this is a deliberate duplication.
-TOP_CITIES = [
-    ("Bangalore", "Karnataka"), ("Hyderabad", "Telangana"), ("Chennai", "Tamil Nadu"),
-    ("Mumbai", "Maharashtra"), ("Delhi", "Delhi"), ("Pune", "Maharashtra"),
-    ("Kolkata", "West Bengal"), ("Ahmedabad", "Gujarat"), ("Jaipur", "Rajasthan"),
-    ("Lucknow", "Uttar Pradesh"), ("Surat", "Gujarat"), ("Kanpur", "Uttar Pradesh"),
-    ("Nagpur", "Maharashtra"), ("Indore", "Madhya Pradesh"), ("Bhopal", "Madhya Pradesh"),
-    ("Visakhapatnam", "Andhra Pradesh"), ("Vadodara", "Gujarat"), ("Noida", "Uttar Pradesh"),
-    ("Thane", "Maharashtra"), ("Patna", "Bihar"),
-]
+BACKEND_URL = os.getenv("LOCALINDIA_API_URL", "https://localsindia-backend-in.azurewebsites.net")
+REGIONS_FILE = Path(__file__).parent / "data" / "city_regions.json"
+
+
+def load_cities() -> list[tuple[str, str, str]]:
+    """(name, state, slug) for every city LocalsIndia actually serves, main
+    city of every state first — the same priority order as the business
+    import (agents/data/city_regions.json)."""
+    data = json.loads(REGIONS_FILE.read_text(encoding="utf-8"))
+    return [(data["regions"][s]["name"], data["regions"][s]["state"], s) for s in data["order"]]
+
+
+TOP_CITIES = load_cities()
+
+# Directory articles: business category -> (article label, SEO category page it links to)
+DIRECTORY_CATEGORIES = {
+    "doctors": ("Hospitals, Clinics & Pharmacies", "doctors"),
+    "tiffin": ("Restaurants, Tiffin Centres & Bakeries", "tiffin"),
+    "education": ("Schools, Colleges & Coaching Centres", "tutors"),
+    "pg-roommate": ("PGs & Hostels", "pg-roommate"),
+    "fashion": ("Clothing, Textile & Jewellery Shops", "fashion"),
+    "services": ("Salons, Laundries & Local Services", "services"),
+    "vehicles": ("Garages, Bike & Car Showrooms", "vehicles"),
+    "electronics": ("Mobile & Electronics Shops", "electronics"),
+    "events": ("Function Halls & Event Venues", "event-venues"),
+    "businesses": ("Supermarkets, Kirana & General Stores", "shops"),
+}
+DIRECTORY_MIN_BUSINESSES = 6
+DIRECTORY_MAX_BUSINESSES = 20
 
 TOPIC_TEMPLATES = {
     "pg-roommate": [
@@ -163,7 +191,7 @@ def generate_post(city: str, state: str, category: str, topic_id: str | None) ->
         print(f"Raw response: {raw[:300]}")
         sys.exit(1)
 
-    city_slug = slugify(city)
+    city_slug = next((c[2] for c in TOP_CITIES if c[0].lower() == city.lower()), slugify(city))
     slug = slugify(data["title"])
     word_count = len(data.get("intro", "").split()) + sum(
         len(s.get("body", "").split()) for s in data.get("sections", [])
@@ -176,6 +204,88 @@ def generate_post(city: str, state: str, category: str, topic_id: str | None) ->
         "title": data["title"], "metaDescription": data["metaDescription"],
         "intro": data["intro"], "sections": data["sections"], "faqs": data.get("faqs", []),
         "cta": build_cta(city_slug, category),
+        "publishedAt": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "wordCount": word_count,
+    }
+
+
+def fetch_directory_businesses(city_slug: str, category: str) -> list[dict]:
+    """Real businesses for the article, preferring ones people can actually
+    find or call (address/phone). Skips anything already claimed-and-hidden."""
+    r = httpx.get(f"{BACKEND_URL}/api/v1/businesses",
+                  params={"city_slug": city_slug, "category_slug": category, "page_size": 50}, timeout=30)
+    r.raise_for_status()
+    # Contactable ones (phone + address) are picked first, then shown A-Z —
+    # the article says "alphabetical, not a ranking", so keep it that way.
+    items = [b for b in r.json() if b.get("address") or b.get("phone")]
+    items.sort(key=lambda b: (not b.get("phone"), not b.get("address")))
+    items = sorted(items[:DIRECTORY_MAX_BUSINESSES], key=lambda b: b["name"].lower())
+    return [{"id": b["id"], "name": b["name"], "address": b.get("address"), "phone": b.get("phone"),
+             "source": b.get("source")} for b in items]
+
+
+def build_directory_prompt(city: str, state: str, label: str, count: int) -> str:
+    return f"""Write a short, practical local guide for LocalsIndia.
+
+City: {city}, {state}
+Topic: choosing and visiting {label.lower()} in {city}.
+The page will ALSO show a factual list of {count} real local businesses (name, address, phone)
+taken from our directory — you do NOT write that list.
+
+Strict rules:
+- Do NOT name, rank, recommend, rate or describe ANY specific business, hospital, school or brand.
+- Do NOT state facts about {city} you are not certain of (no street names, prices, statistics, rankings).
+- Give general, genuinely useful advice: what to check, what to ask, documents/timings to confirm,
+  how to compare options, safety tips. Mention calling ahead to confirm details, since listings may be out of date.
+- 3-4 sections, 2-4 FAQs, plain language.
+
+Return ONLY the JSON described in your instructions — no markdown fences, no commentary."""
+
+
+def generate_directory_post(city_slug: str, category: str) -> dict | None:
+    """Returns a post, or None when the city doesn't have enough real businesses."""
+    city = next((c for c in TOP_CITIES if c[2] == city_slug), None)
+    if not city or category not in DIRECTORY_CATEGORIES:
+        raise ValueError(f"Unknown city/category: {city_slug}/{category}")
+    name, state, _ = city
+    label, seo_page = DIRECTORY_CATEGORIES[category]
+    businesses = fetch_directory_businesses(city_slug, category)
+    if len(businesses) < DIRECTORY_MIN_BUSINESSES:
+        print(f"[SKIP] {name}/{category}: only {len(businesses)} businesses with address/phone")
+        return None
+    print(f"[BlogAgent] directory — {name} — {category} ({len(businesses)} businesses)")
+
+    data, last_error = None, None
+    for attempt in range(3):
+        raw = generate(SYSTEM_PROMPT, build_directory_prompt(name, state, label, len(businesses)))
+        if "```" in raw:
+            raw = raw.split("```")[1]
+            if raw.startswith("json"):
+                raw = raw[4:]
+        try:
+            parsed = json.loads(raw)
+            validate_shape(parsed)
+            data = parsed
+            break
+        except (json.JSONDecodeError, ValueError) as e:
+            last_error = e
+            print(f"[RETRY {attempt + 1}/3] Invalid response: {e}")
+    if data is None:
+        raise SystemExit(f"[FAIL] Invalid response: {last_error}")
+
+    title = f"{label} in {name}: Addresses & Phone Numbers"
+    word_count = len(data["intro"].split()) + sum(len(x["body"].split()) for x in data["sections"])
+    return {
+        "schemaVersion": 2,
+        "kind": "directory",
+        "city": name, "citySlug": city_slug, "state": state,
+        "slug": slugify(title), "category": category, "topicTemplateId": f"directory-{category}",
+        "title": title,
+        "metaDescription": f"{len(businesses)} {label.lower()} in {name} with addresses and phone numbers, "
+                           f"plus what to check before you visit."[:158],
+        "intro": data["intro"], "sections": data["sections"], "faqs": data.get("faqs", []),
+        "businesses": businesses,
+        "cta": {"text": f"See all {label.lower()} in {name}", "href": f"/{city_slug}/{seo_page}"},
         "publishedAt": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "wordCount": word_count,
     }
@@ -209,24 +319,47 @@ def pick_next_auto_rotate(state: dict) -> tuple[str, str, str]:
         cat_idx = (state["lastCategoryIndex"] + 1) % len(categories)
         state["lastCityIndex"] = city_idx
         state["lastCategoryIndex"] = cat_idx
-        city, cat_state = TOP_CITIES[city_idx]
+        city, cat_state, slug = TOP_CITIES[city_idx]
         category = categories[cat_idx]
-        if (slugify(city), category) not in recent:
+        if (slug, category) not in recent:
             return city, cat_state, category
     # Exhausted the no-repeat window — just take whatever we landed on.
-    city, cat_state = TOP_CITIES[state["lastCityIndex"]]
+    city, cat_state, _ = TOP_CITIES[state["lastCityIndex"]]
     return city, cat_state, categories[state["lastCategoryIndex"]]
 
 
+def next_directory_target(state: dict) -> tuple[str, str] | None:
+    """Next (city, category) directory article not yet published: every
+    category for the biggest cities first, walking down the priority order."""
+    done = {(h["citySlug"], h["category"]) for h in state["history"] if h.get("kind") == "directory"}
+    done |= set(tuple(x) for x in state.get("directorySkipped", []))
+    for _, _, slug in TOP_CITIES:
+        for category in DIRECTORY_CATEGORIES:
+            if (slug, category) not in done:
+                return slug, category
+    return None
+
+
 def run_auto_rotate() -> None:
+    """Alternates: directory article (real businesses) on even runs, guide on odd."""
     state = load_rotation_state()
-    city, city_state, category = pick_next_auto_rotate(state)
-    post = generate_post(city, city_state, category, topic_id=None)
+    post = None
+    if len(state["history"]) % 2 == 0:
+        while post is None:
+            target = next_directory_target(state)
+            if not target:
+                break
+            post = generate_directory_post(*target)
+            if post is None:
+                state.setdefault("directorySkipped", []).append(list(target))
+    if post is None:
+        city, city_state, category = pick_next_auto_rotate(state)
+        post = generate_post(city, city_state, category, topic_id=None)
     path = save_post(post)
     print(f"[OK] Saved: {path}")
 
     state["history"].append({
-        "citySlug": post["citySlug"], "category": category,
+        "citySlug": post["citySlug"], "category": post["category"], "kind": post.get("kind", "guide"),
         "topicTemplateId": post["topicTemplateId"], "publishedAt": post["publishedAt"],
     })
     save_rotation_state(state)
@@ -240,11 +373,19 @@ def main():
     parser.add_argument("--category", choices=sorted(VALID_CATEGORIES), help="Category slug")
     parser.add_argument("--topic-id", default=None, help="Force a specific topic template id")
     parser.add_argument("--auto-rotate", action="store_true", help="Pick city/category/topic automatically and advance rotation state")
+    parser.add_argument("--directory", nargs=2, metavar=("CITY_SLUG", "BUSINESS_CATEGORY"),
+                        help="Real-business directory article, e.g. --directory guntur doctors")
     parser.add_argument("--env-file", default=".env", help="Path to .env file")
     args = parser.parse_args()
 
     env_path = Path(args.env_file)
     load_dotenv(env_path if env_path.exists() else None)
+
+    if args.directory:
+        post = generate_directory_post(*args.directory)
+        if post:
+            print(f"[OK] Saved: {save_post(post)}")
+        return
 
     if args.auto_rotate:
         run_auto_rotate()

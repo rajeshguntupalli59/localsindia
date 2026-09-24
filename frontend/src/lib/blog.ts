@@ -19,6 +19,10 @@ export interface BlogPost {
   cta: { text: string; href: string };
   publishedAt: string;
   wordCount: number;
+  // schemaVersion 2 "directory" articles: a factual list of real local
+  // businesses from the directory (the LLM never writes these entries)
+  kind?: 'guide' | 'directory';
+  businesses?: { id: string; name: string; address: string | null; phone: string | null; source?: string | null }[];
 }
 
 export function listCitySlugs(): string[] {

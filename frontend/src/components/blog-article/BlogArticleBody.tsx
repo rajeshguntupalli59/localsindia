@@ -1,5 +1,7 @@
 import Link from 'next/link';
+import { MapPin, Phone } from 'lucide-react';
 import type { BlogPost } from '@/lib/blog';
+import OsmAttribution from '@/components/osm-attribution/OsmAttribution';
 
 export default function BlogArticleBody({ post }: { post: BlogPost }) {
   return (
@@ -7,6 +9,38 @@ export default function BlogArticleBody({ post }: { post: BlogPost }) {
       <p className="text-base leading-relaxed mb-8" style={{ color: 'var(--li-text)' }}>
         {post.intro}
       </p>
+
+      {post.businesses && post.businesses.length > 0 && (
+        <div className="mb-10">
+          <h2 className="text-xl font-bold mb-1" style={{ color: 'var(--li-text)' }}>
+            {post.businesses.length} places in {post.city}
+          </h2>
+          <p className="text-xs mb-4" style={{ color: 'var(--li-muted)' }}>
+            From the LocalsIndia business directory, in alphabetical order — not a ranking.
+            Call ahead to confirm timings; details may have changed.
+          </p>
+          <ol className="space-y-2">
+            {post.businesses.map((b, i) => (
+              <li key={b.id} className="rounded-2xl border p-4" style={{ borderColor: 'var(--li-border)' }}>
+                <Link href={`/${post.citySlug}/businesses/${b.id}`} className="font-bold text-sm hover:underline" style={{ color: 'var(--li-text)' }}>
+                  {i + 1}. {b.name}
+                </Link>
+                {b.address && (
+                  <p className="flex items-start gap-1.5 text-xs mt-1" style={{ color: 'var(--li-muted)' }}>
+                    <MapPin className="w-3.5 h-3.5 shrink-0 mt-px" /> {b.address}
+                  </p>
+                )}
+                {b.phone && (
+                  <p className="flex items-center gap-1.5 text-xs mt-1" style={{ color: 'var(--li-muted)' }}>
+                    <Phone className="w-3.5 h-3.5 shrink-0" /> <a href={`tel:${b.phone}`} className="hover:underline">{b.phone}</a>
+                  </p>
+                )}
+              </li>
+            ))}
+          </ol>
+          {post.businesses.some(b => b.source === 'osm') && <OsmAttribution className="mt-2" />}
+        </div>
+      )}
 
       {post.sections.map((section, i) => (
         <div key={i} className="mb-8">
