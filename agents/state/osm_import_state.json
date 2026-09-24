@@ -47,6 +47,26 @@
   "skipped_existing": 0,
   "unknown_category": 0
  },
+ "bhongir": {
+  "clean": true,
+  "created": 47,
+  "date": "2026-09-24",
+  "found": 47,
+  "moved_to_nearest_city": 0,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
+ "bidar": {
+  "clean": true,
+  "created": 71,
+  "date": "2026-09-24",
+  "found": 71,
+  "moved_to_nearest_city": 0,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
  "chennai": {
   "clean": true,
   "created": 1835,
@@ -65,11 +85,41 @@
   "skipped_existing": 0,
   "unknown_category": 0
  },
+ "cuddalore": {
+  "clean": true,
+  "created": 82,
+  "date": "2026-09-24",
+  "found": 82,
+  "moved_to_nearest_city": 0,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
  "davanagere": {
   "clean": true,
   "created": 178,
   "date": "2026-09-24",
   "found": 178,
+  "moved_to_nearest_city": 0,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
+ "dindigul": {
+  "clean": true,
+  "created": 115,
+  "date": "2026-09-24",
+  "found": 115,
+  "moved_to_nearest_city": 0,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
+ "eluru": {
+  "clean": true,
+  "created": 104,
+  "date": "2026-09-24",
+  "found": 104,
   "moved_to_nearest_city": 0,
   "removed_by_cleanup": 0,
   "skipped_existing": 0,
@@ -82,6 +132,16 @@
   "found": 412,
   "removed_by_cleanup": 0,
   "skipped_existing": 111,
+  "unknown_category": 0
+ },
+ "hospet": {
+  "clean": true,
+  "created": 52,
+  "date": "2026-09-24",
+  "found": 52,
+  "moved_to_nearest_city": 0,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
   "unknown_category": 0
  },
  "hubballi": {
@@ -138,6 +198,26 @@
   "created": 223,
   "date": "2026-09-24",
   "found": 223,
+  "moved_to_nearest_city": 0,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
+ "kannur": {
+  "clean": true,
+  "created": 380,
+  "date": "2026-09-24",
+  "found": 380,
+  "moved_to_nearest_city": 0,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
+ "kasaragod": {
+  "clean": true,
+  "created": 452,
+  "date": "2026-09-24",
+  "found": 452,
   "moved_to_nearest_city": 0,
   "removed_by_cleanup": 0,
   "skipped_existing": 0,
@@ -229,6 +309,26 @@
   "skipped_existing": 0,
   "unknown_category": 0
  },
+ "medak": {
+  "clean": true,
+  "created": 40,
+  "date": "2026-09-24",
+  "found": 40,
+  "moved_to_nearest_city": 0,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
+ "miryalaguda": {
+  "clean": true,
+  "created": 34,
+  "date": "2026-09-24",
+  "found": 34,
+  "moved_to_nearest_city": 0,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
  "mysuru": {
   "clean": true,
   "created": 431,
@@ -268,11 +368,41 @@
   "skipped_existing": 0,
   "unknown_category": 0
  },
+ "nizamabad": {
+  "clean": true,
+  "created": 113,
+  "date": "2026-09-24",
+  "found": 113,
+  "moved_to_nearest_city": 0,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
+ "ongole": {
+  "clean": true,
+  "created": 146,
+  "date": "2026-09-24",
+  "found": 146,
+  "moved_to_nearest_city": 0,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
  "palakkad": {
   "clean": true,
   "created": 544,
   "date": "2026-09-24",
   "found": 544,
+  "moved_to_nearest_city": 0,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
+ "perinthalmanna": {
+  "clean": true,
+  "created": 69,
+  "date": "2026-09-24",
+  "found": 69,
   "moved_to_nearest_city": 0,
   "removed_by_cleanup": 0,
   "skipped_existing": 0,
@@ -307,6 +437,16 @@
   "skipped_existing": 0,
   "unknown_category": 0
  },
+ "shivamogga": {
+  "clean": true,
+  "created": 112,
+  "date": "2026-09-24",
+  "found": 112,
+  "moved_to_nearest_city": 0,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
  "sivakasi": {
   "clean": true,
   "created": 64,
@@ -322,6 +462,26 @@
   "created": 95,
   "date": "2026-09-24",
   "found": 95,
+  "moved_to_nearest_city": 0,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
+ "thalassery": {
+  "clean": true,
+  "created": 49,
+  "date": "2026-09-24",
+  "found": 49,
+  "moved_to_nearest_city": 0,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
+ "thanjavur": {
+  "clean": true,
+  "created": 212,
+  "date": "2026-09-24",
+  "found": 212,
   "moved_to_nearest_city": 0,
   "removed_by_cleanup": 0,
   "skipped_existing": 0,
@@ -356,11 +516,41 @@
   "skipped_existing": 0,
   "unknown_category": 0
  },
+ "tirupati": {
+  "clean": true,
+  "created": 299,
+  "date": "2026-09-24",
+  "found": 299,
+  "moved_to_nearest_city": 0,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
  "tiruppur": {
   "clean": true,
   "created": 144,
   "date": "2026-09-24",
   "found": 144,
+  "moved_to_nearest_city": 0,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
+ "vellore": {
+  "clean": true,
+  "created": 122,
+  "date": "2026-09-24",
+  "found": 122,
+  "moved_to_nearest_city": 0,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
+ "vijayapura": {
+  "clean": true,
+  "created": 181,
+  "date": "2026-09-24",
+  "found": 181,
   "moved_to_nearest_city": 0,
   "removed_by_cleanup": 0,
   "skipped_existing": 0,
@@ -380,6 +570,16 @@
   "created": 437,
   "date": "2026-09-24",
   "found": 437,
+  "removed_by_cleanup": 0,
+  "skipped_existing": 0,
+  "unknown_category": 0
+ },
+ "vizianagaram": {
+  "clean": true,
+  "created": 149,
+  "date": "2026-09-24",
+  "found": 149,
+  "moved_to_nearest_city": 0,
   "removed_by_cleanup": 0,
   "skipped_existing": 0,
   "unknown_category": 0
