@@ -8,7 +8,7 @@ and post free listings that others contact directly on WhatsApp. Business owners
 |---|---|
 | Website | https://www.localsindia.com |
 | Backend API | https://localsindia-backend-in.azurewebsites.net (`/api/v1/...`) |
-| Android app | React Native + Expo, on Google Play closed testing |
+| Android app | React Native + Expo — live on Google Play (production since 2026-08-11; latest build versionCode 14) |
 | Code | https://github.com/rajeshguntupalli59/localsindia (branch `master` = production) |
 
 **Coverage (September 2026):** 150 cities in 6 states — Andhra Pradesh 36, Tamil Nadu 33, Karnataka 32,

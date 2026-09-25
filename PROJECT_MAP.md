@@ -12,7 +12,7 @@ LocalsIndia (localsindia.com) — free local directory + classifieds for South I
 
 - Web: https://www.localsindia.com (Next.js 14, Azure Static Web Apps, hybrid SSR)
 - Backend: https://localsindia-backend-in.azurewebsites.net (FastAPI, Azure App Service)
-- Mobile: React Native + Expo 56, EAS builds, Google Play closed testing (production release not yet approved)
+- Mobile: React Native + Expo 56, EAS builds. **Live in production on Google Play since 2026-08-11.** Builds: versionCode 12 (2026-08-10, first production release), 13 (2026-08-14), 14 (2026-08-31, mobile reCAPTCHA, commit 9ac90a2 — uploaded by Raj; confirm its rollout in Play Console). All versionName 1.0.0. Since v14 the only app changes are commit 3630dc4 (business directory, claim, hours) + 5380e26 (removed dead `claim()`).
 - GitHub: https://github.com/rajeshguntupalli59/localsindia
 
 ---
