@@ -146,6 +146,11 @@ Open items:
 - **URGENT (Raj): rotate the admin password** — it was committed to the public repo (see Security review fixes below).
 - DONE: opening-hours backfill (run 36091832956) — 4,888 businesses got hours. `sitemap-areas.xml` submitted in GSC and fetched OK (GSC first showed "Couldn't fetch" — its normal new-sitemap glitch; resolved on its own).
 - Raj: add the site to Bing Webmaster Tools via "Import from GSC".
+- **Mobile app is behind the website** (checked on the Pixel 6 emulator 2026-09-25, dev build + current code):
+  - Home shows categories + empty "Wanted" only — no real businesses; tapping a category (e.g. Doctors) shows "No listings found" although Hyderabad has hundreds (categories search listings only, and nearly all listings were invented and are now unpublished).
+  - Business list: first 20 only, no paging/category filter, no photos, every card "0.0 · 0 reviews".
+  - Business page: name/address/phone only — reads `business.website`/`business.category` but the API sends `website_url`/`category_slug` (never shown); no cover photo, hours, directions, share, claim, OSM attribution (ODbL requires it); still shows the paid "Get Verified ₹499/month" card (web switch doesn't reach the app).
+  - Any fix needs a new EAS build + Play Console upload (Raj's permission required).
 - Admin pages are cramped on phones (fixed 224px sidebar) and log a harmless hydration warning (layout reads localStorage in useState).
 - Optional: dedicated MSG91 DLT template for claim SMS (claims reuse the login template); ask owners to request reviews when a claim is approved.
 - Real SMS delivery of claim codes not yet tested end to end (local tests used OTP_DEBUG).
