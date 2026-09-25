@@ -94,12 +94,12 @@ Python scripts using the Anthropic API (`base_agent.py` is the shared runner) to
 
 ---
 
-## 5. What's Actually Scheduled (ground truth — verified 2026-08-08 via `gh workflow list` + reading each `.yml`; `city-seeder.yml` added 2026-08-11)
+## 5. What's Actually Scheduled (ground truth — verified 2026-08-08 via `gh workflow list` + reading each `.yml`; updated 2026-09-25: City Seeder retired, manual data workflows added)
 
 | Workflow | Cron (UTC) | IST | What it does |
 |---|---|---|---|
 | `social-poster.yml` | `0 4 * * *`, `30 13 * * *` | 9:30am, 7pm daily | Runs `meta_poster.py` (mostly) or `ecosystem_poster.py`/text variant (2nd slot, randomized) |
-| `city-seeder.yml` | `0 5 * * *` | 10:30am daily | Seeds the next 10 empty cities (`city_launcher.py --auto 10`). Live and verified 2026-08-11 — see §6 |
+| ~~`city-seeder.yml`~~ | — | — | **RETIRED 2026-09-25** — disabled in GitHub, schedule removed. It posted AI-written listings with made-up phone numbers; never re-enable (see §6) |
 | `seo-agent.yml` | `0 6 * * *` | 11:30am daily | Generates SEO metadata for the next 10 indexable cities without it yet (`seo_agent.py --auto 10`). Live and verified 2026-08-13 — see §6 |
 | `blog-publisher.yml` | `0 3 * * 0` | 8:30am Sunday | Weekly evergreen blog article via `blog_agent.py` |
 | `expiry-reminders.yml` | `30 3 * * *` | 9am daily | Sends real reminders to users with expiring listings |
@@ -108,12 +108,23 @@ Python scripts using the Anthropic API (`base_agent.py` is the shared runner) to
 | `backend-azure.yml` | push to master (`backend/**`) | — | Deploys backend to Azure App Service |
 | `frontend-azure.yml` | push to master (`frontend/**`) + PR preview | — | Deploys frontend to Azure Static Web Apps |
 | `test.yml` | push/PR to master/develop (`frontend/**`) | — | Runs Vitest |
+| `osm-import.yml` | manual | — | OpenStreetMap business import per city (`--auto N`, verify/fix, `fix_done`), plus `backfill_hours` (opening hours for already-imported businesses) |
+| `assign-localities.yml` | manual | — | Tags businesses with their OSM neighbourhood (`assign_localities.py`); re-run after any import |
 
-The original 5 cron-scheduled workflows were manually triggered and verified working 2026-08-08 (see §6). `city-seeder.yml` was added and verified live (real posting, not dry-run) 2026-08-11 — 16 cities seeded successfully that day across two manual batches.
+The original 5 cron-scheduled workflows were manually triggered and verified working 2026-08-08 (see §6). `city-seeder.yml` ran daily from 2026-08-11 until it was retired 2026-09-25.
 
 ---
 
 ## 6. Changelog (dated, most recent first — append here after notable sessions)
+
+### 2026-09-25 — SESSION SUMMARY + open items (start here next session)
+Shipped today (details in the entries below): claim flow E2E-tested 23/23 + onboarding-quiz fix · `/admin/outreach` owner outreach · live-site audit fixes (share images, real counts, Organization JSON-LD, Call/Directions/Share) · City Seeder retired + 2,997 fake listings unpublished · neighbourhood pages (27,040 businesses tagged, 3,749 URLs in `/sitemap-areas.xml`) · opening hours + "Open now" · home page 925 → 371 KB. Sitemap resubmitted in GSC (~37,865 discovered).
+Open items:
+- Opening-hours backfill (osm-import run 36091832956, `backfill_hours`) was still running at session end — check it finished (`gh run view 36091832956`); re-run the same input if it failed.
+- Raj: submit `sitemap-areas.xml` in Google Search Console; add the site to Bing Webmaster Tools via "Import from GSC".
+- Admin pages are cramped on phones (fixed 224px sidebar) and log a harmless hydration warning (layout reads localStorage in useState).
+- Optional: dedicated MSG91 DLT template for claim SMS (claims reuse the login template); ask owners to request reviews when a claim is approved.
+- Real SMS delivery of claim codes not yet tested end to end (local tests used OTP_DEBUG).
 
 ### 2026-09-25 — City location fix, blog rework
 - 12 cities had wrong import areas (Nominatim matched a building, a same-named place elsewhere or a district: Anantapuram 112 km, Ariyalur 261 km, Tandur 290 km — the other Tandur, Chikkaballapur, Yadgir, Gangavati, Neyveli; tiny boxes for Villupuram/Bagalkot/Arsikere/Tadepalligudem/Manjeri). Re-centred on Wikidata town coordinates, 43 out-of-area imports removed, re-imported. `prepare_city_regions.py` now cross-checks every city with Wikidata (MANUAL_CENTRES for spellings it can't match); cleanup removes businesses outside every city's area. Live: 35,304 business pages, 150/150 cities clean.
