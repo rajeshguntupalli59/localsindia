@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Heart, Search } from 'lucide-react';
 import { useSaved } from '@/hooks/useSaved';
 import ListingCard from '@/components/listing-card/ListingCard';
+import { listingCovers } from '@/lib/categoryCover';
 import type { Listing } from '@/lib/types';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend-in.azurewebsites.net';
@@ -27,6 +28,7 @@ function SavedInner() {
   }, []);
 
   const listings = backendSaved ?? localSaved;
+  const savedCovers = listingCovers(listings);
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--li-page-bg)' }}>
@@ -66,7 +68,7 @@ function SavedInner() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {listings.map(l => (
-              <ListingCard key={l.id} listing={l} />
+              <ListingCard key={l.id} listing={l} coverUrl={savedCovers.get(l.id)} />
             ))}
           </div>
         )}

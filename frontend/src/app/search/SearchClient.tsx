@@ -7,6 +7,7 @@ import { Search, MapPin, ArrowLeft, X, SlidersHorizontal } from 'lucide-react';
 import { api } from '@/lib/api';
 import type { Listing, Category } from '@/lib/types';
 import ListingCard from '@/components/listing-card/ListingCard';
+import { listingCovers } from '@/lib/categoryCover';
 import ListingCardSkeleton from '@/components/listing-card/ListingCardSkeleton';
 import CityPickerModal from '@/components/city-picker/CityPickerModal';
 import { usePrefs } from '@/context/PrefsContext';
@@ -111,6 +112,7 @@ function SearchInner() {
     navigate({ q: inputQ });
   };
 
+  const resultCovers = listingCovers(results);
   const activeCat = categories.find(c => c.slug === categorySlug || c.name.toLowerCase().replace(/[\s/]+/g, '-') === categorySlug);
 
   return (
@@ -302,7 +304,7 @@ function SearchInner() {
             {loading
               ? Array.from({ length: 8 }).map((_, i) => <ListingCardSkeleton key={i} />)
               : results.length > 0
-                ? results.map(l => <ListingCard key={l.id} listing={l} citySlug={cityParam} />)
+                ? results.map(l => <ListingCard key={l.id} listing={l} citySlug={cityParam} coverUrl={resultCovers.get(l.id)} />)
                 : (
                   <div className="col-span-full text-center py-16">
                     <p className="text-slate-400 font-medium mb-1">

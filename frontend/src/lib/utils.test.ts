@@ -100,11 +100,23 @@ describe('realImages', () => {
   });
 });
 
-describe('categoryCover', () => {
-  it('uses the category photo, falling back to classifieds', async () => {
-    const { categoryCover } = await import('./categoryCover');
-    expect(categoryCover('tiffin')).toBe('/category-covers/tiffin.jpg');
-    expect(categoryCover('unknown')).toBe('/category-covers/classifieds.jpg');
-    expect(categoryCover(null)).toBe('/category-covers/classifieds.jpg');
+describe('cover photos', () => {
+  it('matches the business type from the name', async () => {
+    const { coverFor } = await import('./categoryCover');
+    expect(coverFor({ id: 'a', category_slug: 'doctors', name: 'Sri Sai Dental Clinic' })).toMatch(/\/v\/dental-\d\.jpg$/);
+    expect(coverFor({ id: 'b', category_slug: 'tiffin', name: 'Hyderabad Biryani House' })).toMatch(/\/v\/biryani-\d\.jpg$/);
+    expect(coverFor({ id: 'c', category_slug: 'fashion', name: 'Lakshmi Jewellers' })).toMatch(/\/v\/jewellery-\d\.jpg$/);
+  });
+  it('is stable per item and falls back for unknown categories', async () => {
+    const { coverFor } = await import('./categoryCover');
+    const s = { id: 'x1', category_slug: 'tiffin', name: 'Ramu Hotel' };
+    expect(coverFor(s)).toBe(coverFor(s));
+    expect(coverFor({ id: 'z', category_slug: 'nope', name: 'Anything' })).toMatch(/^\/category-covers\//);
+  });
+  it('gives neighbouring cards different photos', async () => {
+    const { assignCovers } = await import('./categoryCover');
+    const items = Array.from({ length: 5 }, (_, i) => ({ id: `t${i}`, category_slug: 'tiffin', name: `Tiffin Centre ${i}` }));
+    const covers = assignCovers(items);
+    expect(new Set(covers.values()).size).toBe(5);
   });
 });

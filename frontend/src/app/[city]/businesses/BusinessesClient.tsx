@@ -11,7 +11,7 @@ import SiteHeader from '@/components/site-header/SiteHeader';
 import SiteFooter from '@/components/site-footer/SiteFooter';
 import OsmAttribution from '@/components/osm-attribution/OsmAttribution';
 import RepresentativeLabel from '@/components/representative-label/RepresentativeLabel';
-import { categoryCover } from '@/lib/categoryCover';
+import { businessCovers, coverFor } from '@/lib/categoryCover';
 import Image from 'next/image';
 import BottomNav from '@/components/bottom-nav/BottomNav';
 
@@ -40,7 +40,7 @@ function StarRating({ rating }: { rating: number }) {
   );
 }
 
-function BusinessCard({ business, citySlug }: { business: Business; citySlug: string }) {
+function BusinessCard({ business, citySlug, cover }: { business: Business; citySlug: string; cover?: string }) {
   return (
     <motion.div
       whileHover={{ y: -2 }}
@@ -49,7 +49,7 @@ function BusinessCard({ business, citySlug }: { business: Business; citySlug: st
       {/* Own photo, or the labelled category cover */}
       <Link href={`/${citySlug}/businesses/${business.id}`} className="block relative h-36 -mx-5 -mt-5 mb-4 bg-slate-100">
         <Image
-          src={business.images?.[0]?.url ?? categoryCover(business.category_slug)}
+          src={business.images?.[0]?.url ?? cover ?? coverFor({ id: business.id, category_slug: business.category_slug, name: business.name })}
           alt={business.images?.[0] ? business.name : ''}
           fill
           className="object-cover"
@@ -187,6 +187,8 @@ export default function BusinessesClient({
   const pickCategory = (slug: string) => { setCategory(slug); syncUrl(slug, q); };
   const clearQuery = () => { setQ(''); syncUrl(category ?? '', ''); };
 
+  const covers = businessCovers(businesses);
+
   // Every category except the listing-only "Classifieds"
   const chipCategories = categories.filter(c => c.slug !== 'classifieds');
 
@@ -260,7 +262,7 @@ export default function BusinessesClient({
           <>
             <div className="grid gap-4 sm:grid-cols-2">
               {businesses.map(biz => (
-                <BusinessCard key={biz.id} business={biz} citySlug={citySlug} />
+                <BusinessCard key={biz.id} business={biz} citySlug={citySlug} cover={covers.get(biz.id)} />
               ))}
             </div>
             {hasMore && (

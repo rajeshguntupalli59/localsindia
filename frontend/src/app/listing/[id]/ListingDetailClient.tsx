@@ -6,7 +6,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import SafetyTips from '@/components/safety-tips/SafetyTips';
 import RepresentativeLabel from '@/components/representative-label/RepresentativeLabel';
-import { categoryCover } from '@/lib/categoryCover';
 import { ArrowLeft, MapPin, Clock, ChevronDown, ChevronUp, Flag, Tag, User, ExternalLink, Heart, Star, ChevronLeft, ChevronRight, Eye, AlertCircle, MessageCircle, Share2 } from 'lucide-react';
 import { api, ApiError } from '@/lib/api';
 import type { Listing, ListingReview } from '@/lib/types';
@@ -14,6 +13,7 @@ import { formatPrice, timeAgo, listingPath, realImages } from '@/lib/utils';
 import { useSaved } from '@/hooks/useSaved';
 import { toast } from 'sonner';
 import ListingCard from '@/components/listing-card/ListingCard';
+import { coverFor, listingCovers } from '@/lib/categoryCover';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend-in.azurewebsites.net';
 
@@ -109,6 +109,7 @@ export default function ListingDetailClient({ id, initialListing = null }: { id:
     : null;
 
   const images = realImages(listing?.images);
+  const similarCovers = listingCovers(similarListings);
 
   const desc = listing?.description ?? '';
   const isLong = desc.length > 200;
@@ -202,7 +203,7 @@ export default function ListingDetailClient({ id, initialListing = null }: { id:
           >
             {/* Own photos, or the labelled category cover when there are none */}
             <Image
-              src={images[activeImg]?.url ?? images[0]?.url ?? categoryCover(listing.category_slug)}
+              src={images[activeImg]?.url ?? images[0]?.url ?? coverFor({ id: listing.id, category_slug: listing.category_slug, name: listing.title })}
               alt={images[0] ? listing.title : ''}
               fill
               className="object-cover transition-opacity duration-200"
@@ -552,7 +553,7 @@ export default function ListingDetailClient({ id, initialListing = null }: { id:
               <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-4">
                 {similarListings.map(l => (
                   <div key={l.id} className="shrink-0 w-52 sm:w-auto">
-                    <ListingCard listing={l} citySlug={listing.city_slug ?? undefined} />
+                    <ListingCard listing={l} citySlug={listing.city_slug ?? undefined} coverUrl={similarCovers.get(l.id)} />
                   </div>
                 ))}
               </div>

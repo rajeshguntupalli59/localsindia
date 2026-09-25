@@ -15,7 +15,7 @@ import SiteFooter from '@/components/site-footer/SiteFooter';
 import AdBanner from '@/components/ad-banner/AdBanner';
 import SafetyTips from '@/components/safety-tips/SafetyTips';
 import RepresentativeLabel from '@/components/representative-label/RepresentativeLabel';
-import { categoryCover } from '@/lib/categoryCover';
+import { coverFor } from '@/lib/categoryCover';
 import { toast } from 'sonner';
 
 export default function ListingDetailPage() {
@@ -183,7 +183,7 @@ export default function ListingDetailPage() {
                   </motion.div>
                 ) : (
                   <div className="absolute inset-0">
-                    <Image src={categoryCover(listing.category_slug)} alt="" fill className="object-cover" sizes="800px" />
+                    <Image src={coverFor({ id: listing.id, category_slug: listing.category_slug, name: listing.title })} alt="" fill className="object-cover" sizes="800px" />
                     <RepresentativeLabel className="bottom-3 left-3" />
                   </div>
                 )}

@@ -11,6 +11,7 @@ import type { Category, SearchResult } from '@/lib/types';
 import SiteHeader from '@/components/site-header/SiteHeader';
 import SiteFooter from '@/components/site-footer/SiteFooter';
 import ListingCard from '@/components/listing-card/ListingCard';
+import { listingCovers } from '@/lib/categoryCover';
 import ListingCardSkeleton from '@/components/listing-card/ListingCardSkeleton';
 import EmptyState from '@/components/empty-state/EmptyState';
 import { searchHeading } from '@/lib/utils';
@@ -161,6 +162,7 @@ function SearchInner() {
     }
     return true;
   }) ?? [];
+  const itemCovers = listingCovers(filteredItems);
 
   const totalPages = result ? Math.ceil(result.total / PAGE_SIZE) : 1;
   const hasActiveFilters = localCat || priceMin || priceMax || dateRange;
@@ -571,7 +573,7 @@ function SearchInner() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: Math.min(i * 0.05, 0.25) }}
                   >
-                    <ListingCard listing={l} citySlug={citySlug} />
+                    <ListingCard listing={l} citySlug={citySlug} coverUrl={itemCovers.get(l.id)} />
                   </motion.div>
                 ))}
               </div>

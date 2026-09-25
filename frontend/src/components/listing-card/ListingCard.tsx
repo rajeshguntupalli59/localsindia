@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import { categoryCover } from '@/lib/categoryCover';
+import { coverFor } from '@/lib/categoryCover';
 import RepresentativeLabel from '@/components/representative-label/RepresentativeLabel';
 import Link from 'next/link';
 import { MapPin, Clock, Heart, Eye, Star, MessageCircle } from 'lucide-react';
@@ -16,9 +16,11 @@ import { useSaved } from '@/hooks/useSaved';
 interface Props {
   listing: Listing;
   citySlug?: string;
+  /** Cover picked by the parent list (assignCovers) so neighbours differ */
+  coverUrl?: string;
 }
 
-export default function ListingCard({ listing }: Props) {
+export default function ListingCard({ listing, coverUrl }: Props) {
   const { t } = usePrefs();
   const { toggle, isSaved } = useSaved();
   const [heartBounce, setHeartBounce] = useState(false);
@@ -69,7 +71,7 @@ export default function ListingCard({ listing }: Props) {
 
           {/* Own photo, or the category cover (labelled) when the listing has none */}
           <Image
-            src={image?.url ?? categoryCover(listing.category_slug)}
+            src={image?.url ?? coverUrl ?? coverFor({ id: listing.id, category_slug: listing.category_slug, name: listing.title })}
             alt={image ? listing.title : ''}
             fill
             className="object-cover transition-transform duration-500 group-hover:scale-[1.05]"

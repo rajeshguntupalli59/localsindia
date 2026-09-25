@@ -13,7 +13,7 @@ import GetVerifiedModal from '@/components/get-verified-modal/GetVerifiedModal';
 import ClaimBusinessModal from '@/components/claim-business/ClaimBusinessModal';
 import OsmAttribution from '@/components/osm-attribution/OsmAttribution';
 import RepresentativeLabel from '@/components/representative-label/RepresentativeLabel';
-import { categoryCover } from '@/lib/categoryCover';
+import { coverFor } from '@/lib/categoryCover';
 
 function StarPicker({ value, onChange }: { value: number; onChange: (v: number) => void }) {
   return (
@@ -138,7 +138,7 @@ export default function BusinessDetailPage() {
           {(!business.images || business.images.length === 0) && (
             <div className="relative mb-5 rounded-xl overflow-hidden bg-slate-100" style={{ aspectRatio: '16/9' }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={categoryCover(business.category_slug)} alt="" className="w-full h-full object-cover" />
+              <img src={coverFor({ id: business.id, category_slug: business.category_slug, name: business.name })} alt="" className="w-full h-full object-cover" />
               <RepresentativeLabel className="bottom-2 left-2" />
             </div>
           )}

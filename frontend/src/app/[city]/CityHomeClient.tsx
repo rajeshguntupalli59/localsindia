@@ -16,6 +16,7 @@ import SiteFooter from '@/components/site-footer/SiteFooter';
 import AdBanner from '@/components/ad-banner/AdBanner';
 import CityBanner from '@/components/city-banner/CityBanner';
 import ListingCard from '@/components/listing-card/ListingCard';
+import { listingCovers } from '@/lib/categoryCover';
 import ListingCardSkeleton from '@/components/listing-card/ListingCardSkeleton';
 import EmptyState from '@/components/empty-state/EmptyState';
 import BuyerRequestsSection from '@/components/buyer-requests/BuyerRequestsSection';
@@ -49,6 +50,7 @@ function HRow({
   loading?: boolean;
 }) {
   if (!loading && items.length < 3) return null;
+  const rowCovers = listingCovers(items);
   return (
     <section>
       <div className="flex items-center justify-between mb-3">
@@ -70,7 +72,7 @@ function HRow({
             ))
           : items.map(l => (
               <div key={l.id} className="shrink-0 w-52">
-                <ListingCard listing={l} citySlug={citySlug} />
+                <ListingCard listing={l} citySlug={citySlug} coverUrl={rowCovers.get(l.id)} />
               </div>
             ))}
       </div>
@@ -205,6 +207,7 @@ export default function CityHomeClient({
     );
   }
 
+  const freshCovers = listingCovers(freshListings.slice(0, 12));
   return (
     <div style={{ background: 'var(--li-page-bg)', minHeight: '100vh' }}>
       <SiteHeader citySlug={citySlug} cityName={city?.name} />
@@ -300,7 +303,7 @@ export default function CityHomeClient({
                   ))
                 : freshListings.slice(0, 12).map(l => (
                     <div key={l.id} className="shrink-0 w-52">
-                      <ListingCard listing={l} citySlug={citySlug} />
+                      <ListingCard listing={l} citySlug={citySlug} coverUrl={freshCovers.get(l.id)} />
                     </div>
                   ))}
             </div>

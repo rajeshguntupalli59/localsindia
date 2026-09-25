@@ -7,6 +7,7 @@ import { ArrowLeft, User } from 'lucide-react';
 import { api } from '@/lib/api';
 import type { SellerProfile } from '@/lib/types';
 import ListingCard from '@/components/listing-card/ListingCard';
+import { listingCovers } from '@/lib/categoryCover';
 
 function Skeleton({ className }: { className?: string }) {
   return <div className={`animate-pulse bg-slate-100 rounded-lg ${className ?? ''}`} />;
@@ -30,6 +31,7 @@ export default function SellerProfilePage() {
       .catch(() => { setError(true); setLoading(false); });
   }, [id]);
 
+  const sellerCovers = listingCovers(profile?.listings ?? []);
   const initials = profile?.name
     ? profile.name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
     : '?';
@@ -125,7 +127,7 @@ export default function SellerProfilePage() {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {profile.listings.map(l => (
-                  <ListingCard key={l.id} listing={l} />
+                  <ListingCard key={l.id} listing={l} coverUrl={sellerCovers.get(l.id)} />
                 ))}
               </div>
             )}

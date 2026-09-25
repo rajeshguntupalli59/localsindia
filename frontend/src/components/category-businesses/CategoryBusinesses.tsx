@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { MapPin, Phone, ArrowRight } from 'lucide-react';
-import { categoryCover } from '@/lib/categoryCover';
+import { businessCovers, coverFor } from '@/lib/categoryCover';
 import { api } from '@/lib/api';
 import type { Business } from '@/lib/types';
 import OsmAttribution from '@/components/osm-attribution/OsmAttribution';
@@ -45,6 +45,7 @@ export default function CategoryBusinesses({
   }).toString();
 
   if (items.length === 0) return null;
+  const covers = businessCovers(items.map(b => ({ ...b, category_slug: b.category_slug ?? categorySlug })));
 
   return (
     <section className="mt-10">
@@ -73,7 +74,7 @@ export default function CategoryBusinesses({
             <div className="flex items-start gap-3">
               <div className="relative w-14 h-14 rounded-xl overflow-hidden shrink-0 bg-slate-100">
                 <Image
-                  src={b.images?.[0]?.url ?? categoryCover(b.category_slug ?? categorySlug)}
+                  src={b.images?.[0]?.url ?? covers.get(b.id) ?? coverFor({ id: b.id, category_slug: categorySlug, name: b.name })}
                   alt="" fill className="object-cover" sizes="56px"
                 />
               </div>

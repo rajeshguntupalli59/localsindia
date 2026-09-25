@@ -1,5 +1,4 @@
 import { listingPath } from '@/lib/utils';
-import { categoryCover } from '@/lib/categoryCover';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
@@ -7,6 +6,7 @@ import Image from 'next/image';
 import { MapPin, Phone } from 'lucide-react';
 import { SEO_CATEGORIES } from '@/lib/seoCategories';
 import ListingCard from '@/components/listing-card/ListingCard';
+import { businessCovers, coverFor, listingCovers } from '@/lib/categoryCover';
 import SiteHeader from '@/components/site-header/SiteHeader';
 import SiteFooter from '@/components/site-footer/SiteFooter';
 import OsmAttribution from '@/components/osm-attribution/OsmAttribution';
@@ -106,6 +106,8 @@ export default async function SeoCategoryPage({
   const [{ items: listings, exact }, businesses] = await Promise.all([
     fetchListings(params.city, meta), fetchBusinesses(params.city, meta.businessSlug),
   ]);
+  const covers = listingCovers(listings);
+  const bizCovers = businessCovers(businesses.map(b => ({ ...b, category_slug: b.category_slug ?? meta.businessSlug })));
   const sameState = cities.filter(c => c.state === city.state && c.slug !== city.slug).slice(0, 12);
   const pageUrl = `https://www.localsindia.com/${params.city}/${params.category}`;
 
@@ -204,7 +206,7 @@ export default async function SeoCategoryPage({
                     >
                       <div className="relative w-16 h-16 rounded-xl overflow-hidden shrink-0 bg-slate-100">
                         <Image
-                          src={b.images?.[0]?.url ?? categoryCover(b.category_slug ?? meta.businessSlug)}
+                          src={b.images?.[0]?.url ?? bizCovers.get(b.id) ?? coverFor({ id: b.id, category_slug: meta.businessSlug, name: b.name })}
                           alt="" fill className="object-cover" sizes="64px"
                         />
                       </div>
@@ -237,7 +239,7 @@ export default async function SeoCategoryPage({
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {listings.map((listing) => (
-                  <ListingCard key={listing.id} listing={listing} citySlug={params.city} />
+                  <ListingCard key={listing.id} listing={listing} citySlug={params.city} coverUrl={covers.get(listing.id)} />
                 ))}
               </div>
             </section>

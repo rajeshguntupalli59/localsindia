@@ -14,7 +14,7 @@ import {
 import { api } from '@/lib/api';
 import { timeAgo, listingPath, realImages } from '@/lib/utils';
 import Image from 'next/image';
-import { categoryCover } from '@/lib/categoryCover';
+import { categoryCover, listingCovers } from '@/lib/categoryCover';
 import RepresentativeLabel from '@/components/representative-label/RepresentativeLabel';
 import type { Listing } from '@/lib/types';
 
@@ -53,7 +53,7 @@ const CATEGORY_VISUALS: Record<string, { gradient: [string, string]; Icon: Lucid
 
 const DEFAULT_VISUAL = { gradient: ['#94A3B8', '#64748B'] as [string, string], Icon: ShoppingBag, label: 'Listing' };
 
-function realListingToDisplay(l: Listing): DisplayListing {
+function realListingToDisplay(l: Listing, cover?: string): DisplayListing {
   const slug = l.category_slug ?? '';
   const vis = CATEGORY_VISUALS[slug] ?? DEFAULT_VISUAL;
   return {
@@ -68,7 +68,7 @@ function realListingToDisplay(l: Listing): DisplayListing {
     badge: l.wa_verified ? 'Verified' : 'New',
     gradient: vis.gradient,
     Icon: vis.Icon,
-    image: realImages(l.images)[0]?.url ?? categoryCover(slug),
+    image: realImages(l.images)[0]?.url ?? cover ?? categoryCover(slug),
     representative: realImages(l.images).length === 0,
     waUrl: l.whatsapp_url ?? `https://wa.me/${l.contact_phone.replace('+', '')}`,
     isReal: true,
@@ -398,7 +398,8 @@ export default function FreshListingsSection({
     api.cities.listings(effectiveCity, { page_size: '6', sort: 'newest' })
       .then(data => {
         if (data && data.length > 0) {
-          setListings(data.map(realListingToDisplay));
+          const covers = listingCovers(data);
+          setListings(data.map(l => realListingToDisplay(l, covers.get(l.id))));
         } else {
           setListings(FRESH_LISTINGS);
         }
