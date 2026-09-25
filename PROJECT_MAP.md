@@ -120,8 +120,8 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 ### 2026-09-25 — SESSION SUMMARY + open items (start here next session)
 Shipped today (details in the entries below): claim flow E2E-tested 23/23 + onboarding-quiz fix · `/admin/outreach` owner outreach · live-site audit fixes (share images, real counts, Organization JSON-LD, Call/Directions/Share) · City Seeder retired + 2,997 fake listings unpublished · neighbourhood pages (27,040 businesses tagged, 3,749 URLs in `/sitemap-areas.xml`) · opening hours + "Open now" · home page 925 → 371 KB. Sitemap resubmitted in GSC (~37,865 discovered).
 Open items:
-- Opening-hours backfill (osm-import run 36091832956, `backfill_hours`) was still running at session end — check it finished (`gh run view 36091832956`); re-run the same input if it failed.
-- Raj: submit `sitemap-areas.xml` in Google Search Console; add the site to Bing Webmaster Tools via "Import from GSC".
+- DONE: opening-hours backfill (run 36091832956) — 4,888 businesses got hours. `sitemap-areas.xml` submitted in GSC and fetched OK (GSC first showed "Couldn't fetch" — its normal new-sitemap glitch; resolved on its own).
+- Raj: add the site to Bing Webmaster Tools via "Import from GSC".
 - Admin pages are cramped on phones (fixed 224px sidebar) and log a harmless hydration warning (layout reads localStorage in useState).
 - Optional: dedicated MSG91 DLT template for claim SMS (claims reuse the login template); ask owners to request reviews when a claim is approved.
 - Real SMS delivery of claim codes not yet tested end to end (local tests used OTP_DEBUG).
