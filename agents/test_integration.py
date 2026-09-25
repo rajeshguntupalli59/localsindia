@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Integration test — verifies all 8 agents work end-to-end with the Claude API.
-Does NOT post to the live backend (no city_launcher seeding).
+Does NOT post to the live backend.
 Run: python agents/test_integration.py
 """
 import sys
@@ -28,7 +28,7 @@ def check(label, fn):
 print("\n-- base_agent --")
 from base_agent import build_system_prompt, generate, save_output
 
-for agent_name in ["city_launcher","seo_agent","content_writer","whatsapp_agent",
+for agent_name in ["seo_agent","content_writer","whatsapp_agent",
                    "reddit_agent","cro_agent","feedback_agent","growth_tracker"]:
     check(
         f"build_system_prompt({agent_name})",
@@ -64,17 +64,6 @@ check("cro_agent.run", lambda: __import__("cro_agent").run)
 check("feedback_agent.run", lambda: __import__("feedback_agent").run)
 check("growth_tracker.run", lambda: __import__("growth_tracker").run)
 check("run_all.run_agent", lambda: __import__("run_all").run_agent)
-
-# ── 5. city_launcher: TokenManager class ──────────────────────────────────────
-print("\n-- city_launcher internals --")
-from city_launcher import TokenManager, build_system_prompt as cl_sp, LISTING_PHONES, BUSINESS_PHONES
-
-check("city_launcher.build_system_prompt()", lambda: cl_sp())
-check("LISTING_PHONES valid format (20 entries)", lambda: (
-    [None for p in LISTING_PHONES if not p.startswith("+9163")] == [] and
-    len(LISTING_PHONES) == 20
-) or (_ for _ in ()).throw(AssertionError("Phone format check failed")))
-check("TokenManager class exists", lambda: TokenManager)
 
 # ── 6. CLI args parse without error ───────────────────────────────────────────
 print("\n-- CLI argument parsing --")

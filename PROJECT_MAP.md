@@ -71,10 +71,10 @@ Python scripts using the Anthropic API (`base_agent.py` is the shared runner) to
 | `meta_poster.py` | Generates + posts branded image/text posts to Facebook Page + Instagram (feed+story). Topics: app_feature, category_tip, safety_tip, city_spotlight, app_launch. **Fixed 2026-08-08**: was picking topics with plain `random.choice()` (no memory) and category_tip never specified which category, so it kept defaulting to the same "fake job posting" example — now uses round-robin-no-repeat rotation persisted to `agents/state/meta_poster_rotation.json`. | ✅ Yes — `social-poster.yml` |
 | `ecosystem_poster.py` | Generates + posts the two-sided "Searching/Offering" ecosystem explainer poster | ✅ Yes — `social-poster.yml` (occasional, second daily slot) |
 | `blog_agent.py` | Generates weekly evergreen SEO guide articles (city + category rotation via `agents/state/blog_rotation.json`, round-robin no-repeat — the pattern `meta_poster.py`'s fix now mirrors), commits to `frontend/src/content/blog/`, shares to Facebook | ✅ Yes — `blog-publisher.yml` |
-| `city_launcher.py` | Seeds a city with 20 listings + 10 businesses (`is_seed=true`, exempt from expiry). `--city NAME` for one city; `--auto N` finds the next N cities with zero active listings (live query, no state file) and seeds each. | ✅ Yes — `city-seeder.yml`, `--auto 10` (also `--city` manually) |
+| ~~`city_launcher.py`~~ | **Deleted 2026-09-25** with `city-seeder.yml`, `seed_ap_cities.ps1` and its prompt — it seeded AI-written listings with fake phones. Real businesses now come from `osm_business_import.py`. | — |
 | `seo_agent.py` | Generates AI-varied SEO metadata (title/description/OG/keywords/JSON-LD) per city, writes to `frontend/src/content/seo/{slug}.json` — read live by `[city]/page.tsx` (`lib/seo.ts`), falls back to the plain template when absent. `--auto N` targets cities that already qualify for Google's index (`>= MIN_LISTINGS_FOR_INDEX`) without generated content yet, prioritized by listing count. **Fixed 2026-08-13**: was previously wired to write into gitignored `agents/output/` — completely disconnected from the live site, zero effect regardless of how often it ran. | ✅ Yes — `seo-agent.yml`, `--auto 10`, daily 11:30am IST |
 | `content_writer.py`, `reddit_agent.py`, `cro_agent.py`, `feedback_agent.py`, `growth_tracker.py`, `whatsapp_agent.py` | Exist as files, described in `MARKETING_AGENT_SYSTEM.md` | ⚠️ Not found in any `.github/workflows/*.yml` — verify manually before assuming these run automatically |
-| `social_publisher.py`, `share_blog_post.py` | Publishing helper utilities | Called by the above, not standalone scheduled jobs |
+| `share_blog_post.py` | Shares a new blog post to Facebook | Called by `blog-publisher.yml` (`social_publisher.py` deleted 2026-09-25 — it imported a class that no longer existed) |
 | `run_all.py`, `test_integration.py` | Batch runner / integration test | Manual |
 
 `agents/context/product_context.md` — shared product facts (voice, all 12 categories, scope) read by the posting agents. `agents/instructions/*.md` — per-agent system prompt instructions.
@@ -100,7 +100,7 @@ Python scripts using the Anthropic API (`base_agent.py` is the shared runner) to
 | Workflow | Cron (UTC) | IST | What it does |
 |---|---|---|---|
 | `social-poster.yml` | `0 4 * * *`, `30 13 * * *` | 9:30am, 7pm daily | Runs `meta_poster.py` (mostly) or `ecosystem_poster.py`/text variant (2nd slot, randomized) |
-| ~~`city-seeder.yml`~~ | — | — | **RETIRED 2026-09-25** — disabled in GitHub, schedule removed. It posted AI-written listings with made-up phone numbers; never re-enable (see §6) |
+| ~~`city-seeder.yml`~~ | — | — | **DELETED 2026-09-25** (was disabled first). It posted AI-written listings with made-up phone numbers; never re-enable (see §6) |
 | `seo-agent.yml` | `0 6 * * *` | 11:30am daily | Generates SEO metadata for the next 10 indexable cities without it yet (`seo_agent.py --auto 10`). Live and verified 2026-08-13 — see §6 |
 | `blog-publisher.yml` | `0 3 * * 0` | 8:30am Sunday | Weekly evergreen blog article via `blog_agent.py` |
 | `expiry-reminders.yml` | `30 3 * * *` | 9am daily | Sends real reminders to users with expiring listings |
@@ -122,6 +122,10 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 - `meta_poster.py` topic `area_directory` (every other post): picks a real (city, category, neighbourhood) with 5+ businesses via `/businesses/locality-pages`, never repeats (`areaPosted` in `agents/state/meta_poster_rotation.json`), rotates Hyderabad/Bengaluru/Chennai/Vijayawada/Kochi/Coimbatore. Text is a fixed template from live counts (no LLM) — e.g. "57 Doctors, Clinics & Pharmacies in Malleswaram" + link. Workflow topic choice added.
 - Claim approval (all 3 paths — SMS code now also notifies) sends one notification with a review nudge (`_notify_new_owner`). Owners see a "Get reviews from your customers" card (WhatsApp share + copy) on their business page until 5 reviews, and on the SMS-claim success screen (`components/review-invite/ReviewInvite.tsx`).
 - Paid "Get Verified — ₹499/month" offers hidden (Raj, 2026-09-25) on the owner's business page and the add-business success screen via `PAID_BADGES_ENABLED = false` in `frontend/src/lib/features.ts` — flip to true to bring them back.
+
+### 2026-09-25 — Dead code removed
+- Deleted (all verified unreferenced): `agents/city_launcher.py` + `agents/instructions/city_launcher.md` + `agents/seed_ap_cities.ps1` + `.github/workflows/city-seeder.yml` (retired seeder); `agents/social_publisher.py` (imported a non-existent `BaseAgent`, could not run); `frontend/src/hooks/useCities.ts`, `frontend/src/lib/static-params.ts` (imported nowhere); mobile `businessesApi.claim()` (called the removed instant-claim endpoint). `agents/test_integration.py` cleaned of seeder checks (it was already broken on the seeder import).
+- Kept on purpose: `meta_client.py` video helpers (manual video pipeline, §4a). Backend: no unimported modules (vulture hits were ORM columns / FastAPI endpoints, i.e. false positives).
 
 ### 2026-09-25 — Security review fixes
 - **Admin password was committed** (`agents/.env.example`, `PROJECT_IQ.md`) in the PUBLIC repo — replaced with placeholders. **Raj must rotate it** (new `ADMIN_PASSWORD_HASH` in Azure + GitHub secret `LOCALINDIA_ADMIN_PASSWORD` + local `agents/.env.agents`); the old value stays in git history. `/auth/admin-login` now rate-limited (20/min).

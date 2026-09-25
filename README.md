@@ -190,7 +190,7 @@ duplicate or overwrite an owner's edits.
 | **Interest Digest** | 9 am daily / Monday | Email digests of new listings matching saved interests |
 | **Keep Backend Alive** | every 25 min | Pings the API so it doesn't cold-start |
 | **Deploy Backend / Frontend**, **Test** | on push to `master` | See section 7 |
-| ~~City Seeder~~ | — | **Retired 2026-09-25 and disabled. Never re-enable** — it posted AI-written listings with made-up phone numbers. |
+| ~~City Seeder~~ | — | **Deleted 2026-09-25.** It posted AI-written listings with made-up phone numbers — never bring it back. |
 
 Manual-only: **OSM Business Import**, **Assign Business Localities** (section 4).
 

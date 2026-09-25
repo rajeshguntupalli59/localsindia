@@ -77,7 +77,7 @@
 | Category browse | §5-categories | `routers/categories.py` | `[city]/[category]/page.tsx` | `categories` | GET /categories |
 | 11-language i18n | §15 | `i18n/request.ts` | `messages/*.json`, `components/language-selector/` | — | — (client-side only) |
 | PWA / offline | §9-ServiceWorker | — | `components/pwa/ServiceWorker.tsx`, `app/offline/page.tsx` | — | — |
-| Hybrid SSR (Azure SWA) | §7, §16 | — | `next.config.mjs`, `staticwebapp.config.json`, `lib/static-params.ts` | — | — |
+| Hybrid SSR (Azure SWA) | §7, §16 | — | `next.config.mjs`, `staticwebapp.config.json` | — | — |
 | Auto-deploy CI/CD + PR staging | §16 | `.github/workflows/backend-azure.yml` | `.github/workflows/frontend-azure.yml` | — | — |
 | City seeding | §18-Scripts | `scripts/seed_cities.py`, `scripts/seed_categories.py` | — | `cities`, `categories` | — |
 | Admin role management | §6-Admin | `routers/admin.py` | `admin/users/page.tsx`, mobile `AdminScreen.tsx` | `users` | PATCH /admin/users/{id}/role |

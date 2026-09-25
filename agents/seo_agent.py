@@ -14,7 +14,7 @@ Usage:
 itself uses — matches agents/seo_agent.py:MIN_LISTINGS_FOR_INDEX) and don't
 already have a generated file, prioritizing the most-listed cities first
 since those get real search traffic soonest. No separate rotation-state
-file — self-correcting the same way city_launcher.py's --auto is: a city
+file — self-correcting: a city
 just stops being a "candidate" once frontend/src/content/seo/{slug}.json
 exists for it, or it drops below the listing threshold.
 

@@ -16,7 +16,6 @@ Agents run (in order):
   6. feedback_agent — Community response templates
 
 NOT run here:
-  - city_launcher  — one-time seed operation, run separately
   - growth_tracker — run separately to check all cities
 
 Output: all files saved to agents/output/{city_slug}/

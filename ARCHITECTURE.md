@@ -784,7 +784,7 @@ The frontend used to be built with Next.js `output: 'export'` (pure static HTML,
 1. `next.config.mjs` no longer sets `output: 'export'` — it's a normal Next.js build (`images.unoptimized: true`, `cleanDistDir: true`, webpack cache disabled to avoid stale-chunk corruption)
 2. `.github/workflows/frontend-azure.yml` deploys with `output_location: ''` — Azure SWA's build system (Oryx) detects the Next.js app and provisions its own managed Node.js Azure Functions runtime behind the scenes; you don't write or see this function app
 3. `app/[city]/layout.tsx` has **no `generateStaticParams()`** — every city route renders server-side, on demand, the first time it's requested (this is what fixed the "all `/[city]/*` routes 500" bug — `generateStaticParams() { return [] }` always crashed the managed function)
-4. `frontend/src/lib/static-params.ts` → `getAllCityParams()` now just returns `[]` with a comment confirming this: *"In SSR (hybrid) mode, city pages render on demand — no pre-building needed."*
+4. City pages render on demand (`dynamicParams = true` in `[city]/layout.tsx`) — no pre-building. (The empty `lib/static-params.ts` helper was deleted 2026-09-25.)
 
 **Why this still feels fast:** city/listing pages are real server renders (not a client-only fetch-after-mount trick) — the HTML that comes back already has the shell; data-heavy bits still hydrate client-side via `useEffect` + `lib/api.ts` calls for content that depends on auth state or changes per-request.
 
