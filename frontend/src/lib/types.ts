@@ -170,6 +170,7 @@ export interface Business {
   longitude?: number | null;
   locality?: string | null;       // neighbourhood from OpenStreetMap, e.g. "Madhapur"
   locality_slug?: string | null;
+  opening_hours?: string | null;  // OpenStreetMap syntax, e.g. "Mo-Sa 09:00-21:00; Su off"
   created_at: string;
   reviews?: Review[];
   images?: ListingImage[];

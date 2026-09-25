@@ -316,6 +316,7 @@ def to_business(el: dict) -> tuple[dict | None, str]:
         "website_url": website if website and website.startswith("http") else None,
         "latitude": round(lat, 6) if lat else None,
         "longitude": round(lon, 6) if lon else None,
+        "opening_hours": (tags.get("opening_hours") or "").strip()[:255] or None,
     }, ""
 
 
@@ -569,6 +570,26 @@ def run_city(city: str, regions: dict, live_categories: list[str], do_apply: boo
     print(f"{city}: clean")
 
 
+def backfill_hours(city: str, regions: dict) -> int:
+    """Copy OSM opening_hours onto this city's already-imported businesses
+    (only where hours are still empty — see POST /admin/businesses/import/hours)."""
+    items = []
+    for el in fetch_osm(tuple(regions[city]["bbox"])):
+        row, _ = to_business(el)
+        if row and row["opening_hours"]:
+            items.append({"source_ref": row["source_ref"], "opening_hours": row["opening_hours"]})
+    updated = 0
+    with httpx.Client(timeout=120) as client:
+        headers = admin_headers(client)
+        for i in range(0, len(items), 2000):
+            r = client.post(f"{BACKEND_URL}/api/v1/admin/businesses/import/hours",
+                            json={"items": items[i:i + 2000]}, headers=headers)
+            r.raise_for_status()
+            updated += r.json()["updated"]
+    print(f"  {city}: {len(items)} with hours in OSM, {updated} filled")
+    return updated
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--city", help="one city slug")
@@ -577,10 +598,20 @@ def main() -> None:
     ap.add_argument("--verify", action="store_true", help="only run the live checks for --city")
     ap.add_argument("--fix", action="store_true", help="with --verify: soft-delete imports that fail the checks first")
     ap.add_argument("--fix-done", action="store_true", help="re-home, clean and verify every city already imported")
+    ap.add_argument("--backfill-hours", action="store_true", help="fill opening hours for --city, or every imported city")
     args = ap.parse_args()
 
     data = load_regions()
     regions, order = data["regions"], data["order"]
+    if args.backfill_hours:
+        cities = [args.city] if args.city else [c for c in order if c in load_state()]
+        total = 0
+        for i, city in enumerate(cities):
+            total += backfill_hours(city, regions)
+            if i < len(cities) - 1:
+                time.sleep(10)   # be gentle with the public Overpass servers
+        print(f"Done: {total} businesses got opening hours")
+        return
     if args.fix_done:
         failed = []
         for city in load_state():

@@ -402,3 +402,32 @@ async def test_localities_set_list_and_pages(auth_client, admin_client, city, ca
     await admin.post("/api/v1/admin/businesses/import/localities",
                      json={"city_slug": city.slug, "items": [{"id": ids[3], "locality": None}]})
     assert (await client.get(f"/api/v1/businesses/{ids[3]}")).json()["locality_slug"] is None
+
+
+@pytest.mark.asyncio
+async def test_opening_hours_import_and_backfill(auth_client, admin_client, city, category):
+    from app.models.business import Business
+    client, _ = auth_client
+    admin, _ = admin_client
+    tag = uuid.uuid4().hex[:8]
+    r = await admin.post("/api/v1/admin/businesses/import", json={"city_slug": city.slug, "businesses": [
+        {"name": f"Hours A {tag}", "category_slug": category.slug, "source_ref": f"node/ha{tag}",
+         "address": "Road 1", "opening_hours": "Mo-Sa 09:00-21:00"},
+        {"name": f"Hours B {tag}", "category_slug": category.slug, "source_ref": f"node/hb{tag}", "address": "Road 2"},
+    ]})
+    assert r.json()["created"] == 2
+
+    # Backfill fills only empty hours — never overwrites existing ones
+    items = [{"source_ref": f"node/ha{tag}", "opening_hours": "24/7"},
+             {"source_ref": f"node/hb{tag}", "opening_hours": "Mo-Su 10:00-22:00"}]
+    assert (await client.post("/api/v1/admin/businesses/import/hours", json={"items": items})).status_code == 403
+    res = await admin.post("/api/v1/admin/businesses/import/hours", json={"items": items})
+    assert res.json() == {"updated": 1, "skipped": 1}
+
+    engine = _make_engine()
+    async with async_sessionmaker(engine)() as s:
+        hours = dict((await s.execute(
+            select(Business.source_ref, Business.opening_hours).where(Business.source_ref.like(f"node/h_{tag}"))
+        )).all())
+    await engine.dispose()
+    assert hours == {f"node/ha{tag}": "Mo-Sa 09:00-21:00", f"node/hb{tag}": "Mo-Su 10:00-22:00"}

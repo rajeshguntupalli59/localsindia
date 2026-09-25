@@ -32,6 +32,11 @@ on:
         required: false
         type: boolean
         default: false
+      backfill_hours:
+        description: 'Fill opening hours from OSM for the given city (or every imported city)'
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: write   # commits the import progress file
@@ -55,6 +60,11 @@ jobs:
           LOCALINDIA_ADMIN_PASSWORD: ${{ secrets.LOCALINDIA_ADMIN_PASSWORD }}
         run: |
           CITY="${{ github.event.inputs.city }}"
+          if [ "${{ github.event.inputs.backfill_hours }}" = "true" ]; then
+            if [ -n "$CITY" ]; then python agents/osm_business_import.py --backfill-hours --city "$CITY"
+            else python agents/osm_business_import.py --backfill-hours; fi
+            exit $?
+          fi
           if [ "${{ github.event.inputs.fix_done }}" = "true" ]; then
             python agents/osm_business_import.py --fix-done
             exit $?

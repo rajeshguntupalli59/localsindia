@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, MapPin, Phone, Globe, Star, BadgeCheck, MessageCircle, ShieldCheck, Navigation, Share2 } from 'lucide-react';
+import { ArrowLeft, MapPin, Phone, Globe, Star, BadgeCheck, MessageCircle, ShieldCheck, Navigation, Share2, Clock } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -14,6 +14,7 @@ import ClaimBusinessModal from '@/components/claim-business/ClaimBusinessModal';
 import OsmAttribution from '@/components/osm-attribution/OsmAttribution';
 import RepresentativeLabel from '@/components/representative-label/RepresentativeLabel';
 import { coverFor } from '@/lib/categoryCover';
+import { describeWeek, openStatus, parseOpeningHours } from '@/lib/openingHours';
 
 function StarPicker({ value, onChange }: { value: number; onChange: (v: number) => void }) {
   return (
@@ -34,6 +35,25 @@ function StarPicker({ value, onChange }: { value: number; onChange: (v: number) 
           />
         </button>
       ))}
+    </div>
+  );
+}
+
+// Hours with an "Open now / Closed" badge (India time); unreadable formats show as written
+function OpeningHours({ raw }: { raw: string }) {
+  const week = parseOpeningHours(raw);
+  const status = week ? openStatus(week) : null;
+  return (
+    <div className="flex items-start gap-2 text-slate-600">
+      <Clock className="w-4 h-4 flex-shrink-0 mt-0.5" />
+      <div>
+        {status && (
+          <span className={`font-semibold ${status.open ? 'text-emerald-600' : 'text-red-600'}`}>{status.label}</span>
+        )}
+        {week
+          ? describeWeek(week).map(row => <div key={row} className="text-xs text-slate-500">{row}</div>)
+          : <span>{raw}</span>}
+      </div>
     </div>
   );
 }
@@ -204,6 +224,7 @@ export default function BusinessDetailPage() {
                 <a href={`tel:${business.phone}`} className="hover:underline">{business.phone}</a>
               </div>
             )}
+            {business.opening_hours && <OpeningHours raw={business.opening_hours} />}
             {business.latitude != null && business.longitude != null && (
               <div className="flex items-center gap-2 text-slate-600">
                 <MapPin className="w-4 h-4 flex-shrink-0" />

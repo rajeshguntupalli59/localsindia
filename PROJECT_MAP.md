@@ -135,6 +135,10 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 - Imported 2,406 (first run). Businesses now also show under their category: `CategoryBusinesses` strip on `/search`, `/[city]/search`, `/[city]/[category]` ("View all" → `/[city]/businesses?category=slug`); directory page got category chips + Load more; `GET /businesses` takes `category_slug` and sorts verified → owned → rated → has-phone. Mapping extended to PG/hostels, event venues, job agencies, property managers; script now refuses to run if a map targets a non-existent category and reports categories with zero businesses.
 - Note: businesses created earlier by `city_launcher.py` use fictional phones (+9164000000xx) and are owned by the admin account.
 
+### 2026-09-25 — Opening hours
+- OSM `opening_hours` (14–24% of businesses have it) stored on businesses (migration `c8d9e0f1a2b3`); new imports carry it, `osm_business_import.py --backfill-hours` (workflow input `backfill_hours`) fills existing rows without overwriting.
+- Business page: hours + "Open now · closes 21:00" / "Closed · opens tomorrow 09:00" in India time (`lib/openingHours.ts`, common formats only — anything else shown as written, no badge); JSON-LD `openingHours`.
+
 ### 2026-09-25 — Neighbourhood (area) pages
 - `agents/assign_localities.py` (workflow `assign-localities.yml`, manual) tags each business with its nearest OSM place node: suburbs when a city has 5+ (≤3 km), else neighbourhoods (≤1.5 km); generic names ("Phase 3") skipped. Idempotent — re-run after new imports.
 - New pages `/[city]/area/[area]` and `/[city]/[category]/[area]` ("Doctors & Clinics in Madhapur, Hyderabad"), indexed at 3+ businesses, listed in `/sitemap-areas.xml` (in robots.txt; sitemap.xml is near the 50k cap). Linked from city page (Popular areas), category pages (by area) and business pages.

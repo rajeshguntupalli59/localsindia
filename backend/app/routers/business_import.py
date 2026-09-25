@@ -34,6 +34,7 @@ class ImportedBusiness(BaseModel):
     website_url: str | None = None
     latitude: float | None = None
     longitude: float | None = None
+    opening_hours: str | None = Field(default=None, max_length=255)
 
 
 class ImportRequest(BaseModel):
@@ -82,6 +83,7 @@ async def import_businesses(
             website_url=b.website_url,
             latitude=b.latitude,
             longitude=b.longitude,
+            opening_hours=b.opening_hours,
             source=body.source,
             source_ref=b.source_ref,
         ))
@@ -187,5 +189,35 @@ async def set_business_localities(
         name = wanted[b.id]
         b.locality = name
         b.locality_slug = locality_slug(name) if name else None
+    await db.commit()
+    return {"updated": len(rows), "skipped": len(body.items) - len(rows)}
+
+
+class HoursItem(BaseModel):
+    source_ref: str = Field(max_length=40)
+    opening_hours: str = Field(max_length=255)
+
+
+class HoursRequest(BaseModel):
+    items: list[HoursItem]
+
+
+@router.post("/businesses/import/hours")
+async def backfill_opening_hours(
+    body: HoursRequest,
+    db: AsyncSession = Depends(get_db),
+    admin: User = Depends(get_current_admin),
+):
+    """Fill opening hours from OpenStreetMap for already-imported businesses.
+    Never overwrites hours that are already set (an owner may have edited them)."""
+    if len(body.items) > 2000:
+        raise HTTPException(status_code=400, detail="Send at most 2000 items per request.")
+    wanted = {i.source_ref: i.opening_hours.strip() for i in body.items if i.opening_hours.strip()}
+    rows = (await db.execute(
+        select(Business).where(Business.source_ref.in_(wanted), Business.opening_hours.is_(None),
+                               Business.deleted_at.is_(None))
+    )).scalars().all()
+    for b in rows:
+        b.opening_hours = wanted[b.source_ref]
     await db.commit()
     return {"updated": len(rows), "skipped": len(body.items) - len(rows)}

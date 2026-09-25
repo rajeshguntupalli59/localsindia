@@ -4,6 +4,7 @@ import type { Business } from '@/lib/types';
 import BusinessDetailClient from './BusinessDetailClient';
 import { SEO_CATEGORIES, SEO_PAGE_FOR_BUSINESS_CATEGORY } from '@/lib/seoCategories';
 import { coverFor } from '@/lib/categoryCover';
+import { parseOpeningHours, schemaOpeningHours } from '@/lib/openingHours';
 import { realImages } from '@/lib/utils';
 
 // Must be dynamic: a generateStaticParams placeholder (left from the old static
@@ -83,6 +84,7 @@ export default async function Page({ params }: { params: { city: string; id: str
         item: `https://www.localsindia.com/${params.city}/businesses/${b.id}` },
     ],
   } : null;
+  const hours = parseOpeningHours(b?.opening_hours);
   const jsonLd = b ? {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
@@ -91,6 +93,7 @@ export default async function Page({ params }: { params: { city: string; id: str
     ...(b.phone ? { telephone: b.phone } : {}),
     ...(b.latitude != null && b.longitude != null
       ? { geo: { '@type': 'GeoCoordinates', latitude: b.latitude, longitude: b.longitude } } : {}),
+    ...(hours ? { openingHours: schemaOpeningHours(hours) } : {}),
     url: `https://www.localsindia.com/${params.city}/businesses/${b.id}`,
   } : null;
   return (
