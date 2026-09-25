@@ -5,6 +5,7 @@ import { X, MessageSquare, FileText, CheckCircle2, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 import { api, ApiError } from '@/lib/api';
 import type { ClaimOptions } from '@/lib/types';
+import ReviewInvite from '@/components/review-invite/ReviewInvite';
 
 type Tab = 'otp' | 'documents';
 
@@ -146,7 +147,10 @@ export default function ClaimBusinessModal({
 
         {done === 'approved' ? (
           <Result icon={<CheckCircle2 className="w-10 h-10 text-emerald-500" />} title="You now manage this business"
-            body="You can edit the details, add photos and see your analytics." onClose={onClose} />
+            body="You can edit the details, add photos and see your analytics." onClose={onClose}>
+            <ReviewInvite businessName={businessName}
+              url={`https://www.localsindia.com${window.location.pathname}`} />
+          </Result>
         ) : done === 'pending' || opts?.pending_claim ? (
           <Result icon={<Clock className="w-10 h-10 text-amber-500" />} title="Your claim is under review"
             body="Our team checks claims within 1–2 days and may call the number you gave. You'll get a notification with the result."
@@ -299,12 +303,15 @@ function FileField({ label, hint, file, onChange, required, capture }: {
   );
 }
 
-function Result({ icon, title, body, onClose }: { icon: React.ReactNode; title: string; body: string; onClose: () => void }) {
+function Result({ icon, title, body, onClose, children }: {
+  icon: React.ReactNode; title: string; body: string; onClose: () => void; children?: React.ReactNode;
+}) {
   return (
     <div className="text-center py-6">
       <div className="flex justify-center mb-3">{icon}</div>
       <p className="font-bold" style={{ color: 'var(--li-text)' }}>{title}</p>
       <p className="text-sm mt-1 mb-5" style={{ color: 'var(--li-muted)' }}>{body}</p>
+      {children && <div className="mb-5">{children}</div>}
       <button onClick={onClose} className="px-6 py-2.5 rounded-xl border text-sm font-semibold">Close</button>
     </div>
   );

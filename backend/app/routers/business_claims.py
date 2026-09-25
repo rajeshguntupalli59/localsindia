@@ -69,6 +69,19 @@ def mask_phone(phone: str) -> str:
     return f"{phone[:3]} ••••• {phone[-4:]}"
 
 
+async def _notify_new_owner(db: AsyncSession, business: Business, user_id: uuid.UUID, how: str) -> None:
+    """Tell the new owner they're in, and point them at the next step that
+    actually brings customers: reviews from people who already know them."""
+    city = await db.get(City, business.city_id)
+    await notify(
+        db, user_id, "business_claim",
+        f"You now manage {business.name}",
+        f"{how} Next: share your page with regular customers on WhatsApp and ask for a review — "
+        "ratings help you show up first in search.",
+        action_url=f"/{city.slug}/businesses/{business.id}",
+    )
+
+
 async def _get_business(business_id: uuid.UUID, db: AsyncSession) -> Business:
     result = await db.execute(
         select(Business).where(Business.id == business_id, Business.deleted_at.is_(None))
@@ -206,6 +219,7 @@ async def verify_claim_otp(
     business.owner_id = current_user.id
     business.updated_at = now
     await db.commit()
+    await _notify_new_owner(db, business, current_user.id, "The code you entered matched the business's phone.")
     return {"status": "approved"}
 
 
@@ -346,12 +360,7 @@ async def approve_claim(
         other.reviewed_at = now
     await db.commit()
 
-    await notify(
-        db, claim.user_id, "business_claim",
-        f"You now manage {business.name}",
-        "Your ownership claim was verified. You can edit the listing now.",
-        action_url=f"/{(await db.get(City, business.city_id)).slug}/businesses/{business.id}",
-    )
+    await _notify_new_owner(db, business, claim.user_id, "Your ownership claim was verified.")
     for other in losers:
         await notify(db, other.user_id, "business_claim", f"Claim for {business.name} not approved", other.reject_reason)
     return {"status": "approved"}
@@ -397,13 +406,7 @@ async def approve_email_claim(
     business.updated_at = now
     await db.commit()
 
-    city = await db.get(City, business.city_id)
-    await notify(
-        db, user.id, "business_claim",
-        f"You now manage {business.name}",
-        "We checked the documents you emailed. You can edit the listing now.",
-        action_url=f"/{city.slug}/businesses/{business.id}",
-    )
+    await _notify_new_owner(db, business, user.id, "We checked the documents you emailed.")
     return {"status": "approved", "business": business.name, "owner": user.name}
 
 

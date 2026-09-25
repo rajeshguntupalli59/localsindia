@@ -40,6 +40,7 @@ const TOPIC_ICON_PATHS = {
   city_spotlight: '<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>',
   app_launch: '<path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>',
   referral: '<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8"/><path d="M16.5 8a2.5 2.5 0 0 0 0-5C13 3 12 8 12 8"/>',
+  area_directory: '<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>',
   seller_call: '<path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/>',
 };
 
@@ -57,6 +58,7 @@ const TOPIC_THEMES = {
   city_spotlight: { eyebrow: 'CITY SPOTLIGHT', accent: '#25D366', glowA: '#163D6B', glowB: '#25D366', footer: 'Free to post · WhatsApp contact · localsindia.com', cta: 'Post free on LocalsIndia →' },
   app_launch: { eyebrow: 'GET STARTED', accent: '#F7921E', glowA: '#F7921E', glowB: '#F7B731', footer: 'Download on Google Play · localsindia.com', cta: 'Download on Google Play →' },
   referral: { eyebrow: 'INVITE & EARN', accent: '#F7B731', glowA: '#F7921E', glowB: '#25D366', footer: 'localsindia.com/invite · both get featured', cta: 'Get your invite link →' },
+  area_directory: { eyebrow: 'LOCAL DIRECTORY', accent: '#25D366', glowA: '#163D6B', glowB: '#F7921E', footer: 'Addresses & phone numbers · localsindia.com', cta: 'See the full list →' },
   seller_call: { eyebrow: 'FOR LOCAL SELLERS', accent: '#25D366', glowA: '#F7921E', glowB: '#25D366', footer: 'List free · Get found on WhatsApp · localsindia.com', cta: 'List your business free →' },
 };
 const DEFAULT_THEME = TOPIC_THEMES.app_feature;

@@ -431,3 +431,19 @@ async def test_opening_hours_import_and_backfill(auth_client, admin_client, city
         )).all())
     await engine.dispose()
     assert hours == {f"node/ha{tag}": "Mo-Sa 09:00-21:00", f"node/hb{tag}": "Mo-Su 10:00-22:00"}
+
+
+@pytest.mark.asyncio
+async def test_new_owner_gets_review_nudge(auth_client, city, monkeypatch):
+    client, _ = auth_client
+    monkeypatch.setattr(business_claims, "generate_otp", lambda: "551177")
+    b = await _unclaimed_business(city, phone="+91 98480 55117")
+    await client.post(f"/api/v1/businesses/{b.id}/claim/otp/send")
+    assert (await client.post(f"/api/v1/businesses/{b.id}/claim/otp/verify", json={"otp": "551177"})).status_code == 200
+
+    notes = (await client.get("/api/v1/notifications")).json()
+    items = notes if isinstance(notes, list) else notes.get("items", notes.get("notifications", []))
+    mine = [n for n in items if n["title"] == f"You now manage {b.name}"]
+    assert len(mine) == 1
+    assert "ask for a review" in mine[0]["body"]
+    assert mine[0]["action_url"] == f"/{city.slug}/businesses/{b.id}"

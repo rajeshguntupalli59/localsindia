@@ -31,6 +31,7 @@ on:
           - app_launch
           - referral
           - seller_call
+          - area_directory
 
 permissions:
   contents: write   # this workflow commits the posting log back to the repo

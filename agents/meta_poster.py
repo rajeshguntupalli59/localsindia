@@ -18,12 +18,14 @@ Requires (env vars, same names already set on Azure for the backend):
 """
 import argparse
 import json
+import os
 import random
 import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
 
+import httpx
 from dotenv import load_dotenv
 
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
@@ -38,11 +40,13 @@ from meta_client import (
     post_to_instagram_story,
 )
 
-TOPICS = ["app_feature", "category_tip", "safety_tip", "city_spotlight", "app_launch", "referral", "seller_call"]
+TOPICS = ["app_feature", "category_tip", "safety_tip", "city_spotlight", "app_launch", "referral", "seller_call", "area_directory"]
 # app_launch is still selectable with --topic, but it's out of the automatic
 # rotation: 15 of the first 80 posts were "the app is live" and the audience
 # had already seen it.
-ROTATION_TOPICS = [t for t in TOPICS if t != "app_launch"]
+ROTATION_TOPICS = [t for t in TOPICS if t not in ("app_launch", "area_directory")]
+# area_directory alternates with the rest (every other post): it links to a
+# real neighbourhood page, e.g. "12 Doctors, Clinics & Pharmacies in Madhapur".
 # How many recent posts the model is shown so it doesn't repeat itself.
 RECENT_POSTS_SHOWN = 20
 SPOTLIGHT_CITIES = ["Hyderabad", "Bengaluru", "Chennai", "Kochi", "Vijayawada", "Coimbatore"]
@@ -54,6 +58,27 @@ SELLER_TYPES = [
     "electricians, plumbers and repair services", "used-furniture and electronics sellers",
     "small shop and business owners", "event organisers", "bike and car sellers",
 ]
+# area_directory: which cities it rotates through, and the label per business
+# category (pages: /{city}/{page}/{area}). Text is built from live counts, not
+# the model — a post can never claim something the page doesn't show.
+BACKEND_URL = os.getenv("LOCALINDIA_API_URL", "https://localsindia-backend-in.azurewebsites.net")
+AREA_CITIES = [("hyderabad", "Hyderabad"), ("bengaluru", "Bengaluru"), ("chennai", "Chennai"),
+               ("vijayawada", "Vijayawada"), ("kochi", "Kochi"), ("coimbatore", "Coimbatore")]
+AREA_CATEGORIES = {   # business category slug -> (page segment, label, hashtag)
+    "doctors": ("doctors", "Doctors, Clinics & Pharmacies", "Doctors"),
+    "tiffin": ("tiffin", "Restaurants & Tiffin Centres", "Food"),
+    "education": ("tutors", "Schools, Tutors & Classes", "Education"),
+    "businesses": ("shops", "Shops & Stores", "Shopping"),
+    "fashion": ("fashion", "Fashion & Textile Shops", "Fashion"),
+    "electronics": ("electronics", "Electronics & Mobile Shops", "Electronics"),
+    "vehicles": ("vehicles", "Garages & Vehicle Dealers", "Garages"),
+    "services": ("services", "Local Services", "LocalServices"),
+    "events": ("event-venues", "Function Halls & Venues", "FunctionHalls"),
+    "pg-roommate": ("pg-roommate", "PGs & Hostels", "PG"),
+    "furniture": ("furniture", "Furniture Shops", "Furniture"),
+    "real-estate": ("real-estate", "Real Estate Agents", "RealEstate"),
+}
+AREA_MIN_BUSINESSES = 5
 # category_tip has no default — without one, the model always falls back to
 # its "e.g. jobs" example in the instructions, so every category_tip post
 # ends up being the same fake-job-listing warning. Pick one explicitly.
@@ -105,6 +130,9 @@ def pick_next(items: list[str], last_index: int, history: list[str], window: int
 
 
 def pick_topic(state: dict) -> str:
+    if (state["topicHistory"] or [None])[-1] != "area_directory":
+        state["topicHistory"] = (state["topicHistory"] + ["area_directory"])[-10:]
+        return "area_directory"
     topic, idx = pick_next(ROTATION_TOPICS, state["lastTopicIndex"], state["topicHistory"], window=3)
     state["lastTopicIndex"] = idx
     state["topicHistory"] = (state["topicHistory"] + [topic])[-10:]
@@ -142,7 +170,54 @@ def recent_posts() -> list[str]:
     return seen
 
 
+def pick_area(state: dict) -> dict:
+    """Next (city, category, neighbourhood) with enough real businesses that
+    hasn't been posted yet, rotating through AREA_CITIES."""
+    posted = set(state.get("areaPosted", []))
+    start = state.get("lastAreaCityIndex", -1)
+    with httpx.Client(base_url=f"{BACKEND_URL}/api/v1", timeout=60) as api:
+        for step in range(1, len(AREA_CITIES) + 1):
+            idx = (start + step) % len(AREA_CITIES)
+            city_slug, city_name = AREA_CITIES[idx]
+            pages = api.get("/businesses/locality-pages", params={"city_slug": city_slug}).json()
+            candidates = [p for p in pages
+                          if p["category_slug"] in AREA_CATEGORIES and p["count"] >= AREA_MIN_BUSINESSES
+                          and f"{city_slug}/{p['category_slug']}/{p['locality_slug']}" not in posted]
+            if not candidates:
+                continue
+            # Vary it: pick among the bigger ones, not always the single largest
+            p = random.choice(sorted(candidates, key=lambda c: -c["count"])[:15])
+            names = {l["slug"]: l["name"] for l in api.get(
+                "/businesses/localities", params={"city_slug": city_slug, "category_slug": p["category_slug"]}).json()}
+            state["lastAreaCityIndex"] = idx
+            state["areaPosted"] = (state.get("areaPosted", []) + [f"{city_slug}/{p['category_slug']}/{p['locality_slug']}"])[-500:]
+            return {"city_slug": city_slug, "city": city_name, "category": p["category_slug"],
+                    "area_slug": p["locality_slug"], "area": names.get(p["locality_slug"], p["locality_slug"]),
+                    "count": p["count"]}
+    raise RuntimeError("No unposted neighbourhood with enough businesses in any AREA_CITIES city")
+
+
+def area_post(state: dict) -> dict:
+    a = pick_area(state)
+    page, label, hashtag = AREA_CATEGORIES[a["category"]]
+    url = f"https://www.localsindia.com/{a['city_slug']}/{page}/{a['area_slug']}"
+    tag = lambda t: "".join(w.capitalize() for w in t.replace("&", " ").replace(",", " ").split())
+    return {
+        "headline": f"{a['count']} {label} in {a['area']}",
+        "tag": f"{a['area']}, {a['city']}",
+        "caption": (
+            f"Looking for {label.lower()} in {a['area']}, {a['city']}? "
+            f"We've listed {a['count']} of them with addresses and phone numbers — free to browse, no sign-up:\n{url}\n\n"
+            "Run one of these businesses? Open the page and claim your free listing to add photos, timings and your WhatsApp number."
+        ),
+        "hashtags": [tag(a["city"]), tag(a["area"]), hashtag, "LocalsIndia"],
+        "url": url,
+    }
+
+
 def generate_post(topic: str, state: dict) -> dict:
+    if topic == "area_directory":
+        return area_post(state)
     extra = ""
     if topic == "city_spotlight":
         extra = f"\n\nCity for this spotlight: {random.choice(SPOTLIGHT_CITIES)}"
@@ -229,7 +304,7 @@ def run(topic: str | None, publish: bool, fmt: str) -> None:
         print(f"[MetaPoster] Logged to {LOG_PATH}")
         return
 
-    tag = f"#{post['hashtags'][0]}" if post.get("hashtags") else "LocalsIndia"
+    tag = post.get("tag") or (f"#{post['hashtags'][0]}" if post.get("hashtags") else "LocalsIndia")
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now().strftime("%Y%m%d_%H%M%S")

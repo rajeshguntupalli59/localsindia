@@ -13,6 +13,7 @@ import GetVerifiedModal from '@/components/get-verified-modal/GetVerifiedModal';
 import ClaimBusinessModal from '@/components/claim-business/ClaimBusinessModal';
 import OsmAttribution from '@/components/osm-attribution/OsmAttribution';
 import RepresentativeLabel from '@/components/representative-label/RepresentativeLabel';
+import ReviewInvite from '@/components/review-invite/ReviewInvite';
 import { coverFor } from '@/lib/categoryCover';
 import { describeWeek, openStatus, parseOpeningHours } from '@/lib/openingHours';
 
@@ -299,6 +300,13 @@ export default function BusinessDetailPage() {
             <button onClick={openClaim} className="mt-3 text-xs font-semibold underline text-slate-500 hover:text-slate-800">
               Is this your business? Request an ownership review
             </button>
+          )}
+
+          {/* Review invite — owner only, until they have a handful of reviews */}
+          {business.owner_id && business.owner_id === myId && business.review_count < 5 && (
+            <div className="mt-4">
+              <ReviewInvite businessName={business.name} url={`https://www.localsindia.com/${citySlug}/businesses/${businessId}`} />
+            </div>
           )}
 
           {/* Analytics dashboard link — owner only */}
