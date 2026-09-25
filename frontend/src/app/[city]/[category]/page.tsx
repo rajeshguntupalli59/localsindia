@@ -9,6 +9,7 @@ import SiteHeader from '@/components/site-header/SiteHeader';
 import SiteFooter from '@/components/site-footer/SiteFooter';
 import type { Business, City, Listing, Locality } from '@/lib/types';
 import BusinessList, { ChipLinks } from '@/components/business-list/BusinessList';
+import { serializeJsonLd } from '@/lib/jsonLd';
 
 // Named routes that take priority — this page must never match these
 const RESERVED = new Set([
@@ -141,7 +142,7 @@ export default async function SeoCategoryPage({
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
 
       <div style={{ background: 'var(--li-page-bg)', minHeight: '100vh' }}>

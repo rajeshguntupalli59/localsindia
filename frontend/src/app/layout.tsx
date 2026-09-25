@@ -13,6 +13,7 @@ import { PrefsProvider } from '@/context/PrefsContext';
 import { cn } from '@/lib/utils';
 import Script from 'next/script';
 import './globals.css';
+import { serializeJsonLd } from '@/lib/jsonLd';
 
 const ADSENSE_PUB_ID = process.env.NEXT_PUBLIC_ADSENSE_PUB_ID ?? '';
 
@@ -118,7 +119,7 @@ export default async function RootLayout({
         <script
           type="application/ld+json"
           // Who the site is (logo + social profiles) for Google's knowledge panel
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(SITE_JSON_LD) }}
+          dangerouslySetInnerHTML={{ __html: serializeJsonLd(SITE_JSON_LD) }}
         />
         {ADSENSE_PUB_ID && (
           <Script

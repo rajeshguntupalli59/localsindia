@@ -2,6 +2,8 @@ import uuid
 from datetime import datetime
 from pydantic import BaseModel, field_validator
 
+from app.schemas.validators import web_url
+
 
 class EventCreate(BaseModel):
     title: str
@@ -13,6 +15,11 @@ class EventCreate(BaseModel):
     is_free: bool = True
     ticket_url: str | None = None
     ticket_price: float | None = None
+
+    @field_validator("ticket_url")
+    @classmethod
+    def validate_ticket_url(cls, v: str | None) -> str | None:
+        return web_url(v)
 
     @field_validator("title")
     @classmethod
@@ -30,6 +37,8 @@ class EventCreate(BaseModel):
 
 
 class EventUpdate(BaseModel):
+    # No `status`: owners must not approve their own events — admins use
+    # /admin/events/{id}/approve|reject.
     title: str | None = None
     description: str | None = None
     venue: str | None = None
@@ -37,7 +46,11 @@ class EventUpdate(BaseModel):
     is_free: bool | None = None
     ticket_url: str | None = None
     ticket_price: float | None = None
-    status: str | None = None
+
+    @field_validator("ticket_url")
+    @classmethod
+    def validate_ticket_url(cls, v: str | None) -> str | None:
+        return web_url(v)
 
 
 class EventImageOut(BaseModel):

@@ -7,6 +7,7 @@ import { regionalPhraseFor } from '@/lib/regionalSeo';
 import { loadCitySeo } from '@/lib/seo';
 import CityHomeClient from './CityHomeClient';
 import CityExplore from '@/components/city-explore/CityExplore';
+import { serializeJsonLd } from '@/lib/jsonLd';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend-in.azurewebsites.net';
 
@@ -175,12 +176,12 @@ export default async function CityHomePage({ params }: { params: { city: string 
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
       {citySeo?.jsonLd && Object.keys(citySeo.jsonLd).length > 0 && (
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(citySeo.jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: serializeJsonLd(citySeo.jsonLd) }}
         />
       )}
       <CityHomeClient

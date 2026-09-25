@@ -6,6 +6,7 @@ import { SEO_CATEGORIES, SEO_PAGE_FOR_BUSINESS_CATEGORY } from '@/lib/seoCategor
 import { coverFor } from '@/lib/categoryCover';
 import { parseOpeningHours, schemaOpeningHours } from '@/lib/openingHours';
 import { realImages } from '@/lib/utils';
+import { serializeJsonLd } from '@/lib/jsonLd';
 
 // Must be dynamic: a generateStaticParams placeholder (left from the old static
 // export) made every real business id 500 — next-intl reads request headers,
@@ -99,10 +100,10 @@ export default async function Page({ params }: { params: { city: string; id: str
   return (
     <>
       {jsonLd && (
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }} />
       )}
       {breadcrumbLd && (
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbLd) }} />
       )}
       <BusinessDetailClient />
       {/* Server-rendered so every business page links to its neighbours */}

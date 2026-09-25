@@ -123,9 +123,18 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 - Claim approval (all 3 paths — SMS code now also notifies) sends one notification with a review nudge (`_notify_new_owner`). Owners see a "Get reviews from your customers" card (WhatsApp share + copy) on their business page until 5 reviews, and on the SMS-claim success screen (`components/review-invite/ReviewInvite.tsx`).
 - Paid "Get Verified — ₹499/month" offers hidden (Raj, 2026-09-25) on the owner's business page and the add-business success screen via `PAID_BADGES_ENABLED = false` in `frontend/src/lib/features.ts` — flip to true to bring them back.
 
+### 2026-09-25 — Security review fixes
+- **Admin password was committed** (`agents/.env.example`, `PROJECT_IQ.md`) in the PUBLIC repo — replaced with placeholders. **Raj must rotate it** (new `ADMIN_PASSWORD_HASH` in Azure + GitHub secret `LOCALINDIA_ADMIN_PASSWORD` + local `agents/.env.agents`); the old value stays in git history. `/auth/admin-login` now rate-limited (20/min).
+- **Stored XSS** via JSON-LD `<script>` tags (business/listing names with `</script>`): every `ld+json` tag now uses `serializeJsonLd` (`frontend/src/lib/jsonLd.ts`, escapes `< > &` and U+2028/9).
+- **Ticket payments**: `/tickets/verify` trusted the client's event_id — one ₹1 payment could mint unlimited tickets for any event. Now `create-order` saves a `PaymentOrder(kind='event_ticket')`; verify takes event + amount from it, checks owner, marks it consumed; only `active` events sell tickets.
+- **Event moderation bypass**: `status` removed from `EventUpdate` (owners could self-approve).
+- Hardening: public `/cities/{slug}/listings?status=` limited to active/fulfilled/expired (pending/flagged/rejected were public); website/social/ticket/WhatsApp links must be http(s) (`app/schemas/validators.py`).
+- Not changed: `GET /listings/{id}` still returns pending listings by ID (safe now that JSON-LD is escaped; the owner preview relies on it). Google OAuth uses a fixed `state` (low impact).
+
 ### 2026-09-25 — SESSION SUMMARY + open items (start here next session)
 Shipped today (details in the entries below): claim flow E2E-tested 23/23 + onboarding-quiz fix · `/admin/outreach` owner outreach · live-site audit fixes (share images, real counts, Organization JSON-LD, Call/Directions/Share) · City Seeder retired + 2,997 fake listings unpublished · neighbourhood pages (27,040 businesses tagged, 3,749 URLs in `/sitemap-areas.xml`) · opening hours + "Open now" · home page 925 → 371 KB. Sitemap resubmitted in GSC (~37,865 discovered).
 Open items:
+- **URGENT (Raj): rotate the admin password** — it was committed to the public repo (see Security review fixes below).
 - DONE: opening-hours backfill (run 36091832956) — 4,888 businesses got hours. `sitemap-areas.xml` submitted in GSC and fetched OK (GSC first showed "Couldn't fetch" — its normal new-sitemap glitch; resolved on its own).
 - Raj: add the site to Bing Webmaster Tools via "Import from GSC".
 - Admin pages are cramped on phones (fixed 224px sidebar) and log a harmless hydration warning (layout reads localStorage in useState).

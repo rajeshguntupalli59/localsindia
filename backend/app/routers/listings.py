@@ -1,3 +1,4 @@
+from typing import Literal
 import uuid
 from datetime import datetime, timezone, timedelta, date as date_type
 
@@ -150,7 +151,9 @@ async def list_city_listings(
     q: str | None = Query(default=None),
     category_id: uuid.UUID | None = Query(default=None),
     category_slug: str | None = Query(default=None),
-    status: str = Query(default="active"),
+    # Public endpoint: never expose listings awaiting review, rejected, or
+    # hidden after reports — only what's actually published.
+    status: Literal["active", "fulfilled", "expired"] = Query(default="active"),
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, le=50),
     min_price: float | None = Query(default=None),

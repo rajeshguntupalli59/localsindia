@@ -16,6 +16,7 @@ from app.core.config import settings
 from app.core.database import get_db
 from app.core.deps import get_current_user
 from app.models.event import Event
+from app.models.payment_order import PaymentOrder
 from app.models.ticket import Ticket
 from app.models.user import User
 from app.schemas.ticket import (
@@ -41,7 +42,7 @@ def _razorpay_auth() -> str:
 
 async def _get_ticketed_event(event_id: uuid.UUID, db: AsyncSession) -> Event:
     result = await db.execute(
-        select(Event).where(Event.id == event_id, Event.deleted_at.is_(None))
+        select(Event).where(Event.id == event_id, Event.deleted_at.is_(None), Event.status == "active")
     )
     event = result.scalar_one_or_none()
     if not event:
@@ -108,6 +109,18 @@ async def create_ticket_order(
     except Exception as exc:
         raise HTTPException(status_code=502, detail=f"Payment gateway error: {exc}") from exc
 
+    # Server-side record of what this order is for — /verify trusts this,
+    # never the event_id in the request (see models/payment_order.py).
+    db.add(PaymentOrder(
+        razorpay_order_id=order["id"],
+        user_id=current_user.id,
+        kind="event_ticket",
+        target_id=event.id,
+        plan="ticket",
+        amount=amount,
+    ))
+    await db.commit()
+
     return TicketCreateOrderResponse(
         order_id=order["id"],
         amount=amount,
@@ -131,13 +144,29 @@ async def verify_ticket_payment(
     if not hmac.compare_digest(expected, body.razorpay_signature):
         raise HTTPException(status_code=400, detail="Payment verification failed.")
 
-    event = await _get_ticketed_event(body.event_id, db)
-    amount = int(round(float(event.ticket_price) * 100))
+    # The signature only proves (order_id, payment_id) belong together — not
+    # which event or amount. Take both from our own order record, once.
+    order = (await db.execute(
+        select(PaymentOrder).where(
+            PaymentOrder.razorpay_order_id == body.razorpay_order_id,
+            PaymentOrder.kind == "event_ticket",
+        )
+    )).scalar_one_or_none()
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found.")
+    if order.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not your order.")
+    if order.consumed:
+        raise HTTPException(status_code=400, detail="This payment has already been used.")
+    if body.event_id and body.event_id != order.target_id:
+        raise HTTPException(status_code=400, detail="This payment was for a different event.")
 
+    event = await _get_ticketed_event(order.target_id, db)
+    order.consumed = True
     ticket = Ticket(
         event_id=event.id,
         user_id=current_user.id,
-        amount=amount,
+        amount=order.amount,
         razorpay_order_id=body.razorpay_order_id,
         razorpay_payment_id=body.razorpay_payment_id,
         qr_token=secrets.token_urlsafe(24),

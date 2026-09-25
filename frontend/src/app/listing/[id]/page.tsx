@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import type { Listing } from '@/lib/types';
 import ListingDetailClient from './ListingDetailClient';
 import { listingIdFromParam, listingPath, realImages } from '@/lib/utils';
+import { serializeJsonLd } from '@/lib/jsonLd';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend-in.azurewebsites.net';
 
@@ -83,7 +84,7 @@ export default async function ListingPage({ params }: { params: { id: string } }
       {jsonLd && (
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
         />
       )}
       <ListingDetailClient id={id} initialListing={listing} />

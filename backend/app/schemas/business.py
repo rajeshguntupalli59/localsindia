@@ -1,6 +1,8 @@
 import uuid
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
+
+from app.schemas.validators import web_url
 
 
 class BusinessCreate(BaseModel):
@@ -13,6 +15,11 @@ class BusinessCreate(BaseModel):
     whatsapp_url: str | None = None
     website_url: str | None = None
 
+    @field_validator("whatsapp_url", "website_url")
+    @classmethod
+    def validate_links(cls, v: str | None) -> str | None:
+        return web_url(v)
+
 
 class BusinessUpdate(BaseModel):
     name: str | None = None
@@ -22,6 +29,11 @@ class BusinessUpdate(BaseModel):
     phone: str | None = None
     whatsapp_url: str | None = None
     website_url: str | None = None
+
+    @field_validator("whatsapp_url", "website_url")
+    @classmethod
+    def validate_links(cls, v: str | None) -> str | None:
+        return web_url(v)
 
 
 class ReviewCreate(BaseModel):

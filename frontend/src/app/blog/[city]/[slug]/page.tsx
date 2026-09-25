@@ -5,6 +5,7 @@ import SiteHeader from '@/components/site-header/SiteHeader';
 import SiteFooter from '@/components/site-footer/SiteFooter';
 import BlogArticleBody from '@/components/blog-article/BlogArticleBody';
 import { listCitySlugs, listPostSlugs, loadPost } from '@/lib/blog';
+import { serializeJsonLd } from '@/lib/jsonLd';
 
 export async function generateStaticParams() {
   return listCitySlugs().flatMap(city =>
@@ -77,9 +78,9 @@ export default function BlogArticlePage({
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
-      {faqLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(articleLd) }} />
+      {faqLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(faqLd) }} />}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbLd) }} />
 
       <div style={{ background: 'var(--li-page-bg)', minHeight: '100vh' }}>
         <SiteHeader citySlug={params.city} />

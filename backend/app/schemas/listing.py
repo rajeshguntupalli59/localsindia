@@ -2,6 +2,7 @@ import re
 import uuid
 from datetime import datetime
 from pydantic import BaseModel, field_validator
+from app.schemas.validators import web_url
 
 PHONE_RE = re.compile(r"^\+91[6-9]\d{9}$")
 WA_RE = re.compile(r"^https://wa\.me/91\d{10}$")
@@ -129,6 +130,11 @@ class ListingCreate(BaseModel):
             raise ValueError("Enter a valid Indian mobile number (+91XXXXXXXXXX)")
         return v
 
+    @field_validator("website_url", "social_url")
+    @classmethod
+    def validate_links(cls, v: str | None) -> str | None:
+        return web_url(v)
+
     @field_validator("whatsapp_url")
     @classmethod
     def validate_wa(cls, v: str | None) -> str | None:
@@ -145,6 +151,11 @@ class ListingUpdate(BaseModel):
     website_url: str | None = None
     social_url: str | None = None
     area: str | None = None
+
+    @field_validator("website_url", "social_url")
+    @classmethod
+    def validate_links(cls, v: str | None) -> str | None:
+        return web_url(v)
 
     @field_validator("whatsapp_url")
     @classmethod

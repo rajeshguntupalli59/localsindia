@@ -103,7 +103,7 @@ Covers classifieds, events, businesses, PG/roommate across 249+ Indian cities in
 | GOOGLE_CLIENT_SECRET | (set) | ✅ LIVE |
 | GOOGLE_REDIRECT_URI | https://localsindia-backend-in.azurewebsites.net/api/v1/auth/google/callback | ✅ SET |
 | ADMIN_USERNAME | localsindia_admin | ✅ SET |
-| ADMIN_PASSWORD_HASH | (bcrypt hash of Rajesh@4356) | ✅ SET |
+| ADMIN_PASSWORD_HASH | (bcrypt hash — value kept in Azure only) | ✅ SET |
 
 ### Frontend (GitHub Actions secrets)
 

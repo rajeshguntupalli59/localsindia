@@ -7,6 +7,7 @@ import SiteHeader from '@/components/site-header/SiteHeader';
 import SiteFooter from '@/components/site-footer/SiteFooter';
 import BusinessList, { ChipLinks } from '@/components/business-list/BusinessList';
 import type { Business, City, Locality } from '@/lib/types';
+import { serializeJsonLd } from '@/lib/jsonLd';
 
 // "Doctors & Clinics in Madhapur, Hyderabad" — real businesses in one
 // neighbourhood (localities come from OpenStreetMap, agents/assign_localities.py).
@@ -94,7 +95,7 @@ export default async function CategoryAreaPage(
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }} />
       <div style={{ background: 'var(--li-page-bg)', minHeight: '100vh' }}>
         <SiteHeader citySlug={params.city} />
 

@@ -7,6 +7,7 @@ import SiteHeader from '@/components/site-header/SiteHeader';
 import SiteFooter from '@/components/site-footer/SiteFooter';
 import BusinessList, { ChipLinks } from '@/components/business-list/BusinessList';
 import type { Business, City, Locality } from '@/lib/types';
+import { serializeJsonLd } from '@/lib/jsonLd';
 
 // "Businesses in Madhapur, Hyderabad" — every real business in one
 // neighbourhood, linking to its category-in-area pages.
@@ -97,7 +98,7 @@ export default async function AreaPage({ params }: { params: { city: string; are
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }} />
       <div style={{ background: 'var(--li-page-bg)', minHeight: '100vh' }}>
         <SiteHeader citySlug={params.city} />
 

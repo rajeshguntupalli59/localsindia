@@ -42,7 +42,8 @@ OTP_EXPIRE_MINUTES = 10
 
 
 @router.post("/admin-login", response_model=AuthResponse)
-async def admin_login(body: AdminLoginRequest, db: AsyncSession = Depends(get_db)):
+@limiter.limit("20/minute")   # slows password guessing; the data workflows log in a few times per city
+async def admin_login(request: Request, body: AdminLoginRequest, db: AsyncSession = Depends(get_db)):
     """Admin login with username + password — credentials stored as Azure env vars."""
     if not settings.ADMIN_USERNAME or not settings.ADMIN_PASSWORD_HASH:
         raise HTTPException(status_code=503, detail="Admin credentials not configured.")
