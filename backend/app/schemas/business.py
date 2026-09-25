@@ -83,6 +83,7 @@ class BusinessOut(BaseModel):
     city_id: uuid.UUID
     category_id: uuid.UUID | None
     category_slug: str | None = None
+    city_slug: str | None = None
     owner_id: uuid.UUID | None
     source: str | None = None
     latitude: float | None = None

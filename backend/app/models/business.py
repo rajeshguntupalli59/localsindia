@@ -66,11 +66,17 @@ class Business(Base):
         lazy="selectin",
     )
     category: Mapped["Category | None"] = relationship("Category", lazy="selectin")
+    city: Mapped["City"] = relationship("City", lazy="selectin")
 
     @property
     def category_slug(self) -> str | None:
         # Lets the frontend pick the category cover photo without a second lookup
         return self.category.slug if self.category else None
+
+    @property
+    def city_slug(self) -> str | None:
+        # Lets the apps build the business's public page URL (/{city}/businesses/{id})
+        return self.city.slug if self.city else None
 
     __table_args__ = (
         Index("idx_businesses_city", "city_id", "category_id"),
