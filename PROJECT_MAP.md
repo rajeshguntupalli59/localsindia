@@ -135,6 +135,10 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 - Imported 2,406 (first run). Businesses now also show under their category: `CategoryBusinesses` strip on `/search`, `/[city]/search`, `/[city]/[category]` ("View all" → `/[city]/businesses?category=slug`); directory page got category chips + Load more; `GET /businesses` takes `category_slug` and sorts verified → owned → rated → has-phone. Mapping extended to PG/hostels, event venues, job agencies, property managers; script now refuses to run if a map targets a non-existent category and reports categories with zero businesses.
 - Note: businesses created earlier by `city_launcher.py` use fictional phones (+9164000000xx) and are owned by the admin account.
 
+### 2026-09-25 — City Seeder retired; 2,997 invented listings unpublished
+- Audit found 2,997 of 2,999 live listings were AI-written by `agents/city_launcher.py` (City Seeder), all posted as admin with made-up contact numbers +916300000001..99 (real mobile range — could ring strangers). Only 2 real user listings existed.
+- Migration `a4b5c6d7e8f9` soft-deletes admin-posted listings with exactly that number pattern (877 from June without `is_seed`, 2,120 from August with it); downgrade restores them. City Seeder workflow disabled in GitHub + schedule removed; `growth_tracker` now points low-listing cities to owner outreach.
+
 ### 2026-09-25 — Live-site audit fixes (sharing previews, counts, structured data)
 - WhatsApp/Facebook previews had NO image on city, category, directory and business pages (a page-level `openGraph` replaces the root one, image included) — added og/twitter images: logo for city/directory, category cover for category pages, the business's own photo or its labelled cover for business pages.
 - Category pages said "24+ …" (the list cap) — now the real count from `/businesses/counts` (e.g. 332 tiffin in Hyderabad). Organization + WebSite JSON-LD in the root layout; `/[city]/search` now noindex (layout.tsx), like `/search`.

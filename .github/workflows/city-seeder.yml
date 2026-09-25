@@ -1,10 +1,9 @@
 name: City Seeder
 
+# RETIRED 2026-09-25: it posted AI-written listings with made-up phone numbers
+# (possibly real strangers' numbers). Every city now has real OpenStreetMap
+# businesses. Schedule removed and the workflow disabled in GitHub.
 on:
-  schedule:
-    # 5:00 AM UTC = 10:30 AM IST daily — after the 9am reminder/digest crons
-    # and the 9:30am social post slot, so it doesn't pile onto the same window
-    - cron: '0 5 * * *'
   workflow_dispatch:  # allow manual trigger + choosing the batch size from the GitHub Actions UI
     inputs:
       count:

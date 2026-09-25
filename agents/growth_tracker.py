@@ -135,9 +135,9 @@ def build_report(data: dict) -> str:
         lines.append(f"| {cat} | {count} |")
 
     lines.append("\n---\n")
-    lines.append(f"## Cities Needing Seeding (< {MIN_LISTINGS_THRESHOLD} listings)\n")
+    lines.append(f"## Cities With Few Real Listings (< {MIN_LISTINGS_THRESHOLD})\n")
     if cities_needing_seed:
-        lines.append("Run `python agents/city_launcher.py --city \"CITY\" --lang LANG` for each:\n")
+        lines.append("Grow these with owner outreach (/admin/outreach) — the City Seeder is retired; it posted invented listings with made-up phone numbers:\n")
         # Group by state
         by_state: dict[str, list] = {}
         for c in cities_needing_seed:
