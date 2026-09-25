@@ -135,6 +135,12 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 - Imported 2,406 (first run). Businesses now also show under their category: `CategoryBusinesses` strip on `/search`, `/[city]/search`, `/[city]/[category]` ("View all" → `/[city]/businesses?category=slug`); directory page got category chips + Load more; `GET /businesses` takes `category_slug` and sorts verified → owned → rated → has-phone. Mapping extended to PG/hostels, event venues, job agencies, property managers; script now refuses to run if a map targets a non-existent category and reports categories with zero businesses.
 - Note: businesses created earlier by `city_launcher.py` use fictional phones (+9164000000xx) and are owned by the admin account.
 
+### 2026-09-25 — Live-site audit fixes (sharing previews, counts, structured data)
+- WhatsApp/Facebook previews had NO image on city, category, directory and business pages (a page-level `openGraph` replaces the root one, image included) — added og/twitter images: logo for city/directory, category cover for category pages, the business's own photo or its labelled cover for business pages.
+- Category pages said "24+ …" (the list cap) — now the real count from `/businesses/counts` (e.g. 332 tiffin in Hyderabad). Organization + WebSite JSON-LD in the root layout; `/[city]/search` now noindex (layout.tsx), like `/search`.
+- Business page: JustDial-style Call / Directions (Google Maps) / Share (native share sheet, WhatsApp fallback) buttons.
+- Audit: 0 broken internal links (250 checked), no JS errors on public pages; home TTFB ~4s on a cold hit.
+
 ### 2026-09-25 — Owner outreach admin page (/admin/outreach)
 - JustDial-style: admin calls or WhatsApps unclaimed businesses one at a time and logs the outcome (No answer / Call back / Interested / Not interested / Wrong number; the WhatsApp button pre-fills a wa.me invite with the claim link + "reply STOP" and auto-logs "WhatsApp sent"). Nothing is sent by the server — no bulk messaging.
 - `routers/business_outreach.py` (GET queue with counts per To contact / Follow up / Closed / Claimed, mobiles first; POST log), table `business_outreach` (migration `f2a3b4c5d6e7`, append-only), `lib/outreach.ts`. Known: admin layout's fixed sidebar is cramped on phones (all admin pages).

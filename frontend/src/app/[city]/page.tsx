@@ -117,7 +117,9 @@ export async function generateMetadata(
       url: `https://www.localsindia.com/${params.city}`,
       siteName: 'LocalsIndia',
       type: 'website',
+      images: [{ url: '/logo.png', width: 1200, height: 630, alt: 'LocalsIndia' }],
     },
+    twitter: { card: 'summary_large_image', title: ogTitle, description: ogDescription, images: ['/logo.png'] },
     alternates: {
       canonical: `https://www.localsindia.com/${params.city}`,
     },

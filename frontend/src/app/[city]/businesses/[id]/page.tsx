@@ -3,6 +3,8 @@ import Link from 'next/link';
 import type { Business } from '@/lib/types';
 import BusinessDetailClient from './BusinessDetailClient';
 import { SEO_CATEGORIES, SEO_PAGE_FOR_BUSINESS_CATEGORY } from '@/lib/seoCategories';
+import { coverFor } from '@/lib/categoryCover';
+import { realImages } from '@/lib/utils';
 
 // Must be dynamic: a generateStaticParams placeholder (left from the old static
 // export) made every real business id 500 — next-intl reads request headers,
@@ -43,7 +45,13 @@ export async function generateMetadata(
   const description = [b.address, b.phone ? `Phone ${b.phone}` : null, `${kind} in ${city} on LocalsIndia.`]
     .filter(Boolean).join(' · ').slice(0, 155);
   const url = `https://www.localsindia.com/${params.city}/businesses/${b.id}`;
-  return { title, description, alternates: { canonical: url }, openGraph: { title, description, url, siteName: 'LocalsIndia' } };
+  // Its own photo when it has one, else the same labelled category cover the page shows
+  const image = realImages(b.images)[0]?.url ?? coverFor(b);
+  return {
+    title, description, alternates: { canonical: url },
+    openGraph: { title, description, url, siteName: 'LocalsIndia', images: [{ url: image, alt: b.name }] },
+    twitter: { card: 'summary_large_image', title, description, images: [image] },
+  };
 }
 
 async function fetchRelated(citySlug: string, category: string | null | undefined, selfId: string): Promise<Business[]> {

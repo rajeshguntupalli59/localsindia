@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, MapPin, Phone, Globe, Star, BadgeCheck, MessageCircle, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, MapPin, Phone, Globe, Star, BadgeCheck, MessageCircle, ShieldCheck, Navigation, Share2 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -84,6 +84,18 @@ export default function BusinessDetailPage() {
     } finally {
       setSubmittingReview(false);
     }
+  };
+
+  // Native share sheet on phones; WhatsApp elsewhere (how most people share locally)
+  const shareBusiness = async () => {
+    if (!business) return;
+    const url = `${window.location.origin}${window.location.pathname}`;
+    const text = `${business.name}${business.address ? ` — ${business.address}` : ''}`;
+    if (navigator.share) {
+      try { await navigator.share({ title: business.name, text, url }); } catch { /* cancelled */ }
+      return;
+    }
+    window.open(`https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`, '_blank', 'noopener');
   };
 
   const openClaim = () => {
@@ -208,7 +220,27 @@ export default function BusinessDetailPage() {
           </div>
 
           {/* Actions */}
-          <div className="flex gap-3 mt-5 flex-wrap">
+          <div className="flex gap-2 mt-5">
+            {business.phone && (
+              <a href={`tel:${business.phone}`}
+                className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-white font-semibold text-sm"
+                style={{ background: 'var(--li-primary)' }}>
+                <Phone className="w-4 h-4" /> Call
+              </a>
+            )}
+            {business.latitude != null && business.longitude != null && (
+              <a href={`https://www.google.com/maps/dir/?api=1&destination=${business.latitude},${business.longitude}`}
+                target="_blank" rel="noopener noreferrer"
+                className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl border font-semibold text-sm text-slate-700">
+                <Navigation className="w-4 h-4" /> Directions
+              </a>
+            )}
+            <button type="button" onClick={shareBusiness}
+              className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl border font-semibold text-sm text-slate-700">
+              <Share2 className="w-4 h-4" /> Share
+            </button>
+          </div>
+          <div className="flex gap-3 mt-3 flex-wrap">
             {business.whatsapp_url && (
               <a
                 href={business.whatsapp_url}

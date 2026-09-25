@@ -75,6 +75,26 @@ export const metadata: Metadata = {
   },
 };
 
+const SITE_JSON_LD = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'LocalsIndia',
+    url: 'https://www.localsindia.com',
+    logo: 'https://www.localsindia.com/logo-mark.png',
+    sameAs: [
+      'https://www.instagram.com/localsindia1/',
+      'https://www.facebook.com/profile.php?id=61591815777647',
+    ],
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'LocalsIndia',
+    url: 'https://www.localsindia.com',
+  },
+];
+
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
@@ -93,6 +113,11 @@ export default async function RootLayout({
       className={cn(plusJakarta.variable, notoSans.variable, notoDevanagari.variable, notoTelugu.variable)}
     >
       <body className={cn("antialiased", plusJakarta.className)}>
+        <script
+          type="application/ld+json"
+          // Who the site is (logo + social profiles) for Google's knowledge panel
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(SITE_JSON_LD) }}
+        />
         {ADSENSE_PUB_ID && (
           <Script
             async

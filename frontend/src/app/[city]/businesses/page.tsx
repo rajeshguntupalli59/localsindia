@@ -31,7 +31,8 @@ export async function generateMetadata({ params }: { params: { city: string } })
   return {
     title,
     description,
-    openGraph: { title, description, url, siteName: 'LocalsIndia', type: 'website' },
+    openGraph: { title, description, url, siteName: 'LocalsIndia', type: 'website', images: [{ url: '/logo.png', width: 1200, height: 630, alt: 'LocalsIndia' }] },
+    twitter: { card: 'summary_large_image', title, description, images: ['/logo.png'] },
     alternates: { canonical: url },
     robots: { index: total >= MIN_BUSINESSES_FOR_INDEX, follow: true },
   };

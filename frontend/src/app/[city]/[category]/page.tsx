@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { MapPin, Phone } from 'lucide-react';
 import { SEO_CATEGORIES } from '@/lib/seoCategories';
 import ListingCard from '@/components/listing-card/ListingCard';
-import { businessCovers, coverFor, listingCovers } from '@/lib/categoryCover';
+import { businessCovers, categoryCover, coverFor, listingCovers } from '@/lib/categoryCover';
 import SiteHeader from '@/components/site-header/SiteHeader';
 import SiteFooter from '@/components/site-footer/SiteFooter';
 import OsmAttribution from '@/components/osm-attribution/OsmAttribution';
@@ -58,6 +58,16 @@ async function fetchBusinesses(citySlug: string, businessSlug: string): Promise<
   return Array.isArray(data) ? data : [];
 }
 
+// Real number of businesses in the category (the list above is capped at BUSINESS_LIMIT)
+async function fetchBusinessCount(citySlug: string, businessSlug: string): Promise<number> {
+  const counts = await getJson<Record<string, number>>(`${API_BASE}/api/v1/businesses/counts?city_slug=${citySlug}`, {});
+  return counts[businessSlug] ?? 0;
+}
+
+function countLabel(total: number, shown: number): string {
+  return (total || shown).toLocaleString('en-IN');
+}
+
 // Index a page when it has something real for the category: at least one
 // genuine listing, or a few real local businesses. An empty "be the first to
 // post" page stays out of Google (soft 404).
@@ -70,10 +80,11 @@ export async function generateMetadata(
   const meta = SEO_CATEGORIES[params.category];
   const city = (await fetchCities()).find(c => c.slug === params.city);
   if (!meta || !city) return { title: 'LocalsIndia' };
-  const [listings, businesses] = await Promise.all([
+  const [listings, businesses, total] = await Promise.all([
     fetchListings(params.city, meta), fetchBusinesses(params.city, meta.businessSlug),
+    fetchBusinessCount(params.city, meta.businessSlug),
   ]);
-  const count = businesses.length >= BUSINESS_LIMIT ? `${BUSINESS_LIMIT}+` : String(businesses.length);
+  const count = countLabel(total, businesses.length);
   const title = `${meta.title} in ${city.name} | LocalsIndia`;
   const description = businesses.length >= MIN_BUSINESSES_FOR_INDEX
     ? `${count} ${meta.title.toLowerCase()} in ${city.name} with addresses and phone numbers. ${meta.description}`.slice(0, 158)
@@ -84,7 +95,8 @@ export async function generateMetadata(
   return {
     title,
     description,
-    openGraph: { title, description, url, siteName: 'LocalsIndia', type: 'website' },
+    openGraph: { title, description, url, siteName: 'LocalsIndia', type: 'website', images: [{ url: categoryCover(meta.businessSlug), alt: title }] },
+    twitter: { card: 'summary_large_image', title, description, images: [categoryCover(meta.businessSlug)] },
     alternates: { canonical: url },
     robots: { index: shouldIndex, follow: true },
   };
@@ -103,8 +115,9 @@ export default async function SeoCategoryPage({
   const city = cities.find(c => c.slug === params.city);
   if (!city) notFound();   // only cities LocalsIndia actually serves
 
-  const [{ items: listings, exact }, businesses] = await Promise.all([
+  const [{ items: listings, exact }, businesses, businessTotal] = await Promise.all([
     fetchListings(params.city, meta), fetchBusinesses(params.city, meta.businessSlug),
+    fetchBusinessCount(params.city, meta.businessSlug),
   ]);
   const covers = listingCovers(listings);
   const bizCovers = businessCovers(businesses.map(b => ({ ...b, category_slug: b.category_slug ?? meta.businessSlug })));
@@ -156,7 +169,7 @@ export default async function SeoCategoryPage({
                 </h1>
                 <p className="text-sm mt-1.5" style={{ color: 'var(--li-muted)' }}>
                   {[
-                    businesses.length > 0 && `${businesses.length >= BUSINESS_LIMIT ? `${BUSINESS_LIMIT}+` : businesses.length} local businesses`,
+                    businesses.length > 0 && `${countLabel(businessTotal, businesses.length)} local businesses`,
                     exact && listings.length > 0 && `${listings.length} listing${listings.length !== 1 ? 's' : ''}`,
                   ].filter(Boolean).join(' · ') || 'Be the first to post a free listing!'}
                 </p>
