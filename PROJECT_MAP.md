@@ -8,11 +8,11 @@
 
 ## 1. What This Is
 
-LocalsIndia (localsindia.com) — India's hyperlocal community classifieds platform. City-wise listings, business directory, events, PG/roommate, jobs — 140 South Indian cities (Telangana, AP, Karnataka, Tamil Nadu, Kerala, Puducherry), 5 languages, WhatsApp-native contact, free to post. Live in production on Azure.
+LocalsIndia (localsindia.com) — free local directory + classifieds for South India. ~35,300 real businesses (from OpenStreetMap) + real-user listings, by city → category → neighbourhood; WhatsApp-native contact, free to post and to claim. 150 cities in 6 states (AP 36, TN 33, Karnataka 32, Telangana 28, Kerala 20, Puducherry 1). Live in production on Azure. **Plain-English overview of how everything works: README.md.**
 
 - Web: https://www.localsindia.com (Next.js 14, Azure Static Web Apps, hybrid SSR)
 - Backend: https://localsindia-backend-in.azurewebsites.net (FastAPI, Azure App Service)
-- Mobile: React Native + Expo 56, EAS builds, not yet on Play Store (internal testing)
+- Mobile: React Native + Expo 56, EAS builds, Google Play closed testing (production release not yet approved)
 - GitHub: https://github.com/rajeshguntupalli59/localsindia
 
 ---
@@ -25,7 +25,7 @@ LocalsIndia (localsindia.com) — India's hyperlocal community classifieds platf
 | `backend/migrations/` | Alembic schema versions |
 | `frontend/src/` | Next.js 14 App Router — `app/` (pages), `components/`, `lib/api.ts` (typed API client), `messages/*.json` (11-language i18n) |
 | `mobile/` | React Native + Expo app — `src/screens/`, `src/lib/`, EAS build config |
-| `agents/` | **Marketing automation** — Python scripts that generate + post content (social, blog) via Claude API. See §4. |
+| `agents/` | **Automation** — data imports (`osm_business_import.py`, `assign_localities.py`, `prepare_city_regions.py`) and marketing (social, blog, SEO). See §4–§5. |
 | `.github/workflows/` | CI/CD + all cron-scheduled automation (deploys, social posting, digests, reminders). See §5 for ground truth on what's actually scheduled. |
 | `.codegraph/`, `graphify-out/` | Pre-built code graph indexes — use these for "where is X" code questions instead of re-reading files |
 | `.claude/skills/phase1-mvp/2-community/3-monetize/` | Build-phase task lists (see §3 — these describe a build order that's now far behind actual progress) |
@@ -38,6 +38,7 @@ Several root docs describe the *original plan*, not current reality. Don't cite 
 
 | Doc | Status | Notes |
 |---|---|---|
+| **README.md** | ✅ Current (2026-09-25) | Plain-English overview: how it works, where everything is, data pipeline, automation, deploy, day-to-day operating. Start here if new. |
 | **CLAUDE.md** | ✅ Current | Live build rules, commands, hard business-logic constraints. Trust this. |
 | **ARCHITECTURE.md** | ✅ Current, detailed | Full schema/API/frontend reference, actively updated (entries dated up to 2026-07-28). Long (1878 lines) — use ARCHITECTURE_INDEX.md to find the right section first. |
 | **ARCHITECTURE_INDEX.md** | ✅ Current, best "where is X" lookup | Feature Map + File Index + Endpoint Index, actively maintained alongside every feature. **Check here before grepping the codebase for "what handles feature Y".** |
