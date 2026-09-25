@@ -1,0 +1,55 @@
+name: Assign Business Localities
+
+# Manual only. Tags each live business with its neighbourhood (nearest
+# OpenStreetMap suburb/neighbourhood — see agents/assign_localities.py), which
+# powers the /[city]/area/[area] and /[city]/[category]/[area] pages.
+# Safe to re-run: only businesses whose locality changes are updated.
+# Re-run after importing new cities or businesses.
+on:
+  workflow_dispatch:
+    inputs:
+      city:
+        description: 'One city slug (leave empty for every city)'
+        required: false
+        default: ''
+      apply:
+        description: 'Update the live site (unticked = stats only)'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  assign:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Python dependencies
+        run: pip install -r agents/requirements.txt
+
+      - name: Assign localities
+        env:
+          LOCALINDIA_ADMIN_PASSWORD: ${{ secrets.LOCALINDIA_ADMIN_PASSWORD }}
+        run: |
+          cd agents
+          CITY="${{ github.event.inputs.city }}"
+          APPLY_FLAG=""
+          if [ "${{ github.event.inputs.apply }}" = "true" ]; then APPLY_FLAG="--apply"; fi
+          if [ -n "$CITY" ]; then
+            python assign_localities.py --city "$CITY" $APPLY_FLAG
+          else
+            python assign_localities.py --all $APPLY_FLAG
+          fi
+
+      - name: Upload summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: localities-summary
+          path: agents/output/osm/localities_summary.json
+          retention-days: 30

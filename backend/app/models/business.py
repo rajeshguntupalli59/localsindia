@@ -38,6 +38,11 @@ class Business(Base):
     source_ref: Mapped[str | None] = mapped_column(String(40), nullable=True, unique=True)
     latitude: Mapped[float | None] = mapped_column(Numeric(9, 6), nullable=True)
     longitude: Mapped[float | None] = mapped_column(Numeric(9, 6), nullable=True)
+    # Neighbourhood/suburb from OpenStreetMap place nodes (nearest to the
+    # business's coordinates) — set by agents/assign_localities.py; powers the
+    # /[city]/area/[area] and /[city]/[category]/[area] pages.
+    locality: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    locality_slug: Mapped[str | None] = mapped_column(String(90), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -67,4 +72,5 @@ class Business(Base):
     __table_args__ = (
         Index("idx_businesses_city", "city_id", "category_id"),
         Index("idx_businesses_owner", "owner_id"),
+        Index("idx_businesses_locality", "city_id", "locality_slug"),
     )

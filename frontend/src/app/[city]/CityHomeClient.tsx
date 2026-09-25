@@ -188,7 +188,7 @@ export default function CityHomeClient({
     return (
       <div style={{ background: 'var(--li-page-bg)', minHeight: '100vh' }}>
         <SiteHeader citySlug={citySlug} />
-        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 px-4 text-center">
+        <div className="flex flex-col items-center justify-center py-12 gap-4 px-4 text-center">
           <AlertTriangle size={28} className="text-amber-500" />
           <h2 className="text-lg font-bold text-slate-800">Could not load listings</h2>
           <p className="text-sm text-slate-500">The server took too long to respond. Please try again.</p>
@@ -203,6 +203,9 @@ export default function CityHomeClient({
             Change city
           </button>
         </div>
+        {/* Server-rendered — the city's businesses and areas still work when the listing feed doesn't */}
+        {explore}
+        <SiteFooter />
       </div>
     );
   }

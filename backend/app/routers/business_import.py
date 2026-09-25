@@ -4,6 +4,7 @@ Imported businesses have no owner — they're claimed later through
 routers/business_claims.py. Re-running an import is safe: rows whose
 source_ref already exists are skipped, never duplicated or overwritten
 (an owner may have edited them since)."""
+import re
 import uuid
 from datetime import datetime, timezone
 
@@ -149,3 +150,42 @@ async def move_imported_businesses(
         b.city_id = city.id
     await db.commit()
     return {"moved": len(rows), "skipped": len(body.business_ids) - len(rows)}
+
+
+def locality_slug(name: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")[:90]
+
+
+class LocalityItem(BaseModel):
+    id: uuid.UUID
+    locality: str | None = Field(default=None, max_length=80)   # None clears it
+
+
+class LocalitiesRequest(BaseModel):
+    city_slug: str
+    items: list[LocalityItem]
+
+
+@router.post("/businesses/import/localities")
+async def set_business_localities(
+    body: LocalitiesRequest,
+    db: AsyncSession = Depends(get_db),
+    admin: User = Depends(get_current_admin),
+):
+    """Set each business's neighbourhood (from agents/assign_localities.py).
+    Only businesses in the given city are touched."""
+    if len(body.items) > 2000:
+        raise HTTPException(status_code=400, detail="Send at most 2000 items per request.")
+    city = (await db.execute(select(City).where(City.slug == body.city_slug))).scalar_one_or_none()
+    if not city:
+        raise HTTPException(status_code=404, detail="City not found.")
+    wanted = {i.id: (i.locality or "").strip() or None for i in body.items}
+    rows = (await db.execute(
+        select(Business).where(Business.id.in_(wanted), Business.city_id == city.id, Business.deleted_at.is_(None))
+    )).scalars().all()
+    for b in rows:
+        name = wanted[b.id]
+        b.locality = name
+        b.locality_slug = locality_slug(name) if name else None
+    await db.commit()
+    return {"updated": len(rows), "skipped": len(body.items) - len(rows)}

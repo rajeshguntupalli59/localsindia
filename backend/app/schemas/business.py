@@ -75,6 +75,8 @@ class BusinessOut(BaseModel):
     source: str | None = None
     latitude: float | None = None
     longitude: float | None = None
+    locality: str | None = None
+    locality_slug: str | None = None
     created_at: datetime
     reviews: list[ReviewOut] = []
     images: list[BusinessImageOut] = []

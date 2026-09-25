@@ -353,3 +353,52 @@ async def test_business_counts_by_category(auth_client, admin_client, city):
         {"name": f"Counted {i}", "category_slug": slug, "source_ref": f"node/{uuid.uuid4().int % 10**9}"} for i in range(3)]})
     counts = (await client.get("/api/v1/businesses/counts", params={"city_slug": "hyderabad"})).json()
     assert counts[slug] == 3
+
+
+@pytest.mark.asyncio
+async def test_localities_set_list_and_pages(auth_client, admin_client, city, category):
+    from app.models.business import Business
+    client, _ = auth_client
+    admin, _ = admin_client
+    tag = uuid.uuid4().hex[:6]
+    area, other = f"Madhapur {tag}", f"Ameerpet {tag}"
+    engine = _make_engine()
+    Session = async_sessionmaker(engine, expire_on_commit=False)
+    async with Session() as s:
+        biz = [Business(city_id=city.id, category_id=category.id, name=f"Loc {tag} {i}") for i in range(4)]
+        s.add_all(biz)
+        await s.commit()
+    await engine.dispose()
+    ids = [str(b.id) for b in biz]
+
+    items = [{"id": ids[0], "locality": area}, {"id": ids[1], "locality": area},
+             {"id": ids[2], "locality": area}, {"id": ids[3], "locality": other}]
+    assert (await client.post("/api/v1/admin/businesses/import/localities",
+                              json={"city_slug": city.slug, "items": items})).status_code == 403
+    r = await admin.post("/api/v1/admin/businesses/import/localities", json={"city_slug": city.slug, "items": items})
+    assert r.json() == {"updated": 4, "skipped": 0}
+
+    slug = f"madhapur-{tag}"
+    one = await client.get(f"/api/v1/businesses/{ids[0]}")
+    assert one.json()["locality"] == area and one.json()["locality_slug"] == slug
+
+    listed = await client.get(f"/api/v1/businesses?city_slug={city.slug}&locality_slug={slug}")
+    assert sorted(b["id"] for b in listed.json()) == sorted(ids[:3])
+
+    locs = (await client.get(f"/api/v1/businesses/localities?city_slug={city.slug}&category_slug={category.slug}")).json()
+    assert locs == [{"slug": slug, "name": area, "count": 3}, {"slug": f"ameerpet-{tag}", "name": other, "count": 1}]
+
+    pages = (await client.get("/api/v1/businesses/locality-pages")).json()
+    mine = [p for p in pages if p["locality_slug"].endswith(tag)]
+    # Only the area with 3+ businesses gets pages: city-wide + in its category
+    assert {(p["locality_slug"], p["category_slug"]) for p in mine} == {(slug, None), (slug, category.slug)}
+
+    scoped = (await client.get(f"/api/v1/businesses/locality-pages?city_slug={city.slug}")).json()
+    assert {(p["locality_slug"], p["category_slug"]) for p in scoped if p["locality_slug"].endswith(tag)} == {
+        (slug, None), (slug, category.slug)}
+    assert (await client.get("/api/v1/businesses/locality-pages?city_slug=nowhere")).json() == []
+
+    # Clearing a locality
+    await admin.post("/api/v1/admin/businesses/import/localities",
+                     json={"city_slug": city.slug, "items": [{"id": ids[3], "locality": None}]})
+    assert (await client.get(f"/api/v1/businesses/{ids[3]}")).json()["locality_slug"] is None

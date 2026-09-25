@@ -2,15 +2,13 @@ import { listingPath } from '@/lib/utils';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
-import { MapPin, Phone } from 'lucide-react';
-import { SEO_CATEGORIES } from '@/lib/seoCategories';
+import { MIN_AREA_BUSINESSES, SEO_CATEGORIES } from '@/lib/seoCategories';
 import ListingCard from '@/components/listing-card/ListingCard';
-import { businessCovers, categoryCover, coverFor, listingCovers } from '@/lib/categoryCover';
+import { categoryCover, listingCovers } from '@/lib/categoryCover';
 import SiteHeader from '@/components/site-header/SiteHeader';
 import SiteFooter from '@/components/site-footer/SiteFooter';
-import OsmAttribution from '@/components/osm-attribution/OsmAttribution';
-import type { Business, City, Listing } from '@/lib/types';
+import type { Business, City, Listing, Locality } from '@/lib/types';
+import BusinessList, { ChipLinks } from '@/components/business-list/BusinessList';
 
 // Named routes that take priority — this page must never match these
 const RESERVED = new Set([
@@ -115,12 +113,13 @@ export default async function SeoCategoryPage({
   const city = cities.find(c => c.slug === params.city);
   if (!city) notFound();   // only cities LocalsIndia actually serves
 
-  const [{ items: listings, exact }, businesses, businessTotal] = await Promise.all([
+  const [{ items: listings, exact }, businesses, businessTotal, localities] = await Promise.all([
     fetchListings(params.city, meta), fetchBusinesses(params.city, meta.businessSlug),
     fetchBusinessCount(params.city, meta.businessSlug),
+    getJson<Locality[]>(`${API_BASE}/api/v1/businesses/localities?city_slug=${params.city}&category_slug=${meta.businessSlug}`, []),
   ]);
   const covers = listingCovers(listings);
-  const bizCovers = businessCovers(businesses.map(b => ({ ...b, category_slug: b.category_slug ?? meta.businessSlug })));
+  const areas = localities.filter(l => l.count >= MIN_AREA_BUSINESSES).slice(0, 40);
   const sameState = cities.filter(c => c.state === city.state && c.slug !== city.slug).slice(0, 12);
   const pageUrl = `https://www.localsindia.com/${params.city}/${params.category}`;
 
@@ -209,40 +208,14 @@ export default async function SeoCategoryPage({
                   View all →
                 </Link>
               </div>
-              <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {businesses.map(b => (
-                  <li key={b.id}>
-                    <Link
-                      href={`/${params.city}/businesses/${b.id}`}
-                      className="flex gap-3 bg-white rounded-2xl border p-3 hover:shadow-md transition-shadow h-full"
-                      style={{ borderColor: 'var(--li-border)' }}
-                    >
-                      <div className="relative w-16 h-16 rounded-xl overflow-hidden shrink-0 bg-slate-100">
-                        <Image
-                          src={b.images?.[0]?.url ?? bizCovers.get(b.id) ?? coverFor({ id: b.id, category_slug: meta.businessSlug, name: b.name })}
-                          alt="" fill className="object-cover" sizes="64px"
-                        />
-                      </div>
-                      <div className="min-w-0">
-                        <h3 className="font-bold text-sm line-clamp-1" style={{ color: 'var(--li-text)' }}>{b.name}</h3>
-                        {b.address && (
-                          <p className="flex items-center gap-1 text-xs mt-0.5" style={{ color: 'var(--li-muted)' }}>
-                            <MapPin className="w-3 h-3 shrink-0" /> <span className="truncate">{b.address}</span>
-                          </p>
-                        )}
-                        {b.phone && (
-                          <p className="flex items-center gap-1 text-xs mt-0.5" style={{ color: 'var(--li-muted)' }}>
-                            <Phone className="w-3 h-3 shrink-0" /> {b.phone}
-                          </p>
-                        )}
-                      </div>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-              {businesses.some(b => b.source === 'osm') && <OsmAttribution className="mt-2" />}
+              <BusinessList businesses={businesses} citySlug={params.city} fallbackCategory={meta.businessSlug} />
             </section>
           )}
+
+          <ChipLinks
+            title={`${meta.title} by area in ${city.name}`}
+            links={areas.map(a => ({ href: `/${params.city}/${params.category}/${a.slug}`, label: `${a.name} (${a.count})` }))}
+          />
 
           {/* Listings posted by people */}
           {exact && listings.length > 0 ? (

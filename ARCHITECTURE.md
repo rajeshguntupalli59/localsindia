@@ -637,6 +637,9 @@ Also `GET /api/v1/admin/errors` (admin-only, see Admin section below) — lists 
 | POST | `/admin/business-claims/email` | Grant ownership for a claim proven by email (business ID + claimant account phone) | Admin |
 | GET | `/admin/outreach` | Owner-outreach queue: unclaimed businesses with a phone, by city/category/status (todo/follow_up/closed/claimed), mobiles first, + counts; latest `business_outreach` row = status | Admin |
 | POST | `/admin/outreach/{business_id}` | Log one manual call/WhatsApp outcome + optional note (nothing is sent by the server) | Admin |
+| GET | `/businesses/localities` | City's neighbourhoods with live business counts (optional category) | Public |
+| GET | `/businesses/locality-pages` | Area pages with 3+ businesses (city-wide + per category), optional city_slug; feeds sitemap-areas.xml | Public |
+| POST | `/admin/businesses/import/localities` | Bulk-set business neighbourhoods (from agents/assign_localities.py) | Admin |
 | POST | `/businesses/{id}/reviews` | Add review (recalculates avg_rating) | Yes |
 | POST | `/businesses/{id}/view` | Fire-and-forget view-count event (feeds analytics below) | No |
 | POST | `/businesses/{id}/wa-click` | Fire-and-forget WhatsApp-click event (feeds analytics below) | No |

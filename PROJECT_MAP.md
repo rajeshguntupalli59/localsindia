@@ -135,6 +135,11 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 - Imported 2,406 (first run). Businesses now also show under their category: `CategoryBusinesses` strip on `/search`, `/[city]/search`, `/[city]/[category]` ("View all" → `/[city]/businesses?category=slug`); directory page got category chips + Load more; `GET /businesses` takes `category_slug` and sorts verified → owned → rated → has-phone. Mapping extended to PG/hostels, event venues, job agencies, property managers; script now refuses to run if a map targets a non-existent category and reports categories with zero businesses.
 - Note: businesses created earlier by `city_launcher.py` use fictional phones (+9164000000xx) and are owned by the admin account.
 
+### 2026-09-25 — Neighbourhood (area) pages
+- `agents/assign_localities.py` (workflow `assign-localities.yml`, manual) tags each business with its nearest OSM place node: suburbs when a city has 5+ (≤3 km), else neighbourhoods (≤1.5 km); generic names ("Phase 3") skipped. Idempotent — re-run after new imports.
+- New pages `/[city]/area/[area]` and `/[city]/[category]/[area]` ("Doctors & Clinics in Madhapur, Hyderabad"), indexed at 3+ businesses, listed in `/sitemap-areas.xml` (in robots.txt; sitemap.xml is near the 50k cap). Linked from city page (Popular areas), category pages (by area) and business pages.
+- City page: leads with Explore when a city has no listings; the listing-feed error screen no longer hides the server-rendered Explore section.
+
 ### 2026-09-25 — City Seeder retired; 2,997 invented listings unpublished
 - Audit found 2,997 of 2,999 live listings were AI-written by `agents/city_launcher.py` (City Seeder), all posted as admin with made-up contact numbers +916300000001..99 (real mobile range — could ring strangers). Only 2 real user listings existed.
 - Migration `a4b5c6d7e8f9` soft-deletes admin-posted listings with exactly that number pattern (877 from June without `is_seed`, 2,120 from August with it); downgrade restores them. City Seeder workflow disabled in GitHub + schedule removed; `growth_tracker` now points low-listing cities to owner outreach.

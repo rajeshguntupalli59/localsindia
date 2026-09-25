@@ -1,7 +1,8 @@
 import { listingPath } from '@/lib/utils';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import type { City, Listing } from '@/lib/types';
+import type { City, Listing, Locality } from '@/lib/types';
+import { MIN_AREA_BUSINESSES } from '@/lib/seoCategories';
 import { regionalPhraseFor } from '@/lib/regionalSeo';
 import { loadCitySeo } from '@/lib/seo';
 import CityHomeClient from './CityHomeClient';
@@ -137,16 +138,18 @@ async function getJson<T>(url: string, fallback: T): Promise<T> {
 }
 
 export default async function CityHomePage({ params }: { params: { city: string } }) {
-  const [city, todayCount, trending, fresh, counts, allCities] = await Promise.all([
+  const [city, todayCount, trending, fresh, counts, allCities, localities] = await Promise.all([
     fetchCity(params.city),
     fetchTodayCount(params.city),
     fetchTrending(params.city),
     fetchFresh(params.city),
     getJson<Record<string, number>>(`${API_BASE}/api/v1/businesses/counts?city_slug=${params.city}`, {}),
     getJson<City[]>(`${API_BASE}/api/v1/cities`, []),
+    getJson<Locality[]>(`${API_BASE}/api/v1/businesses/localities?city_slug=${params.city}`, []),
   ]);
 
   if (!city) notFound();
+  const areas = localities.filter(l => l.count >= MIN_AREA_BUSINESSES).slice(0, 30);
   const nearby = allCities.filter(c => c.state === city.state && c.slug !== city.slug).slice(0, 15);
 
   const jsonLd = {
@@ -185,7 +188,7 @@ export default async function CityHomePage({ params }: { params: { city: string 
         initialTodayCount={todayCount}
         initialTrending={trending}
         initialFresh={fresh}
-        explore={<CityExplore city={city} counts={counts} nearby={nearby} />}
+        explore={<CityExplore city={city} counts={counts} nearby={nearby} areas={areas} />}
       />
     </>
   );

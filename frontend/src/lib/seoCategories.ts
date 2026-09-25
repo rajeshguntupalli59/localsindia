@@ -122,3 +122,7 @@ export const SEO_CATEGORIES: Record<string, {
 export const SEO_PAGE_FOR_BUSINESS_CATEGORY: Record<string, string> = Object.fromEntries(
   Object.entries(SEO_CATEGORIES).map(([key, m]) => [m.businessSlug, key]),
 );
+
+// An area page (/[city]/area/[area], /[city]/[category]/[area]) needs at least
+// this many real businesses — matches MIN_AREA_BUSINESSES in routers/businesses.py.
+export const MIN_AREA_BUSINESSES = 3;

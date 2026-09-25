@@ -168,6 +168,8 @@ export interface Business {
   source?: string | null;      // 'osm' = imported from OpenStreetMap (needs attribution)
   latitude?: number | null;
   longitude?: number | null;
+  locality?: string | null;       // neighbourhood from OpenStreetMap, e.g. "Madhapur"
+  locality_slug?: string | null;
   created_at: string;
   reviews?: Review[];
   images?: ListingImage[];
@@ -274,4 +276,10 @@ export interface OutreachItem {
 export interface OutreachQueue {
   counts: Record<OutreachStatus, number>;
   items: OutreachItem[];
+}
+
+export interface Locality {
+  slug: string;
+  name: string;
+  count: number;
 }

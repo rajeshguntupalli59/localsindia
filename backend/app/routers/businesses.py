@@ -37,6 +37,7 @@ async def list_businesses(
     category_id: uuid.UUID | None = Query(default=None),
     category_slug: str | None = Query(default=None),
     q: str | None = Query(default=None, max_length=100),
+    locality_slug: str | None = Query(default=None, max_length=90),
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, le=50),
     db: AsyncSession = Depends(get_db),
@@ -66,6 +67,8 @@ async def list_businesses(
         stmt = stmt.where(Business.category_id == category_id)
     elif category_slug:
         stmt = stmt.join(Category, Category.id == Business.category_id).where(Category.slug == category_slug)
+    if locality_slug:
+        stmt = stmt.where(Business.locality_slug == locality_slug)
     if q and q.strip():
         # Every word must appear in the name (e.g. "dental hospital")
         for word in q.strip().split()[:5]:
@@ -135,6 +138,57 @@ async def business_sitemap_entries(
         .limit(limit)
     )
     return [{"id": str(i), "city_slug": c, "updated_at": u} for i, c, u in rows.all()]
+
+
+MIN_AREA_BUSINESSES = 3   # an area page needs at least this many real businesses
+
+
+@router.get("/businesses/localities")
+async def business_localities(
+    city_slug: str = Query(...),
+    category_slug: str | None = Query(default=None),
+    db: AsyncSession = Depends(get_db),
+):
+    """[{slug, name, count}] — the city's neighbourhoods by live business count
+    (optionally within one category), for the area pages and their links."""
+    stmt = (
+        select(Business.locality_slug, func.min(Business.locality), func.count(Business.id))
+        .join(City, City.id == Business.city_id)
+        .where(City.slug == city_slug, Business.deleted_at.is_(None), Business.locality_slug.is_not(None))
+        .group_by(Business.locality_slug)
+        .order_by(func.count(Business.id).desc(), Business.locality_slug)
+    )
+    if category_slug:
+        stmt = stmt.join(Category, Category.id == Business.category_id).where(Category.slug == category_slug)
+    return [{"slug": s, "name": n, "count": c} for s, n, c in (await db.execute(stmt)).all()]
+
+
+@router.get("/businesses/locality-pages")
+async def business_locality_pages(
+    city_slug: str | None = Query(default=None),
+    db: AsyncSession = Depends(get_db),
+):
+    """Every area page worth indexing (3+ businesses), for sitemap.xml:
+    city-wide areas (category_slug null) and category-in-area pages."""
+    base = (
+        select(City.slug, Business.locality_slug, func.count(Business.id))
+        .join(City, City.id == Business.city_id)
+        .where(Business.deleted_at.is_(None), Business.locality_slug.is_not(None))
+    )
+    if city_slug:
+        base = base.where(City.slug == city_slug)
+    areas = await db.execute(
+        base.group_by(City.slug, Business.locality_slug).having(func.count(Business.id) >= MIN_AREA_BUSINESSES)
+    )
+    per_cat = await db.execute(
+        base.add_columns(Category.slug).join(Category, Category.id == Business.category_id)
+        .group_by(City.slug, Business.locality_slug, Category.slug)
+        .having(func.count(Business.id) >= MIN_AREA_BUSINESSES)
+    )
+    return (
+        [{"city_slug": c, "locality_slug": l, "category_slug": None, "count": n} for c, l, n in areas.all()]
+        + [{"city_slug": c, "locality_slug": l, "category_slug": cat, "count": n} for c, l, n, cat in per_cat.all()]
+    )
 
 
 @router.get("/businesses/{business_id}", response_model=BusinessOut)

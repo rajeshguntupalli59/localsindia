@@ -192,6 +192,12 @@ export default function BusinessDetailPage() {
                 <span>{business.address}</span>
               </div>
             )}
+            {business.locality_slug && (
+              <Link href={`/${citySlug}/area/${business.locality_slug}`}
+                className="inline-block text-xs font-semibold hover:underline" style={{ color: 'var(--li-primary)' }}>
+                More businesses in {business.locality} →
+              </Link>
+            )}
             {business.phone && (
               <div className="flex items-center gap-2 text-slate-600">
                 <Phone className="w-4 h-4 flex-shrink-0" />
