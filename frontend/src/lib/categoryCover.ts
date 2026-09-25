@@ -16,8 +16,8 @@ const NAME_RULES: Record<string, [RegExp, string][]> = {
     [/dental|dentist|teeth|tooth|smile|orthodon/, 'dental'],
     [/eye|netra|vision|optic|lasik/, 'eye'],
     [/lab\b|labs\b|diagnos|scan|path(o|ology)|x-?ray|imaging|blood/, 'lab'],
+    [/hospital|nursing home|institute|multi.?speciality|super.?speciality|care cent|maternity|trust|medical college/, 'hospital'],
     [/pharma|medical|medicals|chemist|drug|medicine/, 'pharmacy'],
-    [/hospital|nursing home|institute|multi.?speciality|super.?speciality|care cent|maternity|trust/, 'hospital'],
     [/vet|pets?|animal/, 'vet'],
   ],
   tiffin: [
@@ -77,7 +77,7 @@ const NAME_RULES: Record<string, [RegExp, string][]> = {
 // When the name doesn't say what it is: a mix of that category's photos
 const CATEGORY_DEFAULTS: Record<string, string[]> = {
   doctors: ['clinic', 'hospital'],
-  tiffin: ['restaurant', 'southindian', 'biryani'],
+  tiffin: ['restaurant', 'southindian', 'curry', 'biryani'],
   education: ['school', 'coaching', 'college'],
   'pg-roommate': ['hostel'],
   services: ['general', 'salon', 'laundry'],
@@ -92,6 +92,22 @@ const CATEGORY_DEFAULTS: Record<string, string[]> = {
   classifieds: ['general'],
 };
 
+// When a list has used up every photo of a type, continue with related
+// photos (still the same kind of place) before repeating one.
+const SPILL: Record<string, string[]> = {
+  hospital: ['clinic', 'lab'], clinic: ['hospital', 'lab'], dental: ['clinic'], pharmacy: ['clinic', 'lab'],
+  lab: ['clinic', 'hospital'], eye: ['clinic'],
+  restaurant: ['curry', 'southindian', 'biryani'], southindian: ['curry', 'restaurant'], curry: ['restaurant', 'southindian'],
+  biryani: ['curry', 'restaurant'], fastfood: ['restaurant', 'curry'], bakery: ['sweets'], sweets: ['bakery'],
+  tea: ['juice', 'restaurant'], juice: ['tea', 'fastfood'],
+  school: ['coaching', 'college'], college: ['school', 'coaching'], coaching: ['school', 'college'], kindergarten: ['school'],
+  salon: ['general'], laundry: ['general'], tailor: ['textiles', 'clothes'], clothes: ['textiles'], textiles: ['clothes'],
+  jewellery: ['clothes'], footwear: ['clothes'], bike: ['garage', 'car'], car: ['garage', 'bike'], garage: ['bike', 'car'],
+  mobile: ['computer', 'appliance'], computer: ['mobile'], appliance: ['mobile'],
+  supermarket: ['grocery', 'general'], grocery: ['supermarket', 'general'], general: ['supermarket', 'grocery'],
+  hardware: ['general'], stationery: ['general'], hostel: [], realestate: [], furniture: [], office: [], events: [],
+};
+
 export interface CoverSubject {
   id?: string;
   category_slug?: string | null;
@@ -99,13 +115,23 @@ export interface CoverSubject {
   name?: string | null;
 }
 
-function pool(subject: CoverSubject): string[] {
+function types(subject: CoverSubject): string[] {
   const cat = subject.category_slug ?? '';
   const name = (subject.name ?? '').toLowerCase();
   const rule = (NAME_RULES[cat] ?? []).find(([re]) => re.test(name));
-  const types = rule ? [rule[1]] : (CATEGORY_DEFAULTS[cat] ?? ['general']);
-  const files = types.flatMap(t => COVER_POOLS[t] ?? []);
+  return rule ? [rule[1]] : (CATEGORY_DEFAULTS[cat] ?? ['general']);
+}
+
+function pool(subject: CoverSubject): string[] {
+  const files = types(subject).flatMap(t => COVER_POOLS[t] ?? []);
   return files.length ? files : COVER_POOLS.general;
+}
+
+/** The item's own photos first, then related types' photos (for lists). */
+function extendedPool(subject: CoverSubject): string[] {
+  const own = pool(subject);
+  const extra = types(subject).flatMap(t => SPILL[t] ?? []).flatMap(t => COVER_POOLS[t] ?? []);
+  return [...own, ...extra.filter(f => !own.includes(f))];
 }
 
 function hash(s: string): number {
@@ -126,13 +152,11 @@ export function assignCovers(subjects: CoverSubject[]): Map<string, string> {
   const used = new Set<string>();
   const out = new Map<string, string>();
   for (const s of subjects) {
-    const files = pool(s);
-    const start = hash(s.id ?? s.name ?? '') % files.length;
-    let pick = files[start];
-    for (let k = 0; k < files.length; k++) {
-      const f = files[(start + k) % files.length];
-      if (!used.has(f)) { pick = f; break; }
-    }
+    const own = pool(s);
+    const start = hash(s.id ?? s.name ?? '') % own.length;
+    // own photos (from this item's usual one), then related types, before repeating
+    const order = [...own.slice(start), ...own.slice(0, start), ...extendedPool(s).slice(own.length)];
+    const pick = order.find(f => !used.has(f)) ?? own[start];
     used.add(pick);
     if (s.id) out.set(s.id, pick);
   }

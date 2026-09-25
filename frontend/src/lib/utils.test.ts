@@ -113,6 +113,17 @@ describe('cover photos', () => {
     expect(coverFor(s)).toBe(coverFor(s));
     expect(coverFor({ id: 'z', category_slug: 'nope', name: 'Anything' })).toMatch(/^\/category-covers\//);
   });
+  it('spills into related photos instead of repeating (24 hospitals)', async () => {
+    const { assignCovers } = await import('./categoryCover');
+    const items = Array.from({ length: 12 }, (_, i) => ({ id: `h${i}`, category_slug: 'doctors', name: `City Hospital ${i}` }));
+    const covers = Array.from(assignCovers(items).values());
+    expect(new Set(covers).size).toBe(12);
+    expect(covers.every(c => /(hospital|clinic|lab|doctors)/.test(c))).toBe(true);
+  });
+  it('treats a medical college hospital as a hospital, not a pharmacy', async () => {
+    const { coverFor } = await import('./categoryCover');
+    expect(coverFor({ id: 'k', category_slug: 'doctors', name: 'Katuri Medical College And Hospital' })).toMatch(/hospital/);
+  });
   it('gives neighbouring cards different photos', async () => {
     const { assignCovers } = await import('./categoryCover');
     const items = Array.from({ length: 5 }, (_, i) => ({ id: `t${i}`, category_slug: 'tiffin', name: `Tiffin Centre ${i}` }));
