@@ -123,6 +123,11 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 - Claim approval (all 3 paths — SMS code now also notifies) sends one notification with a review nudge (`_notify_new_owner`). Owners see a "Get reviews from your customers" card (WhatsApp share + copy) on their business page until 5 reviews, and on the SMS-claim success screen (`components/review-invite/ReviewInvite.tsx`).
 - Paid "Get Verified — ₹499/month" offers hidden (Raj, 2026-09-25) on the owner's business page and the add-business success screen via `PAID_BADGES_ENABLED = false` in `frontend/src/lib/features.ts` — flip to true to bring them back.
 
+### 2026-09-25 — App build v1.1.0 (versionCode 15) cut for Play production
+- `eas build --platform android --profile production` from `master` @ `059036c` (version bumped 1.0.0 → 1.1.0). Build id `253a2dde-d8e1-4af0-8a84-a3212949b6c4`, same signing credentials (`Build Credentials quaxx7FT7h`). AAB: https://expo.dev/artifacts/eas/9he3FEyFvnKoHbb76zuUkXMagSn9ZybrX7EKmSaEmvw.aab
+- Contents vs v14: only commit 3630dc4 (business directory, claim flow, hours, covers, Call/Directions/Share, paid badge hidden) + removal of the dead `claim()` call. Emulator-tested; not yet tested on a real phone; real claim SMS delivery not tested.
+- **Raj to do:** upload the AAB in Play Console → Production → Create new release; staged rollout recommended. Release notes drafted in-session (categories show real businesses, hours/Open now, Call/Directions/Share, claim your listing).
+
 ### 2026-09-25 — Mobile app caught up with the website (code done + emulator-tested; new build not yet made)
 - Found on the emulator: every category tile showed "No listings found"; home had no real content; business list = first 20, no filter/photos, fake "0.0 · 0 reviews"; business page read `website`/`category` (API sends `website_url`/`category_slug`), no claim, hours, directions, share, covers, OSM credit; paid ₹499 badge still shown.
 - Now: category tiles open that category's real businesses (`BusinessesScreen` with chips + counts, paging, covers, "Open now", "Classified ads for X →"); home "Popular in {city}" row; business page = labelled cover, hours + Open now, Call/Directions/Share, claim sheet (SMS code / documents / email — `components/ClaimBusinessSheet.tsx`), owner review-invite card, OSM attribution; `PAID_BADGES_ENABLED=false` (`mobile/src/lib/features.ts`). Cover/hours logic copied from the web (`mobile/src/lib/categoryCover.ts`, `coverPools.ts`, `openingHours.ts` — keep in sync).
@@ -152,7 +157,7 @@ Open items:
 - **URGENT (Raj): rotate the admin password** — it was committed to the public repo (see Security review fixes below).
 - DONE: opening-hours backfill (run 36091832956) — 4,888 businesses got hours. `sitemap-areas.xml` submitted in GSC and fetched OK (GSC first showed "Couldn't fetch" — its normal new-sitemap glitch; resolved on its own).
 - Raj: add the site to Bing Webmaster Tools via "Import from GSC".
-- **Mobile app updated (2026-09-25), NOT yet shipped:** needs a new EAS build + Play Console upload — ask Raj first. See the changelog entry "Mobile app caught up with the website".
+- **Mobile app v1.1.0 (versionCode 15) BUILT 2026-09-25, awaiting Raj's Play Console upload** — AAB link in the changelog entry "App build v1.1.0". See the changelog entry "Mobile app caught up with the website".
 - Admin pages are cramped on phones (fixed 224px sidebar) and log a harmless hydration warning (layout reads localStorage in useState).
 - Optional: dedicated MSG91 DLT template for claim SMS (claims reuse the login template); ask owners to request reviews when a claim is approved.
 - Real SMS delivery of claim codes not yet tested end to end (local tests used OTP_DEBUG).
