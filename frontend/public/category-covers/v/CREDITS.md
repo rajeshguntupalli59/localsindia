@@ -33,11 +33,10 @@ listings and businesses without their own photos. Chosen per business type.
 | v/restaurant-0.jpg | Roosevelt Lodge, lobby | YellowstoneNPS | PDM | https://www.flickr.com/photos/80223459@N05/9411485704 |
 | v/restaurant-1.jpg | Old Faithful Snow Lodge, dining room | YellowstoneNPS | PDM | https://www.flickr.com/photos/80223459@N05/9408598631 |
 | v/restaurant-2.jpg | Grant Village, inside the restaurant | YellowstoneNPS | PDM | https://www.flickr.com/photos/80223459@N05/9395700182 |
-| v/restaurant-3.jpg | Old Faithful Snow Lodge, dining room | YellowstoneNPS | PDM | https://www.flickr.com/photos/80223459@N05/9408598631 |
-| v/restaurant-4.jpg | 5. A Santa Fe Pleasure Dome | railfan 44 | PDM | https://www.flickr.com/photos/129679309@N05/24088187174 |
-| v/restaurant-5.jpg | Lounge furniture, sofa, arm chairs, round table, 3rd floor c | Wonderlane | CC0 | https://www.flickr.com/photos/71401718@N00/5510326235 |
-| v/restaurant-6.jpg | restaurant in classical style | Foto Miki Digital | PDM | https://www.flickr.com/photos/96511847@N04/10560556104 |
-| v/restaurant-7.jpg | indoor0004 | koiest | CC0 | https://www.flickr.com/photos/105675854@N04/10472181363 |
+| v/restaurant-3.jpg | 5. A Santa Fe Pleasure Dome | railfan 44 | PDM | https://www.flickr.com/photos/129679309@N05/24088187174 |
+| v/restaurant-4.jpg | Lounge furniture, sofa, arm chairs, round table, 3rd floor c | Wonderlane | CC0 | https://www.flickr.com/photos/71401718@N00/5510326235 |
+| v/restaurant-5.jpg | restaurant in classical style | Foto Miki Digital | PDM | https://www.flickr.com/photos/96511847@N04/10560556104 |
+| v/restaurant-6.jpg | indoor0004 | koiest | CC0 | https://www.flickr.com/photos/105675854@N04/10472181363 |
 | v/curry-0.jpg | A Bengali curry dish made from Potato and fresh matar (green | Billjones94 | CC0 | https://commons.wikimedia.org/w/index.php?curid=141170679 |
 | v/curry-1.jpg | Betki fish kalia, a fish curry dish popular in West Bengal,  | Billjones94 | CC0 | https://commons.wikimedia.org/w/index.php?curid=143011111 |
 | v/curry-2.jpg | Mother in law pork curry | roland | CC0 | https://www.flickr.com/photos/35034347371@N01/59462959 |
@@ -91,8 +90,7 @@ listings and businesses without their own photos. Chosen per business type.
 | v/coaching-3.jpg | School Books | Krzysztof%20Puszczy%u0144ski | CC0 | https://stocksnap.io/photo/school-books-S059QDGBOG |
 | v/kindergarten-0.jpg |  | — | CC0 | https://www.rawpixel.com/image/5971866/free-public-domain-cc0-photo |
 | v/hostel-0.jpg | Room Beds | Jay Mantri | CC0 | https://stocksnap.io/photo/room-beds-8B828310AC |
-| v/hostel-1.jpg |  | — | CC0 | https://www.rawpixel.com/image/6068670/free-public-domain-cc0-photo |
-| v/hostel-2.jpg | Free elegant simple bedroom image | — | CC0 | https://www.rawpixel.com/image/5912907/image-public-domain-minimal-window |
+| v/hostel-1.jpg | Free elegant simple bedroom image | — | CC0 | https://www.rawpixel.com/image/5912907/image-public-domain-minimal-window |
 | v/salon-0.jpg | And finally... | comedy_nose | PDM | https://www.flickr.com/photos/23408922@N07/4058094011 |
 | v/salon-1.jpg | Old barber shop | — | CC0 | https://www.rawpixel.com/image/5939531/old-barber-shop |
 | v/salon-2.jpg | Scissors Comb | Candace McDaniel | CC0 | https://stocksnap.io/photo/scissors-comb-A5M4RVGZKE |
@@ -151,10 +149,9 @@ listings and businesses without their own photos. Chosen per business type.
 | v/stationery-1.jpg | Free notebook photo | — | CC0 | https://www.rawpixel.com/image/5907510/photo-image-paper-public-domain-note |
 | v/general-0.jpg | Grocery Shelves | Dennis S. Hurd | CC0 | https://www.flickr.com/photos/43296902@N00/65248068 |
 | v/general-1.jpg | Open Sign | %C1lvaro%20Serrano | CC0 | https://stocksnap.io/photo/open-sign-C6YGDZ1DSW |
-| v/realestate-0.jpg | Apartment building | DennisM2 | CC0 | https://www.flickr.com/photos/14674348@N04/15380775232 |
-| v/realestate-1.jpg | Modern apartment building | DennisM2 | CC0 | https://www.flickr.com/photos/14674348@N04/14996764996 |
-| v/realestate-2.jpg | Apart building | DennisM2 | CC0 | https://www.flickr.com/photos/14674348@N04/26401105160 |
-| v/realestate-3.jpg | MD.RB - Apartment buildings in Rîbnița - sep 2020 - 02 | Gikü (talk) | CC0 | https://commons.wikimedia.org/w/index.php?curid=116236867 |
+| v/realestate-0.jpg | Modern apartment building | DennisM2 | CC0 | https://www.flickr.com/photos/14674348@N04/14996764996 |
+| v/realestate-1.jpg | Apart building | DennisM2 | CC0 | https://www.flickr.com/photos/14674348@N04/26401105160 |
+| v/realestate-2.jpg | MD.RB - Apartment buildings in Rîbnița - sep 2020 - 02 | Gikü (talk) | CC0 | https://commons.wikimedia.org/w/index.php?curid=116236867 |
 | v/furniture-0.jpg | 나무 목재 의자 테이블 Wooden chairs | CC0photo | CC0 | https://www.flickr.com/photos/137346712@N07/24832305235 |
 | v/furniture-1.jpg | Free wooden chairs table image | — | CC0 | https://www.rawpixel.com/image/5911562/image-public-domain-wooden-room |
 | v/furniture-2.jpg | Closeup wooden chair | — | CC0 | https://www.rawpixel.com/image/6031256/photo-image-public-domain-wooden-free |

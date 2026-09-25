@@ -156,7 +156,13 @@ export function assignCovers(subjects: CoverSubject[]): Map<string, string> {
     const start = hash(s.id ?? s.name ?? '') % own.length;
     // own photos (from this item's usual one), then related types, before repeating
     const order = [...own.slice(start), ...own.slice(0, start), ...extendedPool(s).slice(own.length)];
-    const pick = order.find(f => !used.has(f)) ?? own[start];
+    let pick = order.find(f => !used.has(f));
+    if (!pick) {
+      // every suitable photo is already on the page: start a fresh cycle so
+      // repeats are spread out evenly instead of piling onto one photo
+      order.forEach(f => used.delete(f));
+      pick = order[0];
+    }
     used.add(pick);
     if (s.id) out.set(s.id, pick);
   }

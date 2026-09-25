@@ -120,6 +120,13 @@ describe('cover photos', () => {
     expect(new Set(covers).size).toBe(12);
     expect(covers.every(c => /(hospital|clinic|lab|doctors)/.test(c))).toBe(true);
   });
+  it('spreads repeats evenly once every related photo is used (40 hospitals)', async () => {
+    const { assignCovers } = await import('./categoryCover');
+    const items = Array.from({ length: 40 }, (_, i) => ({ id: `q${i}`, category_slug: 'doctors', name: `Care Hospital ${i}` }));
+    const counts = new Map<string, number>();
+    assignCovers(items).forEach(u => counts.set(u, (counts.get(u) ?? 0) + 1));
+    expect(Math.max(...Array.from(counts.values()))).toBeLessThanOrEqual(3);
+  });
   it('treats a medical college hospital as a hospital, not a pharmacy', async () => {
     const { coverFor } = await import('./categoryCover');
     expect(coverFor({ id: 'k', category_slug: 'doctors', name: 'Katuri Medical College And Hospital' })).toMatch(/hospital/);
