@@ -248,6 +248,9 @@ export default function CityHomeClient({
         </div>
       </div>
 
+      {/* No listings yet: lead with the city's real businesses, not an empty feed */}
+      {freshListings.length === 0 && explore}
+
       <div className="page-wrap py-8 space-y-10">
 
         {!loading && <CityBanner citySlug={citySlug} />}
@@ -364,7 +367,7 @@ export default function CityHomeClient({
         )}
       </div>
 
-      {explore}
+      {freshListings.length > 0 && explore}
 
       <div className="page-wrap py-4">
         <AdBanner slot="7291834056" format="horizontal" className="rounded-2xl overflow-hidden" />
