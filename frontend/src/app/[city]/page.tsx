@@ -185,6 +185,7 @@ export default async function CityHomePage({ params }: { params: { city: string 
         />
       )}
       <CityHomeClient
+        key={params.city}   // fresh state per city — it trusts the server data below
         initialCity={city}
         initialTodayCount={todayCount}
         initialTrending={trending}

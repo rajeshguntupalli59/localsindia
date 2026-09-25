@@ -123,6 +123,11 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 - Claim approval (all 3 paths — SMS code now also notifies) sends one notification with a review nudge (`_notify_new_owner`). Owners see a "Get reviews from your customers" card (WhatsApp share + copy) on their business page until 5 reviews, and on the SMS-claim success screen (`components/review-invite/ReviewInvite.tsx`).
 - Paid "Get Verified — ₹499/month" offers hidden (Raj, 2026-09-25) on the owner's business page and the add-business success screen via `PAID_BADGES_ENABLED = false` in `frontend/src/lib/features.ts` — flip to true to bring them back.
 
+### 2026-09-25 — City page loading fixed (blank screen + skeleton flash)
+- Measured live: cold first HTML byte 5.2 s (blank screen), then the browser re-fetched the city's data the server had already rendered (9 API calls) and put the listing skeleton back over the real page for ~1.8 s; a slow re-fetch replaced the feed with "Could not load listings".
+- Fixes: `CityHomeClient` trusts the server data (fetches only when there is none, or on Retry; keyed per city in `[city]/page.tsx`) → 4 calls, no skeleton flash (0/40 samples vs 18/40). New `app/[city]/loading.tsx` skeleton shows instantly when a city is picked. `keepalive.yml` now also pings www.localsindia.com/hyderabad so the SWA server stays warm.
+- Backend endpoints themselves are fast (~0.75 s from the US is almost all network; server time is small).
+
 ### 2026-09-25 — Dead code removed
 - Deleted (all verified unreferenced): `agents/city_launcher.py` + `agents/instructions/city_launcher.md` + `agents/seed_ap_cities.ps1` + `.github/workflows/city-seeder.yml` (retired seeder); `agents/social_publisher.py` (imported a non-existent `BaseAgent`, could not run); `frontend/src/hooks/useCities.ts`, `frontend/src/lib/static-params.ts` (imported nowhere); mobile `businessesApi.claim()` (called the removed instant-claim endpoint). `agents/test_integration.py` cleaned of seeder checks (it was already broken on the seeder import).
 - Kept on purpose: `meta_client.py` video helpers (manual video pipeline, §4a). Backend: no unimported modules (vulture hits were ORM columns / FastAPI endpoints, i.e. false positives).

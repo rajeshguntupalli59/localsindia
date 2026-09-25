@@ -12,3 +12,9 @@ jobs:
       - name: Ping health endpoint
         run: |
           curl -sf https://localsindia-backend-in.azurewebsites.net/api/v1/health || echo "Backend warming up"
+
+      # The website's own server (Azure Static Web Apps) also goes cold and then
+      # takes ~5 s before a city page shows anything — keep it warm too.
+      - name: Ping website city page
+        run: |
+          curl -s -o /dev/null -w "city page %{http_code} in %{time_total}s" https://www.localsindia.com/hyderabad || echo "Website warming up"

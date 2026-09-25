@@ -152,6 +152,10 @@ export default function CityHomeClient({
   }, []);
 
   useEffect(() => {
+    // The server already rendered this city's data — show it as is instead of
+    // blanking the page behind a skeleton while fetching the same data again.
+    // Fetch in the browser only when there was no server data, or on Retry.
+    if (initialCity && retryKey === 0) return;
     setLoadError(false);
     setLoading(true);
     async function load() {
@@ -173,7 +177,7 @@ export default function CityHomeClient({
       }
     }
     load();
-  }, [citySlug, retryKey]);
+  }, [citySlug, retryKey, initialCity]);
 
   const handleCategoryClick = (slug: string) => {
     if (slug === 'events') { router.push(`/${citySlug}/events`); return; }
