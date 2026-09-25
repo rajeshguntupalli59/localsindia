@@ -47,7 +47,8 @@ const CATEGORY_COLORS: Record<string, string> = {
   doctors:       '#0284c7',
 };
 
-const API_BASE = 'https://localsindia-backend-in.azurewebsites.net/api/v1';
+// EXPO_PUBLIC_API_URL only for local testing; release builds use production.
+const API_BASE = process.env.EXPO_PUBLIC_API_URL ?? 'https://localsindia-backend-in.azurewebsites.net/api/v1';
 
 type Category = { id: string; name: string; slug: string; icon: string };
 

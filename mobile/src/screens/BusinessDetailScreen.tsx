@@ -1,13 +1,20 @@
 import { useState, useRef, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator,
-  ScrollView, Modal, TextInput, Linking, Image,
+  ScrollView, Modal, TextInput, Linking, Image, Share,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 import { Ionicons } from '@expo/vector-icons';
 import { businessesApi } from '../lib/api';
 import { storage } from '../lib/storage';
+import { coverFor } from '../lib/categoryCover';
+import { describeWeek, openStatus, parseOpeningHours } from '../lib/openingHours';
+import { PAID_BADGES_ENABLED, SITE_URL, siteImage } from '../lib/features';
+import ClaimBusinessSheet from '../components/ClaimBusinessSheet';
+import ReviewInviteCard from '../components/ReviewInviteCard';
+import { businessCategoryLabel } from '../lib/businessCategories';
+
 
 const RAZORPAY_KEY = process.env.EXPO_PUBLIC_RAZORPAY_KEY_ID ?? '';
 
@@ -78,6 +85,7 @@ export default function BusinessDetailScreen({ route, navigation }: any) {
   const [reviewRating, setReviewRating]         = useState(5);
   const [reviewBody, setReviewBody]             = useState('');
   const [submittingReview, setSubmittingReview] = useState(false);
+  const [claimVisible, setClaimVisible]         = useState(false);
 
   useEffect(() => { load(); }, [businessId]);
 
@@ -85,14 +93,16 @@ export default function BusinessDetailScreen({ route, navigation }: any) {
   // the Get Verified offer immediately instead of only being discoverable if
   // the owner comes back to their listing later.
   useEffect(() => {
-    if (route.params?.promptVerify && business && !business.verified) {
+    if (PAID_BADGES_ENABLED && route.params?.promptVerify && business && !business.verified) {
       setBadgeModal(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [business]);
 
-  const load = async () => {
-    setLoading(true);
+  // silent: refresh in place (e.g. after a claim) without swapping the whole
+  // screen for a spinner, which would also reset an open claim sheet.
+  const load = async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const [biz, user] = await Promise.all([
         businessesApi.getById(businessId),
@@ -158,7 +168,7 @@ export default function BusinessDetailScreen({ route, navigation }: any) {
         Alert.alert(
           "You're Verified! ✓",
           'Your blue verification badge is now live.',
-          [{ text: 'Great!', onPress: load }]
+          [{ text: 'Great!', onPress: () => load() }]
         );
       } catch (err: any) {
         Alert.alert('Verification Error', err?.response?.data?.detail ?? 'Contact support.');
@@ -203,6 +213,24 @@ export default function BusinessDetailScreen({ route, navigation }: any) {
   }
 
   const isOwner = !!(currentUser && business.owner_id && currentUser.id === business.owner_id);
+  const citySlug = business.city_slug ?? route.params?.citySlug ?? 'hyderabad';
+  const pageUrl = `${SITE_URL}/${citySlug}/businesses/${business.id}`;
+  const hours = parseOpeningHours(business.opening_hours);
+  const hoursStatus = hours ? openStatus(hours) : null;
+  const hasMap = business.latitude != null && business.longitude != null;
+  const openClaim = () => {
+    if (!currentUser) {
+      Alert.alert('Sign in to claim', 'Sign in with your phone number first, then claim your business.', [
+        { text: 'Not now', style: 'cancel' },
+        { text: 'Sign in', onPress: () => navigation.navigate('Login') },
+      ]);
+      return;
+    }
+    setClaimVisible(true);
+  };
+  const shareBusiness = () => Share.share({
+    message: `${business.name}${business.address ? ` — ${business.address}` : ''}\n${pageUrl}`,
+  });
   const selectedPlan = BADGE_PLANS.find(p => p.key === badgePlan)!;
 
   return (
@@ -236,6 +264,17 @@ export default function BusinessDetailScreen({ route, navigation }: any) {
           </>
         )}
 
+        {/* No photos yet — labelled category cover until the owner adds some */}
+        {!(business.images?.length > 0) && (
+          <View>
+            <Image
+              source={{ uri: siteImage(coverFor({ id: business.id, category_slug: business.category_slug, name: business.name })) }}
+              style={styles.coverPhoto}
+            />
+            <Text style={styles.representative}>Representative image</Text>
+          </View>
+        )}
+
         {/* Business info card */}
         <View style={styles.card}>
           <View style={styles.nameRow}>
@@ -248,13 +287,13 @@ export default function BusinessDetailScreen({ route, navigation }: any) {
             )}
           </View>
 
-          {business.category && (
+          {business.category_slug && (
             <View style={styles.categoryChip}>
-              <Text style={styles.categoryText}>{business.category}</Text>
+              <Text style={styles.categoryText}>{businessCategoryLabel(business.category_slug)}</Text>
             </View>
           )}
 
-          {business.avg_rating != null && (
+          {business.review_count > 0 && !!business.avg_rating && (
             <View style={styles.ratingRow}>
               {[1,2,3,4,5].map(s => (
                 <Ionicons key={s} name={s <= Math.round(business.avg_rating) ? 'star' : 'star-outline'} size={14} color="#f59e0b" />
@@ -279,10 +318,28 @@ export default function BusinessDetailScreen({ route, navigation }: any) {
             </TouchableOpacity>
           )}
 
-          {business.website && (
-            <TouchableOpacity style={styles.infoRow} onPress={() => Linking.openURL(business.website)}>
+          {business.opening_hours && (
+            <View style={styles.infoRow}>
+              <Ionicons name="time-outline" size={16} color="#6b7280" />
+              <View style={{ flex: 1 }}>
+                {hoursStatus && (
+                  <Text style={[styles.infoText, { fontWeight: '700', color: hoursStatus.open ? '#059669' : '#dc2626' }]}>
+                    {hoursStatus.label}
+                  </Text>
+                )}
+                {hours
+                  ? describeWeek(hours).map(row => <Text key={row} style={styles.hoursRow}>{row}</Text>)
+                  : <Text style={styles.infoText}>{business.opening_hours}</Text>}
+              </View>
+            </View>
+          )}
+
+          {business.website_url && (
+            <TouchableOpacity style={styles.infoRow} onPress={() => Linking.openURL(business.website_url)}>
               <Ionicons name="globe-outline" size={16} color="#6b7280" />
-              <Text style={[styles.infoText, { color: '#2563eb' }]} numberOfLines={1}>{business.website}</Text>
+              <Text style={[styles.infoText, { color: '#2563eb' }]} numberOfLines={1}>
+                {business.website_url.replace(/^https?:\/\//, '')}
+              </Text>
             </TouchableOpacity>
           )}
 
@@ -295,6 +352,56 @@ export default function BusinessDetailScreen({ route, navigation }: any) {
             </View>
           )}
         </View>
+
+        {/* Call / Directions / Share */}
+        <View style={styles.actionRow}>
+          {business.phone && (
+            <TouchableOpacity style={[styles.actionBtn, styles.actionPrimary]} onPress={() => Linking.openURL(`tel:${business.phone}`)} activeOpacity={0.85}>
+              <Ionicons name="call" size={16} color="white" />
+              <Text style={[styles.actionText, { color: 'white' }]}>Call</Text>
+            </TouchableOpacity>
+          )}
+          {hasMap && (
+            <TouchableOpacity
+              style={styles.actionBtn}
+              onPress={() => Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${business.latitude},${business.longitude}`)}
+              activeOpacity={0.85}
+            >
+              <Ionicons name="navigate-outline" size={16} color="#374151" />
+              <Text style={styles.actionText}>Directions</Text>
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity style={styles.actionBtn} onPress={shareBusiness} activeOpacity={0.85}>
+            <Ionicons name="share-social-outline" size={16} color="#374151" />
+            <Text style={styles.actionText}>Share</Text>
+          </TouchableOpacity>
+        </View>
+
+        {!business.owner_id ? (
+          <View style={{ marginBottom: 12 }}>
+            <TouchableOpacity style={styles.claimBtn} onPress={openClaim} activeOpacity={0.85}>
+              <Text style={styles.claimBtnText}>Claim this Business</Text>
+            </TouchableOpacity>
+            <Text style={styles.unclaimed}>Unclaimed listing — details may be out of date. Own this business? Claim it to update it.</Text>
+          </View>
+        ) : !isOwner ? (
+          <TouchableOpacity onPress={openClaim} style={{ marginBottom: 12 }}>
+            <Text style={styles.reviewLink}>Is this your business? Request an ownership review</Text>
+          </TouchableOpacity>
+        ) : null}
+
+        {business.source === 'osm' && (
+          <Text style={styles.attribution} onPress={() => Linking.openURL('https://www.openstreetmap.org/copyright')}>
+            Business details from © OpenStreetMap contributors, available under the ODbL.
+          </Text>
+        )}
+
+        {/* Review invite — owner only, until they have a handful of reviews */}
+        {isOwner && business.review_count < 5 && (
+          <View style={{ marginBottom: 12 }}>
+            <ReviewInviteCard businessName={business.name} url={pageUrl} />
+          </View>
+        )}
 
         {/* WhatsApp CTA */}
         {business.whatsapp_url && (
@@ -318,7 +425,7 @@ export default function BusinessDetailScreen({ route, navigation }: any) {
         )}
 
         {/* Get Verified CTA — owner, not yet verified */}
-        {isOwner && !business.verified && (
+        {PAID_BADGES_ENABLED && isOwner && !business.verified && (
           <TouchableOpacity style={styles.verifyCta} onPress={() => setBadgeModal(true)} activeOpacity={0.85}>
             <View style={styles.verifyCtaInner}>
               <View style={styles.verifyCtaIcon}>
@@ -334,7 +441,7 @@ export default function BusinessDetailScreen({ route, navigation }: any) {
         )}
 
         {/* Renew CTA — owner, already verified */}
-        {isOwner && business.verified && (
+        {PAID_BADGES_ENABLED && isOwner && business.verified && (
           <TouchableOpacity style={[styles.verifyCta, styles.renewCta]} onPress={() => setBadgeModal(true)} activeOpacity={0.85}>
             <View style={styles.verifyCtaInner}>
               <View style={[styles.verifyCtaIcon, { backgroundColor: '#d1fae5' }]}>
@@ -424,6 +531,15 @@ export default function BusinessDetailScreen({ route, navigation }: any) {
 
         <View style={{ height: 40 }} />
       </ScrollView>
+
+      <ClaimBusinessSheet
+        visible={claimVisible}
+        businessId={business.id}
+        businessName={business.name}
+        businessUrl={pageUrl}
+        onClose={() => setClaimVisible(false)}
+        onClaimed={() => load(true)}
+      />
 
       {/* Badge plan modal */}
       <Modal visible={badgeModalVisible} transparent animationType="slide" onRequestClose={() => setBadgeModal(false)}>
@@ -551,6 +667,23 @@ const styles = StyleSheet.create({
   },
   verifiedText: { fontSize: 12, fontWeight: '700', color: '#2563eb' },
 
+  representative: {
+    position: 'absolute', left: 10, bottom: 22, backgroundColor: 'rgba(0,0,0,0.55)', color: 'white',
+    fontSize: 11, fontWeight: '600', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 999, overflow: 'hidden',
+  },
+  hoursRow: { fontSize: 12, color: '#6b7280', marginTop: 1 },
+  actionRow: { flexDirection: 'row', gap: 8, marginBottom: 12 },
+  actionBtn: {
+    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
+    paddingVertical: 11, borderRadius: 12, borderWidth: 1, borderColor: '#e5e7eb', backgroundColor: 'white',
+  },
+  actionPrimary: { backgroundColor: '#f97316', borderColor: '#f97316' },
+  actionText: { fontSize: 14, fontWeight: '700', color: '#374151' },
+  claimBtn: { borderWidth: 1, borderColor: '#d1d5db', backgroundColor: 'white', paddingVertical: 12, borderRadius: 12, alignItems: 'center' },
+  claimBtnText: { fontSize: 14, fontWeight: '700', color: '#1f2937' },
+  unclaimed: { fontSize: 12, color: '#6b7280', marginTop: 8 },
+  reviewLink: { fontSize: 13, fontWeight: '600', color: '#2563eb', textAlign: 'center' },
+  attribution: { fontSize: 11, color: '#9ca3af', marginBottom: 14 },
   categoryChip: {
     alignSelf: 'flex-start', backgroundColor: '#f3f4f6',
     borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4,

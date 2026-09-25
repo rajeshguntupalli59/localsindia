@@ -123,6 +123,12 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 - Claim approval (all 3 paths — SMS code now also notifies) sends one notification with a review nudge (`_notify_new_owner`). Owners see a "Get reviews from your customers" card (WhatsApp share + copy) on their business page until 5 reviews, and on the SMS-claim success screen (`components/review-invite/ReviewInvite.tsx`).
 - Paid "Get Verified — ₹499/month" offers hidden (Raj, 2026-09-25) on the owner's business page and the add-business success screen via `PAID_BADGES_ENABLED = false` in `frontend/src/lib/features.ts` — flip to true to bring them back.
 
+### 2026-09-25 — Mobile app caught up with the website (code done + emulator-tested; new build not yet made)
+- Found on the emulator: every category tile showed "No listings found"; home had no real content; business list = first 20, no filter/photos, fake "0.0 · 0 reviews"; business page read `website`/`category` (API sends `website_url`/`category_slug`), no claim, hours, directions, share, covers, OSM credit; paid ₹499 badge still shown.
+- Now: category tiles open that category's real businesses (`BusinessesScreen` with chips + counts, paging, covers, "Open now", "Classified ads for X →"); home "Popular in {city}" row; business page = labelled cover, hours + Open now, Call/Directions/Share, claim sheet (SMS code / documents / email — `components/ClaimBusinessSheet.tsx`), owner review-invite card, OSM attribution; `PAID_BADGES_ENABLED=false` (`mobile/src/lib/features.ts`). Cover/hours logic copied from the web (`mobile/src/lib/categoryCover.ts`, `coverPools.ts`, `openingHours.ts` — keep in sync).
+- Bugs found while testing and fixed: Expo 56's global fetch rejects RN file parts ("Unsupported FormDataPart") → claim upload goes through axios; keyboard covered the claim code box and KeyboardAvoidingView left a gap in the Modal → explicit keyboard-height lift; the claim success screen was lost when the page reloaded → silent refresh.
+- Backend: business responses include `city_slug` (share links). App API base can be overridden with `EXPO_PUBLIC_API_URL` for local testing only (release builds use production).
+
 ### 2026-09-25 — City page loading fixed (blank screen + skeleton flash)
 - Measured live: cold first HTML byte 5.2 s (blank screen), then the browser re-fetched the city's data the server had already rendered (9 API calls) and put the listing skeleton back over the real page for ~1.8 s; a slow re-fetch replaced the feed with "Could not load listings".
 - Fixes: `CityHomeClient` trusts the server data (fetches only when there is none, or on Retry; keyed per city in `[city]/page.tsx`) → 4 calls, no skeleton flash (0/40 samples vs 18/40). New `app/[city]/loading.tsx` skeleton shows instantly when a city is picked. `keepalive.yml` now also pings www.localsindia.com/hyderabad so the SWA server stays warm.
@@ -146,11 +152,7 @@ Open items:
 - **URGENT (Raj): rotate the admin password** — it was committed to the public repo (see Security review fixes below).
 - DONE: opening-hours backfill (run 36091832956) — 4,888 businesses got hours. `sitemap-areas.xml` submitted in GSC and fetched OK (GSC first showed "Couldn't fetch" — its normal new-sitemap glitch; resolved on its own).
 - Raj: add the site to Bing Webmaster Tools via "Import from GSC".
-- **Mobile app is behind the website** (checked on the Pixel 6 emulator 2026-09-25, dev build + current code):
-  - Home shows categories + empty "Wanted" only — no real businesses; tapping a category (e.g. Doctors) shows "No listings found" although Hyderabad has hundreds (categories search listings only, and nearly all listings were invented and are now unpublished).
-  - Business list: first 20 only, no paging/category filter, no photos, every card "0.0 · 0 reviews".
-  - Business page: name/address/phone only — reads `business.website`/`business.category` but the API sends `website_url`/`category_slug` (never shown); no cover photo, hours, directions, share, claim, OSM attribution (ODbL requires it); still shows the paid "Get Verified ₹499/month" card (web switch doesn't reach the app).
-  - Any fix needs a new EAS build + Play Console upload (Raj's permission required).
+- **Mobile app updated (2026-09-25), NOT yet shipped:** needs a new EAS build + Play Console upload — ask Raj first. See the changelog entry "Mobile app caught up with the website".
 - Admin pages are cramped on phones (fixed 224px sidebar) and log a harmless hydration warning (layout reads localStorage in useState).
 - Optional: dedicated MSG91 DLT template for claim SMS (claims reuse the login template); ask owners to request reviews when a claim is approved.
 - Real SMS delivery of claim codes not yet tested end to end (local tests used OTP_DEBUG).

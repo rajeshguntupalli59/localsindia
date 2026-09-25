@@ -3,7 +3,8 @@ import * as FileSystem from 'expo-file-system/legacy';
 import { storage } from './storage';
 import { reportError } from './errorReporting';
 
-const API_BASE = 'https://localsindia-backend-in.azurewebsites.net/api/v1';
+// EXPO_PUBLIC_API_URL only for local testing; release builds use production.
+const API_BASE = process.env.EXPO_PUBLIC_API_URL ?? 'https://localsindia-backend-in.azurewebsites.net/api/v1';
 
 const api = axios.create({ baseURL: API_BASE });
 
@@ -209,8 +210,48 @@ export const paymentsApi = {
 };
 
 export const businessesApi = {
-  list: (citySlug: string) =>
-    api.get('/businesses', { params: { city_slug: citySlug } }).then(r => r.data),
+  list: (citySlug: string, opts: { category_slug?: string; q?: string; page?: number; page_size?: number } = {}) =>
+    api.get('/businesses', { params: { city_slug: citySlug, ...opts } }).then(r => r.data),
+
+  // {category_slug: count} of live businesses in the city
+  counts: (citySlug: string) =>
+    api.get('/businesses/counts', { params: { city_slug: citySlug } }).then(r => r.data as Record<string, number>),
+
+  claimOptions: (businessId: string) =>
+    api.get(`/businesses/${businessId}/claim-options`).then(r => r.data),
+
+  claimOtpSend: (businessId: string) =>
+    api.post(`/businesses/${businessId}/claim/otp/send`).then(r => r.data),
+
+  claimOtpVerify: (businessId: string, otp: string) =>
+    api.post(`/businesses/${businessId}/claim/otp/verify`, { otp }).then(r => r.data),
+
+  // Several files in one multipart request (document + shop photo + optional
+  // visiting card). Sent through axios (XMLHttpRequest): Expo 56's global fetch
+  // rejects React Native {uri, name, type} file parts ("Unsupported FormDataPart").
+  claimDocuments: async (businessId: string, form: {
+    doc_type: string; contact_phone: string; note?: string;
+    document: string; shop_photo: string; visiting_card?: string | null;
+  }) => {
+    const body = new FormData();
+    body.append('doc_type', form.doc_type);
+    body.append('contact_phone', form.contact_phone);
+    if (form.note) body.append('note', form.note);
+    const file = (uri: string, name: string) => ({ uri, name: `${name}.jpg`, type: 'image/jpeg' }) as any;
+    body.append('document', file(form.document, 'document'));
+    body.append('shop_photo', file(form.shop_photo, 'shop_photo'));
+    if (form.visiting_card) body.append('visiting_card', file(form.visiting_card, 'visiting_card'));
+    try {
+      const res = await api.post(`/businesses/${businessId}/claim/documents`, body, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        transformRequest: d => d,   // hand the FormData to XHR untouched
+      });
+      return res.data;
+    } catch (err: any) {
+      const detail = err?.response?.data?.detail;
+      throw new Error(typeof detail === 'string' ? detail : 'Upload failed — please try again.');
+    }
+  },
 
   getById: (id: string) =>
     api.get(`/businesses/${id}`).then(r => r.data),

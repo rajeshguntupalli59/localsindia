@@ -8,7 +8,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { storage } from '../lib/storage';
 
-const API_BASE = 'https://localsindia-backend-in.azurewebsites.net/api/v1';
+// EXPO_PUBLIC_API_URL only for local testing; release builds use production.
+const API_BASE = process.env.EXPO_PUBLIC_API_URL ?? 'https://localsindia-backend-in.azurewebsites.net/api/v1';
 
 interface ListingSnippet {
   id: string;

@@ -5,7 +5,10 @@ import {
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { listingsApi, citiesApi, categoriesApi } from '../lib/api';
+import { listingsApi, citiesApi, categoriesApi, businessesApi } from '../lib/api';
+import { assignCovers } from '../lib/categoryCover';
+import { siteImage } from '../lib/features';
+import { businessCategoryLabel } from '../lib/businessCategories';
 import { storage } from '../lib/storage';
 import ListingCard from '../components/ListingCard';
 import NotificationBell from '../components/NotificationBell';
@@ -95,6 +98,51 @@ function HRow({
   );
 }
 
+/** Horizontal row of real local businesses (OpenStreetMap-imported or owner-added). */
+function BusinessRow({ title, data, navigation, citySlug, cityName }: {
+  title: string; data: any[]; navigation: any; citySlug: string; cityName: string;
+}) {
+  if (data.length === 0) return null;
+  const covers = assignCovers(data.map(b => ({ id: b.id, category_slug: b.category_slug, name: b.name })));
+  return (
+    <View style={{ marginBottom: 8 }}>
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>{title}</Text>
+        <TouchableOpacity onPress={() => navigation.navigate('Businesses', { citySlug, cityName })}>
+          <Text style={styles.viewAll}>View all →</Text>
+        </TouchableOpacity>
+      </View>
+      <FlatList
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        data={data}
+        keyExtractor={item => item.id}
+        contentContainerStyle={{ paddingHorizontal: 16 }}
+        renderItem={({ item }) => {
+          const own = item.images?.[0]?.url;
+          const photo = own ?? covers.get(item.id);
+          return (
+            <TouchableOpacity
+              style={styles.bizCard}
+              onPress={() => navigation.navigate('BusinessDetail', { businessId: item.id, citySlug })}
+              activeOpacity={0.85}
+            >
+              <View>
+                {photo ? <Image source={{ uri: siteImage(photo) }} style={styles.bizPhoto} /> : <View style={styles.bizPhoto} />}
+                {!own && photo && <Text style={styles.bizRep}>Representative image</Text>}
+              </View>
+              <View style={{ padding: 10, gap: 2 }}>
+                <Text style={styles.bizName} numberOfLines={1}>{item.name}</Text>
+                <Text style={styles.bizMeta} numberOfLines={1}>{businessCategoryLabel(item.category_slug)}</Text>
+              </View>
+            </TouchableOpacity>
+          );
+        }}
+      />
+    </View>
+  );
+}
+
 export default function HomeScreen({ navigation }: any) {
   const insets = useSafeAreaInsets();
   const [citySlug, setCitySlug] = useState('hyderabad');
@@ -105,6 +153,7 @@ export default function HomeScreen({ navigation }: any) {
   const [freshListings, setFreshListings] = useState<Listing[]>([]);
   const [recentlyViewed, setRecentlyViewed] = useState<Listing[]>([]);
   const [categories, setCategories] = useState<{ id: string; name: string; slug: string; icon: string }[]>([]);
+  const [popularBusinesses, setPopularBusinesses] = useState<any[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   // Guards against alerting twice when the categories call and the
   // count/trending/fresh calls fail at the same time (e.g. no network) —
@@ -117,6 +166,9 @@ export default function HomeScreen({ navigation }: any) {
   }, []);
 
   const loadAll = useCallback(async (slug: string, name: string) => {
+    businessesApi.list(slug, { page_size: 12 })
+      .then((data: any[]) => setPopularBusinesses(Array.isArray(data) ? data : []))
+      .catch(() => setPopularBusinesses([]));
     try {
       const [countData, trending, fresh] = await Promise.all([
         citiesApi.todayCount(slug),
@@ -247,6 +299,15 @@ export default function HomeScreen({ navigation }: any) {
           </TouchableOpacity>
         </View>
 
+        {/* ── Real local businesses — always there, even before anyone posts ── */}
+        <BusinessRow
+          title={`Popular in ${cityName}`}
+          data={popularBusinesses}
+          navigation={navigation}
+          citySlug={citySlug}
+          cityName={cityName}
+        />
+
         {/* ── ROW 1: Recently viewed (conditional — hide if < 3) ── */}
         {recentlyViewed.length >= 3 && (
           <HRow
@@ -316,16 +377,22 @@ export default function HomeScreen({ navigation }: any) {
             // by their own dedicated screens (Business Directory, Events
             // Calendar), not classifieds search results — route them there
             // instead of Search, same tile, same grid, no separate banner.
+            // Every other category (Doctors, Tiffin, PG, …) opens that category's
+            // real businesses — listings alone are often empty in a new city.
+            // Classifieds has no business equivalent, so it stays a listing search.
             const dest =
-              cat.slug === 'businesses' ? 'Businesses' :
               cat.slug === 'events' ? 'Events' :
-              null;
+              cat.slug === 'classifieds' ? null :
+              'Businesses';
             return (
               <TouchableOpacity
                 key={cat.slug}
                 style={[styles.catBlock, { backgroundColor: vis.bg }]}
                 onPress={() => dest
-                  ? navigation.navigate(dest, { citySlug, cityName })
+                  ? navigation.navigate(dest, {
+                      citySlug, cityName,
+                      ...(dest === 'Businesses' && cat.slug !== 'businesses' ? { categorySlug: cat.slug } : {}),
+                    })
                   : navigation.navigate('Search', { citySlug, cityName, categorySlug: cat.slug })}
                 activeOpacity={0.82}
               >
@@ -363,6 +430,17 @@ export default function HomeScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
+  bizCard: {
+    width: 170, marginRight: 12, backgroundColor: 'white', borderRadius: 14, overflow: 'hidden',
+    borderWidth: 1, borderColor: '#f1f5f9',
+  },
+  bizPhoto: { width: '100%', height: 100, backgroundColor: '#f1f5f9' },
+  bizName: { fontSize: 13, fontWeight: '700', color: '#1f2937' },
+  bizRep: {
+    position: 'absolute', left: 6, bottom: 6, backgroundColor: 'rgba(0,0,0,0.55)', color: 'white',
+    fontSize: 9, fontWeight: '600', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 999, overflow: 'hidden',
+  },
+  bizMeta: { fontSize: 11, color: '#6b7280' },
   container: { flex: 1, backgroundColor: '#f4f5f9' },
 
   /* ── Hero ── */

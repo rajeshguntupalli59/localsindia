@@ -213,6 +213,14 @@ npm install
 NEXT_PUBLIC_API_URL=http://localhost:8000 npm run dev
 ```
 
+**Mobile app** (`mobile/`, Expo 56 development build on an emulator):
+```bash
+cd mobile && npx expo start --dev-client                                   # against production
+EXPO_PUBLIC_API_URL=http://127.0.0.1:8000/api/v1 npx expo start --dev-client   # against a local backend
+adb reverse tcp:8081 tcp:8081 && adb reverse tcp:8000 tcp:8000           # let the emulator reach them
+```
+Users only get app changes through a new EAS build uploaded to Play Console.
+
 Local-only tips: set `OTP_DEBUG=true` so login codes are shown instead of texted; leave `MSG91_*`,
 `CLOUDINARY_*`, `SENDGRID_API_KEY` empty and those services run in mock mode. `FRONTEND_URL` must match the
 frontend's address or the browser's requests are blocked (CORS).
