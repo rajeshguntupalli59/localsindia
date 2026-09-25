@@ -335,3 +335,21 @@ async def test_move_imported_business_to_nearest_city(auth_client, admin_client,
     assert res["moved"] == 1
     moved = (await client.get("/api/v1/businesses", params={"city_slug": cslug, "category_slug": slug})).json()
     assert [x["name"] for x in moved] == ["Edge Clinic"]
+
+
+@pytest.mark.asyncio
+async def test_business_counts_by_category(auth_client, admin_client, city):
+    from app.models.category import Category
+    client, _ = auth_client
+    admin, _ = admin_client
+    engine = _make_engine()
+    Session = async_sessionmaker(engine, expire_on_commit=False)
+    slug = f"cnt-{uuid.uuid4().hex[:6]}"
+    async with Session() as s:
+        s.add(Category(name=slug, slug=slug, sort_order=0))
+        await s.commit()
+    await engine.dispose()
+    await admin.post("/api/v1/admin/businesses/import", json={"city_slug": "hyderabad", "businesses": [
+        {"name": f"Counted {i}", "category_slug": slug, "source_ref": f"node/{uuid.uuid4().int % 10**9}"} for i in range(3)]})
+    counts = (await client.get("/api/v1/businesses/counts", params={"city_slug": "hyderabad"})).json()
+    assert counts[slug] == 3

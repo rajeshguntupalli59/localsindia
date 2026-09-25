@@ -103,6 +103,23 @@ async def create_business(
     return await _get_active_business(business.id, db)
 
 
+@router.get("/businesses/counts")
+async def business_counts(
+    city_slug: str = Query(...),
+    db: AsyncSession = Depends(get_db),
+):
+    """{category_slug: live business count} for a city — powers the city
+    page's "Explore" links (and tells the page which categories have content)."""
+    rows = await db.execute(
+        select(Category.slug, func.count(Business.id))
+        .join(Business, Business.category_id == Category.id)
+        .join(City, City.id == Business.city_id)
+        .where(City.slug == city_slug, Business.deleted_at.is_(None))
+        .group_by(Category.slug)
+    )
+    return {slug: n for slug, n in rows.all()}
+
+
 @router.get("/businesses/sitemap-entries")
 async def business_sitemap_entries(
     limit: int = Query(default=45000, le=45000),

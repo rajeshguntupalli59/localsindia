@@ -5,6 +5,7 @@ import type { City, Listing } from '@/lib/types';
 import { regionalPhraseFor } from '@/lib/regionalSeo';
 import { loadCitySeo } from '@/lib/seo';
 import CityHomeClient from './CityHomeClient';
+import CityExplore from '@/components/city-explore/CityExplore';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend-in.azurewebsites.net';
 
@@ -124,15 +125,27 @@ export async function generateMetadata(
   };
 }
 
+async function getJson<T>(url: string, fallback: T): Promise<T> {
+  try {
+    const res = await fetch(url, { next: { revalidate: 3600 } });
+    return res.ok ? await res.json() : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 export default async function CityHomePage({ params }: { params: { city: string } }) {
-  const [city, todayCount, trending, fresh] = await Promise.all([
+  const [city, todayCount, trending, fresh, counts, allCities] = await Promise.all([
     fetchCity(params.city),
     fetchTodayCount(params.city),
     fetchTrending(params.city),
     fetchFresh(params.city),
+    getJson<Record<string, number>>(`${API_BASE}/api/v1/businesses/counts?city_slug=${params.city}`, {}),
+    getJson<City[]>(`${API_BASE}/api/v1/cities`, []),
   ]);
 
   if (!city) notFound();
+  const nearby = allCities.filter(c => c.state === city.state && c.slug !== city.slug).slice(0, 15);
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -170,6 +183,7 @@ export default async function CityHomePage({ params }: { params: { city: string 
         initialTodayCount={todayCount}
         initialTrending={trending}
         initialFresh={fresh}
+        explore={<CityExplore city={city} counts={counts} nearby={nearby} />}
       />
     </>
   );

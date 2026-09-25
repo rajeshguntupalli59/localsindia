@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import type { Business } from '@/lib/types';
 import BusinessDetailClient from './BusinessDetailClient';
+import { SEO_CATEGORIES, SEO_PAGE_FOR_BUSINESS_CATEGORY } from '@/lib/seoCategories';
 
 // Must be dynamic: a generateStaticParams placeholder (left from the old static
 // export) made every real business id 500 — next-intl reads request headers,
@@ -44,8 +46,35 @@ export async function generateMetadata(
   return { title, description, alternates: { canonical: url }, openGraph: { title, description, url, siteName: 'LocalsIndia' } };
 }
 
+async function fetchRelated(citySlug: string, category: string | null | undefined, selfId: string): Promise<Business[]> {
+  if (!category) return [];
+  try {
+    const res = await fetch(`${API_BASE}/api/v1/businesses?city_slug=${citySlug}&category_slug=${category}&page_size=9`,
+      { next: { revalidate: 3600 } });
+    const data: Business[] = res.ok ? await res.json() : [];
+    return data.filter(x => x.id !== selfId).slice(0, 8);
+  } catch {
+    return [];
+  }
+}
+
 export default async function Page({ params }: { params: { city: string; id: string } }) {
   const b = await fetchBusiness(params.id);
+  const related = b ? await fetchRelated(params.city, b.category_slug, b.id) : [];
+  const seoKey = SEO_PAGE_FOR_BUSINESS_CATEGORY[b?.category_slug ?? ''];
+  const seoMeta = seoKey ? SEO_CATEGORIES[seoKey] : null;
+  const city = cityName(params.city);
+  const breadcrumbLd = b ? {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: city, item: `https://www.localsindia.com/${params.city}` },
+      ...(seoKey && seoMeta ? [{ '@type': 'ListItem', position: 2, name: `${seoMeta.title} in ${city}`,
+        item: `https://www.localsindia.com/${params.city}/${seoKey}` }] : []),
+      { '@type': 'ListItem', position: seoKey ? 3 : 2, name: b.name,
+        item: `https://www.localsindia.com/${params.city}/businesses/${b.id}` },
+    ],
+  } : null;
   const jsonLd = b ? {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
@@ -61,7 +90,33 @@ export default async function Page({ params }: { params: { city: string; id: str
       {jsonLd && (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       )}
+      {breadcrumbLd && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      )}
       <BusinessDetailClient />
+      {/* Server-rendered so every business page links to its neighbours */}
+      {related.length > 0 && seoMeta && (
+        <section className="max-w-2xl mx-auto px-4 pb-24 -mt-16" style={{ background: 'var(--li-page-bg)' }}>
+          <h2 className="text-base font-extrabold mb-3" style={{ color: 'var(--li-text)' }}>
+            More {seoMeta.title.toLowerCase()} in {city}
+          </h2>
+          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {related.map(r => (
+              <li key={r.id}>
+                <Link href={`/${params.city}/businesses/${r.id}`}
+                  className="block bg-white rounded-xl border px-3.5 py-2.5 text-sm font-semibold hover:shadow-sm truncate"
+                  style={{ borderColor: 'var(--li-border)', color: 'var(--li-text)' }}>
+                  {r.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <Link href={`/${params.city}/${seoKey}`} className="inline-block mt-3 text-sm font-semibold hover:underline"
+            style={{ color: 'var(--li-primary)' }}>
+            See all {seoMeta.title.toLowerCase()} in {city} →
+          </Link>
+        </section>
+      )}
     </>
   );
 }

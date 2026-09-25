@@ -27,6 +27,8 @@ interface CityHomeClientProps {
   initialTodayCount?: number;
   initialTrending?: Listing[];
   initialFresh?: Listing[];
+  /** Server-rendered block (links to categories, directory, nearby cities) shown above the footer */
+  explore?: React.ReactNode;
 }
 
 function getGreeting(): string {
@@ -81,6 +83,7 @@ export default function CityHomeClient({
   initialTodayCount,
   initialTrending = [],
   initialFresh = [],
+  explore,
 }: CityHomeClientProps) {
   const params = useParams();
   const citySlug = params.city as string;
@@ -357,6 +360,8 @@ export default function CityHomeClient({
           />
         )}
       </div>
+
+      {explore}
 
       <div className="page-wrap py-4">
         <AdBanner slot="7291834056" format="horizontal" className="rounded-2xl overflow-hidden" />
