@@ -14,6 +14,7 @@ import ClaimBusinessModal from '@/components/claim-business/ClaimBusinessModal';
 import OsmAttribution from '@/components/osm-attribution/OsmAttribution';
 import RepresentativeLabel from '@/components/representative-label/RepresentativeLabel';
 import ReviewInvite from '@/components/review-invite/ReviewInvite';
+import { PAID_BADGES_ENABLED } from '@/lib/features';
 import { coverFor } from '@/lib/categoryCover';
 import { describeWeek, openStatus, parseOpeningHours } from '@/lib/openingHours';
 
@@ -320,7 +321,7 @@ export default function BusinessDetailPage() {
           )}
 
           {/* Get Verified CTA — shown to owner if not yet verified */}
-          {business.owner_id && business.owner_id === myId && !business.verified && (
+          {PAID_BADGES_ENABLED && business.owner_id && business.owner_id === myId && !business.verified && (
             <div className="mt-4 p-4 rounded-xl border-2 border-blue-100 bg-blue-50 flex items-start gap-3">
               <ShieldCheck className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
               <div className="flex-1">

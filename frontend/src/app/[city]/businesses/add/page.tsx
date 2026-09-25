@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { api, ApiError } from '@/lib/api';
 import type { City } from '@/lib/types';
 import GetVerifiedModal from '@/components/get-verified-modal/GetVerifiedModal';
+import { PAID_BADGES_ENABLED } from '@/lib/features';
 
 export default function AddBusinessPage() {
   const params = useParams();
@@ -100,29 +101,42 @@ export default function AddBusinessPage() {
           <h1 className="text-xl font-black mt-3" style={{ color: 'var(--li-text)' }}>Business listed!</h1>
           <p className="text-sm text-slate-500 mt-1">{form.name} is now live in {city?.name || citySlug}.</p>
 
-          <div className="mt-5 p-4 rounded-xl border-2 border-blue-100 bg-blue-50 text-left flex items-start gap-3">
-            <ShieldCheck className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
-            <div>
-              <p className="text-sm font-semibold text-blue-900">Want to stand out?</p>
-              <p className="text-xs text-blue-700 mt-0.5">Get Verified — blue ✓ badge and priority ranking. Starts at ₹499/month.</p>
-            </div>
-          </div>
+          {PAID_BADGES_ENABLED ? (
+            <>
+              <div className="mt-5 p-4 rounded-xl border-2 border-blue-100 bg-blue-50 text-left flex items-start gap-3">
+                <ShieldCheck className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-semibold text-blue-900">Want to stand out?</p>
+                  <p className="text-xs text-blue-700 mt-0.5">Get Verified — blue ✓ badge and priority ranking. Starts at ₹499/month.</p>
+                </div>
+              </div>
 
-          <Button
-            type="button"
-            className="w-full text-white mt-4"
-            style={{ background: 'var(--li-primary)' }}
-            onClick={() => setBadgeModal(true)}
-          >
-            Get Verified Now
-          </Button>
-          <button
-            type="button"
-            onClick={goToBusiness}
-            className="w-full py-2.5 mt-2 text-sm text-slate-500 hover:text-slate-800 transition-colors"
-          >
-            Skip for now
-          </button>
+              <Button
+                type="button"
+                className="w-full text-white mt-4"
+                style={{ background: 'var(--li-primary)' }}
+                onClick={() => setBadgeModal(true)}
+              >
+                Get Verified Now
+              </Button>
+              <button
+                type="button"
+                onClick={goToBusiness}
+                className="w-full py-2.5 mt-2 text-sm text-slate-500 hover:text-slate-800 transition-colors"
+              >
+                Skip for now
+              </button>
+            </>
+          ) : (
+            <Button
+              type="button"
+              className="w-full text-white mt-5"
+              style={{ background: 'var(--li-primary)' }}
+              onClick={goToBusiness}
+            >
+              View your business
+            </Button>
+          )}
         </div>
 
         {badgeModal && (
