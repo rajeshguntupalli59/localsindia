@@ -14,6 +14,8 @@ export default function OnboardingGate() {
   useEffect(() => {
     // Already dismissed locally
     if (localStorage.getItem(KEY)) return;
+    // Not over a business page (owners claiming it), admin or sign-in — shows on a later visit instead
+    if (/\/businesses\/|^\/admin|^\/auth/.test(window.location.pathname)) return;
     // Only show if logged in
     const token = localStorage.getItem('access_token');
     if (!token) return;
