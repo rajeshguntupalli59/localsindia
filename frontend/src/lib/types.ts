@@ -253,3 +253,25 @@ export interface AdminBusinessClaim {
   visiting_card_url: string | null;
   reject_reason: string | null;
 }
+
+export type OutreachStatus = 'todo' | 'follow_up' | 'closed' | 'claimed';
+
+export interface OutreachItem {
+  id: string;
+  name: string;
+  address: string | null;
+  phone: string;
+  mobile: string | null;          // +91XXXXXXXXXX when the phone is an Indian mobile
+  city_slug: string;
+  city_name: string;
+  category_name: string | null;
+  last_outcome: string | null;
+  last_note: string | null;
+  last_contacted_at: string | null;
+  attempts: number;
+}
+
+export interface OutreachQueue {
+  counts: Record<OutreachStatus, number>;
+  items: OutreachItem[];
+}

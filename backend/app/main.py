@@ -8,7 +8,7 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from app.core.config import settings
 from app.core.limiter import limiter
-from app.routers import auth, cities, categories, listings, uploads, search, admin, events, businesses, payments, users, chat, saved_searches, favorites, notifications, preferences, cron, buyer_requests, errors, analytics, tickets, business_claims, business_import
+from app.routers import auth, cities, categories, listings, uploads, search, admin, events, businesses, payments, users, chat, saved_searches, favorites, notifications, preferences, cron, buyer_requests, errors, analytics, tickets, business_claims, business_import, business_outreach
 
 logger = logging.getLogger(__name__)
 
@@ -77,6 +77,7 @@ app.include_router(analytics.router)
 app.include_router(tickets.router)
 app.include_router(business_claims.router)
 app.include_router(business_import.router)
+app.include_router(business_outreach.router)
 
 
 @app.get("/api/v1/health")
