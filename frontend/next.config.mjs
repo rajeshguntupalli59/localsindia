@@ -6,7 +6,9 @@ const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 const nextConfig = {
   cleanDistDir: true,
   images: {
-    unoptimized: true,
+    // Cloudinary resizes (see src/lib/imageLoader.ts) — SWA can't run Next's optimiser
+    loader: 'custom',
+    loaderFile: './src/lib/imageLoader.ts',
     remotePatterns: [
       { protocol: 'https', hostname: 'res.cloudinary.com' },
       { protocol: 'https', hostname: '*.azurewebsites.net' },

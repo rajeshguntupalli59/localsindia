@@ -135,6 +135,10 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 - Imported 2,406 (first run). Businesses now also show under their category: `CategoryBusinesses` strip on `/search`, `/[city]/search`, `/[city]/[category]` ("View all" → `/[city]/businesses?category=slug`); directory page got category chips + Load more; `GET /businesses` takes `category_slug` and sorts verified → owned → rated → has-phone. Mapping extended to PG/hostels, event venues, job agencies, property managers; script now refuses to run if a map targets a non-existent category and reports categories with zero businesses.
 - Note: businesses created earlier by `city_launcher.py` use fictional phones (+9164000000xx) and are owned by the admin account.
 
+### 2026-09-25 — Home page weight 925 KB → 371 KB
+- `images.unoptimized` replaced by a custom loader (`src/lib/imageLoader.ts`): Cloudinary serves each photo at the displayed width with f_auto/q_auto (a listing photo went 320 KB → 43 KB). SWA can't run Next's optimiser, so this is the way.
+- Noto Sans Devanagari/Telugu no longer preloaded on every page (~240 KB); they still load on demand when that script appears. Cold-start TTFB (~4 s on first hit) is the SWA server waking, not page weight — not addressed.
+
 ### 2026-09-25 — Opening hours
 - OSM `opening_hours` (14–24% of businesses have it) stored on businesses (migration `c8d9e0f1a2b3`); new imports carry it, `osm_business_import.py --backfill-hours` (workflow input `backfill_hours`) fills existing rows without overwriting.
 - Business page: hours + "Open now · closes 21:00" / "Closed · opens tomorrow 09:00" in India time (`lib/openingHours.ts`, common formats only — anything else shown as written, no badge); JSON-LD `openingHours`.

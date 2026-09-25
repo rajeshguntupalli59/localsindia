@@ -35,6 +35,7 @@ const notoDevanagari = Noto_Sans_Devanagari({
   variable: '--font-devanagari',
   weight: ['400', '600', '700'],
   display: 'swap',
+  preload: false,   // ~120 KB; loaded only on pages that show Hindi text
 });
 
 const notoTelugu = Noto_Sans_Telugu({
@@ -42,6 +43,7 @@ const notoTelugu = Noto_Sans_Telugu({
   variable: '--font-telugu',
   weight: ['400', '600', '700'],
   display: 'swap',
+  preload: false,   // ~120 KB; loaded only on pages that show Telugu text
 });
 
 export const viewport: Viewport = {
