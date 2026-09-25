@@ -298,3 +298,16 @@ async def test_links_must_be_web_addresses(auth_client, city):
         "title": "Link Test", "description": "x", "venue": "Hall 1", "event_date": "2026-12-01T18:00:00Z",
         "city_id": str(city.id), "is_free": True, "ticket_url": "javascript:alert(1)"})
     assert event.status_code == 422
+
+
+def test_web_url_rules():
+    from app.schemas.validators import web_url
+    assert web_url("instagram.com/myshop") == "https://instagram.com/myshop"
+    assert web_url("https://example.com") == "https://example.com"
+    assert web_url("  ") is None and web_url(None) is None
+    for bad in ("javascript:alert(1)", "JavaScript:alert(1)", "data:text/html,x", "vbscript:x"):
+        try:
+            web_url(bad)
+            raise AssertionError(bad)
+        except ValueError:
+            pass
