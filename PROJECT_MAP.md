@@ -140,13 +140,14 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 - Noto Sans Devanagari/Telugu no longer preloaded on every page (~240 KB); they still load on demand when that script appears. Cold-start TTFB (~4 s on first hit) is the SWA server waking, not page weight — not addressed.
 
 ### 2026-09-25 — Opening hours
-- OSM `opening_hours` (14–24% of businesses have it) stored on businesses (migration `c8d9e0f1a2b3`); new imports carry it, `osm_business_import.py --backfill-hours` (workflow input `backfill_hours`) fills existing rows without overwriting.
+- OSM `opening_hours` (14–24% of businesses have it; Hyderabad 342, Vijayawada 328) stored on businesses (migration `c8d9e0f1a2b3`); new imports carry it, `osm_business_import.py --backfill-hours` (workflow input `backfill_hours`) fills existing rows without overwriting.
 - Business page: hours + "Open now · closes 21:00" / "Closed · opens tomorrow 09:00" in India time (`lib/openingHours.ts`, common formats only — anything else shown as written, no badge); JSON-LD `openingHours`.
 
 ### 2026-09-25 — Neighbourhood (area) pages
 - `agents/assign_localities.py` (workflow `assign-localities.yml`, manual) tags each business with its nearest OSM place node: suburbs when a city has 5+ (≤3 km), else neighbourhoods (≤1.5 km); generic names ("Phase 3") skipped. Idempotent — re-run after new imports.
 - New pages `/[city]/area/[area]` and `/[city]/[category]/[area]` ("Doctors & Clinics in Madhapur, Hyderabad"), indexed at 3+ businesses, listed in `/sitemap-areas.xml` (in robots.txt; sitemap.xml is near the 50k cap). Linked from city page (Popular areas), category pages (by area) and business pages.
 - City page: leads with Explore when a city has no listings; the listing-feed error screen no longer hides the server-rendered Explore section.
+- First full run (run 36087208711, ~50 min): all 150 cities, 27,040 businesses tagged, 1,329 areas with 3+ businesses (each an area page + category-in-area pages). 28 small towns (Jagtial, Medak, Kanchipuram, …) have no OSM neighbourhoods → no area pages, expected. Raj to submit `sitemap-areas.xml` in Google Search Console.
 
 ### 2026-09-25 — City Seeder retired; 2,997 invented listings unpublished
 - Audit found 2,997 of 2,999 live listings were AI-written by `agents/city_launcher.py` (City Seeder), all posted as admin with made-up contact numbers +916300000001..99 (real mobile range — could ring strangers). Only 2 real user listings existed.
