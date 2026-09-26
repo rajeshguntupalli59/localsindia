@@ -5,10 +5,12 @@ import {
 import { useState, useEffect, useRef } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { listingsApi, categoriesApi, savedSearchesApi } from '../lib/api';
+import { listingsApi, categoriesApi, savedSearchesApi, businessesApi } from '../lib/api';
 import { getApproxLocation } from '../lib/location';
 import { storage } from '../lib/storage';
 import ListingCard from '../components/ListingCard';
+import BusinessRow from '../components/BusinessRow';
+import { BUSINESS_CATEGORY_LABEL, businessCategoryLabel } from '../lib/businessCategories';
 import { C, RADIUS, SHADOW } from '../lib/theme';
 
 type Category = { id: string; name: string; slug: string; icon: string };
@@ -36,12 +38,15 @@ export default function SearchScreen({ navigation, route }: any) {
   const [activeCat, setActiveCat] = useState(initCat);
   const [categories, setCategories] = useState<Category[]>([]);
   const [listings, setListings] = useState<any[]>([]);
+  // Real directory businesses matching the search — classifieds alone are sparse.
+  const [businesses, setBusinesses] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [nearMe, setNearMe] = useState(false);
   const [nearMeLoading, setNearMeLoading] = useState(false);
   const [savingSearch, setSavingSearch] = useState(false);
   const inputRef = useRef<TextInput>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const searchId = useRef(0);
   const insets = useSafeAreaInsets();
 
   useEffect(() => {
@@ -53,6 +58,7 @@ export default function SearchScreen({ navigation, route }: any) {
   const doSearch = (q: string, cat: string, city: string, useNearMe: boolean) => {
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(async () => {
+      const id = ++searchId.current;
       setLoading(true);
       try {
         const params: Record<string, string> = { page_size: '20' };
@@ -65,10 +71,20 @@ export default function SearchScreen({ navigation, route }: any) {
             params.lng = String(location.longitude);
           }
         }
-        const data = await listingsApi.byCitySlug(city, params);
-        setListings(data);
-      } catch { setListings([]); }
-      finally { setLoading(false); }
+        // Only business categories have directory entries; skip the rest.
+        const bizCat = cat && BUSINESS_CATEGORY_LABEL[cat] ? cat : '';
+        const [ls, bs] = await Promise.allSettled([
+          listingsApi.byCitySlug(city, params),
+          cat && !bizCat
+            ? Promise.resolve([])
+            : businessesApi.list(city, { page_size: 10, ...(bizCat ? { category_slug: bizCat } : {}), ...(q ? { q } : {}) }),
+        ]);
+        if (id !== searchId.current) return; // a newer search has started
+        setListings(ls.status === 'fulfilled' ? ls.value : []);
+        setBusinesses(bs.status === 'fulfilled' ? bs.value : []);
+      } finally {
+        if (id === searchId.current) setLoading(false);
+      }
     }, 350);
   };
 
@@ -245,7 +261,7 @@ export default function SearchScreen({ navigation, route }: any) {
       {loading ? (
         <View style={styles.loadingWrap}>
           <ActivityIndicator color={C.orange} size="large" />
-          <Text style={styles.loadingText}>Finding listings...</Text>
+          <Text style={styles.loadingText}>Searching...</Text>
         </View>
       ) : (
         <FlatList
@@ -254,18 +270,32 @@ export default function SearchScreen({ navigation, route }: any) {
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
           ListHeaderComponent={
-            listings.length > 0 ? (
+            <>
+            <View style={{ marginHorizontal: -16, marginTop: -20 }}>
+              <BusinessRow
+                title={query.trim()
+                  ? `Businesses matching "${query.trim()}"`
+                  : activeCat ? businessCategoryLabel(activeCat) : `Popular in ${activeCityName}`}
+                data={businesses}
+                navigation={navigation}
+                citySlug={activeCity}
+                cityName={activeCityName}
+                categorySlug={activeCat && BUSINESS_CATEGORY_LABEL[activeCat] ? activeCat : undefined}
+              />
+            </View>
+            {listings.length > 0 ? (
               <Text style={styles.countText}>
                 {listings.length} listing{listings.length !== 1 ? 's' : ''} in{' '}
                 <Text style={{ color: C.orange, fontWeight: '700' }}>{activeCityName}</Text>
                 {activeCat ? ` · ${allCats.find(c => c.slug === activeCat)?.name ?? ''}` : ''}
               </Text>
-            ) : null
+            ) : null}
+            </>
           }
           ListEmptyComponent={
-            <View style={styles.emptyWrap}>
-              <Ionicons name="search-outline" size={48} color={C.textMuted} style={{ marginBottom: 16 }} />
-              <Text style={styles.emptyTitle}>No listings found</Text>
+            <View style={[styles.emptyWrap, businesses.length > 0 && { paddingTop: 24 }]}>
+              {businesses.length === 0 && <Ionicons name="search-outline" size={48} color={C.textMuted} style={{ marginBottom: 16 }} />}
+              <Text style={styles.emptyTitle}>{businesses.length > 0 ? 'No classified ads yet' : 'No listings found'}</Text>
               <Text style={styles.emptyText}>
                 {query ? `Nothing for "${query}" in ${activeCityName}.` : `No listings in ${activeCityName} yet.`}
               </Text>
