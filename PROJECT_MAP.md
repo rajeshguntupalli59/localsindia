@@ -123,6 +123,10 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 - Claim approval (all 3 paths — SMS code now also notifies) sends one notification with a review nudge (`_notify_new_owner`). Owners see a "Get reviews from your customers" card (WhatsApp share + copy) on their business page until 5 reviews, and on the SMS-claim success screen (`components/review-invite/ReviewInvite.tsx`).
 - Paid "Get Verified — ₹499/month" offers hidden (Raj, 2026-09-25) on the owner's business page and the add-business success screen via `PAID_BADGES_ENABLED = false` in `frontend/src/lib/features.ts` — flip to true to bring them back.
 
+### 2026-09-26 — App build v1.1.0 (versionCode 18) — SUPERSEDES 16 (17 cancelled)
+- Mobile search showed only classifieds (Hyderabad has 1 since the seeded ones were unpublished), so search and the "All" chip looked empty/not loading (API itself ~0.8 s). Search now also shows matching directory businesses via shared `components/BusinessRow.tsx` (commit f488d95). Login-screen Terms/Privacy links had no onPress — now open the site pages in an in-app browser tab (commit fd33309).
+- Build id `42ab0ac0-a0bd-4f21-9725-f7538c63eb65`, versionCode 18 (17 = cancelled build c50f6a8e). AAB: https://expo.dev/artifacts/eas/dScQuQKJSQXfTKtEoV71Zwbpgh6p8ubUU0JDHC_gsog.aab. Tested the actual AAB on the emulator (bundletool universal APK): launches, no FATAL/R8 errors, live-server login check, Terms + Privacy open. Screens behind login not tested by Claude (Raj to check search on device).
+
 ### 2026-09-26 — App build v1.1.0 (versionCode 16) — R8 obfuscation fix, SUPERSEDES 15
 - Play Console warned "DEX code optimization below threshold — Obfuscation (2%)". Enabled R8 minify + resource shrinking via `expo-build-properties` in `mobile/app.json` (commit 56537ef). Release-mode test APK (preview build db0a36b4) smoke-tested on emulator: launches, sign-in/create-account work, no FATAL/ClassNotFound in logcat.
 - Production build id `3a1e3598-310a-4f96-9090-55d2609f144b`, versionCode 16, version 1.1.0. AAB: https://expo.dev/artifacts/eas/JF0bZwzcNEIprZjm_0qPotzdAAYqCY8wqffdnAZZKxo.aab. Build 15 was never uploaded — upload 16 instead.
@@ -161,7 +165,7 @@ Open items:
 - **URGENT (Raj): rotate the admin password** — it was committed to the public repo (see Security review fixes below).
 - DONE: opening-hours backfill (run 36091832956) — 4,888 businesses got hours. `sitemap-areas.xml` submitted in GSC and fetched OK (GSC first showed "Couldn't fetch" — its normal new-sitemap glitch; resolved on its own).
 - Raj: add the site to Bing Webmaster Tools via "Import from GSC".
-- **Mobile app v1.1.0 (versionCode 16, R8 on) BUILT 2026-09-26, awaiting Raj's Play Console upload** — AAB link in the changelog entry "App build v1.1.0 (versionCode 16)". Build 15 was never uploaded (superseded). See the changelog entry "Mobile app caught up with the website".
+- **Mobile app v1.1.0 (versionCode 18, R8 on, search shows businesses) BUILT 2026-09-26, awaiting Raj's Play Console upload** — AAB link in the changelog entry "App build v1.1.0 (versionCode 18)". Builds 15/16 never uploaded (superseded), 17 cancelled. See the changelog entry "Mobile app caught up with the website".
 - Admin pages are cramped on phones (fixed 224px sidebar) and log a harmless hydration warning (layout reads localStorage in useState).
 - Optional: dedicated MSG91 DLT template for claim SMS (claims reuse the login template); ask owners to request reviews when a claim is approved.
 - Real SMS delivery of claim codes not yet tested end to end (local tests used OTP_DEBUG).
