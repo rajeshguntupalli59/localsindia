@@ -3,6 +3,8 @@ import {
   KeyboardAvoidingView, Platform, Image, ActivityIndicator, ScrollView,
 } from 'react-native';
 import { useState, useRef } from 'react';
+import * as WebBrowser from 'expo-web-browser';
+import { SITE_URL } from '../lib/features';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { authApi } from '../lib/api';
 import { storage } from '../lib/storage';
@@ -567,9 +569,9 @@ export default function LoginScreen({ navigation }: any) {
         {/* Legal */}
         <Text style={styles.legal}>
           By continuing, you agree to our{' '}
-          <Text style={styles.legalLink}>Terms of Service</Text>
+          <Text style={styles.legalLink} onPress={() => WebBrowser.openBrowserAsync(`${SITE_URL}/terms`)}>Terms of Service</Text>
           {' '}and{' '}
-          <Text style={styles.legalLink}>Privacy Policy</Text>
+          <Text style={styles.legalLink} onPress={() => WebBrowser.openBrowserAsync(`${SITE_URL}/privacy`)}>Privacy Policy</Text>
         </Text>
       </ScrollView>
     </KeyboardAvoidingView>
