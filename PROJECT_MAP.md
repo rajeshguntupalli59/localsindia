@@ -123,6 +123,13 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 - Claim approval (all 3 paths — SMS code now also notifies) sends one notification with a review nudge (`_notify_new_owner`). Owners see a "Get reviews from your customers" card (WhatsApp share + copy) on their business page until 5 reviews, and on the SMS-claim success screen (`components/review-invite/ReviewInvite.tsx`).
 - Paid "Get Verified — ₹499/month" offers hidden (Raj, 2026-09-25) on the owner's business page and the add-business success screen via `PAID_BADGES_ENABLED = false` in `frontend/src/lib/features.ts` — flip to true to bring them back.
 
+### 2026-09-26 — SESSION SUMMARY (start here next session)
+- **App v1.1.0 / versionCode 18 SUBMITTED to Play Console production by Raj (2026-09-26)** with the release notes below. Contains: business directory + claim + hours (the 09-25 mobile catch-up), R8 minify + resource shrinking (fixes Play's "Obfuscation 2%" DEX warning; mapping file ships inside the AAB), search showing directory businesses, working Terms/Privacy links. Next: watch Android vitals for crashes before widening the staged rollout; confirm the obfuscation warning clears.
+- Release notes used: find local businesses; search shows matching businesses; opening hours + Open now; call/directions/share; claim your business free; invite customers to review on WhatsApp; faster, smaller app.
+- Not verified by Claude on the release build: screens behind login (no real-account login on prod). Raj to spot-check search (All / a category / "hospital") on his phone.
+- Testing a release AAB locally: `java -jar bundletool.jar build-apks --bundle=x.aab --output=x.apks --mode=universal --ks=~/.android/debug.keystore --ks-pass=pass:android --ks-key-alias=androiddebugkey --key-pass=pass:android`, unzip `universal.apk`, uninstall the old app first (signature differs), `adb install`. Java: Android Studio's `jbr/bin/java.exe`.
+- PC memory: the Pixel_6 emulator is set to 4 GB RAM (`hw.ramSize=4096`); with Chrome/Teams/ChatGPT/WhatsApp open the 16 GB machine runs out and Claude Code kills the emulator. Close those first (or lower the AVD to 2 GB).
+
 ### 2026-09-26 — App build v1.1.0 (versionCode 18) — SUPERSEDES 16 (17 cancelled)
 - Mobile search showed only classifieds (Hyderabad has 1 since the seeded ones were unpublished), so search and the "All" chip looked empty/not loading (API itself ~0.8 s). Search now also shows matching directory businesses via shared `components/BusinessRow.tsx` (commit f488d95). Login-screen Terms/Privacy links had no onPress — now open the site pages in an in-app browser tab (commit fd33309).
 - Build id `42ab0ac0-a0bd-4f21-9725-f7538c63eb65`, versionCode 18 (17 = cancelled build c50f6a8e). AAB: https://expo.dev/artifacts/eas/dScQuQKJSQXfTKtEoV71Zwbpgh6p8ubUU0JDHC_gsog.aab. Tested the actual AAB on the emulator (bundletool universal APK): launches, no FATAL/R8 errors, live-server login check, Terms + Privacy open. Screens behind login not tested by Claude (Raj to check search on device).
@@ -165,7 +172,7 @@ Open items:
 - **URGENT (Raj): rotate the admin password** — it was committed to the public repo (see Security review fixes below).
 - DONE: opening-hours backfill (run 36091832956) — 4,888 businesses got hours. `sitemap-areas.xml` submitted in GSC and fetched OK (GSC first showed "Couldn't fetch" — its normal new-sitemap glitch; resolved on its own).
 - Raj: add the site to Bing Webmaster Tools via "Import from GSC".
-- **Mobile app v1.1.0 (versionCode 18, R8 on, search shows businesses) BUILT 2026-09-26, awaiting Raj's Play Console upload** — AAB link in the changelog entry "App build v1.1.0 (versionCode 18)". Builds 15/16 never uploaded (superseded), 17 cancelled. See the changelog entry "Mobile app caught up with the website".
+- DONE 2026-09-26: **Mobile app v1.1.0 (versionCode 18, R8 on, search shows businesses) submitted to Play Console production by Raj** — AAB link in the changelog entry "App build v1.1.0 (versionCode 18)". Builds 15/16 never uploaded (superseded), 17 cancelled. See the changelog entry "Mobile app caught up with the website".
 - Admin pages are cramped on phones (fixed 224px sidebar) and log a harmless hydration warning (layout reads localStorage in useState).
 - Optional: dedicated MSG91 DLT template for claim SMS (claims reuse the login template); ask owners to request reviews when a claim is approved.
 - Real SMS delivery of claim codes not yet tested end to end (local tests used OTP_DEBUG).

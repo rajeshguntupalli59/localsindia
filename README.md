@@ -8,7 +8,7 @@ and post free listings that others contact directly on WhatsApp. Business owners
 |---|---|
 | Website | https://www.localsindia.com |
 | Backend API | https://localsindia-backend-in.azurewebsites.net (`/api/v1/...`) |
-| Android app | React Native + Expo — live on Google Play (production since 2026-08-11; latest build versionCode 14) |
+| Android app | React Native + Expo — live on Google Play (production since 2026-08-11; latest release v1.1.0 / versionCode 18, submitted 2026-09-26) |
 | Code | https://github.com/rajeshguntupalli59/localsindia (branch `master` = production) |
 
 **Coverage (September 2026):** 150 cities in 6 states — Andhra Pradesh 36, Tamil Nadu 33, Karnataka 32,
@@ -219,7 +219,12 @@ cd mobile && npx expo start --dev-client                                   # aga
 EXPO_PUBLIC_API_URL=http://127.0.0.1:8000/api/v1 npx expo start --dev-client   # against a local backend
 adb reverse tcp:8081 tcp:8081 && adb reverse tcp:8000 tcp:8000           # let the emulator reach them
 ```
-Users only get app changes through a new EAS build uploaded to Play Console.
+Users only get app changes through a new EAS build uploaded to Play Console:
+`cd mobile && npx eas-cli build --platform android --profile production` makes the AAB (versionCode goes up automatically;
+release builds are minified/obfuscated with R8 via `expo-build-properties` in `app.json`). Before uploading, test the exact
+AAB: turn it into an APK with Google's `bundletool` (`build-apks --mode=universal`, debug keystore), install it on the
+emulator and open it. Upload in Play Console → Production → Create new release, staged rollout ~20% first.
+Build history is in PROJECT_MAP.md §6.
 
 Local-only tips: set `OTP_DEBUG=true` so login codes are shown instead of texted; leave `MSG91_*`,
 `CLOUDINARY_*`, `SENDGRID_API_KEY` empty and those services run in mock mode. `FRONTEND_URL` must match the
