@@ -123,6 +123,10 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 - Claim approval (all 3 paths — SMS code now also notifies) sends one notification with a review nudge (`_notify_new_owner`). Owners see a "Get reviews from your customers" card (WhatsApp share + copy) on their business page until 5 reviews, and on the SMS-claim success screen (`components/review-invite/ReviewInvite.tsx`).
 - Paid "Get Verified — ₹499/month" offers hidden (Raj, 2026-09-25) on the owner's business page and the add-business success screen via `PAID_BADGES_ENABLED = false` in `frontend/src/lib/features.ts` — flip to true to bring them back.
 
+### 2026-09-26 — App build v1.1.0 (versionCode 16) — R8 obfuscation fix, SUPERSEDES 15
+- Play Console warned "DEX code optimization below threshold — Obfuscation (2%)". Enabled R8 minify + resource shrinking via `expo-build-properties` in `mobile/app.json` (commit 56537ef). Release-mode test APK (preview build db0a36b4) smoke-tested on emulator: launches, sign-in/create-account work, no FATAL/ClassNotFound in logcat.
+- Production build id `3a1e3598-310a-4f96-9090-55d2609f144b`, versionCode 16, version 1.1.0. AAB: https://expo.dev/artifacts/eas/JF0bZwzcNEIprZjm_0qPotzdAAYqCY8wqffdnAZZKxo.aab. Build 15 was never uploaded — upload 16 instead.
+
 ### 2026-09-25 — App build v1.1.0 (versionCode 15) cut for Play production
 - `eas build --platform android --profile production` from `master` @ `059036c` (version bumped 1.0.0 → 1.1.0). Build id `253a2dde-d8e1-4af0-8a84-a3212949b6c4`, same signing credentials (`Build Credentials quaxx7FT7h`). AAB: https://expo.dev/artifacts/eas/9he3FEyFvnKoHbb76zuUkXMagSn9ZybrX7EKmSaEmvw.aab
 - Contents vs v14: only commit 3630dc4 (business directory, claim flow, hours, covers, Call/Directions/Share, paid badge hidden) + removal of the dead `claim()` call. Emulator-tested; not yet tested on a real phone; real claim SMS delivery not tested.
@@ -157,7 +161,7 @@ Open items:
 - **URGENT (Raj): rotate the admin password** — it was committed to the public repo (see Security review fixes below).
 - DONE: opening-hours backfill (run 36091832956) — 4,888 businesses got hours. `sitemap-areas.xml` submitted in GSC and fetched OK (GSC first showed "Couldn't fetch" — its normal new-sitemap glitch; resolved on its own).
 - Raj: add the site to Bing Webmaster Tools via "Import from GSC".
-- **Mobile app v1.1.0 (versionCode 15) BUILT 2026-09-25, awaiting Raj's Play Console upload** — AAB link in the changelog entry "App build v1.1.0". See the changelog entry "Mobile app caught up with the website".
+- **Mobile app v1.1.0 (versionCode 16, R8 on) BUILT 2026-09-26, awaiting Raj's Play Console upload** — AAB link in the changelog entry "App build v1.1.0 (versionCode 16)". Build 15 was never uploaded (superseded). See the changelog entry "Mobile app caught up with the website".
 - Admin pages are cramped on phones (fixed 224px sidebar) and log a harmless hydration warning (layout reads localStorage in useState).
 - Optional: dedicated MSG91 DLT template for claim SMS (claims reuse the login template); ask owners to request reviews when a claim is approved.
 - Real SMS delivery of claim codes not yet tested end to end (local tests used OTP_DEBUG).
