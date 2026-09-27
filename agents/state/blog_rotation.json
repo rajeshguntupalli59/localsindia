@@ -1,6 +1,6 @@
 {
-  "lastCityIndex": 14,
-  "lastCategoryIndex": 0,
+  "lastCityIndex": 15,
+  "lastCategoryIndex": 1,
   "history": [
     {
       "citySlug": "bangalore",
@@ -91,6 +91,13 @@
       "category": "pg-roommate",
       "topicTemplateId": "avoid-scam",
       "publishedAt": "2026-09-21T14:28:14Z"
+    },
+    {
+      "citySlug": "khammam",
+      "category": "tiffin",
+      "kind": "guide",
+      "topicTemplateId": "dietary-needs",
+      "publishedAt": "2026-09-27T08:48:36Z"
     }
   ]
 }
