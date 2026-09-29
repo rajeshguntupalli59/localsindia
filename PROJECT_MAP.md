@@ -127,7 +127,7 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 
 ### 2026-09-29 — IndexNow (Bing & co.) added
 - `agents/indexnow_submit.py` + daily `indexnow.yml`: submits changed sitemap URLs to IndexNow so Bing/DuckDuckGo/Yahoo pick them up in hours. Key file `frontend/public/74eb53be13b9a9e4700e7fe12f121081.txt`. One-off full submission done 2026-09-29: all 39,997 sitemap URLs accepted (200) in 4 batches — the very first run got 403 on 2 batches while IndexNow validated the key, a rerun fixed it (expected on first use). The frontend deploy first failed on a transient `next/font` Google Fonts download error; a plain rerun succeeded.
-- Bing Webmaster Tools: "Import from GSC" found no sites, so the site was added manually (`https://www.localsindia.com/`, root only — entering a sitemap/file URL as the site address makes Bing look for `<that URL>/BingSiteAuth.xml`) and verified with `frontend/public/BingSiteAuth.xml`. Next: add both sitemaps under Bing → Sitemaps.
+- Bing Webmaster Tools: "Import from GSC" found no sites, so the site was added manually (`https://www.localsindia.com/`, root only — entering a sitemap/file URL as the site address makes Bing look for `<that URL>/BingSiteAuth.xml`) and verified with `frontend/public/BingSiteAuth.xml`. DONE 2026-09-29: Raj verified the site in Bing and submitted both sitemaps there. Bing results usually appear within days; IndexNow submissions show in Bing's IndexNow report.
 
 ### 2026-09-29 — Why sitemap pages weren't indexed + website showed '1 listing'
 - SEO agent is fine but idle: all 150 cities already have SEO files ("0 cities qualify" daily) — not the cause.
