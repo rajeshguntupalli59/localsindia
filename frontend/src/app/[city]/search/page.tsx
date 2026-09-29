@@ -559,6 +559,17 @@ function SearchInner() {
             </select>
           </div>
 
+          {/* Real directory businesses first — classified ads alone are sparse */}
+          {!loading && (
+            <CategoryBusinesses
+              citySlug={citySlug}
+              categorySlug={activeCategorySlug}
+              categoryName={categories.find(c => c.id === localCat)?.name}
+              q={q}
+              className="mb-8"
+            />
+          )}
+
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-5">
               {Array.from({ length: 9 }).map((_, i) => <ListingCardSkeleton key={i} />)}
@@ -629,19 +640,11 @@ function SearchInner() {
                 </div>
               )}
 
-              {(activeCategorySlug || q) && (
-                <CategoryBusinesses
-                  citySlug={citySlug}
-                  categorySlug={activeCategorySlug}
-                  categoryName={categories.find(c => c.id === localCat)?.name}
-                  q={q}
-                />
-              )}
             </>
           ) : (
             <EmptyState
               icon={SearchX}
-              title={q ? `No results for "${q}"` : catParam ? 'No listings in this category yet' : 'No listings yet'}
+              title={q ? `No classified ads for "${q}"` : catParam ? 'No classified ads in this category yet' : 'No classified ads yet'}
               description={q ? 'Try different keywords or remove filters' : 'Be the first to post in this city!'}
               action={{ label: q ? 'Browse all listings' : 'Post Listing', href: q ? `/${citySlug}` : `/${citySlug}/classifieds/post` }}
             />

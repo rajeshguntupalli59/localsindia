@@ -80,6 +80,8 @@ function HRow({
   );
 }
 
+const MIN_LISTINGS_FOR_FEED_FIRST = 6;
+
 export default function CityHomeClient({
   initialCity = null,
   initialTodayCount,
@@ -215,6 +217,9 @@ export default function CityHomeClient({
   }
 
   const freshCovers = listingCovers(freshListings.slice(0, 12));
+  // Until a city has a real feed of listings, lead with its real businesses
+  // (a lone listing at the top looked like the page hadn't loaded).
+  const businessesFirst = freshListings.length < MIN_LISTINGS_FOR_FEED_FIRST;
   return (
     <div style={{ background: 'var(--li-page-bg)', minHeight: '100vh' }}>
       <SiteHeader citySlug={citySlug} cityName={city?.name} />
@@ -256,7 +261,7 @@ export default function CityHomeClient({
       </div>
 
       {/* No listings yet: lead with the city's real businesses, not an empty feed */}
-      {freshListings.length === 0 && explore}
+      {businessesFirst && explore}
 
       <div className="page-wrap py-8 space-y-10">
 
@@ -374,7 +379,7 @@ export default function CityHomeClient({
         )}
       </div>
 
-      {freshListings.length > 0 && explore}
+      {!businessesFirst && explore}
 
       <div className="page-wrap py-4">
         <AdBanner slot="7291834056" format="horizontal" className="rounded-2xl overflow-hidden" />

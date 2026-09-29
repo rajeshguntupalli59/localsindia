@@ -12,24 +12,27 @@ import OsmAttribution from '@/components/osm-attribution/OsmAttribution';
 /**
  * "Related businesses" strip for category and search pages — directory
  * businesses (many imported from OpenStreetMap) in the category being
- * browsed and/or whose name matches the search. Renders nothing when none.
+ * browsed and/or whose name matches the search (the city's top businesses when
+ * neither is set). Renders nothing when none.
  */
 export default function CategoryBusinesses({
   citySlug,
   categorySlug,
   categoryName,
   q,
+  className = 'mt-10',
 }: {
   citySlug: string;
   categorySlug?: string;
   categoryName?: string;
   q?: string;
+  className?: string;
 }) {
   const [items, setItems] = useState<Business[]>([]);
   const query = (q ?? '').trim();
 
   useEffect(() => {
-    if (!citySlug || (!categorySlug && !query)) { setItems([]); return; }
+    if (!citySlug) { setItems([]); return; }
     api.businesses.list(citySlug, {
       page_size: '6',
       ...(categorySlug ? { category_slug: categorySlug } : {}),
@@ -48,7 +51,7 @@ export default function CategoryBusinesses({
   const covers = businessCovers(items.map(b => ({ ...b, category_slug: b.category_slug ?? categorySlug })));
 
   return (
-    <section className="mt-10">
+    <section className={className}>
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-lg font-extrabold" style={{ color: 'var(--li-text)' }}>
           {query
