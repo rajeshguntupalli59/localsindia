@@ -73,6 +73,7 @@ Python scripts using the Anthropic API (`base_agent.py` is the shared runner) to
 | `blog_agent.py` | Generates weekly evergreen SEO guide articles (city + category rotation via `agents/state/blog_rotation.json`, round-robin no-repeat — the pattern `meta_poster.py`'s fix now mirrors), commits to `frontend/src/content/blog/`, shares to Facebook | ✅ Yes — `blog-publisher.yml` |
 | ~~`city_launcher.py`~~ | **Deleted 2026-09-25** with `city-seeder.yml`, `seed_ap_cities.ps1` and its prompt — it seeded AI-written listings with fake phones. Real businesses now come from `osm_business_import.py`. | — |
 | `seo_agent.py` | Generates AI-varied SEO metadata (title/description/OG/keywords/JSON-LD) per city, writes to `frontend/src/content/seo/{slug}.json` — read live by `[city]/page.tsx` (`lib/seo.ts`), falls back to the plain template when absent. `--auto N` targets cities that already qualify for Google's index (`>= MIN_LISTINGS_FOR_INDEX`) without generated content yet, prioritized by listing count. **Fixed 2026-08-13**: was previously wired to write into gitignored `agents/output/` — completely disconnected from the live site, zero effect regardless of how often it ran. | ✅ Yes — `seo-agent.yml`, `--auto 10`, daily 11:30am IST |
+| `indexnow_submit.py` | (2026-09-29) Pings IndexNow (Bing, Yandex, Seznam…; not Google) with URLs from the live sitemaps: default = pages whose `<lastmod>` is in the last 2 days, `--all` = every sitemap URL, `--dry-run`. Key `74eb53be…` is public by design, served from `frontend/public/<key>.txt`. Stdlib only. | ✅ Yes — `indexnow.yml` |
 | `content_writer.py`, `reddit_agent.py`, `cro_agent.py`, `feedback_agent.py`, `growth_tracker.py`, `whatsapp_agent.py` | Exist as files, described in `MARKETING_AGENT_SYSTEM.md` | ⚠️ Not found in any `.github/workflows/*.yml` — verify manually before assuming these run automatically |
 | `share_blog_post.py` | Shares a new blog post to Facebook | Called by `blog-publisher.yml` (`social_publisher.py` deleted 2026-09-25 — it imported a class that no longer existed) |
 | `run_all.py`, `test_integration.py` | Batch runner / integration test | Manual |
@@ -102,6 +103,7 @@ Python scripts using the Anthropic API (`base_agent.py` is the shared runner) to
 | `social-poster.yml` | `0 4 * * *`, `30 13 * * *` | 9:30am, 7pm daily | Runs `meta_poster.py` (mostly) or `ecosystem_poster.py`/text variant (2nd slot, randomized) |
 | ~~`city-seeder.yml`~~ | — | — | **DELETED 2026-09-25** (was disabled first). It posted AI-written listings with made-up phone numbers; never re-enable (see §6) |
 | `seo-agent.yml` | `0 6 * * *` | 11:30am daily | Generates SEO metadata for the next 10 indexable cities without it yet (`seo_agent.py --auto 10`). Live and verified 2026-08-13 — see §6 |
+| `indexnow.yml` | `0 7 * * *` | 12:30pm daily | `indexnow_submit.py` — changed pages to Bing/IndexNow; manual run with mode `all` submits every sitemap URL |
 | `blog-publisher.yml` | `0 3 * * 0` | 8:30am Sunday | Weekly evergreen blog article via `blog_agent.py` |
 | `expiry-reminders.yml` | `30 3 * * *` | 9am daily | Sends real reminders to users with expiring listings |
 | `interest-digest.yml` | `30 3 * * *`, `35 3 * * 1` | 9am daily / 9:05am Monday | Daily/weekly digest emails to users based on saved interests |
@@ -122,6 +124,9 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 - `meta_poster.py` topic `area_directory` (every other post): picks a real (city, category, neighbourhood) with 5+ businesses via `/businesses/locality-pages`, never repeats (`areaPosted` in `agents/state/meta_poster_rotation.json`), rotates Hyderabad/Bengaluru/Chennai/Vijayawada/Kochi/Coimbatore. Text is a fixed template from live counts (no LLM) — e.g. "57 Doctors, Clinics & Pharmacies in Malleswaram" + link. Workflow topic choice added.
 - Claim approval (all 3 paths — SMS code now also notifies) sends one notification with a review nudge (`_notify_new_owner`). Owners see a "Get reviews from your customers" card (WhatsApp share + copy) on their business page until 5 reviews, and on the SMS-claim success screen (`components/review-invite/ReviewInvite.tsx`).
 - Paid "Get Verified — ₹499/month" offers hidden (Raj, 2026-09-25) on the owner's business page and the add-business success screen via `PAID_BADGES_ENABLED = false` in `frontend/src/lib/features.ts` — flip to true to bring them back.
+
+### 2026-09-29 — IndexNow (Bing & co.) added
+- `agents/indexnow_submit.py` + daily `indexnow.yml`: submits changed sitemap URLs to IndexNow so Bing/DuckDuckGo/Yahoo pick them up in hours. Key file `frontend/public/74eb53be13b9a9e4700e7fe12f121081.txt`. One-off full submission (~40k URLs) run after deploy. Raj still to import the site into Bing Webmaster Tools (Import from GSC) — IndexNow submissions then show under Bing's IndexNow report.
 
 ### 2026-09-29 — Why sitemap pages weren't indexed + website showed '1 listing'
 - SEO agent is fine but idle: all 150 cities already have SEO files ("0 cities qualify" daily) — not the cause.

@@ -1,0 +1,39 @@
+name: IndexNow
+
+# Tells Bing & co. (IndexNow) about pages changed in the last 2 days, so they
+# show up in Bing/DuckDuckGo/Yahoo within hours instead of waiting for a crawl.
+# URLs come from the live sitemaps — see agents/indexnow_submit.py.
+
+on:
+  schedule:
+    # 7:00 AM UTC = 12:30 PM IST daily
+    - cron: '0 7 * * *'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'changed = pages changed in the last 2 days; all = every sitemap page (one-off)'
+        required: false
+        default: 'changed'
+        type: choice
+        options: [changed, all]
+
+permissions:
+  contents: read
+
+jobs:
+  submit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Submit URLs to IndexNow
+        run: |
+          if [ "${{ github.event.inputs.mode }}" = "all" ]; then
+            python agents/indexnow_submit.py --all
+          else
+            python agents/indexnow_submit.py
+          fi
