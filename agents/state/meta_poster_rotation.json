@@ -2,7 +2,6 @@
   "lastTopicIndex": 3,
   "lastTipCategoryIndex": 11,
   "topicHistory": [
-    "safety_tip",
     "city_spotlight",
     "referral",
     "seller_call",
@@ -11,7 +10,8 @@
     "area_directory",
     "safety_tip",
     "area_directory",
-    "city_spotlight"
+    "city_spotlight",
+    "area_directory"
   ],
   "tipCategoryHistory": [
     "services",
@@ -25,9 +25,8 @@
     "furniture",
     "fashion"
   ],
-  "lastStyleIndex": 0,
+  "lastStyleIndex": 1,
   "styleHistory": [
-    "bold",
     "duotone",
     "quote",
     "spotlight",
@@ -36,11 +35,13 @@
     "duotone",
     "quote",
     "spotlight",
-    "glass"
+    "glass",
+    "bold"
   ],
-  "lastAreaCityIndex": 1,
+  "lastAreaCityIndex": 2,
   "areaPosted": [
     "hyderabad/doctors/kukatpally",
-    "bengaluru/tiffin/basavanagudi"
+    "bengaluru/tiffin/basavanagudi",
+    "chennai/doctors/radha-nagar"
   ]
 }
