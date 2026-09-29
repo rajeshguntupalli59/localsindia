@@ -151,7 +151,7 @@ event-venues, real-estate, shops`.
 | Chat assistant | `routers/chat.py` (Gemini) | `components/chat-widget/` |
 | Payments / featured / tickets | `routers/payments.py`, `routers/tickets.py` | promote & ticket pages |
 | Notifications / push | `services/notification_svc.py`, `routers/notifications.py` | notification bell |
-| Sitemaps | `/businesses/sitemap-entries`, `/businesses/locality-pages` | `app/sitemap.ts`, `app/sitemap-areas.xml/route.ts` |
+| Sitemaps | `/businesses/sitemap-entries`, `/businesses/sitemap-counts`, `/businesses/locality-pages` | `app/sitemap.ts`, `app/sitemap-areas.xml/route.ts` |
 
 ---
 
@@ -279,7 +279,7 @@ More: `AZURE_DEPLOY.md` (infrastructure), `SETUP_GUIDE.md` (third-party accounts
 | **Email claims** | Owner emails proof to support@localsindia.com with the business ID → "Approve an email claim" box on the same page (needs the phone number they signed up with) |
 | **Owner outreach** (~20 min/day) | `/admin/outreach` → pick a city → **To contact** → WhatsApp (pre-filled invite) or call → log the outcome. One message per business; if they say stop, mark *Not interested*. |
 | **Add / refresh businesses** | Run **OSM Business Import**, then **Assign Business Localities** (section 4) |
-| **Check Google** | Search Console → Performance (which pages get impressions) and Indexing → Pages. Sitemaps submitted: `sitemap.xml`, `sitemap-areas.xml`. |
+| **Check Google** | Search Console → Performance (which pages get impressions) and Indexing → Pages. Sitemaps submitted: `sitemap.xml`, `sitemap-areas.xml` (last resubmitted 2026-09-29). Rule: the sitemap only lists pages that are indexable — `app/sitemap.ts` applies the same "has real content" thresholds as the pages' own noindex logic, so if you change a page's threshold, change it there too. Pages Google must read (business, category, city) have to render their content on the server, not only in the browser. |
 | **See what was posted on social** | `agents/output/social_posts_log.jsonl` (committed after each run) |
 | **Turn paid badges back on** | `PAID_BADGES_ENABLED = true` in `frontend/src/lib/features.ts`, push |
 
