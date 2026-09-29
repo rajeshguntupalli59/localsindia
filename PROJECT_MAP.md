@@ -125,6 +125,21 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 - Claim approval (all 3 paths — SMS code now also notifies) sends one notification with a review nudge (`_notify_new_owner`). Owners see a "Get reviews from your customers" card (WhatsApp share + copy) on their business page until 5 reviews, and on the SMS-claim success screen (`components/review-invite/ReviewInvite.tsx`).
 - Paid "Get Verified — ₹499/month" offers hidden (Raj, 2026-09-25) on the owner's business page and the add-business success screen via `PAID_BADGES_ENABLED = false` in `frontend/src/lib/features.ts` — flip to true to bring them back.
 
+### 2026-09-29 — SESSION SUMMARY + open items (start here next session)
+Shipped today (details in the entries below):
+- **SEO / indexing:** business pages server-render their details; sitemap lists only indexable pages (`GET /businesses/sitemap-counts`, 36,248 + 3,749 area URLs), no `/launch`, real lastmods, active classified ads added. Raj resubmitted both sitemaps in GSC.
+- **Website shows businesses first** (city page + search/All/categories) — only 2 classified ads are live site-wide.
+- **IndexNow** (`agents/indexnow_submit.py`, daily `indexnow.yml`): all 39,997 URLs accepted. **Bing Webmaster Tools** verified (`frontend/public/BingSiteAuth.xml`) + both sitemaps submitted by Raj.
+- **Admin password rotated** (Azure hash + GitHub secret) and verified via a workflow login.
+- App v1.1.0 / versionCode 18 was submitted to Play on 09-26 (see that summary).
+
+Open items:
+- ~2026-10-06: get GSC "Why pages aren't indexed" breakdown (+ Bing indexed count) from Raj; then focus effort on the page types getting impressions.
+- Owner outreach in Hyderabad via `/admin/outreach` (biggest traffic lever: claimed pages + reviews + owners sharing).
+- Play: raise the staged rollout to 100% after a clean day or two in Android vitals; confirm the "Obfuscation 2%" warning cleared.
+- Optional: Search Console API weekly report (needs a Google Cloud service account added to GSC — Raj's call).
+- Carried over: admin pages cramped on phones; dedicated MSG91 DLT template for claim SMS; real claim-SMS delivery untested.
+
 ### 2026-09-29 — IndexNow (Bing & co.) added
 - `agents/indexnow_submit.py` + daily `indexnow.yml`: submits changed sitemap URLs to IndexNow so Bing/DuckDuckGo/Yahoo pick them up in hours. Key file `frontend/public/74eb53be13b9a9e4700e7fe12f121081.txt`. One-off full submission done 2026-09-29: all 39,997 sitemap URLs accepted (200) in 4 batches — the very first run got 403 on 2 batches while IndexNow validated the key, a rerun fixed it (expected on first use). The frontend deploy first failed on a transient `next/font` Google Fonts download error; a plain rerun succeeded.
 - Bing Webmaster Tools: "Import from GSC" found no sites, so the site was added manually (`https://www.localsindia.com/`, root only — entering a sitemap/file URL as the site address makes Bing look for `<that URL>/BingSiteAuth.xml`) and verified with `frontend/public/BingSiteAuth.xml`. DONE 2026-09-29: Raj verified the site in Bing and submitted both sitemaps there. Bing results usually appear within days; IndexNow submissions show in Bing's IndexNow report.
