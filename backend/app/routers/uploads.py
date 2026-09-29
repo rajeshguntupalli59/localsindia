@@ -57,7 +57,7 @@ async def upload_image(
     listing = result.scalar_one_or_none()
     if not listing:
         raise HTTPException(status_code=404, detail="Listing not found.")
-    if listing.user_id != current_user.id:
+    if listing.user_id != current_user.id and current_user.role != "admin":
         raise HTTPException(status_code=403, detail="Not authorised.")
 
     # Validate type (BL-08)

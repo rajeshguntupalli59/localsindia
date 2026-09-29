@@ -99,16 +99,37 @@ async def test_my_listings_returns_only_own(auth_client, city, category):
     assert all(listing["user_id"] == str(user.id) for listing in data)
 
 
-# ── Update non-owner forbidden ─────────────────────────────────────────────────
+# ── Update: admin may edit any listing, other users may not ────────────────────
 
 @pytest.mark.asyncio
-async def test_update_non_owner_forbidden(auth_client, admin_client, city, category):
-    """PATCH by a different user (even admin) returns 403."""
+async def test_update_admin_can_edit_others_listing(auth_client, admin_client, city, category):
+    """PATCH by an admin on someone else's listing succeeds (moderation fixes)."""
     ac, _owner = auth_client
     admin_ac, _admin = admin_client
 
     create_resp = await ac.post("/api/v1/listings", json={
-        "title": "Owner-only listing",
+        "title": "Owner listing",
+        "description": "Admin fixes a typo",
+        "category_id": str(category.id),
+        "city_id": str(city.id),
+        "contact_phone": "+919876543210",
+    })
+    listing_id = create_resp.json()["id"]
+
+    resp = await admin_ac.patch(f"/api/v1/listings/{listing_id}", json={"title": "Owner listing (fixed)"})
+    assert resp.status_code == 200
+    assert resp.json()["title"] == "Owner listing (fixed)"
+    assert resp.json()["status"] == "pending"  # editing doesn't approve it
+
+
+@pytest.mark.asyncio
+async def test_update_non_owner_forbidden(auth_client, admin_client, city, category):
+    """PATCH by a different, non-admin user returns 403."""
+    ac, _user = auth_client
+    admin_ac, _admin = admin_client
+
+    create_resp = await admin_ac.post("/api/v1/listings", json={
+        "title": "Someone else's listing",
         "description": "Non-owner should be blocked",
         "category_id": str(category.id),
         "city_id": str(city.id),
@@ -116,7 +137,7 @@ async def test_update_non_owner_forbidden(auth_client, admin_client, city, categ
     })
     listing_id = create_resp.json()["id"]
 
-    resp = await admin_ac.patch(f"/api/v1/listings/{listing_id}", json={"title": "Hijacked"})
+    resp = await ac.patch(f"/api/v1/listings/{listing_id}", json={"title": "Hijacked"})
     assert resp.status_code == 403
 
 

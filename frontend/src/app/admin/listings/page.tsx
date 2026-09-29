@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { CheckCircle, XCircle, Clock, Trash2, Tag, Search, X, ChevronDown, MapPin, Phone } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, Trash2, Tag, Search, X, ChevronDown, MapPin, Phone, Pencil } from 'lucide-react';
+import Link from 'next/link';
 import Image from 'next/image';
 import { formatPrice, timeAgo } from '@/lib/utils';
 import type { Listing } from '@/lib/types';
@@ -302,6 +303,13 @@ export default function AdminListingsPage() {
                         </button>
                       </>
                     )}
+                    <Link
+                      href={`/profile/listings/${listing.id}/edit`}
+                      onClick={e => e.stopPropagation()}
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 text-xs font-semibold hover:bg-slate-200 transition-colors"
+                    >
+                      <Pencil className="w-3.5 h-3.5" /> Edit
+                    </Link>
                     <button
                       onClick={e => { e.stopPropagation(); setDeleteModal(listing.id); }}
                       disabled={actionId === listing.id}

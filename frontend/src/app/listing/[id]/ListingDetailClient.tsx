@@ -6,7 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import SafetyTips from '@/components/safety-tips/SafetyTips';
 import RepresentativeLabel from '@/components/representative-label/RepresentativeLabel';
-import { ArrowLeft, MapPin, Clock, ChevronDown, ChevronUp, Flag, Tag, User, ExternalLink, Heart, Star, ChevronLeft, ChevronRight, Eye, AlertCircle, MessageCircle, Share2 } from 'lucide-react';
+import { ArrowLeft, MapPin, Clock, ChevronDown, ChevronUp, Flag, Tag, User, ExternalLink, Heart, Star, ChevronLeft, ChevronRight, Eye, AlertCircle, MessageCircle, Share2, Pencil } from 'lucide-react';
 import { api, ApiError } from '@/lib/api';
 import type { Listing, ListingReview } from '@/lib/types';
 import { formatPrice, timeAgo, listingPath, realImages } from '@/lib/utils';
@@ -37,11 +37,13 @@ export default function ListingDetailClient({ id, initialListing = null }: { id:
   const [reviewBody, setReviewBody] = useState('');
   const [submittingReview, setSubmittingReview] = useState(false);
   const [similarListings, setSimilarListings] = useState<Listing[]>([]);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     try {
       const u = JSON.parse(localStorage.getItem('user') ?? 'null');
       if (u?.id) setCurrentUserId(u.id);
+      if (u?.role === 'admin') setIsAdmin(true);
     } catch {}
   }, []);
 
@@ -530,6 +532,19 @@ export default function ListingDetailClient({ id, initialListing = null }: { id:
                 Chat on WhatsApp
               </a>
             </div>
+
+            {/* Edit — the owner, or any admin (moderation fixes) */}
+            {((currentUserId && listing.user_id === currentUserId) || isAdmin) && (
+              <div className="mt-4">
+                <Link
+                  href={`/profile/listings/${id}/edit`}
+                  className="flex items-center justify-center gap-2 w-full h-12 rounded-2xl border font-semibold text-sm transition-colors hover:bg-slate-50"
+                  style={{ borderColor: 'var(--li-border)', color: 'var(--li-text)' }}
+                >
+                  <Pencil className="w-4 h-4" /> Edit listing{isAdmin && listing.user_id !== currentUserId ? ' (admin)' : ''}
+                </Link>
+              </div>
+            )}
 
             {/* Promote button — visible to listing owner only */}
             {currentUserId && listing.user_id === currentUserId && !listing.is_featured && listing.city_slug && (

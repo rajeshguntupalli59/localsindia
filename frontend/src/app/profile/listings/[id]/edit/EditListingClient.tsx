@@ -27,6 +27,7 @@ export default function EditListingPage() {
   const [area, setArea] = useState('');
 
   const [images, setImages] = useState<ListingImage[]>([]);
+  const [adminEdit, setAdminEdit] = useState(false); // an admin editing someone else's listing
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -49,6 +50,7 @@ export default function EditListingPage() {
         return;
       }
       setListing(data);
+      setAdminEdit(data.user_id !== user.id && user.role === 'admin');
       setTitle(data.title);
       setDescription(data.description);
       setPrice(data.price !== null ? String(data.price) : '');
@@ -116,7 +118,8 @@ export default function EditListingPage() {
         area: area.trim() || undefined,
       }, token);
       toast.success('Listing updated!');
-      router.push('/profile/listings');
+      // An admin editing someone else's listing goes back to moderation
+      router.push(adminEdit ? '/admin/listings' : '/profile/listings');
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : 'Failed to update listing');
     } finally {
@@ -154,7 +157,9 @@ export default function EditListingPage() {
 
         {/* Status note */}
         <div className="px-4 py-3 rounded-xl bg-amber-50 border border-amber-200 text-sm text-amber-800">
-          Saving changes will resubmit the listing for review.
+          {adminEdit
+            ? 'Editing as admin — changes go live straight away and the listing keeps its current status.'
+            : 'Saving changes will resubmit the listing for review.'}
         </div>
 
         {/* Title */}

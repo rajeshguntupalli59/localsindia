@@ -405,7 +405,8 @@ async def update_listing(
     current_user: User = Depends(get_current_user),
 ):
     listing = await _get_active_listing(listing_id, db)
-    if listing.user_id != current_user.id:
+    # Admins can correct any listing (typos, contact links, photos) while moderating
+    if listing.user_id != current_user.id and current_user.role != "admin":
         raise HTTPException(status_code=403, detail="Not authorised.")
 
     for field, value in body.model_dump(exclude_unset=True).items():
