@@ -105,7 +105,10 @@ export default async function Page({ params }: { params: { city: string; id: str
       {breadcrumbLd && (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbLd) }} />
       )}
-      <BusinessDetailClient />
+      <BusinessDetailClient
+        initial={b}
+        subtitle={b ? `${CATEGORY_LABEL[b.category_slug ?? ''] ?? 'Local business'} in ${b.locality ? `${b.locality}, ` : ''}${city}` : undefined}
+      />
       {/* Server-rendered so every business page links to its neighbours */}
       {related.length > 0 && seoMeta && (
         <section className="max-w-2xl mx-auto px-4 pb-24 -mt-16" style={{ background: 'var(--li-page-bg)' }}>

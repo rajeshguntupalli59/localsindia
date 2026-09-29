@@ -1,60 +1,71 @@
 import type { MetadataRoute } from 'next';
 import { listAllPosts } from '@/lib/blog';
+import { SEO_CATEGORIES } from '@/lib/seoCategories';
+import { listingPath } from '@/lib/utils';
 
 const BASE = 'https://www.localsindia.com';
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend-in.azurewebsites.net';
 
-// Must match the keys of SEO_CATEGORIES in app/[city]/[category]/page.tsx —
-// that page self-gates its own robots/noindex per city based on real listing
-// count, so it's safe to submit unconditionally for every city.
-const CATEGORY_SLUGS = [
-  'tiffin', 'pg-roommate', 'jobs', 'vehicles',
-  'electronics', 'services', 'furniture', 'tutors',
-  'doctors', 'fashion', 'event-venues', 'real-estate', 'shops',
-];
+// Same "has real content" thresholds the pages use to decide index/noindex
+// ([city]/page.tsx, [city]/businesses/page.tsx, [city]/[category]/page.tsx).
+// A URL here whose page says noindex is a contradiction Google reports as an
+// error, so only pages that will actually be indexable are listed.
+const CITY_MIN_LISTINGS = 3;
+const CITY_MIN_BUSINESSES = 10;
+const CATEGORY_MIN_LISTINGS = 1;
+const CATEGORY_MIN_BUSINESSES = 3;
+
+type CityCounts = { businesses: Record<string, number>; listings: Record<string, number>; events: number };
+type SitemapCounts = {
+  cities: Record<string, CityCounts>;
+  listings: { id: string; title: string; updated_at: string }[];
+};
+
+const sum = (m: Record<string, number>) => Object.values(m).reduce((a, b) => a + b, 0);
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  // No lastModified on pages without a real change date — stamping every URL
+  // with "now" teaches Google to ignore the field.
   const staticRoutes: MetadataRoute.Sitemap = [
-    { url: BASE,              lastModified: new Date(), changeFrequency: 'daily',   priority: 1.0 },
-    { url: `${BASE}/privacy`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
-    { url: `${BASE}/terms`,   lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
-    { url: `${BASE}/invite`,  lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
-    { url: `${BASE}/trust`,   lastModified: new Date(), changeFrequency: 'monthly', priority: 0.4 },
+    { url: BASE,              changeFrequency: 'daily',   priority: 1.0 },
+    { url: `${BASE}/privacy`, changeFrequency: 'monthly', priority: 0.3 },
+    { url: `${BASE}/terms`,   changeFrequency: 'monthly', priority: 0.3 },
+    { url: `${BASE}/invite`,  changeFrequency: 'monthly', priority: 0.5 },
+    { url: `${BASE}/trust`,   changeFrequency: 'monthly', priority: 0.4 },
   ];
 
   const cityRoutes: MetadataRoute.Sitemap = [];
+  const listingRoutes: MetadataRoute.Sitemap = [];
   try {
-    const res = await fetch(`${API_BASE}/api/v1/cities`, { next: { revalidate: 86400 } });
+    const res = await fetch(`${API_BASE}/api/v1/businesses/sitemap-counts`, { next: { revalidate: 86400 } });
     if (res.ok) {
-      const cities: { slug: string; updated_at?: string }[] = await res.json();
-
-      for (const c of cities) {
-        const mod = c.updated_at ? new Date(c.updated_at) : new Date();
-
-        // City home — highest priority, crawled hourly
-        cityRoutes.push({ url: `${BASE}/${c.slug}`, lastModified: mod, changeFrequency: 'hourly', priority: 0.9 });
-
-        // Events + businesses pages
-        cityRoutes.push({ url: `${BASE}/${c.slug}/events`,     lastModified: mod, changeFrequency: 'daily', priority: 0.8 });
-        cityRoutes.push({ url: `${BASE}/${c.slug}/businesses`, lastModified: mod, changeFrequency: 'daily', priority: 0.8 });
-        cityRoutes.push({ url: `${BASE}/${c.slug}/launch`,     lastModified: mod, changeFrequency: 'weekly', priority: 0.6 });
-
-        // Category SEO pages — long-tail SEO gold ("tiffin in Hyderabad").
-        // Points at /[city]/[category], not /[city]/search?category= — the
-        // search page is client-rendered and already declares itself
-        // noindex, so submitting it to Google was pure waste.
-        for (const cat of CATEGORY_SLUGS) {
-          cityRoutes.push({
-            url: `${BASE}/${c.slug}/${cat}`,
-            lastModified: mod,
-            changeFrequency: 'daily',
-            priority: 0.7,
-          });
+      const data: SitemapCounts = await res.json();
+      for (const [slug, c] of Object.entries(data.cities)) {
+        const totalBiz = sum(c.businesses);
+        if (sum(c.listings) >= CITY_MIN_LISTINGS || totalBiz >= CITY_MIN_BUSINESSES) {
+          cityRoutes.push({ url: `${BASE}/${slug}`, changeFrequency: 'daily', priority: 0.9 });
         }
+        if (totalBiz >= CITY_MIN_BUSINESSES) {
+          cityRoutes.push({ url: `${BASE}/${slug}/businesses`, changeFrequency: 'weekly', priority: 0.8 });
+        }
+        if (c.events > 0) {
+          cityRoutes.push({ url: `${BASE}/${slug}/events`, changeFrequency: 'daily', priority: 0.7 });
+        }
+        // Category pages ("tiffin in Hyderabad")
+        for (const [key, meta] of Object.entries(SEO_CATEGORIES)) {
+          const listings = meta.categorySlug ? c.listings[meta.categorySlug] ?? 0 : 0;
+          if (listings >= CATEGORY_MIN_LISTINGS || (c.businesses[meta.businessSlug] ?? 0) >= CATEGORY_MIN_BUSINESSES) {
+            cityRoutes.push({ url: `${BASE}/${slug}/${key}`, changeFrequency: 'weekly', priority: 0.7 });
+          }
+        }
+      }
+      // Every active classified ad (server-rendered, canonical /listing/{id}-{slug})
+      for (const l of data.listings) {
+        listingRoutes.push({ url: `${BASE}${listingPath(l)}`, lastModified: new Date(l.updated_at), changeFrequency: 'weekly', priority: 0.6 });
       }
     }
   } catch {
-    // sitemap still works with static routes if API is down at build time
+    // sitemap still works with static routes if API is down
   }
 
   // Every business page (real, mostly OpenStreetMap-imported) so Google can
@@ -81,7 +92,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // guarded so a malformed content file can never break the whole sitemap.
   const blogRoutes: MetadataRoute.Sitemap = [];
   try {
-    blogRoutes.push({ url: `${BASE}/blog`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.6 });
+    blogRoutes.push({ url: `${BASE}/blog`, changeFrequency: 'weekly', priority: 0.6 });
     for (const post of listAllPosts()) {
       blogRoutes.push({
         url: `${BASE}/blog/${post.citySlug}/${post.slug}`,
@@ -94,5 +105,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // sitemap still works without blog routes if content dir is malformed
   }
 
-  return [...staticRoutes, ...cityRoutes, ...blogRoutes, ...businessRoutes];
+  return [...staticRoutes, ...cityRoutes, ...listingRoutes, ...blogRoutes, ...businessRoutes];
 }

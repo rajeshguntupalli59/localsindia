@@ -44,7 +44,10 @@ function StarPicker({ value, onChange }: { value: number; onChange: (v: number) 
 // Hours with an "Open now / Closed" badge (India time); unreadable formats show as written
 function OpeningHours({ raw }: { raw: string }) {
   const week = parseOpeningHours(raw);
-  const status = week ? openStatus(week) : null;
+  // Depends on the viewer's clock, so it's worked out after load — the
+  // server-rendered HTML (what Google reads) just lists the weekly hours.
+  const [status, setStatus] = useState<{ open: boolean; label: string } | null>(null);
+  useEffect(() => { setStatus(week ? openStatus(week) : null); }, [raw]); // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <div className="flex items-start gap-2 text-slate-600">
       <Clock className="w-4 h-4 flex-shrink-0 mt-0.5" />
@@ -60,14 +63,16 @@ function OpeningHours({ raw }: { raw: string }) {
   );
 }
 
-export default function BusinessDetailPage() {
+// `initial` is the business the server page already fetched, so the full page
+// is in the server-rendered HTML (Google indexes it); it's refreshed on load.
+export default function BusinessDetailPage({ initial = null, subtitle }: { initial?: Business | null; subtitle?: string }) {
   const params = useParams();
   const router = useRouter();
   const citySlug = params.city as string;
   const businessId = params.id as string;
 
-  const [business, setBusiness] = useState<Business | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [business, setBusiness] = useState<Business | null>(initial);
+  const [loading, setLoading] = useState(!initial);
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewBody, setReviewBody] = useState('');
   const [submittingReview, setSubmittingReview] = useState(false);
@@ -185,6 +190,7 @@ export default function BusinessDetailPage() {
                   <BadgeCheck className="w-5 h-5 text-blue-500" />
                 )}
               </div>
+              {subtitle && <p className="text-sm text-slate-500 mt-0.5">{subtitle}</p>}
               {business.review_count > 0 && !!business.avg_rating && (
                 <div className="flex items-center gap-2 mt-1">
                   <div className="flex gap-0.5">
@@ -341,7 +347,7 @@ export default function BusinessDetailPage() {
           {business.verified && business.badge_expires_at && (
             <div className="mt-3 flex items-center gap-2 text-xs text-green-700">
               <BadgeCheck className="w-4 h-4 text-blue-500" />
-              Verified badge active · expires {new Date(business.badge_expires_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+              Verified badge active · expires {new Date(business.badge_expires_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' })}
               <button onClick={() => setBadgeModal(true)} className="underline text-blue-600 ml-1">Renew</button>
             </div>
           )}
@@ -364,7 +370,7 @@ export default function BusinessDetailPage() {
                       ))}
                     </div>
                     <span className="text-xs text-slate-400">
-                      {new Date(review.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                      {new Date(review.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' })}
                     </span>
                   </div>
                   {review.body && <p className="text-sm text-slate-600">{review.body}</p>}
