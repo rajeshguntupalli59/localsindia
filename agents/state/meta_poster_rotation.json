@@ -1,8 +1,7 @@
 {
-  "lastTopicIndex": 3,
+  "lastTopicIndex": 4,
   "lastTipCategoryIndex": 11,
   "topicHistory": [
-    "city_spotlight",
     "referral",
     "seller_call",
     "app_feature",
@@ -11,7 +10,8 @@
     "safety_tip",
     "area_directory",
     "city_spotlight",
-    "area_directory"
+    "area_directory",
+    "referral"
   ],
   "tipCategoryHistory": [
     "services",
@@ -25,9 +25,8 @@
     "furniture",
     "fashion"
   ],
-  "lastStyleIndex": 1,
+  "lastStyleIndex": 2,
   "styleHistory": [
-    "duotone",
     "quote",
     "spotlight",
     "glass",
@@ -36,7 +35,8 @@
     "quote",
     "spotlight",
     "glass",
-    "bold"
+    "bold",
+    "duotone"
   ],
   "lastAreaCityIndex": 2,
   "areaPosted": [
