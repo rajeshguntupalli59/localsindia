@@ -928,7 +928,7 @@ Replaces the earlier `CATEGORY_CHIPS`/`form.attributes` system (a much smaller p
 
 **Files:** `app/profile/listings/[id]/edit/page.tsx` + `EditListingClient.tsx` (web); `mobile/src/screens/EditListingScreen.tsx` (mobile)
 
-Same fields as Post, pre-filled with existing data. Only listing owner can access.
+Same fields as Post, pre-filled with existing data. The listing owner **or any admin** can access (admins since 2026-09-29: `PATCH /listings/{id}` and `POST /upload/image/{listing_id}` allow `role == 'admin'`; editing never changes `status`). Entry points: "Edit" on every listing in `/admin/listings` (all tabs) and "Edit listing" on the public listing page (`listing/[id]/ListingDetailClient.tsx`, owner or admin). An admin editing someone else's listing sees an admin note and returns to `/admin/listings` after saving. Note: the "Saving changes will resubmit the listing for review" text owners see is not what the backend does — edits keep the current status.
 Sends PATCH to `/api/v1/listings/{id}`.
 **Photos** (added 2026-07-13 — was missing on both web and mobile until caught in live emulator testing): existing photos shown in a grid with per-photo remove; add button uploads a new photo. Both actions call `POST/DELETE /api/v1/upload/image/...` immediately (not deferred to Save), since this is an already-live listing rather than a draft. Max 5 photos total, same limit as Post.
 

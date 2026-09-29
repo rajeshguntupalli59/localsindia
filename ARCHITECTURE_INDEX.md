@@ -31,7 +31,7 @@
 | Post a listing | §8-PostListing, §10 | `routers/listings.py` | `[city]/classifieds/post/page.tsx` | `listings` | POST /listings |
 | Browse listings | §8-CityHome | `routers/listings.py` | `[city]/page.tsx`, `[city]/[category]/page.tsx` | `listings`, `listing_images` | GET /cities/{slug}/listings |
 | Listing detail | §8-ListingDetail | `routers/listings.py` | `[city]/classifieds/[id]/page.tsx`, `ListingDetailClient.tsx` | `listings`, `listing_images`, `listing_reviews` | GET /listings/{id} |
-| Edit listing | §8-EditListing | `routers/listings.py` | `profile/listings/[id]/edit/page.tsx`, `EditListingClient.tsx` (web); `mobile/src/screens/EditListingScreen.tsx` | `listings` | PATCH /listings/{id} |
+| Edit listing (owner or admin — admin since 2026-09-29) | §8-EditListing | `routers/listings.py`, `routers/uploads.py` | `profile/listings/[id]/edit/page.tsx`, `EditListingClient.tsx` (web); entry points: Edit on every `/admin/listings` row + "Edit listing" on `listing/[id]/ListingDetailClient.tsx`; `mobile/src/screens/EditListingScreen.tsx` | `listings` | PATCH /listings/{id} |
 | Delete listing | §10 | `routers/listings.py` | `profile/listings/page.tsx` | `listings` (soft-delete) | DELETE /listings/{id} |
 | Renew listing | §8-MyListings | `routers/listings.py` | `profile/listings/page.tsx` | `listings` | POST /listings/{id}/renew |
 | Mark as sold | §8-MyListings | `routers/listings.py` | `profile/listings/page.tsx` | `listings` | POST /listings/{id}/fulfill |
@@ -186,7 +186,7 @@
 | `app/[city]/[category]/page.tsx` | `/[city]/jobs` | All listings in a category for the city |
 | `app/[city]/classifieds/[id]/page.tsx` | `/[city]/classifieds/[id]` | Listing detail (Server Component wrapper) |
 | `app/[city]/classifieds/[id]/ListingDetailClient.tsx` | (client) | Listing detail UI: interactive image carousel (activeImg state, prev/next arrows, dot indicators, clickable thumbnails with active orange border), WhatsApp, reviews |
-| `app/profile/listings/[id]/edit/page.tsx` | `/profile/listings/{id}/edit` | Edit listing form (owner only) |
+| `app/profile/listings/[id]/edit/page.tsx` | `/profile/listings/{id}/edit` | Edit listing form (owner or admin) |
 | `app/profile/listings/[id]/edit/EditListingClient.tsx` | (client) | Edit form state and API calls; includes photo add/remove (2026-07-13, uses `api.upload.image`/`api.upload.deleteImage`, same as post flow) |
 | `app/[city]/classifieds/[id]/promote/page.tsx` | `/[city]/classifieds/[id]/promote` | Featured listing payment (wrapper) |
 | `app/[city]/classifieds/[id]/promote/PromoteClient.tsx` | (client) | Razorpay checkout UI |

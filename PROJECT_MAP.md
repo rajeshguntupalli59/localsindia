@@ -140,6 +140,11 @@ Open items:
 - Optional: Search Console API weekly report (needs a Google Cloud service account added to GSC — Raj's call).
 - Carried over: admin pages cramped on phones; dedicated MSG91 DLT template for claim SMS; real claim-SMS delivery untested.
 
+### 2026-09-29 — Admins can edit any listing
+- `PATCH /listings/{id}` and listing photo upload now allow admins (delete already did); editing never changes the listing's status. Web: Edit button on every `/admin/listings` row (all tabs), "Edit listing" on the public listing page for the owner or an admin; admins get an accurate note and return to `/admin/listings` after saving. Test updated: admin edit → 200 (stays pending); other non-admin user → 403. Commit ba473ec.
+- Found, not changed (Raj's call): an owner's edit of an already-approved listing goes live without re-review, though the edit page tells owners it's resubmitted. Options: make owner edits of active listings go back to pending, or fix the wording.
+- Mobile app admin edit not done (needs a new build).
+
 ### 2026-09-29 — IndexNow (Bing & co.) added
 - `agents/indexnow_submit.py` + daily `indexnow.yml`: submits changed sitemap URLs to IndexNow so Bing/DuckDuckGo/Yahoo pick them up in hours. Key file `frontend/public/74eb53be13b9a9e4700e7fe12f121081.txt`. One-off full submission done 2026-09-29: all 39,997 sitemap URLs accepted (200) in 4 batches — the very first run got 403 on 2 batches while IndexNow validated the key, a rerun fixed it (expected on first use). The frontend deploy first failed on a transient `next/font` Google Fonts download error; a plain rerun succeeded.
 - Bing Webmaster Tools: "Import from GSC" found no sites, so the site was added manually (`https://www.localsindia.com/`, root only — entering a sitemap/file URL as the site address makes Bing look for `<that URL>/BingSiteAuth.xml`) and verified with `frontend/public/BingSiteAuth.xml`. DONE 2026-09-29: Raj verified the site in Bing and submitted both sitemaps there. Bing results usually appear within days; IndexNow submissions show in Bing's IndexNow report.
