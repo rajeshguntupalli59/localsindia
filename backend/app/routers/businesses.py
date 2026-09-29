@@ -191,6 +191,59 @@ async def business_locality_pages(
     )
 
 
+@router.get("/businesses/sitemap-counts")
+async def business_sitemap_counts(db: AsyncSession = Depends(get_db)):
+    """Per active city: live businesses and active listings by category slug,
+    plus upcoming events — one call, so sitemap.xml lists only city/category
+    pages that pass the same "has real content" rules the pages use for noindex.
+    Also every active classified listing page (id, title, updated_at)."""
+    from app.models.event import Event
+    from app.models.listing import Listing
+
+    out: dict[str, dict] = {
+        slug: {"businesses": {}, "listings": {}, "events": 0}
+        for (slug,) in (await db.execute(select(City.slug).where(City.active == True))).all()
+    }
+    biz = await db.execute(
+        select(City.slug, Category.slug, func.count(Business.id))
+        .join(City, City.id == Business.city_id)
+        .join(Category, Category.id == Business.category_id)
+        .where(Business.deleted_at.is_(None), City.active == True)
+        .group_by(City.slug, Category.slug)
+    )
+    for city_slug, cat, n in biz.all():
+        out[city_slug]["businesses"][cat] = n
+    lst = await db.execute(
+        select(City.slug, Category.slug, func.count(Listing.id))
+        .join(City, City.id == Listing.city_id)
+        .join(Category, Category.id == Listing.category_id)
+        .where(Listing.status == "active", Listing.deleted_at.is_(None), City.active == True)
+        .group_by(City.slug, Category.slug)
+    )
+    for city_slug, cat, n in lst.all():
+        out[city_slug]["listings"][cat] = n
+    ev = await db.execute(
+        select(City.slug, func.count(Event.id))
+        .join(City, City.id == Event.city_id)
+        .where(Event.status == "active", Event.deleted_at.is_(None),
+               Event.event_date >= datetime.now(timezone.utc), City.active == True)
+        .group_by(City.slug)
+    )
+    for city_slug, n in ev.all():
+        out[city_slug]["events"] = n
+    pages = await db.execute(
+        select(Listing.id, Listing.title, Listing.updated_at)
+        .join(City, City.id == Listing.city_id)
+        .where(Listing.status == "active", Listing.deleted_at.is_(None), City.active == True)
+        .order_by(Listing.updated_at.desc())
+        .limit(5000)
+    )
+    return {
+        "cities": out,
+        "listings": [{"id": str(i), "title": t, "updated_at": u} for i, t, u in pages.all()],
+    }
+
+
 @router.get("/businesses/{business_id}", response_model=BusinessOut)
 async def get_business(
     business_id: uuid.UUID,

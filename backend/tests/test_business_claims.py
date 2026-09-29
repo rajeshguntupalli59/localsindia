@@ -447,3 +447,25 @@ async def test_new_owner_gets_review_nudge(auth_client, city, monkeypatch):
     assert len(mine) == 1
     assert "ask for a review" in mine[0]["body"]
     assert mine[0]["action_url"] == f"/{city.slug}/businesses/{b.id}"
+
+
+@pytest.mark.asyncio
+async def test_sitemap_counts_per_city_and_category(auth_client, admin_client, city):
+    from app.models.category import Category
+    client, _ = auth_client
+    admin, _ = admin_client
+    engine = _make_engine()
+    Session = async_sessionmaker(engine, expire_on_commit=False)
+    slug = f"sc-{uuid.uuid4().hex[:6]}"
+    async with Session() as s:
+        s.add(Category(name=slug, slug=slug, sort_order=0))
+        await s.commit()
+    await engine.dispose()
+    await admin.post("/api/v1/admin/businesses/import", json={"city_slug": "hyderabad", "businesses": [
+        {"name": f"Shop {i}", "category_slug": slug, "source_ref": f"node/{uuid.uuid4().int % 10**9}"} for i in range(3)]})
+    data = (await client.get("/api/v1/businesses/sitemap-counts")).json()
+    counts = data["cities"]
+    assert isinstance(data["listings"], list)
+    assert counts["hyderabad"]["businesses"][slug] == 3
+    assert slug not in counts["hyderabad"]["listings"]
+    assert isinstance(counts["hyderabad"]["events"], int)
