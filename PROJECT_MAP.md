@@ -181,7 +181,7 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 ### 2026-09-25 — SESSION SUMMARY + open items (start here next session)
 Shipped today (details in the entries below): claim flow E2E-tested 23/23 + onboarding-quiz fix · `/admin/outreach` owner outreach · live-site audit fixes (share images, real counts, Organization JSON-LD, Call/Directions/Share) · City Seeder retired + 2,997 fake listings unpublished · neighbourhood pages (27,040 businesses tagged, 3,749 URLs in `/sitemap-areas.xml`) · opening hours + "Open now" · home page 925 → 371 KB. Sitemap resubmitted in GSC (~37,865 discovered).
 Open items:
-- **URGENT (Raj): rotate the admin password** — it was committed to the public repo (see Security review fixes below).
+- DONE 2026-09-29: admin password rotated by Raj — new `ADMIN_PASSWORD_HASH` in Azure + GitHub secret `LOCALINDIA_ADMIN_PASSWORD` (updated 15:27 UTC). Verified: osm-import `backfill_hours` run 36590405316 logged in as admin with the new secret (success). The old password in git history no longer works. Local `agents/.env.agents` must hold the new password too.
 - DONE: opening-hours backfill (run 36091832956) — 4,888 businesses got hours. `sitemap-areas.xml` submitted in GSC and fetched OK (GSC first showed "Couldn't fetch" — its normal new-sitemap glitch; resolved on its own).
 - Raj: add the site to Bing Webmaster Tools via "Import from GSC".
 - DONE 2026-09-26: **Mobile app v1.1.0 (versionCode 18, R8 on, search shows businesses) submitted to Play Console production by Raj** — AAB link in the changelog entry "App build v1.1.0 (versionCode 18)". Builds 15/16 never uploaded (superseded), 17 cancelled. See the changelog entry "Mobile app caught up with the website".
