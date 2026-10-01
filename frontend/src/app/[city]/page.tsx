@@ -1,7 +1,7 @@
 import { listingPath } from '@/lib/utils';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import type { City, Listing, Locality } from '@/lib/types';
+import type { Business, City, Listing, Locality } from '@/lib/types';
 import { MIN_AREA_BUSINESSES } from '@/lib/seoCategories';
 import { regionalPhraseFor } from '@/lib/regionalSeo';
 import { loadCitySeo } from '@/lib/seo';
@@ -139,7 +139,7 @@ async function getJson<T>(url: string, fallback: T): Promise<T> {
 }
 
 export default async function CityHomePage({ params }: { params: { city: string } }) {
-  const [city, todayCount, trending, fresh, counts, allCities, localities] = await Promise.all([
+  const [city, todayCount, trending, fresh, counts, allCities, localities, popular] = await Promise.all([
     fetchCity(params.city),
     fetchTodayCount(params.city),
     fetchTrending(params.city),
@@ -147,6 +147,7 @@ export default async function CityHomePage({ params }: { params: { city: string 
     getJson<Record<string, number>>(`${API_BASE}/api/v1/businesses/counts?city_slug=${params.city}`, {}),
     getJson<City[]>(`${API_BASE}/api/v1/cities`, []),
     getJson<Locality[]>(`${API_BASE}/api/v1/businesses/localities?city_slug=${params.city}`, []),
+    fetchBusinessSample(params.city),   // same request as generateMetadata's, so it's de-duplicated
   ]);
 
   if (!city) notFound();
@@ -190,7 +191,7 @@ export default async function CityHomePage({ params }: { params: { city: string 
         initialTodayCount={todayCount}
         initialTrending={trending}
         initialFresh={fresh}
-        explore={<CityExplore city={city} counts={counts} nearby={nearby} areas={areas} />}
+        explore={<CityExplore city={city} counts={counts} nearby={nearby} areas={areas} popular={(popular as Business[]).slice(0, 6)} />}
       />
     </>
   );

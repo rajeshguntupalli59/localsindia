@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import { Store, ArrowRight } from 'lucide-react';
 import { SEO_CATEGORIES } from '@/lib/seoCategories';
-import type { City, Locality } from '@/lib/types';
-import { ChipLinks } from '@/components/business-list/BusinessList';
+import type { Business, City, Locality } from '@/lib/types';
+import BusinessList, { ChipLinks } from '@/components/business-list/BusinessList';
 
 /**
  * Server-rendered "Explore <city>" block for the city home page: links to
@@ -15,11 +15,13 @@ export default function CityExplore({
   counts,
   nearby,
   areas = [],
+  popular = [],
 }: {
   city: City;
   counts: Record<string, number>;
   nearby: City[];
   areas?: Locality[];   // neighbourhoods with enough businesses for their own page
+  popular?: Business[]; // a few real businesses shown as cards, so the page opens on actual listings
 }) {
   const categories = Object.entries(SEO_CATEGORIES)
     .map(([key, m]) => ({ key, m, n: counts[m.businessSlug] ?? 0 }))
@@ -44,6 +46,13 @@ export default function CityExplore({
           </Link>
         )}
       </div>
+
+      {popular.length > 0 && (
+        <div className="mb-6">
+          <h3 className="text-sm font-bold mb-2.5" style={{ color: 'var(--li-text)' }}>Popular in {city.name}</h3>
+          <BusinessList businesses={popular} citySlug={city.slug} />
+        </div>
+      )}
 
       {categories.length > 0 && (
         <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
