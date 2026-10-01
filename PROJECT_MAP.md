@@ -129,18 +129,22 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 - Raj: "listings not popping up when I open the city". The page worked (no errors, ~1 s server time; one 5.8 s cold start) but its top was only category buttons with counts. `CityExplore` now shows a server-rendered "Popular in <city>" list of 6 real businesses (reuses `BusinessList` and the business sample `generateMetadata` already fetches) above the categories. Commit 63c191d.
 - Mobile app: its home already has the equivalent "Popular in <city>" row (since v1.1.0); phones still on the older version (staged rollout) won't show it until they update.
 
-### 2026-09-29 — SESSION SUMMARY + open items (start here next session)
-Shipped today (details in the entries below):
+### 2026-09-29 → 10-01 — SESSION SUMMARY + open items (start here next session)
+Shipped (details in the entries below):
 - **SEO / indexing:** business pages server-render their details; sitemap lists only indexable pages (`GET /businesses/sitemap-counts`, 36,248 + 3,749 area URLs), no `/launch`, real lastmods, active classified ads added. Raj resubmitted both sitemaps in GSC.
 - **Website shows businesses first** (city page + search/All/categories) — only 2 classified ads are live site-wide.
 - **IndexNow** (`agents/indexnow_submit.py`, daily `indexnow.yml`): all 39,997 URLs accepted. **Bing Webmaster Tools** verified (`frontend/public/BingSiteAuth.xml`) + both sitemaps submitted by Raj.
 - **Admin password rotated** (Azure hash + GitHub secret) and verified via a workflow login.
+- **Admins can edit any listing** (web: Edit on every `/admin/listings` row + "Edit listing" on listing pages).
+- **10-01: city page opens on 6 real business cards** ("Popular in <city>") instead of only category buttons.
 - App v1.1.0 / versionCode 18 was submitted to Play on 09-26 (see that summary).
 
 Open items:
 - ~2026-10-06: get GSC "Why pages aren't indexed" breakdown (+ Bing indexed count) from Raj; then focus effort on the page types getting impressions.
 - Owner outreach in Hyderabad via `/admin/outreach` (biggest traffic lever: claimed pages + reviews + owners sharing).
-- Play: raise the staged rollout to 100% after a clean day or two in Android vitals; confirm the "Obfuscation 2%" warning cleared.
+- **Play: raise the staged rollout to 100%** (clean in vitals so far) — phones still on the old version don't get the "Popular in <city>" home row or search-shows-businesses. Confirm the "Obfuscation 2%" warning cleared. Raj to check which version his phone has.
+- **Decision for Raj:** owner edits of an approved listing go live without re-review (edit page says otherwise). Recommended: send owner edits of active listings back to pending; alternative: just fix the wording.
+- Mobile: admin listing edit in the app (next app build).
 - Optional: Search Console API weekly report (needs a Google Cloud service account added to GSC — Raj's call).
 - Carried over: admin pages cramped on phones; dedicated MSG91 DLT template for claim SMS; real claim-SMS delivery untested.
 
