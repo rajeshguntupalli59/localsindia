@@ -125,6 +125,10 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 - Claim approval (all 3 paths — SMS code now also notifies) sends one notification with a review nudge (`_notify_new_owner`). Owners see a "Get reviews from your customers" card (WhatsApp share + copy) on their business page until 5 reviews, and on the SMS-claim success screen (`components/review-invite/ReviewInvite.tsx`).
 - Paid "Get Verified — ₹499/month" offers hidden (Raj, 2026-09-25) on the owner's business page and the add-business success screen via `PAID_BADGES_ENABLED = false` in `frontend/src/lib/features.ts` — flip to true to bring them back.
 
+### 2026-10-01 — City page opens on real business cards (web)
+- Raj: "listings not popping up when I open the city". The page worked (no errors, ~1 s server time; one 5.8 s cold start) but its top was only category buttons with counts. `CityExplore` now shows a server-rendered "Popular in <city>" list of 6 real businesses (reuses `BusinessList` and the business sample `generateMetadata` already fetches) above the categories. Commit 63c191d.
+- Mobile app: its home already has the equivalent "Popular in <city>" row (since v1.1.0); phones still on the older version (staged rollout) won't show it until they update.
+
 ### 2026-09-29 — SESSION SUMMARY + open items (start here next session)
 Shipped today (details in the entries below):
 - **SEO / indexing:** business pages server-render their details; sitemap lists only indexable pages (`GET /businesses/sitemap-counts`, 36,248 + 3,749 area URLs), no `/launch`, real lastmods, active classified ads added. Raj resubmitted both sitemaps in GSC.
