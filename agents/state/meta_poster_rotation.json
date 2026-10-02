@@ -1,8 +1,7 @@
 {
-  "lastTopicIndex": 0,
-  "lastTipCategoryIndex": 11,
+  "lastTopicIndex": 1,
+  "lastTipCategoryIndex": 0,
   "topicHistory": [
-    "safety_tip",
     "area_directory",
     "city_spotlight",
     "area_directory",
@@ -11,10 +10,10 @@
     "seller_call",
     "area_directory",
     "app_feature",
-    "area_directory"
+    "area_directory",
+    "category_tip"
   ],
   "tipCategoryHistory": [
-    "services",
     "pg-roommate",
     "vehicles",
     "electronics",
@@ -23,11 +22,11 @@
     "tiffin",
     "real-estate",
     "furniture",
-    "fashion"
+    "fashion",
+    "classifieds"
   ],
-  "lastStyleIndex": 2,
+  "lastStyleIndex": 3,
   "styleHistory": [
-    "quote",
     "spotlight",
     "glass",
     "bold",
@@ -36,7 +35,8 @@
     "spotlight",
     "glass",
     "bold",
-    "duotone"
+    "duotone",
+    "quote"
   ],
   "lastAreaCityIndex": 5,
   "areaPosted": [
