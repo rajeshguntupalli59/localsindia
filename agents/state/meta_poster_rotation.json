@@ -2,7 +2,6 @@
   "lastTopicIndex": 1,
   "lastTipCategoryIndex": 0,
   "topicHistory": [
-    "area_directory",
     "city_spotlight",
     "area_directory",
     "referral",
@@ -11,7 +10,8 @@
     "area_directory",
     "app_feature",
     "area_directory",
-    "category_tip"
+    "category_tip",
+    "area_directory"
   ],
   "tipCategoryHistory": [
     "pg-roommate",
@@ -25,9 +25,8 @@
     "fashion",
     "classifieds"
   ],
-  "lastStyleIndex": 3,
+  "lastStyleIndex": 4,
   "styleHistory": [
-    "spotlight",
     "glass",
     "bold",
     "duotone",
@@ -36,15 +35,17 @@
     "glass",
     "bold",
     "duotone",
-    "quote"
+    "quote",
+    "spotlight"
   ],
-  "lastAreaCityIndex": 5,
+  "lastAreaCityIndex": 0,
   "areaPosted": [
     "hyderabad/doctors/kukatpally",
     "bengaluru/tiffin/basavanagudi",
     "chennai/doctors/radha-nagar",
     "vijayawada/doctors/krishna-lanka",
     "kochi/education/kongorpilly",
-    "coimbatore/doctors/racecourse"
+    "coimbatore/doctors/racecourse",
+    "hyderabad/doctors/vengal-rao-nagar"
   ]
 }
