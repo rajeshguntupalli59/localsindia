@@ -1,0 +1,205 @@
+{
+  "schemaVersion": 2,
+  "kind": "directory",
+  "city": "Bengaluru",
+  "citySlug": "bengaluru",
+  "state": "Karnataka",
+  "slug": "hospitals-clinics-pharmacies-in-bengaluru-addresses-phone-numbers",
+  "category": "doctors",
+  "topicTemplateId": "directory-doctors",
+  "title": "Hospitals, Clinics & Pharmacies in Bengaluru: Addresses & Phone Numbers",
+  "metaDescription": "20 hospitals, clinics & pharmacies in Bengaluru with addresses and phone numbers, plus what to check before you visit.",
+  "intro": "Whether you need urgent care or a routine check-up, knowing how to find a trustworthy hospital, clinic, or pharmacy in Bengaluru saves time, money, and stress. This guide walks you through what to look for and what to confirm before you visit.",
+  "sections": [
+    {
+      "heading": "How to Find Hospitals and Clinics Near You",
+      "body": "Start by asking neighbors, colleagues, or family in your area — word-of-mouth recommendations often point you to places that are genuinely reliable and convenient. Search online for hospitals and clinics near your locality, and check their listed timings and departments. Many clinics operate on a first-come, first-served basis, so calling ahead before you go is always smart — especially for specialists or during peak hours. If you're using LocalsIndia or other community boards, locals often share their experiences with nearby healthcare providers. Pay attention to practical details: Is it within walking distance or do you need transport? Does it have parking if you're driving? Ask whether they accept your health insurance before you arrive, as this can affect your out-of-pocket cost significantly."
+    },
+    {
+      "heading": "What to Check When You First Visit",
+      "body": "Before committing to a hospital or clinic, visit in person if time allows. Observe the cleanliness of the waiting area, reception desk, and visible patient areas — this reflects their overall standards. Check whether staff are courteous and willing to answer your questions clearly. Ask to see their registration certificates and licenses displayed; reputable facilities keep these visible. Confirm the doctor's qualifications and experience, especially if you need specialized care. Note the facilities available: Do they have basic equipment like blood pressure monitors and thermometers? Can they handle emergencies or do they refer patients elsewhere? Ask about fees upfront — most clinics have a standard consultation charge, but tests, procedures, or medicines cost extra. Understanding the payment structure beforehand prevents surprises at the counter."
+    },
+    {
+      "heading": "Choosing a Pharmacy You Can Trust",
+      "body": "A good pharmacy should have a licensed pharmacist on duty during all operating hours — this is your first check. Verify that the pharmacist is willing to explain your medicines: what each one does, how often to take it, and any side effects to watch for. Never accept medicines without a clear label showing the name, dose, and expiry date. Always ask for the original branded strip or bottle rather than loose tablets, as this protects you against counterfeit medicines. Keep your prescription and receipts for future reference — they're helpful if you need to file insurance claims or discuss your medications with another doctor. If a pharmacy is out of stock on a medicine your doctor prescribed, ask them to suggest an equivalent alternative and confirm with your doctor before taking it. Building a relationship with one trusted pharmacy near your home often works well, as the pharmacist gets to know your medical history and can spot potential interactions if you're on multiple medicines."
+    },
+    {
+      "heading": "Tips for Managing Cost and Health Insurance",
+      "body": "Before visiting any hospital or clinic for non-emergency care, call ahead and ask about consultation fees and typical costs for tests you might need. If you have health insurance, confirm which facilities are in-network — visiting an out-of-network provider means paying more out of your own pocket. Keep a copy of your insurance card and policy details handy when you visit. Many clinics and pharmacies offer discounts on repeat visits or bundled tests, so don't hesitate to ask. For chronic conditions requiring regular check-ups, ask if the clinic offers a health card or package that works out cheaper over time. During consultations, ask your doctor to explain why each test or medicine is necessary — unnecessary tests and branded medicines when generics work just as well can add up quickly. Maintain a personal health record with your vaccination history, blood group, allergies, and past diagnoses; this speeds up future visits and helps new doctors understand your medical background."
+    }
+  ],
+  "faqs": [
+    {
+      "question": "How do I know if a hospital or clinic is registered and legitimate?",
+      "answer": "Reputable facilities display their registration certificates and licenses in a visible place, usually near the reception or waiting area. You can also ask the staff directly for their registration details. Licensed clinics and hospitals have their credentials verified by the Medical Council, and staff should be willing to share this information without hesitation."
+    },
+    {
+      "question": "Should I always get a written prescription, or can I just tell the pharmacist what the doctor said?",
+      "answer": "Always ask for a written prescription from your doctor. A written prescription protects you, helps the pharmacist dispense the correct medicine, and gives you a record for future reference or if you need to consult another doctor. It also prevents misunderstandings due to unclear speech or accents."
+    },
+    {
+      "question": "What should I do if a medicine is very expensive or unavailable at my regular pharmacy?",
+      "answer": "Ask the pharmacist if a generic equivalent is available — often a medicine's generic version works the same way but costs less. If the medicine is out of stock, ask them to check other nearby pharmacies or order it for you. You can also call your doctor to ask if there's a more affordable alternative that will work for your condition."
+    },
+    {
+      "question": "Is it worth visiting a large hospital for routine check-ups, or should I go to a smaller clinic?",
+      "answer": "Smaller clinics are often quicker and more affordable for routine check-ups and minor health issues. Large hospitals are better for emergencies, specialized care, or complex diagnoses. Choose based on your actual need — don't assume bigger always means better for every situation."
+    },
+    {
+      "question": "How can I find healthcare providers if I'm new to Bengaluru?",
+      "answer": "Ask colleagues, neighbors, or friends in your area for recommendations. Check online community boards and local groups on social platforms where residents share experiences. You can also use LocalsIndia or similar community platforms to see what healthcare services are listed near your location and read user feedback."
+    },
+    {
+      "question": "What documents should I carry when visiting a hospital or clinic?",
+      "answer": "Carry your health insurance card, ID proof, any previous medical reports or test results, and a list of medicines you're currently taking. If it's your first visit, arriving 10–15 minutes early helps with registration. Having these ready speeds up your consultation and gives the doctor important context about your health."
+    }
+  ],
+  "businesses": [
+    {
+      "id": "76ba08da-b317-4446-baac-aa550979e948",
+      "name": "32Smiles Multispecialty Dental clinic",
+      "address": "No. 5, 1st Floor,, Bellandur Gate, Sarjapura Road, Bengaluru, 560103",
+      "phone": "+919343433222",
+      "source": "osm"
+    },
+    {
+      "id": "6ce5571b-b264-4daa-9369-cf0d3f55440a",
+      "name": "4 Paws Pet Clinic",
+      "address": "Kudlu Main Rd, near bbmp office, Vinayaka Nagar, Hosapalaya, Muneshwara Nagar, Bengaluru, 560068",
+      "phone": "+919481457685",
+      "source": "osm"
+    },
+    {
+      "id": "73284f40-5035-4a11-b0a8-79822247193f",
+      "name": "A & J Ayur Care",
+      "address": "Chikkanayakanahalli Road, Doddakanahalli Junction, Sarjapur Road, Bangalore, 560035",
+      "phone": "+919243112373",
+      "source": "osm"
+    },
+    {
+      "id": "8bb8b11a-ceb8-411a-a497-aca590c45788",
+      "name": "Aarthi diagnostics",
+      "address": "500, Chinmaya Mission Hospital Rd, Bhadrappa Layout, Indira Nagar 1st Stage, Stage 1, Indiranagar, Bengaluru, 560038",
+      "phone": "+918041132068",
+      "source": "osm"
+    },
+    {
+      "id": "be791843-fd4c-4118-abc0-ddb05ba66999",
+      "name": "Abhishek Nethradhama",
+      "address": "971/37, 15th A Cross Road",
+      "phone": "+917795715203",
+      "source": "osm"
+    },
+    {
+      "id": "e9032297-8c91-4781-bda4-98fb08c94c77",
+      "name": "Acura Speciality Hospital",
+      "address": "435, Acura Hospital, 18th Main, 6th Block, Koramangala",
+      "phone": "+918041105151",
+      "source": "osm"
+    },
+    {
+      "id": "c3931022-3edf-4e8f-8e4f-d162d5f9fa9a",
+      "name": "Addresshealth Child Health Clinic",
+      "address": "14, Kaikondrahalli, Sarjapur Road, Bangalore, 560034",
+      "phone": "+918066815572",
+      "source": "osm"
+    },
+    {
+      "id": "58b7f679-c33f-4354-ab86-f42dd236dc45",
+      "name": "Aditi Dental Care",
+      "address": "955, Ambalipura, Sarjapura Road, Bangalore, 560102",
+      "phone": "+919611980263",
+      "source": "osm"
+    },
+    {
+      "id": "ab2f2e43-636b-4ee1-95ba-9fade5cf141d",
+      "name": "Aitone Diagnostics & Clinics",
+      "address": "1/1A, Varthur Main Road",
+      "phone": "+918217777281",
+      "source": "osm"
+    },
+    {
+      "id": "8146d048-8d08-4aa4-9d30-d7141fd46d7e",
+      "name": "Al Shifa Unani & Ayurvedic Dawa Khana",
+      "address": "28, Charminar Masjid Road, Near-Russel Market, Shivaji Nagar, Sulthangunta, Shivaji Nagar, bangalore, 560051",
+      "phone": "+918025302786",
+      "source": "osm"
+    },
+    {
+      "id": "d0ff859c-211d-4474-af73-59ae8627566e",
+      "name": "AlignBy Orthodontic & Multi-Speciality Clinic",
+      "address": "341, 2nd Main Road, Bengaluru, 560035",
+      "phone": "+917483805407",
+      "source": "osm"
+    },
+    {
+      "id": "c87bb347-3a8a-43a2-a64b-f5b12946a5e0",
+      "name": "Amplifon",
+      "address": "#174/148, 26th Main Road, 4th T Block East, Jayanagara 9th Block, Banagalore, 560041",
+      "phone": "+918042198047",
+      "source": "osm"
+    },
+    {
+      "id": "18b87a8e-faf6-4394-8c85-6a23ce237033",
+      "name": "Amrutha Medicals",
+      "address": "403, Dr. Rajkumar Road, 6th Block, 80 Feet Rd, 4th Block, Ramchandrapuram, Rajaji Nagar, bangalore, 560010",
+      "phone": "+918023117929",
+      "source": "osm"
+    },
+    {
+      "id": "a45fc60f-3ffb-4df0-a636-da2a413bdb40",
+      "name": "Angels Advanced Clinic Pvt Ltd.",
+      "address": "675, 9th A Main Rd, Binnamangala, Hoysala Nagar, Indiranagar, Bengaluru, 560038",
+      "phone": "+919845566799",
+      "source": "osm"
+    },
+    {
+      "id": "08cd1bc2-1db8-4466-957e-a41238ca4d0e",
+      "name": "Annayya Healthcare Pvt Ltd",
+      "address": "No.14, 14Th Main,Hsr 5Th Sector,Koramangala",
+      "phone": "+919845504949",
+      "source": "osm"
+    },
+    {
+      "id": "e4ce1e05-ee63-477f-b6c5-fa07c04727b6",
+      "name": "Arogya Kendra",
+      "address": "Adichunchangiri Shopping Complex Adichunchangirishpgcplx Vjyngrb40 Vijaynagar, Attiguppe, Bangalore, 560040",
+      "phone": "+918023400463",
+      "source": "osm"
+    },
+    {
+      "id": "7b21975e-4707-410f-b034-f9121e78661b",
+      "name": "Arvind Homoeo Medicals",
+      "address": "2, 1st Floor, 14th Main, Next To Kodandaram Temple, Vijayanagar, SBI Staff Colony, Hoshalli Extension, RPC Layout, Bangalore, 560040",
+      "phone": "+918023503413",
+      "source": "osm"
+    },
+    {
+      "id": "c5e1144e-8c3b-42b7-9e48-d48e076f580b",
+      "name": "Axon Speciality Hospital",
+      "address": "321, 6th Main Road, HAL 2nd Stage, Indira Nagar, BENGALURU, 560038",
+      "phone": "+918043346333",
+      "source": "osm"
+    },
+    {
+      "id": "24894beb-cb70-4b5a-a591-bfb7adace229",
+      "name": "Ayur jagruti",
+      "address": "3718, 10th Cross Rd, Doopanahalli, Indiranagar, Karnataka, Bengaluru, 560008",
+      "phone": "+919663381398",
+      "source": "osm"
+    },
+    {
+      "id": "dcfe6c8d-e904-41e8-b14f-efddd17884fc",
+      "name": "Ayurvaid Hospital",
+      "address": "230, Amarjyothi Layout, Off.Intermediate Ring Road, Domlur Extension",
+      "phone": "+918040925555",
+      "source": "osm"
+    }
+  ],
+  "cta": {
+    "text": "See all hospitals, clinics & pharmacies in Bengaluru",
+    "href": "/bengaluru/doctors"
+  },
+  "publishedAt": "2026-10-04T09:10:43Z",
+  "wordCount": 611
+}
