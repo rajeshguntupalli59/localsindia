@@ -128,12 +128,13 @@ async def business_sitemap_entries(
     limit: int = Query(default=45000, le=45000),
     db: AsyncSession = Depends(get_db),
 ):
-    """Lightweight list of every live business page for the sitemap, so
-    Google can index them (a sitemap file holds at most 50,000 URLs)."""
+    """Lightweight list of every indexable business page for the sitemap
+    (thin ones are noindex — see Business.indexable; a sitemap file holds at
+    most 50,000 URLs)."""
     rows = await db.execute(
         select(Business.id, City.slug, Business.updated_at)
         .join(City, City.id == Business.city_id)
-        .where(Business.deleted_at.is_(None), City.active == True)
+        .where(Business.deleted_at.is_(None), City.active == True, Business.indexable)
         .order_by(Business.updated_at.desc())
         .limit(limit)
     )

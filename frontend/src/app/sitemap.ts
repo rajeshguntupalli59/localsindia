@@ -68,8 +68,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // sitemap still works with static routes if API is down
   }
 
-  // Every business page (real, mostly OpenStreetMap-imported) so Google can
-  // surface them. Capped server-side below the 50,000-URL sitemap limit.
+  // Business pages worth indexing (backend Business.indexable — thin OSM
+  // imports are noindex and left out). Capped server-side below 50,000 URLs.
   const businessRoutes: MetadataRoute.Sitemap = [];
   try {
     const res = await fetch(`${API_BASE}/api/v1/businesses/sitemap-entries`, { next: { revalidate: 86400 } });

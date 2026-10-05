@@ -411,7 +411,7 @@ POST   /api/v1/admin/business-claims/{id}/approve  Sets owner (overrides), rejec
 POST   /api/v1/admin/business-claims/{id}/reject   {reason} required, notifies [ADMIN]
 POST   /api/v1/admin/businesses/import       {city_slug, source, businesses[≤500]} → unclaimed businesses; skips existing source_ref [ADMIN]
 POST   /api/v1/admin/businesses/import/remove  {business_ids, reason} → soft-deletes imported + unclaimed only [ADMIN]
-GET    /api/v1/businesses/sitemap-entries    id, city_slug, updated_at for sitemap.xml (≤45k)
+GET    /api/v1/businesses/sitemap-entries    id, city_slug, updated_at for sitemap.xml (≤45k; indexable only — Business.indexable)
 GET    /api/v1/businesses/sitemap-counts     (2026-09-29) {cities: {slug: {businesses: {cat:n}, listings: {cat:n}, events: n}}, listings: [{id,title,updated_at}]} — `app/sitemap.ts` lists only city/category pages passing the pages' own index rules, plus active classified ads
 GET    /api/v1/businesses?q=&category_slug=  name keyword search (all words) + category filter
 GET    /api/v1/businesses/localities?city_slug=&category_slug=  [{slug, name, count}] neighbourhoods by business count

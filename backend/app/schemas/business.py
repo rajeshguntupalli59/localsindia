@@ -91,6 +91,7 @@ class BusinessOut(BaseModel):
     locality: str | None = None
     locality_slug: str | None = None
     opening_hours: str | None = None
+    indexable: bool = True
     created_at: datetime
     reviews: list[ReviewOut] = []
     images: list[BusinessImageOut] = []

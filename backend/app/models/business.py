@@ -1,9 +1,11 @@
 import uuid
 from datetime import datetime, timezone
-from sqlalchemy import String, Text, Boolean, Integer, Numeric, ForeignKey, Index, DateTime
+from sqlalchemy import String, Text, Boolean, Integer, Numeric, ForeignKey, Index, DateTime, case, exists, func, or_
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID
 from app.core.database import Base
+from app.models.business_image import BusinessImage
 
 
 class Business(Base):
@@ -77,6 +79,31 @@ class Business(Base):
     def city_slug(self) -> str | None:
         # Lets the apps build the business's public page URL (/{city}/businesses/{id})
         return self.city.slug if self.city else None
+
+    # Worth asking Google to index: real owner/user content, or at least two of
+    # phone / opening hours / website. Bare OpenStreetMap imports (name +
+    # address) are thin, widely duplicated pages — they stay live but get
+    # noindex and are left out of sitemap.xml. Python and SQL forms must agree.
+    @hybrid_property
+    def indexable(self) -> bool:
+        if (self.owner_id or self.review_count or (self.description or "").strip()
+                or self.source != "osm" or any("placehold.co" not in i.url for i in self.images)):
+            return True
+        return sum(bool((v or "").strip()) for v in (self.phone, self.opening_hours, self.website_url)) >= 2
+
+    @indexable.inplace.expression
+    @classmethod
+    def _indexable_expression(cls):
+        def filled(col):
+            return case((func.coalesce(func.trim(col), "") != "", 1), else_=0)
+        return or_(
+            cls.owner_id.is_not(None),
+            cls.review_count > 0,
+            func.coalesce(func.trim(cls.description), "") != "",
+            cls.source.is_distinct_from("osm"),
+            exists().where(BusinessImage.business_id == cls.id, ~BusinessImage.url.contains("placehold.co")),
+            filled(cls.phone) + filled(cls.opening_hours) + filled(cls.website_url) >= 2,
+        )
 
     __table_args__ = (
         Index("idx_businesses_city", "city_id", "category_id"),

@@ -171,6 +171,8 @@ export interface Business {
   locality?: string | null;       // neighbourhood from OpenStreetMap, e.g. "Madhapur"
   locality_slug?: string | null;
   opening_hours?: string | null;  // OpenStreetMap syntax, e.g. "Mo-Sa 09:00-21:00; Su off"
+  /** false = thin page (bare OSM import): served with noindex, left out of sitemap.xml */
+  indexable?: boolean;
   created_at: string;
   reviews?: Review[];
   images?: ListingImage[];

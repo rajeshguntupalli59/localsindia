@@ -51,6 +51,9 @@ export async function generateMetadata(
   const image = realImages(b.images)[0]?.url ?? coverFor(b);
   return {
     title, description, alternates: { canonical: url },
+    // Thin pages stay live for visitors but aren't offered to Google (same rule
+    // decides who's in sitemap.xml); links on them are still followed.
+    ...(b.indexable === false ? { robots: { index: false, follow: true } } : {}),
     openGraph: { title, description, url, siteName: 'LocalsIndia', images: [{ url: image, alt: b.name }] },
     twitter: { card: 'summary_large_image', title, description, images: [image] },
   };
