@@ -131,7 +131,7 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 
 ### 2026-10-05 — Thin business pages noindexed; sitemap lists strong ones only
 - Raj: "it's not indexing". Live check found no technical blocker (robots, redirects, canonicals, 200s all fine) → cause is Google skipping ~35k thin, widely duplicated OSM pages on a new domain.
-- New rule `Business.indexable` (hybrid property, Python + SQL in `app/models/business.py`): indexable if claimed / reviewed / description / real photo / not OSM-imported, OR 2+ of phone, opening hours, website. 5-city sample: ~20% pass → expect ~7k business URLs in sitemap.xml (was 35k). Thin pages stay live but get `noindex, follow` (`indexable` in `BusinessOut`; frontend treats a missing field as indexable). IndexNow follows the sitemap automatically.
+- New rule `Business.indexable` (hybrid property, Python + SQL in `app/models/business.py`): indexable if claimed / reviewed / description / real photo / not OSM-imported, OR 2+ of phone, opening hours, website. Live after deploy: 3,950 business URLs in sitemap.xml (was 35,304; small cities are thinner than the 5-city sample suggested); API flag and sitemap verified to agree per city. Thin pages stay live but get `noindex, follow` (`indexable` in `BusinessOut`; frontend treats a missing field as indexable). IndexNow follows the sitemap automatically.
 - Test: `tests/test_business_indexable.py` (page flag and sitemap agree). Next: watch GSC indexed count over 2–4 weeks; a page becomes indexable automatically when an owner claims it / adds hours etc.
 
 ### 2026-09-29 → 10-01 — SESSION SUMMARY + open items (start here next session)
