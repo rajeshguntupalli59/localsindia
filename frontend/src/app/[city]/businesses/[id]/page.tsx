@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import type { Business } from '@/lib/types';
 import BusinessDetailClient from './BusinessDetailClient';
 import { SEO_CATEGORIES, SEO_PAGE_FOR_BUSINESS_CATEGORY } from '@/lib/seoCategories';
@@ -22,12 +23,16 @@ const CATEGORY_LABEL: Record<string, string> = {
 };
 
 async function fetchBusiness(id: string): Promise<Business | null> {
+  let res: Response;
   try {
-    const res = await fetch(`${API_BASE}/api/v1/businesses/${id}`, { next: { revalidate: 3600 } });
-    return res.ok ? await res.json() : null;
+    res = await fetch(`${API_BASE}/api/v1/businesses/${id}`, { next: { revalidate: 3600 } });
   } catch {
     return null;
   }
+  // Removed/unpublished business → real 404; otherwise the client bounced to the
+  // city list and Google logged it as "Page with redirect"
+  if (res.status === 404) notFound();
+  return res.ok ? await res.json() : null;
 }
 
 function cityName(slug: string) {
