@@ -13,6 +13,7 @@ the real URL until it's live rather than guessing a sleep duration.
 Usage:
   python agents/share_blog_post.py --publish
   python agents/share_blog_post.py                 # dry run: prints what would be posted
+  python agents/share_blog_post.py --post bengaluru/<slug> --publish   # re-share a specific post
 
 Requires (env vars, only needed with --publish):
   META_PAGE_ID, META_PAGE_ACCESS_TOKEN
@@ -35,6 +36,13 @@ from meta_client import post_to_facebook_link
 BLOG_CONTENT_DIR = Path(__file__).parent.parent / "frontend" / "src" / "content" / "blog"
 LOG_PATH = Path(__file__).parent / "output" / "social_posts_log.jsonl"
 SITE_BASE = "https://www.localsindia.com"
+
+
+def find_post(city_slug: str) -> dict:
+    path = BLOG_CONTENT_DIR / f"{city_slug}.json"
+    if not path.exists():
+        raise SystemExit(f"No blog post at {path}")
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
 def find_latest_post() -> dict:
@@ -67,8 +75,8 @@ def log_post(entry: dict) -> None:
         f.write(json.dumps(entry) + "\n")
 
 
-def run(publish: bool) -> None:
-    post = find_latest_post()
+def run(publish: bool, post_path: str | None = None) -> None:
+    post = find_post(post_path) if post_path else find_latest_post()
     url = f"{SITE_BASE}/blog/{post['citySlug']}/{post['slug']}"
     message = f"{post['title']}\n\n{post['metaDescription']}"
 
@@ -102,13 +110,14 @@ def run(publish: bool) -> None:
 def main():
     parser = argparse.ArgumentParser(description="Share the latest generated blog post to Facebook")
     parser.add_argument("--publish", action="store_true", help="Actually post live (default: dry run)")
+    parser.add_argument("--post", help='Share this post instead of the newest, e.g. "bengaluru/<slug>" (manual retry)')
     parser.add_argument("--env-file", default=".env")
     args = parser.parse_args()
 
     env_path = Path(args.env_file)
     load_dotenv(env_path if env_path.exists() else None)
 
-    run(args.publish)
+    run(args.publish, args.post)
 
 
 if __name__ == "__main__":
