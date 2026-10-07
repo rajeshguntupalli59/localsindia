@@ -134,6 +134,7 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 - 5xx (230, crawled Jul–Sep): 22 of 23 re-tested return 200 now (the 23rd is the tirupur→tiruppur redirect) → transient backend errors; just Validate Fix. Alternate-canonical (85) = `/{city}/businesses?category=` → intended.
 - Fixed: `/listing/{id}` for a deleted/expired listing returned 200 "Listing not found" → now real 404 (`notFound()` on API 404). Old client-only `/{city}/classifieds/{uuid}` → 308 to `/listing/{id}` (next.config). robots.txt disallows `/*/events/post`, `/*/classifieds/post`, `/post$`. Next: Validate Fix on Duplicate + 5xx + Soft 404 in GSC.
 - "Page with redirect" (1,055): old classifieds URLs (expected) + removed businesses — `/{city}/businesses/{id}` returned 200 then the client bounced to the city list. Now `notFound()` on API 404 → not-found page + noindex (still HTTP 200 because `[city]/loading.tsx` streams first; acceptable). Validate Fix clicked on Duplicate, 5xx, Page with redirect (2026-10-07).
+- Bing (10-07): 488 indexed, 0 errors; sitemaps still at the 9/29 36.2K version → both resubmitted. Bing "identical titles" (7 pages) → `/auth/*` + `/profile/*` now `noindex, follow` via route layouts (search pages already were).
 
 ### 2026-10-05 — Thin business pages noindexed; sitemap lists strong ones only
 - Raj: "it's not indexing". Live check found no technical blocker (robots, redirects, canonicals, 200s all fine) → cause is Google skipping ~35k thin, widely duplicated OSM pages on a new domain.
