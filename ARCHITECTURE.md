@@ -888,6 +888,8 @@ Wraps all city pages. Provides:
 
 ### `/[city]/classifieds/[id]` — Listing Detail
 
+> **2026-10-07: retired.** `next.config.mjs` 308-redirects `/:city/classifieds/:uuid` → `/listing/:id` (it was a client-only duplicate with no canonical; Google flagged it). Files below are unreachable; `/promote` and `/post` under this path still work.
+
 **Files:** `app/[city]/classifieds/[id]/page.tsx` + `ListingDetailClient.tsx`
 
 Shows one listing in full detail:
@@ -990,6 +992,7 @@ Yellow Pages style:
 **Files:** `app/[city]/businesses/[id]/page.tsx` + `BusinessDetailClient.tsx`
 
 - Photo gallery (added 2026-07-22): cover photo + thumbnail grid, shown only if `business.images` is non-empty
+- 2026-10-07: API 404 → `notFound()` (not-found page + noindex) instead of the client bouncing to `/{city}/businesses` (Google logged that as "Page with redirect"). Still HTTP 200 because `[city]/loading.tsx` streams first.
 - Business details: name, address, phone, website, WhatsApp
 - Star rating display (average + total count)
 - Review list (sorted newest first)
@@ -1019,7 +1022,7 @@ Form to add a new business listing: name, category, description, address, phone,
 
 ### `/[city]/events` — Events Calendar
 
-**File:** `app/[city]/events/page.tsx`
+**File:** `app/[city]/events/page.tsx` (client) + `layout.tsx` (2026-10-07: server metadata — "Events in {City}" title, canonical, `noindex` while the city has 0 events, same rule as `sitemap.ts`)
 
 - Calendar-style month header
 - Event cards sorted by event_date ascending (upcoming first)
@@ -1206,6 +1209,8 @@ Displays listings the user has bookmarked locally. No backend — purely localSt
 **Files:** `app/listing/[id]/page.tsx` + `ListingDetailClient.tsx`
 
 A second listing-detail route that doesn't require a city in the URL — used by deep links (mobile app, shares, QR codes) where the city isn't known up front. Renders the same listing UI as `/[city]/classifieds/[id]` (gallery, price, WhatsApp CTA, reviews, category emoji fallback) but fetches purely by listing ID.
+
+2026-10-07: API 404 (deleted/expired listing) → `notFound()`, a real HTTP 404 (was a 200 "Listing not found" page — GSC duplicate/soft-404). This is now the only listing-detail route.
 
 ---
 
@@ -1791,10 +1796,13 @@ Side services (called from backend):
 | `app/[city]/businesses/[id]/BusinessDetailClient.tsx` | Business detail UI with state |
 | `app/[city]/businesses/add/page.tsx` | Add business form |
 | `app/[city]/events/page.tsx` | Events calendar |
+| `app/[city]/events/layout.tsx` | Events metadata; noindex when city has 0 events |
 | `app/[city]/events/post/page.tsx` | Post event form |
 | `app/[city]/launch/page.tsx` | City launch celebration |
+| `app/auth/layout.tsx` | `noindex, follow` for all /auth pages |
 | `app/auth/login/page.tsx` | Phone OTP + Google OAuth login |
 | `app/auth/callback/page.tsx` | Google OAuth redirect handler |
+| `app/profile/layout.tsx` | `noindex, follow` for all /profile pages |
 | `app/profile/page.tsx` | User settings (name, language, city) |
 | `app/profile/listings/page.tsx` | My listings management |
 | `app/profile/listings/[id]/page.tsx` | Listing stub (static export segment coverage) |
