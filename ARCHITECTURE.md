@@ -1214,6 +1214,16 @@ A second listing-detail route that doesn't require a city in the URL — used by
 
 ---
 
+### `/blog`, `/blog/[city]`, `/blog/[city]/[slug]` — Blog
+
+**Files:** `app/blog/page.tsx`, `app/blog/[city]/page.tsx`, `app/blog/[city]/[slug]/page.tsx`, `components/blog-article/BlogArticleBody.tsx`, `components/blog-article/ReelEmbed.tsx`, `lib/blog.ts`
+
+- Posts are JSON files in `src/content/blog/<city>/<slug>.json`, written by `agents/blog_agent.py` (weekly `blog-publisher.yml`); unserved-city posts live in `content/blog-archive/` and their URLs 308 to `/blog`.
+- Article JSON-LD: Article, FAQPage, BreadcrumbList, plus **VideoObject** when the post has a `video` block (2026-10-07).
+- `video` (optional): one of our Instagram reels on the same topic, attached by `agents/attach_reel_to_blog.py`; `ReelEmbed` shows it after the intro via Instagram's `/reel/<code>/embed/` iframe (no third-party script, fixed 640px height so nothing shifts). Thumbnail is a Cloudinary copy (IG thumbnail URLs expire).
+
+---
+
 ### `/category/[slug]` — Global Category Redirect
 
 **File:** `app/category/[slug]/page.tsx`
@@ -1797,6 +1807,8 @@ Side services (called from backend):
 | `app/[city]/businesses/add/page.tsx` | Add business form |
 | `app/[city]/events/page.tsx` | Events calendar |
 | `app/[city]/events/layout.tsx` | Events metadata; noindex when city has 0 events |
+| `app/blog/[city]/[slug]/page.tsx` | Blog article (Article/FAQ/Breadcrumb/VideoObject JSON-LD) |
+| `components/blog-article/ReelEmbed.tsx` | Embedded Instagram reel on a blog article |
 | `app/[city]/events/post/page.tsx` | Post event form |
 | `app/[city]/launch/page.tsx` | City launch celebration |
 | `app/auth/layout.tsx` | `noindex, follow` for all /auth pages |

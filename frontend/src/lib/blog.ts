@@ -23,6 +23,16 @@ export interface BlogPost {
   // businesses from the directory (the LLM never writes these entries)
   kind?: 'guide' | 'directory';
   businesses?: { id: string; name: string; address: string | null; phone: string | null; source?: string | null }[];
+  // One of our own Instagram reels on the same topic (agents/attach_reel_to_blog.py)
+  video?: {
+    platform: 'instagram';
+    url: string;
+    shortcode: string;
+    title: string;
+    description: string;
+    thumbnailUrl: string;
+    uploadDate: string;
+  };
 }
 
 export function listCitySlugs(): string[] {

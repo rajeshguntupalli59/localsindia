@@ -78,6 +78,7 @@
 | 11-language i18n | §15 | `i18n/request.ts` | `messages/*.json`, `components/language-selector/` | — | — (client-side only) |
 | PWA / offline | §9-ServiceWorker | — | `components/pwa/ServiceWorker.tsx`, `app/offline/page.tsx` | — | — |
 | Hybrid SSR (Azure SWA) | §7, §16 | — | `next.config.mjs`, `staticwebapp.config.json` | — | — |
+| Blog + reel embeds (reels 2026-10-07) | §8 (Blog) | `agents/blog_agent.py`, `agents/share_blog_post.py`, `agents/attach_reel_to_blog.py`, `agents/crosspost_ig_reels.py` | `blog/[city]/[slug]/page.tsx`, `components/blog-article/BlogArticleBody.tsx` + `ReelEmbed.tsx`, `lib/blog.ts`, `content/blog/` | — | — (static JSON) |
 | Search-engine indexing hygiene (2026-10-07) | §8 | — | `public/robots.txt` (disallows post forms), `next.config.mjs` (old classifieds → /listing 308), `notFound()` in `listing/[id]` + `[city]/businesses/[id]`, noindex layouts: `auth/`, `profile/`, `[city]/search/`, `[city]/events/` (0 events), `sitemap.ts` | — | — |
 | Auto-deploy CI/CD + PR staging | §16 | `.github/workflows/backend-azure.yml` | `.github/workflows/frontend-azure.yml` | — | — |
 | City seeding | §18-Scripts | `scripts/seed_cities.py`, `scripts/seed_categories.py` | — | `cities`, `categories` | — |

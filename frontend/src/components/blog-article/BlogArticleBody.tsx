@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { MapPin, Phone } from 'lucide-react';
 import type { BlogPost } from '@/lib/blog';
 import OsmAttribution from '@/components/osm-attribution/OsmAttribution';
+import ReelEmbed from './ReelEmbed';
 
 export default function BlogArticleBody({ post }: { post: BlogPost }) {
   return (
@@ -9,6 +10,8 @@ export default function BlogArticleBody({ post }: { post: BlogPost }) {
       <p className="text-base leading-relaxed mb-8" style={{ color: 'var(--li-text)' }}>
         {post.intro}
       </p>
+
+      {post.video && <ReelEmbed video={post.video} />}
 
       {post.businesses && post.businesses.length > 0 && (
         <div className="mb-10">

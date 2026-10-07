@@ -65,6 +65,17 @@ export default function BlogArticlePage({
     })),
   } : null;
 
+  const videoLd = post.video ? {
+    '@context': 'https://schema.org',
+    '@type': 'VideoObject',
+    name: post.video.title,
+    description: post.video.description,
+    thumbnailUrl: post.video.thumbnailUrl,
+    uploadDate: post.video.uploadDate,
+    embedUrl: `https://www.instagram.com/reel/${post.video.shortcode}/embed/`,
+    publisher: { '@type': 'Organization', name: 'LocalsIndia' },
+  } : null;
+
   const breadcrumbLd = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
@@ -80,6 +91,7 @@ export default function BlogArticlePage({
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(articleLd) }} />
       {faqLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(faqLd) }} />}
+      {videoLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(videoLd) }} />}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbLd) }} />
 
       <div style={{ background: 'var(--li-page-bg)', minHeight: '100vh' }}>

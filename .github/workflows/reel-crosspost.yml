@@ -1,0 +1,53 @@
+name: Reel Crosspost
+
+on:
+  schedule:
+    # 11:30 UTC = 5:00 PM IST daily — copies up to 2 Instagram reels to the
+    # Facebook Page (Raj posts reels on Instagram only; see crosspost_ig_reels.py)
+    - cron: '30 11 * * *'
+  workflow_dispatch:
+    inputs:
+      max:
+        description: 'Max reels to copy this run'
+        required: false
+        default: '2'
+
+permissions:
+  contents: write   # commits the posting log (tracks which reels are already on Facebook)
+
+jobs:
+  crosspost:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Python dependencies
+        run: pip install -r agents/requirements.txt
+
+      - name: Copy new Instagram reels to Facebook
+        env:
+          META_PAGE_ID: ${{ secrets.META_PAGE_ID }}
+          META_PAGE_ACCESS_TOKEN: ${{ secrets.META_PAGE_ACCESS_TOKEN }}
+          META_IG_BUSINESS_ID: ${{ secrets.META_IG_BUSINESS_ID }}
+          META_IG_ACCESS_TOKEN: ${{ secrets.META_IG_ACCESS_TOKEN }}
+        run: python agents/crosspost_ig_reels.py --publish --max "${{ github.event.inputs.max || '2' }}"
+
+      # The log is the "already posted" record — without committing it,
+      # tomorrow's run would post the same reels again.
+      - name: Commit posting log
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add agents/output/social_posts_log.jsonl
+          if git diff --cached --quiet; then
+            echo "No new cross-posts to log"
+            exit 0
+          fi
+          git commit -m "chore: log Instagram reel cross-posts to Facebook"
+          git pull --rebase origin master
+          git push
