@@ -1,8 +1,7 @@
 {
-  "lastTopicIndex": 5,
+  "lastTopicIndex": 0,
   "lastTipCategoryIndex": 0,
   "topicHistory": [
-    "category_tip",
     "area_directory",
     "safety_tip",
     "area_directory",
@@ -11,7 +10,8 @@
     "referral",
     "area_directory",
     "seller_call",
-    "area_directory"
+    "area_directory",
+    "app_feature"
   ],
   "tipCategoryHistory": [
     "pg-roommate",
@@ -25,9 +25,8 @@
     "fashion",
     "classifieds"
   ],
-  "lastStyleIndex": 2,
+  "lastStyleIndex": 3,
   "styleHistory": [
-    "quote",
     "spotlight",
     "glass",
     "bold",
@@ -36,7 +35,8 @@
     "spotlight",
     "glass",
     "bold",
-    "duotone"
+    "duotone",
+    "quote"
   ],
   "lastAreaCityIndex": 4,
   "areaPosted": [
