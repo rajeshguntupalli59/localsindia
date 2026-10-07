@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import type { Listing } from '@/lib/types';
 import ListingDetailClient from './ListingDetailClient';
 import { listingIdFromParam, listingPath, realImages } from '@/lib/utils';
@@ -7,13 +8,16 @@ import { serializeJsonLd } from '@/lib/jsonLd';
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend-in.azurewebsites.net';
 
 async function fetchListing(id: string): Promise<Listing | null> {
+  let res: Response;
   try {
-    const res = await fetch(`${API_BASE}/api/v1/listings/${id}`, { next: { revalidate: 300 } });
-    if (!res.ok) return null;
-    return await res.json();
+    res = await fetch(`${API_BASE}/api/v1/listings/${id}`, { next: { revalidate: 300 } });
   } catch {
     return null;
   }
+  // Deleted/expired listing → real 404, not a 200 "not found" page Google flags as duplicate/soft-404
+  if (res.status === 404) notFound();
+  if (!res.ok) return null;
+  return await res.json();
 }
 
 function truncate(text: string, max: number): string {

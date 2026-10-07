@@ -1,5 +1,9 @@
 User-agent: *
 Allow: /
+# Form pages — no indexable content
+Disallow: /*/events/post
+Disallow: /*/classifieds/post
+Disallow: /post$
 
 Sitemap: https://www.localsindia.com/sitemap.xml
 Sitemap: https://www.localsindia.com/sitemap-areas.xml

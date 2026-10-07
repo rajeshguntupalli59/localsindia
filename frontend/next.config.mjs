@@ -22,6 +22,12 @@ const nextConfig = {
       { source: '/tirupur', destination: '/tiruppur', permanent: true },
       { source: '/tirupur/:path*', destination: '/tiruppur/:path*', permanent: true },
       // Blog posts moved from the wrong 'bangalore' slug to the real city (2026-09-25)
+      // Old client-rendered listing route duplicated /listing/{id} (no canonical) — Google flagged it as duplicate
+      {
+        source: '/:city/classifieds/:id([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})',
+        destination: '/listing/:id',
+        permanent: true,
+      },
       { source: '/blog/bangalore', destination: '/blog/bengaluru', permanent: true },
       { source: '/blog/bangalore/:path*', destination: '/blog/bengaluru/:path*', permanent: true },
       // Posts about cities LocalsIndia doesn't serve were unpublished (kept in

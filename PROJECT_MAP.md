@@ -129,6 +129,11 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 - Raj: "listings not popping up when I open the city". The page worked (no errors, ~1 s server time; one 5.8 s cold start) but its top was only category buttons with counts. `CityExplore` now shows a server-rendered "Popular in <city>" list of 6 real businesses (reuses `BusinessList` and the business sample `generateMetadata` already fetches) above the categories. Commit 63c191d.
 - Mobile app: its home already has the equivalent "Popular in <city>" row (since v1.1.0); phones still on the older version (staged rollout) won't show it until they update.
 
+### 2026-10-07 — GSC indexing-report fixes (duplicates / soft 404)
+- GSC breakdown (www property): 7.98K indexed; not indexed: 33.6K discovered, 1,345 soft 404, 1,305 noindex, 1,055 redirect, 265 duplicate w/o canonical, 230 5xx, 212 404, 85 alternate-canonical.
+- 5xx (230, crawled Jul–Sep): 22 of 23 re-tested return 200 now (the 23rd is the tirupur→tiruppur redirect) → transient backend errors; just Validate Fix. Alternate-canonical (85) = `/{city}/businesses?category=` → intended.
+- Fixed: `/listing/{id}` for a deleted/expired listing returned 200 "Listing not found" → now real 404 (`notFound()` on API 404). Old client-only `/{city}/classifieds/{uuid}` → 308 to `/listing/{id}` (next.config). robots.txt disallows `/*/events/post`, `/*/classifieds/post`, `/post$`. Next: Validate Fix on Duplicate + 5xx + Soft 404 in GSC.
+
 ### 2026-10-05 — Thin business pages noindexed; sitemap lists strong ones only
 - Raj: "it's not indexing". Live check found no technical blocker (robots, redirects, canonicals, 200s all fine) → cause is Google skipping ~35k thin, widely duplicated OSM pages on a new domain.
 - New rule `Business.indexable` (hybrid property, Python + SQL in `app/models/business.py`): indexable if claimed / reviewed / description / real photo / not OSM-imported, OR 2+ of phone, opening hours, website. Live after deploy: 3,950 business URLs in sitemap.xml (was 35,304; small cities are thinner than the 5-city sample suggested); API flag and sitemap verified to agree per city. Thin pages stay live but get `noindex, follow` (`indexable` in `BusinessOut`; frontend treats a missing field as indexable). IndexNow follows the sitemap automatically.
