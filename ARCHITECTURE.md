@@ -1654,7 +1654,7 @@ Since there's no server (static export), locale preference is stored in localSto
 
 ### Fonts
 
-4 font families loaded via `next/font/google` (self-hosted -- no FOUT):
+4 variable font files committed in `src/app/fonts/` (from `@fontsource-variable`), loaded via `next/font/local` in `app/layout.tsx`. **Since 2026-10-07** — `next/font/google` downloaded them from Google at build time and a flaky response failed production deploys (3x on 10-04/10-07). To update a font, replace the `.woff2` file:
 - `Plus Jakarta Sans` -- Latin display font (headings, UI)
 - `Noto Sans` -- Latin body text
 - `Noto Sans Devanagari` -- Hindi, Marathi

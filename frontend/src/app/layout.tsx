@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Plus_Jakarta_Sans, Noto_Sans, Noto_Sans_Devanagari, Noto_Sans_Telugu } from 'next/font/google';
+import localFont from 'next/font/local';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
 import { Toaster } from '@/components/ui/sonner';
@@ -17,32 +17,35 @@ import { serializeJsonLd } from '@/lib/jsonLd';
 
 const ADSENSE_PUB_ID = process.env.NEXT_PUBLIC_ADSENSE_PUB_ID ?? '';
 
-const plusJakarta = Plus_Jakarta_Sans({
-  subsets: ['latin'],
+// Self-hosted variable fonts (from @fontsource-variable, in ./fonts) instead of
+// next/font/google: that downloaded from Google at build time and a flaky
+// response failed production deploys ("An error occurred in `next/font`").
+const plusJakarta = localFont({
+  src: './fonts/plus-jakarta-sans-latin-wght-normal.woff2',
   variable: '--font-jakarta',
-  weight: ['400', '500', '600', '700', '800'],
+  weight: '200 800',
   display: 'swap',
 });
 
-const notoSans = Noto_Sans({
-  subsets: ['latin'],
+const notoSans = localFont({
+  src: './fonts/noto-sans-latin-wght-normal.woff2',
   variable: '--font-sans',
-  weight: ['400', '600', '700'],
+  weight: '100 900',
   display: 'swap',
 });
 
-const notoDevanagari = Noto_Sans_Devanagari({
-  subsets: ['devanagari'],
+const notoDevanagari = localFont({
+  src: './fonts/noto-sans-devanagari-devanagari-wght-normal.woff2',
   variable: '--font-devanagari',
-  weight: ['400', '600', '700'],
+  weight: '100 900',
   display: 'swap',
   preload: false,   // ~120 KB; loaded only on pages that show Hindi text
 });
 
-const notoTelugu = Noto_Sans_Telugu({
-  subsets: ['telugu'],
+const notoTelugu = localFont({
+  src: './fonts/noto-sans-telugu-telugu-wght-normal.woff2',
   variable: '--font-telugu',
-  weight: ['400', '600', '700'],
+  weight: '100 900',
   display: 'swap',
   preload: false,   // ~120 KB; loaded only on pages that show Telugu text
 });
