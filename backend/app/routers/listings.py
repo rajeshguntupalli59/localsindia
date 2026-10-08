@@ -1,4 +1,5 @@
 from typing import Literal
+import math
 import uuid
 from datetime import datetime, timezone, timedelta, date as date_type
 
@@ -56,6 +57,8 @@ def _answer_filters(stmt, category_slug: str, subcategory_slug: str | None, para
                 try:
                     bound = float(raw)
                 except ValueError:
+                    bound = float("nan")
+                if not math.isfinite(bound):
                     raise HTTPException(status_code=422, detail=f"f_{key}{suffix} must be a number.")
                 col = cast(Listing.attributes[key].astext, Float)
                 stmt = stmt.where(col >= bound if suffix == "_min" else col <= bound)

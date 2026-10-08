@@ -19,6 +19,8 @@ Rules:
   (select/multiselect/switch = exact match, number = min/max range).
 """
 
+import math
+
 YEAR_NOW = 2026
 
 # Keep it short and tappable: each subcategory asks only what buyers decide
@@ -732,6 +734,8 @@ def validate_answers(category_slug: str | None, subcategory_slug: str | None, an
             try:
                 num = float(v)
             except (TypeError, ValueError):
+                raise AnswerError(f"'{qq['label']}' must be a number.")
+            if not math.isfinite(num):  # "nan" passes every range check, then breaks the JSONB save
                 raise AnswerError(f"'{qq['label']}' must be a number.")
             if "min" in qq and num < qq["min"] or "max" in qq and num > qq["max"]:
                 raise AnswerError(f"'{qq['label']}' must be between {qq.get('min')} and {qq.get('max')}.")

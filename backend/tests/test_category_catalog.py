@@ -118,6 +118,9 @@ def test_validate_answers_rules():
         cc.validate_answers("vehicles", None, {"fuel_type": "Kerosene"})
     with pytest.raises(cc.AnswerError, match="between"):
         cc.validate_answers("vehicles", None, {"year": 3000})
+    for bad in ("nan", "inf", "-Infinity"):
+        with pytest.raises(cc.AnswerError, match="number|between"):
+            cc.validate_answers("vehicles", None, {"km_driven": bad})
     with pytest.raises(cc.AnswerError, match="Unknown"):
         cc.validate_answers("vehicles", None, {"bhk": 2})
     with pytest.raises(cc.AnswerError, match="Min Salary"):
@@ -249,8 +252,9 @@ async def test_listing_answer_filters(auth_client, db, city):
     assert await titles(f_bhk_min="3", f_bhk_max="3") == [3]
     assert await titles(f_tenant_preference="Family") == [2]
     assert await titles(f_furnishing="Not-an-option") == [2, 3, 4]  # ignored, not an error
-    bad = await ac.get("/api/v1/cities/hyderabad/listings", params={"category_slug": "real-estate", "f_bhk_min": "two"})
-    assert bad.status_code == 422
+    for junk in ("two", "nan"):
+        bad = await ac.get("/api/v1/cities/hyderabad/listings", params={"category_slug": "real-estate", "f_bhk_min": junk})
+        assert bad.status_code == 422
 
 
 @pytest.mark.asyncio
