@@ -341,3 +341,16 @@ async def test_import_and_backfill_subcategories(admin_client, client, db, city)
     assert filled.json() == {"updated": 1, "skipped": 2}
     assert await subs() == {"Care": "hospitals", "Mismatch": None, "Plain": "pharmacies"}
     assert (await client.post("/api/v1/admin/businesses/import/subcategories", json={"items": []})).status_code in (401, 403)
+
+
+@pytest.mark.asyncio
+async def test_sitemap_counts_include_subcategories(client, db, city):
+    from app.models.business import Business
+    doctors = await _cat(db, "doctors", "Doctors")
+    tag = uuid.uuid4().hex[:6]
+    before = (await client.get("/api/v1/businesses/sitemap-counts")).json()["cities"]["hyderabad"]["subcategories"].get("dentists", 0)
+    for i in range(2):
+        db.add(Business(name=f"Smile Dental {tag}{i}", city_id=city.id, category_id=doctors.id, subcategory_slug="dentists"))
+    await db.commit()
+    after = (await client.get("/api/v1/businesses/sitemap-counts")).json()["cities"]["hyderabad"]["subcategories"]
+    assert after["dentists"] == before + 2

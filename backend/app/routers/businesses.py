@@ -232,14 +232,15 @@ async def business_locality_pages(
 @router.get("/businesses/sitemap-counts")
 async def business_sitemap_counts(db: AsyncSession = Depends(get_db)):
     """Per active city: live businesses and active listings by category slug,
-    plus upcoming events — one call, so sitemap.xml lists only city/category
-    pages that pass the same "has real content" rules the pages use for noindex.
+    live businesses by subcategory slug, plus upcoming events — one call, so
+    sitemap.xml lists only city/category and city/type pages that pass the same
+    "has real content" rules the pages use for noindex.
     Also every active classified listing page (id, title, updated_at)."""
     from app.models.event import Event
     from app.models.listing import Listing
 
     out: dict[str, dict] = {
-        slug: {"businesses": {}, "listings": {}, "events": 0}
+        slug: {"businesses": {}, "subcategories": {}, "listings": {}, "events": 0}
         for (slug,) in (await db.execute(select(City.slug).where(City.active == True))).all()
     }
     biz = await db.execute(
@@ -251,6 +252,14 @@ async def business_sitemap_counts(db: AsyncSession = Depends(get_db)):
     )
     for city_slug, cat, n in biz.all():
         out[city_slug]["businesses"][cat] = n
+    subs = await db.execute(
+        select(City.slug, Business.subcategory_slug, func.count(Business.id))
+        .join(City, City.id == Business.city_id)
+        .where(Business.deleted_at.is_(None), City.active == True, Business.subcategory_slug.is_not(None))
+        .group_by(City.slug, Business.subcategory_slug)
+    )
+    for city_slug, sub, n in subs.all():
+        out[city_slug]["subcategories"][sub] = n
     lst = await db.execute(
         select(City.slug, Category.slug, func.count(Listing.id))
         .join(City, City.id == Listing.city_id)

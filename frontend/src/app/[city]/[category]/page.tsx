@@ -10,6 +10,8 @@ import SiteFooter from '@/components/site-footer/SiteFooter';
 import type { Business, City, Listing, Locality } from '@/lib/types';
 import BusinessList, { ChipLinks } from '@/components/business-list/BusinessList';
 import { serializeJsonLd } from '@/lib/jsonLd';
+import { fetchCatalog, findType, MIN_TYPE_BUSINESSES } from '@/lib/typePages';
+import TypePage, { typeMetadata } from './TypePage';
 
 // Named routes that take priority — this page must never match these
 const RESERVED = new Set([
@@ -78,6 +80,11 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const meta = SEO_CATEGORIES[params.category];
   const city = (await fetchCities()).find(c => c.slug === params.city);
+  if (!meta && city) {
+    // Not a category — maybe a type page, e.g. /hyderabad/dentists
+    const type = findType(await fetchCatalog(), params.category);
+    if (type) return typeMetadata(city, type);
+  }
   if (!meta || !city) return { title: 'LocalsIndia' };
   const [listings, businesses, total] = await Promise.all([
     fetchListings(params.city, meta), fetchBusinesses(params.city, meta.businessSlug),
@@ -108,17 +115,30 @@ export default async function SeoCategoryPage({
 }) {
   if (RESERVED.has(params.category)) notFound();
   const meta = SEO_CATEGORIES[params.category];
-  if (!meta) notFound();
 
   const cities = await fetchCities();
   const city = cities.find(c => c.slug === params.city);
   if (!city) notFound();   // only cities LocalsIndia actually serves
 
-  const [{ items: listings, exact }, businesses, businessTotal, localities] = await Promise.all([
+  if (!meta) {
+    // Not a category — maybe a type page, e.g. /hyderabad/dentists
+    const type = findType(await fetchCatalog(), params.category);
+    if (!type) notFound();
+    return <TypePage city={city} type={type} />;
+  }
+
+  const [{ items: listings, exact }, businesses, businessTotal, localities, typeCounts, catalog] = await Promise.all([
     fetchListings(params.city, meta), fetchBusinesses(params.city, meta.businessSlug),
     fetchBusinessCount(params.city, meta.businessSlug),
     getJson<Locality[]>(`${API_BASE}/api/v1/businesses/localities?city_slug=${params.city}&category_slug=${meta.businessSlug}`, []),
+    getJson<Record<string, number>>(`${API_BASE}/api/v1/businesses/subcategory-counts?city_slug=${params.city}&category_slug=${meta.businessSlug}`, {}),
+    fetchCatalog(),
   ]);
+  // Type pages worth linking (the same 3+ bar that makes them indexable)
+  const typeLinks = (catalog.find(c => c.slug === meta.businessSlug)?.subcategories ?? [])
+    .map(s => ({ slug: s.slug, name: s.name, n: typeCounts[s.slug] ?? 0 }))
+    .filter(t => t.n >= MIN_TYPE_BUSINESSES && findType(catalog, t.slug))
+    .sort((a, b) => b.n - a.n);
   const covers = listingCovers(listings);
   const areas = localities.filter(l => l.count >= MIN_AREA_BUSINESSES).slice(0, 40);
   const sameState = cities.filter(c => c.state === city.state && c.slug !== city.slug).slice(0, 12);
@@ -212,6 +232,11 @@ export default async function SeoCategoryPage({
               <BusinessList businesses={businesses} citySlug={params.city} fallbackCategory={meta.businessSlug} />
             </section>
           )}
+
+          <ChipLinks
+            title={`${meta.title} by type in ${city.name}`}
+            links={typeLinks.map(t => ({ href: `/${params.city}/${t.slug}`, label: `${t.name} (${t.n.toLocaleString('en-IN')})` }))}
+          />
 
           <ChipLinks
             title={`${meta.title} by area in ${city.name}`}

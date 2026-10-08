@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { listAllPosts } from '@/lib/blog';
 import { SEO_CATEGORIES } from '@/lib/seoCategories';
+import { fetchCatalog, MIN_TYPE_BUSINESSES, typePageSlugs } from '@/lib/typePages';
 import { listingPath } from '@/lib/utils';
 
 const BASE = 'https://www.localsindia.com';
@@ -15,7 +16,12 @@ const CITY_MIN_BUSINESSES = 10;
 const CATEGORY_MIN_LISTINGS = 1;
 const CATEGORY_MIN_BUSINESSES = 3;
 
-type CityCounts = { businesses: Record<string, number>; listings: Record<string, number>; events: number };
+type CityCounts = {
+  businesses: Record<string, number>;
+  subcategories?: Record<string, number>;   // businesses per type, for /{city}/{type} pages
+  listings: Record<string, number>;
+  events: number;
+};
 type SitemapCounts = {
   cities: Record<string, CityCounts>;
   listings: { id: string; title: string; updated_at: string }[];
@@ -40,6 +46,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const res = await fetch(`${API_BASE}/api/v1/businesses/sitemap-counts`, { next: { revalidate: 86400 } });
     if (res.ok) {
       const data: SitemapCounts = await res.json();
+      const typeSlugs = typePageSlugs(await fetchCatalog());
       for (const [slug, c] of Object.entries(data.cities)) {
         const totalBiz = sum(c.businesses);
         if (sum(c.listings) >= CITY_MIN_LISTINGS || totalBiz >= CITY_MIN_BUSINESSES) {
@@ -56,6 +63,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           const listings = meta.categorySlug ? c.listings[meta.categorySlug] ?? 0 : 0;
           if (listings >= CATEGORY_MIN_LISTINGS || (c.businesses[meta.businessSlug] ?? 0) >= CATEGORY_MIN_BUSINESSES) {
             cityRoutes.push({ url: `${BASE}/${slug}/${key}`, changeFrequency: 'weekly', priority: 0.7 });
+          }
+        }
+        // Type pages ("dentists in Hyderabad") — same 3+ business bar as the page's noindex rule
+        for (const [type, n] of Object.entries(c.subcategories ?? {})) {
+          if (n >= MIN_TYPE_BUSINESSES && typeSlugs.has(type)) {
+            cityRoutes.push({ url: `${BASE}/${slug}/${type}`, changeFrequency: 'weekly', priority: 0.6 });
           }
         }
       }
