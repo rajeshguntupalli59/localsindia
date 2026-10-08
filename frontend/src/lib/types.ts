@@ -314,6 +314,8 @@ export interface OutreachItem {
   city_slug: string;
   city_name: string;
   category_name: string | null;
+  subcategory_slug: string | null; // e.g. 'dentists' — the message links /{city}/{type}
+  subcategory_name: string | null;
   last_outcome: string | null;
   last_note: string | null;
   last_contacted_at: string | null;

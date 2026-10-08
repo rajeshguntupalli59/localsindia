@@ -83,6 +83,26 @@ export default function BlogArticleBody({ post }: { post: BlogPost }) {
         </div>
       )}
 
+      {post.relatedLinks && post.relatedLinks.length > 0 && (
+        <div className="mt-10">
+          <h2 className="text-lg font-bold mb-3" style={{ color: 'var(--li-text)' }}>
+            Browse by type in {post.city}
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {post.relatedLinks.map(l => (
+              <Link
+                key={l.href}
+                href={l.href}
+                className="text-sm px-3 py-1.5 rounded-full border transition-colors hover:border-orange-400 hover:text-orange-500"
+                style={{ borderColor: 'var(--li-border)', color: 'var(--li-text)' }}
+              >
+                {l.text}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div
         className="mt-10 p-6 rounded-3xl border text-center"
         style={{ background: 'var(--li-card-bg)', borderColor: 'var(--li-border)' }}

@@ -201,5 +201,31 @@
     "href": "/bengaluru/doctors"
   },
   "publishedAt": "2026-10-04T09:10:43Z",
-  "wordCount": 611
+  "wordCount": 611,
+  "relatedLinks": [
+    {
+      "text": "Hospitals in Bengaluru (767)",
+      "href": "/bengaluru/hospitals"
+    },
+    {
+      "text": "Doctors & Clinics in Bengaluru (621)",
+      "href": "/bengaluru/doctors-clinics"
+    },
+    {
+      "text": "Pharmacies & Medical Shops in Bengaluru (240)",
+      "href": "/bengaluru/pharmacies"
+    },
+    {
+      "text": "Dentists in Bengaluru (172)",
+      "href": "/bengaluru/dentists"
+    },
+    {
+      "text": "Eye Care & Opticals in Bengaluru (30)",
+      "href": "/bengaluru/eye-care"
+    },
+    {
+      "text": "Diagnostics & Labs in Bengaluru (28)",
+      "href": "/bengaluru/diagnostics-labs"
+    }
+  ]
 }

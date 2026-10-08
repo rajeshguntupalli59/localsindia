@@ -40,13 +40,16 @@ from meta_client import (
     post_to_instagram_story,
 )
 
-TOPICS = ["app_feature", "category_tip", "safety_tip", "city_spotlight", "app_launch", "referral", "seller_call", "area_directory"]
+TOPICS = ["app_feature", "category_tip", "safety_tip", "city_spotlight", "app_launch", "referral", "seller_call",
+          "area_directory", "type_spotlight"]
 # app_launch is still selectable with --topic, but it's out of the automatic
 # rotation: 15 of the first 80 posts were "the app is live" and the audience
 # had already seen it.
-ROTATION_TOPICS = [t for t in TOPICS if t not in ("app_launch", "area_directory")]
-# area_directory alternates with the rest (every other post): it links to a
-# real neighbourhood page, e.g. "12 Doctors, Clinics & Pharmacies in Madhapur".
+ROTATION_TOPICS = [t for t in TOPICS if t not in ("app_launch", "area_directory", "type_spotlight")]
+# Every other post links a real page, taking turns: area_directory (a
+# neighbourhood page, e.g. "12 Doctors, Clinics & Pharmacies in Madhapur") and
+# type_spotlight (a city type page, e.g. "37 Dentists in Hyderabad").
+PAGE_TOPICS = ["area_directory", "type_spotlight"]
 # How many recent posts the model is shown so it doesn't repeat itself.
 RECENT_POSTS_SHOWN = 20
 SPOTLIGHT_CITIES = ["Hyderabad", "Bengaluru", "Chennai", "Kochi", "Vijayawada", "Coimbatore"]
@@ -79,6 +82,11 @@ AREA_CATEGORIES = {   # business category slug -> (page segment, label, hashtag)
     "real-estate": ("real-estate", "Real Estate Agents", "RealEstate"),
 }
 AREA_MIN_BUSINESSES = 5
+# type_spotlight: /{city}/{type} pages (frontend lib/typePages.ts), focused on
+# one city during a push. Same exclusions and 3+ bar as the pages themselves.
+TYPE_SPOTLIGHT_CITY = ("hyderabad", "Hyderabad")
+TYPE_MIN_BUSINESSES = 3
+NO_TYPE_PAGE = {"other-shops", "other-items", "other-services", "function-halls"}
 # category_tip has no default — without one, the model always falls back to
 # its "e.g. jobs" example in the instructions, so every category_tip post
 # ends up being the same fake-job-listing warning. Pick one explicitly.
@@ -130,9 +138,13 @@ def pick_next(items: list[str], last_index: int, history: list[str], window: int
 
 
 def pick_topic(state: dict) -> str:
-    if (state["topicHistory"] or [None])[-1] != "area_directory":
-        state["topicHistory"] = (state["topicHistory"] + ["area_directory"])[-10:]
-        return "area_directory"
+    history = state["topicHistory"] or [None]
+    if history[-1] not in PAGE_TOPICS:
+        # Page-post slot: alternate area_directory / type_spotlight
+        last_page = next((t for t in reversed(history) if t in PAGE_TOPICS), "type_spotlight")
+        topic = PAGE_TOPICS[(PAGE_TOPICS.index(last_page) + 1) % len(PAGE_TOPICS)]
+        state["topicHistory"] = (state["topicHistory"] + [topic])[-10:]
+        return topic
     topic, idx = pick_next(ROTATION_TOPICS, state["lastTopicIndex"], state["topicHistory"], window=3)
     state["lastTopicIndex"] = idx
     state["topicHistory"] = (state["topicHistory"] + [topic])[-10:]
@@ -215,9 +227,54 @@ def area_post(state: dict) -> dict:
     }
 
 
+def pick_type(state: dict) -> dict:
+    """Next type page in TYPE_SPOTLIGHT_CITY with 3+ real businesses that hasn't
+    been posted yet (resets once every type has had a turn)."""
+    city_slug, city_name = TYPE_SPOTLIGHT_CITY
+    posted = set(state.get("typePosted", []))
+    with httpx.Client(base_url=f"{BACKEND_URL}/api/v1", timeout=60) as api:
+        candidates = []
+        for cat in api.get("/categories/catalog").json():
+            counts = api.get("/businesses/subcategory-counts",
+                             params={"city_slug": city_slug, "category_slug": cat["slug"]}).json()
+            for sub in cat["subcategories"]:
+                n = counts.get(sub["slug"], 0)
+                if n >= TYPE_MIN_BUSINESSES and sub["slug"] not in NO_TYPE_PAGE:
+                    candidates.append({"slug": sub["slug"], "name": sub["name"], "count": n})
+    if not candidates:
+        raise RuntimeError(f"No type page with {TYPE_MIN_BUSINESSES}+ businesses in {city_name}")
+    fresh = [c for c in candidates if f"{city_slug}/{c['slug']}" not in posted]
+    if not fresh:                      # every type has had a turn — start over
+        state["typePosted"], fresh = [], candidates
+    t = random.choice(sorted(fresh, key=lambda c: -c["count"])[:10])
+    state["typePosted"] = (state.get("typePosted", []) + [f"{city_slug}/{t['slug']}"])[-200:]
+    return {**t, "city_slug": city_slug, "city": city_name}
+
+
+def type_post(state: dict) -> dict:
+    t = pick_type(state)
+    url = f"https://www.localsindia.com/{t['city_slug']}/{t['slug']}"
+    tag = lambda s_: "".join(w.capitalize() for w in s_.replace("&", " ").replace(",", " ").split())
+    count = f"{t['count']:,}"
+    return {
+        "headline": f"{count} {t['name']} in {t['city']}",
+        "tag": t["city"],
+        "caption": (
+            f"Need {t['name'].lower()} in {t['city']}? We've listed {count} of them with addresses, "
+            f"phone numbers and opening hours — free to browse, no sign-up:\n{url}\n\n"
+            "Own one of these businesses? Open the page and claim your free listing to add photos, "
+            "timings and your WhatsApp number."
+        ),
+        "hashtags": [tag(t["city"]), tag(t["name"]), "LocalsIndia"],
+        "url": url,
+    }
+
+
 def generate_post(topic: str, state: dict) -> dict:
     if topic == "area_directory":
         return area_post(state)
+    if topic == "type_spotlight":
+        return type_post(state)
     extra = ""
     if topic == "city_spotlight":
         extra = f"\n\nCity for this spotlight: {random.choice(SPOTLIGHT_CITIES)}"

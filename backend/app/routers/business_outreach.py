@@ -15,6 +15,7 @@ from app.models.business_outreach import BusinessOutreach
 from app.models.category import Category
 from app.models.city import City
 from app.models.user import User
+from app.core.category_catalog import subcategory_entry
 from app.routers.business_claims import normalize_indian_mobile
 
 router = APIRouter(prefix="/api/v1/admin/outreach", tags=["business-outreach"])
@@ -102,6 +103,9 @@ async def outreach_queue(
                 "city_slug": city.slug,
                 "city_name": city.name,
                 "category_name": cat.name if cat else None,
+                # Type (e.g. Dentists) — the outreach message links its /{city}/{type} page
+                "subcategory_slug": b.subcategory_slug,
+                "subcategory_name": (subcategory_entry(b.subcategory_slug) or (None, {}))[1].get("name"),
                 "last_outcome": outcome,
                 "last_note": note,
                 "last_contacted_at": contacted_at,

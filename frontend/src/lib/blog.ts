@@ -17,6 +17,10 @@ export interface BlogPost {
   sections: { heading: string; body: string }[];
   faqs: { question: string; answer: string }[];
   cta: { text: string; href: string };
+  // Type pages for this city + category with 3+ businesses, e.g.
+  // { text: "Hospitals in Hyderabad (856)", href: "/hyderabad/hospitals" } —
+  // filled from live counts by agents/blog_agent.py, never written by the model.
+  relatedLinks?: { text: string; href: string }[];
   publishedAt: string;
   wordCount: number;
   // schemaVersion 2 "directory" articles: a factual list of real local

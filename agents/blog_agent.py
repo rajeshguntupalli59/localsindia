@@ -118,6 +118,48 @@ def slugify(text: str) -> str:
     return text
 
 
+# Type pages (/{city}/{type}, frontend lib/typePages.ts): same exclusions and
+# 3+ business bar, so a link never points at a thin or missing page.
+TYPE_MIN_BUSINESSES = 3
+NO_TYPE_PAGE = {"other-shops", "other-items", "other-services", "function-halls"}
+MAX_TYPE_LINKS = 6
+
+
+def type_links(city_slug: str, city_name: str, category: str) -> list[dict]:
+    """Links to this city's type pages for the category, biggest first, with
+    live counts — e.g. "Hospitals in Hyderabad (856)". Empty on any API error."""
+    try:
+        with httpx.Client(base_url=f"{BACKEND_URL}/api/v1", timeout=60) as api:
+            cat = next((c for c in api.get("/categories/catalog").json() if c["slug"] == category), None)
+            if not cat:
+                return []
+            counts = api.get("/businesses/subcategory-counts",
+                             params={"city_slug": city_slug, "category_slug": category}).json()
+    except httpx.HTTPError:
+        return []
+    subs = [(counts.get(s["slug"], 0), s) for s in cat["subcategories"] if s["slug"] not in NO_TYPE_PAGE]
+    subs = sorted([x for x in subs if x[0] >= TYPE_MIN_BUSINESSES], key=lambda x: -x[0])[:MAX_TYPE_LINKS]
+    return [{"text": f"{s['name']} in {city_name} ({n:,})", "href": f"/{city_slug}/{s['slug']}"} for n, s in subs]
+
+
+def refresh_type_links() -> int:
+    """Add/refresh relatedLinks on every published post (re-run as more cities
+    get their businesses typed). Returns how many posts changed."""
+    changed = 0
+    for path in sorted(FRONTEND_CONTENT_DIR.glob("*/*.json")):
+        post = json.loads(path.read_text(encoding="utf-8"))
+        links = type_links(post["citySlug"], post["city"], post["category"])
+        if links != post.get("relatedLinks", []):
+            if links:
+                post["relatedLinks"] = links
+            else:
+                post.pop("relatedLinks", None)
+            path.write_text(json.dumps(post, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+            changed += 1
+            print(f"[links] {path.parent.name}/{path.name}: {len(links)} type links")
+    return changed
+
+
 def build_cta(city_slug: str, category: str) -> dict:
     return {
         "text": "Post your listing free on LocalsIndia — it takes 2 minutes",
@@ -204,6 +246,7 @@ def generate_post(city: str, state: str, category: str, topic_id: str | None) ->
         "title": data["title"], "metaDescription": data["metaDescription"],
         "intro": data["intro"], "sections": data["sections"], "faqs": data.get("faqs", []),
         "cta": build_cta(city_slug, category),
+        "relatedLinks": type_links(city_slug, city, category),
         "publishedAt": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "wordCount": word_count,
     }
@@ -286,6 +329,7 @@ def generate_directory_post(city_slug: str, category: str) -> dict | None:
         "intro": data["intro"], "sections": data["sections"], "faqs": data.get("faqs", []),
         "businesses": businesses,
         "cta": {"text": f"See all {label.lower()} in {name}", "href": f"/{city_slug}/{seo_page}"},
+        "relatedLinks": type_links(city_slug, name, category),
         "publishedAt": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "wordCount": word_count,
     }
@@ -375,11 +419,17 @@ def main():
     parser.add_argument("--auto-rotate", action="store_true", help="Pick city/category/topic automatically and advance rotation state")
     parser.add_argument("--directory", nargs=2, metavar=("CITY_SLUG", "BUSINESS_CATEGORY"),
                         help="Real-business directory article, e.g. --directory guntur doctors")
+    parser.add_argument("--refresh-type-links", action="store_true",
+                        help="Add/refresh 'Browse by type' links on every published post (no LLM calls)")
     parser.add_argument("--env-file", default=".env", help="Path to .env file")
     args = parser.parse_args()
 
     env_path = Path(args.env_file)
     load_dotenv(env_path if env_path.exists() else None)
+
+    if args.refresh_type_links:
+        print(f"[OK] {refresh_type_links()} posts updated")
+        return
 
     if args.directory:
         post = generate_directory_post(*args.directory)

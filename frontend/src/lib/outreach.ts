@@ -16,11 +16,21 @@ export function businessUrl(b: { id: string; city_slug: string }): string {
   return `${SITE}/${b.city_slug}/businesses/${b.id}`;
 }
 
-export function outreachMessage(b: { id: string; name: string; city_slug: string; city_name: string }): string {
+// Catch-all types have no /{city}/{type} page (frontend lib/typePages.ts)
+const NO_TYPE_PAGE = new Set(['other-shops', 'other-items', 'other-services', 'function-halls']);
+
+export function outreachMessage(b: {
+  id: string; name: string; city_slug: string; city_name: string;
+  subcategory_slug?: string | null; subcategory_name?: string | null;
+}): string {
+  const typeLine = b.subcategory_slug && b.subcategory_name && !NO_TYPE_PAGE.has(b.subcategory_slug)
+    ? [`Customers looking for ${b.subcategory_name.toLowerCase()} in ${b.city_name} find you here: ${SITE}/${b.city_slug}/${b.subcategory_slug}`, '']
+    : [];
   return [
     `Namaste! Your business "${b.name}" is listed for free on LocalsIndia, the local directory for ${b.city_name}:`,
     businessUrl(b),
     '',
+    ...typeLine,
     'You can claim it for free to update your phone number, timings and photos, and reply to customer reviews — open the link and tap "Claim this Business".',
     '',
     "If you'd rather not hear from us, just reply STOP.",
