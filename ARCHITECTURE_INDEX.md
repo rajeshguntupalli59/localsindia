@@ -29,7 +29,7 @@
 | User profile | §8-Profile | `routers/auth.py` | `profile/page.tsx` | `users` | GET /auth/me, PATCH /auth/me |
 | Account deletion (2026-07-14) | §8-Profile, §6-Auth | `routers/auth.py` (soft-deletes user + cascades to their listings) | `profile/page.tsx` (Delete account button), `account-deletion/page.tsx` (public, no-login-required page for Play Store data-deletion policy), `mobile/src/screens/ProfileScreen.tsx` (Delete account, double-confirm) | `users`, `listings` (both soft-deleted; user PII scrubbed: name/phone/email/password_hash/avatar_url set to null/placeholder) | DELETE /auth/me |
 | Post a listing | §8-PostListing, §10 | `routers/listings.py` | `[city]/classifieds/post/page.tsx` | `listings` | POST /listings |
-| Browse listings | §8-CityHome | `routers/listings.py` | `[city]/page.tsx`, `[city]/[category]/page.tsx` | `listings`, `listing_images` | GET /cities/{slug}/listings |
+| Browse listings | §8-CityHome | `routers/listings.py` | `[city]/(home)/page.tsx`, `[city]/[category]/page.tsx` | `listings`, `listing_images` | GET /cities/{slug}/listings |
 | Listing detail | §8-ListingDetail | `routers/listings.py` | `listing/[id]/page.tsx` + `ListingDetailClient.tsx` (real 404 for deleted listings, 2026-10-07); old `[city]/classifieds/[id]` 308-redirects here (`next.config.mjs`) | `listings`, `listing_images`, `listing_reviews` | GET /listings/{id} |
 | Edit listing (owner or admin — admin since 2026-09-29) | §8-EditListing | `routers/listings.py`, `routers/uploads.py` | `profile/listings/[id]/edit/page.tsx`, `EditListingClient.tsx` (web); entry points: Edit on every `/admin/listings` row + "Edit listing" on `listing/[id]/ListingDetailClient.tsx`; `mobile/src/screens/EditListingScreen.tsx` | `listings` | PATCH /listings/{id} |
 | Delete listing | §10 | `routers/listings.py` | `profile/listings/page.tsx` | `listings` (soft-delete) | DELETE /listings/{id} |
@@ -186,7 +186,7 @@
 | `app/page.tsx` | `/` | Homepage: city selector, categories, fresh listings, trust badges |
 | `app/layout.tsx` | (root) | Root HTML shell: fonts, NextIntlClientProvider, Toaster, ServiceWorker |
 | `app/[city]/layout.tsx` | `/[city]/*` | Sticky header, bottom nav, city context |
-| `app/[city]/page.tsx` | `/[city]` | Server Component wrapper (2026-07-07): real SSR fetch of city/todayCount/trending/fresh, `generateMetadata` with per-city title + noindex if <3 real listings, JSON-LD. Renders `CityHomeClient.tsx` |
+| `app/[city]/(home)/page.tsx` | `/[city]` | (moved into the `(home)` route group 2026-10-08 with `loading.tsx` + `CityHomeClient.tsx`, so the skeleton only wraps the city home — see soft-404 fix) Server Component wrapper (2026-07-07): real SSR fetch of city/todayCount/trending/fresh, `generateMetadata` with per-city title + noindex if <3 real listings, JSON-LD. Renders `CityHomeClient.tsx` |
 | `app/[city]/CityHomeClient.tsx` | (client) | City home UI: hero, trending/fresh listing rows, category browse — seeded with server-fetched `initialCity`/`initialFresh`/etc props so first paint has real content, not "Loading..." |
 | `app/[city]/[category]/page.tsx` | `/[city]/jobs` | All listings in a category for the city |
 | `app/[city]/classifieds/[id]/page.tsx` | `/[city]/classifieds/[id]` | Listing detail (Server Component wrapper) |
@@ -310,7 +310,7 @@
 | `.github/workflows/backend-azure.yml` | Auto-deploy backend to Azure App Service on master push |
 | `.github/workflows/frontend-azure.yml` | Auto-deploy frontend to Azure Static Web Apps on master push |
 | `.github/workflows/keepalive.yml` | Every 25 min: pings the backend /api/v1/health and (since 2026-09-25) www.localsindia.com/hyderabad — keeps both the App Service and the SWA website server warm |
-| `.github/workflows/test.yml` | Runs `cd frontend && npm test` (Vitest) on push/PR to master + develop (added 2026-07-07) |
+| `.github/workflows/test.yml` | On push/PR to master + develop: `frontend-test` (Vitest, added 2026-07-07) and `backend-test` (pytest against a Postgres 16 service, Python 3.12 — added 2026-10-08) |
 | `frontend/vitest.config.ts` + `vitest.setup.ts` | Vitest config (jsdom env, `@` path alias) + jest-dom matchers setup |
 | `staticwebapp.config.json` | Minimal hybrid-SSR config — `apiRuntime: node:18`, security headers, anonymous `/api/*` (no more SPA fallback rules) |
 | `next.config.mjs` | Hybrid SSR (no `output: 'export'`), unoptimized images, webpack cache disabled |
@@ -602,7 +602,7 @@ GET    /api/v1/health                     {"status":"ok"} — keepalive probe
 | `search.*` | `[city]/search/page.tsx` |
 | `post.*` | `[city]/classifieds/post/page.tsx` |
 | `errors.*` | Form validation across all forms |
-| `categories.*` | `[city]/page.tsx`, category chips |
+| `categories.*` | `[city]/(home)/CityHomeClient.tsx`, category chips |
 | `hero.*` | `app/page.tsx` |
 | `home.*` | `app/page.tsx` — why-us cards, day sections, closing CTA |
 | `sort.*` | Listing grid sort dropdown |

@@ -21,7 +21,7 @@ under test (e.g. `src/lib/utils.test.ts` next to `src/lib/utils.ts`).
 ## Test layers
 
 - **Unit tests** — pure functions and business logic (`src/lib/*.test.ts`). Run on every
-  push via `.github/workflows/test.yml`.
+  push via `.github/workflows/test.yml` — and since 2026-10-08 the backend pytest suite too (Postgres 16 service).
 - **Integration tests** — not yet set up. Would cover component behavior with mocked API
   calls (MSW or similar).
 - **E2E tests** — not yet set up. Would use Playwright against a running dev server for

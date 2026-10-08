@@ -869,7 +869,7 @@ The entry point. Restructured 2026-07-22 — previously a generic hero → flat 
 
 ### `/[city]` — City Home
 
-**File:** `app/[city]/page.tsx`
+**File:** `app/[city]/(home)/page.tsx` (route group since 2026-10-08; its `loading.tsx` skeleton wraps only the city home)
 
 The main discovery page for a specific city. Shows:
 - Featured listings (is_featured=true, shown at top with amber badge)
@@ -1797,7 +1797,7 @@ Side services (called from backend):
 | `app/layout.tsx` | Root HTML shell -- fonts, global providers, toast notifications |
 | `app/page.tsx` | Homepage (restructured 2026-07-22): hero → "Why LocalsIndia" differentiators → "A Day in Your City" time-grouped categories → fresh listings → single closing CTA |
 | `app/[city]/layout.tsx` | City shell: sticky header, bottom nav |
-| `app/[city]/page.tsx` | City home: featured + latest listings by category |
+| `app/[city]/(home)/page.tsx` | City home: featured + latest listings by category |
 | `app/[city]/[category]/page.tsx` | Category listings browse |
 | `app/[city]/classifieds/[id]/page.tsx` | Listing detail (Server Component wrapper) |
 | `app/[city]/classifieds/[id]/ListingDetailClient.tsx` | Listing detail -- actual UI with state |
