@@ -10,6 +10,8 @@ import { getApproxLocation } from '../lib/location';
 import { storage } from '../lib/storage';
 import ListingCard from '../components/ListingCard';
 import BusinessRow from '../components/BusinessRow';
+import AnswerFiltersSheet, { type AnswerFilterValues } from '../components/AnswerFiltersSheet';
+import type { CatalogEntry } from '../components/DetailQuestions';
 import { BUSINESS_CATEGORY_LABEL, businessCategoryLabel } from '../lib/businessCategories';
 import { C, RADIUS, SHADOW } from '../lib/theme';
 
@@ -36,6 +38,11 @@ export default function SearchScreen({ navigation, route }: any) {
   const [activeCity, setActiveCity] = useState(citySlug);
   const [activeCityName, setActiveCityName] = useState(cityName);
   const [activeCat, setActiveCat] = useState(initCat);
+  // Subcategory + answer filters for the active category (catalog-driven)
+  const [catalog, setCatalog] = useState<CatalogEntry[]>([]);
+  const [activeSub, setActiveSub] = useState('');
+  const [answerFilters, setAnswerFilters] = useState<AnswerFilterValues>({});
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [listings, setListings] = useState<any[]>([]);
   // Real directory businesses matching the search — classifieds alone are sparse.
@@ -53,9 +60,26 @@ export default function SearchScreen({ navigation, route }: any) {
     categoriesApi.list().then(setCategories).catch(() => {
       Alert.alert('Could not load categories', 'Check your internet connection and try again.');
     });
+    categoriesApi.catalog().then(setCatalog).catch(() => {});
   }, []);
 
-  const doSearch = (q: string, cat: string, city: string, useNearMe: boolean) => {
+  const subcategories = catalog.find(c => c.slug === activeCat)?.subcategories ?? [];
+  const selectedSubcat = subcategories.find(sc => sc.slug === activeSub);
+  const filterQuestions = (selectedSubcat?.questions
+    ?? catalog.find(c => c.slug === activeCat)?.questions ?? []).filter(q => q.filter);
+  const activeFilterCount = Object.keys(answerFilters).length;
+
+  const pickCategory = (slug: string) => {
+    setActiveCat(slug);
+    setActiveSub('');
+    setAnswerFilters({});   // filters belong to the old category's questions
+  };
+  const pickSub = (slug: string) => {
+    setActiveSub(slug === activeSub ? '' : slug);
+    setAnswerFilters({});
+  };
+
+  const doSearch = (q: string, cat: string, city: string, useNearMe: boolean, sub: string, answers: AnswerFilterValues) => {
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(async () => {
       const id = ++searchId.current;
@@ -64,6 +88,8 @@ export default function SearchScreen({ navigation, route }: any) {
         const params: Record<string, string> = { page_size: '20' };
         if (q) params.q = q;
         if (cat) params.category_slug = cat;
+        if (cat && sub) params.subcategory_slug = sub;
+        if (cat) Object.assign(params, answers);
         if (useNearMe) {
           const location = await getApproxLocation();
           if (location) {
@@ -77,7 +103,10 @@ export default function SearchScreen({ navigation, route }: any) {
           listingsApi.byCitySlug(city, params),
           cat && !bizCat
             ? Promise.resolve([])
-            : businessesApi.list(city, { page_size: 10, ...(bizCat ? { category_slug: bizCat } : {}), ...(q ? { q } : {}) }),
+            : businessesApi.list(city, {
+                page_size: 10, ...(bizCat ? { category_slug: bizCat } : {}),
+                ...(bizCat && sub ? { subcategory_slug: sub } : {}), ...(q ? { q } : {}),
+              }),
         ]);
         if (id !== searchId.current) return; // a newer search has started
         setListings(ls.status === 'fulfilled' ? ls.value : []);
@@ -89,8 +118,8 @@ export default function SearchScreen({ navigation, route }: any) {
   };
 
   useEffect(() => {
-    doSearch(query, activeCat, activeCity, nearMe);
-  }, [query, activeCat, activeCity, nearMe]);
+    doSearch(query, activeCat, activeCity, nearMe, activeSub, answerFilters);
+  }, [query, activeCat, activeCity, nearMe, activeSub, answerFilters]);
 
   const toggleNearMe = async () => {
     if (nearMe) { setNearMe(false); return; }
@@ -237,7 +266,7 @@ export default function SearchScreen({ navigation, route }: any) {
             return (
               <TouchableOpacity
                 style={[styles.catChip, active && styles.catChipActive]}
-                onPress={() => setActiveCat(item.slug)}
+                onPress={() => pickCategory(item.slug)}
                 activeOpacity={0.8}
                 accessibilityRole="button"
                 accessibilityLabel={`Filter by ${item.name}`}
@@ -256,6 +285,53 @@ export default function SearchScreen({ navigation, route }: any) {
           }}
         />
       </View>
+
+      {/* ── Subcategory chips + Filters for the active category ── */}
+      {activeCat && (subcategories.length > 0 || filterQuestions.length > 0) ? (
+        <View style={styles.subsContainer}>
+          <FlatList
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            data={subcategories}
+            keyExtractor={sc => sc.slug}
+            contentContainerStyle={styles.catsContent}
+            ListHeaderComponent={filterQuestions.length > 0 ? (
+              <TouchableOpacity
+                style={[styles.subChip, activeFilterCount > 0 && styles.subChipActive, { marginRight: 8 }]}
+                onPress={() => setFiltersOpen(true)}
+                accessibilityRole="button"
+                accessibilityLabel={`Filters${activeFilterCount ? `, ${activeFilterCount} active` : ''}`}
+              >
+                <Ionicons name="options-outline" size={14} color={activeFilterCount > 0 ? C.orange : C.textMuted} />
+                <Text style={[styles.subText, activeFilterCount > 0 && styles.subTextActive]}>
+                  Filters{activeFilterCount ? ` (${activeFilterCount})` : ''}
+                </Text>
+              </TouchableOpacity>
+            ) : null}
+            renderItem={({ item }) => {
+              const active = item.slug === activeSub;
+              return (
+                <TouchableOpacity
+                  style={[styles.subChip, active && styles.subChipActive]}
+                  onPress={() => pickSub(item.slug)}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: active }}
+                >
+                  <Text style={[styles.subText, active && styles.subTextActive]}>{item.name}</Text>
+                </TouchableOpacity>
+              );
+            }}
+          />
+        </View>
+      ) : null}
+
+      <AnswerFiltersSheet
+        visible={filtersOpen}
+        questions={filterQuestions}
+        values={answerFilters}
+        onClose={() => setFiltersOpen(false)}
+        onApply={next => { setAnswerFilters(next); setFiltersOpen(false); }}
+      />
 
       {/* ── Results ── */}
       {loading ? (
@@ -400,6 +476,15 @@ const styles = StyleSheet.create({
   catEmoji: { fontSize: 13 },
   catText: { fontSize: 13, color: 'rgba(255,255,255,0.65)', fontWeight: '600' },
   catTextActive: { color: 'white', fontWeight: '700' },
+  subsContainer: { backgroundColor: C.navBg, paddingBottom: 12 },
+  subChip: {
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    borderRadius: RADIUS.pill, paddingHorizontal: 12, paddingVertical: 6,
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.18)',
+  },
+  subChipActive: { backgroundColor: 'white', borderColor: 'white' },
+  subText: { fontSize: 12, color: 'rgba(255,255,255,0.75)', fontWeight: '600' },
+  subTextActive: { color: C.orange, fontWeight: '700' },
 
   // Content
   listContent: { padding: 16, paddingBottom: 40 },

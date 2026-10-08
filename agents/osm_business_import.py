@@ -178,6 +178,113 @@ NAME_KEYWORDS = [
 ]
 
 
+# OSM tag → our subcategory, per category (slugs from
+# backend/app/core/category_catalog.py; check_subcategory_mapping() refuses
+# to run if one doesn't exist). A specific tag wins; the name is the fallback.
+SUBCATEGORY_BY_TAG = {
+    "doctors": {
+        ("amenity", "hospital"): "hospitals", ("healthcare", "hospital"): "hospitals",
+        ("amenity", "dentist"): "dentists", ("healthcare", "dentist"): "dentists",
+        ("amenity", "pharmacy"): "pharmacies", ("shop", "chemist"): "pharmacies",
+        ("shop", "medical_supply"): "pharmacies", ("healthcare", "pharmacy"): "pharmacies",
+        ("healthcare", "laboratory"): "diagnostics-labs", ("healthcare", "optometrist"): "eye-care",
+        ("amenity", "clinic"): "doctors-clinics", ("amenity", "doctors"): "doctors-clinics",
+    },
+    "tiffin": {
+        ("amenity", "restaurant"): "restaurants", ("amenity", "food_court"): "restaurants",
+        ("amenity", "fast_food"): "restaurants", ("amenity", "cafe"): "bakeries-sweets",
+        ("shop", "bakery"): "bakeries-sweets", ("shop", "confectionery"): "bakeries-sweets",
+        ("shop", "sweets"): "bakeries-sweets", ("shop", "pastry"): "bakeries-sweets",
+    },
+    "education": {
+        ("amenity", "school"): "schools-colleges", ("amenity", "college"): "schools-colleges",
+        ("amenity", "kindergarten"): "schools-colleges", ("amenity", "driving_school"): "driving-schools",
+        ("amenity", "language_school"): "language-classes",
+    },
+    "services": {
+        ("shop", "hairdresser"): "beauty-salon", ("shop", "beauty"): "beauty-salon",
+        ("shop", "laundry"): "laundry", ("shop", "dry_cleaning"): "laundry",
+        ("amenity", "veterinary"): "pet-care",
+    },
+    "vehicles": {
+        ("shop", "car_repair"): "garages-car-wash", ("shop", "motorcycle_repair"): "garages-car-wash",
+        ("amenity", "car_wash"): "garages-car-wash", ("shop", "tyres"): "spare-parts",
+        ("shop", "car_parts"): "spare-parts", ("shop", "bicycle"): "bicycles",
+    },
+    "electronics": {
+        ("shop", "mobile_phone"): "mobiles-tablets", ("shop", "computer"): "laptops-computers",
+        ("shop", "appliance"): "home-appliances",
+    },
+    "furniture": {("shop", "interior_decoration"): "home-decor"},
+    "fashion": {
+        ("shop", "clothes"): "clothing", ("shop", "boutique"): "clothing", ("shop", "fabric"): "ethnic-wear",
+        ("shop", "shoes"): "footwear", ("shop", "jewelry"): "watches-jewellery",
+        ("shop", "watches"): "watches-jewellery", ("shop", "bag"): "bags-accessories",
+    },
+    "events": {
+        ("amenity", "events_venue"): "function-halls", ("amenity", "community_centre"): "function-halls",
+        ("amenity", "conference_centre"): "function-halls",
+    },
+    "pg-roommate": {("tourism", "hostel"): "pg-hostels", ("tourism", "guest_house"): "pg-hostels"},
+    "businesses": {
+        ("shop", "supermarket"): "kirana-supermarkets", ("shop", "convenience"): "kirana-supermarkets",
+        ("shop", "general"): "kirana-supermarkets", ("shop", "grocery"): "kirana-supermarkets",
+        ("shop", "greengrocer"): "kirana-supermarkets", ("shop", "variety_store"): "kirana-supermarkets",
+        ("shop", "hardware"): "hardware-paints", ("shop", "paint"): "hardware-paints",
+        ("shop", "doityourself"): "hardware-paints", ("shop", "electrical"): "hardware-paints",
+        ("shop", "stationery"): "stationery-books-shops", ("shop", "books"): "stationery-books-shops",
+        ("shop", "gift"): "gifts-toys", ("shop", "toys"): "gifts-toys", ("shop", "religion"): "pooja-items",
+    },
+}
+SUBCATEGORY_BY_NAME = {
+    "doctors": [
+        ("dentists", r"dental|dentist"), ("eye-care", r"\beye\b|optic|vision"),
+        ("diagnostics-labs", r"diagnos|\blabs?\b|scan centre|scans\b|patholog"),
+        ("pharmacies", r"pharma|chemist|medical (hall|store|shop)|medicals?\b"),
+        ("hospitals", r"hospital|nursing home"), ("doctors-clinics", r"clinic|health ?care|polyclinic|\bdr\.?\b"),
+    ],
+    "tiffin": [
+        ("tiffin-mess", r"\bmess\b|tiffin|bhojan|meals\b"), ("caterers", r"cater"),
+        ("bakeries-sweets", r"baker|sweet|cake|cafe|coffee|\btea\b|chai"),
+        ("restaurants", r"restaurant|dhaba|biryani|hotel|kitchen|grill|\bfoods?\b"),
+    ],
+    "education": [
+        ("driving-schools", r"driving"), ("schools-colleges", r"school|vidyalaya|college|university|kids ?(world|zone)"),
+        ("coaching-exams", r"coaching|academy|institute"), ("tuition-tutors", r"tuition|tutorial"),
+    ],
+    "fashion": [
+        ("ethnic-wear", r"saree|silk|textile|handloom"), ("footwear", r"footwear|shoe|chappal"),
+        ("watches-jewellery", r"jewel|gold|watch"), ("clothing", r"garment|fashion|collection|boutique|dress|wear\b"),
+    ],
+    "events": [("function-halls", r"function hall|convention|banquet|kalyana? ?mandap|marriage hall")],
+    "businesses": [
+        ("kirana-supermarkets", r"\bmart\b|super ?market|kirana|general stores?|provision|grocer"),
+        ("hardware-paints", r"hardware|paints?\b|electricals?\b|sanitary"),
+        ("stationery-books-shops", r"book|stationer|xerox"), ("gifts-toys", r"gift|toy"),
+        ("pooja-items", r"pooja|puja"),
+    ],
+}
+
+
+# A generic "clinic" tag is often a dental, eye or scan centre — a name that
+# says so is more specific than the tag.
+GENERIC_TAG_SUBS = {"doctors-clinics": {"dentists", "eye-care", "diagnostics-labs"}}
+
+
+def subcategory_for(tags: dict, category: str) -> str | None:
+    name = (tags.get("name:en") or tags.get("name") or "").lower()
+    by_name = next((sub for sub, pat in SUBCATEGORY_BY_NAME.get(category, []) if re.search(pat, name)), None)
+    by_tag = SUBCATEGORY_BY_TAG.get(category, {})
+    for k in ("amenity", "healthcare", "shop", "tourism"):
+        sub = by_tag.get((k, tags.get(k)))
+        if sub:
+            return by_name if by_name in GENERIC_TAG_SUBS.get(sub, ()) else sub
+    sub = by_name
+    if not sub and category == "businesses" and tags.get("shop"):
+        return "other-shops"
+    return sub
+
+
 def category_from_name(name: str) -> str | None:
     n = name.lower()
     return next((cat for cat, pat in NAME_KEYWORDS if re.search(pat, n)), None)
@@ -317,6 +424,7 @@ def to_business(el: dict) -> tuple[dict | None, str]:
         "latitude": round(lat, 6) if lat else None,
         "longitude": round(lon, 6) if lon else None,
         "opening_hours": (tags.get("opening_hours") or "").strip()[:255] or None,
+        "subcategory_slug": subcategory_for(tags, category),
     }, ""
 
 
@@ -570,6 +678,49 @@ def run_city(city: str, regions: dict, live_categories: list[str], do_apply: boo
     print(f"{city}: clean")
 
 
+def check_subcategory_mapping() -> None:
+    """Every subcategory mapping target must be a real subcategory of that
+    category on the live site — stop before writing anything otherwise."""
+    catalog = httpx.get(f"{BACKEND_URL}/api/v1/categories/catalog", timeout=60).json()
+    live = {c["slug"]: {s["slug"] for s in c["subcategories"]} for c in catalog}
+    bad = [f"{cat} → {sub}"
+           for cat, m in SUBCATEGORY_BY_TAG.items() for sub in m.values() if sub not in live.get(cat, set())]
+    bad += [f"{cat} → {sub}"
+            for cat, rules in SUBCATEGORY_BY_NAME.items() for sub, _ in rules if sub not in live.get(cat, set())]
+    if bad:
+        raise SystemExit("Subcategory mapping points at subcategories the site doesn't have:\n  " + "\n  ".join(bad))
+
+
+def backfill_subcategories(city: str, regions: dict, do_apply: bool) -> Counter:
+    """Work out each already-imported business's subcategory from its OSM tags
+    and (with --apply) set it — only where none is set yet, see
+    POST /admin/businesses/import/subcategories. Dry run just reports."""
+    items, per_sub, unmatched = [], Counter(), Counter()
+    for el in fetch_osm(tuple(regions[city]["bbox"])):
+        row, _ = to_business(el)
+        if not row:
+            continue
+        if row["subcategory_slug"]:
+            items.append({"source_ref": row["source_ref"], "subcategory_slug": row["subcategory_slug"]})
+            per_sub[row["subcategory_slug"]] += 1
+        else:
+            unmatched[row["category_slug"]] += 1
+    print(f"  {city}: {len(items)} matched — " + ", ".join(f"{s} {n}" for s, n in per_sub.most_common()))
+    if unmatched:
+        print(f"  {city}: no subcategory (stay in the category) — " + ", ".join(f"{c} {n}" for c, n in unmatched.most_common()))
+    if do_apply and items:
+        updated = 0
+        with httpx.Client(timeout=120) as client:
+            headers = admin_headers(client)
+            for i in range(0, len(items), 2000):
+                r = client.post(f"{BACKEND_URL}/api/v1/admin/businesses/import/subcategories",
+                                json={"items": items[i:i + 2000]}, headers=headers)
+                r.raise_for_status()
+                updated += r.json()["updated"]
+        print(f"  {city}: {updated} businesses got a subcategory")
+    return per_sub
+
+
 def backfill_hours(city: str, regions: dict) -> int:
     """Copy OSM opening_hours onto this city's already-imported businesses
     (only where hours are still empty — see POST /admin/businesses/import/hours)."""
@@ -599,10 +750,21 @@ def main() -> None:
     ap.add_argument("--fix", action="store_true", help="with --verify: soft-delete imports that fail the checks first")
     ap.add_argument("--fix-done", action="store_true", help="re-home, clean and verify every city already imported")
     ap.add_argument("--backfill-hours", action="store_true", help="fill opening hours for --city, or every imported city")
+    ap.add_argument("--backfill-subcategories", action="store_true",
+                    help="set subcategories (Hospitals, Pharmacies…) for --city or every imported city; "
+                         "dry run unless --apply")
     args = ap.parse_args()
 
     data = load_regions()
     regions, order = data["regions"], data["order"]
+    if args.backfill_subcategories:
+        check_subcategory_mapping()
+        cities = [args.city] if args.city else [c for c in order if c in load_state()]
+        total = Counter()
+        for city in cities:
+            total += backfill_subcategories(city, regions, args.apply)
+        print(f"Done ({'applied' if args.apply else 'dry run'}): {sum(total.values())} matched across {len(cities)} cities")
+        return
     if args.backfill_hours:
         cities = [args.city] if args.city else [c for c in order if c in load_state()]
         total = 0

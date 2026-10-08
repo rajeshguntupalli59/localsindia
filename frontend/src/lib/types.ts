@@ -35,6 +35,46 @@ export interface Category {
   sort_order: number;
 }
 
+// Posting questions + subcategories — GET /api/v1/categories/catalog
+// (backend/app/core/category_catalog.py is the one source for web + mobile).
+export type QuestionType = 'text' | 'number' | 'select' | 'multiselect' | 'switch';
+
+export interface CatalogQuestion {
+  key: string;
+  label: string;
+  type: QuestionType;
+  options?: string[];
+  placeholder?: string;
+  unit?: string;
+  min?: number;
+  max?: number;
+  required?: boolean;
+  filter?: boolean;
+}
+
+export interface CatalogSubcategory {
+  slug: string;
+  name: string;
+  questions: CatalogQuestion[];
+  price_label?: string;
+  show_price?: boolean;
+  title_placeholder?: string;
+}
+
+export interface CatalogCategory {
+  slug: string;
+  name: string;
+  icon: string | null;
+  questions: CatalogQuestion[];
+  subcategories: CatalogSubcategory[];
+}
+
+export interface DetailRow {
+  key: string;
+  label: string;
+  value: string;
+}
+
 export interface ListingImage {
   id: string;
   url: string;
@@ -51,8 +91,10 @@ export interface Listing {
   website_url: string | null;
   social_url: string | null;
   area: string | null;
-  attributes?: Record<string, string> | null;
+  subcategory_slug?: string | null;
+  subcategory_name?: string | null;
   category_details?: Record<string, unknown> | null;
+  detail_rows?: DetailRow[];
   wa_verified: boolean;
   view_count?: number;
   contact_click_count?: number;
@@ -164,6 +206,8 @@ export interface Business {
   city_id: string;
   category_id: string | null;
   category_slug?: string | null;
+  subcategory_slug?: string | null;
+  subcategory_name?: string | null;
   owner_id: string | null;
   source?: string | null;      // 'osm' = imported from OpenStreetMap (needs attribution)
   latitude?: number | null;
@@ -214,7 +258,7 @@ export interface CreateListingInput {
   area?: string;
   latitude?: number;
   longitude?: number;
-  attributes?: Record<string, string>;
+  subcategory_slug?: string | null;
   category_details?: Record<string, unknown> | null;
 }
 

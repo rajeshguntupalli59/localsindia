@@ -3,7 +3,7 @@ from datetime import datetime, timezone, timedelta
 from typing import Any
 from sqlalchemy import String, Text, Numeric, Boolean, Integer, ForeignKey, CheckConstraint, Index, Computed, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.dialects.postgresql import UUID, TSVECTOR
+from sqlalchemy.dialects.postgresql import UUID, TSVECTOR, JSONB
 from app.core.database import Base
 
 
@@ -28,6 +28,10 @@ class Listing(Base):
     website_url: Mapped[str | None] = mapped_column(Text, nullable=True)
     social_url: Mapped[str | None] = mapped_column(Text, nullable=True)
     area: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    # Subcategory + answers to its posting questions — both defined in
+    # app/core/category_catalog.py (subcategories aren't `categories` rows).
+    subcategory_slug: Mapped[str | None] = mapped_column(String(60), nullable=True, index=True)
+    attributes: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     latitude: Mapped[float | None] = mapped_column(Numeric(9, 6), nullable=True)
     longitude: Mapped[float | None] = mapped_column(Numeric(9, 6), nullable=True)
     wa_verified: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)

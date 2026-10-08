@@ -38,7 +38,7 @@ export default function BusinessRow({ title, data, navigation, citySlug, cityNam
               </View>
               <View style={{ padding: 10, gap: 2 }}>
                 <Text style={styles.bizName} numberOfLines={1}>{item.name}</Text>
-                <Text style={styles.bizMeta} numberOfLines={1}>{businessCategoryLabel(item.category_slug)}</Text>
+                <Text style={styles.bizMeta} numberOfLines={1}>{item.subcategory_name ?? businessCategoryLabel(item.category_slug)}</Text>
               </View>
             </TouchableOpacity>
           );

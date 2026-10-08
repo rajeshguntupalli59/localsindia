@@ -3,6 +3,7 @@ import type {
   ClaimOptions,
   CityBanner,
   Category,
+  CatalogCategory,
   Listing,
   ListingImage,
   User,
@@ -106,6 +107,7 @@ function qs(params: Record<string, string | undefined>): string {
 export const api = {
   categories: {
     list: () => req<Category[]>('/api/v1/categories'),
+    catalog: () => req<CatalogCategory[]>('/api/v1/categories/catalog'),
   },
   cities: {
     list: () => req<City[]>('/api/v1/cities'),
@@ -226,6 +228,8 @@ export const api = {
     list: (citySlug: string, params?: Record<string, string>) =>
       req<Business[]>(`/api/v1/businesses${qs({ city_slug: citySlug, ...params })}`),
     get: (id: string) => req<Business>(`/api/v1/businesses/${id}`),
+    subcategoryCounts: (citySlug: string, categorySlug: string) =>
+      req<Record<string, number>>(`/api/v1/businesses/subcategory-counts${qs({ city_slug: citySlug, category_slug: categorySlug })}`),
     create: (data: object, token: string) =>
       req<Business>('/api/v1/businesses', { method: 'POST', body: JSON.stringify(data), token }),
     update: (id: string, data: object, token: string) =>

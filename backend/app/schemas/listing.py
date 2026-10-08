@@ -1,109 +1,22 @@
 import re
 import uuid
 from datetime import datetime
-from pydantic import BaseModel, field_validator
+from pydantic import AliasChoices, BaseModel, Field, computed_field, field_validator
+from app.core.category_catalog import display_rows, subcategory_entry
 from app.schemas.validators import web_url
 
 PHONE_RE = re.compile(r"^\+91[6-9]\d{9}$")
 WA_RE = re.compile(r"^https://wa\.me/91\d{10}$")
 
 
-# ── Category-specific detail schemas ────────────────────────────────────────
-# One per category needing structured questions beyond title/description/price.
-# `category_slug` on ListingCreate picks which of these validates the raw
-# `category_details` dict — see DETAILS_SCHEMA_BY_CATEGORY_SLUG below and
-# routers/listings.py, which persists the validated result into the matching
-# *_details table (models/listing_details.py).
-
-class VehicleDetailsIn(BaseModel):
-    brand: str | None = None
-    model: str | None = None
-    year: int | None = None
-    km_driven: int | None = None
-    fuel_type: str | None = None
-    transmission: str | None = None
-    owners_count: int | None = None
+# Category-specific answers (`category_details`) are validated against the
+# question list in app/core/category_catalog.py — see routers/listings.py.
 
 
-class JobDetailsIn(BaseModel):
-    company_name: str | None = None
-    salary_min: float | None = None
-    salary_max: float | None = None
-    job_type: str | None = None
-    experience_required: str | None = None
-    work_mode: str | None = None
-
-
-class PgRoommateDetailsIn(BaseModel):
-    room_type: str | None = None
-    gender_preference: str | None = None
-    deposit_amount: float | None = None
-    amenities: list[str] | None = None
-
-
-class RealEstateDetailsIn(BaseModel):
-    property_type: str | None = None
-    bhk: int | None = None
-    sqft: int | None = None
-    furnishing: str | None = None
-    listing_type: str | None = None
-
-
-class ElectronicsDetailsIn(BaseModel):
-    brand: str | None = None
-    model: str | None = None
-    condition: str | None = None
-    warranty_remaining: str | None = None
-
-
-class FurnitureDetailsIn(BaseModel):
-    material: str | None = None
-    dimensions: str | None = None
-    condition: str | None = None
-
-
-class FashionDetailsIn(BaseModel):
-    brand: str | None = None
-    size: str | None = None
-    gender: str | None = None
-
-
-class EducationDetailsIn(BaseModel):
-    course_type: str | None = None
-    mode: str | None = None
-    duration: str | None = None
-
-
-class DoctorDetailsIn(BaseModel):
-    specialization: str | None = None
-    consultation_fee: float | None = None
-    available_timings: str | None = None
-
-
-class ServiceDetailsIn(BaseModel):
-    service_type: str | None = None
-    experience_years: int | None = None
-
-
-class TiffinDetailsIn(BaseModel):
-    meal_type: str | None = None
-    delivery_area: str | None = None
-    subscription_available: bool | None = None
-
-
-DETAILS_SCHEMA_BY_CATEGORY_SLUG: dict[str, type[BaseModel]] = {
-    "vehicles": VehicleDetailsIn,
-    "jobs": JobDetailsIn,
-    "pg-roommate": PgRoommateDetailsIn,
-    "real-estate": RealEstateDetailsIn,
-    "electronics": ElectronicsDetailsIn,
-    "furniture": FurnitureDetailsIn,
-    "fashion": FashionDetailsIn,
-    "education": EducationDetailsIn,
-    "doctors": DoctorDetailsIn,
-    "services": ServiceDetailsIn,
-    "tiffin": TiffinDetailsIn,
-}
+class DetailRow(BaseModel):
+    key: str
+    label: str
+    value: str
 
 
 class ListingCreate(BaseModel):
@@ -121,6 +34,7 @@ class ListingCreate(BaseModel):
     area: str | None = None
     latitude: float | None = None
     longitude: float | None = None
+    subcategory_slug: str | None = None
     category_details: dict | None = None
     is_seed: bool = False  # only honored server-side when the caller is an admin
     @field_validator("contact_phone")
@@ -151,6 +65,10 @@ class ListingUpdate(BaseModel):
     website_url: str | None = None
     social_url: str | None = None
     area: str | None = None
+    # Sent together: the answers are re-checked against the (possibly new)
+    # subcategory's questions and replace the old answers wholesale.
+    subcategory_slug: str | None = None
+    category_details: dict | None = None
 
     @field_validator("website_url", "social_url")
     @classmethod
@@ -202,7 +120,26 @@ class ListingOut(BaseModel):
     category_name: str | None = None
     category_slug: str | None = None
     seller_name: str | None = None
-    category_details: dict | None = None
+    subcategory_slug: str | None = None
+    # Read from Listing.attributes; the API name predates the JSONB column.
+    category_details: dict | None = Field(
+        default=None, validation_alias=AliasChoices("category_details", "attributes"),
+    )
+
+    @computed_field
+    @property
+    def subcategory_name(self) -> str | None:
+        sub = subcategory_entry(self.subcategory_slug)
+        return sub[1]["name"] if sub else None
+
+    @computed_field
+    @property
+    def detail_rows(self) -> list[DetailRow]:
+        """The answers with their question labels, in question order — what
+        the listing page shows buyers."""
+        sub = subcategory_entry(self.subcategory_slug)
+        cat_slug = sub[0] if sub else self.category_slug
+        return [DetailRow(**r) for r in display_rows(cat_slug, self.subcategory_slug, self.category_details)]
 
     model_config = {"from_attributes": True}
 

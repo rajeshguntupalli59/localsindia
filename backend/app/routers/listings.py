@@ -2,7 +2,7 @@ from typing import Literal
 import uuid
 from datetime import datetime, timezone, timedelta, date as date_type
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy import select, func, asc, desc, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -25,40 +25,52 @@ REPORT_FLAG_THRESHOLD = 3
 RENEW_DAYS = 30
 
 
-async def _save_category_details(
-    db: AsyncSession, listing_id: uuid.UUID, category_slug: str, details: dict,
-) -> None:
-    """Validate `details` against the schema for `category_slug` and persist
-    it into the matching *_details table. No-op for categories without one
-    (Classifieds, Businesses, Events) or an empty/missing payload."""
-    from app.models.listing_details import DETAILS_BY_CATEGORY_SLUG
-    from app.schemas.listing import DETAILS_SCHEMA_BY_CATEGORY_SLUG
+def _checked_answers(category_slug: str | None, subcategory_slug: str | None, details: dict | None) -> dict | None:
+    """Validate a subcategory + its answers against app/core/category_catalog.py;
+    returns the cleaned answers for Listing.attributes (None when empty)."""
+    from app.core.category_catalog import AnswerError, subcategory_entry, validate_answers
 
-    schema_cls = DETAILS_SCHEMA_BY_CATEGORY_SLUG.get(category_slug)
-    model_cls = DETAILS_BY_CATEGORY_SLUG.get(category_slug)
-    if not schema_cls or not model_cls:
-        return
-    validated = schema_cls(**details)
-    db.add(model_cls(listing_id=listing_id, **validated.model_dump()))
-    await db.commit()
+    if subcategory_slug:
+        sub = subcategory_entry(subcategory_slug)
+        if not sub or sub[0] != category_slug:
+            raise HTTPException(status_code=422, detail=f"'{subcategory_slug}' is not a subcategory of '{category_slug}'.")
+    try:
+        return validate_answers(category_slug, subcategory_slug, details) or None
+    except AnswerError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
 
 
-async def _load_category_details(
-    db: AsyncSession, listing_id: uuid.UUID, category_slug: str | None,
-) -> dict | None:
-    """Fetch the category-specific detail row for a listing, if its category
-    has one, as a plain dict for ListingOut.category_details."""
-    from app.models.listing_details import DETAILS_BY_CATEGORY_SLUG
+def _answer_filters(stmt, category_slug: str, subcategory_slug: str | None, params):
+    """Apply `f_<key>=value` / `f_<key>_min` / `f_<key>_max` query params for
+    the category's filterable questions. Unknown keys and invalid option
+    values are ignored rather than erroring, so old links keep working."""
+    from sqlalchemy import Float, cast
+    from app.core.category_catalog import filterable_questions
 
-    model_cls = DETAILS_BY_CATEGORY_SLUG.get(category_slug or "")
-    if not model_cls:
-        return None
-    result = await db.execute(select(model_cls).where(model_cls.listing_id == listing_id))
-    row = result.scalar_one_or_none()
-    if not row:
-        return None
-    exclude = {"id", "listing_id", "created_at", "_sa_instance_state"}
-    return {k: v for k, v in row.__dict__.items() if k not in exclude}
+    for key, qq in filterable_questions(category_slug, subcategory_slug).items():
+        if qq["type"] == "number":
+            for suffix in ("_min", "_max"):
+                raw = params.get(f"f_{key}{suffix}")
+                if raw in (None, ""):
+                    continue
+                try:
+                    bound = float(raw)
+                except ValueError:
+                    raise HTTPException(status_code=422, detail=f"f_{key}{suffix} must be a number.")
+                col = cast(Listing.attributes[key].astext, Float)
+                stmt = stmt.where(col >= bound if suffix == "_min" else col <= bound)
+            continue
+        raw = params.get(f"f_{key}")
+        if raw in (None, ""):
+            continue
+        if qq["type"] == "switch":
+            if raw.lower() in ("true", "1", "yes"):
+                stmt = stmt.where(Listing.attributes.contains({key: True}))
+        elif raw in qq.get("options", []):
+            # JSONB containment — served by the GIN index on attributes.
+            value = [raw] if qq["type"] == "multiselect" else raw
+            stmt = stmt.where(Listing.attributes.contains({key: value}))
+    return stmt
 
 
 async def _get_active_listing(listing_id: uuid.UUID, db: AsyncSession) -> Listing:
@@ -148,9 +160,11 @@ async def trending_listings(slug: str, db: AsyncSession = Depends(get_db)):
 @router.get("/cities/{slug}/listings", response_model=list[ListingOut])
 async def list_city_listings(
     slug: str,
+    request: Request,
     q: str | None = Query(default=None),
     category_id: uuid.UUID | None = Query(default=None),
     category_slug: str | None = Query(default=None),
+    subcategory_slug: str | None = Query(default=None, max_length=60),
     # Public endpoint: never expose listings awaiting review, rejected, or
     # hidden after reports — only what's actually published.
     status: Literal["active", "fulfilled", "expired"] = Query(default="active"),
@@ -178,6 +192,10 @@ async def list_city_listings(
         cat = cat_result.scalar_one_or_none()
         if cat:
             category_id = cat.id
+    elif category_id and not category_slug:
+        cat_result = await db.execute(select(Category).where(Category.id == category_id))
+        cat = cat_result.scalar_one_or_none()
+        category_slug = cat.slug if cat else None
 
     stmt = (
         select(Listing)
@@ -192,6 +210,10 @@ async def list_city_listings(
 
     if category_id:
         stmt = stmt.where(Listing.category_id == category_id)
+        if subcategory_slug:
+            stmt = stmt.where(Listing.subcategory_slug == subcategory_slug)
+        if category_slug:
+            stmt = _answer_filters(stmt, category_slug, subcategory_slug, request.query_params)
     if q:
         # OR-match each word instead of requiring the whole phrase as one
         # literal substring — "dental service near me" used to need that exact
@@ -300,6 +322,7 @@ async def create_listing(
     resolved_cat_result = await db.execute(select(Category).where(Category.id == category_id))
     resolved_cat = resolved_cat_result.scalar_one_or_none()
     resolved_category_slug = resolved_cat.slug if resolved_cat else None
+    attributes = _checked_answers(resolved_category_slug, body.subcategory_slug, body.category_details)
 
     # Auto-generate whatsapp_url from contact_phone if not provided
     whatsapp_url = body.whatsapp_url
@@ -334,6 +357,8 @@ async def create_listing(
         website_url=body.website_url,
         social_url=body.social_url,
         area=body.area,
+        subcategory_slug=body.subcategory_slug,
+        attributes=attributes,
         latitude=body.latitude,
         longitude=body.longitude,
         status="pending",  # BL-11: always pending on create
@@ -343,12 +368,8 @@ async def create_listing(
     await db.commit()
     await db.refresh(listing)
 
-    if body.category_details and resolved_category_slug:
-        await _save_category_details(db, listing.id, resolved_category_slug, body.category_details)
-
     out = ListingOut.model_validate(listing)
     out.category_slug = resolved_category_slug
-    out.category_details = await _load_category_details(db, listing.id, resolved_category_slug)
     return out
 
 
@@ -376,7 +397,6 @@ async def my_listings(
         cat = cat_res.scalar_one_or_none()
         if cat:
             item.category_slug = cat.slug
-            item.category_details = await _load_category_details(db, listing.id, cat.slug)
         out.append(item)
     return out
 
@@ -393,7 +413,6 @@ async def get_listing(listing_id: uuid.UUID, db: AsyncSession = Depends(get_db))
     out.category_name = cat.name if cat else None
     out.category_slug = cat.slug if cat else None
     out.seller_name = (user.name or '').split('+91')[0].strip() or None if user else None
-    out.category_details = await _load_category_details(db, listing.id, cat.slug if cat else None)
     return out
 
 
@@ -409,12 +428,24 @@ async def update_listing(
     if listing.user_id != current_user.id and current_user.role != "admin":
         raise HTTPException(status_code=403, detail="Not authorised.")
 
-    for field, value in body.model_dump(exclude_unset=True).items():
+    from app.models.category import Category
+
+    updates = body.model_dump(exclude_unset=True)
+    cat = (await db.execute(select(Category).where(Category.id == listing.category_id))).scalar_one_or_none()
+    if "subcategory_slug" in updates or "category_details" in updates:
+        sub = updates.pop("subcategory_slug", listing.subcategory_slug)
+        details = updates.pop("category_details", listing.attributes)
+        listing.attributes = _checked_answers(cat.slug if cat else None, sub, details)
+        listing.subcategory_slug = sub
+    for field, value in updates.items():
         setattr(listing, field, value)
 
     await db.commit()
     await db.refresh(listing)
-    return listing
+    out = ListingOut.model_validate(listing)
+    out.category_slug = cat.slug if cat else None
+    out.category_name = cat.name if cat else None
+    return out
 
 
 @router.delete("/listings/{listing_id}", status_code=204)

@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { Store, Star, MapPin, Phone, Plus, BadgeCheck } from 'lucide-react';
 import Link from 'next/link';
 import { api } from '@/lib/api';
-import type { Business, Category } from '@/lib/types';
+import type { Business, CatalogCategory, Category } from '@/lib/types';
 import SiteHeader from '@/components/site-header/SiteHeader';
 import SiteFooter from '@/components/site-footer/SiteFooter';
 import OsmAttribution from '@/components/osm-attribution/OsmAttribution';
@@ -136,6 +136,10 @@ export default function BusinessesClient({
   // ?category=<slug> — set by the "View all" link on category pages
   const [category, setCategory] = useState<string | null>(null);
   const [q, setQ] = useState('');   // ?q= from a search page's "View all"
+  // ?sub=<subcategory slug> within the picked category (Hospitals, Pharmacies…)
+  const [sub, setSub] = useState('');
+  const [catalog, setCatalog] = useState<CatalogCategory[]>([]);
+  const [subCounts, setSubCounts] = useState<Record<string, number>>({});
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -144,13 +148,22 @@ export default function BusinessesClient({
     const sp = new URLSearchParams(window.location.search);
     setQ(sp.get('q') || '');
     setCategory(sp.get('category') || '');
+    setSub(sp.get('sub') || '');
     api.cities.get(citySlug).then(c => setCityName(c.name)).catch(() => {});
     api.categories.list().then(setCategories).catch(() => {});
+    api.categories.catalog().then(setCatalog).catch(() => {});
   }, [citySlug]);
+
+  useEffect(() => {
+    setSubCounts({});
+    if (!category) return;
+    api.businesses.subcategoryCounts(citySlug, category).then(setSubCounts).catch(() => {});
+  }, [citySlug, category]);
 
   const fetchPage = (pg: number) =>
     api.businesses.list(citySlug, {
-      page: String(pg), page_size: String(PAGE_SIZE), ...(category ? { category_slug: category } : {}), ...(q ? { q } : {}),
+      page: String(pg), page_size: String(PAGE_SIZE), ...(category ? { category_slug: category } : {}),
+      ...(category && sub ? { subcategory_slug: sub } : {}), ...(q ? { q } : {}),
     });
 
   // Reload from page 1 whenever the category changes
@@ -158,7 +171,7 @@ export default function BusinessesClient({
     if (category === null) return;   // wait until the URL has been read
     if (skipFirstLoad.current) {
       skipFirstLoad.current = false;
-      if (!category && !q) { setHasMore(initialBusinesses.length === PAGE_SIZE); return; }
+      if (!category && !q && !sub) { setHasMore(initialBusinesses.length === PAGE_SIZE); return; }
     }
     setLoading(true);
     fetchPage(1)
@@ -166,7 +179,7 @@ export default function BusinessesClient({
       .catch(() => setBusinesses([]))
       .finally(() => setLoading(false));
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [citySlug, category, q]);
+  }, [citySlug, category, q, sub]);
 
   const loadMore = async () => {
     setLoadingMore(true);
@@ -180,12 +193,16 @@ export default function BusinessesClient({
     }
   };
 
-  const syncUrl = (cat: string, query: string) => {
-    const sp = new URLSearchParams({ ...(cat ? { category: cat } : {}), ...(query ? { q: query } : {}) }).toString();
+  const syncUrl = (cat: string, query: string, subSlug = '') => {
+    const sp = new URLSearchParams({
+      ...(cat ? { category: cat } : {}), ...(cat && subSlug ? { sub: subSlug } : {}), ...(query ? { q: query } : {}),
+    }).toString();
     window.history.replaceState(null, '', sp ? `?${sp}` : window.location.pathname);
   };
-  const pickCategory = (slug: string) => { setCategory(slug); syncUrl(slug, q); };
-  const clearQuery = () => { setQ(''); syncUrl(category ?? '', ''); };
+  const pickCategory = (slug: string) => { setCategory(slug); setSub(''); syncUrl(slug, q); };
+  const pickSub = (slug: string) => { setSub(slug); syncUrl(category ?? '', q, slug); };
+  const clearQuery = () => { setQ(''); syncUrl(category ?? '', '', sub); };
+  const subcategories = catalog.find(c => c.slug === category)?.subcategories ?? [];
 
   const covers = businessCovers(businesses);
 
@@ -238,6 +255,29 @@ export default function BusinessesClient({
                 {c.name}
               </button>
             ))}
+          </div>
+        )}
+
+        {/* Subcategory chips for the picked category */}
+        {category && subcategories.length > 0 && (
+          <div className="flex gap-2 overflow-x-auto scrollbar-none pb-2 mb-5 -mx-4 px-4 -mt-2">
+            {[{ slug: '', name: 'All types' }, ...subcategories].map(sc => {
+              const active = sub === sc.slug;
+              const n = sc.slug ? subCounts[sc.slug] : undefined;
+              return (
+                <button
+                  key={sc.slug || 'all'}
+                  onClick={() => pickSub(sc.slug)}
+                  aria-pressed={active}
+                  className={`shrink-0 px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+                    active ? 'border-orange-400 text-orange-600 bg-orange-50' : 'bg-white text-slate-600 hover:border-orange-300'
+                  }`}
+                  style={active ? undefined : { borderColor: 'var(--li-border)' }}
+                >
+                  {sc.name}{n ? <span className="ml-1 opacity-60">{n}</span> : null}
+                </button>
+              );
+            })}
           </div>
         )}
 

@@ -8,7 +8,8 @@ import { Upload, X, CheckCircle, ArrowLeft, ArrowRight, Sparkles, Lightbulb, Cam
 import type { LucideIcon } from 'lucide-react';
 import Link from 'next/link';
 import { api, ApiError } from '@/lib/api';
-import type { Category } from '@/lib/types';
+import type { Category, CatalogCategory, CatalogQuestion } from '@/lib/types';
+import DetailQuestions, { answersPayload, checkAnswers } from '@/components/detail-questions/DetailQuestions';
 import SiteHeader from '@/components/site-header/SiteHeader';
 import { toast } from 'sonner';
 import { usePrefs } from '@/context/PrefsContext';
@@ -34,85 +35,10 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
   fashion: ShoppingBag,
 };
 
-// Category-specific questions shown on their own step, right after picking a
-// category. Keys match the backend's per-category *_details table columns
-// 1:1 (backend/app/models/listing_details.py), so these are sent straight
-// through as `category_details` on create — same field-set as the mobile
-// app's PostScreen.tsx, kept in sync for parity across platforms.
-type DetailField =
-  | { key: string; label: string; type: 'text'; placeholder?: string }
-  | { key: string; label: string; type: 'number'; placeholder?: string }
-  | { key: string; label: string; type: 'select'; options: string[] }
-  | { key: string; label: string; type: 'multiselect'; options: string[] }
-  | { key: string; label: string; type: 'switch' };
-
-const CATEGORY_DETAIL_FIELDS: Record<string, DetailField[]> = {
-  vehicles: [
-    { key: 'brand', label: 'Brand', type: 'text', placeholder: 'e.g. Honda, Maruti Suzuki' },
-    { key: 'model', label: 'Model', type: 'text', placeholder: 'e.g. Activa 6G, Swift' },
-    { key: 'year', label: 'Year', type: 'number', placeholder: 'e.g. 2022' },
-    { key: 'km_driven', label: 'KM Driven', type: 'number', placeholder: 'e.g. 15000' },
-    { key: 'fuel_type', label: 'Fuel Type', type: 'select', options: ['Petrol', 'Diesel', 'Electric', 'CNG', 'Hybrid'] },
-    { key: 'transmission', label: 'Transmission', type: 'select', options: ['Manual', 'Automatic'] },
-    { key: 'owners_count', label: 'Number of Owners', type: 'number', placeholder: 'e.g. 1' },
-  ],
-  jobs: [
-    { key: 'company_name', label: 'Company Name', type: 'text', placeholder: 'e.g. Acme Pvt Ltd' },
-    { key: 'salary_min', label: 'Min Salary (₹/month)', type: 'number', placeholder: 'e.g. 15000' },
-    { key: 'salary_max', label: 'Max Salary (₹/month)', type: 'number', placeholder: 'e.g. 25000' },
-    { key: 'job_type', label: 'Job Type', type: 'select', options: ['Full-time', 'Part-time', 'Contract', 'Internship'] },
-    { key: 'experience_required', label: 'Experience Required', type: 'text', placeholder: 'e.g. 1-2 years' },
-    { key: 'work_mode', label: 'Work Mode', type: 'select', options: ['On-site', 'Remote', 'Hybrid'] },
-  ],
-  'pg-roommate': [
-    { key: 'room_type', label: 'Room Type', type: 'select', options: ['Single', 'Sharing', '1RK', '1BHK'] },
-    { key: 'gender_preference', label: 'Gender Preference', type: 'select', options: ['Male', 'Female', 'Any'] },
-    { key: 'deposit_amount', label: 'Deposit Amount (₹)', type: 'number', placeholder: 'e.g. 10000' },
-    { key: 'amenities', label: 'Amenities', type: 'multiselect', options: ['WiFi', 'AC', 'Food', 'Laundry', 'Parking'] },
-  ],
-  'real-estate': [
-    { key: 'property_type', label: 'Property Type', type: 'select', options: ['Apartment', 'Villa', 'Plot', 'Commercial'] },
-    { key: 'bhk', label: 'BHK', type: 'number', placeholder: 'e.g. 2' },
-    { key: 'sqft', label: 'Area (sq.ft)', type: 'number', placeholder: 'e.g. 1200' },
-    { key: 'furnishing', label: 'Furnishing', type: 'select', options: ['Furnished', 'Semi-furnished', 'Unfurnished'] },
-    { key: 'listing_type', label: 'Listing Type', type: 'select', options: ['Rent', 'Sale'] },
-  ],
-  electronics: [
-    { key: 'brand', label: 'Brand', type: 'text', placeholder: 'e.g. Samsung, Apple' },
-    { key: 'model', label: 'Model', type: 'text', placeholder: 'e.g. Galaxy S23' },
-    { key: 'condition', label: 'Condition', type: 'select', options: ['New', 'Like New', 'Good', 'Fair'] },
-    { key: 'warranty_remaining', label: 'Warranty Remaining', type: 'text', placeholder: 'e.g. 6 months' },
-  ],
-  furniture: [
-    { key: 'material', label: 'Material', type: 'text', placeholder: 'e.g. Wood, Metal' },
-    { key: 'dimensions', label: 'Dimensions', type: 'text', placeholder: 'e.g. 6ft x 4ft' },
-    { key: 'condition', label: 'Condition', type: 'select', options: ['New', 'Like New', 'Good', 'Fair'] },
-  ],
-  fashion: [
-    { key: 'brand', label: 'Brand', type: 'text', placeholder: 'e.g. Nike, Zara' },
-    { key: 'size', label: 'Size', type: 'text', placeholder: 'e.g. M, 32, UK 8' },
-    { key: 'gender', label: 'Gender', type: 'select', options: ['Men', 'Women', 'Unisex', 'Kids'] },
-  ],
-  education: [
-    { key: 'course_type', label: 'Course Type', type: 'text', placeholder: 'e.g. Spoken English, Maths Tuition' },
-    { key: 'mode', label: 'Mode', type: 'select', options: ['Online', 'Offline', 'Hybrid'] },
-    { key: 'duration', label: 'Duration', type: 'text', placeholder: 'e.g. 3 months' },
-  ],
-  doctors: [
-    { key: 'specialization', label: 'Specialization', type: 'text', placeholder: 'e.g. Dentist, Cardiologist' },
-    { key: 'consultation_fee', label: 'Consultation Fee (₹)', type: 'number', placeholder: 'e.g. 500' },
-    { key: 'available_timings', label: 'Available Timings', type: 'text', placeholder: 'e.g. Mon-Sat 10am-6pm' },
-  ],
-  services: [
-    { key: 'service_type', label: 'Service Type', type: 'text', placeholder: 'e.g. Plumber, Electrician' },
-    { key: 'experience_years', label: 'Experience (years)', type: 'number', placeholder: 'e.g. 5' },
-  ],
-  tiffin: [
-    { key: 'meal_type', label: 'Meal Type', type: 'select', options: ['Veg', 'Non-Veg', 'Both'] },
-    { key: 'delivery_area', label: 'Delivery Area', type: 'text', placeholder: 'e.g. Within 5km of Kukatpally' },
-    { key: 'subscription_available', label: 'Subscription Available', type: 'switch' },
-  ],
-};
+// Category-specific questions come from GET /api/v1/categories/catalog
+// (backend/app/core/category_catalog.py) — the same list the mobile app uses.
+// Picking a category opens a Details step: first its subcategory, then that
+// subcategory's own questions, sent as `subcategory_slug` + `category_details`.
 
 // Copy for the generic Listing step (Title/Description/Price) — tailored per
 // category so it reads like it's actually about a PG, a job, a course, etc.,
@@ -230,13 +156,14 @@ interface FormData {
   area: string;
   latitude?: number;
   longitude?: number;
+  subcategory_slug: string;
   category_details: Record<string, unknown>;
 }
 
 const EMPTY: FormData = {
   title: '', description: '', category_id: '', price: '',
   contact_phone: '', whatsapp_toggle: true,
-  website_url: '', social_url: '', area: '', category_details: {},
+  website_url: '', social_url: '', area: '', subcategory_slug: '', category_details: {},
 };
 
 const PHONE_RE = /^\+91[6-9]\d{9}$/;
@@ -249,6 +176,8 @@ export default function PostListingPage() {
   const [form, setForm] = useState<FormData>(EMPTY);
   const [errors, setErrors] = useState<Partial<FormData>>({});
   const [categories, setCategories] = useState<Category[]>([]);
+  const [catalog, setCatalog] = useState<CatalogCategory[]>([]);
+  const [detailErrors, setDetailErrors] = useState<Record<string, string>>({});
   const [showMapPicker, setShowMapPicker] = useState(false);
   const { cities } = usePrefs();
 
@@ -273,8 +202,13 @@ export default function PostListingPage() {
   // questions — those get a dedicated step, separate from the generic
   // Title/Description step, instead of both living on one scrollable screen.
   const selectedCategory = categories.find(c => c.id === form.category_id) ?? null;
-  const detailFields = selectedCategory ? CATEGORY_DETAIL_FIELDS[selectedCategory.slug] ?? null : null;
-  const hasDetailsStep = !!detailFields;
+  // Events/Businesses have subcategories for the directory but no posting
+  // questions, so only categories whose subcategories ask something get a step.
+  const subcategories = (catalog.find(c => c.slug === selectedCategory?.slug)?.subcategories ?? [])
+    .filter(sc => sc.questions.length > 0);
+  const selectedSub = subcategories.find(sc => sc.slug === form.subcategory_slug) ?? null;
+  const detailFields: CatalogQuestion[] | null = selectedSub ? selectedSub.questions : null;
+  const hasDetailsStep = subcategories.length > 0;
   const STEPS = hasDetailsStep
     ? [
         { label: 'Category', desc: 'What are you posting?' },
@@ -294,7 +228,15 @@ export default function PostListingPage() {
   const STEP_LISTING = hasDetailsStep ? 2 : 1;
   const STEP_PHOTOS = STEP_LISTING + 1;
   const STEP_CONTACT = STEP_PHOTOS + 1;
-  const listingCopy = (selectedCategory ? LISTING_COPY[selectedCategory.slug] : null) ?? LISTING_COPY.classifieds;
+  const baseCopy = (selectedCategory ? LISTING_COPY[selectedCategory.slug] : null) ?? LISTING_COPY.classifieds;
+  // A subcategory can relabel the price ("Monthly Rent", "Price per plate"…),
+  // hide it, or give a better title example.
+  const listingCopy: ListingCopy = {
+    ...baseCopy,
+    ...(selectedSub?.price_label ? { priceLabel: selectedSub.price_label } : {}),
+    ...(selectedSub?.show_price === false ? { showPrice: false } : {}),
+    ...(selectedSub?.title_placeholder ? { titlePlaceholder: selectedSub.title_placeholder } : {}),
+  };
 
   useEffect(() => {
     if (!localStorage.getItem('access_token')) {
@@ -308,13 +250,15 @@ export default function PostListingPage() {
         // Merge with EMPTY so any field missing from an older draft version gets a safe default.
         // category_details must always be an object — if absent from the stored draft, accessing
         // category_details[key] in the field renderer throws "Cannot read properties of undefined".
-        setForm({ ...EMPTY, ...draft, category_details: draft.category_details ?? {} });
+        setForm({ ...EMPTY, ...draft, category_details: draft.category_details ?? {}, subcategory_slug: draft.subcategory_slug ?? '' });
       } catch {
         // Corrupted JSON — discard the draft rather than crash on every page load
         localStorage.removeItem('li_post_form');
       }
     }
     api.categories.list().then(setCategories).catch(() => {});
+    // Without the catalog the form still works — it just skips the Details step.
+    api.categories.catalog().then(setCatalog).catch(() => {});
     try {
       const u = JSON.parse(localStorage.getItem('user') ?? '{}');
       if (u.phone) setForm(f => ({ ...f, contact_phone: u.phone }));
@@ -329,79 +273,7 @@ export default function PostListingPage() {
 
   const setDetailField = (key: string, value: unknown) => {
     save({ category_details: { ...form.category_details, [key]: value } });
-  };
-
-  const renderDetailField = (field: DetailField) => {
-    const value = form.category_details[field.key];
-
-    if (field.type === 'select' || field.type === 'multiselect') {
-      const selected: string[] = field.type === 'multiselect'
-        ? (Array.isArray(value) ? value as string[] : [])
-        : (typeof value === 'string' && value ? [value] : []);
-      return (
-        <div>
-          <p className="text-sm font-bold mb-2" style={{ color: 'var(--li-text)' }}>{field.label}</p>
-          <div className="flex flex-wrap gap-2">
-            {field.options.map(opt => {
-              const active = selected.includes(opt);
-              return (
-                <button
-                  key={opt}
-                  type="button"
-                  onClick={() => {
-                    if (field.type === 'multiselect') {
-                      const next = active ? selected.filter(o => o !== opt) : [...selected, opt];
-                      setDetailField(field.key, next);
-                    } else {
-                      setDetailField(field.key, opt);
-                    }
-                  }}
-                  className="px-3 py-1.5 rounded-full text-sm font-semibold border-2 transition-all"
-                  style={active
-                    ? { borderColor: 'var(--li-primary)', background: 'var(--li-primary-light)', color: 'var(--li-primary)' }
-                    : { borderColor: 'var(--li-border)', color: 'var(--li-muted)' }}
-                >
-                  {opt}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      );
-    }
-
-    if (field.type === 'switch') {
-      return (
-        <div className="flex items-center justify-between">
-          <p className="text-sm font-bold" style={{ color: 'var(--li-text)' }}>{field.label}</p>
-          <button
-            type="button"
-            onClick={() => setDetailField(field.key, !value)}
-            className="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors duration-200 focus:outline-none"
-            style={{ background: value ? 'var(--li-wa-green)' : '#D1D5DB' }}
-          >
-            <span
-              className="inline-block h-5 w-5 rounded-full bg-white shadow-md transition-transform duration-200"
-              style={{ transform: value ? 'translateX(22px)' : 'translateX(2px)' }}
-            />
-          </button>
-        </div>
-      );
-    }
-
-    return (
-      <div>
-        <label className="text-sm font-bold mb-2 block" style={{ color: 'var(--li-text)' }}>{field.label}</label>
-        <input
-          type={field.type === 'number' ? 'number' : 'text'}
-          value={value != null ? String(value) : ''}
-          onChange={e => setDetailField(field.key, e.target.value)}
-          placeholder={field.placeholder}
-          className="w-full rounded-xl px-4 py-3 text-sm outline-none focus:border-orange-400 transition-colors"
-          style={{ border: '2px solid var(--li-border)', color: 'var(--li-text)' }}
-        />
-      </div>
-    );
+    if (detailErrors[key]) setDetailErrors(prev => { const next = { ...prev }; delete next[key]; return next; });
   };
 
   const validateCategoryStep = () => {
@@ -409,6 +281,15 @@ export default function PostListingPage() {
     if (!form.category_id) e.category_id = 'Please pick a category';
     setErrors(e);
     if (Object.keys(e).length > 0) toast.error('Pick a category to continue');
+    return Object.keys(e).length === 0;
+  };
+
+  // Same rules as the backend's validate_answers (see DetailQuestions)
+  const validateDetailsStep = () => {
+    const e = checkAnswers(selectedSub, form.category_details);
+    setDetailErrors(e);
+    if (e._sub) toast.error(e._sub);
+    else if (Object.keys(e).length > 0) toast.error('Please answer the marked questions');
     return Object.keys(e).length === 0;
   };
 
@@ -438,19 +319,9 @@ export default function PostListingPage() {
     return Object.keys(e).length === 0;
   };
 
-  const buildCategoryDetailsPayload = (): Record<string, unknown> | null => {
-    if (!detailFields) return null;
-    const out: Record<string, unknown> = {};
-    for (const f of detailFields) {
-      const v = form.category_details[f.key];
-      if (v === undefined || v === null || v === '' || (Array.isArray(v) && v.length === 0)) continue;
-      out[f.key] = f.type === 'number' ? Number(v) : v;
-    }
-    return Object.keys(out).length > 0 ? out : null;
-  };
-
   const handleNext = () => {
     if (step === STEP_CATEGORY && !validateCategoryStep()) return;
+    if (step === STEP_DETAILS && !validateDetailsStep()) return;
     if (step === STEP_LISTING && !validateListingStep()) return;
     // Photo-first: ask once before letting someone continue with no photos
     if (step === STEP_PHOTOS && photos.length === 0 && !skipPhotosAsked) {
@@ -501,7 +372,8 @@ export default function PostListingPage() {
         area: form.area.trim() || undefined,
         latitude: form.latitude,
         longitude: form.longitude,
-        category_details: buildCategoryDetailsPayload(),
+        subcategory_slug: selectedSub?.slug,
+        category_details: answersPayload(detailFields, form.category_details),
       }, token);
 
       for (const photo of photos) {
@@ -634,7 +506,11 @@ export default function PostListingPage() {
                         key={cat.id}
                         whileHover={{ y: -2 }}
                         whileTap={{ scale: 0.97 }}
-                        onClick={() => save({ category_id: cat.id, category_details: {} })}
+                        onClick={() => {
+                          if (cat.id === form.category_id) return;
+                          setDetailErrors({});
+                          save({ category_id: cat.id, subcategory_slug: '', category_details: {} });
+                        }}
                         className="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all"
                         style={
                           isActive
@@ -668,7 +544,7 @@ export default function PostListingPage() {
           )}
 
           {/* ── STEP: CATEGORY-SPECIFIC DETAILS (only for categories with their own questions) ── */}
-          {hasDetailsStep && step === STEP_DETAILS && detailFields && selectedCategory && (
+          {hasDetailsStep && step === STEP_DETAILS && selectedCategory && (
             <motion.div
               key="stepDetails"
               initial={{ opacity: 0, x: 20 }}
@@ -681,13 +557,16 @@ export default function PostListingPage() {
                   {selectedCategory.name} details
                 </h2>
                 <p className="text-sm mb-5" style={{ color: 'var(--li-muted)' }}>
-                  A few quick questions specific to this category.
+                  What kind is it? We&apos;ll ask the questions buyers care about for that.
                 </p>
-                <div className="space-y-5">
-                  {detailFields.map(field => (
-                    <div key={field.key}>{renderDetailField(field)}</div>
-                  ))}
-                </div>
+                <DetailQuestions
+                  subcategories={subcategories}
+                  subSlug={form.subcategory_slug}
+                  answers={form.category_details}
+                  errors={detailErrors}
+                  onSubChange={(slug, kept) => { setDetailErrors({}); save({ subcategory_slug: slug, category_details: kept }); }}
+                  onAnswer={setDetailField}
+                />
               </div>
             </motion.div>
           )}

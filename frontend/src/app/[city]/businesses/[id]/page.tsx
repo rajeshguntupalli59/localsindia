@@ -115,7 +115,7 @@ export default async function Page({ params }: { params: { city: string; id: str
       )}
       <BusinessDetailClient
         initial={b}
-        subtitle={b ? `${CATEGORY_LABEL[b.category_slug ?? ''] ?? 'Local business'} in ${b.locality ? `${b.locality}, ` : ''}${city}` : undefined}
+        subtitle={b ? `${b.subcategory_name ?? CATEGORY_LABEL[b.category_slug ?? ''] ?? 'Local business'} in ${b.locality ? `${b.locality}, ` : ''}${city}` : undefined}
       />
       {/* Server-rendered so every business page links to its neighbours */}
       {related.length > 0 && seoMeta && (

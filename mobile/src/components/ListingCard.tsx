@@ -54,6 +54,7 @@ interface Listing {
   created_at?: string;
   view_count?: number;
   images?: { id: string; url: string; display_order: number }[];
+  detail_rows?: { key: string; label: string; value: string }[];
 }
 
 interface Props {
@@ -62,6 +63,7 @@ interface Props {
 }
 
 export default function ListingCard({ listing, onPress }: Props) {
+  const chips = (listing.detail_rows ?? []).map(r => r.value).filter(v => v.length <= 20).slice(0, 3);
   const image     = listing.images?.[0];
   const catColor  = CATEGORY_COLORS[listing.category_slug ?? ''] ?? '#94a3b8';
   const catIcon   = CATEGORY_ICONS[listing.category_slug ?? ''] ?? 'pricetag';
@@ -169,6 +171,11 @@ export default function ListingCard({ listing, onPress }: Props) {
 
           {/* Title */}
           <Text style={styles.title} numberOfLines={2}>{listing.title}</Text>
+
+          {/* Key answers (fuel, BHK, km…) from the category's questions */}
+          {chips.length > 0 ? (
+            <Text style={styles.chipsLine} numberOfLines={1}>{chips.join(' · ')}</Text>
+          ) : null}
 
           {/* Meta row */}
           <View style={styles.metaRow}>
@@ -383,6 +390,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     marginBottom: 6,
   },
+  chipsLine: { fontSize: 11, fontWeight: '600', color: '#ea580c', marginTop: 4 },
   metaRow: {
     flexDirection: 'row',
     alignItems: 'center',

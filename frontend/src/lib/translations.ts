@@ -55,6 +55,12 @@ export interface UIDict {
     events:     string;
     businesses: string;
     education:  string;
+    doctors:    string;
+    services:   string;
+    realEstate: string;
+    furniture:  string;
+    fashion:    string;
+    classifieds:string;
   };
   sort: {
     newest:       string;
@@ -126,7 +132,7 @@ const DICTS: Record<LangCode, UIDict> = {
     city:   { select: 'Select City', search: 'Search city...', recent: 'Recent', locate: 'Use my location', notFound: 'No cities match "{query}"' },
     search: { placeholder: 'Search tiffin, PG, tutor...' },
     listing:{ priceOnRequest: 'Price on request', featured: 'Featured', sold: 'Sold', activeOnWA: 'Active on WA', chatOnWA: 'Chat on WhatsApp', viewAll: 'View all →', viewAllListings: 'View all listings →', noListings: 'No listings yet', beFirst: 'Be the first to post in your city!', postListing: '+ Post a Listing' },
-    categories: { all: 'All', tiffin: 'Tiffin', pgRooms: 'PG / Rooms', jobs: 'Jobs', vehicles: 'Vehicles', electronics: 'Electronics', events: 'Events', businesses: 'Businesses', education: 'Education' },
+    categories: { all: 'All', tiffin: 'Tiffin', pgRooms: 'PG / Rooms', jobs: 'Jobs', vehicles: 'Vehicles', electronics: 'Electronics', events: 'Events', businesses: 'Businesses', education: 'Education', doctors: 'Doctors', services: 'Services', realEstate: 'Real Estate', furniture: 'Furniture', fashion: 'Fashion', classifieds: 'Classifieds' },
     sort:   { newest: 'Newest First', priceAsc: 'Price: Low to High', priceDesc: 'Price: High to Low', featuredFirst: 'Featured First' },
     city2:  { discover: 'Discover', activeListings: '{count} active listings · updated just now', featuredListings: 'Featured Listings', latestListings: 'Latest Listings' },
     bottomNav: { home: 'Home', search: 'Search', post: 'Post', myListings: 'My Listings', profile: 'Profile', signUp: 'Sign Up' },
@@ -168,7 +174,7 @@ const DICTS: Record<LangCode, UIDict> = {
     city:   { select: 'నగరం ఎంచుకోండి', search: 'నగరం వెతకండి...', recent: 'ఇటీవలి', locate: 'నా లొకేషన్', notFound: '"{query}" తో నగరాలు దొరకలేదు' },
     search: { placeholder: 'టిఫిన్, PG, ట్యూటర్ వెతకండి...' },
     listing:{ priceOnRequest: 'ధర అడగండి', featured: 'ఫీచర్డ్', sold: 'అమ్ముడైంది', activeOnWA: 'WA లో చురుకు', chatOnWA: 'WhatsApp లో చాట్ చేయి', viewAll: 'అన్నీ చూడు →', viewAllListings: 'అన్ని లిస్టింగ్‌లు చూడు →', noListings: 'ఇంకా లిస్టింగ్‌లు లేవు', beFirst: 'మీ నగరంలో మొదటిగా పోస్ట్ చేయండి!', postListing: '+ లిస్టింగ్ పోస్ట్ చేయి' },
-    categories: { all: 'అన్నీ', tiffin: 'టిఫిన్', pgRooms: 'PG / గదులు', jobs: 'ఉద్యోగాలు', vehicles: 'వాహనాలు', electronics: 'ఎలక్ట్రానిక్స్', events: 'కార్యక్రమాలు', businesses: 'వ్యాపారాలు', education: 'విద్య' },
+    categories: { all: 'అన్నీ', tiffin: 'టిఫిన్', pgRooms: 'PG / గదులు', jobs: 'ఉద్యోగాలు', vehicles: 'వాహనాలు', electronics: 'ఎలక్ట్రానిక్స్', events: 'కార్యక్రమాలు', businesses: 'వ్యాపారాలు', education: 'విద్య', doctors: 'డాక్టర్లు', services: 'సేవలు', realEstate: 'రియల్ ఎస్టేట్', furniture: 'ఫర్నిచర్', fashion: 'ఫ్యాషన్', classifieds: 'ప్రకటనలు' },
     sort:   { newest: 'కొత్తవి ముందు', priceAsc: 'ధర: తక్కువ నుండి ఎక్కువ', priceDesc: 'ధర: ఎక్కువ నుండి తక్కువ', featuredFirst: 'ఫీచర్డ్ ముందు' },
     city2:  { discover: 'అన్వేషించండి', activeListings: '{count} చురుకు లిస్టింగ్‌లు · ఇప్పుడే అప్‌డేట్', featuredListings: 'ఫీచర్డ్ లిస్టింగ్‌లు', latestListings: 'తాజా లిస్టింగ్‌లు' },
     bottomNav: { home: 'హోమ్', search: 'వెతకండి', post: 'పోస్ట్', myListings: 'నా లిస్టింగ్‌లు', profile: 'ప్రొఫైల్', signUp: 'సైన్ అప్' },
@@ -210,7 +216,7 @@ const DICTS: Record<LangCode, UIDict> = {
     city:   { select: 'நகரம் தேர்வு', search: 'நகரம் தேடுக...', recent: 'சமீபத்திய', locate: 'என் இடம்', notFound: '"{query}" பொருந்தும் நகரங்கள் இல்லை' },
     search: { placeholder: 'டிஃபின், PG, டியூட்டர் தேடுக...' },
     listing:{ priceOnRequest: 'விலை கேட்கவும்', featured: 'சிறப்பு', sold: 'விற்றது', activeOnWA: 'WA இல் செயலில்', chatOnWA: 'WhatsApp இல் பேசுக', viewAll: 'அனைத்தும் காண →', viewAllListings: 'அனைத்து பட்டியல்கள் →', noListings: 'இன்னும் பட்டியல்கள் இல்லை', beFirst: 'உங்கள் நகரில் முதலில் பதிவிடுங்கள்!', postListing: '+ பட்டியல் இடுக' },
-    categories: { all: 'அனைத்தும்', tiffin: 'டிஃபின்', pgRooms: 'PG / அறைகள்', jobs: 'வேலைகள்', vehicles: 'வாகனங்கள்', electronics: 'மின்னணுவியல்', events: 'நிகழ்வுகள்', businesses: 'தொழில்கள்', education: 'கல்வி' },
+    categories: { all: 'அனைத்தும்', tiffin: 'டிஃபின்', pgRooms: 'PG / அறைகள்', jobs: 'வேலைகள்', vehicles: 'வாகனங்கள்', electronics: 'மின்னணுவியல்', events: 'நிகழ்வுகள்', businesses: 'தொழில்கள்', education: 'கல்வி', doctors: 'மருத்துவர்கள்', services: 'சேவைகள்', realEstate: 'ரியல் எஸ்டேட்', furniture: 'மரச்சாமான்கள்', fashion: 'ஃபேஷன்', classifieds: 'விளம்பரங்கள்' },
     sort:   { newest: 'புதியது முதலில்', priceAsc: 'விலை: குறைவிலிருந்து அதிகம்', priceDesc: 'விலை: அதிகத்திலிருந்து குறைவு', featuredFirst: 'சிறப்பு முதலில்' },
     city2:  { discover: 'கண்டுபிடி', activeListings: '{count} செயலில் பட்டியல்கள் · இப்போது புதுப்பிக்கப்பட்டது', featuredListings: 'சிறப்பு பட்டியல்கள்', latestListings: 'சமீபத்திய பட்டியல்கள்' },
     bottomNav: { home: 'முகப்பு', search: 'தேடு', post: 'இடுக', myListings: 'என் பட்டியல்கள்', profile: 'சுயவிவரம்', signUp: 'பதிவு' },
@@ -252,7 +258,7 @@ const DICTS: Record<LangCode, UIDict> = {
     city:   { select: 'ನಗರ ಆಯ್ಕೆ', search: 'ನಗರ ಹುಡುಕಿ...', recent: 'ಇತ್ತೀಚಿನ', locate: 'ನನ್ನ ಸ್ಥಳ', notFound: '"{query}" ಗೆ ಯಾವ ನಗರ ದೊರೆಯಲಿಲ್ಲ' },
     search: { placeholder: 'ಟಿಫಿನ್, PG, ಟ್ಯೂಟರ್ ಹುಡುಕಿ...' },
     listing:{ priceOnRequest: 'ಬೆಲೆ ಕೇಳಿ', featured: 'ವಿಶೇಷ', sold: 'ಮಾರಾಟವಾಯಿತು', activeOnWA: 'WA ನಲ್ಲಿ ಸಕ್ರಿಯ', chatOnWA: 'WhatsApp ನಲ್ಲಿ ಮಾತನಾಡಿ', viewAll: 'ಎಲ್ಲ ನೋಡಿ →', viewAllListings: 'ಎಲ್ಲ ಲಿಸ್ಟಿಂಗ್ ನೋಡಿ →', noListings: 'ಇನ್ನು ಲಿಸ್ಟಿಂಗ್‌ಗಳಿಲ್ಲ', beFirst: 'ನಿಮ್ಮ ನಗರದಲ್ಲಿ ಮೊದಲು ಪೋಸ್ಟ್ ಮಾಡಿ!', postListing: '+ ಲಿಸ್ಟಿಂಗ್ ಹಾಕಿ' },
-    categories: { all: 'ಎಲ್ಲ', tiffin: 'ಟಿಫಿನ್', pgRooms: 'PG / ಕೋಣೆ', jobs: 'ಉದ್ಯೋಗ', vehicles: 'ವಾಹನ', electronics: 'ಎಲೆಕ್ಟ್ರಾನಿಕ್ಸ್', events: 'ಕಾರ್ಯಕ್ರಮ', businesses: 'ವ್ಯವಹಾರ', education: 'ಶಿಕ್ಷಣ' },
+    categories: { all: 'ಎಲ್ಲ', tiffin: 'ಟಿಫಿನ್', pgRooms: 'PG / ಕೋಣೆ', jobs: 'ಉದ್ಯೋಗ', vehicles: 'ವಾಹನ', electronics: 'ಎಲೆಕ್ಟ್ರಾನಿಕ್ಸ್', events: 'ಕಾರ್ಯಕ್ರಮ', businesses: 'ವ್ಯವಹಾರ', education: 'ಶಿಕ್ಷಣ', doctors: 'ವೈದ್ಯರು', services: 'ಸೇವೆಗಳು', realEstate: 'ರಿಯಲ್ ಎಸ್ಟೇಟ್', furniture: 'ಪೀಠೋಪಕರಣ', fashion: 'ಫ್ಯಾಷನ್', classifieds: 'ಜಾಹೀರಾತುಗಳು' },
     sort:   { newest: 'ಹೊಸತು ಮೊದಲು', priceAsc: 'ಬೆಲೆ: ಕಡಿಮೆಯಿಂದ ಹೆಚ್ಚು', priceDesc: 'ಬೆಲೆ: ಹೆಚ್ಚಿನಿಂದ ಕಡಿಮೆ', featuredFirst: 'ವಿಶೇಷ ಮೊದಲು' },
     city2:  { discover: 'ಅನ್ವೇಷಿಸಿ', activeListings: '{count} ಸಕ್ರಿಯ ಲಿಸ್ಟಿಂಗ್ · ಇದೀಗ ಅಪ್‌ಡೇಟ್', featuredListings: 'ವಿಶೇಷ ಲಿಸ್ಟಿಂಗ್‌ಗಳು', latestListings: 'ಇತ್ತೀಚಿನ ಲಿಸ್ಟಿಂಗ್‌ಗಳು' },
     bottomNav: { home: 'ಮನೆ', search: 'ಹುಡುಕಿ', post: 'ಹಾಕಿ', myListings: 'ನನ್ನ ಲಿಸ್ಟಿಂಗ್', profile: 'ಪ್ರೊಫೈಲ್', signUp: 'ಸೈನ್ ಅಪ್' },
@@ -294,7 +300,7 @@ const DICTS: Record<LangCode, UIDict> = {
     city:   { select: 'നഗരം തിരഞ്ഞെടുക്കുക', search: 'നഗരം തിരയുക...', recent: 'സമീപകാലം', locate: 'എന്റെ സ്ഥലം', notFound: '"{query}" ക്ക് നഗരങ്ങൾ ലഭിച്ചില്ല' },
     search: { placeholder: 'ടിഫിൻ, PG, ട്യൂട്ടർ തിരയുക...' },
     listing:{ priceOnRequest: 'വില ആരായുക', featured: 'ഫീച്ചർഡ്', sold: 'വിൽക്കപ്പെട്ടു', activeOnWA: 'WA-ൽ സജീവം', chatOnWA: 'WhatsApp-ൽ സംസാരിക്കുക', viewAll: 'എല്ലാം കാണുക →', viewAllListings: 'എല്ലാ ലിസ്റ്റിംഗും →', noListings: 'ഇനിയും ലിസ്റ്റിംഗുകൾ ഇല്ല', beFirst: 'നിങ്ങളുടെ നഗരത്തിൽ ആദ്യം പോസ്റ്റ് ചെയ്യൂ!', postListing: '+ ലിസ്റ്റിംഗ് ചേർക്കുക' },
-    categories: { all: 'എല്ലാം', tiffin: 'ടിഫിൻ', pgRooms: 'PG / മുറികൾ', jobs: 'ജോലി', vehicles: 'വാഹനങ്ങൾ', electronics: 'ഇലക്ട്രോണിക്സ്', events: 'ഇവന്റുകൾ', businesses: 'ബിസിനസ്', education: 'വിദ്യാഭ്യാസം' },
+    categories: { all: 'എല്ലാം', tiffin: 'ടിഫിൻ', pgRooms: 'PG / മുറികൾ', jobs: 'ജോലി', vehicles: 'വാഹനങ്ങൾ', electronics: 'ഇലക്ട്രോണിക്സ്', events: 'ഇവന്റുകൾ', businesses: 'ബിസിനസ്', education: 'വിദ്യാഭ്യാസം', doctors: 'ഡോക്ടർമാർ', services: 'സേവനങ്ങൾ', realEstate: 'റിയൽ എസ്റ്റേറ്റ്', furniture: 'ഫർണിച്ചർ', fashion: 'ഫാഷൻ', classifieds: 'പരസ്യങ്ങൾ' },
     sort:   { newest: 'പുതിയത് ആദ്യം', priceAsc: 'വില: കുറഞ്ഞത് മുതൽ കൂടിയത്', priceDesc: 'വില: കൂടിയത് മുതൽ കുറഞ്ഞത്', featuredFirst: 'ഫീച്ചർഡ് ആദ്യം' },
     city2:  { discover: 'കണ്ടെത്തുക', activeListings: '{count} സജീവ ലിസ്റ്റിംഗ് · ഇപ്പോൾ അപ്‌ഡേറ്റ്', featuredListings: 'ഫീച്ചർഡ് ലിസ്റ്റിംഗുകൾ', latestListings: 'ഏറ്റവും പുതിയ ലിസ്റ്റിംഗുകൾ' },
     bottomNav: { home: 'ഹോം', search: 'തിരയുക', post: 'ചേർക്കുക', myListings: 'എന്റെ ലിസ്റ്റിംഗ്', profile: 'പ്രൊഫൈൽ', signUp: 'സൈൻ അപ്' },

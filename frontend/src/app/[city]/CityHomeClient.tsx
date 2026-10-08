@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   SearchX, Tag, UtensilsCrossed, Building2, Briefcase, Car,
   Smartphone, CalendarDays, Store, GraduationCap, Plus, AlertTriangle,
+  Stethoscope, Wrench, Home, Sofa, Shirt,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import Link from 'next/link';
@@ -97,13 +98,19 @@ export default function CityHomeClient({
   const CATEGORIES: CatDef[] = [
     { label: t('categories.all'),         slug: '',            icon: Tag },
     { label: t('categories.tiffin'),      slug: 'tiffin',      icon: UtensilsCrossed },
+    { label: t('categories.doctors'),     slug: 'doctors',     icon: Stethoscope },
     { label: t('categories.pgRooms'),     slug: 'pg-roommate', icon: Building2 },
     { label: t('categories.jobs'),        slug: 'jobs',        icon: Briefcase },
+    { label: t('categories.education'),   slug: 'education',   icon: GraduationCap },
+    { label: t('categories.services'),    slug: 'services',    icon: Wrench },
     { label: t('categories.vehicles'),    slug: 'vehicles',    icon: Car },
     { label: t('categories.electronics'), slug: 'electronics', icon: Smartphone },
+    { label: t('categories.realEstate'),  slug: 'real-estate', icon: Home },
+    { label: t('categories.furniture'),   slug: 'furniture',   icon: Sofa },
+    { label: t('categories.fashion'),     slug: 'fashion',     icon: Shirt },
     { label: t('categories.events'),      slug: 'events',      icon: CalendarDays },
     { label: t('categories.businesses'),  slug: 'businesses',  icon: Store },
-    { label: t('categories.education'),   slug: 'education',   icon: GraduationCap },
+    { label: t('categories.classifieds'), slug: 'classifieds', icon: Tag },
   ];
 
   const [city, setCity] = useState<City | null>(initialCity);
@@ -184,7 +191,11 @@ export default function CityHomeClient({
   const handleCategoryClick = (slug: string) => {
     if (slug === 'events') { router.push(`/${citySlug}/events`); return; }
     if (slug === 'businesses') { router.push(`/${citySlug}/businesses`); return; }
-    if (slug) router.push(`/${citySlug}/search?category=${slug}`);
+    // Same as the mobile app: every other category opens its real businesses
+    // (listings alone are often empty in a new city). Classifieds has no
+    // business equivalent, so it stays a listing search.
+    if (slug === 'classifieds') { router.push(`/${citySlug}/search?category=${slug}`); return; }
+    if (slug) router.push(`/${citySlug}/businesses?category=${slug}`);
     else router.push(`/${citySlug}/search`);
   };
 

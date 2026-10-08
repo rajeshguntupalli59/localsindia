@@ -4,7 +4,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { businessesApi } from '../lib/api';
+import { businessesApi, categoriesApi } from '../lib/api';
+import type { CatalogEntry } from '../components/DetailQuestions';
 import { assignCovers } from '../lib/categoryCover';
 import { openStatus, parseOpeningHours } from '../lib/openingHours';
 import { siteImage } from '../lib/features';
@@ -18,6 +19,10 @@ export default function BusinessesScreen({ route, navigation }: any) {
   const { citySlug, cityName, categorySlug: initialCategory = '' } = route.params ?? {};
   const [category, setCategory] = useState<string>(initialCategory);
   const [counts, setCounts] = useState<Record<string, number>>({});
+  // Subcategory within the chosen category (Hospitals, Pharmacies…)
+  const [sub, setSub] = useState('');
+  const [catalog, setCatalog] = useState<CatalogEntry[]>([]);
+  const [subCounts, setSubCounts] = useState<Record<string, number>>({});
   const [businesses, setBusinesses] = useState<any[]>([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -27,14 +32,25 @@ export default function BusinessesScreen({ route, navigation }: any) {
 
   useEffect(() => {
     businessesApi.counts(citySlug).then(setCounts).catch(() => setCounts({}));
+    categoriesApi.catalog().then(setCatalog).catch(() => {});
   }, [citySlug]);
+
+  useEffect(() => {
+    setSubCounts({});
+    if (!category) return;
+    businessesApi.subcategoryCounts(citySlug, category).then(setSubCounts).catch(() => {});
+  }, [citySlug, category]);
+
+  const pickCategory = (slug: string) => { setCategory(slug); setSub(''); };
+  const subcategories = catalog.find(c => c.slug === category)?.subcategories ?? [];
 
   const load = useCallback(async (p: number) => {
     const id = ++requestId.current;
     p === 1 ? setLoading(true) : setLoadingMore(true);
     try {
       const data: any[] = await businessesApi.list(citySlug, {
-        category_slug: category || undefined, page: p, page_size: PAGE_SIZE,
+        category_slug: category || undefined, subcategory_slug: (category && sub) || undefined,
+        page: p, page_size: PAGE_SIZE,
       });
       if (id !== requestId.current) return;   // a newer filter was chosen meanwhile
       setBusinesses(prev => (p === 1 ? data : [...prev, ...data]));
@@ -45,7 +61,7 @@ export default function BusinessesScreen({ route, navigation }: any) {
     } finally {
       if (id === requestId.current) { setLoading(false); setLoadingMore(false); }
     }
-  }, [citySlug, category]);
+  }, [citySlug, category, sub]);
 
   useEffect(() => { load(1); }, [load]);
 
@@ -59,7 +75,8 @@ export default function BusinessesScreen({ route, navigation }: any) {
     // the chosen category first so it's visible, then by size
     .sort((a, b) => (b[0] === category ? 1 : 0) - (a[0] === category ? 1 : 0) || b[1] - a[1]);
   const total = Object.values(counts).reduce((a, b) => a + b, 0);
-  const title = category ? `${businessCategoryLabel(category)} in ${cityName}` : `Businesses in ${cityName}`;
+  const subName = subcategories.find(sc => sc.slug === sub)?.name;
+  const title = category ? `${subName ?? businessCategoryLabel(category)} in ${cityName}` : `Businesses in ${cityName}`;
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -78,19 +95,40 @@ export default function BusinessesScreen({ route, navigation }: any) {
 
       <View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
-          <TouchableOpacity style={[styles.chip, !category && styles.chipActive]} onPress={() => setCategory('')}>
+          <TouchableOpacity style={[styles.chip, !category && styles.chipActive]} onPress={() => pickCategory('')}>
             <Text style={[styles.chipText, !category && styles.chipTextActive]}>
               All{total ? ` (${total.toLocaleString('en-IN')})` : ''}
             </Text>
           </TouchableOpacity>
           {chips.map(([slug, n]) => (
-            <TouchableOpacity key={slug} style={[styles.chip, category === slug && styles.chipActive]} onPress={() => setCategory(slug)}>
+            <TouchableOpacity key={slug} style={[styles.chip, category === slug && styles.chipActive]} onPress={() => pickCategory(slug)}>
               <Text style={[styles.chipText, category === slug && styles.chipTextActive]}>
                 {BUSINESS_CATEGORY_LABEL[slug]} ({n.toLocaleString('en-IN')})
               </Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
+        {!!category && subcategories.length > 0 && (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={[styles.chips, { paddingTop: 0 }]}>
+            {[{ slug: '', name: 'All types' }, ...subcategories].map(sc => {
+              const active = sub === sc.slug;
+              const n = sc.slug ? subCounts[sc.slug] : undefined;
+              return (
+                <TouchableOpacity
+                  key={sc.slug || 'all'}
+                  style={[styles.subChip, active && styles.chipActive]}
+                  onPress={() => setSub(sc.slug)}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: active }}
+                >
+                  <Text style={[styles.subChipText, active && styles.chipTextActive]}>
+                    {sc.name}{n ? ` (${n.toLocaleString('en-IN')})` : ''}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        )}
       </View>
 
       {loading ? (
@@ -144,7 +182,7 @@ export default function BusinessesScreen({ route, navigation }: any) {
                     {item.verified && <Ionicons name="checkmark-circle" size={15} color="#2563eb" />}
                   </View>
                   <Text style={styles.category} numberOfLines={1}>
-                    {businessCategoryLabel(item.category_slug)}
+                    {item.subcategory_name ?? businessCategoryLabel(item.category_slug)}
                     {status ? <Text style={{ color: status.open ? '#059669' : '#dc2626' }}>  ·  {status.open ? 'Open now' : 'Closed'}</Text> : null}
                   </Text>
                   {item.review_count > 0 && !!item.avg_rating && (
@@ -177,6 +215,8 @@ const styles = StyleSheet.create({
   chipActive: { borderColor: '#f97316', backgroundColor: '#fff7ed' },
   chipText: { fontSize: 13, color: '#4b5563', fontWeight: '600' },
   chipTextActive: { color: '#c2410c' },
+  subChip: { borderWidth: 1, borderColor: '#e5e7eb', backgroundColor: '#f9fafb', borderRadius: 999, paddingHorizontal: 10, paddingVertical: 5 },
+  subChipText: { fontSize: 12, color: '#4b5563', fontWeight: '500' },
   addButton: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
     borderWidth: 1, borderColor: '#bfdbfe', backgroundColor: '#eff6ff', paddingVertical: 10, borderRadius: 12, marginBottom: 2,

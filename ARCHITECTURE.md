@@ -301,6 +301,8 @@ Every classified ad posted on the platform. This is the most important table.
 | `user_id` | FK->users | Who posted it |
 | `city_id` | FK->cities | Which city |
 | `category_id` | FK->categories | What type of listing |
+| `subcategory_slug` | String(60), nullable | Subcategory, e.g. `homes-for-rent` — defined in `core/category_catalog.py`, not a `categories` row (2026-10-08) |
+| `attributes` | JSONB, nullable, GIN index | Answers to the subcategory's posting questions (BHK, fuel…); API name `category_details`. Replaced the 11 `*_details` tables (now legacy, copied over by migration `d1e2f3a4b5c6`) |
 | `title` | String(150) | "1 BHK Flat for Rent - Madhapur" |
 | `description` | Text | Full details |
 | `price` | Numeric(12,2) | Rs. amount, nullable = "Price on request" |
@@ -582,13 +584,14 @@ Also `GET /api/v1/admin/errors` (admin-only, see Admin section below) — lists 
 | Method | Path | What it does |
 |--------|------|-------------|
 | GET | `/` | All parent categories (sorted by sort_order) |
+| GET | `/catalog` | Each category with its subcategories and their posting questions (`core/category_catalog.py`) — web + mobile build the post form, type chips and filters from it (2026-10-08) |
 
 ### Listings: `/api/v1`
 
 | Method | Path | What it does | Auth? |
 |--------|------|-------------|-------|
 | GET | `/cities/{slug}/listings` | Listings for a city (filter by category, status, page); optional `lat`/`lng` (2026-07-16) sorts by real Haversine distance, unlocated listings kept via `NULLS LAST` rather than dropped; `q` OR-matches per word (fixed 2026-07-16 — was AND-matching every word, so one filler word could zero out an otherwise-exact match) | No |
-| POST | `/listings` | Create listing (status='pending'); body may include `category_details` (2026-07-21) — validated against the category's schema and persisted to the matching `*_details` table (no-op for Classifieds/Businesses/Events) | Yes |
+| POST | `/listings` | Create listing (status='pending'); body may include `subcategory_slug` + `category_details` — validated by `category_catalog.validate_answers` (required, options, ranges) and stored in `listings.attributes` (2026-10-08; was per-category `*_details` tables). Responses carry `detail_rows` (labelled answers) and `subcategory_name`. PATCH accepts the same two fields. City listings accept `subcategory_slug` and `f_<key>` / `f_<key>_min` / `f_<key>_max` answer filters | Yes |
 | GET | `/listings/mine` | My listings (all statuses); includes `category_details` per listing | Yes |
 | GET | `/listings/{id}` | Single listing detail; includes `category_details` if the category has any | No |
 | PATCH | `/listings/{id}` | Update listing (owner only) | Yes |
@@ -641,6 +644,7 @@ Also `GET /api/v1/admin/errors` (admin-only, see Admin section below) — lists 
 | GET | `/businesses/locality-pages` | Area pages with 3+ businesses (city-wide + per category), optional city_slug; feeds sitemap-areas.xml | Public |
 | POST | `/admin/businesses/import/localities` | Bulk-set business neighbourhoods (from agents/assign_localities.py) | Admin |
 | POST | `/admin/businesses/import/hours` | Backfill OSM opening hours by source_ref (never overwrites) | Admin |
+| POST | `/admin/businesses/import/subcategories` | Backfill subcategory by source_ref from OSM tags (only empty ones, only a subcategory of the business's category) | Admin |
 | POST | `/businesses/{id}/reviews` | Add review (recalculates avg_rating) | Yes |
 | POST | `/businesses/{id}/view` | Fire-and-forget view-count event (feeds analytics below) | No |
 | POST | `/businesses/{id}/wa-click` | Fire-and-forget WhatsApp-click event (feeds analytics below) | No |

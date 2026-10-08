@@ -35,6 +35,14 @@ class ImportedBusiness(BaseModel):
     latitude: float | None = None
     longitude: float | None = None
     opening_hours: str | None = Field(default=None, max_length=255)
+    subcategory_slug: str | None = Field(default=None, max_length=60)
+
+
+def _fits(category_slug: str, subcategory_slug: str | None) -> str | None:
+    """The subcategory if it belongs to the category (app/core/category_catalog.py), else None."""
+    from app.core.category_catalog import subcategory_entry
+    sub = subcategory_entry(subcategory_slug)
+    return subcategory_slug if sub and sub[0] == category_slug else None
 
 
 class ImportRequest(BaseModel):
@@ -84,6 +92,7 @@ async def import_businesses(
             latitude=b.latitude,
             longitude=b.longitude,
             opening_hours=b.opening_hours,
+            subcategory_slug=_fits(b.category_slug, b.subcategory_slug),
             source=body.source,
             source_ref=b.source_ref,
         ))
@@ -221,3 +230,40 @@ async def backfill_opening_hours(
         b.opening_hours = wanted[b.source_ref]
     await db.commit()
     return {"updated": len(rows), "skipped": len(body.items) - len(rows)}
+
+
+class SubcategoryItem(BaseModel):
+    source_ref: str = Field(max_length=40)
+    subcategory_slug: str = Field(max_length=60)
+
+
+class SubcategoryRequest(BaseModel):
+    items: list[SubcategoryItem]
+
+
+@router.post("/businesses/import/subcategories")
+async def backfill_subcategories(
+    body: SubcategoryRequest,
+    db: AsyncSession = Depends(get_db),
+    admin: User = Depends(get_current_admin),
+):
+    """Set the subcategory (Hospitals, Pharmacies…) on already-imported
+    businesses from their OpenStreetMap tags. Only fills businesses that have
+    none yet, and only with a subcategory of the business's own category."""
+    if len(body.items) > 2000:
+        raise HTTPException(status_code=400, detail="Send at most 2000 items per request.")
+    wanted = {i.source_ref: i.subcategory_slug for i in body.items}
+    rows = (await db.execute(
+        select(Business, Category.slug)
+        .join(Category, Category.id == Business.category_id)
+        .where(Business.source_ref.in_(wanted), Business.subcategory_slug.is_(None),
+               Business.deleted_at.is_(None))
+    )).all()
+    updated = 0
+    for b, cat_slug in rows:
+        sub = _fits(cat_slug, wanted[b.source_ref])
+        if sub:
+            b.subcategory_slug = sub
+            updated += 1
+    await db.commit()
+    return {"updated": updated, "skipped": len(body.items) - updated}

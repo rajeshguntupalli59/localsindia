@@ -289,7 +289,7 @@ export default function BusinessDetailScreen({ route, navigation }: any) {
 
           {business.category_slug && (
             <View style={styles.categoryChip}>
-              <Text style={styles.categoryText}>{businessCategoryLabel(business.category_slug)}</Text>
+              <Text style={styles.categoryText}>{business.subcategory_name ?? businessCategoryLabel(business.category_slug)}</Text>
             </View>
           )}
 

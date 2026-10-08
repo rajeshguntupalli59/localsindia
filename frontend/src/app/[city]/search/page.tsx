@@ -7,7 +7,7 @@ import { Search, SearchX, X, ChevronDown, ChevronUp, Tag, UtensilsCrossed, Build
 import type { LucideIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { api, ApiError } from '@/lib/api';
-import type { Category, SearchResult } from '@/lib/types';
+import type { CatalogCategory, Category, SearchResult } from '@/lib/types';
 import SiteHeader from '@/components/site-header/SiteHeader';
 import SiteFooter from '@/components/site-footer/SiteFooter';
 import ListingCard from '@/components/listing-card/ListingCard';
@@ -16,6 +16,7 @@ import ListingCardSkeleton from '@/components/listing-card/ListingCardSkeleton';
 import EmptyState from '@/components/empty-state/EmptyState';
 import { searchHeading } from '@/lib/utils';
 import CategoryBusinesses from '@/components/category-businesses/CategoryBusinesses';
+import AnswerFilters, { answerApiParams, hasAnswerFilters, withoutAnswerFilters } from '@/components/answer-filters/AnswerFilters';
 
 const PAGE_SIZE = 12;
 const CATEGORY_ICONS: Record<string, LucideIcon> = {
@@ -42,7 +43,11 @@ function SearchInner() {
 
   const [result, setResult] = useState<SearchResult | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [catalog, setCatalog] = useState<CatalogCategory[]>([]);
   const [loading, setLoading] = useState(true);
+  // Subcategory (`sub`) + answer filters (`f_*`) — the listings endpoint
+  // applies them; the text-search endpoint doesn't, so they switch to it.
+  const answerQuery = JSON.stringify(answerApiParams(new URLSearchParams(searchParams.toString())));
 
   // sidebar filter state
   const [localCat, setLocalCat] = useState(catParam);
@@ -76,9 +81,12 @@ function SearchInner() {
   const doSearch = useCallback(async () => {
     setLoading(true);
     try {
-      if (!q.trim()) {
-        // Browse mode — no query. Use city listings endpoint (supports category_slug + category_id).
-        const params: Record<string, string> = { status: 'active', sort: sortBy };
+      const answers: Record<string, string> = JSON.parse(answerQuery);
+      if (!q.trim() || (catParam && Object.keys(answers).length > 0)) {
+        // Browse mode, or answer filters — city listings endpoint (supports
+        // category, subcategory, f_* answer filters and a plain q).
+        const params: Record<string, string> = { status: 'active', sort: sortBy, ...answers };
+        if (q.trim()) params.q = q.trim();
         if (catParam) {
           if (isUUID(catParam)) params.category_id = catParam;
           else params.category_slug = catParam;
@@ -101,10 +109,11 @@ function SearchInner() {
     } finally {
       setLoading(false);
     }
-  }, [q, citySlug, catParam, page, sortBy]);
+  }, [q, citySlug, catParam, page, sortBy, answerQuery]);
 
   useEffect(() => {
     api.categories.list().then(setCategories).catch(() => {});
+    api.categories.catalog().then(setCatalog).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -113,7 +122,8 @@ function SearchInner() {
 
   const applyCategory = (catId: string) => {
     setLocalCat(catId);
-    const params = new URLSearchParams(searchParams.toString());
+    // Subcategory/answer filters belong to the old category's questions
+    const params = withoutAnswerFilters(new URLSearchParams(searchParams.toString()));
     if (catId) params.set('category', catId); else params.delete('category');
     params.set('page', '1');
     router.replace(`/${citySlug}/search?${params.toString()}`);
@@ -150,6 +160,7 @@ function SearchInner() {
     if (key === 'cat') { applyCategory(''); return; }
     if (key === 'price') { setPriceMin(''); setPriceMax(''); return; }
     if (key === 'date') { setDateRange(''); return; }
+    if (key === 'sub') { applyAnswerFilters(withoutAnswerFilters(new URLSearchParams(searchParams.toString()))); return; }
   };
 
   const filteredItems = result?.items.filter(l => {
@@ -165,11 +176,23 @@ function SearchInner() {
   const itemCovers = listingCovers(filteredItems);
 
   const totalPages = result ? Math.ceil(result.total / PAGE_SIZE) : 1;
-  const hasActiveFilters = localCat || priceMin || priceMax || dateRange;
+  const hasActiveFilters = localCat || priceMin || priceMax || dateRange || hasAnswerFilters(new URLSearchParams(searchParams.toString()));
 
   const activeCategorySlug = categories.find(c => c.id === localCat)?.slug
     ?? (catParam && !isUUID(catParam) ? catParam : undefined);
   const canSaveSearch = !!q.trim() || !!activeCategorySlug;
+  const activeCatalog = catalog.find(c => c.slug === activeCategorySlug) ?? null;
+  const applyAnswerFilters = (next: URLSearchParams) => {
+    next.set('page', '1');
+    router.replace(`/${citySlug}/search?${next.toString()}`);
+  };
+  const answerFilters = (
+    <AnswerFilters
+      category={activeCatalog}
+      params={new URLSearchParams(searchParams.toString())}
+      onChange={applyAnswerFilters}
+    />
+  );
 
   const saveSearch = async () => {
     const token = localStorage.getItem('access_token');
@@ -197,6 +220,8 @@ function SearchInner() {
   }
   if (priceMin || priceMax) activeChips.push({ label: `₹${priceMin || '0'} – ₹${priceMax || '∞'}`, key: 'price' });
   if (dateRange) activeChips.push({ label: DATE_OPTIONS.find(d => d.value === dateRange)?.label ?? dateRange, key: 'date' });
+  const activeSub = activeCatalog?.subcategories.find(sc => sc.slug === searchParams.get('sub'));
+  if (activeSub) activeChips.push({ label: activeSub.name, key: 'sub' });
 
   const cityLabel = citySlug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
   const heading = searchHeading(q, categories.find(c => c.id === localCat)?.name, cityLabel);
@@ -355,6 +380,13 @@ function SearchInner() {
               </AnimatePresence>
             </div>
 
+            {/* Subcategory + this category's own filters (BHK, fuel, salary…) */}
+            {activeCatalog && (
+              <div className="border-b px-5 py-4" style={{ borderColor: 'var(--li-border)' }}>
+                {answerFilters}
+              </div>
+            )}
+
             {/* Price filter */}
             <div className="border-b" style={{ borderColor: 'var(--li-border)' }}>
               <button
@@ -467,6 +499,12 @@ function SearchInner() {
                 );
               })}
             </div>
+
+            {activeCatalog && (
+              <div className="bg-white rounded-2xl border p-4" style={{ borderColor: 'var(--li-border)' }}>
+                {answerFilters}
+              </div>
+            )}
 
             {/* More filters toggle */}
             <button

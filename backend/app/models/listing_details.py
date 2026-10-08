@@ -1,4 +1,9 @@
 """
+LEGACY — no longer written or read. Since migration d1e2f3a4b5c6 the answers
+live in `listings.attributes` (JSONB), validated against
+app/core/category_catalog.py; that migration copied every row from these
+tables. Kept only so the tables stay in the schema until they're dropped.
+
 Category-specific structured details for a listing.
 
 Each table is a 1:1 extension of `listings` (one row per listing, only for

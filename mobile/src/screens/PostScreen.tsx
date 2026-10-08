@@ -11,6 +11,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { listingsApi, categoriesApi, citiesApi, businessesApi, eventsApi } from '../lib/api';
 import { storage } from '../lib/storage';
+import DetailQuestions, { answersPayload, checkAnswers, type CatalogEntry, type Question } from '../components/DetailQuestions';
 
 const CATEGORY_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
   tiffin:        'restaurant-outline',
@@ -52,84 +53,6 @@ const API_BASE = process.env.EXPO_PUBLIC_API_URL ?? 'https://localsindia-backend
 
 type Category = { id: string; name: string; slug: string; icon: string };
 
-// Category-specific questions shown on the Details step, right above the
-// generic Title/Description fields. Keys match the backend's per-category
-// *_details table columns (models/listing_details.py) 1:1, so these can be
-// sent straight through as `category_details` on create — no renaming layer.
-type DetailField =
-  | { key: string; label: string; type: 'text'; placeholder?: string }
-  | { key: string; label: string; type: 'number'; placeholder?: string }
-  | { key: string; label: string; type: 'select'; options: string[] }
-  | { key: string; label: string; type: 'multiselect'; options: string[] }
-  | { key: string; label: string; type: 'switch' };
-
-const CATEGORY_DETAIL_FIELDS: Record<string, DetailField[]> = {
-  vehicles: [
-    { key: 'brand', label: 'Brand', type: 'text', placeholder: 'e.g. Honda, Maruti Suzuki' },
-    { key: 'model', label: 'Model', type: 'text', placeholder: 'e.g. Activa 6G, Swift' },
-    { key: 'year', label: 'Year', type: 'number', placeholder: 'e.g. 2022' },
-    { key: 'km_driven', label: 'KM Driven', type: 'number', placeholder: 'e.g. 15000' },
-    { key: 'fuel_type', label: 'Fuel Type', type: 'select', options: ['Petrol', 'Diesel', 'Electric', 'CNG', 'Hybrid'] },
-    { key: 'transmission', label: 'Transmission', type: 'select', options: ['Manual', 'Automatic'] },
-    { key: 'owners_count', label: 'Number of Owners', type: 'number', placeholder: 'e.g. 1' },
-  ],
-  jobs: [
-    { key: 'company_name', label: 'Company Name', type: 'text', placeholder: 'e.g. Acme Pvt Ltd' },
-    { key: 'salary_min', label: 'Min Salary (₹/month)', type: 'number', placeholder: 'e.g. 15000' },
-    { key: 'salary_max', label: 'Max Salary (₹/month)', type: 'number', placeholder: 'e.g. 25000' },
-    { key: 'job_type', label: 'Job Type', type: 'select', options: ['Full-time', 'Part-time', 'Contract', 'Internship'] },
-    { key: 'experience_required', label: 'Experience Required', type: 'text', placeholder: 'e.g. 1-2 years' },
-    { key: 'work_mode', label: 'Work Mode', type: 'select', options: ['On-site', 'Remote', 'Hybrid'] },
-  ],
-  'pg-roommate': [
-    { key: 'room_type', label: 'Room Type', type: 'select', options: ['Single', 'Sharing', '1RK', '1BHK'] },
-    { key: 'gender_preference', label: 'Gender Preference', type: 'select', options: ['Male', 'Female', 'Any'] },
-    { key: 'deposit_amount', label: 'Deposit Amount (₹)', type: 'number', placeholder: 'e.g. 10000' },
-    { key: 'amenities', label: 'Amenities', type: 'multiselect', options: ['WiFi', 'AC', 'Food', 'Laundry', 'Parking'] },
-  ],
-  'real-estate': [
-    { key: 'property_type', label: 'Property Type', type: 'select', options: ['Apartment', 'Villa', 'Plot', 'Commercial'] },
-    { key: 'bhk', label: 'BHK', type: 'number', placeholder: 'e.g. 2' },
-    { key: 'sqft', label: 'Area (sq.ft)', type: 'number', placeholder: 'e.g. 1200' },
-    { key: 'furnishing', label: 'Furnishing', type: 'select', options: ['Furnished', 'Semi-furnished', 'Unfurnished'] },
-    { key: 'listing_type', label: 'Listing Type', type: 'select', options: ['Rent', 'Sale'] },
-  ],
-  electronics: [
-    { key: 'brand', label: 'Brand', type: 'text', placeholder: 'e.g. Samsung, Apple' },
-    { key: 'model', label: 'Model', type: 'text', placeholder: 'e.g. Galaxy S23' },
-    { key: 'condition', label: 'Condition', type: 'select', options: ['New', 'Like New', 'Good', 'Fair'] },
-    { key: 'warranty_remaining', label: 'Warranty Remaining', type: 'text', placeholder: 'e.g. 6 months' },
-  ],
-  furniture: [
-    { key: 'material', label: 'Material', type: 'text', placeholder: 'e.g. Wood, Metal' },
-    { key: 'dimensions', label: 'Dimensions', type: 'text', placeholder: 'e.g. 6ft x 4ft' },
-    { key: 'condition', label: 'Condition', type: 'select', options: ['New', 'Like New', 'Good', 'Fair'] },
-  ],
-  fashion: [
-    { key: 'brand', label: 'Brand', type: 'text', placeholder: 'e.g. Nike, Zara' },
-    { key: 'size', label: 'Size', type: 'text', placeholder: 'e.g. M, 32, UK 8' },
-    { key: 'gender', label: 'Gender', type: 'select', options: ['Men', 'Women', 'Unisex', 'Kids'] },
-  ],
-  education: [
-    { key: 'course_type', label: 'Course Type', type: 'text', placeholder: 'e.g. Spoken English, Maths Tuition' },
-    { key: 'mode', label: 'Mode', type: 'select', options: ['Online', 'Offline', 'Hybrid'] },
-    { key: 'duration', label: 'Duration', type: 'text', placeholder: 'e.g. 3 months' },
-  ],
-  doctors: [
-    { key: 'specialization', label: 'Specialization', type: 'text', placeholder: 'e.g. Dentist, Cardiologist' },
-    { key: 'consultation_fee', label: 'Consultation Fee (₹)', type: 'number', placeholder: 'e.g. 500' },
-    { key: 'available_timings', label: 'Available Timings', type: 'text', placeholder: 'e.g. Mon-Sat 10am-6pm' },
-  ],
-  services: [
-    { key: 'service_type', label: 'Service Type', type: 'text', placeholder: 'e.g. Plumber, Electrician' },
-    { key: 'experience_years', label: 'Experience (years)', type: 'number', placeholder: 'e.g. 5' },
-  ],
-  tiffin: [
-    { key: 'meal_type', label: 'Meal Type', type: 'select', options: ['Veg', 'Non-Veg', 'Both'] },
-    { key: 'delivery_area', label: 'Delivery Area', type: 'text', placeholder: 'e.g. Within 5km of Kukatpally' },
-    { key: 'subscription_available', label: 'Subscription Available', type: 'switch' },
-  ],
-};
 
 // Copy for the generic Listing step (Title/Description/Price) — tailored per
 // category so it reads like it's actually about a PG, a job, a course, etc.,
@@ -251,6 +174,8 @@ export default function PostScreen({ navigation, route }: any) {
   const [area, setArea] = useState('');
   const [categorySlug, setCategorySlug] = useState('');
   const [categoryDetails, setCategoryDetails] = useState<Record<string, any>>({});
+  const [subcategorySlug, setSubcategorySlug] = useState('');
+  const [catalog, setCatalog] = useState<CatalogEntry[]>([]);
   const [phone, setPhone] = useState('');
   const [whatsappOn, setWhatsappOn] = useState(true);
   const [websiteUrl, setWebsiteUrl] = useState('');
@@ -276,8 +201,15 @@ export default function PostScreen({ navigation, route }: any) {
   // Step layout depends on whether the picked category has its own specific
   // questions — those get a dedicated step, separate from the generic
   // Title/Description step, instead of both living on one scrollable screen.
-  const detailFields = CATEGORY_DETAIL_FIELDS[categorySlug] ?? null;
-  const hasDetailsStep = !!detailFields;
+  // Listing categories: subcategories that ask questions. Businesses: its
+  // directory types (Kirana, Hardware…) — they ask nothing, but a Business
+  // is created, so its type matters. Events use their own calendar form.
+  const allSubs = catalog.find(c => c.slug === categorySlug)?.subcategories ?? [];
+  const subcategories = categorySlug === 'businesses' ? allSubs
+    : categorySlug === 'events' ? [] : allSubs.filter(sc => sc.questions.length > 0);
+  const selectedSub = subcategories.find(sc => sc.slug === subcategorySlug) ?? null;
+  const detailFields: Question[] | null = selectedSub && selectedSub.questions.length > 0 ? selectedSub.questions : null;
+  const hasDetailsStep = subcategories.length > 0;
   const STEPS = hasDetailsStep
     ? ['Category', 'Details', 'Listing', 'Photos', 'Contact']
     : ['Category', 'Listing', 'Photos', 'Contact'];
@@ -286,7 +218,15 @@ export default function PostScreen({ navigation, route }: any) {
   const STEP_LISTING = hasDetailsStep ? 2 : 1;
   const STEP_PHOTOS = STEP_LISTING + 1;
   const STEP_CONTACT = STEP_PHOTOS + 1;
-  const listingCopy = LISTING_COPY[categorySlug] ?? LISTING_COPY.classifieds;
+  const baseCopy = LISTING_COPY[categorySlug] ?? LISTING_COPY.classifieds;
+  // A subcategory can relabel the price ("Monthly Rent", "Price per plate"…),
+  // hide it, or give a better title example.
+  const listingCopy: ListingCopy = {
+    ...baseCopy,
+    ...(selectedSub?.price_label ? { priceLabel: selectedSub.price_label } : {}),
+    ...(selectedSub?.show_price === false ? { showPrice: false } : {}),
+    ...(selectedSub?.title_placeholder ? { titlePlaceholder: selectedSub.title_placeholder } : {}),
+  };
 
   useEffect(() => {
     storage.getUser().then(u => {
@@ -303,6 +243,8 @@ export default function PostScreen({ navigation, route }: any) {
       Alert.alert('Could not load categories', 'Check your internet connection and try again.');
     });
     citiesApi.list().then(setCities).catch(() => {});
+    // Without the catalog the form still works — it just skips the Details step.
+    categoriesApi.catalog().then(setCatalog).catch(() => {});
     if (route?.params?.presetCategory) setCategorySlug(route.params.presetCategory);
   }, []);
 
@@ -393,8 +335,17 @@ export default function PostScreen({ navigation, route }: any) {
     return Object.keys(e).length === 0;
   };
 
+  // Same rules as the backend's validate_answers; the type is optional only
+  // for Businesses (directory entries, no questions).
+  const validateDetailsStep = () => {
+    const e = checkAnswers(selectedSub, categoryDetails, categorySlug !== 'businesses');
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
+
   const handleNext = () => {
     if (step === STEP_CATEGORY && !validateCategoryStep()) return;
+    if (step === STEP_DETAILS && !validateDetailsStep()) return;
     if (step === STEP_LISTING && !validateListingStep()) return;
     if (step === STEP_CONTACT) { submit(); return; }
     setErrors({});
@@ -403,83 +354,7 @@ export default function PostScreen({ navigation, route }: any) {
 
   const setDetailField = (key: string, value: any) => {
     setCategoryDetails(prev => ({ ...prev, [key]: value }));
-  };
-
-  const buildCategoryDetailsPayload = () => {
-    const fields = CATEGORY_DETAIL_FIELDS[categorySlug];
-    if (!fields) return null;
-    const out: Record<string, any> = {};
-    for (const f of fields) {
-      const v = categoryDetails[f.key];
-      if (v === undefined || v === null || v === '' || (Array.isArray(v) && v.length === 0)) continue;
-      out[f.key] = f.type === 'number' ? Number(v) : v;
-    }
-    return Object.keys(out).length > 0 ? out : null;
-  };
-
-  const renderDetailField = (field: DetailField) => {
-    const value = categoryDetails[field.key];
-
-    if (field.type === 'select' || field.type === 'multiselect') {
-      const selected: string[] = field.type === 'multiselect'
-        ? (Array.isArray(value) ? value : [])
-        : (value ? [value] : []);
-      return (
-        <>
-          <Text style={styles.label}>{field.label}</Text>
-          <View style={styles.chipRow}>
-            {field.options.map(opt => {
-              const active = selected.includes(opt);
-              return (
-                <TouchableOpacity
-                  key={opt}
-                  style={[styles.chip, active && styles.chipActive]}
-                  onPress={() => {
-                    if (field.type === 'multiselect') {
-                      const next = active ? selected.filter(o => o !== opt) : [...selected, opt];
-                      setDetailField(field.key, next);
-                    } else {
-                      setDetailField(field.key, opt);
-                    }
-                  }}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: active }}
-                >
-                  <Text style={[styles.chipText, active && styles.chipTextActive]}>{opt}</Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        </>
-      );
-    }
-
-    if (field.type === 'switch') {
-      return (
-        <View style={styles.detailSwitchRow}>
-          <Text style={[styles.label, { marginBottom: 0 }]}>{field.label}</Text>
-          <Switch
-            value={!!value}
-            onValueChange={v => setDetailField(field.key, v)}
-            trackColor={{ false: '#d1d5db', true: '#25D366' }}
-            thumbColor="white"
-          />
-        </View>
-      );
-    }
-
-    return (
-      <>
-        <Text style={styles.label}>{field.label}</Text>
-        <TextInput
-          style={styles.input}
-          value={value != null ? String(value) : ''}
-          onChangeText={t => setDetailField(field.key, field.type === 'number' ? t.replace(/[^0-9.]/g, '') : t)}
-          placeholder={field.placeholder}
-          keyboardType={field.type === 'number' ? 'numeric' : 'default'}
-        />
-      </>
-    );
+    if (errors[key]) setErrors(e => ({ ...e, [key]: '' }));
   };
 
   const uploadPhoto = async (
@@ -520,6 +395,8 @@ export default function PostScreen({ navigation, route }: any) {
         const business = await businessesApi.create({
           name: title.trim(),
           city_id: city.id,
+          category_id: categories.find(c => c.slug === 'businesses')?.id ?? null,
+          subcategory_slug: selectedSub?.slug ?? null,
           description: description.trim() || null,
           address: area.trim() || null,
           phone: `+91${phone}`,
@@ -590,7 +467,8 @@ export default function PostScreen({ navigation, route }: any) {
         social_url: socialUrl.trim() || null,
         latitude: location?.latitude ?? null,
         longitude: location?.longitude ?? null,
-        category_details: buildCategoryDetailsPayload(),
+        subcategory_slug: selectedSub?.slug ?? null,
+        category_details: answersPayload(detailFields, categoryDetails),
       });
 
       if (images.length > 0) {
@@ -654,6 +532,7 @@ export default function PostScreen({ navigation, route }: any) {
     setArea('');
     setCategorySlug('');
     setCategoryDetails({});
+    setSubcategorySlug('');
     setImages([]);
     setWebsiteUrl('');
     setSocialUrl('');
@@ -819,6 +698,7 @@ export default function PostScreen({ navigation, route }: any) {
                         active && styles.catCardActive,
                       ]}
                       onPress={() => {
+                        if (c.slug !== categorySlug) setSubcategorySlug('');
                         setCategorySlug(c.slug);
                         setCategoryDetails({});
                         setErrors(e => ({ ...e, category: '' }));
@@ -848,18 +728,26 @@ export default function PostScreen({ navigation, route }: any) {
         )}
 
         {/* ── STEP: CATEGORY-SPECIFIC DETAILS (only for categories with their own questions) ── */}
-        {hasDetailsStep && step === STEP_DETAILS && detailFields && (
+        {hasDetailsStep && step === STEP_DETAILS && (
           <>
             <View style={styles.card}>
               <Text style={styles.cardTitle}>
                 {categories.find(c => c.slug === categorySlug)?.name ?? 'Category'} details
               </Text>
-              <Text style={styles.cardSubtitle}>A few quick questions specific to this category.</Text>
-              {detailFields.map(field => (
-                <View key={field.key} style={{ marginTop: 14 }}>
-                  {renderDetailField(field)}
-                </View>
-              ))}
+              <Text style={styles.cardSubtitle}>
+                {categorySlug === 'businesses'
+                  ? 'What kind of shop is it? Customers browse by type.'
+                  : "What kind is it? We'll ask the questions buyers care about for that."}
+              </Text>
+              <DetailQuestions
+                subcategories={subcategories}
+                subSlug={subcategorySlug}
+                answers={categoryDetails}
+                errors={errors}
+                subRequired={categorySlug !== 'businesses'}
+                onSubChange={(slug, kept) => { setErrors({}); setSubcategorySlug(slug); setCategoryDetails(kept); }}
+                onAnswer={setDetailField}
+              />
             </View>
           </>
         )}
@@ -1384,19 +1272,6 @@ const styles = StyleSheet.create({
   catLabel: { fontSize: 10, color: 'white', fontWeight: '700', marginTop: 3, textAlign: 'center' },
 
   // Category-specific detail fields (select / multiselect chips, switch row)
-  chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  chip: {
-    paddingHorizontal: 14,
-    paddingVertical: 9,
-    borderRadius: 20,
-    borderWidth: 1.5,
-    borderColor: '#e5e7eb',
-    backgroundColor: '#fafafa',
-  },
-  chipActive: { borderColor: '#f97316', backgroundColor: '#fff7ed' },
-  chipText: { fontSize: 13, fontWeight: '600', color: '#6b7280' },
-  chipTextActive: { color: '#f97316' },
-  detailSwitchRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
 
   // Price
   priceRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },

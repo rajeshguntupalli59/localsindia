@@ -179,7 +179,7 @@ export default function ListingDetailScreen({ navigation, route }: any) {
           <View style={styles.metaTop}>
             {listing.category_name && (
               <View style={styles.catBadge}>
-                <Text style={styles.catBadgeText}>{listing.category_name}</Text>
+                <Text style={styles.catBadgeText}>{listing.subcategory_name ?? listing.category_name}</Text>
               </View>
             )}
             {listing.is_featured && (
@@ -227,6 +227,23 @@ export default function ListingDetailScreen({ navigation, route }: any) {
 
           {/* Divider */}
           <View style={styles.divider} />
+
+          {/* The seller's answers to the category's questions (BHK, fuel…),
+              labelled + formatted by the backend catalog */}
+          {listing.detail_rows?.length > 0 && (
+            <>
+              <Text style={styles.sectionLabel}>Details</Text>
+              <View style={styles.detailTable}>
+                {listing.detail_rows.map((r: { key: string; label: string; value: string }, i: number) => (
+                  <View key={r.key} style={[styles.detailRow, i === listing.detail_rows.length - 1 && { borderBottomWidth: 0 }]}>
+                    <Text style={styles.detailLabel}>{r.label}</Text>
+                    <Text style={styles.detailValue}>{r.value}</Text>
+                  </View>
+                ))}
+              </View>
+              <View style={styles.divider} />
+            </>
+          )}
 
           {/* Description */}
           <Text style={styles.sectionLabel}>Description</Text>
@@ -383,6 +400,13 @@ const styles = StyleSheet.create({
   waBadgeText: { color: '#16A34A', fontSize: 12, fontWeight: '700' },
 
   divider: { height: 1, backgroundColor: C.divider, marginVertical: 18 },
+  detailTable: { borderWidth: 1, borderColor: C.divider, borderRadius: 12, paddingHorizontal: 12 },
+  detailRow: {
+    flexDirection: 'row', justifyContent: 'space-between', gap: 12,
+    paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: C.divider,
+  },
+  detailLabel: { fontSize: 14, color: C.textMuted, flexShrink: 1 },
+  detailValue: { fontSize: 14, fontWeight: '700', color: C.textSub, flexShrink: 1, textAlign: 'right' },
   sectionLabel: {
     fontSize: 15, fontWeight: '800', color: C.text, marginBottom: 10,
   },

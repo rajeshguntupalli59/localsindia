@@ -19,6 +19,19 @@ from app.schemas.business import BusinessCreate, BusinessOut, BusinessUpdate, Re
 router = APIRouter(prefix="/api/v1", tags=["businesses"])
 
 
+async def _check_subcategory(db: AsyncSession, category_id: uuid.UUID | None, subcategory_slug: str | None) -> None:
+    """A business's subcategory must belong to its category (catalog in
+    app/core/category_catalog.py)."""
+    from app.core.category_catalog import subcategory_entry
+
+    if not subcategory_slug:
+        return
+    sub = subcategory_entry(subcategory_slug)
+    cat = (await db.execute(select(Category).where(Category.id == category_id))).scalar_one_or_none() if category_id else None
+    if not sub or not cat or sub[0] != cat.slug:
+        raise HTTPException(status_code=422, detail=f"'{subcategory_slug}' is not a subcategory of this business's category.")
+
+
 async def _get_active_business(business_id: uuid.UUID, db: AsyncSession) -> Business:
     result = await db.execute(
         select(Business)
@@ -36,6 +49,7 @@ async def list_businesses(
     city_slug: str = Query(...),
     category_id: uuid.UUID | None = Query(default=None),
     category_slug: str | None = Query(default=None),
+    subcategory_slug: str | None = Query(default=None, max_length=60),
     q: str | None = Query(default=None, max_length=100),
     locality_slug: str | None = Query(default=None, max_length=90),
     page: int = Query(default=1, ge=1),
@@ -67,6 +81,8 @@ async def list_businesses(
         stmt = stmt.where(Business.category_id == category_id)
     elif category_slug:
         stmt = stmt.join(Category, Category.id == Business.category_id).where(Category.slug == category_slug)
+    if subcategory_slug:
+        stmt = stmt.where(Business.subcategory_slug == subcategory_slug)
     if locality_slug:
         stmt = stmt.where(Business.locality_slug == locality_slug)
     if q and q.strip():
@@ -87,11 +103,13 @@ async def create_business(
     city_result = await db.execute(select(City).where(City.id == payload.city_id, City.active == True))
     if not city_result.scalar_one_or_none():
         raise HTTPException(status_code=404, detail="City not found.")
+    await _check_subcategory(db, payload.category_id, payload.subcategory_slug)
 
     business = Business(
         city_id=payload.city_id,
         owner_id=current_user.id,
         category_id=payload.category_id,
+        subcategory_slug=payload.subcategory_slug,
         name=payload.name,
         description=payload.description,
         address=payload.address,
@@ -119,6 +137,25 @@ async def business_counts(
         .join(City, City.id == Business.city_id)
         .where(City.slug == city_slug, Business.deleted_at.is_(None))
         .group_by(Category.slug)
+    )
+    return {slug: n for slug, n in rows.all()}
+
+
+@router.get("/businesses/subcategory-counts")
+async def business_subcategory_counts(
+    city_slug: str = Query(...),
+    category_slug: str = Query(...),
+    db: AsyncSession = Depends(get_db),
+):
+    """{subcategory_slug: live business count} within one category of a city
+    — lets the directory's subcategory chips show how many are in each."""
+    rows = await db.execute(
+        select(Business.subcategory_slug, func.count(Business.id))
+        .join(Category, Category.id == Business.category_id)
+        .join(City, City.id == Business.city_id)
+        .where(City.slug == city_slug, Category.slug == category_slug,
+               Business.deleted_at.is_(None), Business.subcategory_slug.is_not(None))
+        .group_by(Business.subcategory_slug)
     )
     return {slug: n for slug, n in rows.all()}
 
@@ -264,7 +301,15 @@ async def update_business(
     if business.owner_id != current_user.id and current_user.role != "admin":
         raise HTTPException(status_code=403, detail="Not authorised.")
 
-    for field, value in payload.model_dump(exclude_none=True).items():
+    updates = payload.model_dump(exclude_none=True)
+    if "subcategory_slug" in updates or "category_id" in updates:
+        new_cat = updates.get("category_id", business.category_id)
+        new_sub = updates.get("subcategory_slug", business.subcategory_slug)
+        if "category_id" in updates and "subcategory_slug" not in updates and new_cat != business.category_id:
+            new_sub = None  # moved to another category: the old subcategory no longer fits
+        await _check_subcategory(db, new_cat, new_sub)
+        updates["subcategory_slug"] = new_sub
+    for field, value in updates.items():
         setattr(business, field, value)
     business.updated_at = datetime.now(timezone.utc)
     await db.commit()

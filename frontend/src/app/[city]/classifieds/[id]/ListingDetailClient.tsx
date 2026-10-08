@@ -320,6 +320,8 @@ export default function ListingDetailPage() {
                 ) : (
                   <dl className="space-y-3">
                     {[
+                      ...(listing.subcategory_name ? [['Type', listing.subcategory_name]] : []),
+                      ...(listing.detail_rows ?? []).map(r => [r.label, r.value]),
                       ['Status', listing.status.charAt(0).toUpperCase() + listing.status.slice(1)],
                       ['Listed', new Date(listing.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })],
                       ['Expires', new Date(listing.expires_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })],

@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { api, ApiError } from '@/lib/api';
-import type { City } from '@/lib/types';
+import type { CatalogCategory, Category, City } from '@/lib/types';
 import GetVerifiedModal from '@/components/get-verified-modal/GetVerifiedModal';
 import { PAID_BADGES_ENABLED } from '@/lib/features';
 
@@ -27,7 +27,15 @@ export default function AddBusinessPage() {
     phone: '',
     whatsapp_url: '',
     website_url: '',
+    category_id: '',
+    subcategory_slug: '',
   });
+  // Category + type decide which directory section the business shows under
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [catalog, setCatalog] = useState<CatalogCategory[]>([]);
+  const businessCategories = categories.filter(c => c.slug !== 'classifieds');
+  const pickedSlug = categories.find(c => c.id === form.category_id)?.slug;
+  const types = catalog.find(c => c.slug === pickedSlug)?.subcategories ?? [];
 
   const [photos, setPhotos] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
@@ -56,6 +64,8 @@ export default function AddBusinessPage() {
 
   useEffect(() => {
     api.cities.get(citySlug).then(setCity).catch(() => {});
+    api.categories.list().then(setCategories).catch(() => {});
+    api.categories.catalog().then(setCatalog).catch(() => {});
   }, [citySlug]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -63,6 +73,7 @@ export default function AddBusinessPage() {
     const token = localStorage.getItem('access_token');
     if (!token) { router.push('/auth/login'); return; }
     if (!city) return;
+    if (!form.category_id) { toast.error('Pick a category for your business'); return; }
     setLoading(true);
     try {
       const biz = await api.businesses.create(
@@ -74,6 +85,8 @@ export default function AddBusinessPage() {
           whatsapp_url: form.whatsapp_url || null,
           website_url: form.website_url || null,
           city_id: city.id,
+          category_id: form.category_id,
+          subcategory_slug: form.subcategory_slug || null,
         },
         token,
       );
@@ -173,6 +186,36 @@ export default function AddBusinessPage() {
                 onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
                 required minLength={2} maxLength={150}
               />
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="biz-category">Category *</Label>
+                <select
+                  id="biz-category"
+                  required
+                  value={form.category_id}
+                  onChange={e => setForm(p => ({ ...p, category_id: e.target.value, subcategory_slug: '' }))}
+                  className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
+                >
+                  <option value="">Choose…</option>
+                  {businessCategories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+              </div>
+              {types.length > 0 && (
+                <div className="space-y-1.5">
+                  <Label htmlFor="biz-type">Type</Label>
+                  <select
+                    id="biz-type"
+                    value={form.subcategory_slug}
+                    onChange={e => setForm(p => ({ ...p, subcategory_slug: e.target.value }))}
+                    className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
+                  >
+                    <option value="">Choose…</option>
+                    {types.map(t => <option key={t.slug} value={t.slug}>{t.name}</option>)}
+                  </select>
+                </div>
+              )}
             </div>
 
             <div className="space-y-1.5">

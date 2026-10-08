@@ -48,6 +48,9 @@ class Business(Base):
     # OpenStreetMap opening_hours syntax, e.g. "Mo-Sa 09:00-21:00; Su off" —
     # nearly the same as schema.org openingHours, so it goes into JSON-LD as is.
     opening_hours: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    # Subcategory within category_id, e.g. 'hospitals' under doctors — slugs
+    # are defined in app/core/category_catalog.py.
+    subcategory_slug: Mapped[str | None] = mapped_column(String(60), nullable=True, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

@@ -13,6 +13,7 @@ import { formatPrice, timeAgo, listingPath, realImages } from '@/lib/utils';
 import { useSaved } from '@/hooks/useSaved';
 import { toast } from 'sonner';
 import ListingCard from '@/components/listing-card/ListingCard';
+import ListingDetailRows from '@/components/listing-details/ListingDetailRows';
 import { coverFor, listingCovers } from '@/lib/categoryCover';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend-in.azurewebsites.net';
@@ -386,15 +387,13 @@ export default function ListingDetailClient({ id, initialListing = null }: { id:
               </Link>
             )}
 
-            {/* Category attribute chips */}
-            {listing.attributes && Object.keys(listing.attributes).length > 0 && (
+            {/* Subcategory chip */}
+            {listing.subcategory_name && (
               <div className="flex flex-wrap gap-2">
-                {Object.entries(listing.attributes).map(([key, val]) => (
-                  <span key={key} className="px-3 py-1 rounded-full text-xs font-semibold border"
-                    style={{ background: 'var(--li-primary-light)', color: 'var(--li-primary)', borderColor: 'rgba(249,115,22,0.2)' }}>
-                    {val}
-                  </span>
-                ))}
+                <span className="px-3 py-1 rounded-full text-xs font-semibold border"
+                  style={{ background: 'var(--li-primary-light)', color: 'var(--li-primary)', borderColor: 'rgba(249,115,22,0.2)' }}>
+                  {listing.subcategory_name}
+                </span>
               </div>
             )}
 
@@ -407,6 +406,8 @@ export default function ListingDetailClient({ id, initialListing = null }: { id:
                 <Link href="/trust#active-on-whatsapp" className="font-semibold underline ml-1">What&apos;s this?</Link>
               </span>
             )}
+
+            <ListingDetailRows rows={listing.detail_rows} />
 
             {/* Description */}
             {desc && (

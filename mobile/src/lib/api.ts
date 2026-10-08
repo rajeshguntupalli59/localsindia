@@ -145,6 +145,8 @@ export const citiesApi = {
 
 export const categoriesApi = {
   list: () => api.get('/categories').then(r => r.data),
+  // Subcategories + posting questions (backend/app/core/category_catalog.py)
+  catalog: () => api.get('/categories/catalog').then(r => r.data),
 };
 
 export const usersApi = {
@@ -210,8 +212,13 @@ export const paymentsApi = {
 };
 
 export const businessesApi = {
-  list: (citySlug: string, opts: { category_slug?: string; q?: string; page?: number; page_size?: number } = {}) =>
+  list: (citySlug: string, opts: { category_slug?: string; subcategory_slug?: string; q?: string; page?: number; page_size?: number } = {}) =>
     api.get('/businesses', { params: { city_slug: citySlug, ...opts } }).then(r => r.data),
+
+  // {subcategory_slug: count} of live businesses within one category
+  subcategoryCounts: (citySlug: string, categorySlug: string) =>
+    api.get('/businesses/subcategory-counts', { params: { city_slug: citySlug, category_slug: categorySlug } })
+      .then(r => r.data as Record<string, number>),
 
   // {category_slug: count} of live businesses in the city
   counts: (citySlug: string) =>
@@ -259,6 +266,8 @@ export const businessesApi = {
   create: (data: {
     name: string;
     city_id: string;
+    category_id?: string | null;
+    subcategory_slug?: string | null;
     description?: string | null;
     address?: string | null;
     phone?: string | null;

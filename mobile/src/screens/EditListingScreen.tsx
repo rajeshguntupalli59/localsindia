@@ -3,8 +3,9 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Activi
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { listingsApi, uploadsApi } from '../lib/api';
+import { categoriesApi, listingsApi, uploadsApi } from '../lib/api';
 import { storage } from '../lib/storage';
+import DetailQuestions, { answersPayload, checkAnswers, type Answers, type CatalogEntry } from '../components/DetailQuestions';
 
 type ListingImage = { id: string; url: string };
 
@@ -24,6 +25,15 @@ export default function EditListingScreen({ navigation, route }: any) {
   const [socialUrl, setSocialUrl] = useState('');
 
   const [images, setImages] = useState<ListingImage[]>([]);
+  // Category questions — same catalog + component as the post screen
+  const [categorySlug, setCategorySlug] = useState('');
+  const [catalog, setCatalog] = useState<CatalogEntry[]>([]);
+  const [subSlug, setSubSlug] = useState('');
+  const [answers, setAnswers] = useState<Answers>({});
+  const [answerErrors, setAnswerErrors] = useState<Record<string, string>>({});
+  const subcategories = (catalog.find(c => c.slug === categorySlug)?.subcategories ?? [])
+    .filter(sc => sc.questions.length > 0);
+  const selectedSub = subcategories.find(sc => sc.slug === subSlug) ?? null;
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
   useEffect(() => {
@@ -43,6 +53,9 @@ export default function EditListingScreen({ navigation, route }: any) {
         setWebsiteUrl(listing.website_url ?? '');
         setSocialUrl(listing.social_url ?? '');
         setImages(listing.images ?? []);
+        setCategorySlug(listing.category_slug ?? '');
+        setSubSlug(listing.subcategory_slug ?? '');
+        setAnswers(listing.category_details ?? {});
       } catch {
         Alert.alert('Error', 'Could not load this listing.');
         navigation.goBack();
@@ -51,6 +64,10 @@ export default function EditListingScreen({ navigation, route }: any) {
       }
     })();
   }, [listingId, navigation]);
+
+  useEffect(() => {
+    categoriesApi.catalog().then(setCatalog).catch(() => {});
+  }, []);
 
   const pickPhoto = async () => {
     if (images.length >= 5) { Alert.alert('Max 5 photos allowed'); return; }
@@ -95,6 +112,12 @@ export default function EditListingScreen({ navigation, route }: any) {
   const handleSave = async () => {
     if (title.trim().length < 3) { Alert.alert('Title too short', 'Enter at least 3 characters.'); return; }
     if (description.trim().length < 10) { Alert.alert('Description too short', 'Enter at least 10 characters.'); return; }
+    // Older listings have no type yet — answers are only (re)sent once one is picked
+    if (selectedSub) {
+      const e = checkAnswers(selectedSub, answers);
+      setAnswerErrors(e);
+      if (Object.keys(e).length > 0) { Alert.alert('Missing details', 'Please answer the marked questions.'); return; }
+    }
     setSaving(true);
     try {
       await listingsApi.update(listingId, {
@@ -105,6 +128,10 @@ export default function EditListingScreen({ navigation, route }: any) {
         whatsapp_url: whatsappUrl.trim() || undefined,
         website_url: websiteUrl.trim() || undefined,
         social_url: socialUrl.trim() || undefined,
+        ...(selectedSub ? {
+          subcategory_slug: selectedSub.slug,
+          category_details: answersPayload(selectedSub.questions, answers),
+        } : {}),
       });
       navigation.goBack();
     } catch {
@@ -145,6 +172,26 @@ export default function EditListingScreen({ navigation, route }: any) {
             numberOfLines={4}
             placeholder="Describe the item, condition, reason for selling..."
           />
+
+          {subcategories.length > 0 && (
+            <View style={styles.questionsCard}>
+              {!subSlug && (
+                <Text style={styles.hint}>Pick a type to add details buyers filter by (optional for older listings).</Text>
+              )}
+              <DetailQuestions
+                subcategories={subcategories}
+                subSlug={subSlug}
+                answers={answers}
+                errors={answerErrors}
+                subRequired={false}
+                onSubChange={(slug, kept) => { setAnswerErrors({}); setSubSlug(slug); setAnswers(kept); }}
+                onAnswer={(key, value) => {
+                  setAnswers(a => ({ ...a, [key]: value }));
+                  setAnswerErrors(e => ({ ...e, [key]: '' }));
+                }}
+              />
+            </View>
+          )}
 
           <Text style={styles.label}>Photos</Text>
           <View style={styles.photoGrid}>
@@ -201,6 +248,7 @@ export default function EditListingScreen({ navigation, route }: any) {
 }
 
 const styles = StyleSheet.create({
+  questionsCard: { marginTop: 16, padding: 14, borderWidth: 1, borderColor: '#e5e7eb', borderRadius: 14, backgroundColor: 'white' },
   container: { flex: 1, backgroundColor: '#f9fafb' },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',

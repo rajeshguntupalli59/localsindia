@@ -8,7 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { api, ApiError } from '@/lib/api';
-import type { Listing, ListingImage } from '@/lib/types';
+import type { CatalogCategory, Listing, ListingImage } from '@/lib/types';
+import DetailQuestions, { answersPayload, checkAnswers, type Answers } from '@/components/detail-questions/DetailQuestions';
 
 export default function EditListingPage() {
   const { id } = useParams<{ id: string }>();
@@ -27,6 +28,14 @@ export default function EditListingPage() {
   const [area, setArea] = useState('');
 
   const [images, setImages] = useState<ListingImage[]>([]);
+  // Category questions — same catalog + component as the post form
+  const [catalog, setCatalog] = useState<CatalogCategory[]>([]);
+  const [subSlug, setSubSlug] = useState('');
+  const [answers, setAnswers] = useState<Answers>({});
+  const [answerErrors, setAnswerErrors] = useState<Record<string, string>>({});
+  const subcategories = (catalog.find(c => c.slug === listing?.category_slug)?.subcategories ?? [])
+    .filter(sc => sc.questions.length > 0);
+  const selectedSub = subcategories.find(sc => sc.slug === subSlug) ?? null;
   const [adminEdit, setAdminEdit] = useState(false); // an admin editing someone else's listing
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -35,6 +44,7 @@ export default function EditListingPage() {
     const token = localStorage.getItem('access_token');
     if (!token) { router.replace('/auth/login'); return; }
     loadListing();
+    api.categories.catalog().then(setCatalog).catch(() => {});
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
@@ -59,6 +69,8 @@ export default function EditListingPage() {
       setSocialUrl(data.social_url ?? '');
       setArea(data.area ?? '');
       setImages(data.images ?? []);
+      setSubSlug(data.subcategory_slug ?? '');
+      setAnswers(data.category_details ?? {});
     } catch {
       toast.error('Listing not found');
       router.replace('/profile/listings');
@@ -105,6 +117,12 @@ export default function EditListingPage() {
     e.preventDefault();
     const token = localStorage.getItem('access_token');
     if (!token || !listing) return;
+    // Older listings have no type yet — answers are only (re)sent once one is picked
+    if (selectedSub) {
+      const e = checkAnswers(selectedSub, answers);
+      setAnswerErrors(e);
+      if (Object.keys(e).length > 0) { toast.error('Please answer the marked questions'); return; }
+    }
 
     setSaving(true);
     try {
@@ -116,6 +134,10 @@ export default function EditListingPage() {
         website_url: websiteUrl.trim() || undefined,
         social_url: socialUrl.trim() || undefined,
         area: area.trim() || undefined,
+        ...(selectedSub ? {
+          subcategory_slug: selectedSub.slug,
+          category_details: answersPayload(selectedSub.questions, answers),
+        } : {}),
       }, token);
       toast.success('Listing updated!');
       // An admin editing someone else's listing goes back to moderation
@@ -189,6 +211,28 @@ export default function EditListingPage() {
             className="w-full border rounded-xl px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-orange-400"
           />
         </div>
+
+        {/* Category questions */}
+        {subcategories.length > 0 && (
+          <div className="rounded-2xl border bg-white p-4" style={{ borderColor: 'var(--li-border)' }}>
+            {!subSlug && (
+              <p className="text-xs mb-3" style={{ color: 'var(--li-muted)' }}>
+                Pick a type to add details buyers filter by (optional for older listings).
+              </p>
+            )}
+            <DetailQuestions
+              subcategories={subcategories}
+              subSlug={subSlug}
+              answers={answers}
+              errors={answerErrors}
+              onSubChange={(slug, kept) => { setAnswerErrors({}); setSubSlug(slug); setAnswers(kept); }}
+              onAnswer={(key, value) => {
+                setAnswers(a => ({ ...a, [key]: value }));
+                setAnswerErrors(prev => { const next = { ...prev }; delete next[key]; return next; });
+              }}
+            />
+          </div>
+        )}
 
         {/* Photos */}
         <div className="space-y-2">

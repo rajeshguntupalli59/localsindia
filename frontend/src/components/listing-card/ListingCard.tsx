@@ -12,6 +12,7 @@ import { api } from '@/lib/api';
 import type { Listing } from '@/lib/types';
 import { usePrefs } from '@/context/PrefsContext';
 import { useSaved } from '@/hooks/useSaved';
+import { cardDetailChips } from '@/components/listing-details/ListingDetailRows';
 
 interface Props {
   listing: Listing;
@@ -192,10 +193,10 @@ export default function ListingCard({ listing, coverUrl }: Props) {
           </div>
         </Link>
 
-        {/* Attribute chips */}
-        {listing.attributes && Object.keys(listing.attributes).length > 0 && (
+        {/* Key answers (fuel, BHK, km…) from the category's questions */}
+        {cardDetailChips(listing.detail_rows).length > 0 && (
           <div className="flex flex-wrap gap-1.5 mb-3">
-            {Object.values(listing.attributes).map((val, i) => (
+            {cardDetailChips(listing.detail_rows).map((val, i) => (
               <span
                 key={i}
                 className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-orange-50 text-orange-600 border border-orange-100"

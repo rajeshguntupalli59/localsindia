@@ -241,14 +241,17 @@ async def test_city_listings_orders_by_distance_when_location_given(client, db, 
 
 @pytest.mark.asyncio
 async def test_category_details_round_trip_for_vehicles(client, db, auth_client, city):
-    """Category-specific structured fields (real typed columns per category,
-    see models/listing_details.py) persist on create and come back on GET,
-    for a category that has them."""
+    """Category-specific answers (listings.attributes, validated against
+    app/core/category_catalog.py) persist on create and come back on GET —
+    the same no-subcategory payload the installed mobile app sends."""
+    from sqlalchemy import select
     from app.models.category import Category
-    vehicles_cat = Category(name="Vehicles", slug="vehicles", sort_order=0)
-    db.add(vehicles_cat)
-    await db.commit()
-    await db.refresh(vehicles_cat)
+    vehicles_cat = (await db.execute(select(Category).where(Category.slug == "vehicles"))).scalar_one_or_none()
+    if not vehicles_cat:
+        vehicles_cat = Category(name="Vehicles", slug="vehicles", sort_order=0)
+        db.add(vehicles_cat)
+        await db.commit()
+        await db.refresh(vehicles_cat)
 
     ac, _user = auth_client
     resp = await ac.post("/api/v1/listings", json={

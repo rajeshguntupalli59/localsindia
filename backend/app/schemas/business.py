@@ -1,6 +1,7 @@
 import uuid
 from datetime import datetime
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, computed_field, field_validator
+from app.core.category_catalog import subcategory_entry
 
 from app.schemas.validators import web_url
 
@@ -9,6 +10,7 @@ class BusinessCreate(BaseModel):
     name: str
     city_id: uuid.UUID
     category_id: uuid.UUID | None = None
+    subcategory_slug: str | None = None
     description: str | None = None
     address: str | None = None
     phone: str | None = None
@@ -24,6 +26,7 @@ class BusinessCreate(BaseModel):
 class BusinessUpdate(BaseModel):
     name: str | None = None
     category_id: uuid.UUID | None = None
+    subcategory_slug: str | None = None
     description: str | None = None
     address: str | None = None
     phone: str | None = None
@@ -83,6 +86,7 @@ class BusinessOut(BaseModel):
     city_id: uuid.UUID
     category_id: uuid.UUID | None
     category_slug: str | None = None
+    subcategory_slug: str | None = None
     city_slug: str | None = None
     owner_id: uuid.UUID | None
     source: str | None = None
@@ -95,5 +99,11 @@ class BusinessOut(BaseModel):
     created_at: datetime
     reviews: list[ReviewOut] = []
     images: list[BusinessImageOut] = []
+
+    @computed_field
+    @property
+    def subcategory_name(self) -> str | None:
+        sub = subcategory_entry(self.subcategory_slug)
+        return sub[1]["name"] if sub else None
 
     model_config = {"from_attributes": True}
