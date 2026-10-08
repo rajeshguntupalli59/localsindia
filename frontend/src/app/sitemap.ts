@@ -8,7 +8,7 @@ const BASE = 'https://www.localsindia.com';
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend-in.azurewebsites.net';
 
 // Same "has real content" thresholds the pages use to decide index/noindex
-// ([city]/page.tsx, [city]/businesses/page.tsx, [city]/[category]/page.tsx).
+// ([city]/(home)/page.tsx, [city]/businesses/page.tsx, [city]/[category]/page.tsx).
 // A URL here whose page says noindex is a contradiction Google reports as an
 // error, so only pages that will actually be indexable are listed.
 const CITY_MIN_LISTINGS = 3;

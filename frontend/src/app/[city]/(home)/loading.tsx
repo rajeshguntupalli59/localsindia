@@ -1,8 +1,10 @@
 import ListingCardSkeleton from '@/components/listing-card/ListingCardSkeleton';
 
-// Shown the instant someone picks a city (and on any page inside a city)
-// while the server gathers that page's data — instead of the old page just
-// sitting there frozen, or a blank screen. No data needed, so it's immediate.
+// Shown the instant someone picks a city, while the server gathers the city
+// home page's data. Deliberately scoped to the home page only (route group
+// "(home)"): a loading boundary makes the page stream before it can call
+// notFound(), so every other /{city}/* page (category, type, area, business)
+// would answer a dead URL with 200 instead of a real 404 ("soft 404").
 export default function CityLoading() {
   return (
     <div style={{ background: 'var(--li-page-bg)', minHeight: '100vh' }} aria-busy="true" aria-label="Loading">
