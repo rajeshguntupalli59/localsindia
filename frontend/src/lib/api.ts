@@ -161,6 +161,9 @@ export const api = {
       req<Listing>(`/api/v1/listings/${id}/fulfill`, { method: 'POST', token }),
     renew: (id: string, token: string) =>
       req<Listing>(`/api/v1/listings/${id}/renew`, { method: 'POST', token }),
+    // Launch phase: no expiry until there are enough active listings
+    expiryPolicy: () =>
+      req<{ expiry_paused: boolean; active_listings: number; min_active_listings: number }>('/api/v1/listings/expiry-policy'),
   },
   search: {
     query: (params: SearchParams) =>

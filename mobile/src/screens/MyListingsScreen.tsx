@@ -36,11 +36,14 @@ export default function MyListingsScreen({ navigation }: any) {
   const [loading, setLoading] = useState(true);
   const [actionId, setActionId] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
+  // While paused, listings never expire — Renew is pointless on live listings
+  const [expiryPaused, setExpiryPaused] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
       storage.getUser().then(u => setUser(u));
       fetchListings();
+      listingsApi.expiryPolicy().then(p => setExpiryPaused(!!p.expiry_paused)).catch(() => {});
     }, [])
   );
 
@@ -162,6 +165,12 @@ export default function MyListingsScreen({ navigation }: any) {
       </View>
 
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
+        {expiryPaused && listings.some(l => l.status === 'active') && (
+          <View style={styles.noExpiryNote}>
+            <Ionicons name="infinite-outline" size={16} color="#16a34a" />
+            <Text style={styles.noExpiryText}>Your listings stay live — no expiry for now.</Text>
+          </View>
+        )}
         {loading ? (
           [1, 2, 3].map(i => (
             <View key={i} style={[styles.card, { height: 100, backgroundColor: '#f3f4f6' }]} />
@@ -237,7 +246,7 @@ export default function MyListingsScreen({ navigation }: any) {
                       </Text>
                     </TouchableOpacity>
                   )}
-                  {(listing.status === 'active' || listing.status === 'expired') && (
+                  {((listing.status === 'active' && !expiryPaused) || listing.status === 'expired') && (
                     <TouchableOpacity
                       style={styles.actionBtn}
                       disabled={actionId === listing.id || onCooldown}
@@ -286,6 +295,11 @@ export default function MyListingsScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
+  noExpiryNote: {
+    flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12,
+    paddingHorizontal: 12, paddingVertical: 10, borderRadius: 12, backgroundColor: '#f0fdf4',
+  },
+  noExpiryText: { fontSize: 13, color: '#166534', fontWeight: '600', flexShrink: 1 },
   container: { flex: 1, backgroundColor: '#f9fafb' },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',

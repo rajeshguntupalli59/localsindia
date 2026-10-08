@@ -26,6 +26,9 @@ class Settings(BaseSettings):
     CLOUDINARY_API_SECRET: str = ""
 
     FRONTEND_URL: str = "http://localhost:3000"
+    # Launch phase: listings don't expire until this many are active
+    # (services/listing_expiry.py). Set to 0 to turn the pause off.
+    LISTING_EXPIRY_MIN_ACTIVE: int = 1000
     OTP_DEBUG: bool = False  # Set to true on Azure to return OTP in response for testing
 
     ADMIN_USERNAME: str = ""

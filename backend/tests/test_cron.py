@@ -7,6 +7,13 @@ from app.core.config import settings
 CRON_SECRET = "test_cron_secret"
 
 
+@pytest.fixture(autouse=True)
+def _expiry_on(monkeypatch):
+    """These tests cover normal 30-day expiry — switch the launch-phase pause
+    (services/listing_expiry.py) off; test_listing_expiry.py covers the pause."""
+    monkeypatch.setattr(settings, "LISTING_EXPIRY_MIN_ACTIVE", 0)
+
+
 # Regression test for a real production bug: a listing promoted for a "week"
 # stayed featured forever because nothing ever checked whether the featured
 # window had passed. The cron job now un-features listings past their

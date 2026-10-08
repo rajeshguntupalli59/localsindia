@@ -36,11 +36,14 @@ export default function MyListingsPage() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionId, setActionId] = useState<string | null>(null);
+  // While paused, listings never expire — Renew is pointless on live listings
+  const [expiryPaused, setExpiryPaused] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('access_token');
     if (!token) { router.replace('/auth/login'); return; }
     fetchMyListings(token);
+    api.listings.expiryPolicy().then(p => setExpiryPaused(p.expiry_paused)).catch(() => {});
   }, [router]);
 
   const fetchMyListings = async (token?: string) => {
@@ -123,6 +126,11 @@ export default function MyListingsPage() {
       </div>
 
       <div className="p-4 space-y-3">
+        {expiryPaused && listings.some(l => l.status === 'active') && (
+          <p className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-green-50 text-green-800">
+            Your listings stay live — no expiry for now.
+          </p>
+        )}
         {loading ? (
           Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="h-28 bg-white rounded-xl animate-pulse" />
@@ -189,7 +197,7 @@ export default function MyListingsPage() {
                     color="text-green-600"
                   />
                 )}
-                {(listing.status === 'active' || listing.status === 'expired') && (() => {
+                {((listing.status === 'active' && !expiryPaused) || listing.status === 'expired') && (() => {
                   const renewedAt = listing.last_renewed_at ? new Date(listing.last_renewed_at) : null;
                   const hoursLeft = renewedAt && listing.status === 'active'
                     ? Math.max(0, 24 - (Date.now() - renewedAt.getTime()) / 3600000)

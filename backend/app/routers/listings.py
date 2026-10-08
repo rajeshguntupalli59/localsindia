@@ -376,6 +376,15 @@ async def create_listing(
     return out
 
 
+@router.get("/listings/expiry-policy")
+async def listing_expiry_policy(db: AsyncSession = Depends(get_db)):
+    """Whether listings currently expire (launch-phase pause, see
+    services/listing_expiry.py) — apps hide Renew/expiry dates while paused.
+    Declared before /listings/{listing_id} so the path isn't parsed as an id."""
+    from app.services.listing_expiry import expiry_status
+    return await expiry_status(db)
+
+
 @router.get("/listings/mine", response_model=list[ListingOut])
 async def my_listings(
     db: AsyncSession = Depends(get_db),

@@ -25,6 +25,9 @@ export default function ListingDetailPage() {
   const [listing, setListing] = useState<Listing | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  // No "Expires" date while the launch-phase expiry pause is on
+  const [expiryPaused, setExpiryPaused] = useState(false);
+  useEffect(() => { api.listings.expiryPolicy().then(p => setExpiryPaused(p.expiry_paused)).catch(() => {}); }, []);
   const [imgIdx, setImgIdx] = useState(0);
   const [showFull, setShowFull] = useState(false);
   const [activeTab, setActiveTab] = useState<'description' | 'details'>('description');
@@ -324,7 +327,7 @@ export default function ListingDetailPage() {
                       ...(listing.detail_rows ?? []).map(r => [r.label, r.value]),
                       ['Status', listing.status.charAt(0).toUpperCase() + listing.status.slice(1)],
                       ['Listed', new Date(listing.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })],
-                      ['Expires', new Date(listing.expires_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })],
+                      ...(expiryPaused ? [] : [['Expires', new Date(listing.expires_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })]]),
                     ].map(([k, v]) => (
                       <div key={k} className="flex items-center justify-between py-2 border-b last:border-0" style={{ borderColor: 'var(--li-border)' }}>
                         <dt className="text-sm font-medium" style={{ color: 'var(--li-muted)' }}>{k}</dt>

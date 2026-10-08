@@ -70,6 +70,10 @@ export const listingsApi = {
   renew: (id: string) =>
     api.post(`/listings/${id}/renew`).then(r => r.data),
 
+  // Launch phase: no expiry until there are enough active listings
+  expiryPolicy: () =>
+    api.get('/listings/expiry-policy').then(r => r.data as { expiry_paused: boolean; active_listings: number; min_active_listings: number }),
+
   fulfill: (id: string) =>
     api.post(`/listings/${id}/fulfill`).then(r => r.data),
 

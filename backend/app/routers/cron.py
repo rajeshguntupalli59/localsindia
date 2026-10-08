@@ -48,6 +48,14 @@ async def send_expiry_reminders(
     from app.services.notification_svc import notify
     from app.models.business import Business
 
+    from app.services.listing_expiry import expiry_status, keep_listings_alive
+
+    # Launch-phase pause: below the active-listing threshold nothing expires —
+    # listings are pushed a full lifetime ahead, so the reminder and expiry
+    # steps below simply find nothing to do.
+    policy = await expiry_status(db)
+    listings_extended = await keep_listings_alive(db) if policy["expiry_paused"] else 0
+
     now = datetime.now(timezone.utc)
     warn_cutoff = now + timedelta(days=EXPIRY_WARN_DAYS)
 
@@ -162,6 +170,9 @@ async def send_expiry_reminders(
         "listings_expired": listings_expired,
         "badges_expired": badges_expired,
         "featured_expired": featured_expired,
+        "expiry_paused": policy["expiry_paused"],
+        "active_listings": policy["active_listings"],
+        "listings_extended": listings_extended,
         "ran_at": now.isoformat(),
     }
 
