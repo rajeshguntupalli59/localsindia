@@ -39,7 +39,10 @@ export default function NotificationBell() {
   const [loaded, setLoaded] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
+  // Read after mount — reading localStorage during render made logged-in
+  // users' first render differ from the server's (a hydration error).
+  const [token, setToken] = useState<string | null>(null);
+  useEffect(() => { setToken(localStorage.getItem('access_token')); }, []);
 
   const fetchCount = useCallback(async () => {
     const t = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
