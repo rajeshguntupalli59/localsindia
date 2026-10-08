@@ -54,7 +54,7 @@ async def send_expiry_reminders(
     # listings are pushed a full lifetime ahead, so the reminder and expiry
     # steps below simply find nothing to do.
     policy = await expiry_status(db)
-    listings_extended = await keep_listings_alive(db) if policy["expiry_paused"] else 0
+    listings_revived, listings_extended = await keep_listings_alive(db) if policy["expiry_paused"] else (0, 0)
 
     now = datetime.now(timezone.utc)
     warn_cutoff = now + timedelta(days=EXPIRY_WARN_DAYS)
@@ -173,6 +173,7 @@ async def send_expiry_reminders(
         "expiry_paused": policy["expiry_paused"],
         "active_listings": policy["active_listings"],
         "listings_extended": listings_extended,
+        "listings_revived": listings_revived,
         "ran_at": now.isoformat(),
     }
 

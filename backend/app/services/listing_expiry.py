@@ -29,11 +29,18 @@ async def expiry_status(db: AsyncSession) -> dict:
     }
 
 
-async def keep_listings_alive(db: AsyncSession) -> int:
-    """While paused: push every live or awaiting-review listing's expires_at a
+async def keep_listings_alive(db: AsyncSession) -> tuple[int, int]:
+    """While paused: bring back listings that had expired (nothing should be
+    expired during the pause — sold/closed ones are 'fulfilled' and stay
+    hidden), then push every live or awaiting-review listing's expires_at a
     full lifetime ahead, so none reaches its expiry or the 'expiring soon'
-    window. Returns how many rows moved."""
+    window. Returns (revived, extended)."""
     target = datetime.now(timezone.utc) + timedelta(days=LISTING_LIFETIME_DAYS)
+    revived = await db.execute(
+        update(Listing)
+        .where(Listing.status == "expired", Listing.deleted_at.is_(None))
+        .values(status="active", expires_at=target)
+    )
     result = await db.execute(
         update(Listing)
         .where(Listing.status.in_(["active", "pending"]), Listing.deleted_at.is_(None),
@@ -41,4 +48,4 @@ async def keep_listings_alive(db: AsyncSession) -> int:
         .values(expires_at=target)
     )
     await db.commit()
-    return result.rowcount or 0
+    return revived.rowcount or 0, result.rowcount or 0

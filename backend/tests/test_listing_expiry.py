@@ -53,6 +53,26 @@ async def test_paused_listings_never_expire(client, db, auth_client, city, categ
 
 
 @pytest.mark.asyncio
+async def test_paused_brings_back_expired_but_not_sold(client, db, auth_client, city, category, monkeypatch):
+    from app.models.listing import Listing
+    monkeypatch.setattr(settings, "LISTING_EXPIRY_MIN_ACTIVE", 1000)
+    ac, _ = auth_client
+    expired_id = await _overdue_listing(ac, db, city, category, "Expired before the pause began")
+    sold_id = await _overdue_listing(ac, db, city, category, "Sold by its owner")
+    for lid, status in ((expired_id, "expired"), (sold_id, "fulfilled")):
+        (await db.execute(select(Listing).where(Listing.id == lid))).scalar_one().status = status
+    await db.commit()
+
+    body = await _run_cron(client)
+    assert body["listings_revived"] >= 1
+    db.expire_all()
+    revived = (await db.execute(select(Listing).where(Listing.id == expired_id))).scalar_one()
+    assert revived.status == "active"
+    assert revived.expires_at > datetime.now(timezone.utc) + timedelta(days=29)
+    assert (await db.execute(select(Listing).where(Listing.id == sold_id))).scalar_one().status == "fulfilled"
+
+
+@pytest.mark.asyncio
 async def test_expiry_resumes_at_threshold(client, db, auth_client, city, category, monkeypatch):
     from app.models.listing import Listing
     monkeypatch.setattr(settings, "LISTING_EXPIRY_MIN_ACTIVE", 1)   # we have 1+ active → not paused
