@@ -511,7 +511,9 @@ See §12 "City Banner Ads" for why this is its own table rather than a `listings
 
 ---
 
-### `vehicle_details`, `job_details`, `pg_roommate_details`, `real_estate_details`, `electronics_details`, `furniture_details`, `fashion_details`, `education_details`, `doctor_details`, `service_details`, `tiffin_details` — category-specific structured fields (added 2026-07-21)
+### `vehicle_details`, `job_details`, `pg_roommate_details`, `real_estate_details`, `electronics_details`, `furniture_details`, `fashion_details`, `education_details`, `doctor_details`, `service_details`, `tiffin_details` — category-specific structured fields (added 2026-07-21; LEGACY since 2026-10-08)
+
+> **Legacy (2026-10-08):** no code reads or writes these tables any more — migration `d1e2f3a4b5c6` copied every row into `listings.attributes`, and answers are validated against `backend/app/core/category_catalog.py`. Their models were removed; the tables stay in the database until a deliberate drop migration (needs Raj's OK).
 
 11 tables, one per category that has its own specific questions — each a 1:1 extension of `listings` (unique `listing_id` FK, `ondelete=CASCADE`), holding **real typed columns**, not a flexible JSON blob, so Search can filter/sort on them directly later (e.g. "vehicles under ₹5L, Petrol, Automatic"). Classifieds/Businesses/Events are excluded: Classifieds is the deliberate catch-all with no specific fields; Businesses/Events already have their own dedicated tables (`businesses`, `events`) rather than a `listings` row.
 
@@ -590,6 +592,7 @@ Also `GET /api/v1/admin/errors` (admin-only, see Admin section below) — lists 
 
 | Method | Path | What it does | Auth? |
 |--------|------|-------------|-------|
+| GET | `/listings/expiry-policy` | Launch-phase expiry pause status `{expiry_paused, active_listings, min_active_listings}` — while active listings < `LISTING_EXPIRY_MIN_ACTIVE` (1000) listings never expire (2026-10-08) | No |
 | GET | `/cities/{slug}/listings` | Listings for a city (filter by category, status, page); optional `lat`/`lng` (2026-07-16) sorts by real Haversine distance, unlocated listings kept via `NULLS LAST` rather than dropped; `q` OR-matches per word (fixed 2026-07-16 — was AND-matching every word, so one filler word could zero out an otherwise-exact match) | No |
 | POST | `/listings` | Create listing (status='pending'); body may include `subcategory_slug` + `category_details` — validated by `category_catalog.validate_answers` (required, options, ranges) and stored in `listings.attributes` (2026-10-08; was per-category `*_details` tables). Responses carry `detail_rows` (labelled answers) and `subcategory_name`. PATCH accepts the same two fields. City listings accept `subcategory_slug` and `f_<key>` / `f_<key>_min` / `f_<key>_max` answer filters | Yes |
 | GET | `/listings/mine` | My listings (all statuses); includes `category_details` per listing | Yes |
@@ -624,7 +627,9 @@ Also `GET /api/v1/admin/errors` (admin-only, see Admin section below) — lists 
 
 | Method | Path | What it does | Auth? |
 |--------|------|-------------|-------|
-| GET | `/businesses` | List businesses for city (filter by category, page) | No |
+| GET | `/businesses` | List businesses for city (filter by category, `subcategory_slug`, locality, q, page) | No |
+| GET | `/businesses/subcategory-counts` | `{subcategory_slug: count}` for one city + category — type chips and type pages (2026-10-08) | No |
+| GET | `/businesses/sitemap-counts` | Per-city businesses by category **and by subcategory** (2026-10-08), listings by category, upcoming events — what sitemap.xml lists | No |
 | POST | `/businesses` | Create business listing | Yes |
 | GET | `/businesses/{id}` | Business detail + reviews | No |
 | PATCH | `/businesses/{id}` | Update business (owner/admin) | Yes |
@@ -978,6 +983,16 @@ Filter bar is always visible (no toggle) — sort (newest/price asc/price desc),
 Lists all active listings in a specific category for the city.
 URL: `/hyderabad/jobs`, `/vijayawada/tiffin`
 
+Category pages also link their type pages ("by type" chips).
+
+### `/[city]/[type]` — Type Page (2026-10-08)
+
+**Files:** `app/[city]/[category]/TypePage.tsx`, `lib/typePages.ts`
+
+Served by the same `[city]/[category]` route when the segment is a subcategory slug instead of a category key, e.g. `/hyderabad/dentists`, `/chennai/restaurants`. Shows the real businesses of that type, matching classified ads, sibling type chips, and ItemList + BreadcrumbList JSON-LD. Indexed only with 3+ businesses of the type (`MIN_TYPE_BUSINESSES`); no page for the catch-alls or Function Halls (`NO_TYPE_PAGE`). Listed in sitemap.xml at the same bar (976 pages across 148 cities on 2026-10-08). Area-level type pages (`/hyderabad/dentists/kukatpally`) are not live yet — a planned second step.
+
+**Soft-404 fix (2026-10-08):** the city loading skeleton lives in the `[city]/(home)/` route group (city home only) and `[city]/layout.tsx` 404s unknown cities (fail-open if the API is down), so every dead `/{city}/*` URL returns a real 404 instead of a streamed 200.
+
 ---
 
 ### `/[city]/businesses` — Business Directory
@@ -1116,6 +1131,8 @@ Shows all user's listings (all statuses: pending, active, expired, etc.):
 - Active: Edit, Mark as Sold (Fulfill), Promote
 - Expired: Renew (extends 30 days)
 - Pending: Waiting for admin approval
+
+**Launch-phase expiry pause (2026-10-08):** while active listings < `LISTING_EXPIRY_MIN_ACTIVE` (1000, `core/config.py`, 0 = off) nothing expires. The daily `GET /cron/expiry-reminders` job (`services/listing_expiry.py`) brings any `expired` listing back to active and keeps every active/pending listing's `expires_at` 30 days ahead, so no "expiring" alerts go out either; sold/closed listings are `fulfilled` and stay hidden. This page and mobile `MyListingsScreen.tsx` read `GET /listings/expiry-policy` to show "Your listings stay live — no expiry for now" and hide Renew on live listings. Normal 30-day expiry resumes automatically at the threshold.
 
 ---
 

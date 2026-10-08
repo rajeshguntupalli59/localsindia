@@ -118,6 +118,7 @@ localindia/
 | `/` | Home: search, choose a city |
 | `/{city}` | City page: explore by category, popular areas, latest listings |
 | `/{city}/{category}` | e.g. `/hyderabad/doctors` — real businesses + listings in that category, "by area" links |
+| `/{city}/{type}` | e.g. `/hyderabad/dentists` — **Dentists in Hyderabad (37)**: one type (subcategory) of business; indexed only with 3+ (added 2026-10-08) |
 | `/{city}/{category}/{area}` | e.g. `/hyderabad/doctors/madhapur` — **Doctors & Clinics in Madhapur, Hyderabad** |
 | `/{city}/area/{area}` | e.g. `/hyderabad/area/madhapur` — every business in that neighbourhood |
 | `/{city}/businesses` | Full business directory with category filter |
@@ -140,6 +141,8 @@ event-venues, real-estate, shops`.
 | Phone OTP / Google login | `routers/auth.py`, `services/msg91.py` | `app/auth/` |
 | Listings (post → pending → approved) | `routers/listings.py`, `routers/admin.py` | `app/[city]/classifieds/`, `app/listing/` |
 | Business directory | `routers/businesses.py` | `app/[city]/businesses/`, `components/business-list/` |
+| Subcategories (types) + posting questions | `core/category_catalog.py` (the ONE list: 89 types, each with its own short tap-to-pick questions; GET /categories/catalog) | post/edit forms (`components/detail-questions/`), search filters (`components/answer-filters/`), type pages (`app/[city]/[category]/TypePage.tsx`); mobile `components/DetailQuestions.tsx` |
+| Listing expiry pause | `services/listing_expiry.py` — no listing expires until 1,000 are active (`LISTING_EXPIRY_MIN_ACTIVE`) | My Listings note on web + mobile |
 | Neighbourhood (area) pages | `routers/businesses.py` (`/businesses/localities`, `/locality-pages`) | `app/[city]/area/[area]/`, `app/[city]/[category]/[area]/`, `app/sitemap-areas.xml/` |
 | Opening hours + *Open now* | `businesses.opening_hours` | `lib/openingHours.ts` |
 | Claiming a business | `routers/business_claims.py` | `components/claim-business/`, `app/admin/business-claims/` |
@@ -169,6 +172,9 @@ All steps are GitHub workflows you run by hand (**Actions → workflow → Run w
    pages. Progress: `agents/state/osm_import_state.json`.
    - Inputs: `city` or `count` (next N cities), `apply` (unticked = preview only), `fix_only`, `fix_done`,
      `backfill_hours` (copy OSM opening hours onto existing businesses; never overwrites).
+   - Each business also gets a **type** (Hospitals, Dentists, Pharmacies…) from its OSM tags/name. To fill
+     types on existing businesses: `python agents/osm_business_import.py --backfill-subcategories --apply`
+     (dry run without `--apply`; only fills empty ones). Done for all 150 cities on 2026-10-08 (96% typed).
 3. **Neighbourhoods** — workflow **Assign Business Localities** (`agents/assign_localities.py`). Tags each
    business with its nearest OpenStreetMap suburb (or neighbourhood, in towns with few suburbs).
    **Re-run it after importing new businesses** so they appear on area pages.
@@ -183,13 +189,13 @@ duplicate or overwrite an owner's edits.
 
 | Workflow | When (IST) | What it does |
 |---|---|---|
-| **Social Poster** (`social-poster.yml`, `agents/meta_poster.py`, `ecosystem_poster.py`) | 9:30 am + 7 pm daily | Posts to the Facebook Page + Instagram. Every other post is an **area list** built from live counts (e.g. "57 Doctors, Clinics & Pharmacies in Malleswaram") linking to that page; the others rotate tips, city spotlights, seller calls. |
-| **Blog Publisher** (`blog-publisher.yml`, `agents/blog_agent.py`) | Sunday 8:30 am | One article a week — alternates city guides and directory articles built from real businesses; auto-shared to Facebook |
+| **Social Poster** (`social-poster.yml`, `agents/meta_poster.py`, `ecosystem_poster.py`) | 9:30 am + 7 pm daily | Posts to the Facebook Page + Instagram. Every other post links a real page built from live counts, alternating an **area list** (e.g. "57 Doctors, Clinics & Pharmacies in Malleswaram") and a **type spotlight** (e.g. "37 Dentists in Hyderabad", added 2026-10-08); the others rotate tips, city spotlights, seller calls. |
+| **Blog Publisher** (`blog-publisher.yml`, `agents/blog_agent.py`) | Sunday 8:30 am | One article a week — alternates city guides and directory articles built from real businesses; auto-shared to Facebook. Posts end with "Browse by type" links to type pages (refresh old posts: `python agents/blog_agent.py --refresh-type-links`) |
 | **SEO Agent** (`seo-agent.yml`, `agents/seo_agent.py`) | 11:30 am daily | Writes SEO text for cities with enough real content |
-| **Expiry Reminders** | 9 am daily | Tells users their listing is about to expire |
+| **Expiry Reminders** | 9 am daily | Tells users their listing is about to expire. **Paused until 1,000 active listings (2026-10-08):** instead it keeps every listing live (30 days ahead) and brings back any expired one |
 | **Interest Digest** | 9 am daily / Monday | Email digests of new listings matching saved interests |
 | **Keep Backend Alive** | every 25 min | Pings the API so it doesn't cold-start |
-| **Deploy Backend / Frontend**, **Test** | on push to `master` | See section 7 |
+| **Deploy Backend / Frontend**, **Test** | on push to `master` | See section 7. Test runs the website (Vitest) and backend (pytest + Postgres) suites |
 | ~~City Seeder~~ | — | **Deleted 2026-09-25.** It posted AI-written listings with made-up phone numbers — never bring it back. |
 
 Manual-only: **OSM Business Import**, **Assign Business Localities** (section 4).
