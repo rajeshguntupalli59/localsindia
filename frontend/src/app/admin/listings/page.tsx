@@ -229,6 +229,9 @@ export default function AdminListingsPage() {
                         {formatPrice(listing.price)}
                       </span>
                     )}
+                    {listing.city_name && (
+                      <span className="flex items-center gap-0.5 font-medium text-foreground"><MapPin className="w-3 h-3" /> {listing.city_name}</span>
+                    )}
                     <span>{listing.created_at ? timeAgo(listing.created_at) : ''}</span>
                     <span className="truncate">{listing.contact_phone}</span>
                   </div>
@@ -276,8 +279,10 @@ export default function AdminListingsPage() {
                   )}
 
                   <div className="flex flex-wrap gap-x-5 gap-y-1.5 text-sm text-muted-foreground">
-                    {listing.area && (
-                      <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" /> {listing.area}</span>
+                    {(listing.area || listing.city_name) && (
+                      <span className="flex items-center gap-1">
+                        <MapPin className="w-3.5 h-3.5" /> {[listing.area, listing.city_name].filter(Boolean).join(', ')}
+                      </span>
                     )}
                     <span className="flex items-center gap-1"><Phone className="w-3.5 h-3.5" /> {listing.contact_phone}</span>
                     {listing.seller_name && <span>Seller: {listing.seller_name}</span>}

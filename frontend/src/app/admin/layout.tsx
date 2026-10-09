@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { ClipboardList, CalendarDays, Flag, Users, LayoutDashboard, LogOut, Activity, ShieldCheck, QrCode, Megaphone, Send, Search, Rss, DollarSign, FileCheck, PhoneCall } from 'lucide-react';
+import { ClipboardList, CalendarDays, Flag, Users, LayoutDashboard, LogOut, Activity, ShieldCheck, QrCode, Megaphone, Send, Search, Rss, DollarSign, FileCheck, PhoneCall, MessageCircleQuestion } from 'lucide-react';
 
 const NAV = [
   { href: '/admin', exact: true, icon: <LayoutDashboard className="w-4 h-4" />, label: 'Dashboard', badge: null },
@@ -19,6 +19,7 @@ const NAV = [
   { href: '/admin/banners', exact: false, icon: <Megaphone className="w-4 h-4" />, label: 'Banners', badge: null },
   { href: '/admin/announcements', exact: false, icon: <Send className="w-4 h-4" />, label: 'Announcements', badge: null },
   { href: '/admin/monitoring', exact: false, icon: <Activity className="w-4 h-4" />, label: 'Monitoring', badge: null },
+  { href: '/admin/chatbot', exact: false, icon: <MessageCircleQuestion className="w-4 h-4" />, label: 'Chatbot Questions', badge: null },
   { href: '/admin/activity', exact: false, icon: <Rss className="w-4 h-4" />, label: 'Marketing Activity', badge: null },
   { href: '/admin/spending', exact: false, icon: <DollarSign className="w-4 h-4" />, label: 'Spending', badge: null },
 ];

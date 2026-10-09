@@ -105,6 +105,7 @@ export interface Listing {
   created_at: string;
   city_id: string;
   city_slug?: string | null;
+  city_name?: string | null;
   category_id: string;
   user_id: string;
   images?: ListingImage[];

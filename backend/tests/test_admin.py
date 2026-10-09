@@ -619,3 +619,48 @@ async def test_admin_azure_cost_parses_a_successful_response(admin_client):
         {"resource_group": "localsindia-rg", "cost_usd": 12.5},
         {"resource_group": "localsindia-rg", "cost_usd": 3.25},
     ]
+
+
+@pytest.mark.asyncio
+async def test_admin_listings_include_city_name(admin_client, auth_client, city, category):
+    """Admin listing cards show the city, not just the area/landmark."""
+    ac, _user = auth_client
+    admin_ac, _admin = admin_client
+
+    create_resp = await ac.post("/api/v1/listings", json={
+        "title": "City name listing",
+        "description": "Used to test admin city name",
+        "category_id": str(category.id),
+        "city_id": str(city.id),
+        "contact_phone": "+919876543210",
+        "area": "Near Clock Tower",
+    })
+    listing_id = create_resp.json()["id"]
+
+    for url in ("/api/v1/admin/listings/pending", "/api/v1/admin/listings?status=pending"):
+        resp = await admin_ac.get(url)
+        assert resp.status_code == 200
+        row = next(l for l in resp.json() if l["id"] == listing_id)
+        assert row["city_name"] == city.name
+        assert row["city_slug"] == city.slug
+
+
+@pytest.mark.asyncio
+async def test_admin_chatbot_questions(admin_client, auth_client, db):
+    """Admins see what users asked the chatbot, newest first; others can't."""
+    from app.models.chatbot_question import ChatbotQuestion
+
+    db.add(ChatbotQuestion(question="PG in Ameerpet under 7000", city_slug="hyderabad",
+                           search_query="PG under 7000", results_count=3))
+    await db.commit()
+
+    admin_ac, _admin = admin_client
+    resp = await admin_ac.get("/api/v1/admin/chatbot-questions?q=ameerpet")
+    assert resp.status_code == 200
+    row = next(r for r in resp.json() if r["question"] == "PG in Ameerpet under 7000")
+    assert row["city_slug"] == "hyderabad"
+    assert row["search_query"] == "PG under 7000"
+    assert row["results_count"] == 3
+
+    ac, _user = auth_client
+    assert (await ac.get("/api/v1/admin/chatbot-questions")).status_code == 403

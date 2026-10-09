@@ -33,6 +33,7 @@ from app.models.business import Business
 from app.models.buyer_request import BuyerRequest
 from app.models.buyer_request_report import BuyerRequestReport
 from app.models.category import Category
+from app.models.chatbot_question import ChatbotQuestion
 from app.models.city import City
 from app.models.city_banner import CityBanner
 from app.models.event import Event
@@ -65,6 +66,25 @@ class BroadcastResult(BaseModel):
 router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
 
 
+async def _with_city(db: AsyncSession, listings) -> list[ListingOut]:
+    """Admin listing cards show the city - the listing row only has the
+    city_id, so look the names up in one query."""
+    city_ids = {l.city_id for l in listings}
+    cities = {}
+    if city_ids:
+        rows = await db.execute(select(City.id, City.name, City.slug).where(City.id.in_(city_ids)))
+        cities = {r.id: r for r in rows}
+    out = []
+    for listing in listings:
+        item = ListingOut.model_validate(listing)
+        city = cities.get(listing.city_id)
+        if city:
+            item.city_name = city.name
+            item.city_slug = city.slug
+        out.append(item)
+    return out
+
+
 @router.get("/listings/pending", response_model=list[ListingOut])
 async def pending_listings(
     page: int = 1,
@@ -79,7 +99,7 @@ async def pending_listings(
         .offset((page - 1) * page_size)
         .limit(page_size)
     )
-    return result.scalars().all()
+    return await _with_city(db, result.scalars().all())
 
 
 @router.get("/listings", response_model=list[ListingOut])
@@ -99,6 +119,38 @@ async def list_listings_by_status(
         .order_by(Listing.created_at.desc())
         .offset((page - 1) * page_size)
         .limit(page_size)
+    )
+    return await _with_city(db, result.scalars().all())
+
+
+class ChatbotQuestionOut(BaseModel):
+    id: uuid.UUID
+    question: str
+    city_slug: str | None
+    search_query: str | None
+    results_count: int | None
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+@router.get("/chatbot-questions", response_model=list[ChatbotQuestionOut])
+async def chatbot_questions(
+    q: str | None = None,
+    page: int = 1,
+    page_size: int = 50,
+    db: AsyncSession = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+):
+    """What users have asked the chatbot, newest first."""
+    query = select(ChatbotQuestion)
+    if q:
+        query = query.where(ChatbotQuestion.question.ilike(f"%{q}%"))
+    result = await db.execute(
+        query
+        .order_by(ChatbotQuestion.created_at.desc())
+        .offset((page - 1) * page_size)
+        .limit(min(page_size, 200))
     )
     return result.scalars().all()
 

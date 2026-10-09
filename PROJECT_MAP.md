@@ -123,6 +123,10 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 
 ## 6. Changelog (dated, most recent first — append here after notable sessions)
 
+### 2026-10-09 — Admin: city on listing cards + chatbot questions page
+- `/admin/listings` now shows the city (admin endpoints didn't send it, so only the area/landmark showed).
+- New `chatbot_questions` table (migration `c7d8e9f0a1b2`): POST /chat saves every message (city, search run, result count), also when Gemini is down. Read at `/admin/chatbot` via GET /admin/chatbot-questions. Only questions asked after deploy show up.
+
 
 ### 2026-10-08 — Subcategories + specific questions per type (web + mobile + backend)
 JustDial comparison found 14 flat categories, 0 subcategories, Doctors = 51% of Hyderabad's directory (hospitals, pharmacies, labs mixed), answers to category questions saved but never shown to buyers or editable, web home showing only 8/14 categories. Built: `backend/app/core/category_catalog.py` (89 subcategories, ≤7 mostly tap-to-pick questions each; served at GET /categories/catalog), `listings.subcategory_slug` + `listings.attributes` JSONB and `businesses.subcategory_slug` (migration `d1e2f3a4b5c6`, copies the old `*_details` rows), validation + labelled `detail_rows` + `f_*` answer filters, business subcategory filter/counts, shared question components on web/mobile post + edit, Details table on listing pages, search filters, directory type chips, add-business form now asks category/type (was saving none). Importer maps OSM tags → subcategory; `--backfill-subcategories` dry run for Hyderabad: 2,374/≈2,500 matched (hospitals 862, clinics 327, restaurants 249…). **Not yet deployed or backfilled on prod.** Installed app v1.1.0 keeps working (legacy question keys kept); new app UI needs an EAS build.

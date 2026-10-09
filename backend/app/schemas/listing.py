@@ -117,6 +117,7 @@ class ListingOut(BaseModel):
     user_id: uuid.UUID
     images: list[ListingImageOut] = []
     city_slug: str | None = None
+    city_name: str | None = None
     category_name: str | None = None
     category_slug: str | None = None
     seller_name: str | None = None

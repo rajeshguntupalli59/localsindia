@@ -677,7 +677,8 @@ Web: `BusinessDashboardClient.tsx`, reached via a "View Analytics" link on `Busi
 | Method | Path | What it does |
 |--------|------|-------------|
 | GET | `/listings/pending` | Moderation queue -- oldest first |
-| GET | `/listings` | All listings with status filter |
+| GET | `/listings` | All listings with status filter (both listing endpoints return `city_name`, 2026-10-09) |
+| GET | `/chatbot-questions` | What users asked the chatbot (`chatbot_questions` table), newest first, `?q=` search (2026-10-09) |
 | PATCH | `/listings/{id}/approve` | Approve -> status='active' |
 | PATCH | `/listings/{id}/reject` | Reject -> status='rejected' |
 | GET | `/events/pending` | Events moderation queue |
@@ -1141,9 +1142,17 @@ Shows all user's listings (all statuses: pending, active, expired, etc.):
 **File:** `app/admin/listings/page.tsx`
 
 Data table with pending listings queue:
-- Title, city, user, category, posted time
+- Title, city, user, category, posted time (city name shown on the card and next to the area — added 2026-10-09, before only the area/landmark showed)
 - "Approve" button (green) -> active
 - "Reject" button (red) -> shows reason modal -> rejected
+
+---
+
+### `/admin/chatbot` — Chatbot Questions (2026-10-09)
+
+**File:** `app/admin/chatbot/page.tsx`
+
+Every message users send the AI assistant (`chatbot_questions` table), newest first, with a search box. Each row shows the city, the listing search the bot ran and how many results it found (0 results highlighted in red — demand we don't have listings for).
 
 ---
 

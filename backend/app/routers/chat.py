@@ -15,6 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.limiter import limiter
+from app.models.chatbot_question import ChatbotQuestion
 from app.models.city import City
 from app.models.llm_usage_log import LlmUsageLog
 from app.services import search_svc
@@ -97,11 +98,31 @@ class ChatResponse(BaseModel):
     listings: list[ListingSnippet] | None = None
 
 
+async def _log_question(
+    db: AsyncSession, req: ChatRequest, city_slug: str | None,
+    search_query: str | None, results_count: int | None,
+) -> None:
+    """Record what the user asked, for /admin/chatbot. Never lets a logging
+    failure break the chat reply."""
+    try:
+        db.add(ChatbotQuestion(
+            question=req.message[:2000],
+            city_slug=(city_slug or req.city_slug or None),
+            search_query=search_query[:300] if search_query else None,
+            results_count=results_count,
+        ))
+        await db.commit()
+    except Exception:
+        await db.rollback()
+        logger.exception("Failed to log chatbot question")
+
+
 @router.post("", response_model=ChatResponse)
 @limiter.limit("5/minute")
 @limiter.limit("20/hour")
 async def chat(request: Request, req: ChatRequest, db: AsyncSession = Depends(get_db)):
     if not settings.GOOGLE_AI_KEY:
+        await _log_question(db, req, None, None, None)
         return ChatResponse(reply="Our AI assistant is temporarily unavailable while we upgrade to a higher usage plan. As LocalsIndia grows, we're scaling our AI capacity — check back soon! In the meantime, use the search bar to find listings in your city.")
 
     client = genai.Client(api_key=settings.GOOGLE_AI_KEY)
@@ -117,6 +138,8 @@ async def chat(request: Request, req: ChatRequest, db: AsyncSession = Depends(ge
 
     found_listings: list[dict] = []
     resolved_city_slug: str | None = None
+    search_query: str | None = None
+    search_total: int | None = None
     total_input_tokens = 0
     total_output_tokens = 0
 
@@ -158,6 +181,8 @@ async def chat(request: Request, req: ChatRequest, db: AsyncSession = Depends(ge
             args = dict(fn_call.args)
             resolved_city_slug = args.get("city_slug") or req.city_slug or "hyderabad"
             query = args.get("query", "")
+            search_query = query
+            search_total = 0
 
             city_row = await db.execute(
                 select(City).where(City.slug == resolved_city_slug.lower(), City.active == True)
@@ -167,6 +192,7 @@ async def chat(request: Request, req: ChatRequest, db: AsyncSession = Depends(ge
             if city:
                 result = await search_svc.search_listings(db, city_id=city.id, q=query, page_size=5)
                 found_listings = result["items"]
+                search_total = result["total"]
                 if found_listings:
                     snippets_text = "\n".join(
                         f"- {i['title']} | {'₹' + str(int(i['price'])) if i.get('price') else 'Price on request'}"
@@ -208,7 +234,11 @@ async def chat(request: Request, req: ChatRequest, db: AsyncSession = Depends(ge
 
     except Exception as e:
         logger.error("Gemini API error: %s %s", type(e).__name__, str(e))
+        await db.rollback()
+        await _log_question(db, req, resolved_city_slug, search_query, search_total)
         return ChatResponse(reply="Our AI assistant is temporarily unavailable while we upgrade to a higher usage plan. As LocalsIndia grows, we're scaling our AI capacity — check back soon! In the meantime, use the search bar to find listings in your city.")
+
+    await _log_question(db, req, resolved_city_slug, search_query, search_total)
 
     listing_snippets = [
         ListingSnippet(

@@ -98,3 +98,26 @@ async def test_chat_without_api_key_does_not_log_usage(client, db):
     assert resp.status_code == 200
     after = await db.scalar(select(func.count()).select_from(LlmUsageLog))
     assert after == baseline
+
+
+@pytest.mark.asyncio
+async def test_chat_records_question(client, db):
+    """Every message is saved for /admin/chatbot - even when the bot is
+    unavailable, since the question itself is what admins want to see."""
+    from app.models.chatbot_question import ChatbotQuestion
+
+    fake_response = _FakeResponse(text="Yes!", input_tokens=10, output_tokens=2)
+    with patch("app.core.config.settings.GOOGLE_AI_KEY", "fake-key-for-test"), \
+         patch("app.routers.chat.genai.Client", return_value=_FakeGenaiClient(fake_response)):
+        resp = await client.post("/api/v1/chat", json={"message": "is posting free?", "city_slug": "chennai"})
+    assert resp.status_code == 200
+
+    with patch("app.core.config.settings.GOOGLE_AI_KEY", ""):
+        resp = await client.post("/api/v1/chat", json={"message": "bot down question"})
+    assert resp.status_code == 200
+
+    rows = (await db.execute(select(ChatbotQuestion))).scalars().all()
+    by_q = {r.question: r for r in rows}
+    assert by_q["is posting free?"].city_slug == "chennai"
+    assert by_q["is posting free?"].search_query is None
+    assert "bot down question" in by_q

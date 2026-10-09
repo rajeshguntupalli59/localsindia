@@ -25,6 +25,7 @@
 | Biometric re-login (mobile only, pre-existing) | §11 | — | `mobile/src/hooks/useBiometric.ts`, `mobile/src/lib/storage.ts` (`biometric_enabled`), `App.tsx` (unlock on launch), `ProfileScreen.tsx` (toggle) | — (local SecureStore only) | — |
 | Google OAuth | §11, §6-Auth | `routers/auth.py`, `core/config.py` | `auth/login/page.tsx`, `auth/callback/page.tsx` | `users` | GET /auth/google, GET /auth/google/callback — **kept intentionally** (existing Google-only users would be locked out otherwise); Raj to notify users before eventual removal |
 | JWT token refresh | §11 | `routers/auth.py`, `core/security.py` | `lib/api.ts` (auto-refresh) | — | POST /auth/refresh |
+| Chatbot questions log (2026-10-09: every message users send the chatbot is saved, admin can read/search them) | §6-Chat | `routers/chat.py` (`_log_question`, logs even when the bot is down), `routers/admin.py` (`GET /admin/chatbot-questions`), `models/chatbot_question.py` | `admin/chatbot/page.tsx` | `chatbot_questions` | GET /admin/chatbot-questions [ADMIN] |
 | Admin login | §6-Auth | `routers/auth.py` | `admin/login/page.tsx` | `users` (role=admin) | POST /auth/admin-login |
 | User profile | §8-Profile | `routers/auth.py` | `profile/page.tsx` | `users` | GET /auth/me, PATCH /auth/me |
 | Account deletion (2026-07-14) | §8-Profile, §6-Auth | `routers/auth.py` (soft-deletes user + cascades to their listings) | `profile/page.tsx` (Delete account button), `account-deletion/page.tsx` (public, no-login-required page for Play Store data-deletion policy), `mobile/src/screens/ProfileScreen.tsx` (Delete account, double-confirm) | `users`, `listings` (both soft-deleted; user PII scrubbed: name/phone/email/password_hash/avatar_url set to null/placeholder) | DELETE /auth/me |
@@ -142,6 +143,7 @@
 | `models/city_banner.py` | `city_banners` | Admin-managed sponsor banner per city with a date range (2026-07-20); deliberately its own table, not a `listings` row |
 | ~~`models/listing_details.py`~~ | (removed 2026-10-08) | The 11 `*_details` tables are no longer used by any code — migration `d1e2f3a4b5c6` copied their rows into `listings.attributes`. The tables still exist in the database until a deliberate drop migration; `alembic revision --autogenerate` will now propose dropping them |
 | `models/business_image.py` | `business_images` | 1:1 extension of `businesses` (2026-07-22), same shape as `listing_images`; `Business.images` relationship (`lazy="selectin"`) auto-loads it on any query |
+| `models/chatbot_question.py` | `chatbot_questions` | (2026-10-09) One row per chatbot message — question, city, search query, results count; no user_id (chat is public) |
 | `models/event_image.py` | `event_images` | 1:1 extension of `events` (2026-07-22), same shape as `listing_images`; `Event.images` relationship (`lazy="selectin"`) auto-loads it on any query |
 
 ### Backend — Routers (API endpoints)
@@ -227,6 +229,7 @@
 | `app/admin/events/page.tsx` | `/admin/events` | Event moderation queue |
 | `app/admin/users/page.tsx` | `/admin/users` | User list + role management |
 | `app/admin/reports/page.tsx` | `/admin/reports` | Abuse reports for flagged listings |
+| `app/admin/chatbot/page.tsx` | `/admin/chatbot` | (2026-10-09) Questions users asked the chatbot, newest first, searchable; shows city + the search it ran + result count (0 results in red) |
 | `app/admin/buyer-requests/page.tsx` | `/admin/buyer-requests` | (2026-07-27) Buyer-request moderation queue — mirrors `admin/reports/page.tsx`; review/restore flagged "Wanted" posts |
 | `app/admin/banners/page.tsx` | `/admin/banners` | (new, 2026-07-20) City banner ads: create form (city picker + advertiser/image/link + date range), list with Active/Scheduled/Expired status pill, remove |
 | `app/privacy/page.tsx` | `/privacy` | Privacy policy (static) |
@@ -450,7 +453,7 @@ DELETE /api/v1/events/{id}               Soft-delete [AUTH, owner/admin]
 ### Admin (all require role=admin)
 ```
 GET    /api/v1/admin/listings/pending     Moderation queue (oldest first)
-GET    /api/v1/admin/listings             All listings (filter: status)
+GET    /api/v1/admin/listings             All listings (filter: status). Both admin listing endpoints fill city_name + city_slug (2026-10-09)
 PATCH  /api/v1/admin/listings/{id}/approve  -> status='active'
 PATCH  /api/v1/admin/listings/{id}/reject   -> status='rejected'
 GET    /api/v1/admin/events/pending       Event moderation queue
@@ -464,6 +467,7 @@ GET    /api/v1/admin/reports             All abuse reports
 GET    /api/v1/admin/banners             All city banners
 POST   /api/v1/admin/banners             Create banner (city_id, advertiser_name, image_url, link_url, start_date, end_date)
 DELETE /api/v1/admin/banners/{id}        Remove banner
+GET    /api/v1/admin/chatbot-questions   What users asked the chatbot, newest first (?q= search) (2026-10-09)
 GET    /api/v1/admin/buyer-requests      Flagged buyer requests + their reports (2026-07-27)
 PATCH  /api/v1/admin/buyer-requests/{id}/restore  Un-flag -> status='open' (2026-07-27)
 ```
@@ -561,6 +565,7 @@ GET    /api/v1/health                     {"status":"ok"} — keepalive probe
 | `analytics_events` | id, business_id, event_type, created_at | One row per view/whatsapp_click event; migration `e1a2b3c4d5f6` (2026-07-18); aggregated (not queried raw) by `GET /analytics/business/{id}` |
 | `tickets` | id, event_id, user_id, amount, razorpay_order_id, razorpay_payment_id, qr_token (unique), used_at, created_at | Migration `f2b3c4d5e6a7` (2026-07-18); created only after Razorpay signature verification, never at order-creation time |
 | `app_error_logs` | id, platform, message, stack, context, app_version, created_at | No user_id (reports must work pre-login/no-auth); platform in ('mobile','web'); migration `b3c4d5e6f7a8` (2026-07-14) |
+| `chatbot_questions` | id, question, city_slug, search_query, results_count, created_at | Written by POST /chat on every message (also when Gemini is down/unconfigured); migration `c7d8e9f0a1b2` (2026-10-09) |
 | `city_banners` | id, city_id, advertiser_name, image_url, link_url, start_date, end_date, created_at | Admin-managed sponsor slot per city, one active banner shown per city homepage; migration `b4c5d6e7f8a9` (2026-07-20); no listing/moderation semantics — intentionally its own table, not `listings` with `category='advertisement'` |
 | `vehicle_details` | id, listing_id (unique FK), brand, model, year, km_driven, fuel_type, transmission, owners_count, created_at | 1:1 with `listings` where category='vehicles'; migration `d3c3f83522ec` (2026-07-21) |
 | `job_details` | id, listing_id (unique FK), company_name, salary_min, salary_max, job_type, experience_required, work_mode, created_at | category='jobs'; migration `d3c3f83522ec` |
