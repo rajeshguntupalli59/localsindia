@@ -126,6 +126,7 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 ### 2026-10-09 — Admin: city on listing cards + chatbot questions page
 - `/admin/listings` now shows the city (admin endpoints didn't send it, so only the area/landmark showed).
 - New `chatbot_questions` table (migration `c7d8e9f0a1b2`): POST /chat saves every message (city, search run, result count), also when Gemini is down. Read at `/admin/chatbot` via GET /admin/chatbot-questions. Only questions asked after deploy show up.
+- Deployed `f896551` (tests + backend + frontend green, migration ran). Live check: endpoint 403 without admin login, page 200; Raj confirmed both pages on the live admin panel.
 
 
 ### 2026-10-08 — Subcategories + specific questions per type (web + mobile + backend)
