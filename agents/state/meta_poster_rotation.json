@@ -1,8 +1,7 @@
 {
-  "lastTopicIndex": 1,
+  "lastTopicIndex": 2,
   "lastTipCategoryIndex": 1,
   "topicHistory": [
-    "city_spotlight",
     "area_directory",
     "referral",
     "area_directory",
@@ -11,7 +10,8 @@
     "app_feature",
     "area_directory",
     "category_tip",
-    "type_spotlight"
+    "type_spotlight",
+    "safety_tip"
   ],
   "tipCategoryHistory": [
     "vehicles",
@@ -25,9 +25,8 @@
     "classifieds",
     "services"
   ],
-  "lastStyleIndex": 1,
+  "lastStyleIndex": 2,
   "styleHistory": [
-    "duotone",
     "quote",
     "spotlight",
     "glass",
@@ -36,7 +35,8 @@
     "quote",
     "spotlight",
     "glass",
-    "bold"
+    "bold",
+    "duotone"
   ],
   "lastAreaCityIndex": 5,
   "areaPosted": [
