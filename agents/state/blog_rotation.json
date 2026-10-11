@@ -1,6 +1,6 @@
 {
-  "lastCityIndex": 15,
-  "lastCategoryIndex": 1,
+  "lastCityIndex": 16,
+  "lastCategoryIndex": 2,
   "history": [
     {
       "citySlug": "bangalore",
@@ -105,6 +105,13 @@
       "kind": "directory",
       "topicTemplateId": "directory-doctors",
       "publishedAt": "2026-10-04T09:10:43Z"
+    },
+    {
+      "citySlug": "salem",
+      "category": "jobs",
+      "kind": "guide",
+      "topicTemplateId": "spot-fake-listing",
+      "publishedAt": "2026-10-11T09:32:35Z"
     }
   ]
 }
