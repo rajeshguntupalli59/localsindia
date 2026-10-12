@@ -123,13 +123,15 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 
 ## 6. Changelog (dated, most recent first — append here after notable sessions)
 
-### 2026-10-12 — GSC validations failed (duplicate / redirect / soft 404): backend-blip root causes
+### 2026-10-12 — SESSION SUMMARY: GSC validations failed (backend-blip root causes) + rate-limiter fix + Hyderabad push check
 - Duplicate (272): URL Inspection showed "User-declared canonical: None" on the Oct 9 crawl. Business/listing pages rendered a generic 200 page with no canonical when the backend fetch failed; category/type pages 404'd. Now they throw → 500 (Google retries). `4e837f1`.
 - Page with redirect (352 failed, all business pages crawled Oct 9): `BusinessDetailClient` re-fetches on mount and `router.push`ed to the city list on failure, even with server data present → Googlebot's render saw a JS redirect. Now only redirects when there's no server data.
 - Soft 404: only 2 of 1,232 failed, both crawled Oct 7 before that day's fix; both are real 404s now — just revalidate.
 - Old `/classifieds/{uuid}` → 308 URLs stay in "Page with redirect" by design.
 - Validate Fix restarted by Raj on all three 2026-10-12 (after both deploys); recheck ~10-26.
 - Rate limiter keyed every request on Azure's proxy IP (169.254.130.1) → one site-wide bucket; a bot on /auth/otp/send could 429 everyone (possibly also crawlers). Now keys on `X-Client-IP` / last `X-Forwarded-For` entry (`backend/app/core/limiter.py`, tests in `test_limiter.py`). Deployed `ff62b2c`, 236 tests pass, health 200.
+- Hyderabad push status check (day 4 of the push started 10-08, live `/admin/outreach`): only 2 businesses contacted (32 Happy Teeth Dental Clinic, AAKAARAA Salon, both follow-up), 0 closed, 0 claimed; 759 still to contact. Automated parts running (1 Hyderabad `type_spotlight` post so far: kirana-supermarkets; weekly blog type links). Bottleneck is Raj's manual WhatsApp outreach (plan 15–20/day), not code. Week-end check moved from ~10-15 to ~10-19 (same day as the GSC/Bing check).
+- **Start here next session (~10-19):** (1) GSC indexing report + Bing; (2) Hyderabad push numbers from `/admin/outreach` (contacted / claimed), real listings, WhatsApp/Call taps, GSC impressions on type pages; (3) ~10-26: did the 3 GSC validations pass — if not, URL-Inspect a failed URL first.
 
 ### 2026-10-09 — Admin: city on listing cards + chatbot questions page
 - `/admin/listings` now shows the city (admin endpoints didn't send it, so only the area/landmark showed).
