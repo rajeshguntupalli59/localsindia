@@ -129,6 +129,7 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 - Soft 404: only 2 of 1,232 failed, both crawled Oct 7 before that day's fix; both are real 404s now — just revalidate.
 - Old `/classifieds/{uuid}` → 308 URLs stay in "Page with redirect" by design.
 - Raj to click Validate Fix again on all three after deploy; recheck ~10-26.
+- Rate limiter keyed every request on Azure's proxy IP (169.254.130.1) → one site-wide bucket; a bot on /auth/otp/send could 429 everyone (possibly also crawlers). Now keys on `X-Client-IP` / last `X-Forwarded-For` entry (`backend/app/core/limiter.py`, tests in `test_limiter.py`). Deployed `ff62b2c`, 236 tests pass, health 200.
 
 ### 2026-10-09 — Admin: city on listing cards + chatbot questions page
 - `/admin/listings` now shows the city (admin endpoints didn't send it, so only the area/landmark showed).
