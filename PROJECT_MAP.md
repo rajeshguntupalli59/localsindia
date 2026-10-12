@@ -123,6 +123,13 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 
 ## 6. Changelog (dated, most recent first — append here after notable sessions)
 
+### 2026-10-12 — GSC validations failed (duplicate / redirect / soft 404): backend-blip root causes
+- Duplicate (272): URL Inspection showed "User-declared canonical: None" on the Oct 9 crawl. Business/listing pages rendered a generic 200 page with no canonical when the backend fetch failed; category/type pages 404'd. Now they throw → 500 (Google retries). `4e837f1`.
+- Page with redirect (352 failed, all business pages crawled Oct 9): `BusinessDetailClient` re-fetches on mount and `router.push`ed to the city list on failure, even with server data present → Googlebot's render saw a JS redirect. Now only redirects when there's no server data.
+- Soft 404: only 2 of 1,232 failed, both crawled Oct 7 before that day's fix; both are real 404s now — just revalidate.
+- Old `/classifieds/{uuid}` → 308 URLs stay in "Page with redirect" by design.
+- Raj to click Validate Fix again on all three after deploy; recheck ~10-26.
+
 ### 2026-10-09 — Admin: city on listing cards + chatbot questions page
 - `/admin/listings` now shows the city (admin endpoints didn't send it, so only the area/landmark showed).
 - New `chatbot_questions` table (migration `c7d8e9f0a1b2`): POST /chat saves every message (city, search run, result count), also when Gemini is down. Read at `/admin/chatbot` via GET /admin/chatbot-questions. Only questions asked after deploy show up.

@@ -90,9 +90,11 @@ export default function BusinessDetailPage({ initial = null, subtitle }: { initi
         setBusiness(b);
         api.businesses.view(businessId); // fire-and-forget view count
       })
-      .catch(() => router.push(`/${citySlug}/businesses`))
+      // Keep the server-rendered business on a failed refresh: navigating away
+      // made Googlebot's render log the page as "Page with redirect"
+      .catch(() => { if (!initial) router.push(`/${citySlug}/businesses`); })
       .finally(() => setLoading(false));
-  }, [businessId, citySlug, router]);
+  }, [businessId, citySlug, router, initial]);
 
   const submitReview = async (e: React.FormEvent) => {
     e.preventDefault();
