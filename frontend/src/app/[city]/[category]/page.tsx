@@ -30,8 +30,18 @@ async function getJson<T>(url: string, fallback: T): Promise<T> {
   }
 }
 
+// No cities/catalog means the backend is down, not that the page doesn't exist:
+// fail with a 5xx (Google retries) rather than a generic page with no canonical.
 async function fetchCities(): Promise<City[]> {
-  return getJson<City[]>(`${API_BASE}/api/v1/cities`, []);
+  const cities = await getJson<City[]>(`${API_BASE}/api/v1/cities`, []);
+  if (!cities.length) throw new Error('cities: backend unavailable');
+  return cities;
+}
+
+async function requireCatalog() {
+  const catalog = await fetchCatalog();
+  if (!catalog.length) throw new Error('catalog: backend unavailable');
+  return catalog;
 }
 
 // Listings for the category. `exact` is false when we had to fall back to
@@ -82,7 +92,7 @@ export async function generateMetadata(
   const city = (await fetchCities()).find(c => c.slug === params.city);
   if (!meta && city) {
     // Not a category — maybe a type page, e.g. /hyderabad/dentists
-    const type = findType(await fetchCatalog(), params.category);
+    const type = findType(await requireCatalog(), params.category);
     if (type) return typeMetadata(city, type);
   }
   if (!meta || !city) return { title: 'LocalsIndia' };
@@ -122,7 +132,7 @@ export default async function SeoCategoryPage({
 
   if (!meta) {
     // Not a category — maybe a type page, e.g. /hyderabad/dentists
-    const type = findType(await fetchCatalog(), params.category);
+    const type = findType(await requireCatalog(), params.category);
     if (!type) notFound();
     return <TypePage city={city} type={type} />;
   }
@@ -132,7 +142,7 @@ export default async function SeoCategoryPage({
     fetchBusinessCount(params.city, meta.businessSlug),
     getJson<Locality[]>(`${API_BASE}/api/v1/businesses/localities?city_slug=${params.city}&category_slug=${meta.businessSlug}`, []),
     getJson<Record<string, number>>(`${API_BASE}/api/v1/businesses/subcategory-counts?city_slug=${params.city}&category_slug=${meta.businessSlug}`, {}),
-    fetchCatalog(),
+    requireCatalog(),
   ]);
   // Type pages worth linking (the same 3+ bar that makes them indexable)
   const typeLinks = (catalog.find(c => c.slug === meta.businessSlug)?.subcategories ?? [])

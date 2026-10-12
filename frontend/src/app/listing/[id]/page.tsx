@@ -7,16 +7,12 @@ import { serializeJsonLd } from '@/lib/jsonLd';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend-in.azurewebsites.net';
 
-async function fetchListing(id: string): Promise<Listing | null> {
-  let res: Response;
-  try {
-    res = await fetch(`${API_BASE}/api/v1/listings/${id}`, { next: { revalidate: 300 } });
-  } catch {
-    return null;
-  }
+async function fetchListing(id: string): Promise<Listing> {
+  const res = await fetch(`${API_BASE}/api/v1/listings/${id}`, { next: { revalidate: 300 } });
   // Deleted/expired listing → real 404, not a 200 "not found" page Google flags as duplicate/soft-404
   if (res.status === 404) notFound();
-  if (!res.ok) return null;
+  // Backend down → 5xx (Google retries) rather than a generic duplicate page
+  if (!res.ok) throw new Error(`listing ${id}: backend ${res.status}`);
   return await res.json();
 }
 
@@ -29,7 +25,6 @@ export async function generateMetadata(
   { params }: { params: { id: string } }
 ): Promise<Metadata> {
   const listing = await fetchListing(listingIdFromParam(params.id));
-  if (!listing) return { title: 'Listing not found | LocalsIndia' };
 
   const locality = [listing.area, listing.city_slug].filter(Boolean).join(', ');
   const title = `${listing.title}${locality ? ` — ${locality}` : ''} | LocalsIndia`;

@@ -22,17 +22,15 @@ const CATEGORY_LABEL: Record<string, string> = {
   businesses: 'Shops', 'real-estate': 'Real Estate', furniture: 'Furniture', fashion: 'Fashion',
 };
 
-async function fetchBusiness(id: string): Promise<Business | null> {
-  let res: Response;
-  try {
-    res = await fetch(`${API_BASE}/api/v1/businesses/${id}`, { next: { revalidate: 3600 } });
-  } catch {
-    return null;
-  }
+async function fetchBusiness(id: string): Promise<Business> {
+  const res = await fetch(`${API_BASE}/api/v1/businesses/${id}`, { next: { revalidate: 3600 } });
   // Removed/unpublished business → real 404; otherwise the client bounced to the
   // city list and Google logged it as "Page with redirect"
   if (res.status === 404) notFound();
-  return res.ok ? await res.json() : null;
+  // Backend down → fail with a 5xx (Google retries later) instead of a generic
+  // page with no canonical, which GSC flagged as "Duplicate without user-selected canonical"
+  if (!res.ok) throw new Error(`business ${id}: backend ${res.status}`);
+  return await res.json();
 }
 
 function cityName(slug: string) {
@@ -45,7 +43,6 @@ export async function generateMetadata(
   { params }: { params: { city: string; id: string } },
 ): Promise<Metadata> {
   const b = await fetchBusiness(params.id);
-  if (!b) return { title: 'Business | LocalsIndia' };
   const city = cityName(params.city);
   const kind = CATEGORY_LABEL[b.category_slug ?? ''] ?? 'Local business';
   const title = `${b.name} — ${kind} in ${city} | LocalsIndia`;
