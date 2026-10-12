@@ -2,7 +2,6 @@
   "lastTopicIndex": 3,
   "lastTipCategoryIndex": 1,
   "topicHistory": [
-    "area_directory",
     "seller_call",
     "area_directory",
     "app_feature",
@@ -11,7 +10,8 @@
     "type_spotlight",
     "safety_tip",
     "area_directory",
-    "city_spotlight"
+    "city_spotlight",
+    "type_spotlight"
   ],
   "tipCategoryHistory": [
     "vehicles",
@@ -25,9 +25,8 @@
     "classifieds",
     "services"
   ],
-  "lastStyleIndex": 4,
+  "lastStyleIndex": 0,
   "styleHistory": [
-    "glass",
     "bold",
     "duotone",
     "quote",
@@ -36,7 +35,8 @@
     "bold",
     "duotone",
     "quote",
-    "spotlight"
+    "spotlight",
+    "glass"
   ],
   "lastAreaCityIndex": 0,
   "areaPosted": [
@@ -55,6 +55,7 @@
     "hyderabad/doctors/vanasthalipuram"
   ],
   "typePosted": [
-    "hyderabad/kirana-supermarkets"
+    "hyderabad/kirana-supermarkets",
+    "hyderabad/pg-hostels"
   ]
 }
