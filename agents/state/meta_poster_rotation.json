@@ -2,7 +2,6 @@
   "lastTopicIndex": 4,
   "lastTipCategoryIndex": 1,
   "topicHistory": [
-    "area_directory",
     "app_feature",
     "area_directory",
     "category_tip",
@@ -11,7 +10,8 @@
     "area_directory",
     "city_spotlight",
     "type_spotlight",
-    "referral"
+    "referral",
+    "area_directory"
   ],
   "tipCategoryHistory": [
     "vehicles",
@@ -25,9 +25,8 @@
     "classifieds",
     "services"
   ],
-  "lastStyleIndex": 1,
+  "lastStyleIndex": 2,
   "styleHistory": [
-    "duotone",
     "quote",
     "spotlight",
     "glass",
@@ -36,9 +35,10 @@
     "quote",
     "spotlight",
     "glass",
-    "bold"
+    "bold",
+    "duotone"
   ],
-  "lastAreaCityIndex": 0,
+  "lastAreaCityIndex": 1,
   "areaPosted": [
     "hyderabad/doctors/kukatpally",
     "bengaluru/tiffin/basavanagudi",
@@ -52,7 +52,8 @@
     "vijayawada/businesses/patamata",
     "kochi/education/kodikuthumala",
     "coimbatore/doctors/saibaba-colony",
-    "hyderabad/doctors/vanasthalipuram"
+    "hyderabad/doctors/vanasthalipuram",
+    "bengaluru/doctors/malleswaram"
   ],
   "typePosted": [
     "hyderabad/kirana-supermarkets",
