@@ -2,7 +2,6 @@
   "lastTopicIndex": 5,
   "lastTipCategoryIndex": 1,
   "topicHistory": [
-    "area_directory",
     "category_tip",
     "type_spotlight",
     "safety_tip",
@@ -11,7 +10,8 @@
     "type_spotlight",
     "referral",
     "area_directory",
-    "seller_call"
+    "seller_call",
+    "type_spotlight"
   ],
   "tipCategoryHistory": [
     "vehicles",
@@ -25,9 +25,8 @@
     "classifieds",
     "services"
   ],
-  "lastStyleIndex": 3,
+  "lastStyleIndex": 4,
   "styleHistory": [
-    "spotlight",
     "glass",
     "bold",
     "duotone",
@@ -36,7 +35,8 @@
     "glass",
     "bold",
     "duotone",
-    "quote"
+    "quote",
+    "spotlight"
   ],
   "lastAreaCityIndex": 1,
   "areaPosted": [
@@ -57,6 +57,7 @@
   ],
   "typePosted": [
     "hyderabad/kirana-supermarkets",
-    "hyderabad/pg-hostels"
+    "hyderabad/pg-hostels",
+    "hyderabad/bakeries-sweets"
   ]
 }
