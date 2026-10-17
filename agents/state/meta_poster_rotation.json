@@ -2,7 +2,6 @@
   "lastTopicIndex": 1,
   "lastTipCategoryIndex": 2,
   "topicHistory": [
-    "area_directory",
     "city_spotlight",
     "type_spotlight",
     "referral",
@@ -11,7 +10,8 @@
     "type_spotlight",
     "app_feature",
     "area_directory",
-    "category_tip"
+    "category_tip",
+    "type_spotlight"
   ],
   "tipCategoryHistory": [
     "electronics",
@@ -25,9 +25,8 @@
     "services",
     "pg-roommate"
   ],
-  "lastStyleIndex": 2,
+  "lastStyleIndex": 3,
   "styleHistory": [
-    "quote",
     "spotlight",
     "glass",
     "bold",
@@ -36,7 +35,8 @@
     "spotlight",
     "glass",
     "bold",
-    "duotone"
+    "duotone",
+    "quote"
   ],
   "lastAreaCityIndex": 2,
   "areaPosted": [
@@ -59,6 +59,7 @@
   "typePosted": [
     "hyderabad/kirana-supermarkets",
     "hyderabad/pg-hostels",
-    "hyderabad/bakeries-sweets"
+    "hyderabad/bakeries-sweets",
+    "hyderabad/garages-car-wash"
   ]
 }
