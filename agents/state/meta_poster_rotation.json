@@ -2,7 +2,6 @@
   "lastTopicIndex": 2,
   "lastTipCategoryIndex": 2,
   "topicHistory": [
-    "type_spotlight",
     "referral",
     "area_directory",
     "seller_call",
@@ -11,7 +10,8 @@
     "area_directory",
     "category_tip",
     "type_spotlight",
-    "safety_tip"
+    "safety_tip",
+    "area_directory"
   ],
   "tipCategoryHistory": [
     "electronics",
@@ -25,9 +25,8 @@
     "services",
     "pg-roommate"
   ],
-  "lastStyleIndex": 4,
+  "lastStyleIndex": 0,
   "styleHistory": [
-    "glass",
     "bold",
     "duotone",
     "quote",
@@ -36,9 +35,10 @@
     "bold",
     "duotone",
     "quote",
-    "spotlight"
+    "spotlight",
+    "glass"
   ],
-  "lastAreaCityIndex": 2,
+  "lastAreaCityIndex": 3,
   "areaPosted": [
     "hyderabad/doctors/kukatpally",
     "bengaluru/tiffin/basavanagudi",
@@ -54,7 +54,8 @@
     "coimbatore/doctors/saibaba-colony",
     "hyderabad/doctors/vanasthalipuram",
     "bengaluru/doctors/malleswaram",
-    "chennai/doctors/alwarthirunagar"
+    "chennai/doctors/alwarthirunagar",
+    "vijayawada/doctors/patamata-lanka"
   ],
   "typePosted": [
     "hyderabad/kirana-supermarkets",
