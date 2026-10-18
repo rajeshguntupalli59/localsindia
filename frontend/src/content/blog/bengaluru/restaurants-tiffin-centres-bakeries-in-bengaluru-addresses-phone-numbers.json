@@ -1,0 +1,211 @@
+{
+  "schemaVersion": 2,
+  "kind": "directory",
+  "city": "Bengaluru",
+  "citySlug": "bengaluru",
+  "state": "Karnataka",
+  "slug": "restaurants-tiffin-centres-bakeries-in-bengaluru-addresses-phone-numbers",
+  "category": "tiffin",
+  "topicTemplateId": "directory-tiffin",
+  "title": "Restaurants, Tiffin Centres & Bakeries in Bengaluru: Addresses & Phone Numbers",
+  "metaDescription": "20 restaurants, tiffin centres & bakeries in Bengaluru with addresses and phone numbers, plus what to check before you visit.",
+  "intro": "Bengaluru has thousands of eating options — from neighbourhood tiffin services to bakeries and restaurants across every cuisine and price range. But how do you know which ones are genuinely good, hygienic, and worth your time and money? This guide walks you through the practical steps to find reliable places to eat, what to check before you order or visit, and how to stay safe.",
+  "sections": [
+    {
+      "heading": "Finding Options: Where to Look and How to Search",
+      "body": "Start by asking locals in your area — colleagues, neighbors, friends who live nearby. Word-of-mouth is often the most reliable source, especially for tiffin services and small neighbourhood eateries that may not be highly visible online. If you're new to your area, apps and websites like LocalsIndia let you search by location and category — restaurants, tiffin services, bakeries — and filter by neighbourhood. Look at what's within walking distance or a short auto ride, not just the most famous place. Check if the listing shows a phone number and address; if it does, call ahead to confirm they're still operating and ask about current timings — many small businesses change hours seasonally or may have moved. Don't rely only on old reviews or outdated information online."
+    },
+    {
+      "heading": "What to Check Before You Order or Visit",
+      "body": "Before ordering a tiffin service or visiting a restaurant for the first time, call and ask specific questions: What are the ingredients? Do they use fresh vegetables daily? How is the food stored and transported? For tiffin services, ask if they have a written menu and pricing, and whether they allow you to visit the kitchen to see how food is prepared. For restaurants and bakeries, if possible, visit in person once before committing to regular orders. Look for basic hygiene signs: Is the kitchen visible or at least clean-looking from outside? Are staff wearing clean clothes? Is the storage area organized? Ask about their water source — do they use filtered water for cooking? Check if they have any certificates or licenses displayed. For bakeries, ask how often they bake and whether items are made fresh daily or stocked from elsewhere. Don't hesitate to ask for references or to speak to existing customers if you're considering a tiffin service for regular meals."
+    },
+    {
+      "heading": "Safety Tips: Payment, Agreements and Red Flags",
+      "body": "Always ask about payment methods upfront — cash, UPI, bank transfer, or a combination. For tiffin services, try to get a written agreement or at least a WhatsApp message confirming the menu, price, and delivery schedule. This prevents confusion later. Avoid services that demand full payment upfront for months; instead, pay weekly or monthly. Be wary of unusually cheap pricing — it often signals corner-cutting on ingredients or quality. If a tiffin service asks for a large deposit or seems vague about their kitchen location or ingredients, skip it. For restaurants, check bills carefully before paying; prices should match the menu. If you have food allergies or dietary restrictions, communicate clearly and confirm the restaurant understands — don't assume. Keep contact numbers saved so you can reach them quickly if there's an issue."
+    },
+    {
+      "heading": "Comparing Options and Building Your Go-To List",
+      "body": "Visit or try two or three options in your category before deciding. Tiffin services: Compare the daily menu variety, portion sizes, freshness, and whether they accommodate customization (less oil, no onion, etc.). Restaurants: Try the same dish at different places if you're a regular eater — quality and consistency matter. Bakeries: Ask about the source of flour and whether they use preservatives; taste a sample if possible. Keep notes on what you like and what doesn't work. A reliable tiffin service might be one that's consistent, delivers on time, uses fresh ingredients, and responds quickly to feedback. A good restaurant is clean, honest about pricing, and consistent in taste. Don't feel obligated to stick with something just because you tried it once; it's fine to switch if you find something better. Once you find places you trust, stick with them — loyalty often gets you better service and sometimes small discounts or perks."
+    }
+  ],
+  "faqs": [
+    {
+      "question": "How do I know if a tiffin service or restaurant is hygienic?",
+      "answer": "Call and ask if you can visit the kitchen — most honest businesses will allow it. Check for cleanliness, proper food storage (refrigeration where needed), and how staff handle food. Ask about water source and whether they have basic food safety practices. If they refuse to show you the kitchen or seem evasive, that's a red flag."
+    },
+    {
+      "question": "What should I ask a tiffin service before placing an order?",
+      "answer": "Ask: What's the daily menu? Are vegetables fresh each day? How is food transported and stored? What's the delivery time? Do they allow customization? Can you visit the kitchen? Is there a written agreement? What happens if I want to pause or cancel? Start with a trial week before committing long-term."
+    },
+    {
+      "question": "How do I find restaurants and bakeries in my specific neighbourhood?",
+      "answer": "Ask locals and colleagues for recommendations — they know what's good nearby. Use LocalsIndia or similar apps to search by area and category. Look for businesses with phone numbers listed and call to confirm they're operating. Check if they deliver or if you need to visit in person."
+    },
+    {
+      "question": "Is it safe to order food online from new places?",
+      "answer": "It's safer if you call first, ask about ingredients and hygiene, and read recent feedback from other customers. Start with a small order to test quality and freshness. Avoid very cheap options that seem suspicious, and always check your delivery for tampered packaging."
+    },
+    {
+      "question": "What's the best way to build a reliable list of places to eat regularly?",
+      "answer": "Try a few options, pick the ones that are consistent in quality and hygiene, and stick with them. Keep their contact numbers saved. Building relationships with small businesses also often means better service and personalized help with your preferences."
+    }
+  ],
+  "businesses": [
+    {
+      "id": "f5ed35ec-8f7a-465e-98a4-bf8959bb6827",
+      "name": "23rd Street Pizza",
+      "address": "19/1, Castle Street, Ashok Nagar, Bengaluru, 560025",
+      "phone": "+919902866933",
+      "source": "osm"
+    },
+    {
+      "id": "11ee1eb7-e029-4961-a9aa-b8d53d9c4689",
+      "name": "3 Ediots",
+      "address": "1, K. Narayanapura Main Road, Bangalore, 560077",
+      "phone": "+919620633312",
+      "source": "osm"
+    },
+    {
+      "id": "80c3cafa-e887-432a-b785-6a23b8bf515a",
+      "name": "69 Second",
+      "address": "1, Kariyammana agrahara, yemalur, Marathalli,, Bangalore",
+      "phone": "+919986383678",
+      "source": "osm"
+    },
+    {
+      "id": "1200340e-15ed-4931-b2ff-ea92e77ed2a6",
+      "name": "7 Plates",
+      "address": "420, 5th Cross Rd, HRBR Layout 3rd Block, HRBR Layout, Kalyan Nagar, Bangalore, 560043",
+      "phone": "+917829779997",
+      "source": "osm"
+    },
+    {
+      "id": "e5b71a8a-1d94-4c01-afc4-2109e5149de4",
+      "name": "A1 Biryani Restaurant",
+      "address": "502, 3rd Cross, Sampige Road, Malleshwaram, Bangalore, 560003",
+      "phone": "+917411144480",
+      "source": "osm"
+    },
+    {
+      "id": "85654bad-8e36-4996-a08b-8f0ff25964f0",
+      "name": "Aaha Bhojanam",
+      "address": "111, Sai Kamala Trinity, ITPL Main Road, Bangalore, 560037",
+      "phone": "+918125592559",
+      "source": "osm"
+    },
+    {
+      "id": "da1189fa-af01-48f9-9a38-e3ad40faa4dc",
+      "name": "Abc Resto",
+      "address": "1, Siddapura Road, bangalore, 560029",
+      "phone": "+919180425655",
+      "source": "osm"
+    },
+    {
+      "id": "75ec3377-ac37-4fec-abfc-3843f5fe51cd",
+      "name": "Absolute Barbecue",
+      "address": "90/4, Outer Ring Road, Marathahalli, Bangalore, 560037",
+      "phone": "+918088922203",
+      "source": "osm"
+    },
+    {
+      "id": "ec806c9f-793f-41a8-b49d-e80d79f0d9af",
+      "name": "Addiction",
+      "address": "36/2, Chord Road, Bengaluru, 560040",
+      "phone": "+919538172727",
+      "source": "osm"
+    },
+    {
+      "id": "d4fffb00-19b3-4b6e-b7b0-d829f4fb429a",
+      "name": "Ahaar Family Restaurant",
+      "address": "#4, Kempapura Main Road, Bangalore, 560024",
+      "phone": "+919739505169",
+      "source": "osm"
+    },
+    {
+      "id": "6b08d00f-4911-449b-8848-2f6ccd07ac69",
+      "name": "Aioli BBQ & Grill Smoke House",
+      "address": "7, 5th main road",
+      "phone": "+918069990174",
+      "source": "osm"
+    },
+    {
+      "id": "f83df72e-b955-493c-bc20-b04df3bf9e5d",
+      "name": "Akshay Bakery & Sweets",
+      "address": "9-10, Kethiganur Main Road, 560049",
+      "phone": "+919845451522",
+      "source": "osm"
+    },
+    {
+      "id": "d36645e7-0088-4737-890d-ecdd45f5ab89",
+      "name": "Al Bek",
+      "address": "Sampige Road",
+      "phone": "+918023461077",
+      "source": "osm"
+    },
+    {
+      "id": "6817619c-041d-443c-a3f3-d5635faec97c",
+      "name": "Al Khair Restaurant",
+      "address": "20, 1st Main Rd, Kanaka Nagar, Hebbal,, Bangalore, 560032",
+      "phone": "+918023651666",
+      "source": "osm"
+    },
+    {
+      "id": "ecccc09d-7893-412c-9518-8db14ef753c5",
+      "name": "Alt Pizza",
+      "address": "974, 80 Feet Road, Koramangala, Bangalore, 560034",
+      "phone": "+918123892268",
+      "source": "osm"
+    },
+    {
+      "id": "e512847f-a872-44fc-9a30-02c9827c1e31",
+      "name": "Amandé Patisserie",
+      "address": "115/121, 4th Main Road, 4th Stage,Thyagaraja Nagar, Bangalore, 560004",
+      "phone": "+918026761080",
+      "source": "osm"
+    },
+    {
+      "id": "03986dfd-e177-440d-b33b-067091e75ffa",
+      "name": "Ambala Cantt- Cloud Kitchen",
+      "address": "39, 5th A Main, 3rd Cross, Hanumagiri Layout, Chikkalsandra, Bengaluru, 560061",
+      "phone": "+917892630802",
+      "source": "osm"
+    },
+    {
+      "id": "b7391240-eddf-406a-875e-9095fdbdff3b",
+      "name": "Ambika Veg Restaurant",
+      "address": "638, 2nd Main, Near-Navarang Theater, Dr Rajkumar Rd, D-Block, 2nd Stage, Rajaji Nagar,, Bangalore, 560010",
+      "phone": "+918041214708",
+      "source": "osm"
+    },
+    {
+      "id": "729e1ef9-50c2-4269-bc45-24161a07cb6d",
+      "name": "Amiel Gourmet",
+      "address": "339, 20th Cross Road, Sahakar Nagar, Bengaluru, 560092",
+      "phone": "+918884441259",
+      "source": "osm"
+    },
+    {
+      "id": "ca4fed93-74ad-4f67-b125-338e78a0498e",
+      "name": "Ammi's Biryani",
+      "address": "645, 24th Cross Road, Banashankari,Bangalore, 560070",
+      "phone": "+918067977777",
+      "source": "osm"
+    }
+  ],
+  "cta": {
+    "text": "See all restaurants, tiffin centres & bakeries in Bengaluru",
+    "href": "/bengaluru/tiffin"
+  },
+  "relatedLinks": [
+    {
+      "text": "Restaurants in Bengaluru (966)",
+      "href": "/bengaluru/restaurants"
+    },
+    {
+      "text": "Bakeries, Sweets & Cafes in Bengaluru (297)",
+      "href": "/bengaluru/bakeries-sweets"
+    }
+  ],
+  "publishedAt": "2026-10-18T07:37:27Z",
+  "wordCount": 641
+}

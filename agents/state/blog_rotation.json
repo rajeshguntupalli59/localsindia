@@ -112,6 +112,13 @@
       "kind": "guide",
       "topicTemplateId": "spot-fake-listing",
       "publishedAt": "2026-10-11T09:32:35Z"
+    },
+    {
+      "citySlug": "bengaluru",
+      "category": "tiffin",
+      "kind": "directory",
+      "topicTemplateId": "directory-tiffin",
+      "publishedAt": "2026-10-18T07:37:27Z"
     }
   ]
 }
