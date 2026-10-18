@@ -1,8 +1,7 @@
 {
-  "lastTopicIndex": 2,
+  "lastTopicIndex": 3,
   "lastTipCategoryIndex": 2,
   "topicHistory": [
-    "referral",
     "area_directory",
     "seller_call",
     "type_spotlight",
@@ -11,7 +10,8 @@
     "category_tip",
     "type_spotlight",
     "safety_tip",
-    "area_directory"
+    "area_directory",
+    "city_spotlight"
   ],
   "tipCategoryHistory": [
     "electronics",
@@ -25,9 +25,8 @@
     "services",
     "pg-roommate"
   ],
-  "lastStyleIndex": 0,
+  "lastStyleIndex": 1,
   "styleHistory": [
-    "bold",
     "duotone",
     "quote",
     "spotlight",
@@ -36,7 +35,8 @@
     "duotone",
     "quote",
     "spotlight",
-    "glass"
+    "glass",
+    "bold"
   ],
   "lastAreaCityIndex": 3,
   "areaPosted": [
