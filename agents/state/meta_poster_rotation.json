@@ -2,7 +2,6 @@
   "lastTopicIndex": 5,
   "lastTipCategoryIndex": 2,
   "topicHistory": [
-    "area_directory",
     "category_tip",
     "type_spotlight",
     "safety_tip",
@@ -11,7 +10,8 @@
     "type_spotlight",
     "referral",
     "area_directory",
-    "seller_call"
+    "seller_call",
+    "type_spotlight"
   ],
   "tipCategoryHistory": [
     "electronics",
@@ -25,9 +25,8 @@
     "services",
     "pg-roommate"
   ],
-  "lastStyleIndex": 0,
+  "lastStyleIndex": 1,
   "styleHistory": [
-    "bold",
     "duotone",
     "quote",
     "spotlight",
@@ -36,7 +35,8 @@
     "duotone",
     "quote",
     "spotlight",
-    "glass"
+    "glass",
+    "bold"
   ],
   "lastAreaCityIndex": 4,
   "areaPosted": [
@@ -63,6 +63,7 @@
     "hyderabad/pg-hostels",
     "hyderabad/bakeries-sweets",
     "hyderabad/garages-car-wash",
-    "hyderabad/clothing"
+    "hyderabad/clothing",
+    "hyderabad/mobiles-tablets"
   ]
 }
