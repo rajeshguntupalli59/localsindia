@@ -73,7 +73,8 @@ export default async function ListingPage({ params }: { params: { id: string } }
   const listing = await fetchListing(id);
   const rating = aggregateRating(await fetchReviews(id));
 
-  const jsonLd = listing ? {
+  // Google requires offers or aggregateRating on a Product — without either it's an error, so skip it
+  const jsonLd = listing && (listing.price !== null || rating) ? {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: listing.title,

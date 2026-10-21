@@ -126,6 +126,7 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 ### 2026-10-21 — GSC "Product snippets: missing review / aggregateRating" (non-critical)
 - Listing Product JSON-LD (`app/listing/[id]/page.tsx`) now includes `aggregateRating` built from real listing reviews (`lib/productJsonLd.ts` + test). Listings with zero reviews still omit it (never fake ratings), so the warning remains for those.
 - `review` deliberately NOT emitted: the reviews API returns no reviewer name, and Google requires `author.name` (would become an error). Adding it needs the backend to return a reviewer display name.
+- Product JSON-LD is now skipped entirely when a listing has no price and no reviews (would be a critical "offers/review/aggregateRating required" error).
 
 ### 2026-10-12 — SESSION SUMMARY: GSC validations failed (backend-blip root causes) + rate-limiter fix + Hyderabad push check
 - Duplicate (272): URL Inspection showed "User-declared canonical: None" on the Oct 9 crawl. Business/listing pages rendered a generic 200 page with no canonical when the backend fetch failed; category/type pages 404'd. Now they throw → 500 (Google retries). `4e837f1`.
