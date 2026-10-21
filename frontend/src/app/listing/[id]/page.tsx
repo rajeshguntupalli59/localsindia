@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import type { Listing } from '@/lib/types';
+import type { Listing, ListingReview } from '@/lib/types';
 import ListingDetailClient from './ListingDetailClient';
 import { listingIdFromParam, listingPath, realImages } from '@/lib/utils';
 import { serializeJsonLd } from '@/lib/jsonLd';
+import { aggregateRating } from '@/lib/productJsonLd';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend-in.azurewebsites.net';
 
@@ -14,6 +15,16 @@ async function fetchListing(id: string): Promise<Listing> {
   // Backend down → 5xx (Google retries) rather than a generic duplicate page
   if (!res.ok) throw new Error(`listing ${id}: backend ${res.status}`);
   return await res.json();
+}
+
+// Reviews only enrich structured data — a failure here must never break the page
+async function fetchReviews(id: string): Promise<ListingReview[]> {
+  try {
+    const res = await fetch(`${API_BASE}/api/v1/listings/${id}/reviews`, { next: { revalidate: 300 } });
+    return res.ok ? await res.json() : [];
+  } catch {
+    return [];
+  }
 }
 
 function truncate(text: string, max: number): string {
@@ -60,6 +71,7 @@ export async function generateMetadata(
 export default async function ListingPage({ params }: { params: { id: string } }) {
   const id = listingIdFromParam(params.id);
   const listing = await fetchListing(id);
+  const rating = aggregateRating(await fetchReviews(id));
 
   const jsonLd = listing ? {
     '@context': 'https://schema.org',
@@ -76,6 +88,7 @@ export default async function ListingPage({ params }: { params: { id: string } }
         url: `https://www.localsindia.com${listingPath(listing)}`,
       },
     } : {}),
+    ...(rating ? { aggregateRating: rating } : {}),
   } : null;
 
   return (

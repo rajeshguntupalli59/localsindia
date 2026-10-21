@@ -123,6 +123,10 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 
 ## 6. Changelog (dated, most recent first — append here after notable sessions)
 
+### 2026-10-21 — GSC "Product snippets: missing review / aggregateRating" (non-critical)
+- Listing Product JSON-LD (`app/listing/[id]/page.tsx`) now includes `aggregateRating` built from real listing reviews (`lib/productJsonLd.ts` + test). Listings with zero reviews still omit it (never fake ratings), so the warning remains for those.
+- `review` deliberately NOT emitted: the reviews API returns no reviewer name, and Google requires `author.name` (would become an error). Adding it needs the backend to return a reviewer display name.
+
 ### 2026-10-12 — SESSION SUMMARY: GSC validations failed (backend-blip root causes) + rate-limiter fix + Hyderabad push check
 - Duplicate (272): URL Inspection showed "User-declared canonical: None" on the Oct 9 crawl. Business/listing pages rendered a generic 200 page with no canonical when the backend fetch failed; category/type pages 404'd. Now they throw → 500 (Google retries). `4e837f1`.
 - Page with redirect (352 failed, all business pages crawled Oct 9): `BusinessDetailClient` re-fetches on mount and `router.push`ed to the city list on failure, even with server data present → Googlebot's render saw a JS redirect. Now only redirects when there's no server data.
