@@ -123,6 +123,12 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 
 ## 6. Changelog (dated, most recent first — append here after notable sessions)
 
+### 2026-10-23 — Site-wide consistency crawl (408 pages + 300 links)
+- Clean: no broken links, no brand-name typos, "150 cities" matches API, city business counts match `/businesses/counts`, all sitemap URLs 200.
+- Fixed: `[city]/search` rendered a 2nd `<title>` in the body (React 18 doesn't hoist) so the tab always showed the default title → `document.title` effect + per-city server title in layout.
+- Fixed: about/contact/privacy/terms/trust/account-deletion had no canonical and reused the homepage description → added both.
+- Not fixed (by design/low value): `*/classifieds/post` + `/post` forms have no h1/canonical (robots-disallowed); `/invite`, `/auth/login`, `/profile/listings` use the default title.
+
 ### 2026-10-23 — Homepage canonical tag
 - SEO spot-check found `/` had no canonical (client component can't export metadata). Split into server `app/page.tsx` (metadata) + `app/HomeClient.tsx`.
 

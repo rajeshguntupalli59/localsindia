@@ -1,6 +1,10 @@
 import Link from 'next/link';
 
-export const metadata = { title: 'Terms of Service — LocalsIndia' };
+export const metadata = {
+  title: 'Terms of Service — LocalsIndia',
+  description: 'The terms for using LocalsIndia to post listings, list businesses and connect with people in your city.',
+  alternates: { canonical: 'https://www.localsindia.com/terms' },
+};
 
 export default function TermsPage() {
   return (

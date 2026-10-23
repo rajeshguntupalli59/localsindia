@@ -226,9 +226,12 @@ function SearchInner() {
   const cityLabel = citySlug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
   const heading = searchHeading(q, categories.find(c => c.id === localCat)?.name, cityLabel);
 
+  // React 18 doesn't hoist a <title> rendered in the body (the head's default
+  // title won), so set it directly as the query/category changes.
+  useEffect(() => { document.title = `${heading} | LocalsIndia`; }, [heading]);
+
   return (
     <div style={{ background: 'var(--li-page-bg)', minHeight: '100vh' }}>
-      <title>{`${heading} | LocalsIndia`}</title>
       <SiteHeader citySlug={citySlug} cityName={cityLabel} />
 
       {/* Search bar strip */}

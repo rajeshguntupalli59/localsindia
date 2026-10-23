@@ -1,6 +1,10 @@
 import Link from 'next/link';
 
-export const metadata = { title: 'Delete Your Account — LocalsIndia' };
+export const metadata = {
+  title: 'Delete Your Account — LocalsIndia',
+  description: 'How to delete your LocalsIndia account and data, with or without the app installed.',
+  alternates: { canonical: 'https://www.localsindia.com/account-deletion' },
+};
 
 export default function AccountDeletionPage() {
   return (

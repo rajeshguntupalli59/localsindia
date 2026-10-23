@@ -1,7 +1,11 @@
 import Link from 'next/link';
 import { Mail, Clock } from 'lucide-react';
 
-export const metadata = { title: 'Contact Us — LocalsIndia' };
+export const metadata = {
+  title: 'Contact Us — LocalsIndia',
+  description: 'Questions, feedback or partnerships — get in touch with the LocalsIndia team.',
+  alternates: { canonical: 'https://www.localsindia.com/contact' },
+};
 
 export default function ContactPage() {
   return (

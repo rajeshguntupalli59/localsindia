@@ -4,6 +4,7 @@ import { SAFETY_TIPS, GENERAL_SAFETY_TIPS } from '@/lib/safety';
 export const metadata = {
   title: 'Trust & Safety — LocalsIndia',
   description: 'What the badges on LocalsIndia mean, how listings are reviewed, and how to stay safe when buying, renting or hiring locally.',
+  alternates: { canonical: 'https://www.localsindia.com/trust' },
 };
 
 const CATEGORY_LABELS: Record<string, string> = {

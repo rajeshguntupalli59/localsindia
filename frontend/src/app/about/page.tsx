@@ -1,6 +1,10 @@
 import Link from 'next/link';
 import { MapPin, MessageCircle, Globe, Users } from 'lucide-react';
-export const metadata = { title: 'About — LocalsIndia' };
+export const metadata = {
+  title: 'About — LocalsIndia',
+  description: 'LocalsIndia is a free, fast, multilingual local marketplace where real people in Indian cities connect without middlemen.',
+  alternates: { canonical: 'https://www.localsindia.com/about' },
+};
 
 const PILLARS = [
   {

@@ -1,6 +1,10 @@
 import Link from 'next/link';
 
-export const metadata = { title: 'Privacy Policy — LocalsIndia' };
+export const metadata = {
+  title: 'Privacy Policy — LocalsIndia',
+  description: 'How LocalsIndia collects, uses and protects your personal data.',
+  alternates: { canonical: 'https://www.localsindia.com/privacy' },
+};
 
 export default function PrivacyPage() {
   return (
