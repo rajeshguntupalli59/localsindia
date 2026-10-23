@@ -34,11 +34,19 @@ export default function AdminUsersPage() {
     const token = localStorage.getItem('access_token');
     if (!token) return;
     try {
-      const res = await fetch(`${API_BASE}/api/v1/admin/users`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) throw new Error();
-      setUsers(await res.json());
+      // The endpoint pages 50 at a time — keep fetching until a short page.
+      const PAGE_SIZE = 50;
+      const all: UserRow[] = [];
+      for (let page = 1; ; page++) {
+        const res = await fetch(`${API_BASE}/api/v1/admin/users?page=${page}&page_size=${PAGE_SIZE}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) throw new Error();
+        const batch: UserRow[] = await res.json();
+        all.push(...batch);
+        if (batch.length < PAGE_SIZE) break;
+      }
+      setUsers(all);
     } catch {
       toast.error('Failed to load users');
     } finally {

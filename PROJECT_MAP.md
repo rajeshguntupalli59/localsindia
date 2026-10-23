@@ -123,6 +123,9 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 
 ## 6. Changelog (dated, most recent first — append here after notable sessions)
 
+### 2026-10-23 — /admin/users showed only 50 of 55 users
+- Page fetched one page (API default page_size=50). Now loops pages until a short page.
+
 ### 2026-10-23 — FB/IG auto-posting PAUSED (Raj's call; using another method)
 - Social Poster 401'd (expired Anthropic key) → new key set in GH secret `ANTHROPIC_API_KEY`, run verified green, then paused anyway.
 - `Social Poster` + `Reel Crosspost` workflows disabled (`gh workflow disable`). Re-enable: `gh workflow enable "Social Poster"` / `"Reel Crosspost"`.
