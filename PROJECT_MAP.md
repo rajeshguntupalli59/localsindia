@@ -123,6 +123,11 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 
 ## 6. Changelog (dated, most recent first — append here after notable sessions)
 
+### 2026-10-23 — FB/IG auto-posting PAUSED (Raj's call; using another method)
+- Social Poster 401'd (expired Anthropic key) → new key set in GH secret `ANTHROPIC_API_KEY`, run verified green, then paused anyway.
+- `Social Poster` + `Reel Crosspost` workflows disabled (`gh workflow disable`). Re-enable: `gh workflow enable "Social Poster"` / `"Reel Crosspost"`.
+- Blog Publisher still publishes + deploys articles; its Facebook share steps now require repo variable `BLOG_FB_SHARE=on` (unset = off). Re-enable: `gh variable set BLOG_FB_SHARE --body on`.
+
 ### 2026-10-21 — GSC "Product snippets: missing review / aggregateRating" (non-critical)
 - Listing Product JSON-LD (`app/listing/[id]/page.tsx`) now includes `aggregateRating` built from real listing reviews (`lib/productJsonLd.ts` + test). Listings with zero reviews still omit it (never fake ratings), so the warning remains for those.
 - `review` deliberately NOT emitted: the reviews API returns no reviewer name, and Google requires `author.name` (would become an error). Adding it needs the backend to return a reviewer display name.
