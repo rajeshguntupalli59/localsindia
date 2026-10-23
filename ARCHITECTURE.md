@@ -865,7 +865,7 @@ Stored in localStorage, available everywhere via React context:
 
 ### `/` — Homepage
 
-**File:** `app/page.tsx`
+**File:** `app/HomeClient.tsx` (UI, client) — `app/page.tsx` is a server wrapper that sets the canonical (2026-10-23)
 
 The entry point. Restructured 2026-07-22 — previously a generic hero → flat category grid → trust-badges template; now organized around directly answering "why LocalsIndia" instead of a features-list shape:
 1. **Hero**: dynamic headline (cycles category words), search bar + city selector + geolocation button. Redirects straight to the city page if a city is already saved (`li_city` in localStorage).
@@ -1826,7 +1826,7 @@ Side services (called from backend):
 | File | What it renders |
 |------|----------------|
 | `app/layout.tsx` | Root HTML shell -- fonts, global providers, toast notifications |
-| `app/page.tsx` | Homepage (restructured 2026-07-22): hero → "Why LocalsIndia" differentiators → "A Day in Your City" time-grouped categories → fresh listings → single closing CTA |
+| `app/page.tsx` + `app/HomeClient.tsx` | Homepage (server wrapper w/ canonical + client UI, split 2026-10-23) (restructured 2026-07-22): hero → "Why LocalsIndia" differentiators → "A Day in Your City" time-grouped categories → fresh listings → single closing CTA |
 | `app/[city]/layout.tsx` | City shell: sticky header, bottom nav |
 | `app/[city]/(home)/page.tsx` | City home: featured + latest listings by category |
 | `app/[city]/[category]/page.tsx` | Category listings browse |

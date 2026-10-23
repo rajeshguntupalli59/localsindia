@@ -123,6 +123,9 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 
 ## 6. Changelog (dated, most recent first — append here after notable sessions)
 
+### 2026-10-23 — Homepage canonical tag
+- SEO spot-check found `/` had no canonical (client component can't export metadata). Split into server `app/page.tsx` (metadata) + `app/HomeClient.tsx`.
+
 ### 2026-10-23 — Admin tabs: paging + per-page picker everywhere; Reports tab fixed
 - Admin list endpoints silently capped at 20/50/100 rows. Now `?page=&page_size=` + `X-Total-Count` header (`core/pagination.py`); shared `AdminPager` on listings, reports, events, businesses (+ name search), buyer requests, claims, chatbot, outreach, users.
 - `/admin/reports` called `GET /admin/listings/flagged`, which never existed → always "Failed to load". Route added (with report reasons) + tests.

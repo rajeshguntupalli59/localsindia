@@ -187,7 +187,8 @@
 
 | File | URL it serves | What it shows |
 |------|--------------|--------------|
-| `app/page.tsx` | `/` | Homepage: city selector, categories, fresh listings, trust badges |
+| `app/page.tsx` | `/` | Server wrapper: homepage metadata (canonical, 2026-10-23) → renders `HomeClient` |
+| `app/HomeClient.tsx` | `/` | Homepage UI: city selector, categories, fresh listings, trust badges |
 | `app/layout.tsx` | (root) | Root HTML shell: fonts, NextIntlClientProvider, Toaster, ServiceWorker |
 | `app/[city]/layout.tsx` | `/[city]/*` | Sticky header, bottom nav, city context |
 | `app/[city]/(home)/page.tsx` | `/[city]` | (moved into the `(home)` route group 2026-10-08 with `loading.tsx` + `CityHomeClient.tsx`, so the skeleton only wraps the city home — see soft-404 fix) Server Component wrapper (2026-07-07): real SSR fetch of city/todayCount/trending/fresh, `generateMetadata` with per-city title + noindex if <3 real listings, JSON-LD. Renders `CityHomeClient.tsx` |
