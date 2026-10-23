@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { Users, ShieldCheck, ShieldOff, Trash2 } from 'lucide-react';
+import { Users, ShieldCheck, ShieldOff, Trash2, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
 import EmptyState from '@/components/empty-state/EmptyState';
 
@@ -16,12 +16,16 @@ interface UserRow {
 }
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
+const PER_PAGE_OPTIONS = [10, 25, 50, 100];
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionId, setActionId] = useState<string | null>(null);
   const [myId, setMyId] = useState<string | null>(null);
+  const [query, setQuery] = useState('');
+  const [perPage, setPerPage] = useState(25);
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     try {
@@ -111,6 +115,15 @@ export default function AdminUsersPage() {
 
   const adminCount = users.filter(u => u.role === 'admin').length;
 
+  const q = query.trim().toLowerCase();
+  const filtered = q
+    ? users.filter(u => [u.name, u.phone, u.email].some(v => v?.toLowerCase().includes(q)))
+    : users;
+  const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
+  const currentPage = Math.min(page, totalPages);
+  const start = (currentPage - 1) * perPage;
+  const pageUsers = filtered.slice(start, start + perPage);
+
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
@@ -122,6 +135,32 @@ export default function AdminUsersPage() {
         </div>
       </div>
 
+      {!loading && users.length > 0 && (
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <input
+              type="search"
+              value={query}
+              onChange={e => { setQuery(e.target.value); setPage(1); }}
+              placeholder="Search by name, phone or email"
+              className="w-full pl-9 pr-3 py-2 text-sm bg-white border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+            />
+          </div>
+          <label className="flex items-center gap-2 text-sm text-muted-foreground">
+            Show
+            <select
+              value={perPage}
+              onChange={e => { setPerPage(Number(e.target.value)); setPage(1); }}
+              className="px-2 py-2 bg-white border rounded-lg text-sm text-foreground"
+            >
+              {PER_PAGE_OPTIONS.map(n => <option key={n} value={n}>{n}</option>)}
+            </select>
+            per page
+          </label>
+        </div>
+      )}
+
       {loading ? (
         <div className="space-y-2">
           {Array.from({ length: 5 }).map((_, i) => (
@@ -130,7 +169,11 @@ export default function AdminUsersPage() {
         </div>
       ) : users.length === 0 ? (
         <EmptyState icon={Users} title="No users yet" description="Users will appear here once they register" />
+      ) : filtered.length === 0 ? (
+        <EmptyState icon={Search} title="No matching users" description={`Nothing matches "${query.trim()}"`} />
       ) : (
+        <>
+
         <div className="bg-white rounded-xl border overflow-hidden">
           <table className="w-full text-sm">
             <thead>
@@ -143,7 +186,7 @@ export default function AdminUsersPage() {
               </tr>
             </thead>
             <tbody>
-              {users.map(u => {
+              {pageUsers.map(u => {
                 const isMe = u.id === myId;
                 const isAdmin = u.role === 'admin';
                 const busy = actionId === u.id;
@@ -206,6 +249,29 @@ export default function AdminUsersPage() {
             </tbody>
           </table>
         </div>
+        <div className="flex items-center justify-between mt-4 text-sm text-muted-foreground">
+          <span>
+            Showing {start + 1}–{start + pageUsers.length} of {filtered.length}
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setPage(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border bg-white hover:bg-slate-50 disabled:opacity-40"
+            >
+              <ChevronLeft className="w-4 h-4" /> Prev
+            </button>
+            <span>Page {currentPage} of {totalPages}</span>
+            <button
+              onClick={() => setPage(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border bg-white hover:bg-slate-50 disabled:opacity-40"
+            >
+              Next <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+        </>
       )}
     </div>
   );

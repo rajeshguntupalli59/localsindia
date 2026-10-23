@@ -125,6 +125,7 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 
 ### 2026-10-23 — /admin/users showed only 50 of 55 users
 - Page fetched one page (API default page_size=50). Now loops pages until a short page.
+- Added client-side search (name/phone/email), per-page picker (10/25/50/100, default 25) and Prev/Next pagination.
 
 ### 2026-10-23 — FB/IG auto-posting PAUSED (Raj's call; using another method)
 - Social Poster 401'd (expired Anthropic key) → new key set in GH secret `ANTHROPIC_API_KEY`, run verified green, then paused anyway.
