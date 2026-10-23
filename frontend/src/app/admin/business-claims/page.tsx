@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { FileCheck, Phone, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
+import AdminPager, { readTotal } from '@/components/admin-pager/AdminPager';
 import EmptyState from '@/components/empty-state/EmptyState';
 import type { AdminBusinessClaim } from '@/lib/types';
 
@@ -14,6 +15,9 @@ export default function AdminBusinessClaimsPage() {
   const [claims, setClaims] = useState<AdminBusinessClaim[]>([]);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(25);
+  const [total, setTotal] = useState(0);
   const [rejecting, setRejecting] = useState<string | null>(null);
   const [reason, setReason] = useState('');
 
@@ -52,17 +56,18 @@ export default function AdminBusinessClaimsPage() {
     if (!token) return;
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/v1/admin/business-claims?status=pending`, {
+      const res = await fetch(`${API_BASE}/api/v1/admin/business-claims?status=pending&page=${page}&page_size=${perPage}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error();
       setClaims(await res.json());
+      setTotal(readTotal(res));
     } catch {
       toast.error('Failed to load claims');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [page, perPage]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -227,6 +232,16 @@ export default function AdminBusinessClaimsPage() {
             </div>
           ))}
         </div>
+      )}
+
+      {!loading && (
+        <AdminPager
+          total={total}
+          page={page}
+          perPage={perPage}
+          onPageChange={setPage}
+          onPerPageChange={n => { setPerPage(n); setPage(1); }}
+        />
       )}
     </div>
   );

@@ -9,6 +9,7 @@ import { formatPrice, timeAgo } from '@/lib/utils';
 import type { Listing } from '@/lib/types';
 import EmptyState from '@/components/empty-state/EmptyState';
 import { toast } from 'sonner';
+import AdminPager, { readTotal } from '@/components/admin-pager/AdminPager';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
 
@@ -29,24 +30,27 @@ export default function AdminListingsPage() {
   const [deleteModal, setDeleteModal] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(25);
+  const [total, setTotal] = useState(0);
 
   const token = () => localStorage.getItem('access_token') ?? '';
 
-  const fetchListings = useCallback(async (status: string, q: string) => {
+  const fetchListings = useCallback(async (status: string, q: string, pg: number, size: number) => {
     setLoading(true);
     try {
+      const qs = new URLSearchParams({ page: String(pg), page_size: String(size) });
+      if (q) qs.set('q', q);
+      if (status !== 'pending') qs.set('status', status);
       const endpoint = status === 'pending'
-        ? `${API_BASE}/api/v1/admin/listings/pending`
-        : `${API_BASE}/api/v1/admin/listings?status=${status}${q ? `&q=${encodeURIComponent(q)}` : ''}`;
+        ? `${API_BASE}/api/v1/admin/listings/pending?${qs}`
+        : `${API_BASE}/api/v1/admin/listings?${qs}`;
       const res = await fetch(endpoint, {
         headers: { Authorization: `Bearer ${token()}` },
       });
       if (!res.ok) throw new Error();
-      let data: Listing[] = await res.json();
-      if (status === 'pending' && q) {
-        data = data.filter(l => l.title?.toLowerCase().includes(q.toLowerCase()));
-      }
-      setListings(data);
+      setListings(await res.json());
+      setTotal(readTotal(res));
     } catch {
       toast.error('Failed to load listings');
     } finally {
@@ -55,9 +59,9 @@ export default function AdminListingsPage() {
   }, []);
 
   useEffect(() => {
-    const timer = setTimeout(() => fetchListings(tab, search), search ? 300 : 0);
+    const timer = setTimeout(() => fetchListings(tab, search, page, perPage), search ? 300 : 0);
     return () => clearTimeout(timer);
-  }, [tab, search, fetchListings]);
+  }, [tab, search, page, perPage, fetchListings]);
 
   const approve = async (id: string) => {
     setActionId(id);
@@ -69,6 +73,7 @@ export default function AdminListingsPage() {
       if (!res.ok) throw new Error();
       toast.success('Listing approved');
       setListings(ls => ls.filter(l => l.id !== id));
+      setTotal(t => t - 1);
     } catch {
       toast.error('Failed to approve');
     } finally {
@@ -88,6 +93,7 @@ export default function AdminListingsPage() {
       if (!res.ok) throw new Error();
       toast.success('Listing rejected');
       setListings(ls => ls.filter(l => l.id !== id));
+      setTotal(t => t - 1);
       setRejectModal(null);
       setRejectReason('');
     } catch {
@@ -107,6 +113,7 @@ export default function AdminListingsPage() {
       if (!res.ok) throw new Error();
       toast.success('Listing deleted');
       setListings(ls => ls.filter(l => l.id !== id));
+      setTotal(t => t - 1);
       setDeleteModal(null);
     } catch {
       toast.error('Failed to delete');
@@ -120,7 +127,7 @@ export default function AdminListingsPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-xl font-bold">Listings</h1>
-          <p className="text-sm text-muted-foreground">{listings.length} {tab} listings</p>
+          <p className="text-sm text-muted-foreground">{total} {tab} listings</p>
         </div>
         <div className="flex gap-2">
           <button
@@ -140,7 +147,7 @@ export default function AdminListingsPage() {
             Seed Images
           </button>
           <button
-            onClick={() => fetchListings(tab, search)}
+            onClick={() => fetchListings(tab, search, page, perPage)}
             className="text-sm px-4 py-2 rounded-lg border hover:bg-muted transition-colors"
           >
             Refresh
@@ -153,7 +160,7 @@ export default function AdminListingsPage() {
         {STATUS_TABS.map(t => (
           <button
             key={t.key}
-            onClick={() => setTab(t.key)}
+            onClick={() => { setTab(t.key); setPage(1); }}
             className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
               tab === t.key ? 'bg-white shadow-sm text-slate-900' : 'text-muted-foreground hover:text-slate-700'
             }`}
@@ -169,13 +176,13 @@ export default function AdminListingsPage() {
         <input
           type="text"
           value={search}
-          onChange={e => setSearch(e.target.value)}
+          onChange={e => { setSearch(e.target.value); setPage(1); }}
           placeholder="Search by title..."
           className="w-full pl-9 pr-9 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
         />
         {search && (
           <button
-            onClick={() => setSearch('')}
+            onClick={() => { setSearch(''); setPage(1); }}
             aria-label="Clear search"
             className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-slate-700"
           >
@@ -328,6 +335,16 @@ export default function AdminListingsPage() {
             </motion.div>
           ))}
         </div>
+      )}
+
+      {!loading && (
+        <AdminPager
+          total={total}
+          page={page}
+          perPage={perPage}
+          onPageChange={setPage}
+          onPerPageChange={n => { setPerPage(n); setPage(1); }}
+        />
       )}
 
       {/* Reject modal */}

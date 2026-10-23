@@ -186,6 +186,59 @@ async def test_admin_list_listings_search_by_title(admin_client, auth_client, ci
     assert other_id not in ids
 
 
+@pytest.mark.asyncio
+async def test_admin_listings_paginate_with_total_count_header(admin_client, auth_client, city, category):
+    """Admin list pages send X-Total-Count so the UI can show page N of M —
+    regression: lists silently stopped at the default page size."""
+    ac, _user = auth_client
+    admin_ac, _admin = admin_client
+
+    for i in range(3):
+        await ac.post("/api/v1/listings", json={
+            "title": f"Paged listing {i}",
+            "description": "Used to test admin pagination",
+            "category_id": str(category.id),
+            "city_id": str(city.id),
+            "contact_phone": "+919876543210",
+        })
+
+    page1 = await admin_ac.get("/api/v1/admin/listings/pending?q=Paged&page=1&page_size=2")
+    page2 = await admin_ac.get("/api/v1/admin/listings/pending?q=Paged&page=2&page_size=2")
+    assert page1.headers["x-total-count"] == "3"
+    assert len(page1.json()) == 2
+    assert len(page2.json()) == 1
+    assert {l["id"] for l in page1.json()}.isdisjoint({l["id"] for l in page2.json()})
+
+
+@pytest.mark.asyncio
+async def test_admin_flagged_listings_include_report_reasons(admin_client, auth_client, city, category, db):
+    """GET /admin/listings/flagged backs the Reports tab — regression: the route
+    didn't exist, so the tab always failed to load."""
+    from app.models.listing import Listing
+    ac, _user = auth_client
+    admin_ac, _admin = admin_client
+
+    listing_id = (await ac.post("/api/v1/listings", json={
+        "title": "Flagged listing",
+        "description": "Will be reported and flagged",
+        "category_id": str(category.id),
+        "city_id": str(city.id),
+        "contact_phone": "+919876543210",
+    })).json()["id"]
+    await ac.post(f"/api/v1/listings/{listing_id}/report", json={"reason": "spam"})
+    listing = await db.get(Listing, uuid.UUID(listing_id))
+    listing.status = "flagged"
+    await db.commit()
+
+    resp = await admin_ac.get("/api/v1/admin/listings/flagged")
+    assert resp.status_code == 200
+    assert resp.headers["x-total-count"] == "1"
+    item = resp.json()[0]
+    assert item["id"] == listing_id
+    assert item["city_name"] == city.name
+    assert [r["reason"] for r in item["reports"]] == ["spam"]
+
+
 # ── Users list ────────────────────────────────────────────────────────────────
 
 @pytest.mark.asyncio

@@ -6,6 +6,7 @@ import { CheckCircle, XCircle, Clock, CalendarDays, MapPin, Ticket } from 'lucid
 import { timeAgo } from '@/lib/utils';
 import EmptyState from '@/components/empty-state/EmptyState';
 import { toast } from 'sonner';
+import AdminPager, { readTotal } from '@/components/admin-pager/AdminPager';
 
 interface EventItem {
   id: string;
@@ -44,20 +45,25 @@ export default function AdminEventsPage() {
   const [tab, setTab] = useState('pending');
   const [actionId, setActionId] = useState<string | null>(null);
   const [rejectModal, setRejectModal] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(25);
+  const [total, setTotal] = useState(0);
 
   const token = () => localStorage.getItem('access_token') ?? '';
 
-  const fetchEvents = useCallback(async (status: string) => {
+  const fetchEvents = useCallback(async (status: string, pg: number, size: number) => {
     setLoading(true);
     try {
+      const paging = `page=${pg}&page_size=${size}`;
       const endpoint = status === 'pending'
-        ? `${API_BASE}/api/v1/admin/events/pending`
-        : `${API_BASE}/api/v1/admin/events?status=${status}`;
+        ? `${API_BASE}/api/v1/admin/events/pending?${paging}`
+        : `${API_BASE}/api/v1/admin/events?status=${status}&${paging}`;
       const res = await fetch(endpoint, {
         headers: { Authorization: `Bearer ${token()}` },
       });
       if (!res.ok) throw new Error();
       setEvents(await res.json());
+      setTotal(readTotal(res));
     } catch {
       toast.error('Failed to load events');
     } finally {
@@ -65,7 +71,7 @@ export default function AdminEventsPage() {
     }
   }, []);
 
-  useEffect(() => { fetchEvents(tab); }, [tab, fetchEvents]);
+  useEffect(() => { fetchEvents(tab, page, perPage); }, [tab, page, perPage, fetchEvents]);
 
   const approve = async (id: string) => {
     setActionId(id);
@@ -77,6 +83,7 @@ export default function AdminEventsPage() {
       if (!res.ok) throw new Error();
       toast.success('Event approved');
       setEvents(ev => ev.filter(e => e.id !== id));
+      setTotal(t => t - 1);
     } catch {
       toast.error('Failed to approve');
     } finally {
@@ -94,6 +101,7 @@ export default function AdminEventsPage() {
       if (!res.ok) throw new Error();
       toast.success('Event rejected');
       setEvents(ev => ev.filter(e => e.id !== id));
+      setTotal(t => t - 1);
       setRejectModal(null);
     } catch {
       toast.error('Failed to reject');
@@ -107,10 +115,10 @@ export default function AdminEventsPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-xl font-bold">Events</h1>
-          <p className="text-sm text-muted-foreground">{events.length} {tab} events</p>
+          <p className="text-sm text-muted-foreground">{total} {tab} events</p>
         </div>
         <button
-          onClick={() => fetchEvents(tab)}
+          onClick={() => fetchEvents(tab, page, perPage)}
           className="text-sm px-4 py-2 rounded-lg border hover:bg-muted transition-colors"
         >
           Refresh
@@ -122,7 +130,7 @@ export default function AdminEventsPage() {
         {STATUS_TABS.map(t => (
           <button
             key={t.key}
-            onClick={() => setTab(t.key)}
+            onClick={() => { setTab(t.key); setPage(1); }}
             className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
               tab === t.key ? 'bg-white shadow-sm text-slate-900' : 'text-muted-foreground hover:text-slate-700'
             }`}
@@ -214,6 +222,16 @@ export default function AdminEventsPage() {
             </motion.div>
           ))}
         </div>
+      )}
+
+      {!loading && (
+        <AdminPager
+          total={total}
+          page={page}
+          perPage={perPage}
+          onPageChange={setPage}
+          onPerPageChange={n => { setPerPage(n); setPage(1); }}
+        />
       )}
 
       {/* Reject confirm modal */}

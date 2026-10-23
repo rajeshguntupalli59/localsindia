@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { Users, ShieldCheck, ShieldOff, Trash2, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Users, ShieldCheck, ShieldOff, Trash2, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import EmptyState from '@/components/empty-state/EmptyState';
+import AdminPager from '@/components/admin-pager/AdminPager';
 
 interface UserRow {
   id: string;
@@ -16,7 +17,6 @@ interface UserRow {
 }
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
-const PER_PAGE_OPTIONS = [10, 25, 50, 100];
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<UserRow[]>([]);
@@ -147,17 +147,6 @@ export default function AdminUsersPage() {
               className="w-full pl-9 pr-3 py-2 text-sm bg-white border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
           </div>
-          <label className="flex items-center gap-2 text-sm text-muted-foreground">
-            Show
-            <select
-              value={perPage}
-              onChange={e => { setPerPage(Number(e.target.value)); setPage(1); }}
-              className="px-2 py-2 bg-white border rounded-lg text-sm text-foreground"
-            >
-              {PER_PAGE_OPTIONS.map(n => <option key={n} value={n}>{n}</option>)}
-            </select>
-            per page
-          </label>
         </div>
       )}
 
@@ -249,28 +238,13 @@ export default function AdminUsersPage() {
             </tbody>
           </table>
         </div>
-        <div className="flex items-center justify-between mt-4 text-sm text-muted-foreground">
-          <span>
-            Showing {start + 1}–{start + pageUsers.length} of {filtered.length}
-          </span>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setPage(currentPage - 1)}
-              disabled={currentPage === 1}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border bg-white hover:bg-slate-50 disabled:opacity-40"
-            >
-              <ChevronLeft className="w-4 h-4" /> Prev
-            </button>
-            <span>Page {currentPage} of {totalPages}</span>
-            <button
-              onClick={() => setPage(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border bg-white hover:bg-slate-50 disabled:opacity-40"
-            >
-              Next <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
+        <AdminPager
+          total={filtered.length}
+          page={currentPage}
+          perPage={perPage}
+          onPageChange={setPage}
+          onPerPageChange={n => { setPerPage(n); setPage(1); }}
+        />
         </>
       )}
     </div>

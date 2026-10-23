@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { ShieldCheck, ShieldOff, Building2 } from 'lucide-react';
+import { ShieldCheck, ShieldOff, Building2, Search } from 'lucide-react';
 import { toast } from 'sonner';
+import AdminPager, { readTotal } from '@/components/admin-pager/AdminPager';
 import EmptyState from '@/components/empty-state/EmptyState';
 
 interface BusinessRow {
@@ -22,16 +23,24 @@ export default function AdminBusinessesPage() {
   const [businesses, setBusinesses] = useState<BusinessRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionId, setActionId] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(25);
+  const [total, setTotal] = useState(0);
 
-  const fetchBusinesses = useCallback(async () => {
+  const fetchBusinesses = useCallback(async (q: string, pg: number, size: number) => {
     const token = localStorage.getItem('access_token');
     if (!token) return;
+    setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/v1/admin/businesses`, {
+      const qs = new URLSearchParams({ page: String(pg), page_size: String(size) });
+      if (q) qs.set('q', q);
+      const res = await fetch(`${API_BASE}/api/v1/admin/businesses?${qs}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error();
       setBusinesses(await res.json());
+      setTotal(readTotal(res));
     } catch {
       toast.error('Failed to load businesses');
     } finally {
@@ -39,7 +48,10 @@ export default function AdminBusinessesPage() {
     }
   }, []);
 
-  useEffect(() => { fetchBusinesses(); }, [fetchBusinesses]);
+  useEffect(() => {
+    const timer = setTimeout(() => fetchBusinesses(search, page, perPage), search ? 300 : 0);
+    return () => clearTimeout(timer);
+  }, [search, page, perPage, fetchBusinesses]);
 
   const grantBadge = async (b: BusinessRow) => {
     setActionId(b.id);
@@ -80,17 +92,26 @@ export default function AdminBusinessesPage() {
     }
   };
 
-  const verifiedCount = businesses.filter(b => b.verified).length;
-
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-xl font-bold">Businesses</h1>
           <p className="text-sm text-muted-foreground">
-            {businesses.length} total · {verifiedCount} verified
+            {total} {search.trim() ? 'matching' : 'total'}
           </p>
         </div>
+      </div>
+
+      <div className="relative mb-4 max-w-sm">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+        <input
+          type="search"
+          value={search}
+          onChange={e => { setSearch(e.target.value); setPage(1); }}
+          placeholder="Search by business name"
+          className="w-full pl-9 pr-3 py-2 text-sm bg-white border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+        />
       </div>
 
       {loading ? (
@@ -100,7 +121,9 @@ export default function AdminBusinessesPage() {
           ))}
         </div>
       ) : businesses.length === 0 ? (
-        <EmptyState icon={Building2} title="No businesses yet" description="Businesses will appear here once they are created" />
+        search.trim()
+          ? <EmptyState icon={Search} title="No matching businesses" description={`Nothing matches "${search.trim()}"`} />
+          : <EmptyState icon={Building2} title="No businesses yet" description="Businesses will appear here once they are created" />
       ) : (
         <div className="bg-white rounded-xl border overflow-hidden">
           <table className="w-full text-sm">
@@ -174,6 +197,16 @@ export default function AdminBusinessesPage() {
             </tbody>
           </table>
         </div>
+      )}
+
+      {!loading && (
+        <AdminPager
+          total={total}
+          page={page}
+          perPage={perPage}
+          onPageChange={setPage}
+          onPerPageChange={n => { setPerPage(n); setPage(1); }}
+        />
       )}
     </div>
   );

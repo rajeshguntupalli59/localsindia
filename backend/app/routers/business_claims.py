@@ -5,7 +5,7 @@ import re
 import uuid
 from datetime import datetime, timezone, timedelta
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, Response, UploadFile
 from pydantic import BaseModel
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -14,6 +14,7 @@ from app.core.config import settings
 from app.core.database import get_db
 from app.core.deps import get_current_user, get_current_admin
 from app.core.limiter import limiter
+from app.core.pagination import paginate
 from app.core.security import generate_otp, hash_password, verify_password
 from app.models.business import Business
 from app.models.business_claim import BusinessClaim
@@ -282,19 +283,22 @@ async def submit_claim_documents(
 
 @router.get("/admin/business-claims")
 async def list_claims(
+    response: Response,
     status: str = "pending",
+    page: int = 1,
+    page_size: int = 50,
     db: AsyncSession = Depends(get_db),
     admin: User = Depends(get_current_admin),
 ):
-    result = await db.execute(
+    query = (
         select(BusinessClaim, Business, City, User)
         .join(Business, Business.id == BusinessClaim.business_id)
         .join(City, City.id == Business.city_id)
         .join(User, User.id == BusinessClaim.user_id)
         .where(BusinessClaim.method == "documents", BusinessClaim.status == status)
         .order_by(BusinessClaim.created_at.asc())
-        .limit(100)
     )
+    result = await db.execute(await paginate(db, query, response, page, page_size))
     return [
         {
             "id": str(c.id),

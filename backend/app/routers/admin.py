@@ -5,7 +5,7 @@ import uuid
 from datetime import datetime, timezone, timedelta
 
 import httpx
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response
 from pydantic import BaseModel
 from sqlalchemy import select, func, distinct, cast, Date
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -28,6 +28,7 @@ PLACEHOLDER_URLS = [
 
 from app.core.database import get_db
 from app.core.deps import get_current_admin
+from app.core.pagination import paginate
 from app.models.app_error_log import AppErrorLog
 from app.models.business import Business
 from app.models.buyer_request import BuyerRequest
@@ -87,23 +88,57 @@ async def _with_city(db: AsyncSession, listings) -> list[ListingOut]:
 
 @router.get("/listings/pending", response_model=list[ListingOut])
 async def pending_listings(
+    response: Response,
+    q: str | None = None,
     page: int = 1,
     page_size: int = 20,
     db: AsyncSession = Depends(get_db),
     _admin: User = Depends(get_current_admin),
 ):
-    result = await db.execute(
-        select(Listing)
-        .where(Listing.status == "pending", Listing.deleted_at.is_(None))
-        .order_by(Listing.created_at.asc())
-        .offset((page - 1) * page_size)
-        .limit(page_size)
-    )
+    query = select(Listing).where(Listing.status == "pending", Listing.deleted_at.is_(None))
+    if q:
+        query = query.where(Listing.title.ilike(f"%{q}%"))
+    query = await paginate(db, query.order_by(Listing.created_at.asc()), response, page, page_size)
+    result = await db.execute(query)
     return await _with_city(db, result.scalars().all())
+
+
+@router.get("/listings/flagged")
+async def flagged_listings(
+    response: Response,
+    page: int = 1,
+    page_size: int = 20,
+    db: AsyncSession = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+):
+    """Flagged listings (3+ reports, BL-04) with the report reasons attached."""
+    query = select(Listing).where(Listing.status == "flagged", Listing.deleted_at.is_(None))
+    query = await paginate(db, query.order_by(Listing.created_at.desc()), response, page, page_size)
+    listings = await _with_city(db, (await db.execute(query)).scalars().all())
+    if not listings:
+        return []
+    reports_result = await db.execute(
+        select(Report)
+        .where(Report.listing_id.in_([l.id for l in listings]))
+        .order_by(Report.created_at.desc())
+    )
+    reports_by_listing: dict[uuid.UUID, list] = {}
+    for rep in reports_result.scalars().all():
+        reports_by_listing.setdefault(rep.listing_id, []).append({
+            "id": str(rep.id),
+            "reason": rep.reason,
+            "notes": rep.notes,
+            "created_at": rep.created_at.isoformat(),
+        })
+    return [
+        {**l.model_dump(mode="json"), "reports": reports_by_listing.get(l.id, [])}
+        for l in listings
+    ]
 
 
 @router.get("/listings", response_model=list[ListingOut])
 async def list_listings_by_status(
+    response: Response,
     status: str = "active",
     q: str | None = None,
     page: int = 1,
@@ -114,12 +149,8 @@ async def list_listings_by_status(
     query = select(Listing).where(Listing.status == status, Listing.deleted_at.is_(None))
     if q:
         query = query.where(Listing.title.ilike(f"%{q}%"))
-    result = await db.execute(
-        query
-        .order_by(Listing.created_at.desc())
-        .offset((page - 1) * page_size)
-        .limit(page_size)
-    )
+    query = await paginate(db, query.order_by(Listing.created_at.desc()), response, page, page_size)
+    result = await db.execute(query)
     return await _with_city(db, result.scalars().all())
 
 
@@ -136,6 +167,7 @@ class ChatbotQuestionOut(BaseModel):
 
 @router.get("/chatbot-questions", response_model=list[ChatbotQuestionOut])
 async def chatbot_questions(
+    response: Response,
     q: str | None = None,
     page: int = 1,
     page_size: int = 50,
@@ -146,12 +178,8 @@ async def chatbot_questions(
     query = select(ChatbotQuestion)
     if q:
         query = query.where(ChatbotQuestion.question.ilike(f"%{q}%"))
-    result = await db.execute(
-        query
-        .order_by(ChatbotQuestion.created_at.desc())
-        .offset((page - 1) * page_size)
-        .limit(min(page_size, 200))
-    )
+    query = await paginate(db, query.order_by(ChatbotQuestion.created_at.desc()), response, page, page_size)
+    result = await db.execute(query)
     return result.scalars().all()
 
 
@@ -261,36 +289,36 @@ async def reject_listing(
 
 @router.get("/events/pending", response_model=list[EventOut])
 async def pending_events(
+    response: Response,
     page: int = 1,
     page_size: int = 20,
     db: AsyncSession = Depends(get_db),
     _admin: User = Depends(get_current_admin),
 ):
-    result = await db.execute(
+    query = (
         select(Event)
         .where(Event.status == "pending", Event.deleted_at.is_(None))
         .order_by(Event.created_at.asc())
-        .offset((page - 1) * page_size)
-        .limit(page_size)
     )
+    result = await db.execute(await paginate(db, query, response, page, page_size))
     return result.scalars().all()
 
 
 @router.get("/events", response_model=list[EventOut])
 async def list_events_by_status(
+    response: Response,
     status: str = "active",
     page: int = 1,
     page_size: int = 50,
     db: AsyncSession = Depends(get_db),
     _admin: User = Depends(get_current_admin),
 ):
-    result = await db.execute(
+    query = (
         select(Event)
         .where(Event.status == status, Event.deleted_at.is_(None))
         .order_by(Event.event_date.asc())
-        .offset((page - 1) * page_size)
-        .limit(page_size)
     )
+    result = await db.execute(await paginate(db, query, response, page, page_size))
     return result.scalars().all()
 
 
@@ -626,24 +654,22 @@ async def list_app_errors(
 
 @router.get("/businesses")
 async def list_businesses_admin(
+    response: Response,
     page: int = 1,
     page_size: int = 50,
     verified_only: bool = False,
+    q: str | None = None,
     db: AsyncSession = Depends(get_db),
     _admin: User = Depends(get_current_admin),
 ):
     from sqlalchemy.orm import selectinload
-    q = (
-        select(Business)
-        .options(selectinload(Business.reviews))
-        .where(Business.deleted_at.is_(None))
-        .order_by(Business.created_at.desc())
-        .offset((page - 1) * page_size)
-        .limit(page_size)
-    )
+    query = select(Business).where(Business.deleted_at.is_(None))
     if verified_only:
-        q = q.where(Business.verified.is_(True))
-    result = await db.execute(q)
+        query = query.where(Business.verified.is_(True))
+    if q:
+        query = query.where(Business.name.ilike(f"%{q}%"))
+    query = await paginate(db, query.order_by(Business.created_at.desc()), response, page, page_size)
+    result = await db.execute(query.options(selectinload(Business.reviews)))
     businesses = result.scalars().all()
     return [
         {
@@ -765,19 +791,19 @@ async def list_reports(
 
 @router.get("/buyer-requests")
 async def list_buyer_requests_admin(
+    response: Response,
     status: str = "flagged",
     page: int = 1,
     page_size: int = 20,
     db: AsyncSession = Depends(get_db),
     _admin: User = Depends(get_current_admin),
 ):
-    result = await db.execute(
+    query = (
         select(BuyerRequest)
         .where(BuyerRequest.status == status, BuyerRequest.deleted_at.is_(None))
         .order_by(BuyerRequest.created_at.desc())
-        .offset((page - 1) * page_size)
-        .limit(page_size)
     )
+    result = await db.execute(await paginate(db, query, response, page, page_size))
     requests = result.scalars().all()
     if not requests:
         return []

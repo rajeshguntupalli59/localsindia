@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Phone, MessageCircle, Copy, ExternalLink, PhoneCall } from 'lucide-react';
 import { toast } from 'sonner';
+import AdminPager from '@/components/admin-pager/AdminPager';
 import EmptyState from '@/components/empty-state/EmptyState';
 import { timeAgo } from '@/lib/utils';
 import { OUTCOME_LABELS, businessUrl, outreachMessage, whatsappLink } from '@/lib/outreach';
@@ -36,6 +37,7 @@ export default function AdminOutreachPage() {
   const [items, setItems] = useState<OutreachItem[]>([]);
   const [counts, setCounts] = useState(EMPTY_COUNTS);
   const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(25);
   const [loading, setLoading] = useState(true);
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -48,21 +50,21 @@ export default function AdminOutreachPage() {
   const load = useCallback(async (p: number) => {
     setLoading(true);
     try {
-      const qs = new URLSearchParams({ status, page: String(p) });
+      const qs = new URLSearchParams({ status, page: String(p), page_size: String(perPage) });
       if (city) qs.set('city_slug', city);
       if (category) qs.set('category_slug', category);
       const res = await fetch(`${API_BASE}/api/v1/admin/outreach?${qs}`, { headers: authHeaders() });
       if (!res.ok) throw new Error();
       const data: OutreachQueue = await res.json();
       setCounts(data.counts);
-      setItems(prev => (p === 1 ? data.items : [...prev, ...data.items]));
+      setItems(data.items);
       setPage(p);
     } catch {
       toast.error('Failed to load the outreach list');
     } finally {
       setLoading(false);
     }
-  }, [city, category, status]);
+  }, [city, category, status, perPage]);
 
   useEffect(() => { load(1); }, [load]);
 
@@ -135,7 +137,7 @@ export default function AdminOutreachPage() {
         ))}
       </div>
 
-      {loading && page === 1 ? (
+      {loading ? (
         <div className="space-y-3">
           {Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-36 bg-white rounded-xl animate-pulse" />)}
         </div>
@@ -204,13 +206,17 @@ export default function AdminOutreachPage() {
               </div>
             );
           })}
-          {items.length < counts[status] && (
-            <button onClick={() => load(page + 1)} disabled={loading}
-              className="w-full py-3 rounded-xl border bg-white text-sm font-semibold disabled:opacity-50">
-              {loading ? 'Loading…' : `Load more (${(counts[status] - items.length).toLocaleString('en-IN')} left)`}
-            </button>
-          )}
         </div>
+      )}
+
+      {!loading && (
+        <AdminPager
+          total={counts[status]}
+          page={page}
+          perPage={perPage}
+          onPageChange={load}
+          onPerPageChange={setPerPage}
+        />
       )}
     </div>
   );

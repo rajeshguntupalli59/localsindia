@@ -6,6 +6,7 @@ import { Flag, CheckCircle, Search } from 'lucide-react';
 import { formatPrice, timeAgo } from '@/lib/utils';
 import EmptyState from '@/components/empty-state/EmptyState';
 import { toast } from 'sonner';
+import AdminPager, { readTotal } from '@/components/admin-pager/AdminPager';
 
 interface ReportDetail {
   id: string;
@@ -33,17 +34,21 @@ export default function AdminBuyerRequestsPage() {
   const [requests, setRequests] = useState<FlaggedBuyerRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionId, setActionId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(25);
+  const [total, setTotal] = useState(0);
 
   const token = () => localStorage.getItem('access_token') ?? '';
 
   const fetchFlagged = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/v1/admin/buyer-requests?status=flagged`, {
+      const res = await fetch(`${API_BASE}/api/v1/admin/buyer-requests?status=flagged&page=${page}&page_size=${perPage}`, {
         headers: { Authorization: `Bearer ${token()}` },
       });
       if (!res.ok) throw new Error();
       setRequests(await res.json());
+      setTotal(readTotal(res));
     } catch {
       toast.error('Failed to load flagged requests');
     } finally {
@@ -52,7 +57,7 @@ export default function AdminBuyerRequestsPage() {
   };
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { fetchFlagged(); }, []);
+  useEffect(() => { fetchFlagged(); }, [page, perPage]);
 
   const restore = async (id: string) => {
     setActionId(id);
@@ -64,6 +69,7 @@ export default function AdminBuyerRequestsPage() {
       if (!res.ok) throw new Error();
       toast.success('Request restored to the public feed');
       setRequests(rs => rs.filter(r => r.id !== id));
+      setTotal(t => t - 1);
     } catch {
       toast.error('Failed');
     } finally {
@@ -82,6 +88,7 @@ export default function AdminBuyerRequestsPage() {
       if (!res.ok) throw new Error();
       toast.success('Request removed');
       setRequests(rs => rs.filter(r => r.id !== id));
+      setTotal(t => t - 1);
     } catch {
       toast.error('Failed');
     } finally {
@@ -94,7 +101,7 @@ export default function AdminBuyerRequestsPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-xl font-bold">Flagged Buyer Requests</h1>
-          <p className="text-sm text-muted-foreground">{requests.length} requests with 3+ reports</p>
+          <p className="text-sm text-muted-foreground">{total} requests with 3+ reports</p>
         </div>
         <button onClick={fetchFlagged} className="text-sm px-4 py-2 rounded-lg border hover:bg-muted transition-colors">
           Refresh
@@ -172,6 +179,16 @@ export default function AdminBuyerRequestsPage() {
             </motion.div>
           ))}
         </div>
+      )}
+
+      {!loading && (
+        <AdminPager
+          total={total}
+          page={page}
+          perPage={perPage}
+          onPageChange={setPage}
+          onPerPageChange={n => { setPerPage(n); setPage(1); }}
+        />
       )}
     </div>
   );

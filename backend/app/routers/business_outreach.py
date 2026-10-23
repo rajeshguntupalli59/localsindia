@@ -16,6 +16,7 @@ from app.models.category import Category
 from app.models.city import City
 from app.models.user import User
 from app.core.category_catalog import subcategory_entry
+from app.core.pagination import MAX_PAGE_SIZE
 from app.routers.business_claims import normalize_indian_mobile
 
 router = APIRouter(prefix="/api/v1/admin/outreach", tags=["business-outreach"])
@@ -53,11 +54,13 @@ async def outreach_queue(
     category_slug: str | None = None,
     status: str = "todo",
     page: int = 1,
+    page_size: int = PAGE_SIZE,
     db: AsyncSession = Depends(get_db),
     admin: User = Depends(get_current_admin),
 ):
     if status not in STATUSES:
         raise HTTPException(status_code=422, detail=f"status must be one of {', '.join(STATUSES)}")
+    page_size = max(1, min(page_size, MAX_PAGE_SIZE))
     latest = _latest_outreach()
     bucket = case(
         (Business.owner_id.is_not(None), case((latest.c.outcome.is_not(None), "claimed"), else_=literal(None))),
@@ -88,7 +91,7 @@ async def outreach_queue(
     # Mobiles first (WhatsApp + SMS-claimable); follow-ups oldest contact first
     order = [is_mobile.desc(), latest.c.created_at.asc()] if status == "follow_up" else [is_mobile.desc(), Business.name]
     rows = (await db.execute(
-        base.where(bucket == status).order_by(*order).limit(PAGE_SIZE).offset((max(page, 1) - 1) * PAGE_SIZE)
+        base.where(bucket == status).order_by(*order).limit(page_size).offset((max(page, 1) - 1) * page_size)
     )).all()
 
     return {

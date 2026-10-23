@@ -123,6 +123,10 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 
 ## 6. Changelog (dated, most recent first — append here after notable sessions)
 
+### 2026-10-23 — Admin tabs: paging + per-page picker everywhere; Reports tab fixed
+- Admin list endpoints silently capped at 20/50/100 rows. Now `?page=&page_size=` + `X-Total-Count` header (`core/pagination.py`); shared `AdminPager` on listings, reports, events, businesses (+ name search), buyer requests, claims, chatbot, outreach, users.
+- `/admin/reports` called `GET /admin/listings/flagged`, which never existed → always "Failed to load". Route added (with report reasons) + tests.
+
 ### 2026-10-23 — /admin/users showed only 50 of 55 users
 - Page fetched one page (API default page_size=50). Now loops pages until a short page.
 - Added client-side search (name/phone/email), per-page picker (10/25/50/100, default 25) and Prev/Next pagination.

@@ -6,6 +6,7 @@ import { MessageCircleQuestion, Search, X, MapPin } from 'lucide-react';
 import { timeAgo } from '@/lib/utils';
 import EmptyState from '@/components/empty-state/EmptyState';
 import { toast } from 'sonner';
+import AdminPager, { readTotal } from '@/components/admin-pager/AdminPager';
 
 interface ChatbotQuestion {
   id: string;
@@ -22,16 +23,20 @@ export default function AdminChatbotPage() {
   const [questions, setQuestions] = useState<ChatbotQuestion[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(25);
+  const [total, setTotal] = useState(0);
 
-  const fetchQuestions = useCallback(async (q: string) => {
+  const fetchQuestions = useCallback(async (q: string, pg: number, size: number) => {
     setLoading(true);
     try {
       const res = await fetch(
-        `${API_BASE}/api/v1/admin/chatbot-questions?page_size=200${q ? `&q=${encodeURIComponent(q)}` : ''}`,
+        `${API_BASE}/api/v1/admin/chatbot-questions?page=${pg}&page_size=${size}${q ? `&q=${encodeURIComponent(q)}` : ''}`,
         { headers: { Authorization: `Bearer ${localStorage.getItem('access_token') ?? ''}` } },
       );
       if (!res.ok) throw new Error();
       setQuestions(await res.json());
+      setTotal(readTotal(res));
     } catch {
       toast.error('Failed to load chatbot questions');
     } finally {
@@ -40,9 +45,9 @@ export default function AdminChatbotPage() {
   }, []);
 
   useEffect(() => {
-    const timer = setTimeout(() => fetchQuestions(search), search ? 300 : 0);
+    const timer = setTimeout(() => fetchQuestions(search, page, perPage), search ? 300 : 0);
     return () => clearTimeout(timer);
-  }, [search, fetchQuestions]);
+  }, [search, page, perPage, fetchQuestions]);
 
   return (
     <div className="p-6">
@@ -51,7 +56,7 @@ export default function AdminChatbotPage() {
           <h1 className="text-xl font-bold">Chatbot Questions</h1>
           <p className="text-sm text-muted-foreground">What people ask the LocalsIndia assistant, newest first</p>
         </div>
-        <button onClick={() => fetchQuestions(search)} className="text-sm px-4 py-2 rounded-lg border hover:bg-muted transition-colors">
+        <button onClick={() => fetchQuestions(search, page, perPage)} className="text-sm px-4 py-2 rounded-lg border hover:bg-muted transition-colors">
           Refresh
         </button>
       </div>
@@ -60,12 +65,12 @@ export default function AdminChatbotPage() {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <input
           value={search}
-          onChange={e => setSearch(e.target.value)}
+          onChange={e => { setSearch(e.target.value); setPage(1); }}
           placeholder="Search questions..."
           className="w-full pl-9 pr-9 py-2.5 rounded-xl border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-orange-200"
         />
         {search && (
-          <button onClick={() => setSearch('')} aria-label="Clear search" className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+          <button onClick={() => { setSearch(''); setPage(1); }} aria-label="Clear search" className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
             <X className="w-4 h-4" />
           </button>
         )}
@@ -106,6 +111,16 @@ export default function AdminChatbotPage() {
             </motion.div>
           ))}
         </div>
+      )}
+
+      {!loading && (
+        <AdminPager
+          total={total}
+          page={page}
+          perPage={perPage}
+          onPageChange={setPage}
+          onPerPageChange={n => { setPerPage(n); setPage(1); }}
+        />
       )}
     </div>
   );

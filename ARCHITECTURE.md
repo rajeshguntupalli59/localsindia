@@ -674,9 +674,12 @@ Web: `BusinessDashboardClient.tsx`, reached via a "View Analytics" link on `Busi
 
 ### Admin: `/api/v1/admin` (all require admin role)
 
+**Paging (2026-10-23):** admin list GETs (`/listings/pending`, `/listings`, `/listings/flagged`, `/events/pending`, `/events`, `/businesses`, `/buyer-requests`, `/chatbot-questions`, `/business-claims`) take `?page=&page_size=` (max 200) and return the full count in the `X-Total-Count` response header (CORS-exposed) — body shape unchanged. Helper: `core/pagination.py::paginate`. `/outreach` takes `page_size` and keeps its `counts` object.
+
 | Method | Path | What it does |
 |--------|------|-------------|
-| GET | `/listings/pending` | Moderation queue -- oldest first |
+| GET | `/listings/pending` | Moderation queue -- oldest first, `?q=` title search |
+| GET | `/listings/flagged` | Flagged listings (3+ reports) each with a `reports` array — backs `/admin/reports` (added 2026-10-23; the page called it before it existed) |
 | GET | `/listings` | All listings with status filter (both listing endpoints return `city_name`, 2026-10-09) |
 | GET | `/chatbot-questions` | What users asked the chatbot (`chatbot_questions` table), newest first, `?q=` search (2026-10-09) |
 | PATCH | `/listings/{id}/approve` | Approve -> status='active' |
@@ -685,7 +688,7 @@ Web: `BusinessDashboardClient.tsx`, reached via a "View Analytics" link on `Busi
 | GET | `/events` | All events with status filter |
 | PATCH | `/events/{id}/approve` | Approve event |
 | PATCH | `/events/{id}/reject` | Reject event |
-| GET | `/users` | All users list |
+| GET | `/users` | All users list (UI fetches every page, then searches + pages client-side) |
 | PATCH | `/users/{user_id}/role` | Set role to `admin` or `user` (cannot change own role) |
 | POST | `/seed-placeholder-images` | Backfills a placeholder image onto every listing with zero photos; also fixes a previously-seeded "LocalIndia" → "LocalsIndia" text typo on old placeholders |
 | GET | `/reports` | All abuse reports |
@@ -1141,6 +1144,8 @@ Shows all user's listings (all statuses: pending, active, expired, etc.):
 
 **File:** `app/admin/listings/page.tsx`
 
+All admin list tabs (listings, reports, events, businesses, buyer requests, business claims, chatbot, outreach, users) share `components/admin-pager/AdminPager.tsx`: per-page picker (10/25/50/100, default 25) + Prev/Next + "Showing x–y of N". Users and Businesses have a search box (2026-10-23).
+
 Data table with pending listings queue:
 - Title, city, user, category, posted time (city name shown on the card and next to the area — added 2026-10-09, before only the area/landmark showed)
 - "Approve" button (green) -> active
@@ -1174,7 +1179,7 @@ User list: phone, name, role, is_active. Role management (promote to admin/busin
 
 **File:** `app/admin/reports/page.tsx`
 
-Lists flagged listings with report reasons. Admin can then reject the listing.
+Lists flagged listings with report reasons (`GET /admin/listings/flagged`). Admin can restore or remove the listing.
 
 ---
 
@@ -1880,6 +1885,7 @@ Side services (called from backend):
 | `components/whatsapp-badge/WhatsAppBadge.tsx` | WhatsApp indicator badge |
 | `components/bottom-nav/BottomNav.tsx` | Mobile bottom navigation (5 tabs) |
 | `components/empty-state/EmptyState.tsx` | "No results" friendly state |
+| `components/admin-pager/AdminPager.tsx` | Admin list paging bar (per-page picker, Prev/Next) + `readTotal(res)` for the `X-Total-Count` header |
 | `components/ad-banner/AdBanner.tsx` | City page ad banner slot (Phase 3) |
 | `components/fresh-listings/FreshListingsSection.tsx` | Homepage latest listings carousel |
 | `components/pwa/ServiceWorker.tsx` | PWA service worker registration |
