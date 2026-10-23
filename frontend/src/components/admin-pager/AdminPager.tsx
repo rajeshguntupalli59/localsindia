@@ -2,7 +2,7 @@
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-export const PER_PAGE_OPTIONS = [10, 25, 50, 100];
+const PER_PAGE_OPTIONS = [10, 25, 50, 100];
 
 /** Admin list endpoints send the full row count in this header. */
 export function readTotal(res: Response): number {

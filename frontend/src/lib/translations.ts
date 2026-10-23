@@ -339,7 +339,7 @@ const DICTS: Record<LangCode, UIDict> = {
 };
 
 // ── Accessor ──────────────────────────────────────────────────────────────────
-export function getDict(lang: LangCode): UIDict {
+function getDict(lang: LangCode): UIDict {
   return DICTS[lang] ?? DICTS.en;
 }
 

@@ -7,7 +7,7 @@ import type { CatalogCategory, CatalogQuestion } from '@/lib/types';
 // `sub=<slug>` and `f_<key>=value` / `f_<key>_min` / `f_<key>_max`, which the
 // listings endpoint reads directly.
 
-export const ANSWER_PARAM_PREFIX = 'f_';
+const ANSWER_PARAM_PREFIX = 'f_';
 
 /** The subcategories that take listings (Events/Businesses have none). */
 export function listingSubcategories(category?: CatalogCategory | null) {

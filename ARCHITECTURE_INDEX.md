@@ -347,7 +347,6 @@ POST   /api/v1/auth/login                 {phone, password} -> AuthResponse. Rep
                                           404 = no account, 409 = account has no password yet, 401 = wrong password
 POST   /api/v1/auth/admin-login           Admin username+password login (unrelated to user password_hash)
 POST   /api/v1/auth/refresh               Exchange refresh token for new access token
-DELETE /api/v1/auth/logout                Client-side only (stateless)
 GET    /api/v1/auth/me                    Get current user [AUTH] — now includes referral_code, lazily
                                           generating + persisting one if the user predates this feature (2026-07-18)
 PATCH  /api/v1/auth/me                    Update name/lang_pref [AUTH]

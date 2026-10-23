@@ -8,7 +8,7 @@
 // pages, not full multi-language SEO — there's no locale-prefixed routing
 // (no middleware.ts, no /te/[city] routes) for hreflang alternates to point
 // at. That would be a real routing/architecture change, a separate decision.
-export const REGIONAL_LISTING_PHRASE: Record<string, string> = {
+const REGIONAL_LISTING_PHRASE: Record<string, string> = {
   te: 'ఉచిత జాబితా పోస్ట్',
   ta: 'இலவச விளம்பரம் பதிவிடு',
   kn: 'ಉಚಿತ ಜಾಹೀರಾತು ಪ್ರಕಟಿಸಿ',

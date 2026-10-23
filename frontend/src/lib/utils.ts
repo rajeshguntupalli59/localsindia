@@ -11,7 +11,7 @@ export function formatPrice(price: number | null): string {
 }
 
 // Categories where physical items change hands — "Sold" label applies
-export const SALE_CATEGORIES = new Set([
+const SALE_CATEGORIES = new Set([
   'classifieds', 'vehicles', 'electronics', 'furniture', 'fashion', 'real-estate',
 ]);
 

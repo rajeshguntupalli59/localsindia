@@ -45,7 +45,7 @@ function detectPrompt(): Prompt | null {
 
 // Listing detail pages have their own sticky WhatsApp bar the prompt would
 // cover, and the post form is where the CTA points — don't show it on either.
-export function isHiddenPath(pathname: string | null): boolean {
+function isHiddenPath(pathname: string | null): boolean {
   if (!pathname) return false;
   return pathname.startsWith('/auth')
     || pathname.startsWith('/listing/')

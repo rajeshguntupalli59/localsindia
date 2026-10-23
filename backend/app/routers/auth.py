@@ -316,12 +316,6 @@ async def refresh_token(body: RefreshRequest, db: AsyncSession = Depends(get_db)
     )
 
 
-@router.delete("/logout", status_code=204)
-async def logout():
-    # JWT is stateless — client drops the token
-    return
-
-
 @router.post("/dev-login", response_model=AuthResponse)
 async def dev_login(db: AsyncSession = Depends(get_db)):
     """Dev-only bypass — only works when OTP_DEBUG=true."""

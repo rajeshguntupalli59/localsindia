@@ -557,7 +557,6 @@ Migration `bc6a44aafa08`. Uploaded via `POST /upload/business-image/{business_id
 | POST | `/otp/verify` | Verify OTP -> returns a short-lived `setup_token`, not full tokens (2026-07-12). Accepts an optional `ref_code` (2026-07-18) — applied only for new signups; unknown, stale, or self-referred codes are silently ignored rather than erroring | No |
 | POST | `/password/set` | Set password using a `setup_token` — same endpoint for signup password-creation and forgot-password reset | No |
 | POST | `/refresh` | Get new access token using refresh token | No |
-| DELETE | `/logout` | Client clears tokens (server stateless) | No |
 | POST | `/dev-login` | Skip OTP (only when OTP_DEBUG=true) | No |
 | GET | `/me` | Get current user profile — now includes `referral_code`, lazily generating and persisting one if the account predates this feature (2026-07-18) | Yes |
 | PATCH | `/me` | Update name or language preference | Yes |
