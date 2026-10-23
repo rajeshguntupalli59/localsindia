@@ -123,6 +123,9 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 
 ## 6. Changelog (dated, most recent first — append here after notable sessions)
 
+### 2026-10-23 — Footer "Blog" link
+- `/blog` was in the sitemap but linked from nowhere. Added to footer Company column. (Unused-code audit same day; `/pricing` left as is per Raj.)
+
 ### 2026-10-23 — Site-wide consistency crawl (408 pages + 300 links)
 - Clean: no broken links, no brand-name typos, "150 cities" matches API, city business counts match `/businesses/counts`, all sitemap URLs 200.
 - Fixed: `[city]/search` rendered a 2nd `<title>` in the body (React 18 doesn't hoist) so the tab always showed the default title → `document.title` effect + per-city server title in layout.

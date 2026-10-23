@@ -53,6 +53,7 @@ const FOOTER_LINKS: Record<string, { label: string; href: string }[]> = {
   ],
   Company: [
     { label: 'About Us', href: '/about' },
+    { label: 'Blog', href: '/blog' },
     { label: 'Trust & Safety', href: '/trust' },
     { label: 'Contact', href: '/contact' },
   ],
