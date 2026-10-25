@@ -46,7 +46,7 @@ Several root docs describe the *original plan*, not current reality. Don't cite 
 | **UI_STACK.md** | ✅ Current | Component/animation/font stack decisions |
 | **TESTING.md** | ✅ Current | Real test setup (Vitest frontend, pytest backend) |
 | **AZURE_DEPLOY.md** | ✅ Current reference | One-time infra setup steps, still accurate if rebuilding infra |
-| **SETUP_GUIDE.md** | ✅ Current reference | Third-party account setup (MSG91, Cloudinary, Google OAuth) |
+| **SETUP_GUIDE.md** | ✅ Current reference | Third-party account setup (MSG91, Cloudinary) |
 | **MSG91_SUPPORT_ISSUE.md** | ✅ Historical record, resolved | OTP delivery bug, fixed 2026-07-13 — keep for reference, not actionable |
 | **START_HERE.md** | ⚠️ Stale | Still says "Phase 1 — NOT STARTED" — the product has been live in production for weeks. Session-handoff ritual (git init, folder scaffold) is obsolete. |
 | **BUILD_PLAN.md** | ⚠️ Stale | 14-week original build plan — project is well past Phase 3 in reality (payments, events, tickets, referrals all live) |

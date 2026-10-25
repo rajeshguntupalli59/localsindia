@@ -33,7 +33,6 @@ Covers classifieds, events, businesses, PG/roommate across 249+ Indian cities in
 | Backend | Azure App Service F1 | FREE | $0/mo |
 | Database | Azure PostgreSQL Flexible Server B1ms | Paid | ~$15/mo |
 | Images | Cloudinary | FREE tier | $0/mo |
-| Auth (Google) | Google OAuth | FREE | $0/mo |
 | CI/CD | GitHub Actions | FREE | $0/mo |
 | Keep-alive | GitHub Actions cron (every 5 min) | FREE | $0/mo |
 | Domain | GoDaddy | Paid | ~$10/yr |
@@ -70,7 +69,6 @@ Covers classifieds, events, businesses, PG/roommate across 249+ Indian cities in
 | DB driver | asyncpg |
 | Database | PostgreSQL 16 |
 | Auth | JWT (access 15 min / refresh 30 days) + bcrypt |
-| OAuth | Google OAuth 2.0 |
 | OTP | MSG91 (currently in debug/mock mode) |
 | Images | Cloudinary (upload + CDN) |
 | Testing (BE) | pytest + pytest-asyncio |
@@ -99,9 +97,6 @@ Covers classifieds, events, businesses, PG/roommate across 249+ Indian cities in
 | CLOUDINARY_CLOUD_NAME | dbgoijryf | ✅ LIVE |
 | CLOUDINARY_API_KEY | 436189718573935 | ✅ LIVE |
 | CLOUDINARY_API_SECRET | (set) | ✅ LIVE |
-| GOOGLE_CLIENT_ID | 919627354106-a74cb4li3cn3g4odl8tiqu63beeo45kc.apps.googleusercontent.com | ✅ LIVE |
-| GOOGLE_CLIENT_SECRET | (set) | ✅ LIVE |
-| GOOGLE_REDIRECT_URI | https://localsindia-backend-in.azurewebsites.net/api/v1/auth/google/callback | ✅ SET |
 | ADMIN_USERNAME | localsindia_admin | ✅ SET |
 | ADMIN_PASSWORD_HASH | (bcrypt hash — value kept in Azure only) | ✅ SET |
 
@@ -115,7 +110,6 @@ Covers classifieds, events, businesses, PG/roommate across 249+ Indian cities in
 | AZURE_SUBSCRIPTION_ID | (set) |
 | AZURE_STATIC_WEB_APPS_API_TOKEN | (set) |
 | NEXT_PUBLIC_API_URL | https://localsindia-backend-in.azurewebsites.net |
-| NEXT_PUBLIC_GOOGLE_AUTH_ENABLED | true |
 | NEXT_PUBLIC_OTP_DEBUG | true |
 
 ---
@@ -150,7 +144,6 @@ Covers classifieds, events, businesses, PG/roommate across 249+ Indian cities in
 - `POST /auth/signin` — existing users sign in directly (no OTP)
 - `POST /auth/otp/send` — send OTP (mock mode: returns OTP in response)
 - `POST /auth/otp/verify` — verify OTP, create/return user
-- `GET /auth/google` + `GET /auth/google/callback` — Google OAuth
 - `POST /auth/refresh` — refresh JWT
 - `DELETE /auth/logout`
 - `GET/PATCH /auth/me`
@@ -194,8 +187,7 @@ Covers classifieds, events, businesses, PG/roommate across 249+ Indian cities in
 | Route | Description |
 |---|---|
 | `/` | Homepage — hero search, category grid, fresh listings, trust badges |
-| `/auth/login` | Phone OTP (3 steps: phone→OTP→name for new) + Google OAuth |
-| `/auth/callback` | Google OAuth token exchange + redirect |
+| `/auth/login` | Phone OTP (3 steps: phone→OTP→name for new) + phone/password |
 | `/[city]` | City home — featured + latest listings, category pills, sort |
 | `/[city]/search` | Search results + sidebar filters (desktop) + mobile filter accordion |
 | `/[city]/classifieds/[id]` | Listing detail — gallery, WhatsApp fixed CTA, seller reviews |
@@ -228,7 +220,7 @@ Covers classifieds, events, businesses, PG/roommate across 249+ Indian cities in
 
 **SEO:** robots.txt, dynamic sitemap.ts (static + all city URLs), Google Search Console verified, JSON-LD ItemList schema on category pages
 
-**Google OAuth:** live + "Continue with Google" button, auto-switches to signup for new emails
+**Google OAuth:** REMOVED 2026-10-25 (not used; code + Azure settings deleted)
 
 **Keep-alive:** GitHub Actions cron every 5 min — prevents Azure F1 cold start
 
@@ -283,7 +275,6 @@ reviews        id(UUID), business_id, user_id, rating(1-5), body
 | **Facebook Page** | Social auto-posting agent | Create Facebook Page for LocalsIndia |
 | **Instagram Business account** | Social auto-posting agent | Create Instagram Business account |
 | **Meta Developer App** | API access for auto-posting | Create app at developers.facebook.com → share App ID |
-| **Google OAuth branding** | Remove "unverified app" warning on Google login | UNDER REVIEW since 2026-06-09 — just wait |
 
 ### Claude builds (unblocked)
 

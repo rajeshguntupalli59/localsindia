@@ -26,7 +26,7 @@
 - `backend/app/core/security.py` â€” JWT create/verify, bcrypt hash
 - `backend/app/models/` â€” all 10 ORM models (cities, users, categories, listings, listing_images, events, businesses, reviews, reports, otp_requests)
 - `backend/app/schemas/` â€” Pydantic request/response schemas for each model
-- `backend/app/routers/auth.py` â€” OTP send/verify + Google OAuth (authlib)
+- `backend/app/routers/auth.py` â€” OTP send/verify (Google OAuth REMOVED 2026-10-25)
 - `backend/app/services/msg91.py` â€” SMS wrapper (mock mode if no key)
 - `backend/tests/test_auth.py` â€” TC-001 through TC-004, TC-017
 
@@ -364,7 +364,7 @@ STATE_LANG = {
 - [x] Q2: Seed cities â€” 140 South India-focused cities (see above)
 - [ ] Q3: MSG91 account â€” see SETUP_GUIDE.md (mock mode works for Day 1)
 - [ ] Q4: Cloudinary account â€” see SETUP_GUIDE.md (5 min setup, free tier)
-- [ ] Q5: Google OAuth â€” see SETUP_GUIDE.md (10 min setup)
+- [x] ~~Q5: Google OAuth~~ (REMOVED 2026-10-25, not used)
 - [ ] Q6: Railway account + project â€” see SETUP_GUIDE.md
 - [ ] Q7: GitHub repo created
 

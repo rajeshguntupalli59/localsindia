@@ -82,8 +82,6 @@ az webapp config appsettings set \
     CLOUDINARY_CLOUD_NAME="" \
     CLOUDINARY_API_KEY="" \
     CLOUDINARY_API_SECRET="" \
-    GOOGLE_CLIENT_ID="" \
-    GOOGLE_CLIENT_SECRET="" \
     SCM_DO_BUILD_DURING_DEPLOYMENT=true \
     STARTUP_COMMAND="python -m uvicorn app.main:app --host 0.0.0.0 --port 8000"
 ```
@@ -214,8 +212,6 @@ FRONTEND_URL=https://localsindia.com
 # Optional (mock mode works without these)
 MSG91_AUTH_KEY=
 MSG91_TEMPLATE_ID=
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
 CLOUDINARY_CLOUD_NAME=
 CLOUDINARY_API_KEY=
 CLOUDINARY_API_SECRET=

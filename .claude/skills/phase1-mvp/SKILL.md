@@ -41,7 +41,7 @@ backend/
       auth.py  upload.py  search.py  admin.py
     routers/
       __init__.py
-      auth.py         â† /auth/otp/send, /auth/otp/verify, /auth/google, /auth/google/callback
+      auth.py         â† /auth/otp/send, /auth/otp/verify
     services/
       __init__.py
       msg91.py        â† MOCK if MSG91_AUTH_KEY not set (print OTP to console)
@@ -327,7 +327,6 @@ Fixed at bottom, z-50, white bg with top border
 app/[city]/classifieds/page.tsx  â€” listing grid + category filter + sort
 app/[city]/classifieds/[id]/edit/page.tsx â€” edit form (owner only, pre-filled)
 app/auth/login/page.tsx â€” Google button + Phone OTP tabs
-app/auth/callback/page.tsx â€” Google OAuth callback
 app/profile/page.tsx â€” my listings, edit profile, city/language settings
 ```
 

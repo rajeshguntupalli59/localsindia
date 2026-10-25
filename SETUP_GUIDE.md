@@ -65,41 +65,9 @@ NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=<same cloud name>
 
 ---
 
-## 3. Google OAuth â€” Sign in with Google
+## 3. Google OAuth — REMOVED 2026-10-25
 
-**Cost:** Free.
-
-### Steps
-1. Go to **console.cloud.google.com**
-2. Click **"New Project"** â†’ name it `LocalIndia` â†’ Create
-3. Left sidebar â†’ **"APIs & Services"** â†’ **"OAuth consent screen"**
-4. Choose **External** â†’ Fill:
-   ```
-   App name: LocalIndia
-   User support email: queryoptimizer78@gmail.com
-   Developer contact: queryoptimizer78@gmail.com
-   ```
-5. Scopes: click "Add or remove scopes" â†’ add `.../auth/userinfo.email` and `.../auth/userinfo.profile`
-6. Test users: add your own Gmail for testing
-7. Left sidebar â†’ **"Credentials"** â†’ **"+ Create Credentials"** â†’ **"OAuth client ID"**
-8. Application type: **Web application**
-9. Name: `LocalIndia Web`
-10. Authorized redirect URIs â€” add ALL of these:
-    ```
-    http://localhost:3000/api/auth/callback/google
-    http://localhost:8000/api/v1/auth/google/callback
-    https://localsindia.com/api/v1/auth/google/callback
-    https://api.localsindia.com/api/v1/auth/google/callback
-    ```
-11. Click **Create** â†’ a popup shows:
-    - **Client ID** (ends in `.apps.googleusercontent.com`)
-    - **Client Secret**
-
-### What to put in .env
-```bash
-GOOGLE_CLIENT_ID=<client id from step 11>
-GOOGLE_CLIENT_SECRET=<client secret from step 11>
-```
+Not used. LocalIndia logs in with phone OTP (signup) + phone/password only; the Google sign-in code and settings were deleted.
 
 ---
 
@@ -149,14 +117,13 @@ git push -u origin main
 
 ## Day 1 Build Order (tomorrow)
 
-You can start building **without** MSG91, Cloudinary, or Google OAuth being set up.
-The backend builds mock modes for all three:
+You can start building **without** MSG91 or Cloudinary being set up.
+The backend builds mock modes for both:
 
 | Account | Needed by | Mock available? |
 |---|---|---|
 | MSG91 | Week 1-2 auth tests | Yes â€” OTP printed to console |
 | Cloudinary | Week 2-3 image upload | Yes â€” saves to local /tmp instead |
-| Google OAuth | Week 1-2 auth tests | Yes â€” skip OAuth in test env |
 | Azure | LIVE — App Service + SWA + PostgreSQL | Already configured |
 
 **Start building today** with `docker-compose up -d` â€” zero accounts needed for Week 1-2.

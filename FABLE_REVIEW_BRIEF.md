@@ -46,7 +46,7 @@ mobile-first, WhatsApp-native, and free to post.
 | Feature | Backend | Frontend | DB Tables | Key Endpoints |
 |---|---|---|---|---|
 | OTP Login (phone) | `routers/auth.py`, `services/msg91.py` | `auth/login/page.tsx` | `otp_requests`, `users` | POST /auth/otp/send, /auth/otp/verify |
-| Google OAuth | `routers/auth.py` | `auth/login`, `auth/callback` | `users` | GET /auth/google, /auth/google/callback |
+| ~~Google OAuth~~ | REMOVED 2026-10-25 | — | — | — |
 | JWT refresh | `routers/auth.py` | `lib/api.ts` (auto-refresh) | — | POST /auth/refresh |
 | Admin login | `routers/auth.py` | `admin/login/page.tsx` | `users` (role=admin) | POST /auth/admin-login |
 | Post a listing | `routers/listings.py` | `[city]/classifieds/post` | `listings` | POST /listings |
@@ -82,7 +82,7 @@ POST   /api/v1/auth/admin-login
 POST   /api/v1/auth/refresh
 DELETE /api/v1/auth/logout                client-side only
 GET    /api/v1/auth/me / PATCH /api/v1/auth/me
-GET    /api/v1/auth/google[?mobile=1] / /auth/google/callback
+(Google OAuth routes REMOVED 2026-10-25)
 POST   /api/v1/auth/dev-login             OTP_DEBUG=true only — CHECK this is false in prod
 
 CITIES & CATEGORIES
@@ -182,7 +182,7 @@ NOT native SDK, because `react-native-razorpay` doesn't work in Expo Go), Alerts
 - `EXPO_PUBLIC_RAZORPAY_KEY_ID` set in `mobile/.env` (local) and as an EAS environment variable
   for the `production` build profile — **`preview` profile currently has no override**, so preview
   APK builds will also use the live Razorpay key via `.env` inheritance
-- Google Sign-In on mobile uses a deep-link callback (`localsindia://`) via `/auth/google?mobile=1`
+- ~~Google Sign-In on mobile~~ — REMOVED 2026-10-25
 
 ## 9. Known Issues / Things To Check Specifically
 

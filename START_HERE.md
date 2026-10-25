@@ -16,7 +16,7 @@ C:\Users\rajes\localindia\
   ARCHITECTURE.md        â† full DB schema, API spec, all requirements
   BUILD_PLAN.md          â† 14-week plan, 140 seed cities, weekly tasks
   UI_STACK.md            â† UI decisions, colors, component patterns
-  SETUP_GUIDE.md         â† MSG91 / Cloudinary / Google OAuth setup steps
+  SETUP_GUIDE.md         â† MSG91 / Cloudinary setup steps
   .claudeignore          â† files Claude must not touch
   .claude/
     settings.json        â† allowed/denied bash commands
@@ -66,7 +66,7 @@ Not corporate. Not cold. Feels like it was built for India.
 |---|---|---|
 | MSG91 (OTP SMS) | NOT SET UP â€” see SETUP_GUIDE.md | Week 1-2 (mock works) |
 | Cloudinary (images) | NOT SET UP â€” see SETUP_GUIDE.md | Week 2-3 (mock works) |
-| Google OAuth | NOT SET UP â€” see SETUP_GUIDE.md | Week 1-2 (mock works) |
+| ~~Google OAuth~~ | REMOVED 2026-10-25, not used | - |
 | Azure (deploy) | LIVE — App Service + SWA + PostgreSQL | Already configured |
 | GitHub repo | NOT SET UP | Week 5-6 only |
 

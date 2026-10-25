@@ -119,7 +119,7 @@ Success metric: active listings per city per week.
 - WhatsApp contact button on every listing
 - City-wise hyperlocal feel (not national like OLX/Quikr)
 - India-specific categories: tiffin, carpool, cricket clubs, temple events
-- Phone OTP + Google login (no password required)
+- Phone OTP signup + phone/password login
 
 ## Channels that work for India
 1. WhatsApp forwards (organic, regional language)

@@ -214,7 +214,7 @@ localsindia/
 ### `users`
 Stores every registered user. Key fields:
 - `phone` — +91 format, this is the primary login identifier
-- `email` — from Google OAuth (optional)
+- `email` — optional (only set on old Google sign-in accounts)
 - `name` — display name (collected on first login)
 - `role` — either `'user'` (default) or `'admin'` (Raj)
 - `lang_pref` — which language they prefer (stored as 2-char code: 'te', 'hi', etc.)
@@ -326,8 +326,6 @@ Everything about user identity.
 | `POST /auth/signin` | Existing users sign in with just their phone (no OTP) — for returning users who are already known. Returns JWT tokens. |
 | `POST /auth/admin-login` | Admin username + password login. Password checked against bcrypt hash stored in env var. Returns JWT with `role=admin`. |
 | `POST /auth/refresh` | When access token expires (after 15 min), frontend sends refresh token here → gets new access token. Refresh token lives 30 days. |
-| `GET /auth/google` | Redirects browser to Google OAuth consent screen |
-| `GET /auth/google/callback` | Google sends user back here with an auth code → exchange code for Google profile → create/find user → redirect to frontend with JWT tokens |
 | `GET /auth/me` | Returns current user's profile (requires valid JWT) |
 | `PATCH /auth/me` | Update name or language preference |
 | `POST /auth/dev-login` | Skip OTP entirely (only works when `OTP_DEBUG=true` in env) — used during development and testing |
@@ -525,11 +523,10 @@ All endpoints require JWT with `role=admin`. Raj's management interface.
 **What it does:** City picker, pre-filled WhatsApp invite message, "Send on WhatsApp" + "Copy link" buttons
 
 ### Auth — Login — `app/auth/login/page.tsx` → URL: `/auth/login`
-**What it shows:** Login screen with two modes: phone OTP and Google OAuth
+**What it shows:** Login screen: phone OTP (new users) and phone/password
 **What it does:**
 - Existing users: enter phone → direct signin (no OTP needed)
 - New users: enter phone → OTP sent via MSG91 → enter OTP → enter name → account created
-- Google button: redirect to Google OAuth → comes back as logged in
 - Wrapped in React Suspense (Next.js requires this for `useSearchParams` regardless of rendering mode)
 
 ### Admin Login — `app/admin/login/page.tsx` → URL: `/admin/login`
@@ -641,12 +638,8 @@ Not visible — pure functionality
 - **Refresh token:** Lives 30 days. When access token expires, `lib/api.ts` automatically calls `POST /auth/refresh` and retries the original request.
 - Tokens are stateless — backend doesn't store them, just verifies the signature using `SECRET_KEY`.
 
-### How Google OAuth works
-1. User clicks "Continue with Google" → backend redirects to Google consent screen
-2. Google sends user back to `/api/v1/auth/google/callback` with an auth code
-3. Backend exchanges code for Google profile (email, name, photo)
-4. Creates/finds user by email → generates JWT → redirects to frontend with tokens in URL params
-5. Frontend (`/auth/callback`) extracts tokens from URL → saves to localStorage
+### Google sign-in — REMOVED 2026-10-25
+No longer used; the `/auth/google*` routes, `/auth/callback` page and `GOOGLE_CLIENT_*` settings were deleted.
 
 ### How admin login works
 - Username + password stored as Azure env vars (`ADMIN_USERNAME`, `ADMIN_PASSWORD_HASH`)
@@ -932,7 +925,7 @@ These are enforced in code. Do not remove them.
 ## 20. What's Built vs What's Coming
 
 ### Phase 1 — MVP (COMPLETE ✅)
-- User registration (OTP + Google OAuth)
+- User registration (phone OTP; Google OAuth was REMOVED 2026-10-25)
 - Post, browse, search, edit, delete listings
 - Photo upload (Cloudinary)
 - Admin moderation panel
@@ -1009,9 +1002,6 @@ Will enable:
 | `CLOUDINARY_CLOUD_NAME` | dbgoijryf | ✅ Live |
 | `CLOUDINARY_API_KEY` | 436189718573935 | ✅ Live |
 | `CLOUDINARY_API_SECRET` | (set) | ✅ Live |
-| `GOOGLE_CLIENT_ID` | 919627354106-... | ✅ Live |
-| `GOOGLE_CLIENT_SECRET` | (set) | ✅ Live |
-| `GOOGLE_REDIRECT_URI` | .../auth/google/callback | ✅ Live |
 | `ADMIN_USERNAME` | localsindia_admin | ✅ Live |
 | `ADMIN_PASSWORD_HASH` | bcrypt hash | ✅ Live |
 | `GOOGLE_AI_KEY` | Google AI Studio key for Gemini chatbot | ❌ Quota exhausted — get new key at aistudio.google.com |
@@ -1058,8 +1048,8 @@ These are external registrations that Raj needs to complete. Claude cannot do th
 4. Set in Azure: `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`
 5. Set in GitHub Actions: `NEXT_PUBLIC_RAZORPAY_KEY_ID`
 
-### 3. Google OAuth Branding Verification
-**Current state:** Under review (submitted 2026-06-09). No action needed — wait.
+### 3. ~~Google OAuth Branding Verification~~
+Not needed — Google sign-in REMOVED 2026-10-25.
 
 ### 4. Social Media Accounts (enables auto-posting agents)
 - Facebook Page for LocalsIndia
