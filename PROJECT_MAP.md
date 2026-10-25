@@ -127,6 +127,8 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 - `POST /admin/users/{id}/block|unblock` + Block/Unblock button and "Blocked" badge on /admin/users. Block = `is_active=false` (existing flag: sessions, login, otp/verify already refuse it) + takes down live listings/events/buyer requests.
 - `otp/send` now refuses blocked phones *before* sending an SMS (previously only otp/verify refused, after the SMS was spent).
 - No IP/device ban (Indian mobile CGNAT would hit innocent users); a new phone number still gets through.
+- Follow-ups same day: blocked user's buyer requests are soft-deleted (not `flagged`, which put them in the user-report queue — 0d72d6d); admins can't be blocked (would lock out the shared admin-login account — 0c97ba2).
+- Button audit (web + mobile): all 253 web + 77 mobile API calls hit a real route+method; added tests for 10 untested button flows (83f88cc, 254 backend tests). Still untested: Razorpay payments/tickets, Google OAuth, image upload, business-claim approve, seed-placeholder-images.
 
 ### 2026-10-23 — Unused-code cleanup + CPU alert root cause
 - Removed: 9 tracked one-off debug scripts in `frontend/` (admin_debug.js, audit.mjs, …); no-op `DELETE /auth/logout` (clients just drop tokens); `export` on 6 file-local consts/functions (knip); 7 disabled Azure alerts (`li-*` without `-in`) still pointing at the deleted pre-migration backend/plan/DB.
