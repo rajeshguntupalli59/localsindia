@@ -278,12 +278,29 @@ async def test_block_user_takes_down_content_and_locks_out(admin_client, auth_cl
     assert create_resp.status_code == 201
     listing_id = uuid.UUID(create_resp.json()["id"])
 
+    br_resp = await ac.post("/api/v1/buyer-requests", json={
+        "city_slug": city.slug,
+        "category_slug": category.slug,
+        "description": "Spammer buyer request text",
+        "contact_phone": "+919876543210",
+    })
+    assert br_resp.status_code == 201
+    br_id = uuid.UUID(br_resp.json()["id"])
+
     resp = await admin_ac.post(f"/api/v1/admin/users/{user.id}/block")
     assert resp.status_code == 200
     assert resp.json()["listings_removed"] == 1
+    assert resp.json()["requests_removed"] == 1
 
     listing = (await db.execute(select(Listing).where(Listing.id == listing_id))).scalar_one()
     assert listing.status == "rejected"
+
+    # Must NOT land in the Flagged Requests queue (that's for user reports).
+    from app.models.buyer_request import BuyerRequest
+    br = (await db.execute(select(BuyerRequest).where(BuyerRequest.id == br_id))).scalar_one()
+    assert br.deleted_at is not None and br.status == "open"
+    flagged = (await admin_ac.get("/api/v1/admin/buyer-requests?status=flagged")).json()
+    assert str(br_id) not in [r["id"] for r in flagged]
 
     assert (await ac.get("/api/v1/auth/me")).status_code == 401
     # Fixture phones (+9190...) fail the [6-9] validator — give the user a valid one.

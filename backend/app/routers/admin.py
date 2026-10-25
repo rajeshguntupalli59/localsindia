@@ -454,11 +454,13 @@ async def block_user(
                Event.status.in_(["pending", "active"]))
         .values(status="cancelled")
     )
+    # Soft-delete, not status="flagged" — flagged would drop them into the
+    # Flagged Requests queue as if users had reported them (and Restore there re-opens).
     requests = await db.execute(
         update(BuyerRequest)
         .where(BuyerRequest.user_id == user_id, BuyerRequest.deleted_at.is_(None),
                BuyerRequest.status == "open")
-        .values(status="flagged")
+        .values(deleted_at=datetime.now(timezone.utc))
     )
     await db.commit()
     return {

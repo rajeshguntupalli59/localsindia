@@ -689,7 +689,7 @@ Web: `BusinessDashboardClient.tsx`, reached via a "View Analytics" link on `Busi
 | PATCH | `/events/{id}/reject` | Reject event |
 | GET | `/users` | All users list (UI fetches every page, then searches + pages client-side) |
 | PATCH | `/users/{user_id}/role` | Set role to `admin` or `user` (cannot change own role) |
-| POST | `/users/{user_id}/block` | `is_active=false` (sessions/login/OTP signup refused; phone kept so the number can't re-register) + listings pending/active/flagged→`rejected`, events pending/active→`cancelled`, open buyer requests→`flagged`. Returns counts. Cannot block self |
+| POST | `/users/{user_id}/block` | `is_active=false` (sessions/login/OTP signup refused; phone kept so the number can't re-register) + listings pending/active/flagged→`rejected`, events pending/active→`cancelled`, open buyer requests soft-deleted (not `flagged` — that queue is for user reports). Returns counts. Cannot block self |
 | POST | `/users/{user_id}/unblock` | `is_active=true`. Removed content is NOT restored |
 | POST | `/seed-placeholder-images` | Backfills a placeholder image onto every listing with zero photos; also fixes a previously-seeded "LocalIndia" → "LocalsIndia" text typo on old placeholders |
 | GET | `/reports` | All abuse reports |
