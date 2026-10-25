@@ -258,6 +258,59 @@ async def test_admin_list_users_returns_correct_shape(admin_client, user_and_tok
         assert "is_active" in user
 
 
+# ── Block / unblock ───────────────────────────────────────────────────────────
+
+@pytest.mark.asyncio
+async def test_block_user_takes_down_content_and_locks_out(admin_client, auth_client, city, category, db):
+    """Block: listings rejected, sessions dead, OTP refused before SMS; unblock restores access."""
+    from sqlalchemy import select
+    from app.models.listing import Listing
+    ac, user = auth_client
+    admin_ac, _admin = admin_client
+
+    create_resp = await ac.post("/api/v1/listings", json={
+        "title": "Unrelated spam post",
+        "description": "Spammer content",
+        "category_id": str(category.id),
+        "city_id": str(city.id),
+        "contact_phone": "+919876543210",
+    })
+    assert create_resp.status_code == 201
+    listing_id = uuid.UUID(create_resp.json()["id"])
+
+    resp = await admin_ac.post(f"/api/v1/admin/users/{user.id}/block")
+    assert resp.status_code == 200
+    assert resp.json()["listings_removed"] == 1
+
+    listing = (await db.execute(select(Listing).where(Listing.id == listing_id))).scalar_one()
+    assert listing.status == "rejected"
+
+    assert (await ac.get("/api/v1/auth/me")).status_code == 401
+    # Fixture phones (+9190...) fail the [6-9] validator — give the user a valid one.
+    from app.models.user import User
+    phone = f"+919{uuid.uuid4().int % 10**9:09d}"
+    db_user = (await db.execute(select(User).where(User.id == user.id))).scalar_one()
+    db_user.phone = phone
+    await db.commit()
+    otp = await admin_ac.post("/api/v1/auth/otp/send", json={"phone": phone})
+    assert otp.status_code == 403
+
+    users = (await admin_ac.get("/api/v1/admin/users")).json()
+    assert next(u for u in users if u["id"] == str(user.id))["is_active"] is False
+
+    resp = await admin_ac.post(f"/api/v1/admin/users/{user.id}/unblock")
+    assert resp.status_code == 200
+    assert (await ac.get("/api/v1/auth/me")).status_code == 200
+
+
+@pytest.mark.asyncio
+async def test_block_rejects_self_and_non_admin(admin_client, auth_client):
+    ac, user = auth_client
+    admin_ac, admin = admin_client
+    assert (await admin_ac.post(f"/api/v1/admin/users/{admin.id}/block")).status_code == 400
+    assert (await ac.post(f"/api/v1/admin/users/{user.id}/block")).status_code == 403
+
+
 # ── Reports list ──────────────────────────────────────────────────────────────
 
 @pytest.mark.asyncio

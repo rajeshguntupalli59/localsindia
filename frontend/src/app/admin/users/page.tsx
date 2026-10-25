@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { Users, ShieldCheck, ShieldOff, Trash2, Search } from 'lucide-react';
+import { Users, ShieldCheck, ShieldOff, Trash2, Search, Ban, CircleCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import EmptyState from '@/components/empty-state/EmptyState';
 import AdminPager from '@/components/admin-pager/AdminPager';
@@ -86,6 +86,38 @@ export default function AdminUsersPage() {
       toast.success(`${u.name ?? 'User'} is now ${newRole === 'admin' ? 'an admin' : 'a regular user'}`);
     } catch {
       toast.error(`Failed to ${label.toLowerCase()}`);
+    } finally {
+      setActionId(null);
+    }
+  };
+
+  const toggleBlock = async (u: UserRow) => {
+    const blocking = u.is_active;
+    const who = u.name ?? u.phone ?? u.email;
+    const confirmed = window.confirm(
+      blocking
+        ? `Block ${who}? They'll be logged out, can't log in or sign up again with this number, and all their live listings, events and requests will be taken down.`
+        : `Unblock ${who}? They can log in again. Their removed posts stay removed.`
+    );
+    if (!confirmed) return;
+    setActionId(u.id);
+    try {
+      const token = localStorage.getItem('access_token');
+      const res = await fetch(`${API_BASE}/api/v1/admin/users/${u.id}/${blocking ? 'block' : 'unblock'}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error();
+      setUsers(us => us.map(x => x.id === u.id ? { ...x, is_active: !blocking } : x));
+      if (blocking) {
+        const d = await res.json();
+        const removed = d.listings_removed + d.events_removed + d.requests_removed;
+        toast.success(`${u.name ?? 'User'} blocked · ${removed} post${removed !== 1 ? 's' : ''} taken down`);
+      } else {
+        toast.success(`${u.name ?? 'User'} unblocked`);
+      }
+    } catch {
+      toast.error(`Failed to ${blocking ? 'block' : 'unblock'} user`);
     } finally {
       setActionId(null);
     }
@@ -199,6 +231,11 @@ export default function AdminUsersPage() {
                         {isAdmin && <ShieldCheck className="w-3 h-3" />}
                         {u.role}
                       </span>
+                      {!u.is_active && (
+                        <span className="ml-1.5 inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-red-100 text-red-700">
+                          <Ban className="w-3 h-3" /> Blocked
+                        </span>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">
                       {new Date(u.created_at).toLocaleDateString('en-IN', {
@@ -220,6 +257,20 @@ export default function AdminUsersPage() {
                             {isAdmin
                               ? <><ShieldOff className="w-3.5 h-3.5" /> Remove Admin</>
                               : <><ShieldCheck className="w-3.5 h-3.5" /> Make Admin</>
+                            }
+                          </button>
+                          <button
+                            onClick={() => toggleBlock(u)}
+                            disabled={busy}
+                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors disabled:opacity-50 ${
+                              u.is_active
+                                ? 'bg-red-50 text-red-700 hover:bg-red-100'
+                                : 'bg-green-50 text-green-700 hover:bg-green-100'
+                            }`}
+                          >
+                            {u.is_active
+                              ? <><Ban className="w-3.5 h-3.5" /> Block</>
+                              : <><CircleCheck className="w-3.5 h-3.5" /> Unblock</>
                             }
                           </button>
                           <button

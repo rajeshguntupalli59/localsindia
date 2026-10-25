@@ -7,7 +7,7 @@ from datetime import datetime, timezone, timedelta
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, Response
 from pydantic import BaseModel
-from sqlalchemy import select, func, distinct, cast, Date
+from sqlalchemy import select, func, distinct, cast, Date, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -424,6 +424,64 @@ async def delete_user(
     user.is_active = False
     await db.commit()
     return {"success": True, "message": f"User {user_id} deleted."}
+
+
+@router.post("/users/{user_id}/block")
+async def block_user(
+    user_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    current_admin: User = Depends(get_current_admin),
+):
+    """Block a spammer: is_active=False kills their sessions, login and OTP signup
+    (phone stays on the row, so the same number can't re-register), and all their
+    live content is taken down. Unblocking does NOT restore content — re-approve by hand."""
+    if user_id == current_admin.id:
+        raise HTTPException(status_code=400, detail="Cannot block your own account.")
+    result = await db.execute(select(User).where(User.id == user_id, User.deleted_at.is_(None)))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found.")
+    user.is_active = False
+    listings = await db.execute(
+        update(Listing)
+        .where(Listing.user_id == user_id, Listing.deleted_at.is_(None),
+               Listing.status.in_(["pending", "active", "flagged"]))
+        .values(status="rejected")
+    )
+    events = await db.execute(
+        update(Event)
+        .where(Event.user_id == user_id, Event.deleted_at.is_(None),
+               Event.status.in_(["pending", "active"]))
+        .values(status="cancelled")
+    )
+    requests = await db.execute(
+        update(BuyerRequest)
+        .where(BuyerRequest.user_id == user_id, BuyerRequest.deleted_at.is_(None),
+               BuyerRequest.status == "open")
+        .values(status="flagged")
+    )
+    await db.commit()
+    return {
+        "success": True,
+        "listings_removed": listings.rowcount,
+        "events_removed": events.rowcount,
+        "requests_removed": requests.rowcount,
+    }
+
+
+@router.post("/users/{user_id}/unblock")
+async def unblock_user(
+    user_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+):
+    result = await db.execute(select(User).where(User.id == user_id, User.deleted_at.is_(None)))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found.")
+    user.is_active = True
+    await db.commit()
+    return {"success": True}
 
 
 @router.post("/seed-placeholder-images")

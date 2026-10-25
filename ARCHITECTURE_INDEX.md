@@ -84,6 +84,7 @@
 | Auto-deploy CI/CD + PR staging | §16 | `.github/workflows/backend-azure.yml` | `.github/workflows/frontend-azure.yml` | — | — |
 | City seeding | §18-Scripts | `scripts/seed_cities.py`, `scripts/seed_categories.py` | — | `cities`, `categories` | — |
 | Admin role management | §6-Admin | `routers/admin.py` | `admin/users/page.tsx`, mobile `AdminScreen.tsx` | `users` | PATCH /admin/users/{id}/role |
+| Admin block/unblock user | §6-Admin | `routers/admin.py`, `routers/auth.py` (otp/send refuses blocked phones) | `admin/users/page.tsx` | `users`, `listings`, `events`, `buyer_requests` | POST /admin/users/{id}/block, /unblock |
 | Seed placeholder images | §6-Admin | `routers/admin.py` | `admin/listings/page.tsx` (button) | `listing_images` | POST /admin/seed-placeholder-images |
 | Business soft-delete | §6-Businesses | `routers/businesses.py` | — | `businesses` | DELETE /businesses/{id} |
 | Google Sign-In (backend route, currently unreachable from either app's UI) | §11 | `routers/auth.py` | none currently — `mobile/src/screens/LoginScreen.tsx` had Google removed in an earlier pass (pre-2026-07-18, confirmed via grep: zero Google references anywhere in `mobile/src/`), and web's button is now flag-gated off (2026-07-18, `NEXT_PUBLIC_GOOGLE_AUTH_ENABLED` secret flipped to `false` — a real user still has a Google-only account with no phone on file, so the backend route is deliberately kept, not deleted, in case it needs to be flipped back on) | `users` | GET /auth/google?mobile=1, GET /auth/google/callback — both routes still live server-side, reachable only by direct URL, not linked from either app's current UI |
@@ -228,7 +229,7 @@
 | `app/admin/layout.tsx` | `/admin/*` | Admin sidebar nav with badge counts |
 | `app/admin/listings/page.tsx` | `/admin/listings` | Listing moderation queue: approve/reject |
 | `app/admin/events/page.tsx` | `/admin/events` | Event moderation queue |
-| `app/admin/users/page.tsx` | `/admin/users` | User list + role management |
+| `app/admin/users/page.tsx` | `/admin/users` | User list + role management + block/unblock |
 | `app/admin/reports/page.tsx` | `/admin/reports` | Abuse reports for flagged listings |
 | `app/admin/chatbot/page.tsx` | `/admin/chatbot` | (2026-10-09) Questions users asked the chatbot, newest first, searchable; shows city + the search it ran + result count (0 results in red) |
 | `app/admin/buyer-requests/page.tsx` | `/admin/buyer-requests` | (2026-07-27) Buyer-request moderation queue — mirrors `admin/reports/page.tsx`; review/restore flagged "Wanted" posts |
@@ -465,6 +466,8 @@ PATCH  /api/v1/admin/events/{id}/approve
 PATCH  /api/v1/admin/events/{id}/reject
 GET    /api/v1/admin/users               All users
 PATCH  /api/v1/admin/users/{id}/role     Set role to admin|user (cannot change own role)
+POST   /api/v1/admin/users/{id}/block    is_active=false + take down live listings/events/buyer requests (not self)
+POST   /api/v1/admin/users/{id}/unblock  is_active=true (removed content stays removed)
 POST   /api/v1/admin/seed-placeholder-images  Backfill placeholder images on photo-less listings; fixes old typo'd placeholders
 GET    /api/v1/admin/reports             All abuse reports
 GET    /api/v1/admin/banners             All city banners

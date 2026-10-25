@@ -123,6 +123,11 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 
 ## 6. Changelog (dated, most recent first — append here after notable sessions)
 
+### 2026-10-25 — Admin "Block user" button (spammer re-posting rejected content)
+- `POST /admin/users/{id}/block|unblock` + Block/Unblock button and "Blocked" badge on /admin/users. Block = `is_active=false` (existing flag: sessions, login, otp/verify already refuse it) + takes down live listings/events/buyer requests.
+- `otp/send` now refuses blocked phones *before* sending an SMS (previously only otp/verify refused, after the SMS was spent).
+- No IP/device ban (Indian mobile CGNAT would hit innocent users); a new phone number still gets through.
+
 ### 2026-10-23 — Unused-code cleanup + CPU alert root cause
 - Removed: 9 tracked one-off debug scripts in `frontend/` (admin_debug.js, audit.mjs, …); no-op `DELETE /auth/logout` (clients just drop tokens); `export` on 6 file-local consts/functions (knip); 7 disabled Azure alerts (`li-*` without `-in`) still pointing at the deleted pre-migration backend/plan/DB.
 - CPU alerts: all 6 `li-backend-cpu-high-in` firings in 30 days landed 5–10 min after a backend deploy (B1 = 1 vCPU; app start pins it ~95% for ~5 min vs a 5-min avg>80% rule) — not real load.

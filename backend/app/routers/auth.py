@@ -141,6 +141,13 @@ async def send_otp(request: Request, body: OtpSendRequest, db: AsyncSession = De
     if not await recaptcha.verify_otp_send(body.recaptcha_token):
         raise HTTPException(status_code=400, detail="Verification failed. Please try again.")
 
+    # Blocked by admin — refuse before spending an SMS (otp/verify would 403 anyway).
+    blocked = await db.execute(
+        select(User.id).where(User.phone == phone, User.deleted_at.is_(None), User.is_active == False)
+    )
+    if blocked.first():
+        raise HTTPException(status_code=403, detail="Your account has been deactivated. Contact support.")
+
     # Per-IP rate limit (above) stops a bot rotating through many phone numbers
     # to burn SMS credits — the per-phone limit below only protects one number.
 
