@@ -328,6 +328,63 @@ async def test_block_rejects_self_and_non_admin(admin_client, auth_client):
     assert (await ac.post(f"/api/v1/admin/users/{user.id}/block")).status_code == 403
 
 
+@pytest.mark.asyncio
+async def test_block_refuses_other_admins(admin_client, auth_client):
+    """An admin must be demoted first — blocking the shared admin-login account locks out the panel."""
+    _ac, user = auth_client
+    admin_ac, _admin = admin_client
+    assert (await admin_ac.patch(f"/api/v1/admin/users/{user.id}/role", json={"role": "admin"})).status_code == 200
+    assert (await admin_ac.post(f"/api/v1/admin/users/{user.id}/block")).status_code == 400
+    assert (await admin_ac.patch(f"/api/v1/admin/users/{user.id}/role", json={"role": "user"})).status_code == 200
+    assert (await admin_ac.post(f"/api/v1/admin/users/{user.id}/block")).status_code == 200
+
+
+# ── Role / delete user ────────────────────────────────────────────────────────
+
+@pytest.mark.asyncio
+async def test_make_and_remove_admin(admin_client, auth_client):
+    ac, user = auth_client
+    admin_ac, admin = admin_client
+    resp = await admin_ac.patch(f"/api/v1/admin/users/{user.id}/role", json={"role": "admin"})
+    assert resp.status_code == 200 and resp.json()["role"] == "admin"
+    assert (await ac.get("/api/v1/admin/users")).status_code == 200  # now has admin access
+    resp = await admin_ac.patch(f"/api/v1/admin/users/{user.id}/role", json={"role": "user"})
+    assert resp.status_code == 200 and resp.json()["role"] == "user"
+    assert (await ac.get("/api/v1/admin/users")).status_code == 403
+    # Guards: bad role, own role
+    assert (await admin_ac.patch(f"/api/v1/admin/users/{user.id}/role", json={"role": "owner"})).status_code == 400
+    assert (await admin_ac.patch(f"/api/v1/admin/users/{admin.id}/role", json={"role": "user"})).status_code == 400
+
+
+@pytest.mark.asyncio
+async def test_delete_user_removes_from_list_and_logs_out(admin_client, auth_client):
+    ac, user = auth_client
+    admin_ac, admin = admin_client
+    assert (await admin_ac.delete(f"/api/v1/admin/users/{admin.id}")).status_code == 400
+    assert (await admin_ac.delete(f"/api/v1/admin/users/{user.id}")).status_code == 200
+    users = (await admin_ac.get("/api/v1/admin/users")).json()
+    assert str(user.id) not in [u["id"] for u in users]
+    assert (await ac.get("/api/v1/auth/me")).status_code == 401
+    assert (await admin_ac.delete(f"/api/v1/admin/users/{user.id}")).status_code == 404
+
+
+# ── Admin login ───────────────────────────────────────────────────────────────
+
+@pytest.mark.asyncio
+async def test_admin_login(client, monkeypatch):
+    from app.core.config import settings
+    from app.core.security import hash_password
+    monkeypatch.setattr(settings, "ADMIN_USERNAME", "testadmin")
+    monkeypatch.setattr(settings, "ADMIN_PASSWORD_HASH", hash_password("right-pw"))
+    bad = await client.post("/api/v1/auth/admin-login", json={"username": "testadmin", "password": "wrong"})
+    assert bad.status_code == 401
+    ok = await client.post("/api/v1/auth/admin-login", json={"username": "testadmin", "password": "right-pw"})
+    assert ok.status_code == 200
+    token = ok.json()["access_token"]
+    resp = await client.get("/api/v1/admin/stats", headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 200
+
+
 # ── Reports list ──────────────────────────────────────────────────────────────
 
 @pytest.mark.asyncio

@@ -441,6 +441,9 @@ async def block_user(
     user = result.scalar_one_or_none()
     if not user:
         raise HTTPException(status_code=404, detail="User not found.")
+    if user.role == "admin":
+        # Blocking the shared admin-login account would lock everyone out of the panel.
+        raise HTTPException(status_code=400, detail="Remove admin role before blocking.")
     user.is_active = False
     listings = await db.execute(
         update(Listing)
