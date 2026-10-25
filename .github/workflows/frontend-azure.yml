@@ -34,7 +34,6 @@ jobs:
         env:
           NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
           NEXT_PUBLIC_OTP_DEBUG: ${{ secrets.NEXT_PUBLIC_OTP_DEBUG }}
-          NEXT_PUBLIC_GOOGLE_AUTH_ENABLED: ${{ secrets.NEXT_PUBLIC_GOOGLE_AUTH_ENABLED }}
           NEXT_PUBLIC_RECAPTCHA_SITE_KEY: ${{ secrets.NEXT_PUBLIC_RECAPTCHA_SITE_KEY }}
 
   close-staging:

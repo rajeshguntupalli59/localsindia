@@ -23,7 +23,7 @@
 | OTP phone verification (signup + forgot-password) | §11, §6-Auth | `routers/auth.py`, `services/msg91.py`, `services/recaptcha.py` (Google siteverify), `core/security.py` (setup_token, 10-min expiry) | `auth/login/page.tsx` + `lib/recaptcha.ts` (reCAPTCHA v3 widget), `mobile/src/screens/LoginScreen.tsx` + `mobile/src/lib/recaptcha.tsx` (same widget, run inside an invisible WebView) | `otp_requests`, `users` | POST /auth/otp/send (per-IP rate limited 3/min+6/hour, reCAPTCHA-gated — see 2026-08-25/31 PROJECT_MAP.md entries), POST /auth/otp/verify (returns `setup_token`, not full tokens), POST /auth/phone/check (15/min per IP) — **mobile reCAPTCHA needs a new EAS build + Play Store release to reach real devices; the currently-live build predates it** |
 | Password auth (2026-07-12) | §11, §6-Auth | `routers/auth.py`, `models/user.py` (`password_hash`, migration `a7b8c9d0e1f2`) | `auth/login/page.tsx`, `mobile/src/screens/LoginScreen.tsx` | `users` | POST /auth/password/set (signup or reset — same endpoint), POST /auth/login (phone+password, replaces the old passwordless `/auth/signin`) |
 | Biometric re-login (mobile only, pre-existing) | §11 | — | `mobile/src/hooks/useBiometric.ts`, `mobile/src/lib/storage.ts` (`biometric_enabled`), `App.tsx` (unlock on launch), `ProfileScreen.tsx` (toggle) | — (local SecureStore only) | — |
-| Google OAuth | §11, §6-Auth | `routers/auth.py`, `core/config.py` | `auth/login/page.tsx`, `auth/callback/page.tsx` | `users` | GET /auth/google, GET /auth/google/callback — **kept intentionally** (existing Google-only users would be locked out otherwise); Raj to notify users before eventual removal |
+| Google sign-in — REMOVED 2026-10-25 (Raj: no longer used). Backend `/auth/google*` routes, `GOOGLE_CLIENT_*` settings, web button + `/auth/callback` page all deleted; mobile UI removed 2026-06-18 before any Play release. Login is phone OTP signup + phone/password. | §11 | — | — | — | — |
 | JWT token refresh | §11 | `routers/auth.py`, `core/security.py` | `lib/api.ts` (auto-refresh) | — | POST /auth/refresh |
 | Chatbot questions log (2026-10-09: every message users send the chatbot is saved, admin can read/search them) | §6-Chat | `routers/chat.py` (`_log_question`, logs even when the bot is down), `routers/admin.py` (`GET /admin/chatbot-questions`), `models/chatbot_question.py` | `admin/chatbot/page.tsx` | `chatbot_questions` | GET /admin/chatbot-questions [ADMIN] |
 | Admin login | §6-Auth | `routers/auth.py` | `admin/login/page.tsx` | `users` (role=admin) | POST /auth/admin-login |
@@ -87,7 +87,6 @@
 | Admin block/unblock user | §6-Admin | `routers/admin.py`, `routers/auth.py` (otp/send refuses blocked phones) | `admin/users/page.tsx` | `users`, `listings`, `events`, `buyer_requests` | POST /admin/users/{id}/block, /unblock |
 | Seed placeholder images | §6-Admin | `routers/admin.py` | `admin/listings/page.tsx` (button) | `listing_images` | POST /admin/seed-placeholder-images |
 | Business soft-delete | §6-Businesses | `routers/businesses.py` | — | `businesses` | DELETE /businesses/{id} |
-| Google Sign-In (backend route, currently unreachable from either app's UI) | §11 | `routers/auth.py` | none currently — `mobile/src/screens/LoginScreen.tsx` had Google removed in an earlier pass (pre-2026-07-18, confirmed via grep: zero Google references anywhere in `mobile/src/`), and web's button is now flag-gated off (2026-07-18, `NEXT_PUBLIC_GOOGLE_AUTH_ENABLED` secret flipped to `false` — a real user still has a Google-only account with no phone on file, so the backend route is deliberately kept, not deleted, in case it needs to be flipped back on) | `users` | GET /auth/google?mobile=1, GET /auth/google/callback — both routes still live server-side, reachable only by direct URL, not linked from either app's current UI |
 | Global listing/category/post redirects | §8 | — | `app/listing/[id]/`, `app/category/[slug]/page.tsx`, `app/post/page.tsx` | — | — |
 | Global error boundary | §8-ErrorBoundary | — | `app/error.tsx` | — | — |
 | Mobile admin panel | §18-Mobile | `routers/admin.py` | `mobile/src/screens/AdminScreen.tsx` | `listings`, `users` | (same as web admin) |
@@ -116,7 +115,7 @@
 | File | What it does |
 |------|-------------|
 | `backend/app/main.py` | FastAPI app entry point; mounts 18 routers under /api/v1; CORS; /health endpoint; rate-limit exception handler |
-| `backend/app/core/config.py` | All env vars (DATABASE_URL, SECRET_KEY, MSG91, Cloudinary, Razorpay, Google OAuth, ANTHROPIC_API_KEY) |
+| `backend/app/core/config.py` | All env vars (DATABASE_URL, SECRET_KEY, MSG91, Cloudinary, Razorpay, ANTHROPIC_API_KEY) |
 | `backend/app/core/database.py` | Async PostgreSQL engine + `get_db()` session dependency |
 | `backend/app/core/security.py` | bcrypt hash/verify, JWT create/decode, 6-digit OTP generator |
 | `backend/app/core/deps.py` | `get_current_user()` and `get_current_admin()` FastAPI dependencies |
@@ -151,7 +150,7 @@
 
 | File | Prefix | What it handles |
 |------|--------|----------------|
-| `routers/auth.py` | `/api/v1/auth` | OTP login, Google OAuth, JWT refresh, profile update |
+| `routers/auth.py` | `/api/v1/auth` | OTP login, password login, JWT refresh, profile update |
 | `routers/cities.py` | `/api/v1/cities` | List cities, get by slug, get active sponsor banner for city (2026-07-20) |
 | `routers/categories.py` | `/api/v1/categories` | List top-level categories; `/catalog` = subcategories + questions |
 | `routers/listings.py` | `/api/v1` | Full listing CRUD + report + renew + fulfill + reviews |
@@ -216,8 +215,7 @@
 | `app/tickets/[id]/page.tsx` | `/tickets/[id]` | (new, 2026-07-18) Ticket display — event info + QR code image (`ticket.qr_image`, generated server-side, not client-side — see §12) |
 | `app/admin/events/scan/page.tsx` | `/admin/events/scan` | (new, 2026-07-18) Ticket check-in — camera scan via the browser's native `BarcodeDetector` API where supported, manual token-entry fallback everywhere else; no new npm dependency |
 | `app/[city]/launch/page.tsx` | `/[city]/launch` | City launch celebration page |
-| `app/auth/login/page.tsx` | `/auth/login` | Phone OTP + Google OAuth login (Suspense-wrapped) |
-| `app/auth/callback/page.tsx` | `/auth/callback` | Google OAuth redirect handler (Suspense-wrapped) |
+| `app/auth/login/page.tsx` | `/auth/login` | Phone OTP + password login (Suspense-wrapped) |
 | `app/profile/page.tsx` | `/profile` | User settings: name, language, city; Delete account button (2026-07-14); "My Tickets" menu entry added (2026-07-18) |
 | `app/account-deletion/page.tsx` | `/account-deletion` | Public page (no login required) explaining how to delete your account — in-app self-serve + email fallback for users without app access. Required by Google Play's account-deletion policy (2026-07-14) |
 | `app/profile/listings/page.tsx` | `/profile/listings` | My listings: manage, renew, fulfill, promote |
@@ -353,8 +351,6 @@ GET    /api/v1/auth/me                    Get current user [AUTH] — now includ
 PATCH  /api/v1/auth/me                    Update name/lang_pref [AUTH]
 DELETE /api/v1/auth/me                    Delete account (2026-07-14) — soft-deletes + anonymises user,
                                           cascades soft-delete to all their listings [AUTH]
-GET    /api/v1/auth/google?mobile=1        Redirect to Google OAuth (mobile=1 -> deep-link callback for RN app) — kept for existing Google-only users
-GET    /api/v1/auth/google/callback       Handle OAuth code -> JWT -> redirect frontend or localsindia:// deep link
 POST   /api/v1/auth/dev-login             Skip OTP (OTP_DEBUG=true only)
 ```
 

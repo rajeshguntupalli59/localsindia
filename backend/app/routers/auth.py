@@ -1,14 +1,11 @@
 import logging
 import re
 import secrets
-import urllib.parse
 from datetime import datetime, timezone, timedelta
 
-import httpx
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 
 logger = logging.getLogger(__name__)
-from fastapi.responses import RedirectResponse
 from sqlalchemy import select, func, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -411,110 +408,3 @@ async def delete_account(
     current_user.password_hash = None
     current_user.avatar_url = None
     await db.commit()
-
-
-# ─── Google OAuth ─────────────────────────────────────────────
-
-@router.get("/google")
-async def google_oauth_start(mobile: bool = False):
-    """Redirect user to Google's OAuth consent screen.
-    Pass ?mobile=1 from the mobile app to get a deep-link callback instead of web."""
-    if not settings.GOOGLE_CLIENT_ID:
-        raise HTTPException(status_code=503, detail="Google OAuth not configured — add GOOGLE_CLIENT_ID to .env")
-    params = {
-        "client_id": settings.GOOGLE_CLIENT_ID,
-        "redirect_uri": settings.GOOGLE_REDIRECT_URI,
-        "response_type": "code",
-        "scope": "openid email profile",
-        "access_type": "offline",
-        "prompt": "select_account",
-        "state": "mobile" if mobile else "web",
-    }
-    url = "https://accounts.google.com/o/oauth2/v2/auth?" + urllib.parse.urlencode(params)
-    return RedirectResponse(url)
-
-
-@router.get("/google/callback")
-async def google_oauth_callback(
-    code: str | None = None,
-    error: str | None = None,
-    state: str = "web",
-    db: AsyncSession = Depends(get_db),
-):
-    """Exchange Google code for user profile, upsert user, redirect to frontend with JWT.
-    When state='mobile', redirects to localsindia:// deep link for the mobile app."""
-    is_mobile = state == "mobile"
-    error_redirect = (
-        "localsindia://auth/callback?error=google_denied"
-        if is_mobile
-        else f"{settings.FRONTEND_URL}/auth/login?error=google_denied"
-    )
-
-    if error or not code:
-        return RedirectResponse(error_redirect)
-
-    try:
-        async with httpx.AsyncClient(timeout=10.0) as client:
-            token_res = await client.post(
-                "https://oauth2.googleapis.com/token",
-                data={
-                    "code": code,
-                    "client_id": settings.GOOGLE_CLIENT_ID,
-                    "client_secret": settings.GOOGLE_CLIENT_SECRET,
-                    "redirect_uri": settings.GOOGLE_REDIRECT_URI,
-                    "grant_type": "authorization_code",
-                },
-            )
-            token_data = token_res.json()
-            if "error" in token_data:
-                return RedirectResponse(error_redirect)
-
-            profile_res = await client.get(
-                "https://www.googleapis.com/oauth2/v2/userinfo",
-                headers={"Authorization": f"Bearer {token_data['access_token']}"},
-            )
-            g_user = profile_res.json()
-    except Exception:
-        return RedirectResponse(error_redirect)
-
-    email = g_user.get("email")
-    name = g_user.get("name") or email or "User"
-    avatar_url = g_user.get("picture")
-
-    if not email:
-        return RedirectResponse(error_redirect)
-
-    # Upsert user by email
-    result = await db.execute(select(User).where(User.email == email, User.deleted_at.is_(None)))
-    user = result.scalar_one_or_none()
-
-    if not user:
-        user = User(email=email, name=name, avatar_url=avatar_url)
-        db.add(user)
-    else:
-        if not user.is_active:
-            redirect = (
-                "localsindia://auth/callback?error=account_deactivated"
-                if is_mobile
-                else f"{settings.FRONTEND_URL}/auth/login?error=account_deactivated"
-            )
-            return RedirectResponse(redirect)
-        if avatar_url:
-            user.avatar_url = avatar_url
-        if name and user.name == user.email:
-            user.name = name
-
-    await db.commit()
-    await db.refresh(user)
-
-    access_token = create_access_token(str(user.id))
-    refresh = create_refresh_token(str(user.id))
-    name_enc = urllib.parse.quote(user.name or "")
-
-    if is_mobile:
-        return RedirectResponse(
-            f"localsindia://auth/callback?token={access_token}&refresh={refresh}&name={name_enc}"
-        )
-    return RedirectResponse(
-        f"{settings.FRONTEND_URL}/auth/callback?token={access_token}&refresh={refresh}&name={name_enc}"
-    )

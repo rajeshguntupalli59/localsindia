@@ -16,10 +16,7 @@ class Settings(BaseSettings):
     RECAPTCHA_SECRET_KEY: str = ""  # from google.com/recaptcha/admin — unset skips verification (dev/mock mode)
     RECAPTCHA_MIN_SCORE: float = 0.5
 
-    GOOGLE_CLIENT_ID: str = ""
-    GOOGLE_CLIENT_SECRET: str = ""
     BACKEND_URL: str = "http://localhost:8000"
-    GOOGLE_REDIRECT_URI: str = "http://localhost:8000/api/v1/auth/google/callback"
 
     CLOUDINARY_CLOUD_NAME: str = ""
     CLOUDINARY_API_KEY: str = ""
@@ -46,7 +43,8 @@ class Settings(BaseSettings):
 
     CRON_SECRET: str = ""  # shared secret for /cron/* endpoints called by GitHub Actions
 
-    model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
+    # extra=ignore: a leftover key in .env (e.g. retired GOOGLE_CLIENT_ID) must not crash startup
+    model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
 
 
 @lru_cache

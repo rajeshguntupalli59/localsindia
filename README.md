@@ -34,7 +34,7 @@ Telangana 28, Kerala 20, Puducherry 1 · ~35,300 real businesses · 27,040 tagge
                                   │ HTTPS  /api/v1/...
   ┌───────────────────────────────▼───────────────────────────────────────────┐
   │  BACKEND — FastAPI (Python, async), Azure App Service (Central India)      │
-  │  Auth (phone OTP / Google), listings, businesses, claims, search, admin.   │
+  │  Auth (phone OTP), listings, businesses, claims, search, admin.   │
   └──────┬──────────────┬──────────────┬──────────────┬───────────────┬───────┘
          ▼              ▼              ▼              ▼               ▼
     PostgreSQL     Cloudinary       MSG91          SendGrid       Google Gemini
@@ -63,7 +63,7 @@ Telangana 28, Kerala 20, Puducherry 1 · ~35,300 real businesses · 27,040 tagge
 - Browse a city → categories → neighbourhoods → a business page (address, phone, hours with *Open now*,
   map, **Call / Directions / Share** buttons, reviews).
 - Search listings and businesses; save listings; chat assistant.
-- Sign in with a phone OTP (or Google) to post a free listing, review a business, save searches, get alerts.
+- Sign in with a phone OTP to post a free listing, review a business, save searches, get alerts.
 
 **Business owners**
 - **Claim** a listing (SMS code, documents + shop photo, or email). Then edit details, see analytics, and use
@@ -138,7 +138,7 @@ event-venues, real-estate, shops`.
 
 | Feature | Backend | Frontend |
 |---|---|---|
-| Phone OTP / Google login | `routers/auth.py`, `services/msg91.py` | `app/auth/` |
+| Phone OTP login | `routers/auth.py`, `services/msg91.py` | `app/auth/` |
 | Listings (post → pending → approved) | `routers/listings.py`, `routers/admin.py` | `app/[city]/classifieds/`, `app/listing/` |
 | Business directory | `routers/businesses.py` | `app/[city]/businesses/`, `components/business-list/` |
 | Subcategories (types) + posting questions | `core/category_catalog.py` (the ONE list: 89 types, each with its own short tap-to-pick questions; GET /categories/catalog) | post/edit forms (`components/detail-questions/`), search filters (`components/answer-filters/`), type pages (`app/[city]/[category]/TypePage.tsx`); mobile `components/DetailQuestions.tsx` |
@@ -263,7 +263,7 @@ endpoints — not by editing the database by hand. Rows are soft-deleted (`delet
 
 - **Backend** (Azure App Service → Configuration; see `backend/app/core/config.py`): `DATABASE_URL`,
   `SECRET_KEY`, `MSG91_AUTH_KEY`, `MSG91_TEMPLATE_ID`, `MSG91_DLT_TEMPLATE_ID`, `RECAPTCHA_SECRET_KEY`,
-  `GOOGLE_CLIENT_ID/SECRET`, `CLOUDINARY_CLOUD_NAME/API_KEY/API_SECRET`, `FRONTEND_URL`, `BACKEND_URL`,
+  `CLOUDINARY_CLOUD_NAME/API_KEY/API_SECRET`, `FRONTEND_URL`, `BACKEND_URL`,
   `ADMIN_USERNAME`, `ADMIN_PASSWORD_HASH`, `ANTHROPIC_API_KEY`, `GOOGLE_AI_KEY`, `RAZORPAY_KEY_ID/SECRET`,
   `SENDGRID_API_KEY`, `EMAIL_FROM`, `CRON_SECRET`, `OTP_DEBUG` (false in production).
 - **GitHub Actions secrets**: Azure deploy credentials, `NEXT_PUBLIC_*` build settings, `ANTHROPIC_API_KEY`,

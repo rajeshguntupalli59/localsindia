@@ -41,7 +41,6 @@ Azure PostgreSQL         <--- 11 tables, full-text search, soft-delete everywher
 Cloudinary              <--- listing photos (upload/delete)
 MSG91                   <--- OTP SMS to Indian phones
 Razorpay                <--- featured listing payments
-Google OAuth            <--- social sign-in (web + mobile deep-link)
 ```
 
 **One-line summary of each tier:**
@@ -190,7 +189,6 @@ All secrets and config loaded from environment variables (`.env` in dev, Azure A
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | 15 minutes -- how long a login session lasts before auto-refresh |
 | `REFRESH_TOKEN_EXPIRE_DAYS` | 30 days -- how long until user must log in again |
 | `MSG91_AUTH_KEY` | Indian OTP SMS gateway -- if missing, OTPs print to console (dev mock) |
-| `GOOGLE_CLIENT_ID/SECRET` | Google OAuth app credentials |
 | `CLOUDINARY_*` | Image CDN credentials -- if missing, images save to /tmp (dev mock) |
 | `RAZORPAY_KEY_ID/SECRET` | Payment gateway -- Week 11-12 feature |
 | `ADMIN_USERNAME/PASSWORD_HASH` | Admin panel login (bcrypt hash) |
@@ -247,7 +245,7 @@ async def create_listing(
 |--------|------|----------------|
 | `id` | UUID | Unique identifier |
 | `phone` | String, unique | +91XXXXXXXXXX -- primary identifier for Indian users |
-| `email` | String, unique | From Google OAuth |
+| `email` | String, unique | Optional (legacy Google sign-in accounts) |
 | `name` | String | Display name shown on listings |
 | `avatar_url` | String | Profile photo URL |
 | `role` | Enum | `user` / `admin` / `business_owner` |
@@ -561,8 +559,6 @@ Migration `bc6a44aafa08`. Uploaded via `POST /upload/business-image/{business_id
 | GET | `/me` | Get current user profile — now includes `referral_code`, lazily generating and persisting one if the account predates this feature (2026-07-18) | Yes |
 | PATCH | `/me` | Update name or language preference | Yes |
 | DELETE | `/me` | Delete account — soft-deletes + anonymises the user (name/phone/email/password scrubbed) and cascades a soft-delete to all their listings (2026-07-14) | Yes |
-| GET | `/google?mobile=1` | Redirect to Google OAuth consent; `mobile=1` requests a deep-link callback for the React Native app instead of a web redirect | No |
-| GET | `/google/callback` | Exchange code -> tokens -> redirect frontend (`state=web`) or `localsindia://auth/callback` deep link (`state=mobile`) | No |
 
 ### Errors: `/api/v1/errors` (added 2026-07-14)
 
@@ -812,7 +808,7 @@ frontend/src/
 |   +-- layout.tsx         <- Root layout (fonts, providers, toaster)
 |   +-- page.tsx           <- Homepage (/)
 |   +-- [city]/            <- Dynamic city routes (/hyderabad/...)
-|   +-- auth/              <- Login, OAuth callback
+|   +-- auth/              <- Login
 |   +-- profile/           <- User profile, listings management
 |   +-- admin/             <- Admin panel
 |   +-- privacy/           <- Privacy policy
@@ -1071,19 +1067,7 @@ Two modes (tabs):
 - **Sign In**: Enter phone -> direct login (backend checks phone exists)
 - **Sign Up**: Enter phone -> OTP sent -> enter OTP -> enter name
 
-Google OAuth button (if `NEXT_PUBLIC_GOOGLE_AUTH_ENABLED=true`).
-
 Wrapped in Suspense because it reads URL params (`?mode=signup`).
-
----
-
-### `/auth/callback` — OAuth Return
-
-**File:** `app/auth/callback/page.tsx`
-
-After Google OAuth, Google redirects here with `?token=...&refresh=...&name=...`
-Reads tokens from URL params -> saves to localStorage -> redirects to homepage.
-Shows spinner while processing.
 
 ---
 
@@ -1514,24 +1498,9 @@ Backend only accepts requests from:
 
 Browser blocks any other origin from calling the API.
 
-### Google Sign-In — Mobile Deep Link (added — commit `f8327b3`; UI removed from mobile in a later, undated pass — see note below)
+### Google Sign-In
 
-**Status as of 2026-07-18: this flow has no UI entry point on either platform, but the backend routes are intentionally kept, not deleted.** `mobile/src/screens/LoginScreen.tsx` no longer has any Google references at all (confirmed via grep — a prior session already stripped it down to phone-only login; this doc had gone stale and still described the mobile flow as live until this pass). Web's "Continue with Google" button is now hidden too (2026-07-18) via the pre-existing `NEXT_PUBLIC_GOOGLE_AUTH_ENABLED` feature flag (GitHub Actions secret flipped `true` → `false`, no code changed) — Raj's call, prompted by wanting to move fully to phone+password/OTP. The backend `GET /auth/google` / `GET /auth/google/callback` routes are deliberately left in place rather than removed: at least one real production user signed up Google-only (no phone number on file, confirmed via the callback code — Google signup only ever sets `email`), so they have no forgot-password fallback if Google access were fully severed. Raj's chosen plan is to email that user directly rather than migrate them programmatically; keeping the route alive (even though unlinked from any UI) preserves a path back if needed, and costs nothing to leave dormant.
-
-The mechanics below describe how the flow worked when it had a mobile UI trigger — kept for reference in case it's ever re-enabled:
-
-The mobile app can't receive a normal HTTP redirect after OAuth, so it uses Expo's `WebBrowser` + a custom URL scheme:
-
-```
-1. Mobile app opens GET /api/v1/auth/google?mobile=1 in an in-app browser (expo-web-browser)
-2. Backend sets state=mobile, redirects to Google consent screen as usual
-3. User approves -> Google redirects to GET /api/v1/auth/google/callback?code=...&state=mobile
-4. Backend exchanges code for tokens, upserts user, then redirects to:
-     localsindia://auth/callback?token=...&refresh=...&name=...
-5. expo-web-browser detects the custom scheme, closes the in-app browser,
-   hands the URL back to LoginScreen.tsx, which parses the tokens and stores them
-```
-On error (`state=mobile` + Google denies): redirects to `localsindia://auth/callback?error=google_denied` instead of the web's `/auth/login?error=google_denied`.
+Google sign-in — REMOVED 2026-10-25 (Raj: no longer used). Backend `/auth/google*` routes, `GOOGLE_CLIENT_*` settings, web button + `/auth/callback` page all deleted; mobile UI removed 2026-06-18 before any Play release. Login is phone OTP signup + phone/password.
 
 ---
 
@@ -1771,7 +1740,6 @@ Side services (called from backend):
   MSG91       -> OTP SMS
   Cloudinary  -> Image CDN
   Razorpay    -> Payments
-  Google      -> OAuth
 ```
 
 ### Domain Routing
@@ -1804,7 +1772,7 @@ Side services (called from backend):
 | `models/event.py` | `events` table -- local events calendar |
 | `models/report.py` | `reports` table -- abuse/spam reports |
 | `models/otp_request.py` | `otp_requests` table -- OTP lifecycle (hash, attempts, expiry) |
-| `routers/auth.py` | Login, signup, OTP, Google OAuth, token refresh |
+| `routers/auth.py` | Login, signup, OTP, token refresh |
 | `routers/cities.py` | List cities, get city by slug |
 | `routers/categories.py` | List all categories |
 | `routers/listings.py` | Full listing CRUD, report, renew, fulfill, reviews |
@@ -1848,8 +1816,7 @@ Side services (called from backend):
 | `app/[city]/events/post/page.tsx` | Post event form |
 | `app/[city]/launch/page.tsx` | City launch celebration |
 | `app/auth/layout.tsx` | `noindex, follow` for all /auth pages |
-| `app/auth/login/page.tsx` | Phone OTP + Google OAuth login |
-| `app/auth/callback/page.tsx` | Google OAuth redirect handler |
+| `app/auth/login/page.tsx` | Phone OTP + password login |
 | `app/profile/layout.tsx` | `noindex, follow` for all /profile pages |
 | `app/profile/page.tsx` | User settings (name, language, city) |
 | `app/profile/listings/page.tsx` | My listings management |
@@ -1943,7 +1910,6 @@ Side services (called from backend):
 | `mobile/src/screens/InviteScreen.tsx` | (new, 2026-07-18) Fetches own `referral_code` via `getMe()`, builds `https://www.localsindia.com/{citySlug}?ref={code}`, shares it via the native `Share.share()` API (same pattern as `ListingDetailScreen.tsx`'s share button) |
 | `mobile/src/screens/CityPickerScreen.tsx` | Searchable modal; pulls from `/api/v1/cities`; callback pattern for city selection |
 | `mobile/src/screens/AdminScreen.tsx` | Admin panel ported to mobile: listing moderation queue, approve/reject, role management |
-| `mobile/src/screens/LoginScreen.tsx` (Google) | Also handles Google Sign-In via `expo-web-browser` deep-link flow — see §11 |
 | `mobile/eas.json` | EAS Build profiles: `development` (debug APK), `preview` (internal APK), `production` (AAB for Play Store, autoIncrement) |
 | `mobile/app.json` | Expo config; `extra.eas.projectId` links to EAS project `@rajeshguntupalli59/localsindia`; splash image + image-picker permission text configured for store builds; `googleServicesFile` (2026-07-16) → `mobile/google-services.json` (gitignored) — required client-side for push notifications to generate a device token |
 | `mobile/assets/icon.png`, `android-icon-foreground.png`, `favicon.png` | Real LocalsIndia logo — mark-only crop (turtle+pin symbol, no wordmark text since it'd be illegible at icon sizes) |
