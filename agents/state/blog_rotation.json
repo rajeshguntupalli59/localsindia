@@ -1,6 +1,6 @@
 {
-  "lastCityIndex": 16,
-  "lastCategoryIndex": 2,
+  "lastCityIndex": 17,
+  "lastCategoryIndex": 3,
   "history": [
     {
       "citySlug": "bangalore",
@@ -119,6 +119,13 @@
       "kind": "directory",
       "topicTemplateId": "directory-tiffin",
       "publishedAt": "2026-10-18T07:37:27Z"
+    },
+    {
+      "citySlug": "nellore",
+      "category": "vehicles",
+      "kind": "guide",
+      "topicTemplateId": "sell-vehicle-safely",
+      "publishedAt": "2026-10-25T07:58:41Z"
     }
   ]
 }
