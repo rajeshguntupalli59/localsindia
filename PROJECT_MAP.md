@@ -123,6 +123,9 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 
 ## 6. Changelog (dated, most recent first — append here after notable sessions)
 
+### 2026-10-28 — Listing review: friendly sign-in instead of raw 401
+- `ListingDetailClient.tsx` review submit used raw fetch → stale token showed "Invalid or expired token.". Now uses `api.listings.submitReview` (auto-refresh / "Session expired" + login); no token → toast + `/auth/login?redirect=<listing>`.
+
 ### 2026-10-28 — Homepage redesign (bright & colourful)
 - `frontend/src/app/HomeClient.tsx`: dark hero → warm light hero; 8 colourful category tiles in the hero; fact chips (live city count, languages, free, 0% commission — no hardcoded business count); new "Popular cities" gradient cards (hardcoded slug list, filtered by live `cities`); "A day in your city" section removed; "Why LocalsIndia" moved below fresh listings.
 - 3 new i18n keys (`home.browseLabel/popularTitle/popularSub`) in all 5 languages. City page `/[city]` unchanged.

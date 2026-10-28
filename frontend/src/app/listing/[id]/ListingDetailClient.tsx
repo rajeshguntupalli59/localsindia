@@ -490,16 +490,16 @@ export default function ListingDetailClient({ id, initialListing = null }: { id:
                     onClick={async () => {
                       if (!reviewRating) return;
                       const token = localStorage.getItem('access_token');
-                      if (!token) { toast.error('Sign in to rate'); return; }
+                      if (!token) {
+                        toast.error('Please sign in to write a review');
+                        router.push(`/auth/login?redirect=${encodeURIComponent(window.location.pathname)}`);
+                        return;
+                      }
                       setSubmittingReview(true);
                       try {
-                        const r = await fetch(`${API_BASE}/api/v1/listings/${id}/reviews`, {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-                          body: JSON.stringify({ rating: reviewRating, body: reviewBody.trim() || null }),
-                        });
-                        if (!r.ok) { const e = await r.json(); throw new Error(e.detail ?? 'Failed'); }
-                        const newReview: ListingReview = await r.json();
+                        // Via api.ts so an expired token is refreshed (or the user is
+                        // sent to sign in) instead of showing the raw 401 detail.
+                        const newReview = await api.listings.submitReview(id, reviewRating, reviewBody.trim() || null, token);
                         setReviews(prev => [newReview, ...prev]);
                         setReviewRating(0);
                         setReviewBody('');
