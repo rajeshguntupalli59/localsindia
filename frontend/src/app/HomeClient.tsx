@@ -8,7 +8,7 @@ import {
   Utensils, Home, Briefcase, Car,
   Smartphone, Calendar, Store, GraduationCap,
   MessageCircle, Languages, Layers,
-  LocateFixed, Loader2, CheckCircle2,
+  LocateFixed, Loader2, CheckCircle2, Sparkles, Landmark,
   type LucideIcon,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -24,7 +24,6 @@ import { geolocateAndMatch } from '@/lib/geolocate';
 // ─── types ───────────────────────────────────────────────────
 interface CategoryDef { icon: LucideIcon; name: string; slug: string; color: string; accent: string; key: TranslationKey }
 interface WhyDef { icon: LucideIcon; title: string; body: string }
-interface DaySection { time: TranslationKey; tagline: TranslationKey; slugs: string[] }
 type GeoStatus = 'idle' | 'locating' | 'located' | 'denied' | 'failed';
 
 // ─── static data ─────────────────────────────────────────────
@@ -39,14 +38,17 @@ const CATEGORIES: CategoryDef[] = [
   { icon: GraduationCap, name: 'Education',     slug: 'education',    color: 'text-white bg-indigo-500',     accent: 'bg-indigo-500', key: 'categories.education' },
 ];
 
-// Category browsing organized around actual daily life instead of a flat
-// icon grid — the same 8 categories, grouped by when someone typically
-// needs them, each with a one-line editorial frame.
-const DAY_SECTIONS: DaySection[] = [
-  { time: 'home.morning', tagline: 'home.morningTag', slugs: ['tiffin', 'pg-roommate'] },
-  { time: 'home.midday',  tagline: 'home.middayTag',  slugs: ['jobs', 'electronics'] },
-  { time: 'home.evening', tagline: 'home.eveningTag', slugs: ['events', 'businesses'] },
-  { time: 'home.anytime', tagline: 'home.anytimeTag', slugs: ['vehicles', 'education'] },
+// Busiest cities, shown as the "Popular cities" row. Only slugs present in the
+// live `cities` list are rendered, so a deactivated city just drops out.
+const POPULAR_CITIES: { slug: string; gradient: string }[] = [
+  { slug: 'hyderabad',     gradient: 'from-orange-500 to-rose-500' },
+  { slug: 'bengaluru',     gradient: 'from-emerald-500 to-teal-600' },
+  { slug: 'chennai',       gradient: 'from-sky-500 to-indigo-600' },
+  { slug: 'kochi',         gradient: 'from-teal-500 to-cyan-600' },
+  { slug: 'vijayawada',    gradient: 'from-amber-500 to-orange-600' },
+  { slug: 'visakhapatnam', gradient: 'from-blue-500 to-violet-600' },
+  { slug: 'coimbatore',    gradient: 'from-fuchsia-500 to-purple-600' },
+  { slug: 'mysuru',        gradient: 'from-rose-500 to-pink-600' },
 ];
 
 const POPULAR_TAGS = ['Tiffin Service', 'PG for Boys', 'Used Laptop', 'Honda Activa', 'Home Tutor', '2BHK Flat'];
@@ -96,10 +98,16 @@ export default function HomePage() {
 
   // Real, live counts — never a hardcoded number that can drift from what's actually active
   const cityCount = cities.length;
-  const STATS: [string, string][] = [
-    [cityCount > 0 ? `${cityCount}+` : '—', 'Cities'],
-    [String(LANGUAGES.length), 'Languages'],
+  const FACTS: { icon: LucideIcon; label: string }[] = [
+    ...(cityCount > 0 ? [{ icon: MapPin, label: `${cityCount}+ cities` }] : []),
+    { icon: Languages, label: `${LANGUAGES.length} languages` },
+    { icon: Sparkles, label: 'Free to post' },
+    { icon: MessageCircle, label: '0% commission' },
   ];
+  const popularCities = POPULAR_CITIES.flatMap(p => {
+    const city = cities.find(c => c.slug === p.slug);
+    return city ? [{ ...city, gradient: p.gradient }] : [];
+  });
   const WHY_US = buildWhyUs(cityCount > 0 ? cityCount : 150, t);
 
   // Cycle hero category words
@@ -252,12 +260,16 @@ export default function HomePage() {
       {/* ══════════════════════════════════════════════
           HERO
       ══════════════════════════════════════════════ */}
-      <section className="relative overflow-hidden bg-[#0D0F1C] py-20 md:py-28">
-        {/* Atmospheric glows */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-[#FFF4E5] via-[#FFF9F2] to-[#F9FAFB] pt-14 pb-10 md:pt-20 md:pb-14">
+        {/* Warm saffron blobs + faint dot texture */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
-          <div className="absolute -right-32 -top-32 h-[500px] w-[500px] rounded-full bg-orange-500/10 blur-[100px]" />
-          <div className="absolute -bottom-20 -left-24 h-[380px] w-[380px] rounded-full bg-violet-600/[0.08] blur-[80px]" />
-          <div className="absolute left-1/2 top-1/3 h-[200px] w-[200px] -translate-x-1/2 rounded-full bg-blue-500/[0.05] blur-[60px]" />
+          <div className="absolute -right-24 -top-28 h-[420px] w-[420px] rounded-full bg-orange-300/30 blur-[90px]" />
+          <div className="absolute -left-28 top-1/3 h-[320px] w-[320px] rounded-full bg-amber-200/40 blur-[80px]" />
+          <div className="absolute right-1/4 bottom-0 h-[240px] w-[240px] rounded-full bg-rose-200/30 blur-[70px]" />
+          <div
+            className="absolute inset-0 opacity-[0.35]"
+            style={{ backgroundImage: 'radial-gradient(rgba(247,146,30,0.18) 1px, transparent 1px)', backgroundSize: '22px 22px' }}
+          />
           {/* Extra glow that pulses when city is located */}
           <AnimatePresence>
             {geoStatus === 'located' && (
@@ -267,7 +279,7 @@ export default function HomePage() {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 1 }}
                 className="absolute left-0 top-0 h-full w-full"
-                style={{ background: 'radial-gradient(ellipse at 30% 50%, rgba(249,115,22,0.06) 0%, transparent 65%)' }}
+                style={{ background: 'radial-gradient(ellipse at 30% 50%, rgba(249,115,22,0.10) 0%, transparent 65%)' }}
               />
             )}
           </AnimatePresence>
@@ -281,7 +293,7 @@ export default function HomePage() {
             className="max-w-3xl"
           >
             {/* ── Dynamic Headline ──────────────────────── */}
-            <h1 className="text-4xl sm:text-5xl md:text-[3.75rem] font-extrabold text-white
+            <h1 className="text-4xl sm:text-5xl md:text-[3.75rem] font-extrabold text-slate-900
               leading-[1.08] tracking-[-0.03em] mb-5">
               {lang !== 'en' ? t('hero.headline1') : 'Find '}
               {lang === 'en' && <AnimatePresence mode="wait" initial={false}>
@@ -302,7 +314,7 @@ export default function HomePage() {
                   initial={{ opacity: 0, y: 18 }}
                   animate={{ opacity: 1, y: 0, transition: SPRING }}
                   exit={{ opacity: 0, y: -10, transition: { duration: 0.16, ease: 'easeIn' } }}
-                  className="text-orange-500 inline-block"
+                  className="text-[#E07B0A] inline-block"
                 >
                   {cityName ? (lang === 'en' ? `in ${cityName}` : t('hero.inCity', { city: cityName })) : t('hero.inYourCity')}
                 </motion.span>
@@ -310,7 +322,7 @@ export default function HomePage() {
             </h1>
 
             {/* Sub-text */}
-            <p className="text-base md:text-lg text-slate-400 max-w-lg leading-relaxed mb-10">
+            <p className="text-base md:text-lg text-slate-600 max-w-lg leading-relaxed mb-8">
               {t('hero.sub')}
             </p>
 
@@ -319,15 +331,15 @@ export default function HomePage() {
               onSubmit={handleSearch}
               animate={geoStatus === 'located' ? {
                 boxShadow: [
-                  '0 24px 64px -12px rgba(0,0,0,0.55), 0 0 0 1px rgba(0,0,0,0.07)',
-                  '0 24px 64px -12px rgba(247,146,30,0.24), 0 0 0 2px rgba(247,146,30,0.20)',
-                  '0 24px 64px -12px rgba(0,0,0,0.55), 0 0 0 1px rgba(0,0,0,0.07)',
+                  '0 18px 48px -14px rgba(224,123,10,0.28), 0 0 0 1px rgba(15,23,42,0.08)',
+                  '0 18px 48px -14px rgba(247,146,30,0.40), 0 0 0 2px rgba(247,146,30,0.35)',
+                  '0 18px 48px -14px rgba(224,123,10,0.28), 0 0 0 1px rgba(15,23,42,0.08)',
                 ],
               } : {}}
               transition={{ duration: 1.1, ease: 'easeOut' }}
               className="flex max-w-2xl w-full overflow-hidden rounded-full bg-white
-                shadow-[inset_0_2px_6px_rgba(0,0,0,0.06),0_24px_64px_-12px_rgba(0,0,0,0.50),0_0_0_1px_rgba(0,0,0,0.06)]
-                focus-within:shadow-[inset_0_2px_6px_rgba(0,0,0,0.05),0_24px_64px_-12px_rgba(247,146,30,0.18),0_0_0_2px_rgba(247,146,30,0.22)]
+                shadow-[0_18px_48px_-14px_rgba(224,123,10,0.28),0_0_0_1px_rgba(15,23,42,0.08)]
+                focus-within:shadow-[0_18px_48px_-14px_rgba(247,146,30,0.40),0_0_0_2px_rgba(247,146,30,0.45)]
                 transition-shadow duration-300"
             >
               {/* ── Segment 1: City trigger ─────────────────── */}
@@ -474,9 +486,9 @@ export default function HomePage() {
                   exit={{ opacity: 0, y: -4 }}
                   transition={{ duration: 0.18 }}
                   className={`mt-3 text-xs font-medium flex items-center gap-1.5 ${
-                    geoStatus === 'located' ? 'text-emerald-400' :
-                    geoStatus === 'denied'  ? 'text-red-400/80' :
-                    'text-amber-400/80'
+                    geoStatus === 'located' ? 'text-emerald-700' :
+                    geoStatus === 'denied'  ? 'text-red-600' :
+                    'text-amber-700'
                   }`}
                 >
                   {geoStatus === 'located' && (
@@ -491,8 +503,8 @@ export default function HomePage() {
             <div className="flex flex-wrap items-center gap-x-2 gap-y-2 mt-8">
               {/* Label */}
               <span className="flex items-center gap-1.5 shrink-0 mr-1
-                text-[11px] font-medium text-slate-400/80">
-                <span className="w-[3px] h-[3px] rounded-full bg-slate-400/50 inline-block" />
+                text-[11px] font-semibold text-slate-500">
+                <span className="w-[5px] h-[5px] rounded-full bg-[#F7921E] inline-block animate-pulse" />
                 Trending
               </span>
               {POPULAR_TAGS.map((tag, i) => (
@@ -510,9 +522,10 @@ export default function HomePage() {
                   whileTap={{ scale: 0.94 }}
                   className="px-3.5 py-[11px] rounded-full
                     text-[11.5px] font-medium leading-none
-                    text-slate-300 bg-white/[0.07] border border-white/[0.12]
-                    hover:bg-[#F7921E]/[0.14] hover:border-[#F7921E]/[0.28]
-                    hover:text-[#F7921E]
+                    text-slate-700 bg-white/80 border border-orange-100
+                    shadow-[0_1px_2px_rgba(15,23,42,0.04)]
+                    hover:bg-[#FEF3E2] hover:border-orange-200
+                    hover:text-[#C2410C]
                     transition-all duration-180 select-none"
                 >
                   {tag}
@@ -521,24 +534,133 @@ export default function HomePage() {
             </div>
           </motion.div>
 
-          {/* ── Stats row ── */}
-          <motion.div
+          {/* ── Category tiles — the colourful first thing you can tap ── */}
+          <div className="mt-12">
+            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500 mb-4">
+              {t('home.browseLabel')}
+            </p>
+            <motion.div
+              initial="hidden"
+              animate="show"
+              variants={{ hidden: {}, show: { transition: { staggerChildren: 0.04, delayChildren: 0.25 } } }}
+              className="grid grid-cols-4 md:grid-cols-8 gap-2.5 sm:gap-3"
+            >
+              {CATEGORIES.map(cat => {
+                const Icon = cat.icon;
+                return (
+                  <motion.button
+                    key={cat.slug}
+                    type="button"
+                    variants={{ hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0, transition: { duration: 0.3, ease: [0.22, 1, 0.36, 1] } } }}
+                    whileHover={{ y: -3 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => {
+                      const p = new URLSearchParams({ category: cat.slug });
+                      if (citySlug) p.set('city', citySlug);
+                      router.push(`/search?${p.toString()}`);
+                    }}
+                    className="group flex flex-col items-center gap-2 px-1.5 py-3.5 sm:py-4 rounded-2xl
+                      bg-white border border-slate-100 cursor-pointer
+                      shadow-[0_4px_16px_-6px_rgba(15,23,42,0.10)]
+                      hover:border-orange-200 hover:shadow-[0_10px_24px_-8px_rgba(224,123,10,0.30)]
+                      transition-[border-color,box-shadow] duration-200"
+                  >
+                    <span className={`w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center ${cat.color}
+                      shadow-[inset_0_1px_0_rgba(255,255,255,0.25)] group-hover:scale-105 transition-transform duration-200`}>
+                      <Icon className="w-5 h-5 sm:w-[22px] sm:h-[22px]" strokeWidth={2} aria-hidden />
+                    </span>
+                    <span className="text-[11.5px] sm:text-[12.5px] font-semibold text-slate-700 text-center leading-tight">
+                      {t(cat.key)}
+                    </span>
+                  </motion.button>
+                );
+              })}
+            </motion.div>
+          </div>
+
+          {/* ── Fact strip — real numbers only ── */}
+          <motion.ul
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.3, duration: 0.45 }}
-            className="flex flex-wrap gap-x-14 gap-y-6 mt-20 pt-10 border-t border-white/[0.07]"
+            transition={{ delay: 0.5, duration: 0.4 }}
+            className="flex flex-wrap gap-2 sm:gap-3 mt-8"
           >
-            {STATS.map(([num, label]) => (
-              <div key={num} className="flex flex-col gap-2">
-                <div className="text-[2.5rem] sm:text-[2.75rem] font-black text-white tracking-[-0.04em] leading-none">{num}</div>
-                <div className="text-[12px] font-medium text-slate-500 leading-none">
-                  {label}
-                </div>
-              </div>
+            {FACTS.map(({ icon: Icon, label }) => (
+              <li key={label} className="flex items-center gap-1.5 px-3.5 py-2 rounded-full
+                bg-white/70 border border-slate-200/70 text-[12.5px] font-semibold text-slate-700">
+                <Icon className="w-3.5 h-3.5 text-[#E07B0A]" strokeWidth={2.4} aria-hidden />
+                {label}
+              </li>
             ))}
-          </motion.div>
+          </motion.ul>
         </div>
       </section>
+
+      {/* ══════════════════════════════════════════════
+          POPULAR CITIES — colourful shortcuts into the busiest cities
+      ══════════════════════════════════════════════ */}
+      {popularCities.length > 0 && (
+        <section className="bg-[#F9FAFB] pt-6 pb-16 sm:pb-20">
+          <div className="page-wrap">
+            <div className="flex items-end justify-between gap-4 mb-6 sm:mb-8">
+              <div>
+                <h2 className="text-[1.6rem] sm:text-[2rem] font-extrabold text-slate-900 tracking-[-0.03em] leading-tight">
+                  {t('home.popularTitle')}
+                </h2>
+                <p className="text-[14px] text-slate-500 mt-1.5">{t('home.popularSub')}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowCityPicker(true)}
+                className="hidden sm:flex items-center gap-1 shrink-0 text-[13px] font-semibold text-[#C2410C]
+                  hover:text-[#9A3412] transition-colors duration-150 cursor-pointer"
+              >
+                {t('nav.cities')}
+                <ArrowRight className="w-3.5 h-3.5" strokeWidth={2.4} aria-hidden />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+              {popularCities.map((city, i) => (
+                <motion.div
+                  key={city.slug}
+                  initial={{ opacity: 0, y: 14 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-30px' }}
+                  transition={{ duration: 0.32, delay: i * 0.04, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <Link
+                    href={`/${city.slug}`}
+                    className={`group relative flex flex-col justify-between h-[112px] sm:h-[132px] p-4 sm:p-5
+                      rounded-2xl overflow-hidden bg-gradient-to-br ${city.gradient} text-white
+                      shadow-[0_10px_24px_-12px_rgba(15,23,42,0.45)]
+                      hover:shadow-[0_16px_32px_-12px_rgba(15,23,42,0.55)] hover:-translate-y-0.5
+                      transition-[transform,box-shadow] duration-200`}
+                  >
+                    <Landmark
+                      className="absolute -right-3 -bottom-3 w-24 h-24 text-white/15 group-hover:scale-110 transition-transform duration-300"
+                      strokeWidth={1.5}
+                      aria-hidden
+                    />
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/80">
+                      {city.state}
+                    </span>
+                    <span className="relative flex items-center gap-1.5 text-[17px] sm:text-[19px] font-extrabold tracking-[-0.02em]">
+                      {city.name}
+                      <ArrowRight className="w-4 h-4 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200" strokeWidth={2.4} aria-hidden />
+                    </span>
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ══════════════════════════════════════════════
+          FRESH LISTINGS
+      ══════════════════════════════════════════════ */}
+      <FreshListingsSection />
 
       {/* ══════════════════════════════════════════════
           WHY LOCALSINDIA — the direct answer, not a badge grid
@@ -589,81 +711,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ══════════════════════════════════════════════
-          A DAY IN YOUR CITY — categories grouped by when you
-          actually need them, not a flat icon grid
-      ══════════════════════════════════════════════ */}
-      <section className="bg-[#F9FAFB] py-24 sm:py-32 border-b border-slate-100/80">
-        <div className="page-wrap">
-          <div className="mb-14 sm:mb-16">
-            <h2 className="text-[2rem] sm:text-[2.5rem] font-extrabold text-slate-900
-              tracking-[-0.04em] leading-tight">
-              {cityName ? t('home.dayTitle', { city: cityName }) : t('home.dayTitleDefault')}
-            </h2>
-            <p className="text-[14px] text-slate-400 mt-3 font-normal leading-relaxed">
-              {t('home.daySub')}
-            </p>
-          </div>
-
-          <div className="space-y-10 sm:space-y-12">
-            {DAY_SECTIONS.map((section, si) => (
-              <motion.div
-                key={section.time}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-30px' }}
-                transition={{ duration: 0.36, delay: si * 0.05, ease: [0.22, 1, 0.36, 1] }}
-                className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-5 md:gap-8 items-start"
-              >
-                {/* Time label — the organizing device */}
-                <div className="md:pt-2">
-                  <h3 className="text-[13px] font-bold uppercase tracking-[0.1em]" style={{ color: 'var(--li-primary)' }}>
-                    {t(section.time)}
-                  </h3>
-                  <p className="text-[13.5px] text-slate-400 mt-1">{t(section.tagline)}</p>
-                </div>
-
-                {/* The 2 categories for this time of day */}
-                <div className="grid grid-cols-2 gap-4">
-                  {section.slugs.map(slug => {
-                    const cat = CATEGORIES.find(c => c.slug === slug);
-                    if (!cat) return null;
-                    const Icon = cat.icon;
-                    return (
-                      <button
-                        key={slug}
-                        type="button"
-                        onClick={() => {
-                          const p = new URLSearchParams({ category: slug });
-                          if (citySlug) p.set('city', citySlug);
-                          router.push(`/search?${p.toString()}`);
-                        }}
-                        className="group flex items-center gap-3.5 p-5 rounded-2xl bg-white border border-slate-100
-                          text-left transition-all duration-200 hover:-translate-y-0.5"
-                        style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.04)' }}
-                      >
-                        <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${cat.color}`}>
-                          <Icon className="w-5 h-5" strokeWidth={2} />
-                        </div>
-                        <span className="text-[14.5px] font-semibold text-slate-800 group-hover:text-[#F7921E] transition-colors duration-200">
-                          {t(cat.key)}
-                        </span>
-                        <ArrowRight className="w-3.5 h-3.5 text-slate-300 ml-auto shrink-0
-                          opacity-0 group-hover:opacity-100 -translate-x-1 group-hover:translate-x-0 transition-all duration-200" />
-                      </button>
-                    );
-                  })}
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════════
-          FRESH LISTINGS
-      ══════════════════════════════════════════════ */}
-      <FreshListingsSection />
 
       {/* ══════════════════════════════════════════════
           CITY PICKER MODAL

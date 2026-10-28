@@ -121,6 +121,9 @@ export interface UIDict {
     postFree: string;
     browse: string;
     browseDefault: string;
+    browseLabel: string;
+    popularTitle: string;
+    popularSub: string;
   };
 }
 
@@ -166,6 +169,9 @@ const DICTS: Record<LangCode, UIDict> = {
       postFree: "Post for free",
       browse: "Browse {city}",
       browseDefault: "Browse your city",
+      browseLabel: "Browse by category",
+      popularTitle: "Popular cities",
+      popularSub: "Jump straight into the busiest neighbourhoods on LocalsIndia",
     },
   },
   te: {
@@ -208,6 +214,9 @@ const DICTS: Record<LangCode, UIDict> = {
       postFree: "ఉచితంగా పోస్ట్ చేయండి",
       browse: "{city} చూడండి",
       browseDefault: "మీ నగరం చూడండి",
+      browseLabel: "వర్గం వారీగా చూడండి",
+      popularTitle: "ప్రముఖ నగరాలు",
+      popularSub: "LocalsIndia లో ఎక్కువ సందడిగా ఉన్న ప్రాంతాలకు నేరుగా వెళ్ళండి",
     },
   },
   ta: {
@@ -250,6 +259,9 @@ const DICTS: Record<LangCode, UIDict> = {
       postFree: "இலவசமாக இடுங்கள்",
       browse: "{city} பாருங்கள்",
       browseDefault: "உங்கள் நகரைப் பாருங்கள்",
+      browseLabel: "வகை வாரியாகப் பாருங்கள்",
+      popularTitle: "பிரபல நகரங்கள்",
+      popularSub: "LocalsIndia-வில் அதிக செயல்பாடுள்ள பகுதிகளுக்கு நேரடியாகச் செல்லுங்கள்",
     },
   },
   kn: {
@@ -292,6 +304,9 @@ const DICTS: Record<LangCode, UIDict> = {
       postFree: "ಉಚಿತವಾಗಿ ಹಾಕಿ",
       browse: "{city} ನೋಡಿ",
       browseDefault: "ನಿಮ್ಮ ನಗರ ನೋಡಿ",
+      browseLabel: "ವರ್ಗದ ಪ್ರಕಾರ ನೋಡಿ",
+      popularTitle: "ಜನಪ್ರಿಯ ನಗರಗಳು",
+      popularSub: "LocalsIndia ನಲ್ಲಿ ಹೆಚ್ಚು ಚಟುವಟಿಕೆಯ ಪ್ರದೇಶಗಳಿಗೆ ನೇರವಾಗಿ ಹೋಗಿ",
     },
   },
   ml: {
@@ -334,6 +349,9 @@ const DICTS: Record<LangCode, UIDict> = {
       postFree: "സൗജന്യമായി പോസ്റ്റ് ചെയ്യുക",
       browse: "{city} കാണുക",
       browseDefault: "നിങ്ങളുടെ നഗരം കാണുക",
+      browseLabel: "വിഭാഗം അനുസരിച്ച് കാണുക",
+      popularTitle: "ജനപ്രിയ നഗരങ്ങൾ",
+      popularSub: "LocalsIndia-യിലെ ഏറ്റവും സജീവമായ പ്രദേശങ്ങളിലേക്ക് നേരിട്ട് പോകൂ",
     },
   },
 };

@@ -123,6 +123,11 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 
 ## 6. Changelog (dated, most recent first — append here after notable sessions)
 
+### 2026-10-28 — Homepage redesign (bright & colourful)
+- `frontend/src/app/HomeClient.tsx`: dark hero → warm light hero; 8 colourful category tiles in the hero; fact chips (live city count, languages, free, 0% commission — no hardcoded business count); new "Popular cities" gradient cards (hardcoded slug list, filtered by live `cities`); "A day in your city" section removed; "Why LocalsIndia" moved below fresh listings.
+- 3 new i18n keys (`home.browseLabel/popularTitle/popularSub`) in all 5 languages. City page `/[city]` unchanged.
+- Note: local dev must run on port 3000 — prod API CORS rejects other ports (cities/listings silently empty).
+
 ### 2026-10-25 — Admin "Block user" button (spammer re-posting rejected content)
 - `POST /admin/users/{id}/block|unblock` + Block/Unblock button and "Blocked" badge on /admin/users. Block = `is_active=false` (existing flag: sessions, login, otp/verify already refuse it) + takes down live listings/events/buyer requests.
 - `otp/send` now refuses blocked phones *before* sending an SMS (previously only otp/verify refused, after the SMS was spent).
