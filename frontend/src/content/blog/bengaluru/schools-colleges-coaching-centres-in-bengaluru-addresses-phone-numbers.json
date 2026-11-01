@@ -1,0 +1,219 @@
+{
+  "schemaVersion": 2,
+  "kind": "directory",
+  "city": "Bengaluru",
+  "citySlug": "bengaluru",
+  "state": "Karnataka",
+  "slug": "schools-colleges-coaching-centres-in-bengaluru-addresses-phone-numbers",
+  "category": "education",
+  "topicTemplateId": "directory-education",
+  "title": "Schools, Colleges & Coaching Centres in Bengaluru: Addresses & Phone Numbers",
+  "metaDescription": "20 schools, colleges & coaching centres in Bengaluru with addresses and phone numbers, plus what to check before you visit.",
+  "intro": "Choosing the right school, college, or coaching centre in Bengaluru can feel overwhelming — there are so many options across different areas, and it's hard to know what actually matters versus marketing talk. This guide walks you through the practical steps to evaluate institutions, what documents to ask for, and how to make the most of your visits.",
+  "sections": [
+    {
+      "heading": "Before You Visit: Do Your Homework",
+      "body": "Start by making a shortlist based on what matters to your family — location (commute time is real), academic focus (board, curriculum type), fees, and facilities. Ask in your local WhatsApp groups or neighborhood communities for honest feedback from parents whose kids actually study there. Look for institutions listed on LocalsIndia's directory or other hyperlocal resources — you'll often find direct contact numbers and addresses. Always call ahead before visiting; hours change, admission schedules vary, and you don't want to waste a trip. Ask the person on the phone what documents you need to bring (birth certificate, address proof, previous school records) and whether you need an appointment. Write down 3–4 questions before you call so you don't forget them in the moment."
+    },
+    {
+      "heading": "What to Check During Your Visit",
+      "body": "When you visit, go during regular school hours if possible — you'll see actual classroom activity, student behavior, and the real vibe of the place. Check the basics: Are classrooms clean and well-lit? Is there safe drinking water? Are toilets clean and separate for boys and girls? Ask to see the playground, library, laboratory (if it's a science stream), and computer lab. For coaching centres, ask how many students are in a batch — overcrowded batches often mean less individual attention. Don't just listen to the staff pitch; observe. Are teachers interacting with students or just lecturing? Do students look engaged or stressed? For colleges, ask about placement support, internship opportunities, and whether they can show you a sample placement report. Look for safety measures: Is there a security guard? Are there CCTV cameras in common areas? For girls especially, ask about anti-harassment policies and whether they're actually enforced."
+    },
+    {
+      "heading": "Questions to Ask That Matter",
+      "body": "Beyond the brochure, ask about fee structure — is tuition the only cost, or are there hidden charges for activities, uniforms, transport, or exams? Request a written fee breakdown. For schools, ask about the teacher-to-student ratio, teacher qualifications, and staff turnover (high turnover can indicate problems). Inquire about the curriculum — does it match what you want (board exams, competitive exams, skill-based learning)? Ask how they handle student grievances and parent concerns — do they have a formal process or is it informal? For colleges, ask about hostel facilities if needed, fee waivers or scholarships, and whether they have tie-ups with industry for internships. For coaching centres, ask about their refund policy, batch size, whether they offer doubt sessions or one-on-one help, and how they track student progress. Always ask for a list of recent results or success stories (not necessarily names, but numbers)."
+    },
+    {
+      "heading": "Making Your Final Decision",
+      "body": "After visiting 2–3 options, sit down and compare on paper: fees, location, facilities, safety, teacher quality, and your gut feeling. Your gut matters — if an institution feels off or your child feels uncomfortable, that's important data. Visit once more if you're torn between two. Talk to current parents if they'll let you; they're usually honest about real pros and cons. Once you've decided, get everything in writing — fee structure, rules, admission requirements, refund policy, cancellation terms. Keep copies of all documents (admission receipt, fee receipts, policies). Connect with other parents at the institution through WhatsApp groups or community platforms like LocalsIndia — a support network helps when you have questions or concerns later. Remember: the most expensive or most famous option isn't always the best fit for your child. The right choice is the one that aligns with your child's learning style, your values, and your practical needs (commute, budget, safety)."
+    }
+  ],
+  "faqs": [
+    {
+      "question": "How much advance notice should I give before visiting a school or coaching centre?",
+      "answer": "Call at least 1–2 days ahead, ideally during their office hours (usually 10am–1pm or 3pm–5pm). Some institutions require written requests or have specific visitor days. Always confirm details on the phone before you go — it saves time and shows respect for their schedule."
+    },
+    {
+      "question": "What documents should I carry when I visit?",
+      "answer": "Typically: your child's birth certificate, your address proof (electricity bill, lease agreement), previous school leaving certificate if applicable, and your ID. Call ahead to confirm the exact list — it varies by institution. Having these ready speeds up the admission process if you decide to enroll."
+    },
+    {
+      "question": "Is it okay to visit a coaching centre without my child?",
+      "answer": "Yes, a preliminary visit is fine to check facilities and ask basic questions. But once you narrow it down, bring your child along. They need to feel comfortable in the space and with the teaching style — their buy-in matters for learning. Many coaching centres also offer a trial class, which is a great way to see if it's a fit."
+    },
+    {
+      "question": "How do I know if a school's fees are reasonable?",
+      "answer": "Get fee details from 3–4 institutions in the same area and with similar facilities. Ask for a complete breakdown: tuition, transport, uniforms, activities, exams, and any other charges. Compare apples to apples — cheaper isn't always better, but you should understand where your money goes. If fees are vague or kept confidential, that's a red flag."
+    },
+    {
+      "question": "What's a good teacher-to-student ratio for coaching centres?",
+      "answer": "Ideally, 1 teacher per 15–20 students in a batch, though it depends on the subject and level. Larger batches (30+) mean less individual attention. Ask the centre how they handle doubt sessions and whether you can sit in on a trial class to see for yourself how much interaction happens."
+    }
+  ],
+  "businesses": [
+    {
+      "id": "feaa0ae7-f8af-43a8-bbf4-65b1688bcc5c",
+      "name": "Allen Career Institute",
+      "address": "80, 1st Main Basaveshwaranagar, Bangalore, 560079",
+      "phone": "+917022627374",
+      "source": "osm"
+    },
+    {
+      "id": "96acb191-9e2a-442f-b89a-a325557cf81e",
+      "name": "Assumption English High School",
+      "address": "12th Main Road, Bangalore, 560010",
+      "phone": "+918023325723",
+      "source": "osm"
+    },
+    {
+      "id": "c25cbf52-f46e-485b-afd6-a217b19d39e4",
+      "name": "Bangalore Institute of Technology",
+      "address": "Krishna Rajendra Road, V V Puram, Bangalore, 560004",
+      "phone": "+918026615865",
+      "source": "osm"
+    },
+    {
+      "id": "6cabd847-6d3b-4499-a819-aabd18d22804",
+      "name": "Bangalore International School",
+      "address": "Hennur Bagalur Road, Kothanur Post, Bangalore, 560 077",
+      "phone": "+918028465060",
+      "source": "osm"
+    },
+    {
+      "id": "50687245-14ab-4709-93d2-d43510d2ad13",
+      "name": "Base Educational Services Pvt Ltd",
+      "address": "218/19, 28th Cross Road, Bangalore, 560010",
+      "phone": "+918023327588",
+      "source": "osm"
+    },
+    {
+      "id": "3e5d1a41-ffa9-46b9-9cab-f5feeee986a7",
+      "name": "BGS World School",
+      "address": "6, 7, Pipeline Road, Mahalakshmipuram, Bengaluru, 560086",
+      "phone": "+918023496765",
+      "source": "osm"
+    },
+    {
+      "id": "1eba0c03-a415-4ba7-a3e4-577a642173f1",
+      "name": "Bhoomi College",
+      "address": "No. 40, Chikkanayakanahalli, Off Doddakaneli, Sarjapura Road,, Bangalore, 560035",
+      "phone": "+918028441173",
+      "source": "osm"
+    },
+    {
+      "id": "e3a2ea2f-93bb-4e8b-8afb-089fd78215fe",
+      "name": "BNM Institute of Technology",
+      "address": "Banashankari, Bengaluru, 560070",
+      "phone": "+918026711781",
+      "source": "osm"
+    },
+    {
+      "id": "d8fb6abd-2584-45d9-90f4-b2cab1f91059",
+      "name": "Brindavan College",
+      "address": "2, Cross Road, Vinayaka Layout, Bhoopasandra, 560094",
+      "phone": "+918043317777",
+      "source": "osm"
+    },
+    {
+      "id": "93973f13-c1f6-4200-9303-3e25ee16e25b",
+      "name": "Brindavan Group of Institutions",
+      "address": "Bagalur Road, Bengaluru, 560063",
+      "phone": "+918028478766",
+      "source": "osm"
+    },
+    {
+      "id": "d44e783c-875d-488e-afa1-6a2015fca223",
+      "name": "Cambridge Institute of Technolgy",
+      "address": "K R Puram, Bangalore, 560 036",
+      "phone": "+918025618799",
+      "source": "osm"
+    },
+    {
+      "id": "9bb30131-9043-47b5-bd58-b19dd4a9dbdd",
+      "name": "Canadian International School",
+      "address": "4, Yelahanka, Bangalore, 560 064",
+      "phone": "+918042494444",
+      "source": "osm"
+    },
+    {
+      "id": "41300518-24a5-4199-8558-a7748f40ca82",
+      "name": "ChipXpert - Best VLSI Training Institute in Bangalore",
+      "address": "4, Sarjapura Road Exit, Bengaluru, 560103",
+      "phone": "+919121290582",
+      "source": "osm"
+    },
+    {
+      "id": "9850f7e2-f53e-450b-957f-4961a847c97b",
+      "name": "Christ University, Bangaluru",
+      "address": "Hosur Rd, Bhavani Nagar, S.G. Palya, Bengaluru, Karnataka, 560029",
+      "phone": "+918040129600",
+      "source": "osm"
+    },
+    {
+      "id": "ce4edb8a-e5d7-4816-b87c-b53f82b844d9",
+      "name": "Chrysalis Kids",
+      "address": "188, Sita Lakshmi ITPL Rd, AECS Layout - A Block, AECS Layout, Brookefield, bangalore, 560037",
+      "phone": "+918951511406",
+      "source": "osm"
+    },
+    {
+      "id": "737be054-40de-40aa-bd99-6af6ef51b4b9",
+      "name": "Clarence High School",
+      "address": "Pottery Road, Bangalore, 560005",
+      "phone": "+918025470868",
+      "source": "osm"
+    },
+    {
+      "id": "600b0358-a551-4b1d-9e24-de64471183f3",
+      "name": "CMR Institute of Technology",
+      "address": "132 AECS Layout ITPL Main Road, Kundalahalli Bangalore 560037",
+      "phone": "+918028524466",
+      "source": "osm"
+    },
+    {
+      "id": "a2f73b98-65de-4346-8278-0e4e8dfa828b",
+      "name": "CMS Business School, Jain University",
+      "address": "CMS Annex 319, 17th Cross Road, 560 078",
+      "phone": "+918043430400",
+      "source": "osm"
+    },
+    {
+      "id": "70f3276e-a611-4178-835e-32320dedb606",
+      "name": "Diya Academy of Learning",
+      "address": "70/1, Kodigehalli Main Road, Ayyappanagar, Bangalore, 560036",
+      "phone": "+918032953468",
+      "source": "osm"
+    },
+    {
+      "id": "f79b7037-1db1-4b7e-9c48-6ab82b647625",
+      "name": "EnlightIQ",
+      "address": "1198, 22nd Cross Road, Bengaluru",
+      "phone": "+918861777114",
+      "source": "osm"
+    }
+  ],
+  "cta": {
+    "text": "See all schools, colleges & coaching centres in Bengaluru",
+    "href": "/bengaluru/tutors"
+  },
+  "relatedLinks": [
+    {
+      "text": "Schools & Colleges in Bengaluru (349)",
+      "href": "/bengaluru/schools-colleges"
+    },
+    {
+      "text": "Coaching & Competitive Exams in Bengaluru (12)",
+      "href": "/bengaluru/coaching-exams"
+    },
+    {
+      "text": "Spoken English & Languages in Bengaluru (5)",
+      "href": "/bengaluru/language-classes"
+    },
+    {
+      "text": "Driving Schools in Bengaluru (4)",
+      "href": "/bengaluru/driving-schools"
+    }
+  ],
+  "publishedAt": "2026-11-01T09:56:05Z",
+  "wordCount": 627
+}

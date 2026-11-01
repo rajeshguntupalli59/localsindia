@@ -126,6 +126,13 @@
       "kind": "guide",
       "topicTemplateId": "sell-vehicle-safely",
       "publishedAt": "2026-10-25T07:58:41Z"
+    },
+    {
+      "citySlug": "bengaluru",
+      "category": "education",
+      "kind": "directory",
+      "topicTemplateId": "directory-education",
+      "publishedAt": "2026-11-01T09:56:05Z"
     }
   ]
 }
