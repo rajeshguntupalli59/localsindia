@@ -137,9 +137,10 @@ def normalize_email(raw: str | None) -> str | None:
     return None
 
 
-def overpass_query(bbox: tuple) -> str:
+def overpass_query(bbox: tuple, email_only: bool = False) -> str:
     s, w, n, e = bbox
-    b = f"({s},{w},{n},{e})"
+    # email_only: just the (few) elements that carry an email tag — far smaller/faster
+    b = ('[~"^(contact:)?email$"~"."]' if email_only else "") + f"({s},{w},{n},{e})"
     amenities = "|".join(AMENITY_MAP)
     offices = "|".join(OFFICE_MAP)
     tourism = "|".join(TOURISM_MAP)
@@ -153,8 +154,8 @@ def overpass_query(bbox: tuple) -> str:
 out tags center;"""
 
 
-def fetch_osm(bbox: tuple) -> list[dict]:
-    query = overpass_query(bbox)
+def fetch_osm(bbox: tuple, email_only: bool = False) -> list[dict]:
+    query = overpass_query(bbox, email_only)
     last_err = None
     # Public Overpass servers are often overloaded (504s, timeouts) — retry
     # both servers for a few rounds with growing waits before giving up.
@@ -758,7 +759,7 @@ def backfill_emails(city: str, regions: dict) -> int:
     """Copy OSM email tags onto this city's already-imported businesses
     (only where email is still empty — see POST /admin/businesses/import/emails)."""
     items = []
-    for el in fetch_osm(tuple(regions[city]["bbox"])):
+    for el in fetch_osm(tuple(regions[city]["bbox"]), email_only=True):
         row, _ = to_business(el)
         if row and row["email"]:
             items.append({"source_ref": row["source_ref"], "email": row["email"]})
@@ -784,6 +785,7 @@ def main() -> None:
     ap.add_argument("--fix-done", action="store_true", help="re-home, clean and verify every city already imported")
     ap.add_argument("--backfill-hours", action="store_true", help="fill opening hours for --city, or every imported city")
     ap.add_argument("--backfill-emails", action="store_true", help="fill owner emails for --city, or every imported city")
+    ap.add_argument("--from-city", help="with --backfill-emails: resume at this city (skip the ones before it)")
     ap.add_argument("--backfill-subcategories", action="store_true",
                     help="set subcategories (Hospitals, Pharmacies…) for --city or every imported city; "
                          "dry run unless --apply")
@@ -801,6 +803,8 @@ def main() -> None:
         return
     if args.backfill_emails:
         cities = [args.city] if args.city else [c for c in order if c in load_state()]
+        if args.from_city:
+            cities = cities[cities.index(args.from_city):]
         total = 0
         for i, city in enumerate(cities):
             total += backfill_emails(city, regions)

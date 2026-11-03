@@ -42,9 +42,16 @@ on:
         required: false
         type: boolean
         default: false
+      from_city:
+        description: 'With backfill_emails: resume at this city slug'
+        required: false
+        default: ''
 
 permissions:
   contents: write   # commits the import progress file
+
+env:
+  PYTHONUNBUFFERED: "1"   # progress lines survive a timeout/cancel
 
 jobs:
   import:
@@ -67,6 +74,7 @@ jobs:
           CITY="${{ github.event.inputs.city }}"
           if [ "${{ github.event.inputs.backfill_emails }}" = "true" ]; then
             if [ -n "$CITY" ]; then python agents/osm_business_import.py --backfill-emails --city "$CITY"
+            elif [ -n "${{ github.event.inputs.from_city }}" ]; then python agents/osm_business_import.py --backfill-emails --from-city "${{ github.event.inputs.from_city }}"
             else python agents/osm_business_import.py --backfill-emails; fi
             exit $?
           fi
