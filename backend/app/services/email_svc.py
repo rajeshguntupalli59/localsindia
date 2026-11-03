@@ -6,9 +6,11 @@ logger = logging.getLogger(__name__)
 SENDGRID_KEY = os.getenv("SENDGRID_API_KEY", "")
 FROM_EMAIL = os.getenv("EMAIL_FROM", "noreply@localsindia.com")
 FROM_NAME = os.getenv("EMAIL_FROM_NAME", "LocalsIndia")
+# Claim invites come from a real inbox so owners can reply
+SUPPORT_EMAIL = os.getenv("EMAIL_SUPPORT", "support@localsindia.com")
 
 
-async def send_email(to: str, subject: str, html: str, text: str = "") -> bool:
+async def send_email(to: str, subject: str, html: str, text: str = "", from_email: str | None = None) -> bool:
     if not SENDGRID_KEY:
         logger.warning(f"[EMAIL MOCK] To: {to} | Subject: {subject}")
         return True
@@ -16,7 +18,7 @@ async def send_email(to: str, subject: str, html: str, text: str = "") -> bool:
         import httpx
         payload = {
             "personalizations": [{"to": [{"email": to}]}],
-            "from": {"email": FROM_EMAIL, "name": FROM_NAME},
+            "from": {"email": from_email or FROM_EMAIL, "name": FROM_NAME},
             "subject": subject,
             "content": [
                 {"type": "text/plain", "value": text or subject},
@@ -104,4 +106,5 @@ async def send_claim_invite_email(to: str, business_name: str, city_name: str,
             f"{business_url}\n\nClaim it for free to update your phone number, timings and photos, and reply "
             f"to customer reviews - open the link and tap \"Claim this Business\".\n\n"
             f"Not interested? Unsubscribe: {unsubscribe_url}")
-    return await send_email(to, f"{business_name} is listed on LocalsIndia — claim it free", html, text)
+    return await send_email(to, f"{business_name} is listed on LocalsIndia — claim it free", html, text,
+                            from_email=SUPPORT_EMAIL)

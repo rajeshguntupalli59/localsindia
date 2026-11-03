@@ -148,3 +148,16 @@ async def test_backfill_emails_never_overwrites(admin_client, city, category):
         assert (await s.get(Business, a.id)).email == "info@a.in"
         assert (await s.get(Business, b.id)).email == "kept@shop.in"
     await engine.dispose()
+
+
+@pytest.mark.asyncio
+async def test_claim_invite_sent_from_support(monkeypatch):
+    from app.services import email_svc
+    calls = []
+
+    async def fake_send(to, subject, html, text="", from_email=None):
+        calls.append(from_email)
+        return True
+    monkeypatch.setattr(email_svc, "send_email", fake_send)
+    await email_svc.send_claim_invite_email("o@shop.in", "Shop", "Hyderabad", "https://x", "https://u")
+    assert calls == ["support@localsindia.com"]
