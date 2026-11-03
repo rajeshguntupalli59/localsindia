@@ -161,3 +161,36 @@ async def test_claim_invite_sent_from_support(monkeypatch):
     monkeypatch.setattr(email_svc, "send_email", fake_send)
     await email_svc.send_claim_invite_email("o@shop.in", "Shop", "Hyderabad", "https://x", "https://u")
     assert calls == ["support@localsindia.com"]
+
+
+@pytest.mark.asyncio
+async def test_shared_email_one_invite_per_address(client, admin_client, city, category, monkeypatch):
+    admin, _ = admin_client
+    sent = []
+
+    async def fake_send(**kw):
+        sent.append(kw)
+        return True
+    monkeypatch.setattr("app.routers.business_outreach.send_claim_invite_email", fake_send)
+    a = await _business(city, category, "Chain Branch A", None)
+    b = await _business(city, category, "Chain Branch B", None)
+    c = await _business(city, category, "Other Shop", None)
+    for x, e in ((a, "info@chain.in"), (b, "info@chain.in"), (c, "owner@other.in")):
+        await admin.put(f"/api/v1/admin/outreach/{x.id}/email", json={"email": e})
+
+    q = f"/api/v1/admin/outreach?city_slug={city.slug}&category_slug={category.slug}"
+    shared = {i["name"]: i["email_shared_with"] for i in (await admin.get(q)).json()["items"]}
+    assert shared == {"Chain Branch A": 1, "Chain Branch B": 1, "Other Shop": 0}
+
+    assert (await admin.post(f"/api/v1/admin/outreach/{a.id}/send-email")).status_code == 201
+    # Same address on another listing: no second invite inside 30 days
+    assert (await admin.post(f"/api/v1/admin/outreach/{b.id}/send-email")).status_code == 429
+
+    # Unsubscribing from the other address blocks only that address
+    from app.routers.business_outreach import unsubscribe_token
+    await client.get(f"/api/v1/outreach/unsubscribe?b={c.id}&t={unsubscribe_token(c.id)}")
+    d = await _business(city, category, "Other Shop Duplicate", None)
+    await admin.put(f"/api/v1/admin/outreach/{d.id}/email", json={"email": "owner@other.in"})
+    r = await admin.post(f"/api/v1/admin/outreach/{d.id}/send-email")
+    assert r.status_code == 409 and "unsubscribed" in r.json()["detail"]
+    assert [s["to"] for s in sent] == ["info@chain.in"]

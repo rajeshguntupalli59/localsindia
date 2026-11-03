@@ -36,6 +36,7 @@ OUTCOMES = FOLLOW_UP + CLOSED
 STATUSES = ("todo", "follow_up", "closed", "claimed")
 PAGE_SIZE = 25
 EMAIL_COOLDOWN = timedelta(days=30)
+UNSUBSCRIBED = "Unsubscribed via email link"
 SITE = "https://www.localsindia.com"
 # Public API host for the unsubscribe link (BACKEND_URL isn't set on Azure; same fallback as the frontend)
 PUBLIC_API = "https://localsindia-backend-in.azurewebsites.net"
@@ -101,10 +102,18 @@ async def outreach_queue(
         else_="follow_up",
     ).label("bucket")
     is_mobile = func.regexp_replace(Business.phone, r"\D", "", "g").op("~")(r"^(91|0)?[6-9][0-9]{9}$")
+    # Same email on several listings = chain head office or duplicate listing; one invite per address
+    shared = (
+        select(Business.email, func.count().label("n"))
+        .where(Business.email.is_not(None), Business.deleted_at.is_(None))
+        .group_by(Business.email).subquery()
+    )
 
     base = (
-        select(Business, City, Category, latest.c.outcome, latest.c.note, latest.c.created_at, latest.c.attempts, bucket)
+        select(Business, City, Category, latest.c.outcome, latest.c.note, latest.c.created_at, latest.c.attempts,
+               shared.c.n, bucket)
         .join(City, City.id == Business.city_id)
+        .outerjoin(shared, shared.c.email == Business.email)
         .outerjoin(Category, Category.id == Business.category_id)
         .outerjoin(latest, latest.c.business_id == Business.id)
         .where(Business.deleted_at.is_(None),
@@ -137,6 +146,7 @@ async def outreach_queue(
                 "phone": b.phone,
                 "mobile": normalize_indian_mobile(b.phone) if b.phone else None,
                 "email": b.email,
+                "email_shared_with": max((shared_n or 1) - 1, 0),
                 "city_slug": city.slug,
                 "city_name": city.name,
                 "category_name": cat.name if cat else None,
@@ -148,7 +158,7 @@ async def outreach_queue(
                 "last_contacted_at": contacted_at,
                 "attempts": attempts or 0,
             }
-            for b, city, cat, outcome, note, contacted_at, attempts, _ in rows
+            for b, city, cat, outcome, note, contacted_at, attempts, shared_n, _ in rows
         ],
     }
 
@@ -220,12 +230,19 @@ async def send_outreach_email(
     )).scalar_one_or_none()
     if latest in CLOSED:
         raise HTTPException(status_code=409, detail="Closed (not interested / wrong number / unsubscribed) — not emailing")
+    same_address = select(Business.id).where(Business.email == business.email)
+    if (await db.execute(
+        select(BusinessOutreach.id).where(BusinessOutreach.business_id.in_(same_address),
+                                          BusinessOutreach.note == UNSUBSCRIBED).limit(1)
+    )).first():
+        raise HTTPException(status_code=409, detail="This email address unsubscribed — not emailing")
     last_email = (await db.execute(
         select(func.max(BusinessOutreach.created_at))
-        .where(BusinessOutreach.business_id == business.id, BusinessOutreach.outcome == "email_sent")
+        .where(BusinessOutreach.business_id.in_(same_address), BusinessOutreach.outcome == "email_sent")
     )).scalar_one_or_none()
     if last_email and datetime.now(timezone.utc) - last_email < EMAIL_COOLDOWN:
-        raise HTTPException(status_code=429, detail="Already emailed in the last 30 days")
+        raise HTTPException(status_code=429,
+                            detail="This email address was already sent an invite in the last 30 days")
 
     city = (await db.execute(select(City).where(City.id == business.city_id))).scalar_one()
     unsub = (f"{PUBLIC_API}/api/v1/outreach/unsubscribe"
@@ -253,8 +270,7 @@ async def unsubscribe(b: uuid.UUID, t: str, db: AsyncSession = Depends(get_db)):
         .order_by(BusinessOutreach.created_at.desc()).limit(1)
     )).scalar_one_or_none()
     if latest not in CLOSED:
-        db.add(BusinessOutreach(business_id=b, admin_id=None, outcome="not_interested",
-                                note="Unsubscribed via email link"))
+        db.add(BusinessOutreach(business_id=b, admin_id=None, outcome="not_interested", note=UNSUBSCRIBED))
         await db.commit()
     name = html.escape(business.name)
     return HTMLResponse(

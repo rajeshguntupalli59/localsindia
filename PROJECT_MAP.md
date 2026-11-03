@@ -187,6 +187,8 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 - `businesses.email` (migration `e3f4a5b6c7d8`), admin-only. Filled from OSM `email`/`contact:email` (new imports + `osm_business_import.py --backfill-emails`, workflow input `backfill_emails`; Hyderabad: 197 of 2,457 have one) or typed on /admin/outreach.
 - /admin/outreach: email box + "Send claim email" — ONE SendGrid invite per click, logged as `email_sent`, 30-day cooldown, blocked when closed/claimed; signed unsubscribe link closes the business. Queue now includes email-only businesses.
 - Unsubscribe link uses the hardcoded prod API host (`BACKEND_URL` is not set on Azure).
+- Claim invites sent from support@localsindia.com (replies reach the inbox). DNS check: no SendGrid DKIM, SPF is GoDaddy-only, DMARC p=quarantine → mail will likely hit spam until Raj authenticates the domain in SendGrid (CNAMEs in GoDaddy).
+- Email/business match audit (Hyderabad, 197 emails): matched by OSM element, names agree; but chains share one address (Care Hospitals ×4) and some listings are duplicates. So cooldown + unsubscribe now apply per ADDRESS across all listings, and the queue shows "Shared with N other listings".
 
 ### 2026-10-09 — Admin: city on listing cards + chatbot questions page
 - `/admin/listings` now shows the city (admin endpoints didn't send it, so only the area/landmark showed).

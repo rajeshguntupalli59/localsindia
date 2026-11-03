@@ -253,6 +253,12 @@ export default function AdminOutreachPage() {
                       onChange={e => setEmailDrafts(d => ({ ...d, [item.id]: e.target.value }))}
                       placeholder="Owner email (from their website, Google, a call…)" maxLength={254}
                       className="flex-1 border rounded-lg px-3 py-2 text-sm" />
+                    {item.email && item.email_shared_with > 0 && (
+                      <span className="text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-2 py-1"
+                        title="Same email on other listings — likely a chain head office or a duplicate listing. Check it belongs to THIS business before sending.">
+                        Shared with {item.email_shared_with} other listing{item.email_shared_with > 1 ? 's' : ''}
+                      </span>
+                    )}
                     {item.id in emailDrafts && (emailDrafts[item.id].trim() !== (item.email ?? '')) && (
                       <button disabled={busyId === item.id} onClick={() => saveEmail(item)}
                         className="px-3 py-2 rounded-lg border text-xs font-semibold disabled:opacity-50">

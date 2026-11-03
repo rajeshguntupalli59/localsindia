@@ -313,6 +313,7 @@ export interface OutreachItem {
   phone: string | null;
   mobile: string | null;          // +91XXXXXXXXXX when the phone is an Indian mobile
   email: string | null;           // owner email for the claim invite (admin-only, never public)
+  email_shared_with: number;      // other listings with the same email (chain head office / duplicate)
   city_slug: string;
   city_name: string;
   category_name: string | null;
