@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Phone, MessageCircle, Copy, ExternalLink, PhoneCall } from 'lucide-react';
+import { Phone, MessageCircle, Copy, ExternalLink, PhoneCall, Mail, Send } from 'lucide-react';
 import { toast } from 'sonner';
 import AdminPager from '@/components/admin-pager/AdminPager';
 import EmptyState from '@/components/empty-state/EmptyState';
@@ -41,6 +41,7 @@ export default function AdminOutreachPage() {
   const [loading, setLoading] = useState(true);
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [emailDrafts, setEmailDrafts] = useState<Record<string, string>>({});
 
   useEffect(() => {
     fetch(`${API_BASE}/api/v1/cities`).then(r => r.json()).then(setCities).catch(() => {});
@@ -95,6 +96,52 @@ export default function AdminOutreachPage() {
     }
   };
 
+  const saveEmail = async (item: OutreachItem) => {
+    setBusyId(item.id);
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/admin/outreach/${item.id}/email`, {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify({ email: emailDrafts[item.id]?.trim() || null }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail);
+      setItems(prev => prev.map(i => i.id === item.id ? { ...i, email: data.email } : i));
+      setEmailDrafts(d => { const rest = { ...d }; delete rest[item.id]; return rest; });
+      toast.success(data.email ? 'Email saved' : 'Email removed');
+    } catch (e) {
+      toast.error(e instanceof Error && e.message ? e.message : 'Could not save the email');
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  // Sends ONE claim invite to this business; the server logs it as "Email sent"
+  const sendEmail = async (item: OutreachItem) => {
+    setBusyId(item.id);
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/admin/outreach/${item.id}/send-email`, {
+        method: 'POST',
+        headers: authHeaders(),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail);
+      if (status !== 'follow_up') {
+        setItems(prev => prev.filter(i => i.id !== item.id));
+        setCounts(c => ({ ...c, [status]: c[status] - 1, follow_up: c.follow_up + 1 }));
+      } else {
+        setItems(prev => prev.map(i => i.id === item.id
+          ? { ...i, last_outcome: 'email_sent', last_contacted_at: new Date().toISOString(), attempts: i.attempts + 1 }
+          : i));
+      }
+      toast.success(`Claim email sent to ${item.email}`);
+    } catch (e) {
+      toast.error(e instanceof Error && e.message ? e.message : 'Could not send the email');
+    } finally {
+      setBusyId(null);
+    }
+  };
+
   const copyMessage = async (item: OutreachItem) => {
     try {
       await navigator.clipboard.writeText(outreachMessage(item));
@@ -110,7 +157,8 @@ export default function AdminOutreachPage() {
         <h1 className="text-xl font-bold">Owner Outreach</h1>
         <p className="text-sm text-muted-foreground max-w-3xl">
           Invite businesses to claim their free listing. Call or WhatsApp them yourself, one at a time, and log what
-          happened. WhatsApp opens with a message pre-filled — you press send. Only message each business once; if they
+          happened. WhatsApp opens with a message pre-filled — you press send. &ldquo;Send claim email&rdquo; emails one
+          business at a time (with an unsubscribe link; max once per 30 days). Only message each business once; if they
           say stop, mark them &ldquo;Not interested&rdquo;.
         </p>
       </div>
@@ -143,7 +191,7 @@ export default function AdminOutreachPage() {
         </div>
       ) : items.length === 0 ? (
         <EmptyState icon={PhoneCall} title="Nothing here"
-          description={status === 'todo' ? 'Every business with a phone number in this filter has been contacted' : 'No businesses in this list yet'} />
+          description={status === 'todo' ? 'Every business with a phone number or email in this filter has been contacted' : 'No businesses in this list yet'} />
       ) : (
         <div className="space-y-3">
           {items.map(item => {
@@ -169,10 +217,19 @@ export default function AdminOutreachPage() {
                     )}
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    <a href={`tel:${item.mobile ?? item.phone}`}
-                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border text-sm font-semibold">
-                      <Phone className="w-4 h-4" /> {item.phone}
-                    </a>
+                    {item.phone && (
+                      <a href={`tel:${item.mobile ?? item.phone}`}
+                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border text-sm font-semibold">
+                        <Phone className="w-4 h-4" /> {item.phone}
+                      </a>
+                    )}
+                    {item.email && status !== 'claimed' && status !== 'closed' && (
+                      <button disabled={busyId === item.id} onClick={() => sendEmail(item)}
+                        title={`Send one claim invite to ${item.email}`}
+                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold disabled:opacity-50">
+                        <Send className="w-4 h-4" /> Send claim email
+                      </button>
+                    )}
                     {wa && (
                       <a href={wa} target="_blank" rel="noopener noreferrer"
                         onClick={() => logOutcome(item, 'whatsapp_sent')}
@@ -189,7 +246,24 @@ export default function AdminOutreachPage() {
                 </div>
 
                 {status !== 'claimed' && (
-                  <div className="mt-3 flex flex-col lg:flex-row gap-2">
+                  <div className="mt-3 flex flex-col sm:flex-row sm:items-center gap-2">
+                    <Mail className="hidden sm:block w-4 h-4 text-slate-400 shrink-0" />
+                    <input type="email" aria-label="Owner email"
+                      value={emailDrafts[item.id] ?? item.email ?? ''}
+                      onChange={e => setEmailDrafts(d => ({ ...d, [item.id]: e.target.value }))}
+                      placeholder="Owner email (from their website, Google, a call…)" maxLength={254}
+                      className="flex-1 border rounded-lg px-3 py-2 text-sm" />
+                    {item.id in emailDrafts && (emailDrafts[item.id].trim() !== (item.email ?? '')) && (
+                      <button disabled={busyId === item.id} onClick={() => saveEmail(item)}
+                        className="px-3 py-2 rounded-lg border text-xs font-semibold disabled:opacity-50">
+                        Save email
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {status !== 'claimed' && (
+                  <div className="mt-2 flex flex-col lg:flex-row gap-2">
                     <input value={notes[item.id] ?? ''} onChange={e => setNotes(n => ({ ...n, [item.id]: e.target.value }))}
                       placeholder="Note (optional), e.g. owner is Ramesh, call after 6pm" maxLength={500}
                       className="flex-1 border rounded-lg px-3 py-2 text-sm" />

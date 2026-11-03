@@ -79,6 +79,7 @@ app.include_router(tickets.router)
 app.include_router(business_claims.router)
 app.include_router(business_import.router)
 app.include_router(business_outreach.router)
+app.include_router(business_outreach.public_router)
 
 
 @app.get("/api/v1/health")

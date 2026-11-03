@@ -85,3 +85,23 @@ async def send_listing_expiry_email(to: str, listing_title: str, renew_url: str,
         <p><a class="btn" href="{renew_url}">Renew Listing →</a></p>"""
     )
     return await send_email(to, f"Renew your listing — expires in {days_left} days", html)
+
+
+async def send_claim_invite_email(to: str, business_name: str, city_name: str,
+                                  business_url: str, unsubscribe_url: str) -> bool:
+    """One claim invite, sent by an admin from /admin/outreach (never in bulk)."""
+    from html import escape
+    name, city = escape(business_name), escape(city_name)
+    html = _base_template(
+        "Your business is listed on LocalsIndia",
+        f"""<p>Namaste! <strong>{name}</strong> is listed for free on LocalsIndia, the local directory for {city}.</p>
+        <p>Claim it for free to update your phone number, timings and photos, and reply to customer reviews.
+        Open your page and tap <strong>"Claim this Business"</strong>.</p>
+        <p><a class="btn" href="{business_url}">View &amp; claim your business →</a></p>"""
+    ).replace('<a href="https://localsindia.com/unsubscribe" style="color:#9ca3af">Unsubscribe</a>',
+              f'<a href="{unsubscribe_url}" style="color:#9ca3af">Unsubscribe — don\'t email us again</a>')
+    text = (f"Namaste! {business_name} is listed for free on LocalsIndia, the local directory for {city_name}:\n"
+            f"{business_url}\n\nClaim it for free to update your phone number, timings and photos, and reply "
+            f"to customer reviews - open the link and tap \"Claim this Business\".\n\n"
+            f"Not interested? Unsubscribe: {unsubscribe_url}")
+    return await send_email(to, f"{business_name} is listed on LocalsIndia — claim it free", html, text)

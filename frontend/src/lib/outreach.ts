@@ -5,6 +5,7 @@ const SITE = 'https://www.localsindia.com';
 
 export const OUTCOME_LABELS: Record<string, string> = {
   whatsapp_sent: 'WhatsApp sent',
+  email_sent: 'Email sent',
   no_answer: 'No answer',
   callback: 'Call back later',
   interested: 'Interested',

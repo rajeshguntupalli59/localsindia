@@ -1,13 +1,20 @@
 """Admin outreach queue: invite directory businesses to claim their free listing,
-JustDial-style — the admin calls or WhatsApps each one themselves (no bulk or
-automated messaging) and logs the outcome here."""
+JustDial-style — the admin calls, WhatsApps or emails each one themselves, one at a
+time (no bulk or automated messaging), and logs the outcome here."""
+import hashlib
+import hmac
+import html
+import re
 import uuid
+from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
 from sqlalchemy import select, func, case, literal
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.core.database import get_db
 from app.core.deps import get_current_admin
 from app.models.business import Business
@@ -18,14 +25,39 @@ from app.models.user import User
 from app.core.category_catalog import subcategory_entry
 from app.core.pagination import MAX_PAGE_SIZE
 from app.routers.business_claims import normalize_indian_mobile
+from app.services.email_svc import send_claim_invite_email
 
 router = APIRouter(prefix="/api/v1/admin/outreach", tags=["business-outreach"])
+public_router = APIRouter(prefix="/api/v1/outreach", tags=["business-outreach"])
 
-FOLLOW_UP = ("whatsapp_sent", "no_answer", "callback", "interested")
+FOLLOW_UP = ("whatsapp_sent", "email_sent", "no_answer", "callback", "interested")
 CLOSED = ("not_interested", "wrong_number")
 OUTCOMES = FOLLOW_UP + CLOSED
 STATUSES = ("todo", "follow_up", "closed", "claimed")
 PAGE_SIZE = 25
+EMAIL_COOLDOWN = timedelta(days=30)
+SITE = "https://www.localsindia.com"
+# Public API host for the unsubscribe link (BACKEND_URL isn't set on Azure; same fallback as the frontend)
+PUBLIC_API = "https://localsindia-backend-in.azurewebsites.net"
+_EMAIL_RE = re.compile(r"^[a-z0-9._%+-]+@[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$")
+
+
+def clean_email(raw: str | None) -> str | None:
+    """First valid address in raw (OSM tags may hold several, or a mailto:), lowercased."""
+    for part in re.split(r"[;,\s]+", raw or ""):
+        part = part.strip().lower().removeprefix("mailto:")
+        if len(part) <= 254 and _EMAIL_RE.match(part):
+            return part
+    return None
+
+
+def unsubscribe_token(business_id: uuid.UUID) -> str:
+    return hmac.new(settings.SECRET_KEY.encode(), f"outreach-unsub:{business_id}".encode(),
+                    hashlib.sha256).hexdigest()[:32]
+
+
+class EmailUpdate(BaseModel):
+    email: str | None = Field(default=None, max_length=254)
 
 
 class OutreachLog(BaseModel):
@@ -75,7 +107,8 @@ async def outreach_queue(
         .join(City, City.id == Business.city_id)
         .outerjoin(Category, Category.id == Business.category_id)
         .outerjoin(latest, latest.c.business_id == Business.id)
-        .where(Business.deleted_at.is_(None), Business.phone.is_not(None), Business.phone != "")
+        .where(Business.deleted_at.is_(None),
+               ((Business.phone.is_not(None)) & (Business.phone != "")) | Business.email.is_not(None))
     )
     if city_slug:
         base = base.where(City.slug == city_slug)
@@ -102,7 +135,8 @@ async def outreach_queue(
                 "name": b.name,
                 "address": b.address,
                 "phone": b.phone,
-                "mobile": normalize_indian_mobile(b.phone),
+                "mobile": normalize_indian_mobile(b.phone) if b.phone else None,
+                "email": b.email,
                 "city_slug": city.slug,
                 "city_name": city.name,
                 "category_name": cat.name if cat else None,
@@ -139,3 +173,93 @@ async def log_outreach(
     ))
     await db.commit()
     return {"ok": True, "status": "closed" if body.outcome in CLOSED else "follow_up"}
+
+
+async def _live_business(db: AsyncSession, business_id: uuid.UUID) -> Business:
+    business = (await db.execute(
+        select(Business).where(Business.id == business_id, Business.deleted_at.is_(None))
+    )).scalar_one_or_none()
+    if not business:
+        raise HTTPException(status_code=404, detail="Business not found")
+    return business
+
+
+@router.put("/{business_id}/email")
+async def set_outreach_email(
+    business_id: uuid.UUID,
+    body: EmailUpdate,
+    db: AsyncSession = Depends(get_db),
+    admin: User = Depends(get_current_admin),
+):
+    """Admin types in an owner email (e.g. found on the business's website); empty clears it."""
+    business = await _live_business(db, business_id)
+    typed = (body.email or "").strip()
+    email = clean_email(typed) if typed else None
+    if typed and not email:
+        raise HTTPException(status_code=422, detail="That doesn't look like a valid email address")
+    business.email = email
+    await db.commit()
+    return {"email": email}
+
+
+@router.post("/{business_id}/send-email", status_code=201)
+async def send_outreach_email(
+    business_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    admin: User = Depends(get_current_admin),
+):
+    """Send ONE claim invite to this business's email, then log it as an outreach attempt."""
+    business = await _live_business(db, business_id)
+    if not business.email:
+        raise HTTPException(status_code=400, detail="This business has no email address")
+    if business.owner_id:
+        raise HTTPException(status_code=409, detail="Already claimed")
+    latest = (await db.execute(
+        select(BusinessOutreach.outcome).where(BusinessOutreach.business_id == business.id)
+        .order_by(BusinessOutreach.created_at.desc()).limit(1)
+    )).scalar_one_or_none()
+    if latest in CLOSED:
+        raise HTTPException(status_code=409, detail="Closed (not interested / wrong number / unsubscribed) — not emailing")
+    last_email = (await db.execute(
+        select(func.max(BusinessOutreach.created_at))
+        .where(BusinessOutreach.business_id == business.id, BusinessOutreach.outcome == "email_sent")
+    )).scalar_one_or_none()
+    if last_email and datetime.now(timezone.utc) - last_email < EMAIL_COOLDOWN:
+        raise HTTPException(status_code=429, detail="Already emailed in the last 30 days")
+
+    city = (await db.execute(select(City).where(City.id == business.city_id))).scalar_one()
+    unsub = (f"{PUBLIC_API}/api/v1/outreach/unsubscribe"
+             f"?b={business.id}&t={unsubscribe_token(business.id)}")
+    ok = await send_claim_invite_email(
+        to=business.email, business_name=business.name, city_name=city.name,
+        business_url=f"{SITE}/{city.slug}/businesses/{business.id}", unsubscribe_url=unsub,
+    )
+    if not ok:
+        raise HTTPException(status_code=502, detail="Email provider rejected the message — try again later")
+    db.add(BusinessOutreach(business_id=business.id, admin_id=admin.id, outcome="email_sent",
+                            note=f"Claim email to {business.email}"))
+    await db.commit()
+    return {"ok": True, "status": "follow_up"}
+
+
+@public_router.get("/unsubscribe", response_class=HTMLResponse)
+async def unsubscribe(b: uuid.UUID, t: str, db: AsyncSession = Depends(get_db)):
+    """One-click opt-out from the claim email: closes the business in the outreach queue."""
+    if not hmac.compare_digest(t, unsubscribe_token(b)):
+        raise HTTPException(status_code=400, detail="Invalid unsubscribe link")
+    business = await _live_business(db, b)
+    latest = (await db.execute(
+        select(BusinessOutreach.outcome).where(BusinessOutreach.business_id == b)
+        .order_by(BusinessOutreach.created_at.desc()).limit(1)
+    )).scalar_one_or_none()
+    if latest not in CLOSED:
+        db.add(BusinessOutreach(business_id=b, admin_id=None, outcome="not_interested",
+                                note="Unsubscribed via email link"))
+        await db.commit()
+    name = html.escape(business.name)
+    return HTMLResponse(
+        "<!doctype html><meta charset=utf-8><meta name=viewport content='width=device-width'>"
+        "<title>Unsubscribed</title><body style='font-family:sans-serif;max-width:480px;margin:60px auto;padding:0 16px'>"
+        f"<h2>You're unsubscribed</h2><p>We won't email {name} about LocalsIndia again.</p>"
+        f"<p><a href='{SITE}'>localsindia.com</a></p></body>"
+    )

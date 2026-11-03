@@ -27,6 +27,8 @@ class Business(Base):
     phone: Mapped[str | None] = mapped_column(String(15), nullable=True)
     whatsapp_url: Mapped[str | None] = mapped_column(Text, nullable=True)
     website_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # Owner email for claim outreach only (from OSM or typed by an admin) — never shown publicly
+    email: Mapped[str | None] = mapped_column(String(254), nullable=True)
     verified: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     badge_plan: Mapped[str | None] = mapped_column(String(20), nullable=True)
     badge_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

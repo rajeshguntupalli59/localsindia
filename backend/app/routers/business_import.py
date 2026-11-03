@@ -13,6 +13,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.routers.business_outreach import clean_email
 from app.core.database import get_db
 from app.core.deps import get_current_admin
 from app.models.business import Business
@@ -36,6 +37,7 @@ class ImportedBusiness(BaseModel):
     longitude: float | None = None
     opening_hours: str | None = Field(default=None, max_length=255)
     subcategory_slug: str | None = Field(default=None, max_length=60)
+    email: str | None = Field(default=None, max_length=254)
 
 
 def _fits(category_slug: str, subcategory_slug: str | None) -> str | None:
@@ -93,6 +95,7 @@ async def import_businesses(
             longitude=b.longitude,
             opening_hours=b.opening_hours,
             subcategory_slug=_fits(b.category_slug, b.subcategory_slug),
+            email=clean_email(b.email),
             source=body.source,
             source_ref=b.source_ref,
         ))
@@ -228,6 +231,36 @@ async def backfill_opening_hours(
     )).scalars().all()
     for b in rows:
         b.opening_hours = wanted[b.source_ref]
+    await db.commit()
+    return {"updated": len(rows), "skipped": len(body.items) - len(rows)}
+
+
+class EmailItem(BaseModel):
+    source_ref: str = Field(max_length=40)
+    email: str = Field(max_length=254)
+
+
+class EmailRequest(BaseModel):
+    items: list[EmailItem]
+
+
+@router.post("/businesses/import/emails")
+async def backfill_emails(
+    body: EmailRequest,
+    db: AsyncSession = Depends(get_db),
+    admin: User = Depends(get_current_admin),
+):
+    """Fill owner emails from OpenStreetMap for already-imported businesses (used only
+    for claim outreach). Never overwrites an email that's already set."""
+    if len(body.items) > 2000:
+        raise HTTPException(status_code=400, detail="Send at most 2000 items per request.")
+    wanted = {i.source_ref: e for i in body.items if (e := clean_email(i.email))}
+    rows = (await db.execute(
+        select(Business).where(Business.source_ref.in_(wanted), Business.email.is_(None),
+                               Business.deleted_at.is_(None))
+    )).scalars().all()
+    for b in rows:
+        b.email = wanted[b.source_ref]
     await db.commit()
     return {"updated": len(rows), "skipped": len(body.items) - len(rows)}
 

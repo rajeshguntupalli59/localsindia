@@ -124,6 +124,17 @@ OFFICE_MAP = {
 }
 DEFAULT_SHOP_CATEGORY = "businesses"   # supermarket, hardware, stationery, general, ...
 PHONE_KEYS = ("phone", "contact:phone", "mobile", "contact:mobile")
+EMAIL_KEYS = ("email", "contact:email")
+_EMAIL_RE = re.compile(r"^[a-z0-9._%+-]+@[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$")
+
+
+def normalize_email(raw: str | None) -> str | None:
+    """First valid address in the tag (may hold several, or a mailto:), lowercased."""
+    for part in re.split(r"[;,\s]+", raw or ""):
+        part = part.strip().lower().removeprefix("mailto:")
+        if len(part) <= 254 and _EMAIL_RE.match(part):
+            return part
+    return None
 
 
 def overpass_query(bbox: tuple) -> str:
@@ -414,6 +425,7 @@ def to_business(el: dict) -> tuple[dict | None, str]:
     lat = el.get("lat") or el.get("center", {}).get("lat")
     lon = el.get("lon") or el.get("center", {}).get("lon")
     website = tags.get("website") or tags.get("contact:website")
+    email = next((normalize_email(tags.get(k)) for k in EMAIL_KEYS if normalize_email(tags.get(k))), None)
     return {
         "name": name[:150],
         "category_slug": category,
@@ -425,6 +437,7 @@ def to_business(el: dict) -> tuple[dict | None, str]:
         "longitude": round(lon, 6) if lon else None,
         "opening_hours": (tags.get("opening_hours") or "").strip()[:255] or None,
         "subcategory_slug": subcategory_for(tags, category),
+        "email": email,
     }, ""
 
 
@@ -741,6 +754,26 @@ def backfill_hours(city: str, regions: dict) -> int:
     return updated
 
 
+def backfill_emails(city: str, regions: dict) -> int:
+    """Copy OSM email tags onto this city's already-imported businesses
+    (only where email is still empty — see POST /admin/businesses/import/emails)."""
+    items = []
+    for el in fetch_osm(tuple(regions[city]["bbox"])):
+        row, _ = to_business(el)
+        if row and row["email"]:
+            items.append({"source_ref": row["source_ref"], "email": row["email"]})
+    updated = 0
+    with httpx.Client(timeout=120) as client:
+        headers = admin_headers(client)
+        for i in range(0, len(items), 2000):
+            r = client.post(f"{BACKEND_URL}/api/v1/admin/businesses/import/emails",
+                            json={"items": items[i:i + 2000]}, headers=headers)
+            r.raise_for_status()
+            updated += r.json()["updated"]
+    print(f"  {city}: {len(items)} with email in OSM, {updated} filled")
+    return updated
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--city", help="one city slug")
@@ -750,6 +783,7 @@ def main() -> None:
     ap.add_argument("--fix", action="store_true", help="with --verify: soft-delete imports that fail the checks first")
     ap.add_argument("--fix-done", action="store_true", help="re-home, clean and verify every city already imported")
     ap.add_argument("--backfill-hours", action="store_true", help="fill opening hours for --city, or every imported city")
+    ap.add_argument("--backfill-emails", action="store_true", help="fill owner emails for --city, or every imported city")
     ap.add_argument("--backfill-subcategories", action="store_true",
                     help="set subcategories (Hospitals, Pharmacies…) for --city or every imported city; "
                          "dry run unless --apply")
@@ -764,6 +798,15 @@ def main() -> None:
         for city in cities:
             total += backfill_subcategories(city, regions, args.apply)
         print(f"Done ({'applied' if args.apply else 'dry run'}): {sum(total.values())} matched across {len(cities)} cities")
+        return
+    if args.backfill_emails:
+        cities = [args.city] if args.city else [c for c in order if c in load_state()]
+        total = 0
+        for i, city in enumerate(cities):
+            total += backfill_emails(city, regions)
+            if i < len(cities) - 1:
+                time.sleep(10)   # be gentle with the public Overpass servers
+        print(f"Done: {total} businesses got an email")
         return
     if args.backfill_hours:
         cities = [args.city] if args.city else [c for c in order if c in load_state()]

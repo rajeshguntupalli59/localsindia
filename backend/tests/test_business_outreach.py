@@ -86,3 +86,65 @@ async def test_validation_and_admin_only(auth_client, admin_client, city, catego
     assert (await admin.post(f"/api/v1/admin/outreach/{b.id}", json={"outcome": "sold"})).status_code == 422
     assert (await admin.get("/api/v1/admin/outreach?status=nope")).status_code == 422
     assert (await admin.post(f"/api/v1/admin/outreach/{uuid.uuid4()}", json={"outcome": "interested"})).status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_email_outreach_flow(client, admin_client, city, category, monkeypatch):
+    admin, _ = admin_client
+    sent = []
+
+    async def fake_send(**kw):
+        sent.append(kw)
+        return True
+    monkeypatch.setattr("app.routers.business_outreach.send_claim_invite_email", fake_send)
+
+    # A business with only an email (no phone) still shows up in the queue
+    b = await _business(city, category, "Email Only Stores", None)
+    base = f"/api/v1/admin/outreach/{b.id}"
+    assert (await admin.post(f"{base}/send-email")).status_code == 400          # no email yet
+    assert (await admin.put(f"{base}/email", json={"email": "not-an-email"})).status_code == 422
+    r = await admin.put(f"{base}/email", json={"email": " mailto:Owner@Shop.IN "})
+    assert r.json()["email"] == "owner@shop.in"
+    q = f"/api/v1/admin/outreach?city_slug={city.slug}&category_slug={category.slug}"
+    item = (await admin.get(q)).json()["items"][0]
+    assert item["email"] == "owner@shop.in" and item["mobile"] is None
+
+    assert (await admin.post(f"{base}/send-email")).status_code == 201
+    assert sent[0]["to"] == "owner@shop.in" and "/unsubscribe?b=" in sent[0]["unsubscribe_url"]
+    follow = (await admin.get(q + "&status=follow_up")).json()["items"][0]
+    assert follow["last_outcome"] == "email_sent"
+    assert (await admin.post(f"{base}/send-email")).status_code == 429          # 30-day cooldown
+
+    # Unsubscribe: bad token rejected; good token closes it and blocks further email
+    from app.routers.business_outreach import unsubscribe_token
+    assert (await client.get(f"/api/v1/outreach/unsubscribe?b={b.id}&t=bad")).status_code == 400
+    r = await client.get(f"/api/v1/outreach/unsubscribe?b={b.id}&t={unsubscribe_token(b.id)}")
+    assert r.status_code == 200 and "unsubscribed" in r.text
+    assert (await admin.get(q + "&status=closed")).json()["items"][0]["id"] == str(b.id)
+    assert (await admin.post(f"{base}/send-email")).status_code == 409
+    assert len(sent) == 1
+
+
+@pytest.mark.asyncio
+async def test_backfill_emails_never_overwrites(admin_client, city, category):
+    admin, _ = admin_client
+    from app.models.business import Business
+    engine = _make_engine()
+    async with async_sessionmaker(engine, expire_on_commit=False)() as s:
+        a = Business(city_id=city.id, category_id=category.id, name="OSM A", source="osm", source_ref="node/1")
+        b = Business(city_id=city.id, category_id=category.id, name="OSM B", source="osm", source_ref="node/2",
+                     email="kept@shop.in")
+        s.add_all([a, b])
+        await s.commit()
+    await engine.dispose()
+    r = await admin.post("/api/v1/admin/businesses/import/emails", json={"items": [
+        {"source_ref": "node/1", "email": "info@a.in; other@a.in"},
+        {"source_ref": "node/2", "email": "new@b.in"},
+        {"source_ref": "node/3", "email": "junk"},
+    ]})
+    assert r.json() == {"updated": 1, "skipped": 2}
+    engine = _make_engine()
+    async with async_sessionmaker(engine)() as s:
+        assert (await s.get(Business, a.id)).email == "info@a.in"
+        assert (await s.get(Business, b.id)).email == "kept@shop.in"
+    await engine.dispose()

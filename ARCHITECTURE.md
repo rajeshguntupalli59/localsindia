@@ -638,8 +638,12 @@ Also `GET /api/v1/admin/errors` (admin-only, see Admin section below) — lists 
 | POST | `/admin/business-claims/{id}/reject` | Reject with reason, notify | Admin |
 | POST | `/admin/businesses/import` | Bulk-create unclaimed directory businesses (OSM import), idempotent on source_ref | Admin |
 | POST | `/admin/business-claims/email` | Grant ownership for a claim proven by email (business ID + claimant account phone) | Admin |
-| GET | `/admin/outreach` | Owner-outreach queue: unclaimed businesses with a phone, by city/category/status (todo/follow_up/closed/claimed), mobiles first, + counts; latest `business_outreach` row = status | Admin |
+| GET | `/admin/outreach` | Owner-outreach queue: unclaimed businesses with a phone or email, by city/category/status (todo/follow_up/closed/claimed), mobiles first, + counts; latest `business_outreach` row = status | Admin |
 | POST | `/admin/outreach/{business_id}` | Log one manual call/WhatsApp outcome + optional note (nothing is sent by the server) | Admin |
+| PUT | `/admin/outreach/{business_id}/email` | Set/clear the owner email (`businesses.email`, admin-only, never in public APIs) | Admin |
+| POST | `/admin/outreach/{business_id}/send-email` | Send ONE claim invite via SendGrid, log `email_sent`; refuses if no email / claimed / closed / emailed <30 days ago | Admin |
+| GET | `/outreach/unsubscribe?b=&t=` | HMAC-signed one-click opt-out from the claim email → logs `not_interested`, no more emails | Public |
+| POST | `/admin/businesses/import/emails` | Backfill owner emails from OSM by `source_ref` (only where empty) | Admin |
 | GET | `/businesses/localities` | City's neighbourhoods with live business counts (optional category) | Public |
 | GET | `/businesses/locality-pages` | Area pages with 3+ businesses (city-wide + per category), optional city_slug; feeds sitemap-areas.xml | Public |
 | POST | `/admin/businesses/import/localities` | Bulk-set business neighbourhoods (from agents/assign_localities.py) | Admin |

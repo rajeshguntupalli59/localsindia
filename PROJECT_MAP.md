@@ -183,6 +183,11 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 - Hyderabad push status check (day 4 of the push started 10-08, live `/admin/outreach`): only 2 businesses contacted (32 Happy Teeth Dental Clinic, AAKAARAA Salon, both follow-up), 0 closed, 0 claimed; 759 still to contact. Automated parts running (1 Hyderabad `type_spotlight` post so far: kirana-supermarkets; weekly blog type links). Bottleneck is Raj's manual WhatsApp outreach (plan 15–20/day), not code. Week-end check moved from ~10-15 to ~10-19 (same day as the GSC/Bing check).
 - **Start here next session (~10-19):** (1) GSC indexing report + Bing; (2) Hyderabad push numbers from `/admin/outreach` (contacted / claimed), real listings, WhatsApp/Call taps, GSC impressions on type pages; (3) ~10-26: did the 3 GSC validations pass — if not, URL-Inspect a failed URL first.
 
+### 2026-11-03 — Owner emails + one-click claim email (outreach)
+- `businesses.email` (migration `e3f4a5b6c7d8`), admin-only. Filled from OSM `email`/`contact:email` (new imports + `osm_business_import.py --backfill-emails`, workflow input `backfill_emails`; Hyderabad: 197 of 2,457 have one) or typed on /admin/outreach.
+- /admin/outreach: email box + "Send claim email" — ONE SendGrid invite per click, logged as `email_sent`, 30-day cooldown, blocked when closed/claimed; signed unsubscribe link closes the business. Queue now includes email-only businesses.
+- Unsubscribe link uses the hardcoded prod API host (`BACKEND_URL` is not set on Azure).
+
 ### 2026-10-09 — Admin: city on listing cards + chatbot questions page
 - `/admin/listings` now shows the city (admin endpoints didn't send it, so only the area/landmark showed).
 - New `chatbot_questions` table (migration `c7d8e9f0a1b2`): POST /chat saves every message (city, search run, result count), also when Gemini is down. Read at `/admin/chatbot` via GET /admin/chatbot-questions. Only questions asked after deploy show up.

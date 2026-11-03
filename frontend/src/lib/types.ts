@@ -310,8 +310,9 @@ export interface OutreachItem {
   id: string;
   name: string;
   address: string | null;
-  phone: string;
+  phone: string | null;
   mobile: string | null;          // +91XXXXXXXXXX when the phone is an Indian mobile
+  email: string | null;           // owner email for the claim invite (admin-only, never public)
   city_slug: string;
   city_name: string;
   category_name: string | null;
