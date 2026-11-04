@@ -189,6 +189,8 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 - Unsubscribe link uses the hardcoded prod API host (`BACKEND_URL` is not set on Azure).
 - Claim invites sent from support@localsindia.com (replies reach the inbox). DNS check: no SendGrid DKIM, SPF is GoDaddy-only, DMARC p=quarantine → mail will likely hit spam until Raj authenticates the domain in SendGrid (CNAMEs in GoDaddy).
 - Email/business match audit (Hyderabad, 197 emails): matched by OSM element, names agree; but chains share one address (Care Hospitals ×4) and some listings are duplicates. So cooldown + unsubscribe now apply per ADDRESS across all listings, and the queue shows "Shared with N other listings".
+- **Prod email backfill DONE (2026-11-04), all 150 cities: 1,397 businesses have an OSM email** (Bengaluru 313, Hyderabad 197, Chennai 135, Kochi 66, Thrissur 63, Kottayam 50; many small towns 0). Took 3 runs. Run 1 timed out at 5h with its logs lost to buffering. So `d3d8ccc` added an email-only Overpass query, `PYTHONUNBUFFERED` and `--from-city` (workflow input `from_city`). Run 2 (`41714377258`) timed out after 84 cities: the free Overpass servers kept returning 502/504. Run 3 (`41762655138`, `from_city=kamareddy`) finished the last 66. Runs 2+3 filled 34 new emails; the rest came from run 1. Only empty emails are filled, so re-running is safe.
+- **Before sending any claim email:** Raj authenticates localsindia.com in SendGrid and adds the CNAMEs in GoDaddy; then re-check `s1/s2._domainkey`. Raj sends invites one at a time from /admin/outreach.
 
 ### 2026-10-09 — Admin: city on listing cards + chatbot questions page
 - `/admin/listings` now shows the city (admin endpoints didn't send it, so only the area/landmark showed).
