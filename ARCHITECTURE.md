@@ -641,7 +641,7 @@ Also `GET /api/v1/admin/errors` (admin-only, see Admin section below) — lists 
 | GET | `/admin/outreach` | Owner-outreach queue: unclaimed businesses with a phone or email, by city/category/status (todo/follow_up/closed/claimed), mobiles first, + counts; latest `business_outreach` row = status | Admin |
 | POST | `/admin/outreach/{business_id}` | Log one manual call/WhatsApp outcome + optional note (nothing is sent by the server) | Admin |
 | PUT | `/admin/outreach/{business_id}/email` | Set/clear the owner email (`businesses.email`, admin-only, never in public APIs) | Admin |
-| POST | `/admin/outreach/{business_id}/send-email` | Send ONE claim invite via SendGrid, log `email_sent`; refuses if no email / claimed / closed / emailed <30 days ago | Admin |
+| POST | `/admin/outreach/{business_id}/send-email` | Send ONE claim invite from support@ (GoDaddy SMTP; SendGrid fallback), log `email_sent`; refuses if no email / claimed / closed / emailed <30 days ago | Admin |
 | GET | `/outreach/unsubscribe?b=&t=` | HMAC-signed one-click opt-out from the claim email → logs `not_interested`, no more emails | Public |
 | POST | `/admin/businesses/import/emails` | Backfill owner emails from OSM by `source_ref` (only where empty) | Admin |
 | GET | `/businesses/localities` | City's neighbourhoods with live business counts (optional category) | Public |
