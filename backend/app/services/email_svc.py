@@ -8,9 +8,52 @@ FROM_EMAIL = os.getenv("EMAIL_FROM", "noreply@localsindia.com")
 FROM_NAME = os.getenv("EMAIL_FROM_NAME", "LocalsIndia")
 # Claim invites come from a real inbox so owners can reply
 SUPPORT_EMAIL = os.getenv("EMAIL_SUPPORT", "support@localsindia.com")
+# Own mailbox (GoDaddy) over SMTP — preferred over SendGrid (trial ended 2026-08-28).
+# GoDaddy only lets the signed-in mailbox be the sender, so From is always SMTP_USER.
+SMTP_HOST = os.getenv("SMTP_HOST", "smtpout.secureserver.net")
+SMTP_PORT = int(os.getenv("SMTP_PORT", "465"))
+SMTP_USER = os.getenv("SMTP_USER", SUPPORT_EMAIL)
+SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
+
+
+def email_configured() -> bool:
+    return bool(SMTP_PASSWORD or SENDGRID_KEY)
+
+
+def _smtp_send(to: str, subject: str, html: str, text: str) -> None:
+    import smtplib
+    import ssl
+    from email.message import EmailMessage
+    from email.utils import formataddr, make_msgid
+
+    msg = EmailMessage()
+    msg["From"] = formataddr((FROM_NAME, SMTP_USER))
+    msg["To"] = to
+    msg["Subject"] = subject
+    msg["Message-ID"] = make_msgid(domain=SMTP_USER.split("@")[-1])
+    msg.set_content(text or subject)
+    msg.add_alternative(html, subtype="html")
+    ctx = ssl.create_default_context()
+    if SMTP_PORT == 465:
+        with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, context=ctx, timeout=20) as s:
+            s.login(SMTP_USER, SMTP_PASSWORD)
+            s.send_message(msg)
+    else:
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=20) as s:
+            s.starttls(context=ctx)
+            s.login(SMTP_USER, SMTP_PASSWORD)
+            s.send_message(msg)
 
 
 async def send_email(to: str, subject: str, html: str, text: str = "", from_email: str | None = None) -> bool:
+    if SMTP_PASSWORD:
+        import asyncio
+        try:
+            await asyncio.to_thread(_smtp_send, to, subject, html, text)
+            return True
+        except Exception as e:
+            logger.error(f"SMTP send failed: {e}")
+            return False
     if not SENDGRID_KEY:
         logger.warning(f"[EMAIL MOCK] To: {to} | Subject: {subject}")
         return True

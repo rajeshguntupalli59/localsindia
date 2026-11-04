@@ -29,6 +29,7 @@ PLACEHOLDER_URLS = [
 from app.core.database import get_db
 from app.core.deps import get_current_admin
 from app.core.pagination import paginate
+from app.services.email_svc import email_configured
 from app.models.app_error_log import AppErrorLog
 from app.models.business import Business
 from app.models.buyer_request import BuyerRequest
@@ -682,7 +683,7 @@ async def get_platform_stats(
         "system": {
             "chatbot_key_set": bool(settings.GOOGLE_AI_KEY),
             "razorpay_configured": bool(settings.RAZORPAY_KEY_ID and settings.RAZORPAY_KEY_SECRET),
-            "sendgrid_configured": bool(settings.SENDGRID_API_KEY),
+            "sendgrid_configured": email_configured(),  # key name kept for the frontend; true for SMTP or SendGrid
         },
     }
 

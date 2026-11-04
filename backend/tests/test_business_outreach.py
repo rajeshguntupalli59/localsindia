@@ -164,6 +164,33 @@ async def test_claim_invite_sent_from_support(monkeypatch):
 
 
 @pytest.mark.asyncio
+async def test_send_email_uses_own_mailbox_smtp(monkeypatch):
+    import smtplib
+    from app.services import email_svc
+    sent = {}
+
+    class FakeSMTP:
+        def __init__(self, host, port, context=None, timeout=None):
+            sent["host"] = (host, port)
+        def __enter__(self): return self
+        def __exit__(self, *a): return False
+        def login(self, user, pw): sent["login"] = user
+        def send_message(self, msg): sent["msg"] = msg
+
+    monkeypatch.setattr(email_svc, "SMTP_PASSWORD", "x")
+    monkeypatch.setattr(smtplib, "SMTP_SSL", FakeSMTP)
+    assert await email_svc.send_email("o@shop.in", "Hi", "<p>hi</p>", "hi") is True
+    assert sent["host"] == ("smtpout.secureserver.net", 465)
+    assert sent["login"] == "support@localsindia.com"
+    assert sent["msg"]["From"] == "LocalsIndia <support@localsindia.com>"
+    assert sent["msg"]["To"] == "o@shop.in"
+
+    def boom(*a, **k): raise OSError("auth failed")
+    monkeypatch.setattr(smtplib, "SMTP_SSL", boom)
+    assert await email_svc.send_email("o@shop.in", "Hi", "<p>hi</p>") is False
+
+
+@pytest.mark.asyncio
 async def test_shared_email_one_invite_per_address(client, admin_client, city, category, monkeypatch):
     admin, _ = admin_client
     sent = []
