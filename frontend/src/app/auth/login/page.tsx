@@ -102,9 +102,11 @@ function LoginInner() {
   const { cities } = usePrefs();
   const cityCount = cities.length;
   const redirectParam = searchParams.get('redirect');
+  // Arrived from "Claim this Business" (often a claim-invite email): most are new, so start on sign-up
+  const claiming = !!redirectParam && redirectParam.includes('claim=1');
   const [step, setStep] = useState<Step>('phone');
   const [mode, setMode] = useState<'signin' | 'signup'>(
-    searchParams.get('mode') === 'signup' ? 'signup' : 'signin'
+    searchParams.get('mode') === 'signup' || claiming ? 'signup' : 'signin'
   );
   const [digits, setDigits] = useState('');
   const [password, setPassword] = useState('');
@@ -290,6 +292,8 @@ function LoginInner() {
     step === 'forgot-phone' ? 'Enter your number to receive a reset code' :
     step === 'forgot-otp' ? `Code sent to ${phone}` :
     step === 'forgot-reset' ? 'Choose a new password' :
+    claiming && mode === 'signup' ? 'Create a free account to claim your business. We\'ll text a code to your mobile. Already have an account? Switch to Sign in.' :
+    claiming ? 'Sign in to claim your business' :
     mode === 'signup' ? 'Verify your number to get started' :
     'Enter your number and password to sign in';
 

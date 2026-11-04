@@ -157,13 +157,25 @@ async def send_claim_invite_email(to: str, business_name: str, city_name: str,
         "Your business is listed on LocalsIndia",
         f"""<p>Namaste! <strong>{name}</strong> is listed for free on LocalsIndia, the local directory for {city}.</p>
         <p>Claim it for free to update your phone number, timings and photos, and reply to customer reviews.
-        Open your page and tap <strong>"Claim this Business"</strong>.</p>
-        <p><a class="btn" href="{business_url}">View &amp; claim your business →</a></p>"""
+        It takes about 2 minutes:</p>
+        <ol style="color:#4b5563;font-size:14px;line-height:1.7;padding-left:20px;margin:0 0 16px">
+          <li>Tap the button below. Your business page opens.</li>
+          <li>Create a free account with your mobile number. We text you a code; then you pick a password. (Already have an account? Just sign in.)</li>
+          <li>On the claim screen, choose <strong>Email code</strong>. We send a 6-digit code to <strong>this email address</strong>.</li>
+          <li>Type the code. Done! The listing is now yours to edit.</li>
+        </ol>
+        <p><a class="btn" href="{business_url}">Claim {name} →</a></p>
+        <p style="font-size:13px">Need help, or something is wrong in the listing? Just reply to this email and we'll sort it out for you.</p>"""
     ).replace('<a href="https://localsindia.com/unsubscribe" style="color:#9ca3af">Unsubscribe</a>',
               f'<a href="{unsubscribe_url}" style="color:#9ca3af">Unsubscribe — don\'t email us again</a>')
-    text = (f"Namaste! {business_name} is listed for free on LocalsIndia, the local directory for {city_name}:\n"
-            f"{business_url}\n\nClaim it for free to update your phone number, timings and photos, and reply "
-            f"to customer reviews - open the link and tap \"Claim this Business\".\n\n"
+    text = (f"Namaste! {business_name} is listed for free on LocalsIndia, the local directory for {city_name}.\n\n"
+            f"Claim it for free to update your phone number, timings and photos, and reply to customer reviews. "
+            f"It takes about 2 minutes:\n"
+            f"1. Open this link. Your business page opens: {business_url}\n"
+            f"2. Create a free account with your mobile number. We text you a code; then you pick a password. (Already have an account? Just sign in.)\n"
+            f"3. On the claim screen choose \"Email code\". We send a 6-digit code to this email address.\n"
+            f"4. Type the code. Done.\n\n"
+            f"Need help? Just reply to this email.\n\n"
             f"Not interested? Unsubscribe: {unsubscribe_url}")
     return await send_email(to, f"{business_name} is listed on LocalsIndia — claim it free", html, text,
                             from_email=SUPPORT_EMAIL)
