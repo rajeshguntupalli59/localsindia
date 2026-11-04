@@ -243,6 +243,10 @@ export const api = {
       req<{ message: string; masked_phone: string; otp?: string }>(`/api/v1/businesses/${id}/claim/otp/send`, { method: 'POST', token }),
     verifyClaimOtp: (id: string, otp: string, token: string) =>
       req<{ status: string }>(`/api/v1/businesses/${id}/claim/otp/verify`, { method: 'POST', body: JSON.stringify({ otp }), token }),
+    sendClaimEmailCode: (id: string, token: string) =>
+      req<{ message: string; masked_email: string; otp?: string }>(`/api/v1/businesses/${id}/claim/email/send`, { method: 'POST', token }),
+    verifyClaimEmailCode: (id: string, otp: string, token: string) =>
+      req<{ status: string }>(`/api/v1/businesses/${id}/claim/email/verify`, { method: 'POST', body: JSON.stringify({ otp }), token }),
     submitClaimDocuments: (id: string, form: FormData, token: string) =>
       req<{ status: string; id: string }>(`/api/v1/businesses/${id}/claim/documents`, { method: 'POST', body: form, token }),
     addReview: (id: string, data: { rating: number; body?: string }, token: string) =>

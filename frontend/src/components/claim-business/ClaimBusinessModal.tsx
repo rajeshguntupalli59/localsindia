@@ -1,17 +1,18 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { X, MessageSquare, FileText, CheckCircle2, Clock } from 'lucide-react';
+import { X, MessageSquare, Mail, FileText, CheckCircle2, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 import { api, ApiError } from '@/lib/api';
 import type { ClaimOptions } from '@/lib/types';
 import ReviewInvite from '@/components/review-invite/ReviewInvite';
 
-type Tab = 'otp' | 'documents';
+type Tab = 'otp' | 'email' | 'documents';
 
 /**
  * Ways to prove you own a business:
  *  - SMS code to the business's listed mobile (instant)
+ *  - Emailed code to the business's listed email (the address our claim invite went to)
  *  - Document + shopfront photo (+ optional visiting card), reviewed by our team,
  *    who may call the contact number given here
  *  - Or email the same proof to support; admin approves it from /admin/business-claims
@@ -32,8 +33,8 @@ export default function ClaimBusinessModal({
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState<'approved' | 'pending' | null>(null);
 
-  // OTP
-  const [codeSent, setCodeSent] = useState(false);
+  // One-time code (SMS or email) — which channel the current code went to
+  const [codeSent, setCodeSent] = useState<Tab | null>(null);
   const [otp, setOtp] = useState('');
 
   // Documents
@@ -73,7 +74,7 @@ export default function ClaimBusinessModal({
       if (u?.phone && /^\+91[6-9]\d{9}$/.test(u.phone)) setContactPhone(u.phone.slice(3));
     } catch { /* ignore */ }
     api.businesses.claimOptions(businessId, token)
-      .then(o => { setOpts(o); setTab(o.otp_available ? 'otp' : 'documents'); })
+      .then(o => { setOpts(o); setTab(o.email_available ? 'email' : o.otp_available ? 'otp' : 'documents'); })
       .catch(err => toast.error(err instanceof ApiError ? err.message : 'Could not load claim options'));
   }, [businessId, token]);
 
@@ -81,9 +82,15 @@ export default function ClaimBusinessModal({
     if (!token) return;
     setBusy(true);
     try {
-      const res = await api.businesses.sendClaimOtp(businessId, token);
-      setCodeSent(true);
-      toast.success(`Code sent to ${res.masked_phone}`);
+      if (tab === 'email') {
+        const res = await api.businesses.sendClaimEmailCode(businessId, token);
+        toast.success(`Code emailed to ${res.masked_email} — check spam too`);
+      } else {
+        const res = await api.businesses.sendClaimOtp(businessId, token);
+        toast.success(`Code sent to ${res.masked_phone}`);
+      }
+      setOtp('');
+      setCodeSent(tab);
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : 'Could not send the code');
     } finally {
@@ -95,7 +102,8 @@ export default function ClaimBusinessModal({
     if (!token) return;
     setBusy(true);
     try {
-      await api.businesses.verifyClaimOtp(businessId, otp.trim(), token);
+      if (tab === 'email') await api.businesses.verifyClaimEmailCode(businessId, otp.trim(), token);
+      else await api.businesses.verifyClaimOtp(businessId, otp.trim(), token);
       setDone('approved');
       onClaimed();
     } catch (err) {
@@ -166,29 +174,46 @@ export default function ClaimBusinessModal({
               </p>
             )}
 
-            {opts.otp_available && (
-              <div className="grid grid-cols-2 gap-2 mb-5 p-1 rounded-xl bg-slate-100">
-                <TabButton active={tab === 'otp'} onClick={() => setTab('otp')} icon={<MessageSquare className="w-4 h-4" />}>
-                  SMS code
-                </TabButton>
+            {(opts.otp_available || opts.email_available) && (
+              <div className={`grid ${opts.otp_available && opts.email_available ? 'grid-cols-3' : 'grid-cols-2'} gap-2 mb-5 p-1 rounded-xl bg-slate-100`}>
+                {opts.email_available && (
+                  <TabButton active={tab === 'email'} onClick={() => setTab('email')} icon={<Mail className="w-4 h-4" />}>
+                    Email code
+                  </TabButton>
+                )}
+                {opts.otp_available && (
+                  <TabButton active={tab === 'otp'} onClick={() => setTab('otp')} icon={<MessageSquare className="w-4 h-4" />}>
+                    SMS code
+                  </TabButton>
+                )}
                 <TabButton active={tab === 'documents'} onClick={() => setTab('documents')} icon={<FileText className="w-4 h-4" />}>
                   Documents
                 </TabButton>
               </div>
             )}
 
-            {tab === 'otp' && opts.otp_available ? (
+            {(tab === 'otp' && opts.otp_available) || (tab === 'email' && opts.email_available) ? (
               <div className="space-y-4">
                 <p className="text-sm" style={{ color: 'var(--li-text)' }}>
-                  We&apos;ll text a 6-digit code to the business&apos;s listed number <strong>{opts.masked_phone}</strong>.
+                  {tab === 'email' ? (
+                    <>We&apos;ll email a 6-digit code to the business&apos;s listed email <strong>{opts.masked_email}</strong>.</>
+                  ) : (
+                    <>We&apos;ll text a 6-digit code to the business&apos;s listed number <strong>{opts.masked_phone}</strong>.</>
+                  )}
                 </p>
-                {!codeSent ? (
+                {codeSent !== tab ? (
                   <button onClick={sendCode} disabled={busy}
                     className="w-full py-3 rounded-xl text-white font-semibold text-sm disabled:opacity-50"
                     style={{ background: 'var(--li-primary)' }}>
                     {busy ? 'Sending…' : 'Send code'}
                   </button>
-                ) : (
+                ) : null}
+                {codeSent !== tab && tab === 'email' && (
+                  <button onClick={() => setCodeSent('email')} className="w-full text-xs font-semibold underline" style={{ color: 'var(--li-muted)' }}>
+                    I already have a code from an earlier email
+                  </button>
+                )}
+                {codeSent !== tab ? null : (
                   <div className="space-y-3">
                     <input value={otp} onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
                       inputMode="numeric" autoComplete="one-time-code" placeholder="Enter 6-digit code"
@@ -204,7 +229,7 @@ export default function ClaimBusinessModal({
                   </div>
                 )}
                 <button onClick={() => setTab('documents')} className="w-full text-xs font-semibold" style={{ color: 'var(--li-primary)' }}>
-                  Don&apos;t have this number any more? Verify with documents instead →
+                  {tab === 'email' ? 'No access to this email?' : 'Don’t have this number any more?'} Verify with documents instead →
                 </button>
               </div>
             ) : (

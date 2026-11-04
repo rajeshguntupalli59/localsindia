@@ -1,5 +1,5 @@
-"""Claiming a directory business: SMS OTP to the business's own number, or
-proof documents reviewed by an admin. Replaces the old first-come instant
+"""Claiming a directory business: SMS OTP to the business's own number, a code
+emailed to the business's own listed email, or proof documents reviewed by an admin. Replaces the old first-come instant
 claim, which let any signed-in user take over any business."""
 import re
 import uuid
@@ -23,6 +23,7 @@ from app.models.user import User
 from app.services import msg91
 from app.services.cloudinary_svc import upload_private_image, private_image_url
 from app.services.notification_svc import notify
+from app.services.email_svc import send_claim_code_email
 
 router = APIRouter(prefix="/api/v1", tags=["business-claims"])
 
@@ -32,6 +33,9 @@ MAX_SIZE_BYTES = 5 * 1024 * 1024
 OTP_EXPIRE_MINUTES = 10
 OTP_MAX_ATTEMPTS = 3
 OTP_MAX_SENDS_PER_HOUR = 3   # per business — the SMS goes to someone else's phone
+# Owners often read the business inbox hours later / on another device. Still safe: the code
+# only works for the account that asked for it, 3 guesses per code, 3 codes per hour.
+EMAIL_CODE_EXPIRE_MINUTES = 24 * 60
 
 DOC_TYPES = {
     "gst": "GST registration certificate",
@@ -68,6 +72,11 @@ def normalize_indian_mobile(raw: str | None) -> str | None:
 
 def mask_phone(phone: str) -> str:
     return f"{phone[:3]} ••••• {phone[-4:]}"
+
+
+def mask_email(email: str) -> str:
+    local, _, domain = email.partition("@")
+    return f"{local[:2]}•••@{domain}"
 
 
 async def _notify_new_owner(db: AsyncSession, business: Business, user_id: uuid.UUID, how: str) -> None:
@@ -121,6 +130,9 @@ async def claim_options(
         # OTP only makes sense for an unclaimed business with a mobile number
         "otp_available": business.owner_id is None and mobile is not None,
         "masked_phone": mask_phone(mobile) if mobile else None,
+        # Same idea for the business's own listed email (the address our claim invite went to)
+        "email_available": business.owner_id is None and bool(business.email),
+        "masked_email": mask_email(business.email) if business.email else None,
         "pending_claim": bool(pending),
         "doc_types": [{"key": k, "label": v} for k, v in DOC_TYPES.items()],
     }
@@ -141,27 +153,7 @@ async def send_claim_otp(
     if not mobile:
         raise HTTPException(status_code=400, detail="This business has no mobile number on file. Use document verification instead.")
 
-    now = datetime.now(timezone.utc)
-    sent_recently = await db.execute(
-        select(func.count()).select_from(BusinessClaim).where(
-            BusinessClaim.business_id == business_id,
-            BusinessClaim.method == "otp",
-            BusinessClaim.created_at >= now - timedelta(hours=1),
-        )
-    )
-    if sent_recently.scalar() >= OTP_MAX_SENDS_PER_HOUR:
-        raise HTTPException(status_code=429, detail="Too many codes sent to this business. Try again in an hour.")
-
-    otp = generate_otp()
-    db.add(BusinessClaim(
-        business_id=business_id,
-        user_id=current_user.id,
-        method="otp",
-        status="otp_sent",
-        otp_hash=hash_password(otp),
-        otp_expires_at=now + timedelta(minutes=OTP_EXPIRE_MINUTES),
-    ))
-    await db.commit()
+    otp = await _issue_code(db, business_id, current_user.id, "otp", OTP_EXPIRE_MINUTES)
 
     if settings.OTP_DEBUG:
         return {"message": "OTP sent", "masked_phone": mask_phone(mobile), "otp": otp}
@@ -185,6 +177,38 @@ async def verify_claim_otp(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    return await _verify_code(db, business_id, current_user, body.otp, "otp",
+                              "The code you entered matched the business's phone.")
+
+
+async def _issue_code(db: AsyncSession, business_id: uuid.UUID, user_id: uuid.UUID,
+                      method: str, expire_minutes: int) -> str:
+    """Rate-limit per business + method, store a hashed one-time code, return it."""
+    now = datetime.now(timezone.utc)
+    sent_recently = await db.execute(
+        select(func.count()).select_from(BusinessClaim).where(
+            BusinessClaim.business_id == business_id,
+            BusinessClaim.method == method,
+            BusinessClaim.created_at >= now - timedelta(hours=1),
+        )
+    )
+    if sent_recently.scalar() >= OTP_MAX_SENDS_PER_HOUR:
+        raise HTTPException(status_code=429, detail="Too many codes sent to this business. Try again in an hour.")
+    otp = generate_otp()
+    db.add(BusinessClaim(
+        business_id=business_id,
+        user_id=user_id,
+        method=method,
+        status="otp_sent",
+        otp_hash=hash_password(otp),
+        otp_expires_at=now + timedelta(minutes=expire_minutes),
+    ))
+    await db.commit()
+    return otp
+
+
+async def _verify_code(db: AsyncSession, business_id: uuid.UUID, current_user: User, code: str,
+                       method: str, how: str) -> dict:
     business = await _get_business(business_id, db)
     if business.owner_id is not None:
         raise HTTPException(status_code=409, detail="This business is already claimed.")
@@ -195,7 +219,7 @@ async def verify_claim_otp(
         .where(
             BusinessClaim.business_id == business_id,
             BusinessClaim.user_id == current_user.id,
-            BusinessClaim.method == "otp",
+            BusinessClaim.method == method,
             BusinessClaim.status == "otp_sent",
             BusinessClaim.otp_expires_at > now,
         )
@@ -211,7 +235,7 @@ async def verify_claim_otp(
         claim.status = "expired"
         await db.commit()
         raise HTTPException(status_code=429, detail="Too many wrong codes. Request a new one.")
-    if not verify_password(body.otp, claim.otp_hash):
+    if not verify_password(code, claim.otp_hash):
         await db.commit()
         raise HTTPException(status_code=400, detail="Wrong code.")
 
@@ -220,8 +244,43 @@ async def verify_claim_otp(
     business.owner_id = current_user.id
     business.updated_at = now
     await db.commit()
-    await _notify_new_owner(db, business, current_user.id, "The code you entered matched the business's phone.")
+    await _notify_new_owner(db, business, current_user.id, how)
     return {"status": "approved"}
+
+
+@router.post("/businesses/{business_id}/claim/email/send")
+@limiter.limit("3/minute")
+async def send_claim_email_code(
+    request: Request,
+    business_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Email a code to the business's OWN listed email (never an address the claimant types)."""
+    business = await _get_business(business_id, db)
+    if business.owner_id is not None:
+        raise HTTPException(status_code=409, detail="This business is already claimed. Use document verification instead.")
+    if not business.email:
+        raise HTTPException(status_code=400, detail="This business has no email on file. Use document verification instead.")
+    otp = await _issue_code(db, business_id, current_user.id, "email_otp", EMAIL_CODE_EXPIRE_MINUTES)
+    if settings.OTP_DEBUG:
+        return {"message": "Code sent", "masked_email": mask_email(business.email), "otp": otp}
+    if not await send_claim_code_email(business.email, business.name, otp):
+        raise HTTPException(status_code=502, detail="Could not send the email. Try document verification instead.")
+    return {"message": "Code sent", "masked_email": mask_email(business.email)}
+
+
+@router.post("/businesses/{business_id}/claim/email/verify")
+@limiter.limit("10/minute")
+async def verify_claim_email_code(
+    request: Request,
+    business_id: uuid.UUID,
+    body: ClaimOtpVerify,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return await _verify_code(db, business_id, current_user, body.otp, "email_otp",
+                              "The code you entered was sent to the business's email.")
 
 
 async def _read_image(file: UploadFile, label: str) -> bytes:

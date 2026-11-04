@@ -469,3 +469,69 @@ async def test_sitemap_counts_per_city_and_category(auth_client, admin_client, c
     assert counts["hyderabad"]["businesses"][slug] == 3
     assert slug not in counts["hyderabad"]["listings"]
     assert isinstance(counts["hyderabad"]["events"], int)
+
+
+async def _business_with_email(city, email="Owner@Shop.in", phone=None):
+    from app.models.business import Business
+    engine = _make_engine()
+    async with async_sessionmaker(engine, expire_on_commit=False)() as s:
+        b = Business(city_id=city.id, name=f"Email Shop {uuid.uuid4().hex[:4]}", phone=phone, email=email)
+        s.add(b)
+        await s.commit()
+        await s.refresh(b)
+    await engine.dispose()
+    return b
+
+
+@pytest.mark.asyncio
+async def test_email_code_claim_happy_path(auth_client, city, monkeypatch):
+    client, user = auth_client
+    monkeypatch.setattr(business_claims, "generate_otp", lambda: "731905")
+    mails = []
+
+    async def fake_mail(to, name, code):
+        mails.append((to, code))
+        return True
+    monkeypatch.setattr(business_claims, "send_claim_code_email", fake_mail)
+    b = await _business_with_email(city, email="owner@shop.in")
+
+    opts = (await client.get(f"/api/v1/businesses/{b.id}/claim-options")).json()
+    assert opts["email_available"] is True and opts["otp_available"] is False
+    assert opts["masked_email"] == "ow•••@shop.in"
+
+    send = await client.post(f"/api/v1/businesses/{b.id}/claim/email/send")
+    assert send.status_code == 200 and "otp" not in send.json()
+    assert mails == [("owner@shop.in", "731905")]   # only ever the business's own listed email
+
+    # An SMS code can't be used for the email flow, and vice versa
+    assert (await client.post(f"/api/v1/businesses/{b.id}/claim/otp/verify", json={"otp": "731905"})).status_code == 400
+    ok = await client.post(f"/api/v1/businesses/{b.id}/claim/email/verify", json={"otp": "731905"})
+    assert ok.status_code == 200
+    assert await _owner_of(b.id) == user.id
+    # Claimed now: no more codes, no more options
+    assert (await client.post(f"/api/v1/businesses/{b.id}/claim/email/send")).status_code == 409
+
+
+@pytest.mark.asyncio
+async def test_email_code_wrong_code_locks(auth_client, city, monkeypatch):
+    client, _ = auth_client
+    monkeypatch.setattr(business_claims, "generate_otp", lambda: "731905")
+
+    async def fake_mail(*a):
+        return True
+    monkeypatch.setattr(business_claims, "send_claim_code_email", fake_mail)
+    b = await _business_with_email(city)
+    await client.post(f"/api/v1/businesses/{b.id}/claim/email/send")
+    for _ in range(3):
+        assert (await client.post(f"/api/v1/businesses/{b.id}/claim/email/verify", json={"otp": "000000"})).status_code == 400
+    assert (await client.post(f"/api/v1/businesses/{b.id}/claim/email/verify", json={"otp": "731905"})).status_code == 429
+    assert await _owner_of(b.id) is None
+
+
+@pytest.mark.asyncio
+async def test_email_code_needs_listed_email(auth_client, city):
+    client, _ = auth_client
+    b = await _unclaimed_business(city)   # phone only
+    opts = (await client.get(f"/api/v1/businesses/{b.id}/claim-options")).json()
+    assert opts["email_available"] is False and opts["masked_email"] is None
+    assert (await client.post(f"/api/v1/businesses/{b.id}/claim/email/send")).status_code == 400

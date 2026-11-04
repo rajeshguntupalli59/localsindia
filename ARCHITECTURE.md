@@ -643,6 +643,8 @@ Also `GET /api/v1/admin/errors` (admin-only, see Admin section below) — lists 
 | PUT | `/admin/outreach/{business_id}/email` | Set/clear the owner email (`businesses.email`, admin-only, never in public APIs) | Admin |
 | POST | `/admin/outreach/{business_id}/send-email` | Send ONE claim invite from support@ (GoDaddy SMTP; SendGrid fallback), log `email_sent`; refuses if no email / claimed / closed / emailed <30 days ago | Admin |
 | POST | `/cron/claim-invites?secret=&limit=` | Daily automatic claim invites (workflow `claim-invites.yml`): max 100/day, each address once ever, skips claimed / closed / unsubscribed / under review; Hyderabad first | Cron secret |
+| POST | `/businesses/{id}/claim/email/send` | Email a 6-digit claim code to the business's own listed email (24h, 3/hour) | User |
+| POST | `/businesses/{id}/claim/email/verify` | `{otp}` → claimant becomes owner (3 guesses per code) | User |
 | GET | `/outreach/unsubscribe?b=&t=` | HMAC-signed one-click opt-out from the claim email → logs `not_interested`, no more emails | Public |
 | POST | `/admin/businesses/import/emails` | Backfill owner emails from OSM by `source_ref` (only where empty) | Admin |
 | GET | `/businesses/localities` | City's neighbourhoods with live business counts (optional category) | Public |

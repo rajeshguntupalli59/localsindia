@@ -132,6 +132,22 @@ async def send_listing_expiry_email(to: str, listing_title: str, renew_url: str,
     return await send_email(to, f"Renew your listing — expires in {days_left} days", html)
 
 
+async def send_claim_code_email(to: str, business_name: str, code: str) -> bool:
+    """Ownership code for claiming a business, sent to the business's own listed email."""
+    from html import escape
+    name = escape(business_name)
+    html = _base_template(
+        f"Your code: {code}",
+        f"""<p>Someone is claiming <strong>{name}</strong> on LocalsIndia and asked for a code sent to this business email.</p>
+        <p style="font-size:28px;font-weight:800;letter-spacing:6px;color:#1a1a2e">{code}</p>
+        <p>Enter it on the claim screen within 24 hours. If this wasn't you, ignore this email — nothing changes without the code.</p>"""
+    )
+    text = (f"Your LocalsIndia code to claim {business_name}: {code}\n"
+            f"Valid for 24 hours. If this wasn't you, ignore this email.")
+    return await send_email(to, f"{code} is your code to claim {business_name}", html, text,
+                            from_email=SUPPORT_EMAIL)
+
+
 async def send_claim_invite_email(to: str, business_name: str, city_name: str,
                                   business_url: str, unsubscribe_url: str) -> bool:
     """One claim invite: one click on /admin/outreach, or the daily claim-invites cron (each address once)."""

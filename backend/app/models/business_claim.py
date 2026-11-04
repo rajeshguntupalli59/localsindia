@@ -11,6 +11,7 @@ class BusinessClaim(Base):
 
     Two methods:
       - 'otp': a code sent by SMS to the business's own listed mobile number.
+      - 'email_otp': a code emailed to the business's own listed email (same flow).
         Approved instantly on a correct code. The OTP lives here, not in
         otp_requests, so it can never be redeemed as a login OTP (or vice versa).
       - 'documents': proof document + shopfront photo (+ optional visiting card)

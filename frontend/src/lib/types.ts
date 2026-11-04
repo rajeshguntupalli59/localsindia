@@ -284,6 +284,8 @@ export interface ClaimOptions {
   is_owner: boolean;
   otp_available: boolean;
   masked_phone: string | null;
+  email_available: boolean;   // a code can be emailed to the business's own listed email
+  masked_email: string | null;
   pending_claim: boolean;
   doc_types: { key: string; label: string }[];
 }
