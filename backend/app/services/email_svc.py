@@ -134,7 +134,7 @@ async def send_listing_expiry_email(to: str, listing_title: str, renew_url: str,
 
 async def send_claim_invite_email(to: str, business_name: str, city_name: str,
                                   business_url: str, unsubscribe_url: str) -> bool:
-    """One claim invite, sent by an admin from /admin/outreach (never in bulk)."""
+    """One claim invite: one click on /admin/outreach, or the daily claim-invites cron (each address once)."""
     from html import escape
     name, city = escape(business_name), escape(city_name)
     html = _base_template(

@@ -1,0 +1,25 @@
+name: Claim Invites
+
+on:
+  schedule:
+    # 5:00 AM UTC = 10:30 AM IST daily (business hours, after the 9 AM reminders)
+    - cron: '0 5 * * *'
+  workflow_dispatch:  # allow manual trigger from GitHub Actions UI
+
+jobs:
+  send-invites:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Email up to 100 unclaimed businesses (each address once, ever)
+        run: |
+          # 25 per call keeps each request well under Azure's 230s limit; the
+          # server stops at 100/day itself, so extra calls just send nothing.
+          for i in 1 2 3 4; do
+            HTTP_STATUS=$(curl -s -m 200 -X POST -o /tmp/r.json -w "%{http_code}" \
+              "${{ secrets.BACKEND_URL }}/api/v1/cron/claim-invites?secret=${{ secrets.CRON_SECRET }}&limit=25")
+            echo "batch $i: HTTP $HTTP_STATUS $(cat /tmp/r.json)"
+            if [ "$HTTP_STATUS" != "200" ]; then exit 1; fi
+            SENT=$(python3 -c "import json;print(json.load(open('/tmp/r.json'))['sent'])")
+            if [ "$SENT" = "0" ]; then break; fi
+          done

@@ -1,0 +1,127 @@
+"""Daily claim-invite cron: each address once ever, skips claimed / unsubscribed /
+under-review, respects the daily cap.
+
+The test DB is shared across the session, so each test first drains invites for
+businesses other tests left behind, then checks only its own (uuid-tagged) addresses."""
+import asyncio
+import uuid
+from unittest.mock import patch
+
+import pytest
+from sqlalchemy.ext.asyncio import async_sessionmaker
+
+from app.core.config import settings
+from tests.conftest import _make_engine
+
+SECRET = "test_cron_secret"
+
+
+async def _add(*objs):
+    engine = _make_engine()
+    async with async_sessionmaker(engine, expire_on_commit=False)() as s:
+        s.add_all(objs)
+        await s.commit()
+    await engine.dispose()
+
+
+@pytest.fixture
+def sent(monkeypatch):
+    out = []
+
+    async def fake_send(**kw):
+        out.append(kw)
+        return True
+
+    async def no_sleep(_):
+        return None
+    monkeypatch.setattr("app.routers.business_outreach.send_claim_invite_email", fake_send)
+    monkeypatch.setattr(asyncio, "sleep", no_sleep)
+    return out
+
+
+async def _run(client, limit=25):
+    with patch.object(settings, "CRON_SECRET", SECRET):
+        r = await client.post(f"/api/v1/cron/claim-invites?secret={SECRET}&limit={limit}")
+    assert r.status_code == 200, r.text
+    return r.json()
+
+
+async def _drain(client, sent, monkeypatch) -> int:
+    """Invite everything already in the DB; returns today's automatic count."""
+    monkeypatch.setattr("app.routers.business_outreach.DAILY_AUTO_INVITES", 10 ** 6)
+    while True:
+        r = await _run(client, limit=50)
+        if r["addresses_left"] == 0 or r["sent"] == 0:
+            sent.clear()
+            return r["sent_today"]
+
+
+@pytest.mark.asyncio
+async def test_each_address_once_and_skips(client, admin_client, city, category, sent, monkeypatch):
+    _, admin_user = admin_client
+    from app.models.business import Business
+    from app.models.business_claim import BusinessClaim
+    from app.models.business_outreach import BusinessOutreach
+    from app.routers.business_outreach import UNSUBSCRIBED
+    await _drain(client, sent, monkeypatch)
+    t = uuid.uuid4().hex[:8]
+
+    def biz(name, email, owner=None):
+        return Business(city_id=city.id, category_id=category.id, name=name, email=f"{email}.{t}.in", owner_id=owner)
+
+    chain_a, chain_b = biz("Chain A", "info@chain"), biz("Chain B", "info@chain")
+    fresh = biz("Fresh Shop", "owner@fresh")
+    claimed = biz("Claimed Shop", "me@claimed", owner=admin_user.id)
+    claimed_sibling = biz("Claimed Sibling", "me@claimed")   # same address as a claimed business
+    emailed, unsub, review = biz("Emailed", "x@emailed"), biz("Unsub", "x@unsub"), biz("Review", "x@review")
+    await _add(chain_a, chain_b, fresh, claimed, claimed_sibling, emailed, unsub, review)
+    await _add(
+        BusinessOutreach(business_id=emailed.id, outcome="email_sent", note="old"),
+        BusinessOutreach(business_id=unsub.id, outcome="not_interested", note=UNSUBSCRIBED),
+        BusinessClaim(business_id=review.id, user_id=admin_user.id, method="documents", status="pending"),
+    )
+
+    first = await _run(client)
+    assert sorted(k["to"] for k in sent) == [f"info@chain.{t}.in", f"owner@fresh.{t}.in"]
+    assert first["sent"] == 2 and first["failed"] == 0 and first["addresses_left"] == 0
+    assert all(k["business_url"].endswith("?claim=1") for k in sent)
+
+    # Run again: nobody gets a second email, ever
+    again = await _run(client)
+    assert again["sent"] == 0 and len(sent) == 2
+
+
+@pytest.mark.asyncio
+async def test_daily_cap(client, city, category, sent, monkeypatch):
+    from app.models.business import Business
+    today = await _drain(client, sent, monkeypatch)
+    monkeypatch.setattr("app.routers.business_outreach.DAILY_AUTO_INVITES", today + 2)
+    t = uuid.uuid4().hex[:8]
+    await _add(*[Business(city_id=city.id, category_id=category.id, name=f"Shop {i}", email=f"s{i}@{t}.in")
+                 for i in range(4)])
+    assert (await _run(client, limit=50))["sent"] == 2
+    capped = await _run(client, limit=50)
+    assert capped["sent"] == 0 and capped["sent_today"] == today + 2 and capped["addresses_left"] == 2
+
+
+@pytest.mark.asyncio
+async def test_stops_after_three_failures(client, city, category, sent, monkeypatch):
+    from app.models.business import Business
+    await _drain(client, sent, monkeypatch)
+    calls = []
+
+    async def failing(**kw):
+        calls.append(kw)
+        return False
+    monkeypatch.setattr("app.routers.business_outreach.send_claim_invite_email", failing)
+    t = uuid.uuid4().hex[:8]
+    await _add(*[Business(city_id=city.id, category_id=category.id, name=f"Shop {i}", email=f"f{i}@{t}.in")
+                 for i in range(6)])
+    r = await _run(client)
+    assert r["sent"] == 0 and r["failed"] == 3 and len(calls) == 3
+
+
+@pytest.mark.asyncio
+async def test_needs_cron_secret(client):
+    with patch.object(settings, "CRON_SECRET", SECRET):
+        assert (await client.post("/api/v1/cron/claim-invites?secret=wrong")).status_code == 403

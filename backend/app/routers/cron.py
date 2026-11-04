@@ -28,6 +28,19 @@ def _check_secret(secret: str = Query(...)) -> None:
         raise HTTPException(status_code=403, detail="Invalid cron secret.")
 
 
+@router.post("/claim-invites")
+async def claim_invites(
+    limit: int = Query(25, ge=1, le=50),
+    _: None = Depends(_check_secret),
+    db: AsyncSession = Depends(get_db),
+):
+    """Daily claim-invite emails to unclaimed businesses (each address once, max 100/day).
+    Small batches per call so one request stays well under Azure's 230s limit;
+    the claim-invites workflow calls this until the day's quota is used."""
+    from app.routers.business_outreach import send_daily_invites
+    return await send_daily_invites(db, limit)
+
+
 @router.get("/expiry-reminders")
 async def send_expiry_reminders(
     _: None = Depends(_check_secret),

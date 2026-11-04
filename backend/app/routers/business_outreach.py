@@ -37,6 +37,7 @@ STATUSES = ("todo", "follow_up", "closed", "claimed")
 PAGE_SIZE = 25
 EMAIL_COOLDOWN = timedelta(days=30)
 UNSUBSCRIBED = "Unsubscribed via email link"
+DAILY_AUTO_INVITES = 100  # GoDaddy mailbox caps ~250-500/day; site mail needs room too
 SITE = "https://www.localsindia.com"
 # Public API host for the unsubscribe link (BACKEND_URL isn't set on Azure; same fallback as the frontend)
 PUBLIC_API = "https://localsindia-backend-in.azurewebsites.net"
@@ -220,43 +221,98 @@ async def send_outreach_email(
 ):
     """Send ONE claim invite to this business's email, then log it as an outreach attempt."""
     business = await _live_business(db, business_id)
+    err = await _send_invite(db, business, admin.id)
+    if err:
+        raise HTTPException(status_code=err[0], detail=err[1])
+    return {"ok": True, "status": "follow_up"}
+
+
+async def _send_invite(db: AsyncSession, business: Business, admin_id) -> tuple[int, str] | None:
+    """Every guard + the send + the log row. Returns (http_status, reason) when not sent."""
     if not business.email:
-        raise HTTPException(status_code=400, detail="This business has no email address")
+        return 400, "This business has no email address"
     if business.owner_id:
-        raise HTTPException(status_code=409, detail="Already claimed")
+        return 409, "Already claimed"
     latest = (await db.execute(
         select(BusinessOutreach.outcome).where(BusinessOutreach.business_id == business.id)
         .order_by(BusinessOutreach.created_at.desc()).limit(1)
     )).scalar_one_or_none()
     if latest in CLOSED:
-        raise HTTPException(status_code=409, detail="Closed (not interested / wrong number / unsubscribed) — not emailing")
+        return 409, "Closed (not interested / wrong number / unsubscribed) — not emailing"
     same_address = select(Business.id).where(Business.email == business.email)
     if (await db.execute(
         select(BusinessOutreach.id).where(BusinessOutreach.business_id.in_(same_address),
                                           BusinessOutreach.note == UNSUBSCRIBED).limit(1)
     )).first():
-        raise HTTPException(status_code=409, detail="This email address unsubscribed — not emailing")
+        return 409, "This email address unsubscribed — not emailing"
     last_email = (await db.execute(
         select(func.max(BusinessOutreach.created_at))
         .where(BusinessOutreach.business_id.in_(same_address), BusinessOutreach.outcome == "email_sent")
     )).scalar_one_or_none()
     if last_email and datetime.now(timezone.utc) - last_email < EMAIL_COOLDOWN:
-        raise HTTPException(status_code=429,
-                            detail="This email address was already sent an invite in the last 30 days")
+        return 429, "This email address was already sent an invite in the last 30 days"
 
     city = (await db.execute(select(City).where(City.id == business.city_id))).scalar_one()
     unsub = (f"{PUBLIC_API}/api/v1/outreach/unsubscribe"
              f"?b={business.id}&t={unsubscribe_token(business.id)}")
     ok = await send_claim_invite_email(
         to=business.email, business_name=business.name, city_name=city.name,
-        business_url=f"{SITE}/{city.slug}/businesses/{business.id}", unsubscribe_url=unsub,
+        business_url=f"{SITE}/{city.slug}/businesses/{business.id}?claim=1", unsubscribe_url=unsub,
     )
     if not ok:
-        raise HTTPException(status_code=502, detail="Email provider rejected the message — try again later")
-    db.add(BusinessOutreach(business_id=business.id, admin_id=admin.id, outcome="email_sent",
+        return 502, "Email provider rejected the message — try again later"
+    db.add(BusinessOutreach(business_id=business.id, admin_id=admin_id, outcome="email_sent",
                             note=f"Claim email to {business.email}"))
     await db.commit()
-    return {"ok": True, "status": "follow_up"}
+    return None
+
+
+async def send_daily_invites(db: AsyncSession, limit: int) -> dict:
+    """Automatic invites (admin_id NULL): each address at most ONCE, ever. Skips claimed
+    businesses, closed/unsubscribed ones, addresses shared with a claimed business, and
+    businesses with a claim under review. Hyderabad first. Capped at DAILY_AUTO_INVITES/day."""
+    import asyncio
+    from app.models.business_claim import BusinessClaim
+    day_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+    sent_today = (await db.execute(
+        select(func.count()).select_from(BusinessOutreach).where(
+            BusinessOutreach.outcome == "email_sent", BusinessOutreach.admin_id.is_(None),
+            BusinessOutreach.created_at >= day_start)
+    )).scalar_one()
+    limit = max(0, min(limit, DAILY_AUTO_INVITES - sent_today))
+
+    touched = (select(Business.email)
+               .join(BusinessOutreach, BusinessOutreach.business_id == Business.id)
+               .where(Business.email.is_not(None),
+                      (BusinessOutreach.outcome.in_(("email_sent",) + CLOSED))
+                      | (BusinessOutreach.note == UNSUBSCRIBED)))
+    claimed = select(Business.email).where(Business.email.is_not(None), Business.owner_id.is_not(None))
+    under_review = select(BusinessClaim.business_id).where(BusinessClaim.status == "pending")
+    rows = (await db.execute(
+        select(Business).join(City, City.id == Business.city_id)
+        .where(Business.email.is_not(None), Business.deleted_at.is_(None), Business.owner_id.is_(None),
+               Business.email.not_in(touched), Business.email.not_in(claimed),
+               Business.id.not_in(under_review))
+        .order_by(case((City.slug == "hyderabad", 0), else_=1), City.name, Business.created_at)
+    )).scalars().all()
+    queue, seen = [], set()
+    for b in rows:
+        if b.email not in seen:
+            seen.add(b.email)
+            queue.append(b)
+
+    sent, failed, streak = 0, 0, 0
+    for b in queue[:limit]:
+        err = await _send_invite(db, b, None)
+        if err is None:
+            sent, streak = sent + 1, 0
+        else:
+            failed, streak = failed + 1, streak + 1
+            if streak >= 3:   # mailbox refusing (daily cap / password) - stop, retry tomorrow
+                break
+        await asyncio.sleep(1)
+    return {"sent": sent, "failed": failed, "sent_today": sent_today + sent,
+            "addresses_left": len(queue) - sent}
 
 
 @public_router.get("/unsubscribe", response_class=HTMLResponse)

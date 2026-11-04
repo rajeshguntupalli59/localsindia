@@ -128,9 +128,19 @@ export default function BusinessDetailPage({ initial = null, subtitle }: { initi
   };
 
   const openClaim = () => {
-    if (!localStorage.getItem('access_token')) { router.push('/auth/login'); return; }
+    if (!localStorage.getItem('access_token')) {
+      // Come back to this page with the claim box open (claim-invite emails link here with ?claim=1)
+      router.push(`/auth/login?redirect=${encodeURIComponent(`${window.location.pathname}?claim=1`)}`);
+      return;
+    }
     setClaimModal(true);
   };
+
+  // ?claim=1 (from the claim-invite email, or back from login): open the claim box once the page is loaded
+  const unclaimed = !!business && !business.owner_id;
+  useEffect(() => {
+    if (unclaimed && new URLSearchParams(window.location.search).get('claim') === '1') openClaim();
+  }, [unclaimed]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (loading) {
     return (
