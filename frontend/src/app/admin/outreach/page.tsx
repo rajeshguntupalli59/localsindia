@@ -21,13 +21,25 @@ const CALL_OUTCOMES = ['no_answer', 'callback', 'interested', 'not_interested', 
 const CLOSED = new Set(['not_interested', 'wrong_number']);
 const EMPTY_COUNTS: Record<OutreachStatus, number> = { todo: 0, follow_up: 0, closed: 0, claimed: 0 };
 
+interface EmailProgress {
+  sent_total: number;
+  sent_today: number;
+  auto_sent_today: number;
+  daily_limit: number;
+  addresses_left: number;
+  claimed_after_email: number;
+  unsubscribed: number;
+  last_sent_at: string | null;
+}
+
 const authHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem('access_token')}`,
   'Content-Type': 'application/json',
 });
 
 // JustDial-style owner outreach: call or WhatsApp each business yourself,
-// one at a time, then log what happened. Nothing is sent automatically.
+// one at a time, then log what happened. Claim emails also go out automatically
+// (100/day, each address once) — the summary card shows where that's at.
 export default function AdminOutreachPage() {
   const [cities, setCities] = useState<City[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -42,6 +54,12 @@ export default function AdminOutreachPage() {
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [busyId, setBusyId] = useState<string | null>(null);
   const [emailDrafts, setEmailDrafts] = useState<Record<string, string>>({});
+  const [progress, setProgress] = useState<EmailProgress | null>(null);
+
+  const loadProgress = useCallback(() => {
+    fetch(`${API_BASE}/api/v1/admin/outreach/email-progress`, { headers: authHeaders() })
+      .then(r => (r.ok ? r.json() : null)).then(setProgress).catch(() => {});
+  }, []);
 
   useEffect(() => {
     fetch(`${API_BASE}/api/v1/cities`).then(r => r.json()).then(setCities).catch(() => {});
@@ -67,7 +85,7 @@ export default function AdminOutreachPage() {
     }
   }, [city, category, status, perPage]);
 
-  useEffect(() => { load(1); }, [load]);
+  useEffect(() => { load(1); loadProgress(); }, [load, loadProgress]);
 
   const logOutcome = async (item: OutreachItem, outcome: string) => {
     setBusyId(item.id);
@@ -135,6 +153,7 @@ export default function AdminOutreachPage() {
           : i));
       }
       toast.success(`Claim email sent to ${item.email}`);
+      loadProgress();
     } catch (e) {
       toast.error(e instanceof Error && e.message ? e.message : 'Could not send the email');
     } finally {
@@ -162,6 +181,31 @@ export default function AdminOutreachPage() {
           say stop, mark them &ldquo;Not interested&rdquo;.
         </p>
       </div>
+
+      {progress && (
+        <div className="rounded-2xl border bg-white p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Mail className="w-4 h-4 text-orange-500" />
+            <span className="text-sm font-bold">Claim emails</span>
+            <span className="text-xs text-muted-foreground">
+              · {progress.daily_limit}/day go out automatically, each address once
+              {progress.last_sent_at && <> · last sent {timeAgo(progress.last_sent_at)}</>}
+            </span>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+            <Stat label="Sent so far" value={progress.sent_total} />
+            <Stat label="Sent today" value={`${progress.auto_sent_today} / ${progress.daily_limit}`}
+              hint={progress.sent_today > progress.auto_sent_today ? `+${progress.sent_today - progress.auto_sent_today} by hand` : undefined} />
+            <Stat label="Still to email" value={progress.addresses_left}
+              hint={progress.addresses_left ? `~${Math.ceil(progress.addresses_left / progress.daily_limit)} days` : 'all done'} />
+            <Stat label="Claimed after email" value={progress.claimed_after_email} good />
+            <Stat label="Unsubscribed" value={progress.unsubscribed} />
+          </div>
+          <p className="text-[11px] text-muted-foreground mt-2">
+            Emailed businesses move to the <strong>Follow up</strong> tab marked &ldquo;Email sent&rdquo; (automatic ones say &ldquo;Auto claim email&rdquo;).
+          </p>
+        </div>
+      )}
 
       <div className="flex flex-wrap gap-2 mb-4">
         <select value={city} onChange={e => setCity(e.target.value)} aria-label="City"
@@ -298,6 +342,16 @@ export default function AdminOutreachPage() {
           onPerPageChange={setPerPage}
         />
       )}
+    </div>
+  );
+}
+
+function Stat({ label, value, hint, good }: { label: string; value: number | string; hint?: string; good?: boolean }) {
+  return (
+    <div className="rounded-xl bg-slate-50 px-3 py-2">
+      <div className={`text-lg font-black ${good ? 'text-emerald-600' : 'text-slate-900'}`}>{typeof value === 'number' ? value.toLocaleString('en-IN') : value}</div>
+      <div className="text-[11px] font-semibold text-slate-500">{label}</div>
+      {hint && <div className="text-[10px] text-slate-400">{hint}</div>}
     </div>
   );
 }

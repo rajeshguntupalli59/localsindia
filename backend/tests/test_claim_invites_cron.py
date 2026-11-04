@@ -125,3 +125,39 @@ async def test_stops_after_three_failures(client, city, category, sent, monkeypa
 async def test_needs_cron_secret(client):
     with patch.object(settings, "CRON_SECRET", SECRET):
         assert (await client.post("/api/v1/cron/claim-invites?secret=wrong")).status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_email_progress_summary(client, admin_client, city, category, sent, monkeypatch):
+    admin, _ = admin_client
+    from sqlalchemy import select
+    from app.models.business import Business
+    from app.models.business_outreach import BusinessOutreach
+    await _drain(client, sent, monkeypatch)
+    before = (await admin.get("/api/v1/admin/outreach/email-progress")).json()
+    assert before["addresses_left"] == 0
+    t = uuid.uuid4().hex[:8]
+    shops = [Business(city_id=city.id, category_id=category.id, name=f"P{i}", email=f"p{i}@{t}.in") for i in range(2)]
+    await _add(*shops)
+    assert (await admin.get("/api/v1/admin/outreach/email-progress")).json()["addresses_left"] == 2
+
+    await _run(client)
+    after = (await admin.get("/api/v1/admin/outreach/email-progress")).json()
+    assert after["addresses_left"] == 0
+    assert after["sent_total"] == before["sent_total"] + 2
+    assert after["auto_sent_today"] == before["auto_sent_today"] + 2
+    assert after["last_sent_at"] is not None
+
+    # The Follow up tab shows these as automatic
+    engine = _make_engine()
+    async with async_sessionmaker(engine)() as s:
+        notes = (await s.execute(select(BusinessOutreach.note).where(
+            BusinessOutreach.business_id.in_([b.id for b in shops])))).scalars().all()
+    await engine.dispose()
+    assert sorted(notes) == [f"Auto claim email to p0@{t}.in", f"Auto claim email to p1@{t}.in"]
+
+
+@pytest.mark.asyncio
+async def test_email_progress_admin_only(auth_client):
+    user_client, _ = auth_client
+    assert (await user_client.get("/api/v1/admin/outreach/email-progress")).status_code == 403

@@ -642,6 +642,7 @@ Also `GET /api/v1/admin/errors` (admin-only, see Admin section below) — lists 
 | POST | `/admin/outreach/{business_id}` | Log one manual call/WhatsApp outcome + optional note (nothing is sent by the server) | Admin |
 | PUT | `/admin/outreach/{business_id}/email` | Set/clear the owner email (`businesses.email`, admin-only, never in public APIs) | Admin |
 | POST | `/admin/outreach/{business_id}/send-email` | Send ONE claim invite from support@ (GoDaddy SMTP; SendGrid fallback), log `email_sent`; refuses if no email / claimed / closed / emailed <30 days ago | Admin |
+| GET | `/admin/outreach/email-progress` | Claim-email campaign summary (sent total/today, addresses left, claimed after email, unsubscribed, last sent) for the card on /admin/outreach | Admin |
 | POST | `/cron/claim-invites?secret=&limit=` | Daily automatic claim invites (workflow `claim-invites.yml`): max 100/day, each address once ever, skips claimed / closed / unsubscribed / under review; Hyderabad first | Cron secret |
 | POST | `/businesses/{id}/claim/email/send` | Email a 6-digit claim code to the business's own listed email (24h, 3/hour) | User |
 | POST | `/businesses/{id}/claim/email/verify` | `{otp}` → claimant becomes owner (3 guesses per code) | User |

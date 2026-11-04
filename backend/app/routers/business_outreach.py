@@ -261,8 +261,9 @@ async def _send_invite(db: AsyncSession, business: Business, admin_id) -> tuple[
     )
     if not ok:
         return 502, "Email provider rejected the message — try again later"
+    who = "Claim email" if admin_id else "Auto claim email"
     db.add(BusinessOutreach(business_id=business.id, admin_id=admin_id, outcome="email_sent",
-                            note=f"Claim email to {business.email}"))
+                            note=f"{who} to {business.email}"))
     await db.commit()
     return None
 
@@ -272,15 +273,36 @@ async def send_daily_invites(db: AsyncSession, limit: int) -> dict:
     businesses, closed/unsubscribed ones, addresses shared with a claimed business, and
     businesses with a claim under review. Hyderabad first. Capped at DAILY_AUTO_INVITES/day."""
     import asyncio
-    from app.models.business_claim import BusinessClaim
-    day_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
-    sent_today = (await db.execute(
-        select(func.count()).select_from(BusinessOutreach).where(
-            BusinessOutreach.outcome == "email_sent", BusinessOutreach.admin_id.is_(None),
-            BusinessOutreach.created_at >= day_start)
-    )).scalar_one()
+    sent_today = await _sent_today(db, auto_only=True)
     limit = max(0, min(limit, DAILY_AUTO_INVITES - sent_today))
+    queue = await _invite_queue(db)
 
+    sent, failed, streak = 0, 0, 0
+    for b in queue[:limit]:
+        err = await _send_invite(db, b, None)
+        if err is None:
+            sent, streak = sent + 1, 0
+        else:
+            failed, streak = failed + 1, streak + 1
+            if streak >= 3:   # mailbox refusing (daily cap / password) - stop, retry tomorrow
+                break
+        await asyncio.sleep(1)
+    return {"sent": sent, "failed": failed, "sent_today": sent_today + sent,
+            "addresses_left": len(queue) - sent}
+
+
+async def _sent_today(db: AsyncSession, auto_only: bool) -> int:
+    day_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+    q = select(func.count()).select_from(BusinessOutreach).where(
+        BusinessOutreach.outcome == "email_sent", BusinessOutreach.created_at >= day_start)
+    if auto_only:
+        q = q.where(BusinessOutreach.admin_id.is_(None))
+    return (await db.execute(q)).scalar_one()
+
+
+async def _invite_queue(db: AsyncSession) -> list[Business]:
+    """Businesses still due their one automatic invite — one per address, Hyderabad first."""
+    from app.models.business_claim import BusinessClaim
     touched = (select(Business.email)
                .join(BusinessOutreach, BusinessOutreach.business_id == Business.id)
                .where(Business.email.is_not(None),
@@ -300,19 +322,36 @@ async def send_daily_invites(db: AsyncSession, limit: int) -> dict:
         if b.email not in seen:
             seen.add(b.email)
             queue.append(b)
+    return queue
 
-    sent, failed, streak = 0, 0, 0
-    for b in queue[:limit]:
-        err = await _send_invite(db, b, None)
-        if err is None:
-            sent, streak = sent + 1, 0
-        else:
-            failed, streak = failed + 1, streak + 1
-            if streak >= 3:   # mailbox refusing (daily cap / password) - stop, retry tomorrow
-                break
-        await asyncio.sleep(1)
-    return {"sent": sent, "failed": failed, "sent_today": sent_today + sent,
-            "addresses_left": len(queue) - sent}
+
+@router.get("/email-progress")
+async def email_progress(
+    db: AsyncSession = Depends(get_db),
+    admin: User = Depends(get_current_admin),
+):
+    """Where the claim-email campaign is at, for the summary on /admin/outreach."""
+    sent_rows = select(BusinessOutreach.business_id).where(BusinessOutreach.outcome == "email_sent")
+    total, last = (await db.execute(
+        select(func.count(), func.max(BusinessOutreach.created_at)).where(BusinessOutreach.outcome == "email_sent")
+    )).one()
+    claimed = (await db.execute(
+        select(func.count()).select_from(Business)
+        .where(Business.id.in_(sent_rows), Business.owner_id.is_not(None))
+    )).scalar_one()
+    unsubscribed = (await db.execute(
+        select(func.count()).select_from(BusinessOutreach).where(BusinessOutreach.note == UNSUBSCRIBED)
+    )).scalar_one()
+    return {
+        "sent_total": total,
+        "sent_today": await _sent_today(db, auto_only=False),
+        "auto_sent_today": await _sent_today(db, auto_only=True),
+        "daily_limit": DAILY_AUTO_INVITES,
+        "addresses_left": len(await _invite_queue(db)),
+        "claimed_after_email": claimed,
+        "unsubscribed": unsubscribed,
+        "last_sent_at": last,
+    }
 
 
 @public_router.get("/unsubscribe", response_class=HTMLResponse)
