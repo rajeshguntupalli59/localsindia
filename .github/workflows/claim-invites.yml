@@ -13,11 +13,11 @@ jobs:
     steps:
       - name: Email up to 100 unclaimed businesses (each address once, ever)
         run: |
-          # 25 per call keeps each request well under Azure's 230s limit; the
+          # 10 per call: each SMTP send takes ~8s, so 25 per call overran the 200s timeout (2026-11-05). The
           # server stops at 100/day itself, so extra calls just send nothing.
-          for i in 1 2 3 4; do
+          for i in 1 2 3 4 5 6 7 8 9 10; do
             HTTP_STATUS=$(curl -s -m 200 -X POST -o /tmp/r.json -w "%{http_code}" \
-              "${{ secrets.BACKEND_URL }}/api/v1/cron/claim-invites?secret=${{ secrets.CRON_SECRET }}&limit=25")
+              "${{ secrets.BACKEND_URL }}/api/v1/cron/claim-invites?secret=${{ secrets.CRON_SECRET }}&limit=10")
             echo "batch $i: HTTP $HTTP_STATUS $(cat /tmp/r.json)"
             if [ "$HTTP_STATUS" != "200" ]; then exit 1; fi
             SENT=$(python3 -c "import json;print(json.load(open('/tmp/r.json'))['sent'])")
