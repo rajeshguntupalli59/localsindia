@@ -127,6 +127,9 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 - Scheduled run started 12:50 UTC (not 05:00) and failed: each SMTP send takes ~9s, so 25 per call overran curl's 200s. Two failed runs still sent 51; workflow now sends 10 per call (`2099bd1`) and finished the day at 100/100.
 - 10 addresses bounced (address doesn't exist / unknown user / mailbox full). New `POST /cron/email-bounces` reads bounce notices from the support@ INBOX over IMAP (read-only), clears those emails from every business that has them and notes "bounced" on the `email_sent` row. It runs as the first step of `claim-invites.yml`.
 - The two 400s on `/outreach/unsubscribe` were scanner probes (v7 UUIDs; our ids are v4), not real opt-outs failing.
+- Yahoo bounces name support@ as Final-Recipient; the parser now falls back to the quoted original's To / X-Apparently-To (`ec65b89`). 11 addresses cleared in total on 11-05. No real replies in support@ yet.
+- Azure Service Health notice SJRX-YHZ (Postgres preview API versions retire 2027-01-30): no action. It is the ARM/control-plane API only; the app uses a normal DB connection and no workflow or script calls the PG management API (only manual `az postgres` steps in AZURE_DEPLOY.md, which the az CLI handles; keep it upgraded).
+- Play Console trader status declared Non-trader (app is India-only). Live Razorpay payments stay on.
 
 ### 2026-10-28 — Listing review: friendly sign-in instead of raw 401
 - `ListingDetailClient.tsx` review submit used raw fetch → stale token showed "Invalid or expired token.". Now uses `api.listings.submitReview` (auto-refresh / "Session expired" + login); no token → toast + `/auth/login?redirect=<listing>`.
