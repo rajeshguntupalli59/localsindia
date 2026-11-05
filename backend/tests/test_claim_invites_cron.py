@@ -161,3 +161,51 @@ async def test_email_progress_summary(client, admin_client, city, category, sent
 async def test_email_progress_admin_only(auth_client):
     user_client, _ = auth_client
     assert (await user_client.get("/api/v1/admin/outreach/email-progress")).status_code == 403
+
+
+DSN = (b"From: Mail Delivery System <MAILER-DAEMON@p3plibsmtp.secureserver.net>\r\n"
+       b"Subject: Message Delivery Failure\r\n\r\n"
+       b"Final-Recipient: rfc822; Gone@Dead.IN\r\nStatus: 5.1.1\r\n"
+       b"Diagnostic-Code: smtp; 550 5.1.1 does not exist\r\n")
+
+
+def test_bounced_recipients_parses_dsn_only():
+    from app.services.email_svc import bounced_recipients
+    reply = (b"From: Owner <owner@shop.in>\r\nSubject: Re: claim\r\n\r\n"
+             b"Final-Recipient: rfc822; not@bounce.in\r\n")   # a normal reply is ignored
+    gmail = (b"From: postmaster@gmail.com\r\nSubject: Delivery Status Notification (Failure)\r\n\r\n"
+             b"X-Failed-Recipients: x@gm.in\r\nFinal-Recipient: rfc822; support@localsindia.com\r\n")
+    assert bounced_recipients([DSN, reply, gmail]) == {"gone@dead.in", "x@gm.in"}
+
+
+@pytest.mark.asyncio
+async def test_email_bounces_removes_dead_addresses(client, city, category, sent, monkeypatch):
+    from sqlalchemy import select
+    from app.models.business import Business
+    from app.models.business_outreach import BusinessOutreach
+    await _drain(client, sent, monkeypatch)
+    t = uuid.uuid4().hex[:8]
+    dead, alive = f"gone@{t}.in", f"ok@{t}.in"
+    a, b2, keep = (Business(city_id=city.id, category_id=category.id, name=n, email=e)
+                   for n, e in (("A", dead), ("A2", dead), ("Keep", alive)))
+    await _add(a, b2, keep)
+    await _run(client)                     # invites go out (one per address)
+
+    async def fake_fetch(days):
+        return {dead}
+    monkeypatch.setattr("app.services.email_svc.fetch_bounced_addresses", fake_fetch)
+    with patch.object(settings, "CRON_SECRET", SECRET):
+        r = await client.post(f"/api/v1/cron/email-bounces?secret={SECRET}")
+        again = await client.post(f"/api/v1/cron/email-bounces?secret={SECRET}")
+    assert r.json() == {"bounced_addresses": 1, "businesses_updated": 2}
+    assert again.json()["businesses_updated"] == 0          # idempotent
+
+    engine = _make_engine()
+    async with async_sessionmaker(engine)() as s:
+        emails = dict((await s.execute(select(Business.name, Business.email).where(
+            Business.id.in_([a.id, b2.id, keep.id])))).all())
+        notes = (await s.execute(select(BusinessOutreach.note).where(
+            BusinessOutreach.business_id.in_([a.id, b2.id])))).scalars().all()
+    await engine.dispose()
+    assert emails == {"A": None, "A2": None, "Keep": alive}
+    assert len(notes) == 1 and notes[0].endswith("email removed)")

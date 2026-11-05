@@ -291,6 +291,28 @@ async def send_daily_invites(db: AsyncSession, limit: int) -> dict:
             "addresses_left": len(queue) - sent}
 
 
+BOUNCED = " (bounced: address doesn't exist, email removed)"
+
+
+async def mark_bounced(db: AsyncSession, addresses: set[str]) -> dict:
+    """Bounced addresses: clear them off every business that has them (no more invites, manual
+    or automatic, and no email-code claim to a dead inbox) and note it on their email_sent rows."""
+    if not addresses:
+        return {"bounced_addresses": 0, "businesses_updated": 0}
+    businesses = (await db.execute(
+        select(Business).where(Business.email.in_(addresses), Business.deleted_at.is_(None))
+    )).scalars().all()
+    for b in businesses:
+        rows = (await db.execute(select(BusinessOutreach).where(
+            BusinessOutreach.business_id == b.id, BusinessOutreach.outcome == "email_sent"))).scalars().all()
+        for r in rows:
+            if BOUNCED not in (r.note or ""):
+                r.note = (r.note or "") + BOUNCED
+        b.email = None
+    await db.commit()
+    return {"bounced_addresses": len(addresses), "businesses_updated": len(businesses)}
+
+
 async def _sent_today(db: AsyncSession, auto_only: bool) -> int:
     day_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
     q = select(func.count()).select_from(BusinessOutreach).where(

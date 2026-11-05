@@ -41,6 +41,19 @@ async def claim_invites(
     return await send_daily_invites(db, limit)
 
 
+@router.post("/email-bounces")
+async def email_bounces(
+    days: int = Query(7, ge=1, le=30),
+    _: None = Depends(_check_secret),
+    db: AsyncSession = Depends(get_db),
+):
+    """Read bounce notices from the support@ inbox and remove those dead addresses from
+    businesses so they're never emailed again. Run before each day's claim invites."""
+    from app.routers.business_outreach import mark_bounced
+    from app.services.email_svc import fetch_bounced_addresses
+    return await mark_bounced(db, await fetch_bounced_addresses(days))
+
+
 @router.get("/expiry-reminders")
 async def send_expiry_reminders(
     _: None = Depends(_check_secret),

@@ -20,6 +20,47 @@ def email_configured() -> bool:
     return bool(SMTP_PASSWORD or SENDGRID_KEY)
 
 
+IMAP_HOST = os.getenv("IMAP_HOST", "imap.secureserver.net")
+
+
+def bounced_recipients(raw_messages: list[bytes]) -> set[str]:
+    """Recipient addresses from delivery-failure notices (mailer-daemon / postmaster bounces)."""
+    import email as email_lib
+    import re
+    found = set()
+    for raw in raw_messages:
+        msg = email_lib.message_from_bytes(raw)
+        frm, subj = str(msg.get("From", "")).lower(), str(msg.get("Subject", ""))
+        if not ("mailer-daemon" in frm or "postmaster" in frm
+                or re.search(r"undeliver|delivery (status|failure)|not delivered|returned mail", subj, re.I)):
+            continue
+        text = raw.decode("utf-8", "replace")
+        rcpts = re.findall(r"(?:Final-Recipient|Original-Recipient):\s*rfc822;\s*<?([^\s<>;]+@[^\s<>;]+)", text, re.I)
+        rcpts += re.findall(r"X-Failed-Recipients:\s*<?([^\s<>;,]+@[^\s<>;,]+)", text, re.I)
+        found.update(r.lower() for r in rcpts if not r.lower().endswith("@" + SMTP_USER.split("@")[-1]))
+    return found
+
+
+def _fetch_inbox_since(days: int) -> list[bytes]:
+    """Read-only (BODY.PEEK) fetch of the support@ INBOX for the last `days` days."""
+    import imaplib
+    from datetime import datetime, timedelta, timezone
+    since = (datetime.now(timezone.utc) - timedelta(days=days)).strftime("%d-%b-%Y")
+    with imaplib.IMAP4_SSL(IMAP_HOST, 993, timeout=30) as m:
+        m.login(SMTP_USER, SMTP_PASSWORD)
+        m.select("INBOX", readonly=True)
+        ids = m.search(None, f'(SINCE "{since}")')[1][0].split()
+        return [m.fetch(i, "(BODY.PEEK[])")[1][0][1] for i in ids]
+
+
+async def fetch_bounced_addresses(days: int = 7) -> set[str]:
+    """Addresses that bounced in the last `days` days, read from the support@ mailbox."""
+    if not SMTP_PASSWORD:
+        return set()
+    import asyncio
+    return bounced_recipients(await asyncio.to_thread(_fetch_inbox_since, days))
+
+
 def _smtp_send(to: str, subject: str, html: str, text: str) -> None:
     import smtplib
     import ssl

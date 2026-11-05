@@ -11,6 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
+      - name: Remove addresses that bounced (read from the support@ inbox)
+        run: |
+          curl -sf -m 120 -X POST "${{ secrets.BACKEND_URL }}/api/v1/cron/email-bounces?secret=${{ secrets.CRON_SECRET }}" || echo "bounce check failed - sending anyway"
+          echo
       - name: Email up to 100 unclaimed businesses (each address once, ever)
         run: |
           # 10 per call: each SMTP send takes ~8s, so 25 per call overran the 200s timeout (2026-11-05). The
