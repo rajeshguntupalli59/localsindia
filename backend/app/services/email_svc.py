@@ -37,7 +37,13 @@ def bounced_recipients(raw_messages: list[bytes]) -> set[str]:
         text = raw.decode("utf-8", "replace")
         rcpts = re.findall(r"(?:Final-Recipient|Original-Recipient):\s*rfc822;\s*<?([^\s<>;]+@[^\s<>;]+)", text, re.I)
         rcpts += re.findall(r"X-Failed-Recipients:\s*<?([^\s<>;,]+@[^\s<>;,]+)", text, re.I)
-        found.update(r.lower() for r in rcpts if not r.lower().endswith("@" + SMTP_USER.split("@")[-1]))
+        ours = "@" + SMTP_USER.split("@")[-1]
+        rcpts = [r.lower() for r in rcpts if not r.lower().endswith(ours)]
+        if not rcpts:  # Yahoo names us as Final-Recipient; the address is in the quoted original
+            rcpts = [r.lower() for r in re.findall(
+                r"^(?:X-Apparently-To|To):\s*(?:[^<\n]*<)?([^\s<>;,]+@[^\s<>;,]+)", text, re.I | re.M)
+                if not r.lower().endswith(ours)]
+        found.update(rcpts)
     return found
 
 

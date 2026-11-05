@@ -178,6 +178,15 @@ def test_bounced_recipients_parses_dsn_only():
     assert bounced_recipients([DSN, reply, gmail]) == {"gone@dead.in", "x@gm.in"}
 
 
+def test_bounced_recipients_yahoo_quoted_original():
+    from app.services.email_svc import bounced_recipients
+    nl = b"\r\n"
+    yahoo = nl.join([b"From: MAILER-DAEMON@yahoo.com", b"To: support@localsindia.com", b"Subject: Failure Notice", b"",
+                     b"Final-Recipient: rfc822; support@localsindia.com", b"Status: 5.0.0", b"",
+                     b"From: LocalsIndia <support@localsindia.com>", b"To: Balaji.Hospital@yahoo.com", b""])
+    assert bounced_recipients([yahoo]) == {"balaji.hospital@yahoo.com"}
+
+
 @pytest.mark.asyncio
 async def test_email_bounces_removes_dead_addresses(client, city, category, sent, monkeypatch):
     from sqlalchemy import select
