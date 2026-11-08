@@ -1,6 +1,6 @@
 {
-  "lastCityIndex": 17,
-  "lastCategoryIndex": 3,
+  "lastCityIndex": 18,
+  "lastCategoryIndex": 4,
   "history": [
     {
       "citySlug": "bangalore",
@@ -133,6 +133,13 @@
       "kind": "directory",
       "topicTemplateId": "directory-education",
       "publishedAt": "2026-11-01T09:56:05Z"
+    },
+    {
+      "citySlug": "hubballi",
+      "category": "electronics",
+      "kind": "guide",
+      "topicTemplateId": "used-phone-check",
+      "publishedAt": "2026-11-08T09:45:32Z"
     }
   ]
 }
