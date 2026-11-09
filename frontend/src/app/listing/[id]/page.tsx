@@ -5,6 +5,7 @@ import ListingDetailClient from './ListingDetailClient';
 import { listingIdFromParam, listingPath, realImages } from '@/lib/utils';
 import { serializeJsonLd } from '@/lib/jsonLd';
 import { aggregateRating } from '@/lib/productJsonLd';
+import { listingDescription, listingTitle } from '@/lib/listingSeo';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend-in.azurewebsites.net';
 
@@ -27,19 +28,13 @@ async function fetchReviews(id: string): Promise<ListingReview[]> {
   }
 }
 
-function truncate(text: string, max: number): string {
-  const clean = text.trim().replace(/\s+/g, ' ');
-  return clean.length > max ? `${clean.slice(0, max - 1).trimEnd()}…` : clean;
-}
-
 export async function generateMetadata(
   { params }: { params: { id: string } }
 ): Promise<Metadata> {
   const listing = await fetchListing(listingIdFromParam(params.id));
 
-  const locality = [listing.area, listing.city_slug].filter(Boolean).join(', ');
-  const title = `${listing.title}${locality ? ` — ${locality}` : ''} | LocalsIndia`;
-  const description = truncate(listing.description, 155);
+  const title = listingTitle(listing);
+  const description = listingDescription(listing);
   const url = `https://www.localsindia.com${listingPath(listing)}`;
   const image = realImages(listing.images)[0]?.url;
 

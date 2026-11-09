@@ -123,6 +123,12 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 
 ## 6. Changelog (dated, most recent first — append here after notable sessions)
 
+### 2026-11-09 — Listing titles name the city, wrong-city business URLs redirect
+- `GET /listings/{id}` now returns `city_name`, used by `lib/listingSeo.ts` for titles ("I phone 12 — Madhapur, Hyderabad | LocalsIndia"). Descriptions under 70 characters get the category and place added.
+- `city_slug` stays unset on that endpoint on purpose: setting it makes the web page show the paid "Promote this listing" button (and also "Similar listings"), which was hidden only because the field was empty.
+- `/{wrong-city}/businesses/{id}` now 308s to the business's real city.
+- Tested locally: pytest 286, frontend 251, build and lint clean; stub backend confirmed the 308, 200 on the right city, 404 on an unknown city.
+
 ### 2026-11-09 — SEO check: GSC numbers, business titles, city pages during backend blips
 - GSC, Oct 11 to Nov 7: 348 clicks, 72K impressions, CTR 0.5%, avg position 9.9; searches are mostly a business name + "contact number". Indexed 7.29K, not indexed 23.9K (12,000 noindex on purpose, 7,863 Discovered/Crawled not indexed). Soft 404 and 5xx samples are now real 404s. Most redirects are intended (`/tirupur`, archived blog posts).
 - Business page titles now name what the page really has: "Ravi Hospital, KPHB — Address, Phone Number & Timings" (`lib/businessSeo.ts`). Compare CTR in about 4 weeks.

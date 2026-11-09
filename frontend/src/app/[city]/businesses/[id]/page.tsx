@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import type { Business } from '@/lib/types';
 import BusinessDetailClient from './BusinessDetailClient';
 import { SEO_CATEGORIES, SEO_PAGE_FOR_BUSINESS_CATEGORY } from '@/lib/seoCategories';
@@ -76,6 +76,8 @@ async function fetchRelated(citySlug: string, category: string | null | undefine
 
 export default async function Page({ params }: { params: { city: string; id: string } }) {
   const b = await fetchBusiness(params.id);
+  // Any city in the URL would otherwise render this page and claim it as canonical
+  if (b.city_slug && b.city_slug !== params.city) permanentRedirect(`/${b.city_slug}/businesses/${b.id}`);
   const related = b ? await fetchRelated(params.city, b.category_slug, b.id) : [];
   const seoKey = SEO_PAGE_FOR_BUSINESS_CATEGORY[b?.category_slug ?? ''];
   const seoMeta = seoKey ? SEO_CATEGORIES[seoKey] : null;

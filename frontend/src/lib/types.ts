@@ -205,6 +205,7 @@ export interface Business {
   avg_rating: number | null;
   review_count: number;
   city_id: string;
+  city_slug?: string | null;
   category_id: string | null;
   category_slug?: string | null;
   subcategory_slug?: string | null;

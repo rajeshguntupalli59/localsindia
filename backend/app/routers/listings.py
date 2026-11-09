@@ -425,6 +425,9 @@ async def get_listing(listing_id: uuid.UUID, db: AsyncSession = Depends(get_db))
     out.category_name = cat.name if cat else None
     out.category_slug = cat.slug if cat else None
     out.seller_name = (user.name or '').split('+91')[0].strip() or None if user else None
+    # Search titles need the city. city_slug stays unset on purpose: on the web
+    # page it would reveal the paid "Promote this listing" button.
+    out.city_name = (await db.execute(select(City.name).where(City.id == listing.city_id))).scalar_one_or_none()
     return out
 
 

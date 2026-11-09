@@ -73,6 +73,7 @@ async def test_get_listing(auth_client, city, category):
     resp = await ac.get(f"/api/v1/listings/{listing_id}")
     assert resp.status_code == 200
     assert resp.json()["id"] == listing_id
+    assert resp.json()["city_name"] == city.name
 
 
 @pytest.mark.asyncio
