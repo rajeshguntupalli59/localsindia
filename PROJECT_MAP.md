@@ -126,13 +126,16 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 ### 2026-11-09 — Listings must go to the right city
 - Web post-listing and add-business forms now need the poster to confirm or change the city (`CityConfirm`); before, the browsed city was used silently. App no longer defaults to Hyderabad and asks "Post in X?" before posting (reaches users with the next app build).
 - Admin listing card has a City dropdown (`PATCH /admin/listings/{id}/city`), so a wrong city is fixed before approving. Businesses have no approval queue, so the poster's confirmation is their only check.
-- Data fixes on prod (direct DB): "Customisation frocks" and "kruthik Farm" moved Hyderabad → Ongole; duplicate Rio Livings entry in Kochi (`782f9d71`) soft-deleted, Kannur entry kept.
+- Data fixes on prod (direct DB): "Customisation frocks" and "kruthik Farm" moved Hyderabad → Ongole; duplicate Rio Livings entry in Kochi (`782f9d71`) soft-deleted, Kannur entry kept. Confirmed through the public API.
+- Tested locally: pytest 289, frontend 254, build, lint and mobile typecheck clean. The new forms were not clicked through in a browser or on a phone.
+- Deployed 2026-11-09 as `e5010ed` (Test and both deploys green). Live check: new code is in the listing, add-business and admin page bundles; `PATCH /admin/listings/{id}/city` returns 403 without login.
 
 ### 2026-11-09 — Listing titles name the city, wrong-city business URLs redirect
 - `GET /listings/{id}` now returns `city_name`, used by `lib/listingSeo.ts` for titles ("I phone 12 — Madhapur, Hyderabad | LocalsIndia"). Descriptions under 70 characters get the category and place added.
 - `city_slug` stays unset on that endpoint on purpose: setting it makes the web page show the paid "Promote this listing" button (and also "Similar listings"), which was hidden only because the field was empty.
 - `/{wrong-city}/businesses/{id}` now 308s to the business's real city.
 - Tested locally: pytest 286, frontend 251, build and lint clean; stub backend confirmed the 308, 200 on the right city, 404 on an unknown city.
+- Deployed 2026-11-09 as `55d42a2`. Live check: all 19 listing titles name the city, none under 70 characters, canonical correct on all 19, `city_slug` still null. Some listing pages timed out for a few minutes after the deploy and recovered on their own (cause not confirmed). Per-listing index status in GSC still unknown.
 
 ### 2026-11-09 — SEO check: GSC numbers, business titles, city pages during backend blips
 - GSC, Oct 11 to Nov 7: 348 clicks, 72K impressions, CTR 0.5%, avg position 9.9; searches are mostly a business name + "contact number". Indexed 7.29K, not indexed 23.9K (12,000 noindex on purpose, 7,863 Discovered/Crawled not indexed). Soft 404 and 5xx samples are now real 404s. Most redirects are intended (`/tirupur`, archived blog posts).
