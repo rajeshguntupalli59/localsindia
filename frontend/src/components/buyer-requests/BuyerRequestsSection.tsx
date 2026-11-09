@@ -216,7 +216,7 @@ export default function BuyerRequestsSection({ citySlug }: Props) {
         </div>
       ) : (
         <p className="px-4 text-sm" style={{ color: 'var(--li-muted)' }}>
-          No requests yet — be the first to post what you&apos;re looking for.
+          Looking for something? Post it here and local sellers can contact you.
         </p>
       )}
 

@@ -6,6 +6,7 @@ import SiteHeader from '@/components/site-header/SiteHeader';
 import SiteFooter from '@/components/site-footer/SiteFooter';
 import ListingCard from '@/components/listing-card/ListingCard';
 import BusinessList, { ChipLinks } from '@/components/business-list/BusinessList';
+import ShareListButton from '@/components/share-list/ShareListButton';
 import { categoryCover, listingCovers } from '@/lib/categoryCover';
 import { serializeJsonLd } from '@/lib/jsonLd';
 import { SEO_CATEGORIES } from '@/lib/seoCategories';
@@ -134,13 +135,16 @@ export default async function TypePage({ city, type }: { city: City; type: TypeI
                   ].filter(Boolean).join(' · ')}
                 </p>
               </div>
-              <Link
-                href={`/${city.slug}/classifieds/post`}
-                className="shrink-0 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-opacity hover:opacity-90"
-                style={{ background: 'var(--li-primary)' }}
-              >
-                + Post Listing
-              </Link>
+              <div className="flex flex-wrap gap-2">
+                <ShareListButton title={`${type.name} in ${city.name}`} names={businesses.map(b => b.name)} total={total} url={pageUrl} />
+                <Link
+                  href={`/${city.slug}/classifieds/post`}
+                  className="shrink-0 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-opacity hover:opacity-90"
+                  style={{ background: 'var(--li-primary)' }}
+                >
+                  + Post Listing
+                </Link>
+              </div>
             </div>
           </div>
         </div>

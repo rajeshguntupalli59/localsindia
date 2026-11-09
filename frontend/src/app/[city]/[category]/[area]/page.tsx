@@ -6,6 +6,7 @@ import { categoryCover } from '@/lib/categoryCover';
 import SiteHeader from '@/components/site-header/SiteHeader';
 import SiteFooter from '@/components/site-footer/SiteFooter';
 import BusinessList, { ChipLinks } from '@/components/business-list/BusinessList';
+import ShareListButton from '@/components/share-list/ShareListButton';
 import type { Business, City, Locality } from '@/lib/types';
 import { serializeJsonLd } from '@/lib/jsonLd';
 
@@ -117,6 +118,9 @@ export default async function CategoryAreaPage(
             <p className="text-sm mt-1.5" style={{ color: 'var(--li-muted)' }}>
               {area.count.toLocaleString('en-IN')} local business{area.count !== 1 ? 'es' : ''} in and around {area.name}
             </p>
+            <div className="mt-3">
+              <ShareListButton title={`${meta.title} in ${area.name}, ${city.name}`} names={businesses.map(b => b.name)} total={area.count} url={pageUrl} />
+            </div>
           </div>
         </div>
 

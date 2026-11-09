@@ -29,6 +29,8 @@ interface CityHomeClientProps {
   initialTodayCount?: number;
   initialTrending?: Listing[];
   initialFresh?: Listing[];
+  /** False hides the Events chip, which would open an empty page */
+  hasEvents?: boolean;
   /** Server-rendered block (links to categories, directory, nearby cities) shown above the footer */
   explore?: React.ReactNode;
 }
@@ -88,6 +90,7 @@ export default function CityHomeClient({
   initialTodayCount,
   initialTrending = [],
   initialFresh = [],
+  hasEvents = false,
   explore,
 }: CityHomeClientProps) {
   const params = useParams();
@@ -359,7 +362,7 @@ export default function CityHomeClient({
         <section>
           <h2 className="section-title mb-3">Browse by category</h2>
           <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none -mx-4 px-4">
-            {CATEGORIES.filter(c => c.slug).map(cat => {
+            {CATEGORIES.filter(c => c.slug && (c.slug !== 'events' || hasEvents)).map(cat => {
               const Icon = cat.icon;
               return (
                 <button
@@ -379,8 +382,8 @@ export default function CityHomeClient({
         {/* Buyer requests — wanted section */}
         <BuyerRequestsSection citySlug={citySlug} />
 
-        {/* Empty state — only if not loading and all rows empty */}
-        {!loading && trendingListings.length === 0 && freshListings.length === 0 && (
+        {/* Empty state — only if nothing at all to show (the city's businesses count as something) */}
+        {!loading && !explore && trendingListings.length === 0 && freshListings.length === 0 && (
           <EmptyState
             icon={SearchX}
             title={t('listing.noListings')}

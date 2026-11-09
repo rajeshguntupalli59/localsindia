@@ -352,6 +352,8 @@ async def add_review(
     current_user: User = Depends(get_current_user),
 ):
     business = await _get_active_business(business_id, db)
+    if business.owner_id == current_user.id:
+        raise HTTPException(status_code=403, detail="You can't rate your own business.")
 
     # Check for existing review
     existing = await db.execute(

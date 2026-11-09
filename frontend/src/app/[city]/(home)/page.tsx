@@ -139,7 +139,7 @@ async function getJson<T>(url: string, fallback: T): Promise<T> {
 }
 
 export default async function CityHomePage({ params }: { params: { city: string } }) {
-  const [city, todayCount, trending, fresh, counts, allCities, localities, popular] = await Promise.all([
+  const [city, todayCount, trending, fresh, counts, allCities, localities, popular, events] = await Promise.all([
     fetchCity(params.city),
     fetchTodayCount(params.city),
     fetchTrending(params.city),
@@ -148,6 +148,7 @@ export default async function CityHomePage({ params }: { params: { city: string 
     getJson<City[]>(`${API_BASE}/api/v1/cities`, []),
     getJson<Locality[]>(`${API_BASE}/api/v1/businesses/localities?city_slug=${params.city}`, []),
     fetchBusinessSample(params.city),   // same request as generateMetadata's, so it's de-duplicated
+    getJson<unknown[]>(`${API_BASE}/api/v1/events?city_slug=${params.city}`, []),
   ]);
 
   if (!city) notFound();
@@ -191,6 +192,7 @@ export default async function CityHomePage({ params }: { params: { city: string 
         initialTodayCount={todayCount}
         initialTrending={trending}
         initialFresh={fresh}
+        hasEvents={events.length > 0}
         explore={<CityExplore city={city} counts={counts} nearby={nearby} areas={areas} popular={(popular as Business[]).slice(0, 6)} />}
       />
     </>

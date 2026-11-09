@@ -123,6 +123,12 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 
 ## 6. Changelog (dated, most recent first — append here after notable sessions)
 
+### 2026-11-09 — One-tap ratings, share list on WhatsApp, fewer empty sections (web)
+- Business page: "Been here? Tap to rate" posts a rating with no text. Not signed in: the tap is held in sessionStorage (never the URL, so a shared link can't post a rating) and sent after login. Owners can't rate their own business (403). After rating, the review form is replaced by "You rated this N stars"; adding text later isn't built.
+- "Share this list" WhatsApp link on category, type and area pages (`components/share-list/ShareListButton.tsx`), naming the first 3 businesses in page order. It says "in", never "best", because lists aren't ranked.
+- City home: Events chip only shows when the city has events; "no listings" empty state no longer appears under real businesses; buyer-requests empty text reworded. The main home page Events tile is unchanged.
+- Mobile app not changed yet. Tested locally: pytest 286, frontend 238, build and lint clean.
+
 ### 2026-11-09 — Outreach card: bounced count, who claimed, "Wrong email"
 - `GET /admin/outreach/email-progress` now returns `bounced`, shown on the /admin/outreach card. Who claimed (owner name/phone, method, when) is on the Claimed tab, per Raj; it was briefly a list on the card (`0787c4f`). The page now opens on All cities: invites go Hyderabad first, so the old Hyderabad default made Follow up/Claimed look frozen next to the all-city card. Follow up now lists the most recent contact first.
 - Bounced businesses show as "Wrong email" in Follow up, derived from the existing bounce note, so earlier bounces are covered with no data change. Those with no phone stay listed so a correct email can be added.

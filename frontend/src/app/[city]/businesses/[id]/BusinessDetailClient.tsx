@@ -17,16 +17,17 @@ import ReviewInvite from '@/components/review-invite/ReviewInvite';
 import { PAID_BADGES_ENABLED } from '@/lib/features';
 import { coverFor } from '@/lib/categoryCover';
 import { describeWeek, openStatus, parseOpeningHours } from '@/lib/openingHours';
+import { savePendingRating, takePendingRating } from '@/lib/quickRating';
 
 function StarPicker({ value, onChange }: { value: number; onChange: (v: number) => void }) {
   return (
-    <div className="flex gap-1">
+    <div className="flex">
       {[1, 2, 3, 4, 5].map(i => (
         <button
           key={i}
           type="button"
           onClick={() => onChange(i)}
-          className="focus:outline-none"
+          className="p-1.5 first:-ml-1.5 focus:outline-none"
           aria-label={`Rate ${i} star${i !== 1 ? 's' : ''}`}
           aria-pressed={i <= value}
         >
@@ -76,6 +77,7 @@ export default function BusinessDetailPage({ initial = null, subtitle }: { initi
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewBody, setReviewBody] = useState('');
   const [submittingReview, setSubmittingReview] = useState(false);
+  const [quickRating, setQuickRating] = useState(0);
   const [claimModal, setClaimModal] = useState(false);
   const [myId, setMyId] = useState<string | null>(null);
   const [badgeModal, setBadgeModal] = useState(false);
@@ -115,6 +117,34 @@ export default function BusinessDetailPage({ initial = null, subtitle }: { initi
     }
   };
 
+  const sendQuickRating = async (rating: number, token: string) => {
+    setQuickRating(rating);
+    try {
+      await api.businesses.addReview(businessId, { rating }, token);
+      toast.success('Thanks for rating!');
+      setBusiness(await api.businesses.get(businessId));
+    } catch (err) {
+      setQuickRating(0);
+      toast.error(err instanceof ApiError ? err.message : 'Could not save your rating');
+    }
+  };
+
+  // One tap sends it. Not signed in: log in first, and the tap is sent on return (effect below).
+  const tapRating = (rating: number) => {
+    if (quickRating) return;
+    const token = localStorage.getItem('access_token');
+    if (token) { sendQuickRating(rating, token); return; }
+    savePendingRating(businessId, rating);
+    router.push(`/auth/login?redirect=${encodeURIComponent(window.location.pathname)}`);
+  };
+
+  useEffect(() => {
+    const token = localStorage.getItem('access_token');
+    if (!token) return;
+    const rating = takePendingRating(businessId);
+    if (rating) sendQuickRating(rating, token);
+  }, [businessId]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Native share sheet on phones; WhatsApp elsewhere (how most people share locally)
   const shareBusiness = async () => {
     if (!business) return;
@@ -151,6 +181,9 @@ export default function BusinessDetailPage({ initial = null, subtitle }: { initi
   }
 
   if (!business) return null;
+
+  const isOwner = !!myId && business.owner_id === myId;
+  const myReview = myId ? business.reviews?.find(r => r.user_id === myId) : undefined;
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--li-page-bg)' }}>
@@ -218,6 +251,14 @@ export default function BusinessDetailPage({ initial = null, subtitle }: { initi
                   </span>
                 </div>
               )}
+              {!isOwner && (myReview ? (
+                <p className="text-xs text-slate-500 mt-2">You rated this {myReview.rating} star{myReview.rating !== 1 ? 's' : ''}</p>
+              ) : (
+                <div className="flex flex-wrap items-center gap-x-3 mt-2">
+                  <span className="text-sm font-semibold text-slate-700">Been here? Tap to rate</span>
+                  <StarPicker value={quickRating} onChange={tapRating} />
+                </div>
+              ))}
             </div>
           </div>
 
@@ -394,7 +435,7 @@ export default function BusinessDetailPage({ initial = null, subtitle }: { initi
           )}
 
           {/* Write review */}
-          <form onSubmit={submitReview} className="space-y-4 pt-4 border-t border-slate-100">
+          {!isOwner && !myReview && <form onSubmit={submitReview} className="space-y-4 pt-4 border-t border-slate-100">
             <h3 className="font-semibold text-slate-800">Write a Review</h3>
             <div className="space-y-1.5">
               <Label>Your Rating</Label>
@@ -417,7 +458,7 @@ export default function BusinessDetailPage({ initial = null, subtitle }: { initi
             >
               {submittingReview ? 'Submitting...' : 'Submit Review'}
             </Button>
-          </form>
+          </form>}
         </div>
       </div>
 

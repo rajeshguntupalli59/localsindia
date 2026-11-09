@@ -654,7 +654,7 @@ Also `GET /api/v1/admin/errors` (admin-only, see Admin section below) — lists 
 | POST | `/admin/businesses/import/localities` | Bulk-set business neighbourhoods (from agents/assign_localities.py) | Admin |
 | POST | `/admin/businesses/import/hours` | Backfill OSM opening hours by source_ref (never overwrites) | Admin |
 | POST | `/admin/businesses/import/subcategories` | Backfill subcategory by source_ref from OSM tags (only empty ones, only a subcategory of the business's category) | Admin |
-| POST | `/businesses/{id}/reviews` | Add review (recalculates avg_rating) | Yes |
+| POST | `/businesses/{id}/reviews` | Add review or one-tap rating, text optional (recalculates avg_rating; one per user; 403 for the business's owner) | Yes |
 | POST | `/businesses/{id}/view` | Fire-and-forget view-count event (feeds analytics below) | No |
 | POST | `/businesses/{id}/wa-click` | Fire-and-forget WhatsApp-click event (feeds analytics below) | No |
 

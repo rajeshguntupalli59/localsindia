@@ -9,6 +9,7 @@ import SiteHeader from '@/components/site-header/SiteHeader';
 import SiteFooter from '@/components/site-footer/SiteFooter';
 import type { Business, City, Listing, Locality } from '@/lib/types';
 import BusinessList, { ChipLinks } from '@/components/business-list/BusinessList';
+import ShareListButton from '@/components/share-list/ShareListButton';
 import { serializeJsonLd } from '@/lib/jsonLd';
 import { fetchCatalog, findType, MIN_TYPE_BUSINESSES } from '@/lib/typePages';
 import TypePage, { typeMetadata } from './TypePage';
@@ -204,13 +205,16 @@ export default async function SeoCategoryPage({
                   ].filter(Boolean).join(' · ') || 'Be the first to post a free listing!'}
                 </p>
               </div>
-              <Link
-                href={`/${params.city}/classifieds/post`}
-                className="shrink-0 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-opacity hover:opacity-90"
-                style={{ background: 'var(--li-primary)' }}
-              >
-                + Post Listing
-              </Link>
+              <div className="flex flex-wrap gap-2">
+                <ShareListButton title={`${meta.headline} in ${city.name}`} names={businesses.map(b => b.name)} total={businessTotal || businesses.length} url={pageUrl} />
+                <Link
+                  href={`/${params.city}/classifieds/post`}
+                  className="shrink-0 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-opacity hover:opacity-90"
+                  style={{ background: 'var(--li-primary)' }}
+                >
+                  + Post Listing
+                </Link>
+              </div>
             </div>
             {params.category === 'jobs' && (
               <div
