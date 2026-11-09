@@ -123,6 +123,12 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 
 ## 6. Changelog (dated, most recent first — append here after notable sessions)
 
+### 2026-11-09 — SEO check: GSC numbers, business titles, city pages during backend blips
+- GSC, Oct 11 to Nov 7: 348 clicks, 72K impressions, CTR 0.5%, avg position 9.9; searches are mostly a business name + "contact number". Indexed 7.29K, not indexed 23.9K (12,000 noindex on purpose, 7,863 Discovered/Crawled not indexed). Soft 404 and 5xx samples are now real 404s. Most redirects are intended (`/tirupur`, archived blog posts).
+- Business page titles now name what the page really has: "Ravi Hospital, KPHB — Address, Phone Number & Timings" (`lib/businessSeo.ts`). Compare CTR in about 4 weeks.
+- City pages: a backend failure is now a real 500 from `[city]/layout.tsx`. Gotcha: `(home)/loading.tsx` streams 200 first, so throwing in the page OR in generateMetadata still returns 200; only the layout above it can set the status. A failed business sample no longer noindexes the city. Verified with a production build against a fake backend: down 500, partial failure 200 + index, unknown city 404.
+- Not fixed: area pages (`[city]/area/[area]`, `[city]/[category]/[area]`) still treat a failed localities fetch as not found.
+
 ### 2026-11-09 — One-tap ratings, share list on WhatsApp, fewer empty sections (web)
 - Business page: "Been here? Tap to rate" posts a rating with no text. Not signed in: the tap is held in sessionStorage (never the URL, so a shared link can't post a rating) and sent after login. Owners can't rate their own business (403). After rating, the review form is replaced by "You rated this N stars"; adding text later isn't built.
 - "Share this list" WhatsApp link on category, type and area pages (`components/share-list/ShareListButton.tsx`), naming the first 3 businesses in page order. It says "in", never "best", because lists aren't ranked.

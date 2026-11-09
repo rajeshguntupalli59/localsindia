@@ -20,14 +20,13 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend
 const MIN_LISTINGS_FOR_INDEX = 3;
 const MIN_BUSINESSES_FOR_INDEX = 10;
 
-async function fetchCity(citySlug: string): Promise<City | null> {
-  try {
-    const res = await fetch(`${API_BASE}/api/v1/cities/${citySlug}`, { next: { revalidate: 3600 } });
-    if (!res.ok) return null;
-    return await res.json();
-  } catch {
-    return null;
-  }
+// [city]/layout.tsx turns backend trouble into a real 500 before this runs;
+// never treat a failed fetch as "no such city" (that served a noindex page for a good city).
+async function fetchCity(citySlug: string): Promise<City> {
+  const res = await fetch(`${API_BASE}/api/v1/cities/${citySlug}`, { next: { revalidate: 3600 } });
+  if (res.status === 404) notFound();
+  if (!res.ok) throw new Error(`city ${citySlug}: backend ${res.status}`);
+  return await res.json();
 }
 
 async function fetchTodayCount(citySlug: string): Promise<number> {
@@ -66,14 +65,16 @@ async function fetchFresh(citySlug: string): Promise<Listing[]> {
   }
 }
 
-async function fetchBusinessSample(slug: string): Promise<unknown[]> {
+// null = the backend failed, so we don't know (never a reason to noindex the city)
+async function fetchBusinessSample(slug: string): Promise<unknown[] | null> {
   try {
     const res = await fetch(`${API_BASE}/api/v1/businesses?city_slug=${slug}&page_size=${MIN_BUSINESSES_FOR_INDEX}`,
       { next: { revalidate: 3600 } });
-    const data = res.ok ? await res.json() : [];
+    if (!res.ok) return null;
+    const data = await res.json();
     return Array.isArray(data) ? data : [];
   } catch {
-    return [];
+    return null;
   }
 }
 
@@ -81,7 +82,6 @@ export async function generateMetadata(
   { params }: { params: { city: string } }
 ): Promise<Metadata> {
   const city = await fetchCity(params.city);
-  if (!city) return { title: 'LocalsIndia' };
 
   // agents/seo_agent.py generates richer, city-specific copy + keywords for
   // cities that qualify for Google's index (see MIN_LISTINGS_FOR_INDEX) —
@@ -107,7 +107,7 @@ export async function generateMetadata(
   // Index once the city has real content: a few listings, or enough real
   // local businesses (the business directory is linked from the city page).
   const [fresh, businesses] = await Promise.all([fetchFresh(params.city), fetchBusinessSample(params.city)]);
-  const shouldIndex = fresh.length >= MIN_LISTINGS_FOR_INDEX || businesses.length >= MIN_BUSINESSES_FOR_INDEX;
+  const shouldIndex = fresh.length >= MIN_LISTINGS_FOR_INDEX || businesses === null || businesses.length >= MIN_BUSINESSES_FOR_INDEX;
 
   return {
     title,
@@ -151,7 +151,6 @@ export default async function CityHomePage({ params }: { params: { city: string 
     getJson<unknown[]>(`${API_BASE}/api/v1/events?city_slug=${params.city}`, []),
   ]);
 
-  if (!city) notFound();
   const areas = localities.filter(l => l.count >= MIN_AREA_BUSINESSES).slice(0, 30);
   const nearby = allCities.filter(c => c.state === city.state && c.slug !== city.slug).slice(0, 15);
 
@@ -193,7 +192,7 @@ export default async function CityHomePage({ params }: { params: { city: string 
         initialTrending={trending}
         initialFresh={fresh}
         hasEvents={events.length > 0}
-        explore={<CityExplore city={city} counts={counts} nearby={nearby} areas={areas} popular={(popular as Business[]).slice(0, 6)} />}
+        explore={<CityExplore city={city} counts={counts} nearby={nearby} areas={areas} popular={((popular ?? []) as Business[]).slice(0, 6)} />}
       />
     </>
   );

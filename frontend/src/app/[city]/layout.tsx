@@ -30,6 +30,11 @@ export default async function CityLayout({
   const slugs = await activeCitySlugs();
   if (slugs && !slugs.has(params.city)) notFound();
 
+  // Also above that boundary: a backend failure for a real city must be a real 500,
+  // which Google retries. Below it, the page streams a 200 "not found" marked noindex.
+  const city = await fetch(`${API_BASE}/api/v1/cities/${params.city}`, { next: { revalidate: 3600 } });
+  if (!city.ok && city.status !== 404) throw new Error(`city ${params.city}: backend ${city.status}`);
+
   return (
     <>
       <div className="pb-16 md:pb-0">{children}</div>

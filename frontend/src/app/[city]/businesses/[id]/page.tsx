@@ -7,6 +7,7 @@ import { SEO_CATEGORIES, SEO_PAGE_FOR_BUSINESS_CATEGORY } from '@/lib/seoCategor
 import { coverFor } from '@/lib/categoryCover';
 import { parseOpeningHours, schemaOpeningHours } from '@/lib/openingHours';
 import { realImages } from '@/lib/utils';
+import { businessTitle } from '@/lib/businessSeo';
 import { serializeJsonLd } from '@/lib/jsonLd';
 
 // Must be dynamic: a generateStaticParams placeholder (left from the old static
@@ -45,7 +46,7 @@ export async function generateMetadata(
   const b = await fetchBusiness(params.id);
   const city = cityName(params.city);
   const kind = CATEGORY_LABEL[b.category_slug ?? ''] ?? 'Local business';
-  const title = `${b.name} — ${kind} in ${city} | LocalsIndia`;
+  const title = businessTitle(b, city, kind);
   const description = [b.address, b.phone ? `Phone ${b.phone}` : null, `${kind} in ${city} on LocalsIndia.`]
     .filter(Boolean).join(' · ').slice(0, 155);
   const url = `https://www.localsindia.com/${params.city}/businesses/${b.id}`;
