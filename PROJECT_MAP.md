@@ -128,7 +128,7 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 - Bounced businesses show as "Wrong email" in Follow up, derived from the existing bounce note, so earlier bounces are covered with no data change. Those with no phone stay listed so a correct email can be added.
 - An address that ever bounced is never emailed again (`_bounced_addresses`, checked in the auto queue and in `_send_invite`), even if an import or admin puts it back.
 - Status as of the 11-09 run: 500 auto invites sent, 55 addresses bounced (about 14% of the 400 emails sent through 11-08), 736 left (~Nov 17). No SMTP send failures 11-06 to 11-09.
-- Tested locally: pytest 282 passed, frontend 233 passed, build and lint clean. Page not checked in a browser. **On branch `outreach-bounced-card`, NOT pushed or deployed yet.** Merging to master and pushing deploys it.
+- Tested locally: pytest 282 passed, frontend 233 passed, build and lint clean. Pushed to master as `0787c4f` and deployed 2026-11-09 (Test, frontend and backend workflows all green). Page not yet viewed logged in as admin.
 
 ### 2026-11-05 — First claim-invite day: timeout fix + bounce cleanup
 - Scheduled run started 12:50 UTC (not 05:00) and failed: each SMTP send takes ~9s, so 25 per call overran curl's 200s. Two failed runs still sent 51; workflow now sends 10 per call (`2099bd1`) and finished the day at 100/100.
