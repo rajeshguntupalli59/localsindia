@@ -124,7 +124,7 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 ## 6. Changelog (dated, most recent first — append here after notable sessions)
 
 ### 2026-11-09 — Outreach card: bounced count, who claimed, "Wrong email"
-- `GET /admin/outreach/email-progress` now returns `bounced` and `claimed_businesses` (business, city, owner name/phone, claim method, when); both show on the /admin/outreach card.
+- `GET /admin/outreach/email-progress` now returns `bounced`, shown on the /admin/outreach card. Who claimed (owner name/phone, method, when) is on the Claimed tab, per Raj; it was briefly a list on the card (`0787c4f`). The page now opens on All cities: invites go Hyderabad first, so the old Hyderabad default made Follow up/Claimed look frozen next to the all-city card. Follow up now lists the most recent contact first.
 - Bounced businesses show as "Wrong email" in Follow up, derived from the existing bounce note, so earlier bounces are covered with no data change. Those with no phone stay listed so a correct email can be added.
 - An address that ever bounced is never emailed again (`_bounced_addresses`, checked in the auto queue and in `_send_invite`), even if an import or admin puts it back.
 - Status as of the 11-09 run: 500 auto invites sent, 55 addresses bounced (about 14% of the 400 emails sent through 11-08), 736 left (~Nov 17). No SMTP send failures 11-06 to 11-09.

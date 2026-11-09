@@ -31,18 +31,6 @@ interface EmailProgress {
   unsubscribed: number;
   bounced: number;
   last_sent_at: string | null;
-  claimed_businesses: ClaimedBusiness[];
-}
-
-interface ClaimedBusiness {
-  id: string;
-  name: string;
-  city_slug: string;
-  city_name: string;
-  owner_name: string;
-  owner_phone: string | null;
-  method: string | null;
-  claimed_at: string | null;
 }
 
 const CLAIM_METHODS: Record<string, string> = {
@@ -63,7 +51,7 @@ const authHeaders = () => ({
 export default function AdminOutreachPage() {
   const [cities, setCities] = useState<City[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [city, setCity] = useState('hyderabad');
+  const [city, setCity] = useState('');  // all cities, so the tabs match the card's totals
   const [category, setCategory] = useState('');
   const [status, setStatus] = useState<OutreachStatus>('todo');
   const [items, setItems] = useState<OutreachItem[]>([]);
@@ -227,29 +215,6 @@ export default function AdminOutreachPage() {
             Emailed businesses move to the <strong>Follow up</strong> tab marked &ldquo;Email sent&rdquo; (automatic ones say &ldquo;Auto claim email&rdquo;).
             Bounced addresses are marked &ldquo;Wrong email&rdquo; once a day, before that day&rsquo;s emails go out, and are never emailed again.
           </p>
-          <div className="mt-3 border-t pt-3">
-            <p className="text-xs font-bold mb-2">Who claimed after an email</p>
-            {progress.claimed_businesses.length === 0 ? (
-              <p className="text-xs text-muted-foreground">Nobody has claimed yet.</p>
-            ) : (
-              <ul className="max-h-60 overflow-y-auto divide-y">
-                {progress.claimed_businesses.map(c => (
-                  <li key={c.id} className="py-2 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 text-sm">
-                    <span className="min-w-0">
-                      <a href={businessUrl(c)} target="_blank" rel="noopener noreferrer" className="font-semibold hover:underline">{c.name}</a>
-                      <span className="text-xs text-muted-foreground"> · {c.city_name}</span>
-                    </span>
-                    <span className="text-xs text-slate-500">
-                      {c.owner_name}
-                      {c.owner_phone && <> · <a href={`tel:${c.owner_phone}`} className="hover:underline">{c.owner_phone}</a></>}
-                      {c.method && <> · {CLAIM_METHODS[c.method] ?? c.method}</>}
-                      {c.claimed_at && <> · {timeAgo(c.claimed_at)}</>}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
         </div>
       )}
 
@@ -303,6 +268,14 @@ export default function AdminOutreachPage() {
                         {item.last_contacted_at && <> · {timeAgo(item.last_contacted_at)}</>}
                         {item.attempts > 1 && <> · {item.attempts} attempts</>}
                         {item.last_note && <span className="text-slate-500"> · &ldquo;{item.last_note}&rdquo;</span>}
+                      </p>
+                    )}
+                    {status === 'claimed' && item.claim && (
+                      <p className="text-xs mt-1 font-semibold text-emerald-700">
+                        Claimed by {item.claim.owner_name}
+                        {item.claim.owner_phone && <> · <a href={`tel:${item.claim.owner_phone}`} className="hover:underline">{item.claim.owner_phone}</a></>}
+                        {item.claim.method && <> · {CLAIM_METHODS[item.claim.method] ?? item.claim.method}</>}
+                        {item.claim.claimed_at && <> · {timeAgo(item.claim.claimed_at)}</>}
                       </p>
                     )}
                   </div>

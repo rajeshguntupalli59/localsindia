@@ -189,17 +189,36 @@ async def test_email_progress_counts_bounces_and_lists_claimers(client, admin_cl
     after = (await admin.get("/api/v1/admin/outreach/email-progress")).json()
     assert after["bounced"] == before["bounced"] + 1
     assert after["claimed_after_email"] == before["claimed_after_email"] + 1
-    assert len(after["claimed_businesses"]) == after["claimed_after_email"]
-    mine = [c for c in after["claimed_businesses"] if c["id"] == str(won.id)]
-    assert len(mine) == 1
-    assert mine[0]["name"] == won.name and mine[0]["owner_name"] == admin_user.name
-    assert mine[0]["method"] == "email_otp" and mine[0]["claimed_at"] is not None
-    assert not [c for c in after["claimed_businesses"] if c["id"] == str(dead.id)]
+
+    # The Claimed tab says who claimed it and how
+    tab = (await admin.get(f"/api/v1/admin/outreach?status=claimed&city_slug={city.slug}&page_size=100")).json()
+    mine = next(i for i in tab["items"] if i["id"] == str(won.id))
+    assert mine["claim"]["owner_name"] == admin_user.name
+    assert mine["claim"]["method"] == "email_otp" and mine["claim"]["claimed_at"] is not None
+    assert not [i for i in tab["items"] if i["id"] == str(dead.id)]
 
     # Bounced business has no phone and no email now, but stays listed as "Wrong email"
     queue = (await admin.get(f"/api/v1/admin/outreach?status=follow_up&city_slug={city.slug}&page_size=100")).json()
     row = next(i for i in queue["items"] if i["id"] == str(dead.id))
     assert row["last_outcome"] == "wrong_email" and row["email"] is None
+
+
+@pytest.mark.asyncio
+async def test_follow_up_shows_newest_first(admin_client, city, category):
+    admin, _ = admin_client
+    from datetime import datetime, timedelta, timezone
+    from app.models.business import Business
+    from app.models.business_outreach import BusinessOutreach
+    t = uuid.uuid4().hex[:8]
+    older = Business(city_id=city.id, category_id=category.id, name="Older", phone="+919876500001", email=f"o@{t}.in")
+    newer = Business(city_id=city.id, category_id=category.id, name="Newer", email=f"n@{t}.in")   # no mobile
+    await _add(older, newer)
+    now = datetime.now(timezone.utc)
+    await _add(BusinessOutreach(business_id=older.id, outcome="email_sent", note="a", created_at=now - timedelta(days=2)),
+               BusinessOutreach(business_id=newer.id, outcome="email_sent", note="b", created_at=now + timedelta(days=1)))
+    items = (await admin.get(f"/api/v1/admin/outreach?status=follow_up&city_slug={city.slug}&page_size=100")).json()["items"]
+    ids = [i["id"] for i in items]
+    assert ids.index(str(newer.id)) < ids.index(str(older.id))
 
 
 @pytest.mark.asyncio

@@ -132,11 +132,25 @@ async def outreach_queue(
         if b in counts:
             counts[b] = n
 
-    # Mobiles first (WhatsApp + SMS-claimable); follow-ups oldest contact first
-    order = [is_mobile.desc(), latest.c.created_at.asc()] if status == "follow_up" else [is_mobile.desc(), Business.name]
+    # Follow-ups: most recent contact first. Other tabs: mobiles first (WhatsApp + SMS-claimable)
+    order = [latest.c.created_at.desc()] if status == "follow_up" else [is_mobile.desc(), Business.name]
     rows = (await db.execute(
         base.where(bucket == status).order_by(*order).limit(page_size).offset((max(page, 1) - 1) * page_size)
     )).all()
+
+    # Claimed tab: who owns each business now and how they claimed it
+    claims = {}
+    if status == "claimed" and rows:
+        from app.models.business_claim import BusinessClaim
+        for business_id, name, phone, method, claimed_at in (await db.execute(
+            select(Business.id, User.name, User.phone, BusinessClaim.method, BusinessClaim.reviewed_at)
+            .join(User, User.id == Business.owner_id)
+            .outerjoin(BusinessClaim, (BusinessClaim.business_id == Business.id)
+                       & (BusinessClaim.user_id == Business.owner_id) & (BusinessClaim.status == "approved"))
+            .where(Business.id.in_([row[0].id for row in rows]))
+            .order_by(BusinessClaim.reviewed_at.asc().nulls_first())   # newest claim wins below
+        )).all():
+            claims[business_id] = {"owner_name": name, "owner_phone": phone, "method": method, "claimed_at": claimed_at}
 
     return {
         "counts": counts,
@@ -159,6 +173,7 @@ async def outreach_queue(
                 "last_note": note,
                 "last_contacted_at": contacted_at,
                 "attempts": attempts or 0,
+                "claim": claims.get(b.id),
             }
             for b, city, cat, outcome, note, contacted_at, attempts, shared_n, _ in rows
         ],
@@ -370,16 +385,10 @@ async def email_progress(
     total, last = (await db.execute(
         select(func.count(), func.max(BusinessOutreach.created_at)).where(BusinessOutreach.outcome == "email_sent")
     )).one()
-    from app.models.business_claim import BusinessClaim
     claimed = (await db.execute(
-        select(Business, City, User, BusinessClaim)
-        .join(City, City.id == Business.city_id)
-        .join(User, User.id == Business.owner_id)
-        .outerjoin(BusinessClaim, (BusinessClaim.business_id == Business.id)
-                   & (BusinessClaim.user_id == Business.owner_id) & (BusinessClaim.status == "approved"))
-        .where(Business.id.in_(sent_rows), Business.deleted_at.is_(None))
-        .order_by(BusinessClaim.reviewed_at.desc().nulls_last())
-    )).all()
+        select(func.count()).select_from(Business)
+        .where(Business.id.in_(sent_rows), Business.owner_id.is_not(None))
+    )).scalar_one()
     unsubscribed = (await db.execute(
         select(func.count()).select_from(BusinessOutreach).where(BusinessOutreach.note == UNSUBSCRIBED)
     )).scalar_one()
@@ -393,23 +402,10 @@ async def email_progress(
         "auto_sent_today": await _sent_today(db, auto_only=True),
         "daily_limit": DAILY_AUTO_INVITES,
         "addresses_left": len(await _invite_queue(db)),
-        "claimed_after_email": len(claimed),
+        "claimed_after_email": claimed,
         "unsubscribed": unsubscribed,
         "bounced": bounced,
         "last_sent_at": last,
-        "claimed_businesses": [
-            {
-                "id": str(b.id),
-                "name": b.name,
-                "city_slug": city.slug,
-                "city_name": city.name,
-                "owner_name": owner.name,
-                "owner_phone": owner.phone,
-                "method": claim.method if claim else None,
-                "claimed_at": claim.reviewed_at if claim else None,
-            }
-            for b, city, owner, claim in claimed
-        ],
     }
 
 

@@ -325,6 +325,7 @@ export interface OutreachItem {
   last_note: string | null;
   last_contacted_at: string | null;
   attempts: number;
+  claim: { owner_name: string; owner_phone: string | null; method: string | null; claimed_at: string | null } | null;
 }
 
 export interface OutreachQueue {
