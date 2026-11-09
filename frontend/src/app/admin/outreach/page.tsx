@@ -29,8 +29,28 @@ interface EmailProgress {
   addresses_left: number;
   claimed_after_email: number;
   unsubscribed: number;
+  bounced: number;
   last_sent_at: string | null;
+  claimed_businesses: ClaimedBusiness[];
 }
+
+interface ClaimedBusiness {
+  id: string;
+  name: string;
+  city_slug: string;
+  city_name: string;
+  owner_name: string;
+  owner_phone: string | null;
+  method: string | null;
+  claimed_at: string | null;
+}
+
+const CLAIM_METHODS: Record<string, string> = {
+  otp: 'SMS code',
+  email_otp: 'Email code',
+  documents: 'Documents',
+  email: 'Proof by email',
+};
 
 const authHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem('access_token')}`,
@@ -192,7 +212,7 @@ export default function AdminOutreachPage() {
               {progress.last_sent_at && <> · last sent {timeAgo(progress.last_sent_at)}</>}
             </span>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
             <Stat label="Sent so far" value={progress.sent_total} />
             <Stat label="Sent today" value={`${progress.auto_sent_today} / ${progress.daily_limit}`}
               hint={progress.sent_today > progress.auto_sent_today ? `+${progress.sent_today - progress.auto_sent_today} by hand` : undefined} />
@@ -200,10 +220,36 @@ export default function AdminOutreachPage() {
               hint={progress.addresses_left ? `~${Math.ceil(progress.addresses_left / progress.daily_limit)} days` : 'all done'} />
             <Stat label="Claimed after email" value={progress.claimed_after_email} good />
             <Stat label="Unsubscribed" value={progress.unsubscribed} />
+            <Stat label="Bounced" value={progress.bounced}
+              hint={progress.sent_total ? `${Math.round((progress.bounced / progress.sent_total) * 100)}% of sent` : undefined} />
           </div>
           <p className="text-[11px] text-muted-foreground mt-2">
             Emailed businesses move to the <strong>Follow up</strong> tab marked &ldquo;Email sent&rdquo; (automatic ones say &ldquo;Auto claim email&rdquo;).
+            Bounced addresses are marked &ldquo;Wrong email&rdquo; once a day, before that day&rsquo;s emails go out, and are never emailed again.
           </p>
+          <div className="mt-3 border-t pt-3">
+            <p className="text-xs font-bold mb-2">Who claimed after an email</p>
+            {progress.claimed_businesses.length === 0 ? (
+              <p className="text-xs text-muted-foreground">Nobody has claimed yet.</p>
+            ) : (
+              <ul className="max-h-60 overflow-y-auto divide-y">
+                {progress.claimed_businesses.map(c => (
+                  <li key={c.id} className="py-2 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 text-sm">
+                    <span className="min-w-0">
+                      <a href={businessUrl(c)} target="_blank" rel="noopener noreferrer" className="font-semibold hover:underline">{c.name}</a>
+                      <span className="text-xs text-muted-foreground"> · {c.city_name}</span>
+                    </span>
+                    <span className="text-xs text-slate-500">
+                      {c.owner_name}
+                      {c.owner_phone && <> · <a href={`tel:${c.owner_phone}`} className="hover:underline">{c.owner_phone}</a></>}
+                      {c.method && <> · {CLAIM_METHODS[c.method] ?? c.method}</>}
+                      {c.claimed_at && <> · {timeAgo(c.claimed_at)}</>}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
       )}
 

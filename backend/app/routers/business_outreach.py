@@ -118,7 +118,8 @@ async def outreach_queue(
         .outerjoin(Category, Category.id == Business.category_id)
         .outerjoin(latest, latest.c.business_id == Business.id)
         .where(Business.deleted_at.is_(None),
-               ((Business.phone.is_not(None)) & (Business.phone != "")) | Business.email.is_not(None))
+               ((Business.phone.is_not(None)) & (Business.phone != "")) | Business.email.is_not(None)
+               | latest.c.note.contains(BOUNCED))  # email was removed; keep it listed as "Wrong email"
     )
     if city_slug:
         base = base.where(City.slug == city_slug)
@@ -154,7 +155,7 @@ async def outreach_queue(
                 # Type (e.g. Dentists) — the outreach message links its /{city}/{type} page
                 "subcategory_slug": b.subcategory_slug,
                 "subcategory_name": (subcategory_entry(b.subcategory_slug) or (None, {}))[1].get("name"),
-                "last_outcome": outcome,
+                "last_outcome": "wrong_email" if outcome == "email_sent" and BOUNCED in (note or "") else outcome,
                 "last_note": note,
                 "last_contacted_at": contacted_at,
                 "attempts": attempts or 0,
@@ -231,6 +232,8 @@ async def _send_invite(db: AsyncSession, business: Business, admin_id) -> tuple[
     """Every guard + the send + the log row. Returns (http_status, reason) when not sent."""
     if not business.email:
         return 400, "This business has no email address"
+    if business.email in await _bounced_addresses(db):
+        return 409, "This email address bounced — not emailing it again"
     if business.owner_id:
         return 409, "Already claimed"
     latest = (await db.execute(
@@ -294,6 +297,15 @@ async def send_daily_invites(db: AsyncSession, limit: int) -> dict:
 BOUNCED = " (bounced: address doesn't exist, email removed)"
 
 
+async def _bounced_addresses(db: AsyncSession) -> set[str]:
+    """Every address that has ever bounced, from the notes mark_bounced leaves. Never emailed again,
+    even if an import or an admin puts the address back on a business."""
+    notes = (await db.execute(
+        select(BusinessOutreach.note).where(BusinessOutreach.note.contains(BOUNCED))
+    )).scalars().all()
+    return {n.removesuffix(BOUNCED).rsplit(" to ", 1)[-1] for n in notes}
+
+
 async def mark_bounced(db: AsyncSession, addresses: set[str]) -> dict:
     """Bounced addresses: clear them off every business that has them (no more invites, manual
     or automatic, and no email-code claim to a dead inbox) and note it on their email_sent rows."""
@@ -339,9 +351,10 @@ async def _invite_queue(db: AsyncSession) -> list[Business]:
                Business.id.not_in(under_review))
         .order_by(case((City.slug == "hyderabad", 0), else_=1), City.name, Business.created_at)
     )).scalars().all()
+    bounced = await _bounced_addresses(db)
     queue, seen = [], set()
     for b in rows:
-        if b.email not in seen:
+        if b.email not in seen and b.email not in bounced:
             seen.add(b.email)
             queue.append(b)
     return queue
@@ -357,12 +370,22 @@ async def email_progress(
     total, last = (await db.execute(
         select(func.count(), func.max(BusinessOutreach.created_at)).where(BusinessOutreach.outcome == "email_sent")
     )).one()
+    from app.models.business_claim import BusinessClaim
     claimed = (await db.execute(
-        select(func.count()).select_from(Business)
-        .where(Business.id.in_(sent_rows), Business.owner_id.is_not(None))
-    )).scalar_one()
+        select(Business, City, User, BusinessClaim)
+        .join(City, City.id == Business.city_id)
+        .join(User, User.id == Business.owner_id)
+        .outerjoin(BusinessClaim, (BusinessClaim.business_id == Business.id)
+                   & (BusinessClaim.user_id == Business.owner_id) & (BusinessClaim.status == "approved"))
+        .where(Business.id.in_(sent_rows), Business.deleted_at.is_(None))
+        .order_by(BusinessClaim.reviewed_at.desc().nulls_last())
+    )).all()
     unsubscribed = (await db.execute(
         select(func.count()).select_from(BusinessOutreach).where(BusinessOutreach.note == UNSUBSCRIBED)
+    )).scalar_one()
+    bounced = (await db.execute(
+        select(func.count()).select_from(BusinessOutreach)
+        .where(BusinessOutreach.outcome == "email_sent", BusinessOutreach.note.contains(BOUNCED))
     )).scalar_one()
     return {
         "sent_total": total,
@@ -370,9 +393,23 @@ async def email_progress(
         "auto_sent_today": await _sent_today(db, auto_only=True),
         "daily_limit": DAILY_AUTO_INVITES,
         "addresses_left": len(await _invite_queue(db)),
-        "claimed_after_email": claimed,
+        "claimed_after_email": len(claimed),
         "unsubscribed": unsubscribed,
+        "bounced": bounced,
         "last_sent_at": last,
+        "claimed_businesses": [
+            {
+                "id": str(b.id),
+                "name": b.name,
+                "city_slug": city.slug,
+                "city_name": city.name,
+                "owner_name": owner.name,
+                "owner_phone": owner.phone,
+                "method": claim.method if claim else None,
+                "claimed_at": claim.reviewed_at if claim else None,
+            }
+            for b, city, owner, claim in claimed
+        ],
     }
 
 

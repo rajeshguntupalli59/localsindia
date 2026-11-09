@@ -158,6 +158,82 @@ async def test_email_progress_summary(client, admin_client, city, category, sent
 
 
 @pytest.mark.asyncio
+async def test_email_progress_counts_bounces_and_lists_claimers(client, admin_client, city, category, sent, monkeypatch):
+    admin, admin_user = admin_client
+    from datetime import datetime, timezone
+    from sqlalchemy import update
+    from app.models.business import Business
+    from app.models.business_claim import BusinessClaim
+    await _drain(client, sent, monkeypatch)
+    before = (await admin.get("/api/v1/admin/outreach/email-progress")).json()
+    t = uuid.uuid4().hex[:8]
+    dead = Business(city_id=city.id, category_id=category.id, name="Dead", email=f"gone@{t}.in")
+    won = Business(city_id=city.id, category_id=category.id, name=f"Won {t}", email=f"won@{t}.in")
+    await _add(dead, won)
+    await _run(client)
+
+    async def fake_fetch(days):
+        return {dead.email}
+    monkeypatch.setattr("app.services.email_svc.fetch_bounced_addresses", fake_fetch)
+    with patch.object(settings, "CRON_SECRET", SECRET):
+        await client.post(f"/api/v1/cron/email-bounces?secret={SECRET}")
+
+    now = datetime.now(timezone.utc)
+    await _add(BusinessClaim(business_id=won.id, user_id=admin_user.id, method="email_otp", status="approved", reviewed_at=now))
+    engine = _make_engine()
+    async with async_sessionmaker(engine)() as s:
+        await s.execute(update(Business).where(Business.id == won.id).values(owner_id=admin_user.id))
+        await s.commit()
+    await engine.dispose()
+
+    after = (await admin.get("/api/v1/admin/outreach/email-progress")).json()
+    assert after["bounced"] == before["bounced"] + 1
+    assert after["claimed_after_email"] == before["claimed_after_email"] + 1
+    assert len(after["claimed_businesses"]) == after["claimed_after_email"]
+    mine = [c for c in after["claimed_businesses"] if c["id"] == str(won.id)]
+    assert len(mine) == 1
+    assert mine[0]["name"] == won.name and mine[0]["owner_name"] == admin_user.name
+    assert mine[0]["method"] == "email_otp" and mine[0]["claimed_at"] is not None
+    assert not [c for c in after["claimed_businesses"] if c["id"] == str(dead.id)]
+
+    # Bounced business has no phone and no email now, but stays listed as "Wrong email"
+    queue = (await admin.get(f"/api/v1/admin/outreach?status=follow_up&city_slug={city.slug}&page_size=100")).json()
+    row = next(i for i in queue["items"] if i["id"] == str(dead.id))
+    assert row["last_outcome"] == "wrong_email" and row["email"] is None
+
+
+@pytest.mark.asyncio
+async def test_bounced_address_is_never_emailed_again(client, admin_client, city, category, sent, monkeypatch):
+    admin, _ = admin_client
+    from app.models.business import Business
+    await _drain(client, sent, monkeypatch)
+    t = uuid.uuid4().hex[:8]
+    dead = f"gone_{t}@x.in"
+    first = Business(city_id=city.id, category_id=category.id, name="First", email=dead)
+    await _add(first)
+    await _run(client)
+    assert [k["to"] for k in sent] == [dead]
+    sent.clear()
+
+    async def fake_fetch(days):
+        return {dead}
+    monkeypatch.setattr("app.services.email_svc.fetch_bounced_addresses", fake_fetch)
+    with patch.object(settings, "CRON_SECRET", SECRET):
+        await client.post(f"/api/v1/cron/email-bounces?secret={SECRET}")
+
+    # A later import brings the address back on another business: automatic run skips it
+    await _add(Business(city_id=city.id, category_id=category.id, name="Reimported", email=dead))
+    r = await _run(client)
+    assert r["sent"] == 0 and r["failed"] == 0 and sent == []
+
+    # An admin types it back in: the manual button refuses too
+    assert (await admin.put(f"/api/v1/admin/outreach/{first.id}/email", json={"email": dead})).status_code == 200
+    blocked = await admin.post(f"/api/v1/admin/outreach/{first.id}/send-email")
+    assert blocked.status_code == 409 and "bounced" in blocked.json()["detail"]
+    assert sent == []
+
+
+@pytest.mark.asyncio
 async def test_email_progress_admin_only(auth_client):
     user_client, _ = auth_client
     assert (await user_client.get("/api/v1/admin/outreach/email-progress")).status_code == 403
