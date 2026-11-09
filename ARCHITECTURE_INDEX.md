@@ -71,7 +71,7 @@
 | Post an event (mobile, 2026-07-18) | §6-Events, §8-Events | `routers/events.py` (no backend change — already fully supported) | `mobile/src/screens/PostScreen.tsx` — same wizard-extension pattern as Businesses: picking "Events" swaps Price/Area for Venue + Date&Time (native picker) + Free/Paid Admission (+ in-app ticket price or external URL if paid); Photos step shows a note (Events has no photo storage); lands on the generic "under review" success screen, not the event's own page, since events are moderated like listings (unlike Businesses); `EventsScreen.tsx` gained a "Post an Event" button reaching it via `presetCategory` | `events` | POST /events — new native dependency `@react-native-community/datetimepicker` added (a deliberate exception since a native rebuild is already unavoidable this cycle for other reasons) |
 | Events calendar | §8-Events | `routers/events.py` | `[city]/events/page.tsx`, `layout.tsx` (metadata; noindex at 0 events) | `events` | GET /events?city_slug= |
 | Post event | §8-PostEvent | `routers/events.py` | `[city]/events/post/page.tsx` | `events` | POST /events |
-| Admin moderation (listings) | §8-AdminListings, §6-Admin | `routers/admin.py` | `admin/listings/page.tsx` | `listings` | GET /admin/listings/pending, GET /admin/listings/flagged, PATCH /admin/listings/{id}/approve |
+| Admin moderation (listings) | §8-AdminListings, §6-Admin | `routers/admin.py` | `admin/listings/page.tsx` | `listings` | GET /admin/listings/pending, GET /admin/listings/flagged, PATCH /admin/listings/{id}/approve, PATCH /admin/listings/{id}/city |
 | Admin moderation (events) | §8-AdminEvents, §6-Admin | `routers/admin.py` | `admin/events/page.tsx` | `events` | GET /admin/events/pending, PATCH /admin/events/{id}/approve |
 | Admin user management | §6-Admin | `routers/admin.py` | `admin/users/page.tsx` | `users` | GET /admin/users |
 | Admin abuse reports | §6-Admin | `routers/admin.py` | `admin/reports/page.tsx` | `reports` | GET /admin/reports |
@@ -274,6 +274,7 @@
 | `components/bottom-nav/BottomNav.tsx` | Mobile-only 5-tab bottom nav |
 | `components/empty-state/EmptyState.tsx` | "No results" state: icon + title + description + optional CTA |
 | `components/admin-pager/AdminPager.tsx` | Admin list paging bar: per-page picker, Prev/Next; `readTotal()` reads X-Total-Count |
+| `components/city-confirm/CityConfirm.tsx` | City picker + required tick on the web post-listing and add-business forms |
 | `components/ad-banner/AdBanner.tsx` | City page ad banner slot (Phase 3 monetization) |
 | `components/fresh-listings/FreshListingsSection.tsx` | Homepage latest listings carousel |
 | `components/pwa/ServiceWorker.tsx` | Registers PWA service worker for offline support |
@@ -461,6 +462,7 @@ GET    /api/v1/admin/listings/flagged     Flagged listings + their reports (Repo
        (admin list GETs: ?page=&page_size=, total in X-Total-Count header — core/pagination.py)
 GET    /api/v1/admin/listings             All listings (filter: status). Both admin listing endpoints fill city_name + city_slug (2026-10-09)
 PATCH  /api/v1/admin/listings/{id}/approve  -> status='active'
+PATCH  /api/v1/admin/listings/{id}/city  Move a listing to the correct active city [ADMIN]
 PATCH  /api/v1/admin/listings/{id}/reject   -> status='rejected'
 GET    /api/v1/admin/events/pending       Event moderation queue
 GET    /api/v1/admin/events               All events

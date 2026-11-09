@@ -687,6 +687,7 @@ Web: `BusinessDashboardClient.tsx`, reached via a "View Analytics" link on `Busi
 | GET | `/listings` | All listings with status filter (both listing endpoints return `city_name`, 2026-10-09) |
 | GET | `/chatbot-questions` | What users asked the chatbot (`chatbot_questions` table), newest first, `?q=` search (2026-10-09) |
 | PATCH | `/listings/{id}/approve` | Approve -> status='active' |
+| PATCH | `/listings/{id}/city` | Move a listing to the correct active city |
 | PATCH | `/listings/{id}/reject` | Reject -> status='rejected' |
 | GET | `/events/pending` | Events moderation queue |
 | GET | `/events` | All events with status filter |
@@ -1863,6 +1864,7 @@ Side services (called from backend):
 | `components/bottom-nav/BottomNav.tsx` | Mobile bottom navigation (5 tabs) |
 | `components/empty-state/EmptyState.tsx` | "No results" friendly state |
 | `components/admin-pager/AdminPager.tsx` | Admin list paging bar (per-page picker, Prev/Next) + `readTotal(res)` for the `X-Total-Count` header |
+| `components/city-confirm/CityConfirm.tsx` | City picker + required tick on the web post-listing and add-business forms |
 | `components/ad-banner/AdBanner.tsx` | City page ad banner slot (Phase 3) |
 | `components/fresh-listings/FreshListingsSection.tsx` | Homepage latest listings carousel |
 | `components/pwa/ServiceWorker.tsx` | PWA service worker registration |

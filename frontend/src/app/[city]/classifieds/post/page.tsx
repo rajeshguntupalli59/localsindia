@@ -13,6 +13,7 @@ import DetailQuestions, { answersPayload, checkAnswers } from '@/components/deta
 import SiteHeader from '@/components/site-header/SiteHeader';
 import { toast } from 'sonner';
 import { usePrefs } from '@/context/PrefsContext';
+import CityConfirm from '@/components/city-confirm/CityConfirm';
 import { reverseGeocode } from '@/lib/geolocate';
 
 // Leaflet touches window/document at import time — must stay client-only.
@@ -190,7 +191,9 @@ export default function PostListingPage() {
       area: form.area.trim() ? form.area : (areaGuess ?? form.area),
     });
   };
-  const city = cities.find(c => c.slug === citySlug) ?? null;
+  const [postCitySlug, setPostCitySlug] = useState(citySlug);
+  const [cityConfirmed, setCityConfirmed] = useState(false);
+  const city = cities.find(c => c.slug === postCitySlug) ?? null;
   const [photos, setPhotos] = useState<File[]>([]);
   const [skipPhotosAsked, setSkipPhotosAsked] = useState(false);
   const [previews, setPreviews] = useState<string[]>([]);
@@ -353,6 +356,7 @@ export default function PostListingPage() {
     const token = localStorage.getItem('access_token');
     if (!token) { router.push('/auth/login'); return; }
     if (!city) { toast.error('City not loaded, please refresh'); return; }
+    if (!cityConfirmed) { toast.error('Please confirm which city this listing is in'); return; }
     setSubmitting(true);
     try {
       const phone = form.contact_phone.trim().startsWith('+91')
@@ -790,6 +794,14 @@ export default function PostListingPage() {
             >
               <div className="bg-white rounded-3xl p-6 border space-y-6" style={{ borderColor: 'var(--li-border)' }}>
                 <h2 className="text-lg font-black" style={{ color: 'var(--li-text)' }}>Contact details</h2>
+
+                <CityConfirm
+                  cities={cities}
+                  value={postCitySlug}
+                  confirmed={cityConfirmed}
+                  onChange={setPostCitySlug}
+                  onConfirmedChange={setCityConfirmed}
+                />
 
                 <div>
                   <label className="text-sm font-bold mb-2 block" style={{ color: 'var(--li-text)' }}>

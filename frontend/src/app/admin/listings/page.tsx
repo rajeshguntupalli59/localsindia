@@ -10,6 +10,7 @@ import type { Listing } from '@/lib/types';
 import EmptyState from '@/components/empty-state/EmptyState';
 import { toast } from 'sonner';
 import AdminPager, { readTotal } from '@/components/admin-pager/AdminPager';
+import { usePrefs } from '@/context/PrefsContext';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
 
@@ -33,6 +34,8 @@ export default function AdminListingsPage() {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(25);
   const [total, setTotal] = useState(0);
+  const { cities } = usePrefs();
+  const sortedCities = [...cities].sort((a, b) => a.name.localeCompare(b.name));
 
   const token = () => localStorage.getItem('access_token') ?? '';
 
@@ -76,6 +79,25 @@ export default function AdminListingsPage() {
       setTotal(t => t - 1);
     } catch {
       toast.error('Failed to approve');
+    } finally {
+      setActionId(null);
+    }
+  };
+
+  const moveCity = async (id: string, citySlug: string) => {
+    setActionId(id);
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/admin/listings/${id}/city`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${token()}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ city_slug: citySlug }),
+      });
+      if (!res.ok) throw new Error();
+      const moved: Listing = await res.json();
+      setListings(ls => ls.map(l => (l.id === id ? { ...l, city_name: moved.city_name, city_slug: moved.city_slug } : l)));
+      toast.success(`Moved to ${moved.city_name}`);
+    } catch {
+      toast.error('Failed to move listing');
     } finally {
       setActionId(null);
     }
@@ -293,6 +315,19 @@ export default function AdminListingsPage() {
                     )}
                     <span className="flex items-center gap-1"><Phone className="w-3.5 h-3.5" /> {listing.contact_phone}</span>
                     {listing.seller_name && <span>Seller: {listing.seller_name}</span>}
+                  </div>
+
+                  <div className="flex items-center gap-2 text-sm">
+                    <label htmlFor={`city-${listing.id}`} className="font-semibold">City</label>
+                    <select
+                      id={`city-${listing.id}`}
+                      value={listing.city_slug ?? ''}
+                      disabled={actionId === listing.id}
+                      onChange={e => moveCity(listing.id, e.target.value)}
+                      className="h-9 rounded-lg border border-input bg-background px-2 text-sm disabled:opacity-50"
+                    >
+                      {sortedCities.map(c => <option key={c.slug} value={c.slug}>{c.name}</option>)}
+                    </select>
                   </div>
 
                   {/* Action buttons */}

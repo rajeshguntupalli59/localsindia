@@ -61,6 +61,66 @@ async def test_admin_pending_queue_contains_new_listing(admin_client, auth_clien
     assert listing_id in ids
 
 
+async def _new_city(slug: str, active: bool = True):
+    from app.models.city import City
+    from sqlalchemy.ext.asyncio import async_sessionmaker
+    from tests.conftest import _make_engine
+    engine = _make_engine()
+    async with async_sessionmaker(engine, expire_on_commit=False)() as session:
+        c = City(name=slug.title(), state="Andhra Pradesh", slug=slug, lang_default="te", active=active)
+        session.add(c)
+        await session.commit()
+    await engine.dispose()
+    return c
+
+
+async def _pending_listing(ac, city, category) -> str:
+    resp = await ac.post("/api/v1/listings", json={
+        "title": "Listing in the wrong city",
+        "description": "Posted under the city being browsed",
+        "category_id": str(category.id),
+        "city_id": str(city.id),
+        "contact_phone": "+919876543210",
+    })
+    assert resp.status_code == 201
+    return resp.json()["id"]
+
+
+@pytest.mark.asyncio
+async def test_admin_moves_listing_to_correct_city(admin_client, auth_client, city, category):
+    ac, _user = auth_client
+    admin_ac, _admin = admin_client
+    target = await _new_city(f"move-{uuid.uuid4().hex[:8]}")
+    listing_id = await _pending_listing(ac, city, category)
+
+    resp = await admin_ac.patch(f"/api/v1/admin/listings/{listing_id}/city", json={"city_slug": target.slug})
+
+    assert resp.status_code == 200
+    assert resp.json()["city_slug"] == target.slug
+    assert resp.json()["city_name"] == target.name
+    assert resp.json()["status"] == "pending"
+
+
+@pytest.mark.asyncio
+async def test_admin_cannot_move_listing_to_unknown_or_inactive_city(admin_client, auth_client, city, category):
+    ac, _user = auth_client
+    admin_ac, _admin = admin_client
+    inactive = await _new_city(f"off-{uuid.uuid4().hex[:8]}", active=False)
+    listing_id = await _pending_listing(ac, city, category)
+
+    for slug in ("no-such-city", inactive.slug):
+        resp = await admin_ac.patch(f"/api/v1/admin/listings/{listing_id}/city", json={"city_slug": slug})
+        assert resp.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_regular_user_cannot_move_listing_city(auth_client, city, category):
+    ac, _user = auth_client
+    listing_id = await _pending_listing(ac, city, category)
+    resp = await ac.patch(f"/api/v1/admin/listings/{listing_id}/city", json={"city_slug": city.slug})
+    assert resp.status_code == 403
+
+
 # ── Approve workflow ──────────────────────────────────────────────────────────
 
 @pytest.mark.asyncio

@@ -161,8 +161,8 @@ const LISTING_COPY: Record<string, ListingCopy> = {
 export default function PostScreen({ navigation, route }: any) {
   const insets = useSafeAreaInsets();
   const [user, setUser] = useState<any>(undefined);
-  const [citySlug, setCitySlug] = useState('hyderabad');
-  const [cityName, setCityName] = useState('Hyderabad');
+  const [citySlug, setCitySlug] = useState('');
+  const [cityName, setCityName] = useState('');
   const [categories, setCategories] = useState<Category[]>([]);
   const [cities, setCities] = useState<{ name: string; slug: string }[]>([]);
   const [step, setStep] = useState(0);
@@ -347,7 +347,7 @@ export default function PostScreen({ navigation, route }: any) {
     if (step === STEP_CATEGORY && !validateCategoryStep()) return;
     if (step === STEP_DETAILS && !validateDetailsStep()) return;
     if (step === STEP_LISTING && !validateListingStep()) return;
-    if (step === STEP_CONTACT) { submit(); return; }
+    if (step === STEP_CONTACT) { confirmCityThenSubmit(); return; }
     setErrors({});
     setStep(s => s + 1);
   };
@@ -525,6 +525,22 @@ export default function PostScreen({ navigation, route }: any) {
     setCityName(c.name);
   };
 
+  // The saved city is only what the user is browsing, so it must be agreed to before posting.
+  const confirmCityThenSubmit = () => {
+    if (!validateContactStep()) return;
+    const chooseCity = () => navigation.navigate('CityPicker', { onSelect: handleCitySelect });
+    if (!citySlug) {
+      Alert.alert('Which city is this in?', 'Village or town not listed? Pick the nearest city.', [
+        { text: 'Choose city', onPress: chooseCity },
+      ]);
+      return;
+    }
+    Alert.alert(`Post in ${cityName}?`, 'Only people in this city will see it.', [
+      { text: 'Change city', onPress: chooseCity },
+      { text: `Yes, ${cityName}`, onPress: submit },
+    ]);
+  };
+
   const resetForm = () => {
     setTitle('');
     setDescription('');
@@ -608,10 +624,10 @@ export default function PostScreen({ navigation, route }: any) {
         style={styles.cityRow}
         onPress={() => navigation.navigate('CityPicker', { onSelect: handleCitySelect })}
         accessibilityRole="button"
-        accessibilityLabel={`Change the city you're posting in, currently ${cityName}`}
+        accessibilityLabel={cityName ? `Change the city you're posting in, currently ${cityName}` : 'Choose the city you are posting in'}
       >
         <Ionicons name="location-outline" size={14} color="#f97316" />
-        <Text style={styles.cityRowText}>Posting in <Text style={styles.cityRowTextBold}>{cityName}</Text></Text>
+        <Text style={styles.cityRowText}>Posting in <Text style={styles.cityRowTextBold}>{cityName || 'Choose your city'}</Text></Text>
         <Ionicons name="chevron-down" size={13} color="#9ca3af" />
       </TouchableOpacity>
 

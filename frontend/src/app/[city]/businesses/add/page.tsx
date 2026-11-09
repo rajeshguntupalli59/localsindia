@@ -9,16 +9,21 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { api, ApiError } from '@/lib/api';
-import type { CatalogCategory, Category, City } from '@/lib/types';
+import type { CatalogCategory, Category } from '@/lib/types';
 import GetVerifiedModal from '@/components/get-verified-modal/GetVerifiedModal';
 import { PAID_BADGES_ENABLED } from '@/lib/features';
+import { usePrefs } from '@/context/PrefsContext';
+import CityConfirm from '@/components/city-confirm/CityConfirm';
 
 export default function AddBusinessPage() {
   const params = useParams();
   const router = useRouter();
   const citySlug = params.city as string;
 
-  const [city, setCity] = useState<City | null>(null);
+  const { cities } = usePrefs();
+  const [postCitySlug, setPostCitySlug] = useState(citySlug);
+  const [cityConfirmed, setCityConfirmed] = useState(false);
+  const city = cities.find(c => c.slug === postCitySlug) ?? null;
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     name: '',
@@ -63,17 +68,17 @@ export default function AddBusinessPage() {
   const [badgeModal, setBadgeModal] = useState(false);
 
   useEffect(() => {
-    api.cities.get(citySlug).then(setCity).catch(() => {});
     api.categories.list().then(setCategories).catch(() => {});
     api.categories.catalog().then(setCatalog).catch(() => {});
-  }, [citySlug]);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const token = localStorage.getItem('access_token');
     if (!token) { router.push('/auth/login'); return; }
-    if (!city) return;
+    if (!city) { toast.error('City not loaded, please refresh'); return; }
     if (!form.category_id) { toast.error('Pick a category for your business'); return; }
+    if (!cityConfirmed) { toast.error('Please confirm which city your business is in'); return; }
     setLoading(true);
     try {
       const biz = await api.businesses.create(
@@ -103,7 +108,7 @@ export default function AddBusinessPage() {
     }
   };
 
-  const goToBusiness = () => router.push(`/${citySlug}/businesses/${createdBusinessId}`);
+  const goToBusiness = () => router.push(`/${postCitySlug}/businesses/${createdBusinessId}`);
 
   // ── Post-creation: get verified now, or skip ──────────────────────────────
   if (createdBusinessId) {
@@ -308,6 +313,14 @@ export default function AddBusinessPage() {
                 </div>
               )}
             </div>
+
+            <CityConfirm
+              cities={cities}
+              value={postCitySlug}
+              confirmed={cityConfirmed}
+              onChange={setPostCitySlug}
+              onConfirmedChange={setCityConfirmed}
+            />
 
             <Button
               type="submit"

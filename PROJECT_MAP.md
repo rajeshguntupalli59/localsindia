@@ -123,6 +123,11 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 
 ## 6. Changelog (dated, most recent first — append here after notable sessions)
 
+### 2026-11-09 — Listings must go to the right city
+- Web post-listing and add-business forms now need the poster to confirm or change the city (`CityConfirm`); before, the browsed city was used silently. App no longer defaults to Hyderabad and asks "Post in X?" before posting (reaches users with the next app build).
+- Admin listing card has a City dropdown (`PATCH /admin/listings/{id}/city`), so a wrong city is fixed before approving. Businesses have no approval queue, so the poster's confirmation is their only check.
+- Data fixes on prod (direct DB): "Customisation frocks" and "kruthik Farm" moved Hyderabad → Ongole; duplicate Rio Livings entry in Kochi (`782f9d71`) soft-deleted, Kannur entry kept.
+
 ### 2026-11-09 — Listing titles name the city, wrong-city business URLs redirect
 - `GET /listings/{id}` now returns `city_name`, used by `lib/listingSeo.ts` for titles ("I phone 12 — Madhapur, Hyderabad | LocalsIndia"). Descriptions under 70 characters get the category and place added.
 - `city_slug` stays unset on that endpoint on purpose: setting it makes the web page show the paid "Promote this listing" button (and also "Similar listings"), which was hidden only because the field was empty.

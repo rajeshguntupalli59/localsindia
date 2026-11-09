@@ -184,6 +184,34 @@ async def chatbot_questions(
     return result.scalars().all()
 
 
+class ListingCityUpdate(BaseModel):
+    city_slug: str
+
+
+@router.patch("/listings/{listing_id}/city", response_model=ListingOut)
+async def move_listing_city(
+    listing_id: uuid.UUID,
+    body: ListingCityUpdate,
+    db: AsyncSession = Depends(get_db),
+    _admin: User = Depends(get_current_admin),
+):
+    """Correct a listing posted under the wrong city."""
+    listing = (await db.execute(
+        select(Listing).where(Listing.id == listing_id, Listing.deleted_at.is_(None))
+    )).scalar_one_or_none()
+    if not listing:
+        raise HTTPException(status_code=404, detail="Listing not found.")
+    city = (await db.execute(
+        select(City).where(City.slug == body.city_slug, City.active == True)
+    )).scalar_one_or_none()
+    if not city:
+        raise HTTPException(status_code=404, detail="City not found.")
+    listing.city_id = city.id
+    await db.commit()
+    await db.refresh(listing)
+    return (await _with_city(db, [listing]))[0]
+
+
 @router.patch("/listings/{listing_id}/approve", response_model=ListingOut)
 async def approve_listing(
     listing_id: uuid.UUID,
