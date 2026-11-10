@@ -123,6 +123,10 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 
 ## 6. Changelog (dated, most recent first — append here after notable sessions)
 
+### 2026-11-10 — Claim email progress
+- `claim-invites.yml` run 11-10: 100 sent, 0 failed; 600 sent total, 636 addresses left (~7 runs, last ~11-17). Bounce step marked 19 more businesses; 74 bounced addresses total (~12%), all "Wrong email" and never emailed again.
+- Claims: still 2 approved (Vi Clinic Dental Hyderabad via email 11-07, Watches & Clocks Bengaluru via phone 11-09). New 11-10: Diabetes Research Centre and M.V. Hospital For Diabetes (Chennai) requested an email code, not entered yet. Abhi ENT Clinic (Hyderabad) code from 11-04 expired.
+
 ### 2026-11-10 — Check: claimed businesses show on the site
 - Read-only check of every live business with an owner (DB + public API + live pages). 3 total: Watches & Clocks (Bengaluru, phone code), Vi Clinic Dental & Women Care (Hyderabad, email code), Rio Livings (Kannur, owner-added). All 3 pass: detail API + page 200, right city, indexable, canonical correct, in sitemap, on city / category / subcategory / area lists and name search, on `/{city}/businesses` and `/{city}/{category}` pages. No code change.
 - Claim requests so far: 2 approved, 3 email codes sent but not entered, 1 expired. Claim owners have posted 0 listings (claiming doesn't create one).
