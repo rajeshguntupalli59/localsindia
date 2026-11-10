@@ -123,6 +123,11 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 
 ## 6. Changelog (dated, most recent first — append here after notable sessions)
 
+### 2026-11-10 — Check: claimed businesses show on the site
+- Read-only check of every live business with an owner (DB + public API + live pages). 3 total: Watches & Clocks (Bengaluru, phone code), Vi Clinic Dental & Women Care (Hyderabad, email code), Rio Livings (Kannur, owner-added). All 3 pass: detail API + page 200, right city, indexable, canonical correct, in sitemap, on city / category / subcategory / area lists and name search, on `/{city}/businesses` and `/{city}/{category}` pages. No code change.
+- Claim requests so far: 2 approved, 3 email codes sent but not entered, 1 expired. Claim owners have posted 0 listings (claiming doesn't create one).
+- 1,934 owned businesses are soft-deleted: 1,932 old admin-seeded fakes (06-16, 09-24), the Kochi Rio Livings duplicate (11-09), 1 user entry (07-21). All expected.
+
 ### 2026-11-09 — Listings must go to the right city
 - Web post-listing and add-business forms now need the poster to confirm or change the city (`CityConfirm`); before, the browsed city was used silently. App no longer defaults to Hyderabad and asks "Post in X?" before posting (reaches users with the next app build).
 - Admin listing card has a City dropdown (`PATCH /admin/listings/{id}/city`), so a wrong city is fixed before approving. Businesses have no approval queue, so the poster's confirmation is their only check.
