@@ -140,6 +140,13 @@
       "kind": "guide",
       "topicTemplateId": "used-phone-check",
       "publishedAt": "2026-11-08T09:45:32Z"
+    },
+    {
+      "citySlug": "bengaluru",
+      "category": "pg-roommate",
+      "kind": "directory",
+      "topicTemplateId": "directory-pg-roommate",
+      "publishedAt": "2026-11-15T10:13:54Z"
     }
   ]
 }
