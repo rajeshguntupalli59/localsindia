@@ -1227,7 +1227,10 @@ async def get_azure_cost(_admin: User = Depends(get_current_admin)):
             "grouping": [{"type": "Dimension", "name": "ResourceGroupName"}],
         },
     }
-    url = f"https://management.azure.com/subscriptions/{_AZURE_SUBSCRIPTION_ID}/providers/Microsoft.CostManagement/query?api-version=2023-11-01"
+    # Query at resource-group scope: the managed identity's Cost Management Reader role is
+    # granted on localsindia-rg only, so a subscription-scope query is rejected (401).
+    url = (f"https://management.azure.com/subscriptions/{_AZURE_SUBSCRIPTION_ID}/resourceGroups/localsindia-rg"
+           "/providers/Microsoft.CostManagement/query?api-version=2023-11-01")
 
     try:
         async with httpx.AsyncClient() as client:

@@ -842,7 +842,10 @@ async def test_admin_azure_cost_parses_a_successful_response(admin_client):
         def raise_for_status(self):
             pass
 
+    called_urls = []
+
     async def fake_post(self, url, json=None, headers=None, timeout=None):
+        called_urls.append(url)
         return _FakeResponse()
 
     ac, _admin = admin_client
@@ -854,6 +857,8 @@ async def test_admin_azure_cost_parses_a_successful_response(admin_client):
     data = resp.json()
     assert data["configured"] is True
     assert data["month_to_date_cost_usd"] == 15.75
+    # Regression: the managed identity's role is on the resource group, so the query must be RG-scoped
+    assert "/resourceGroups/localsindia-rg/providers/Microsoft.CostManagement/query" in called_urls[0]
     assert data["currency"] == "USD"
     assert data["breakdown"] == [
         {"resource_group": "localsindia-rg", "cost_usd": 12.5},
