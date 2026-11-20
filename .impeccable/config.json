@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "gray-on-color",
+        "value": "*",
+        "files": [
+          "frontend/src/app/admin/users/page.tsx"
+        ],
+        "createdAt": "2026-10-23T19:50:38.457Z",
+        "reason": "Claude triage: slate-600 text on slate-100 neutral Delete button (pre-existing), ~6:1 contrast, not a colored background"
+      }
+    ]
+  }
+}
