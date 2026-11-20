@@ -125,6 +125,7 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 
 ### 2026-11-19 — Azure spend (Tier C) root cause fixed
 - `/admin/azure-cost` always showed "not configured": the managed identity's Cost Management Reader role is on `localsindia-rg`, but the query was subscription-scoped → 401. Not an MCA billing quirk. Query now RG-scoped (`admin.py`), regression assert in `test_admin.py`. Same query run by hand: $8.05 MTD (11-19).
+- `/admin/llm-usage` Claude + Gemini totals were all-time (Claude $3.96 since 07-29, $3.54 of it Aug) but shown under "Month to date" next to Azure. Totals now current UTC month only (Nov: Claude $0.04, 4 calls); "recent" list still full history.
 - Also 11-17: claim email queue empty (all ~1,400 addresses sent). 11-18: GSC — 7,060 indexed; restarted the 4 failed validations (Soft 404, 5xx, Duplicate, Redirect), recheck ~12-02.
 
 ### 2026-11-10 — Claim email progress

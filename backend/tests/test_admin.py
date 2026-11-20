@@ -758,9 +758,11 @@ async def test_admin_llm_usage_merges_gemini_db_and_claude_file(admin_client, db
 
     admin_module._llm_usage_cache["data"] = None
 
+    from datetime import datetime as _dt, timezone as _tz
+    month_start = _dt.now(_tz.utc).replace(day=1, hour=0, minute=0, second=0, microsecond=0)
     baseline = (await db.execute(
         select(func.count(LlmUsageLog.id), func.coalesce(func.sum(LlmUsageLog.estimated_cost_usd), 0))
-        .where(LlmUsageLog.provider == "gemini")
+        .where(LlmUsageLog.provider == "gemini", LlmUsageLog.created_at >= month_start)
     )).one()
 
     db.add(LlmUsageLog(
@@ -769,9 +771,14 @@ async def test_admin_llm_usage_merges_gemini_db_and_claude_file(admin_client, db
     ))
     await db.commit()
 
+    from datetime import datetime, timezone
+    this_month = datetime.now(timezone.utc).strftime("%Y-%m")
     claude_log = (
-        '{"timestamp": "2026-07-26T10:00:00", "agent": "blog_agent", "model": "claude-haiku-4-5-20251001", '
+        f'{{"timestamp": "{this_month}-01T10:00:00", "agent": "blog_agent", "model": "claude-haiku-4-5-20251001", '
         '"input_tokens": 2000, "output_tokens": 500, "estimated_cost_usd": 0.0045}\n'
+        # An older month's entry: shown in "recent" history but NOT counted in the month-to-date totals
+        '{"timestamp": "2020-01-15T10:00:00", "agent": "meta_poster", "model": "claude-haiku-4-5-20251001", '
+        '"input_tokens": 9999, "output_tokens": 999, "estimated_cost_usd": 9.99}\n'
     )
 
     async def fake_fetch_raw(client, path):
@@ -789,6 +796,7 @@ async def test_admin_llm_usage_merges_gemini_db_and_claude_file(admin_client, db
     assert data["totals"]["combined_cost_usd"] > 0
     assert any(r["provider"] == "claude" and r["context"] == "blog_agent" for r in data["recent"])
     assert any(r["provider"] == "gemini" and r["input_tokens"] == 1000 for r in data["recent"])
+    assert any(r["provider"] == "claude" and r["context"] == "meta_poster" for r in data["recent"])
 
 
 # ── Azure cost (Cost Management API) ────────────────────────────────────────────

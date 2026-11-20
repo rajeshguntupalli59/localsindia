@@ -1127,13 +1127,18 @@ async def get_llm_usage(db: AsyncSession = Depends(get_db), _admin: User = Depen
     if _llm_usage_cache["data"] is not None and now - _llm_usage_cache["fetched_at"] < _ACTIVITY_CACHE_TTL_SECONDS:
         return _llm_usage_cache["data"]
 
+    # Totals are month-to-date (UTC), matching the Azure figure they're summed with on the page.
+    # The "recent" list below stays unfiltered history.
+    month_start = datetime.now(timezone.utc).replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    month_prefix = month_start.strftime("%Y-%m")
+
     gemini_totals_row = (await db.execute(
         select(
             func.count(LlmUsageLog.id),
             func.coalesce(func.sum(LlmUsageLog.input_tokens), 0),
             func.coalesce(func.sum(LlmUsageLog.output_tokens), 0),
             func.coalesce(func.sum(LlmUsageLog.estimated_cost_usd), 0),
-        ).where(LlmUsageLog.provider == "gemini")
+        ).where(LlmUsageLog.provider == "gemini", LlmUsageLog.created_at >= month_start)
     )).one()
     gemini_calls, gemini_in, gemini_out, gemini_cost = gemini_totals_row
 
@@ -1162,10 +1167,11 @@ async def get_llm_usage(db: AsyncSession = Depends(get_db), _admin: User = Depen
             if not line.strip():
                 continue
             entry = json.loads(line)
-            claude_calls += 1
-            claude_in += entry.get("input_tokens", 0)
-            claude_out += entry.get("output_tokens", 0)
-            claude_cost += entry.get("estimated_cost_usd", 0)
+            if (entry.get("timestamp") or "").startswith(month_prefix):
+                claude_calls += 1
+                claude_in += entry.get("input_tokens", 0)
+                claude_out += entry.get("output_tokens", 0)
+                claude_cost += entry.get("estimated_cost_usd", 0)
             recent.append({
                 "provider": "claude",
                 "context": entry.get("agent"),
