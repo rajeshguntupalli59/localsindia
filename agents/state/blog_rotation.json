@@ -1,6 +1,6 @@
 {
-  "lastCityIndex": 18,
-  "lastCategoryIndex": 4,
+  "lastCityIndex": 19,
+  "lastCategoryIndex": 5,
   "history": [
     {
       "citySlug": "bangalore",
@@ -147,6 +147,13 @@
       "kind": "directory",
       "topicTemplateId": "directory-pg-roommate",
       "publishedAt": "2026-11-15T10:13:54Z"
+    },
+    {
+      "citySlug": "kollam",
+      "category": "services",
+      "kind": "guide",
+      "topicTemplateId": "hire-reliable-help",
+      "publishedAt": "2026-11-22T10:34:53Z"
     }
   ]
 }
