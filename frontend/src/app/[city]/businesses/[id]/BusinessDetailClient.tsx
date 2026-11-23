@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, MapPin, Phone, Globe, Star, BadgeCheck, MessageCircle, ShieldCheck, Navigation, Share2, Clock } from 'lucide-react';
+import { ArrowLeft, MapPin, Phone, Globe, Star, BadgeCheck, MessageCircle, ShieldCheck, Navigation, Share2, Clock, Pencil } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -360,6 +360,17 @@ export default function BusinessDetailPage({ initial = null, subtitle }: { initi
             <button onClick={openClaim} className="mt-3 text-xs font-semibold underline text-slate-500 hover:text-slate-800">
               Is this your business? Request an ownership review
             </button>
+          )}
+
+          {/* Edit details — owner only; changes go live at once */}
+          {isOwner && (
+            <Link
+              href={`/${citySlug}/businesses/${businessId}/edit`}
+              className="mt-4 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90"
+              style={{ background: 'var(--li-primary)' }}
+            >
+              <Pencil className="w-4 h-4" /> Edit business details
+            </Link>
           )}
 
           {/* Review invite — owner only, until they have a handful of reviews */}

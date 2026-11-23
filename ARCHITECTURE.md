@@ -627,7 +627,7 @@ Also `GET /api/v1/admin/errors` (admin-only, see Admin section below) — lists 
 | GET | `/businesses/sitemap-counts` | Per-city businesses by category **and by subcategory** (2026-10-08), listings by category, upcoming events — what sitemap.xml lists | No |
 | POST | `/businesses` | Create business listing | Yes |
 | GET | `/businesses/{id}` | Business detail + reviews | No |
-| PATCH | `/businesses/{id}` | Update business (owner/admin) | Yes |
+| PATCH | `/businesses/{id}` | Update business (owner/admin). Fields: name (non-blank), description, address, phone (+91 mobile), whatsapp_url, website_url, latitude+longitude (together, inside India), opening_hours (OSM syntax ≤255), category/subcategory. Unsent fields untouched, `null` clears (null category ignored). Live instantly (2026-11-23) | Yes |
 | DELETE | `/businesses/{id}` | Soft-delete business (admin or owner only) | Yes |
 | GET | `/businesses/{id}/claim-options` | OTP availability, masked phone, document types | Yes |
 | POST | `/businesses/{id}/claim/otp/send` | SMS code to the business's listed mobile | Yes |
@@ -1029,6 +1029,14 @@ Yellow Pages style:
 - "Write a Review" form (requires login, 1 per user)
 - "Claim this business" button (if no owner set)
 - "View Analytics" link, shown whenever `business.owner_id` is set (client-side check isn't narrowed to the *current* user — `GET /analytics/business/{id}`'s 403 is what actually enforces ownership)
+
+---
+
+### `/[city]/businesses/[id]/edit` — Edit Business (owner)
+
+**Files:** `app/[city]/businesses/[id]/edit/page.tsx` (noindex) + `EditBusinessClient.tsx`
+
+Added 2026-11-23. Owner (or admin) edits their business; changes go live at once (owner already proved ownership when claiming — Raj's call, no review queue). Sections: About (name, description), Location (address + `MapPinPicker`), Contact (mobile normalised by `lib/phone.ts` `toIndianMobile`, WhatsApp link, website), Opening hours (7 rows Closed/open/close → OSM text via `rowsToOpeningHours`; hours the simple editor can't show, e.g. lunch breaks, are kept as text until the owner replaces them), Photos (existing `/upload/business-image`, up to 5). Only changed fields are sent, so an old OSM landline doesn't block other edits. Reached from an owner-only "Edit business details" button on the business page; admins open the URL directly. Not done: mobile app screen; category/city changes; `locality` isn't recomputed when the pin moves (re-run `assign-localities.yml`). Public page server fetch is cached ≤1h; the client view refetches.
 
 ---
 
@@ -1543,6 +1551,7 @@ First piece of Phase 3 monetization built after Featured Listings — chosen fir
 
 - `POST /api/v1/businesses/{id}/view` and `POST /api/v1/businesses/{id}/wa-click` — fire-and-forget, same pattern as the existing `listings.py` view/wa-click endpoints, but log a row to a new `analytics_events` table (`business_id`, `event_type`, `created_at`) instead of incrementing a denormalized counter. A log was needed here (not just a counter) because the dashboard shows a day-by-day trend, not just a lifetime total.
 - `GET /api/v1/analytics/business/{id}` — owner-or-admin only (403 otherwise). Aggregates the last 30 days: total views, total WhatsApp clicks, plus a per-day breakdown for the trend chart. Review count and average rating come straight off the `businesses` row, not the event log.
+- `/[city]/businesses/[id]/edit` — owner/admin edit form for a business (about, location + pin, contact, hours, photos); live instantly (2026-11-23).
 - `/[city]/businesses/[id]/dashboard` — 4 stat cards (Views, WhatsApp Taps, Reviews, Avg Rating) and a plain CSS bar chart for the daily trend. Deliberately no new charting library (`recharts`) added for one simple chart, in keeping with this app's existing preference against heavy dependencies.
 - Reached via a "View Analytics" link on the business detail page, shown whenever the business has an owner on record (same gating convention the existing "Get Verified" CTA already uses on that page — the backend is the actual authorization boundary, not this link's visibility).
 

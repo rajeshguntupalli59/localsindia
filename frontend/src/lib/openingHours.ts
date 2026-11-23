@@ -117,3 +117,34 @@ export function schemaOpeningHours(week: WeekHours): string[] {
   }
   return out;
 }
+
+// ── Owner hours editor: one open/close time (or Closed) per day ────────────
+
+export type DayRow = { closed: boolean; open: string; close: string };  // "HH:MM"; close "24:00" = midnight end
+
+/** 7 rows (Mon first) for the editor, or null when there are no hours or a day
+ *  has more than one time range (the editor can't show those — the page keeps the raw text). */
+export function weekToRows(raw: string | null | undefined): DayRow[] | null {
+  const week = parseOpeningHours(raw);
+  if (!week || week.some(spans => spans.length > 1)) return null;
+  return week.map(spans => spans.length === 0
+    ? { closed: true, open: '09:00', close: '21:00' }
+    : { closed: false, open: fmt(spans[0][0]), close: spans[0][1] - spans[0][0] >= 24 * 60 ? '24:00' : fmt(spans[0][1]) });
+}
+
+/** OpenStreetMap opening_hours text with equal consecutive days grouped,
+ *  e.g. "Mo-Sa 09:00-21:00; Su off". null when every day is closed. */
+export function rowsToOpeningHours(rows: DayRow[]): string | null {
+  if (rows.every(r => r.closed)) return null;
+  const text = (r: DayRow) => (r.closed ? 'off' : `${r.open}-${r.close}`);
+  const rules: string[] = [];
+  let start = 0;
+  for (let d = 1; d <= 7; d++) {
+    if (d === 7 || text(rows[d]) !== text(rows[start])) {
+      const days = start === d - 1 ? DAYS[start] : `${DAYS[start]}-${DAYS[d - 1]}`;
+      rules.push(`${days} ${text(rows[start])}`);
+      start = d;
+    }
+  }
+  return rules.join('; ');
+}

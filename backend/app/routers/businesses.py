@@ -310,7 +310,11 @@ async def update_business(
     if business.owner_id != current_user.id and current_user.role != "admin":
         raise HTTPException(status_code=403, detail="Not authorised.")
 
-    updates = payload.model_dump(exclude_none=True)
+    # exclude_unset (not exclude_none): an owner can clear a field by sending
+    # null, while fields they didn't send stay as they are
+    updates = payload.model_dump(exclude_unset=True)
+    if updates.get("category_id", ...) is None:
+        updates.pop("category_id")   # a business always keeps a category
     if "subcategory_slug" in updates or "category_id" in updates:
         new_cat = updates.get("category_id", business.category_id)
         new_sub = updates.get("subcategory_slug", business.subcategory_slug)

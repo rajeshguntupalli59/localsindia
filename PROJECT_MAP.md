@@ -123,6 +123,11 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 
 ## 6. Changelog (dated, most recent first — append here after notable sessions)
 
+### 2026-11-23 — Owner edit business page
+- New `/[city]/businesses/[id]/edit` (owner/admin): name, description, address, map pin, mobile, WhatsApp, website, opening hours, photos. Live instantly (Raj). Owner-only "Edit business details" button on the business page. Trigger: Carewell Homoeo Clinic (Bengaluru) emailed an address change 11-22; support@ replied with the claim link (and a correction: our team edits until this ships).
+- PATCH `/businesses/{id}`: + latitude/longitude (both, inside India), opening_hours; phone now +91 mobile-validated; `exclude_unset` so null clears; blank name refused; null category ignored. Tests: `test_business_edit.py` (18), `openingHoursEdit.test.ts`, `phone.test.ts`. Design: `docs/superpowers/specs/2026-11-23-owner-edit-business-design.md`.
+- Not done: mobile app screen, locality recompute on pin move, category/city edits.
+
 ### 2026-11-19 — Azure spend (Tier C) root cause fixed
 - `/admin/azure-cost` always showed "not configured": the managed identity's Cost Management Reader role is on `localsindia-rg`, but the query was subscription-scoped → 401. Not an MCA billing quirk. Query now RG-scoped (`admin.py`), regression assert in `test_admin.py`. Same query run by hand: $8.05 MTD (11-19).
 - `/admin/llm-usage` Claude + Gemini totals were all-time (Claude $3.96 since 07-29, $3.54 of it Aug) but shown under "Month to date" next to Azure. Totals now current UTC month only (Nov: Claude $0.04, 4 calls); "recent" list still full history.
