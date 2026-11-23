@@ -87,6 +87,7 @@
 | Auto-deploy CI/CD + PR staging | §16 | `.github/workflows/backend-azure.yml` | `.github/workflows/frontend-azure.yml` | — | — |
 | City seeding | §18-Scripts | `scripts/seed_cities.py`, `scripts/seed_categories.py` | — | `cities`, `categories` | — |
 | Admin role management | §6-Admin | `routers/admin.py` | `admin/users/page.tsx`, mobile `AdminScreen.tsx` | `users` | PATCH /admin/users/{id}/role |
+| Buyer request → matching owners (2026-11-23) | §6-BuyerRequests | `services/buyer_request_leads.py` (`notify_matching_owners`: same city + category + type, claimed only, not the requester, distinct owners, cap 20; untyped request in a typed category → nobody), `routers/buyer_requests.py` (type must belong to category → 422; BackgroundTasks after create, own `AsyncSessionLocal`), migration `b7c8d9e0f1a2` | Web `BuyerRequestsSection.tsx` (optional type chips after category, card shows type, `id="buyer-requests"` anchor, modal scrolls); mobile `BuyerRequestsSection.tsx` (same picker, sheet scrolls; needs app build). Owners get in-app + push (`buyer_request_match`) and an email if their account has one | `buyer_requests.subcategory_slug` (new) | POST /buyer-requests (+ `subcategory_slug`) |
 | Admin block/unblock user | §6-Admin | `routers/admin.py`, `routers/auth.py` (otp/send refuses blocked phones) | `admin/users/page.tsx` | `users`, `listings`, `events`, `buyer_requests` | POST /admin/users/{id}/block, /unblock |
 | Seed placeholder images | §6-Admin | `routers/admin.py` | `admin/listings/page.tsx` (button) | `listing_images` | POST /admin/seed-placeholder-images |
 | Business soft-delete | §6-Businesses | `routers/businesses.py` | — | `businesses` | DELETE /businesses/{id} |
@@ -166,7 +167,8 @@
 | `routers/users.py` | `/api/v1/users` | Public seller profiles (name, member since, active listings) |
 | `routers/chat.py` | `/api/v1/chat` | AI chatbot (Gemini 2.0 Flash); rate-limited 5/min + 20/hr per IP; needs GOOGLE_AI_KEY |
 | `routers/saved_searches.py` | `/api/v1/saved-searches` | Save/list search alerts for a user |
-| `routers/buyer_requests.py` | `/api/v1/buyer-requests` | "Wanted" post CRUD — list by city, create, fulfill, soft-delete |
+| `routers/buyer_requests.py` | `/api/v1/buyer-requests` | "Wanted" post CRUD — list by city, create (optional type; tells matching owners in the background), fulfill, soft-delete |
+| `services/buyer_request_leads.py` | — | (2026-11-23) Finds claimed owners of matching businesses for a new request and sends in-app/push + email |
 | `routers/analytics.py` | `/api/v1/analytics` | Business owner analytics dashboard data (2026-07-18) — owner/admin-only |
 | `routers/tickets.py` | `/api/v1/tickets` | Event ticket purchase (Razorpay create-order/verify), owner ticket lookup, "my tickets" list (2026-07-18) |
 
@@ -280,7 +282,7 @@
 | `components/ad-banner/AdBanner.tsx` | City page ad banner slot (Phase 3 monetization) |
 | `components/fresh-listings/FreshListingsSection.tsx` | Homepage latest listings carousel |
 | `components/pwa/ServiceWorker.tsx` | Registers PWA service worker for offline support |
-| `components/buyer-requests/BuyerRequestsSection.tsx` | "Wanted" horizontal row on city home + post-request modal (category, description, budget) — WhatsApp-contact CTA per request |
+| `components/buyer-requests/BuyerRequestsSection.tsx` | "Wanted" horizontal row on city home + post-request modal (category, optional type, description, budget, contact) — WhatsApp-contact CTA per request |
 | `components/referral-capture/ReferralCapture.tsx` | Invisible client component mounted in root `layout.tsx` — reads `?ref=` from the URL on any page and persists it to `localStorage` for the signup flow to pick up later (2026-07-18) |
 
 ### Frontend — Library

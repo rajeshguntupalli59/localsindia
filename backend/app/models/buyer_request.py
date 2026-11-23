@@ -19,6 +19,9 @@ class BuyerRequest(Base):
     category_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("categories.id", ondelete="SET NULL"), nullable=True
     )
+    # Type within the category, e.g. 'plumbers' under services (slugs in
+    # app/core/category_catalog.py) — used to tell matching business owners
+    subcategory_slug: Mapped[str | None] = mapped_column(String(60), nullable=True)
     description: Mapped[str] = mapped_column(Text, nullable=False)
     budget: Mapped[float | None] = mapped_column(Float, nullable=True)
     contact_phone: Mapped[str] = mapped_column(String(20), nullable=False)

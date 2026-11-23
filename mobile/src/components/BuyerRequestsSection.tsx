@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, FlatList, Modal, TextInput,
-  Linking, Alert, ActivityIndicator, Pressable, KeyboardAvoidingView, Platform,
+  Linking, Alert, ActivityIndicator, Pressable, KeyboardAvoidingView, Platform, ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { buyerRequestsApi, categoriesApi } from '../lib/api';
@@ -10,10 +10,12 @@ import { formatPrice } from '../lib/format';
 import { C, SHADOW, RADIUS } from '../lib/theme';
 
 interface Category { id: string; slug: string; name: string }
+interface CatalogCategory { slug: string; subcategories: { slug: string; name: string }[] }
 interface BuyerRequest {
   id: string; description: string; budget: number | null; contact_phone: string;
   status: string; created_at: string; user_id: string;
   category_name: string | null; category_slug: string | null;
+  subcategory_name?: string | null;
 }
 
 const CAT_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
@@ -42,6 +44,11 @@ export default function BuyerRequestsSection({ citySlug, navigation }: Props) {
   const [reportedIds, setReportedIds] = useState<Set<string>>(new Set());
   const [showModal, setShowModal] = useState(false);
   const [categorySlug, setCategorySlug] = useState('');
+  // Type within the category (e.g. Plumbers) — lets the backend tell only
+  // the businesses that do that work
+  const [catalog, setCatalog] = useState<CatalogCategory[]>([]);
+  const [subcategorySlug, setSubcategorySlug] = useState('');
+  const types = catalog.find(c => c.slug === categorySlug)?.subcategories ?? [];
   const [description, setDescription] = useState('');
   const [budget, setBudget] = useState('');
   const [contactPhone, setContactPhone] = useState('');
@@ -50,6 +57,7 @@ export default function BuyerRequestsSection({ citySlug, navigation }: Props) {
   useEffect(() => {
     buyerRequestsApi.list(citySlug).then(setRequests).catch(() => {});
     categoriesApi.list().then(setCategories).catch(() => {});
+    categoriesApi.catalog().then(setCatalog).catch(() => {});
     storage.getUser().then(u => setCurrentUserId(u?.id ?? null));
   }, [citySlug]);
 
@@ -110,6 +118,7 @@ export default function BuyerRequestsSection({ citySlug, navigation }: Props) {
       const r = await buyerRequestsApi.create({
         city_slug: citySlug,
         category_slug: categorySlug,
+        subcategory_slug: subcategorySlug || undefined,
         description: description.trim(),
         budget: budget ? parseFloat(budget) : undefined,
         contact_phone: `+91${contactPhone}`,
@@ -117,6 +126,7 @@ export default function BuyerRequestsSection({ citySlug, navigation }: Props) {
       setRequests(prev => [r, ...prev]);
       setShowModal(false);
       setCategorySlug('');
+      setSubcategorySlug('');
       setDescription('');
       setBudget('');
       setContactPhone('');
@@ -154,7 +164,7 @@ export default function BuyerRequestsSection({ citySlug, navigation }: Props) {
                 <View style={styles.cardHeader}>
                   <View style={styles.cardHeaderLeft}>
                     <Ionicons name={CAT_ICONS[r.category_slug ?? ''] ?? 'search-outline'} size={16} color={C.orange} />
-                    <Text style={styles.catName}>{r.category_name}</Text>
+                    <Text style={styles.catName}>{r.subcategory_name ?? r.category_name}</Text>
                   </View>
                   {!isOwner && (
                     <TouchableOpacity onPress={() => handleReport(r.id)} disabled={reported} hitSlop={8}>
@@ -210,6 +220,7 @@ export default function BuyerRequestsSection({ citySlug, navigation }: Props) {
               </TouchableOpacity>
             </View>
 
+            <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
             <Text style={styles.label}>Category</Text>
             <View style={styles.chipsWrap}>
               {categories.map(cat => {
@@ -217,7 +228,7 @@ export default function BuyerRequestsSection({ citySlug, navigation }: Props) {
                 return (
                   <TouchableOpacity
                     key={cat.id}
-                    onPress={() => setCategorySlug(cat.slug)}
+                    onPress={() => { if (cat.slug !== categorySlug) setSubcategorySlug(''); setCategorySlug(cat.slug); }}
                     style={[styles.chip, active && styles.chipActive]}
                   >
                     <Ionicons name={CAT_ICONS[cat.slug] ?? 'pricetag-outline'} size={13} color={active ? C.orange : C.textSub} />
@@ -226,6 +237,26 @@ export default function BuyerRequestsSection({ citySlug, navigation }: Props) {
                 );
               })}
             </View>
+
+            {types.length > 0 && (
+              <>
+                <Text style={styles.label}>What kind? (we'll tell local businesses that do this)</Text>
+                <View style={styles.chipsWrap}>
+                  {types.map(t => {
+                    const active = subcategorySlug === t.slug;
+                    return (
+                      <TouchableOpacity
+                        key={t.slug}
+                        onPress={() => setSubcategorySlug(active ? '' : t.slug)}
+                        style={[styles.chip, active && styles.chipActive]}
+                      >
+                        <Text style={[styles.chipText, active && styles.chipTextActive]}>{t.name}</Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              </>
+            )}
 
             <Text style={styles.label}>Describe what you need</Text>
             <TextInput
@@ -278,6 +309,7 @@ export default function BuyerRequestsSection({ citySlug, navigation }: Props) {
                 </>
               )}
             </TouchableOpacity>
+            </ScrollView>
           </View>
         </KeyboardAvoidingView>
       </Modal>

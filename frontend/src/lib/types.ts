@@ -278,6 +278,8 @@ export interface BuyerRequestOut {
   category_name: string | null;
   category_slug: string | null;
   category_icon: string | null;
+  subcategory_slug?: string | null;   // type within the category, e.g. 'plumbers'
+  subcategory_name?: string | null;
 }
 
 export interface ClaimOptions {

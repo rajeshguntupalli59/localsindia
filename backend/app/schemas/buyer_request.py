@@ -1,12 +1,16 @@
 import uuid
 from datetime import datetime
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, computed_field, field_validator
+from app.core.category_catalog import subcategory_entry
 from app.schemas.listing import PHONE_RE
 
 
 class BuyerRequestCreate(BaseModel):
     city_slug: str
     category_slug: str
+    # Optional type within the category (e.g. 'plumbers'); checked against the
+    # category in the router. Lets us tell only owners who do that work.
+    subcategory_slug: str | None = None
     description: str
     budget: float | None = None
     contact_phone: str
@@ -40,5 +44,12 @@ class BuyerRequestOut(BaseModel):
     category_name: str | None = None
     category_slug: str | None = None
     category_icon: str | None = None
+    subcategory_slug: str | None = None
+
+    @computed_field
+    @property
+    def subcategory_name(self) -> str | None:
+        sub = subcategory_entry(self.subcategory_slug)
+        return sub[1]["name"] if sub else None
 
     model_config = {"from_attributes": True}

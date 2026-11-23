@@ -1,11 +1,13 @@
 import uuid
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, HTTPException
+import logging
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import get_db
+from app.core.category_catalog import subcategory_entry
+from app.core.database import AsyncSessionLocal, get_db
 from app.core.deps import get_current_user
 from app.models.buyer_request import BuyerRequest
 from app.models.buyer_request_report import BuyerRequestReport
@@ -20,6 +22,18 @@ router = APIRouter(prefix="/api/v1/buyer-requests", tags=["buyer-requests"])
 # BL-04-equivalent for buyer requests: 3 reports → flagged, hidden from the
 # public city feed — mirrors REPORT_FLAG_THRESHOLD in routers/listings.py.
 REPORT_FLAG_THRESHOLD = 3
+
+logger = logging.getLogger(__name__)
+
+
+async def _notify_in_background(request_id: uuid.UUID) -> None:
+    """Runs after the response is sent — SMTP takes ~10s a mail, the buyer shouldn't wait."""
+    from app.services.buyer_request_leads import notify_matching_owners
+    try:
+        async with AsyncSessionLocal() as db:
+            await notify_matching_owners(db, request_id)
+    except Exception:
+        logger.exception("buyer request %s: notifying owners failed", request_id)
 
 
 def _with_category(req: BuyerRequest, cat: Category | None) -> BuyerRequestOut:
@@ -74,6 +88,7 @@ async def list_buyer_requests(slug: str, db: AsyncSession = Depends(get_db)):
 @router.post("", response_model=BuyerRequestOut, status_code=201)
 async def create_buyer_request(
     body: BuyerRequestCreate,
+    background: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -89,10 +104,17 @@ async def create_buyer_request(
     if not cat:
         raise HTTPException(status_code=404, detail=f"Category '{body.category_slug}' not found.")
 
+    sub = body.subcategory_slug or None
+    if sub:
+        entry = subcategory_entry(sub)
+        if not entry or entry[0] != cat.slug:
+            raise HTTPException(status_code=422, detail=f"'{sub}' is not a type of {cat.name}.")
+
     req = BuyerRequest(
         city_id=city.id,
         user_id=current_user.id,
         category_id=cat.id,
+        subcategory_slug=sub,
         description=body.description,
         budget=body.budget,
         contact_phone=body.contact_phone,
@@ -101,6 +123,7 @@ async def create_buyer_request(
     db.add(req)
     await db.commit()
     await db.refresh(req)
+    background.add_task(_notify_in_background, req.id)
     return _with_category(req, cat)
 
 

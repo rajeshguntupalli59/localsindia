@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { api, ApiError } from '@/lib/api';
-import type { BuyerRequestOut, Category } from '@/lib/types';
+import type { BuyerRequestOut, CatalogCategory, Category } from '@/lib/types';
 import { timeAgo, formatPrice } from '@/lib/utils';
 import { toast } from 'sonner';
 
@@ -28,7 +28,11 @@ export default function BuyerRequestsSection({ citySlug }: Props) {
   const [requests, setRequests] = useState<BuyerRequestOut[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [showModal, setShowModal] = useState(false);
-  const [form, setForm] = useState({ category_slug: '', description: '', budget: '', contact_phone: '' });
+  const [catalog, setCatalog] = useState<CatalogCategory[]>([]);
+  const [form, setForm] = useState({ category_slug: '', subcategory_slug: '', description: '', budget: '', contact_phone: '' });
+  // Types of the picked category (e.g. Plumbers under Services) — picking one
+  // lets us tell only the businesses that do that work
+  const types = catalog.find(c => c.slug === form.category_slug)?.subcategories ?? [];
   const [submitting, setSubmitting] = useState(false);
   const [reportedIds, setReportedIds] = useState<Set<string>>(new Set());
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -36,6 +40,7 @@ export default function BuyerRequestsSection({ citySlug }: Props) {
   useEffect(() => {
     api.buyerRequests.list(citySlug).then(setRequests).catch(() => {});
     api.categories.list().then(setCategories).catch(() => {});
+    api.categories.catalog().then(setCatalog).catch(() => {});
     try {
       const user = JSON.parse(localStorage.getItem('user') ?? 'null');
       setCurrentUserId(user?.id ?? null);
@@ -102,14 +107,17 @@ export default function BuyerRequestsSection({ citySlug }: Props) {
       const r = await api.buyerRequests.create({
         city_slug: citySlug,
         category_slug: form.category_slug,
+        subcategory_slug: form.subcategory_slug || undefined,
         description: form.description.trim(),
         budget: form.budget ? parseFloat(form.budget) : undefined,
         contact_phone: `+91${form.contact_phone}`,
       }, token);
       setRequests(prev => [r, ...prev]);
       setShowModal(false);
-      setForm({ category_slug: '', description: '', budget: '', contact_phone: '' });
-      toast.success('Request posted! Sellers will reach out on WhatsApp.');
+      setForm({ category_slug: '', subcategory_slug: '', description: '', budget: '', contact_phone: '' });
+      toast.success(form.subcategory_slug
+        ? "Request posted! We've told local businesses that do this. They'll reach out on WhatsApp."
+        : 'Request posted! Sellers will reach out on WhatsApp.');
     } catch {
       toast.error('Could not post request');
     } finally {
@@ -118,7 +126,8 @@ export default function BuyerRequestsSection({ citySlug }: Props) {
   };
 
   return (
-    <div className="mt-6">
+    // id: owners' "new customer request" notifications link to /{city}#buyer-requests
+    <div id="buyer-requests" className="mt-6 scroll-mt-20">
       {/* Header row */}
       <div className="flex items-center justify-between px-4 mb-3">
         <div>
@@ -153,7 +162,7 @@ export default function BuyerRequestsSection({ citySlug }: Props) {
                     const Icon = CATEGORY_ICONS[r.category_slug ?? ''] ?? Search;
                     return <Icon size={18} style={{ color: 'var(--li-primary)' }} />;
                   })()}
-                  <span className="text-xs font-semibold" style={{ color: 'var(--li-muted)' }}>{r.category_name}</span>
+                  <span className="text-xs font-semibold" style={{ color: 'var(--li-muted)' }}>{r.subcategory_name ?? r.category_name}</span>
                 </div>
                 {!isOwner && (
                   <button
@@ -235,7 +244,7 @@ export default function BuyerRequestsSection({ citySlug }: Props) {
               initial={{ y: 40, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 40, opacity: 0 }}
-              className="w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl"
+              className="w-full max-w-md max-h-[90vh] overflow-y-auto bg-white rounded-3xl p-6 shadow-2xl"
             >
               <div className="flex items-center justify-between mb-5">
                 <h2 className="text-lg font-black" style={{ color: 'var(--li-text)' }}>What are you looking for?</h2>
@@ -253,7 +262,7 @@ export default function BuyerRequestsSection({ citySlug }: Props) {
                   return (
                     <button
                       key={cat.id}
-                      onClick={() => setForm(f => ({ ...f, category_slug: cat.slug }))}
+                      onClick={() => setForm(f => ({ ...f, category_slug: cat.slug, subcategory_slug: f.category_slug === cat.slug ? f.subcategory_slug : '' }))}
                       className="px-3 py-1.5 rounded-full text-sm font-semibold border-2 transition-all flex items-center gap-1.5"
                       style={active
                         ? { borderColor: 'var(--li-primary)', background: 'var(--li-primary-light)', color: 'var(--li-primary)' }
@@ -265,6 +274,34 @@ export default function BuyerRequestsSection({ citySlug }: Props) {
                   );
                 })}
               </div>
+
+              {/* Type chips — optional, shown once a category with types is picked */}
+              {types.length > 0 && (
+                <>
+                  <p className="text-xs font-semibold mb-2" style={{ color: 'var(--li-muted)' }}>
+                    What kind? <span className="font-normal">(we&apos;ll tell local businesses that do this)</span>
+                  </p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {types.map(t => {
+                      const active = form.subcategory_slug === t.slug;
+                      return (
+                        <button
+                          key={t.slug}
+                          type="button"
+                          onClick={() => setForm(f => ({ ...f, subcategory_slug: active ? '' : t.slug }))}
+                          className="px-3 py-1 rounded-full text-xs font-semibold border-2 transition-all"
+                          style={active
+                            ? { borderColor: 'var(--li-primary)', background: 'var(--li-primary-light)', color: 'var(--li-primary)' }
+                            : { borderColor: 'var(--li-border)', color: 'var(--li-muted)' }}
+                          aria-pressed={active}
+                        >
+                          {t.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
 
               {/* Description */}
               <p className="text-xs font-semibold mb-2" style={{ color: 'var(--li-muted)' }}>Describe what you need</p>

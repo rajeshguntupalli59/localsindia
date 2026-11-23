@@ -346,7 +346,7 @@ export const buyerRequestsApi = {
   list: (citySlug: string) =>
     api.get(`/buyer-requests/cities/${citySlug}`).then(r => r.data),
 
-  create: (data: { city_slug: string; category_slug: string; description: string; budget?: number; contact_phone: string }) =>
+  create: (data: { city_slug: string; category_slug: string; subcategory_slug?: string; description: string; budget?: number; contact_phone: string }) =>
     api.post('/buyer-requests', data).then(r => r.data),
 
   report: (id: string, reason: string) =>

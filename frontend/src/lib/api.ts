@@ -279,7 +279,7 @@ export const api = {
   buyerRequests: {
     list: (citySlug: string) =>
       req<BuyerRequestOut[]>(`/api/v1/buyer-requests/cities/${citySlug}`),
-    create: (data: { city_slug: string; category_slug: string; description: string; budget?: number; contact_phone: string }, token: string) =>
+    create: (data: { city_slug: string; category_slug: string; subcategory_slug?: string; description: string; budget?: number; contact_phone: string }, token: string) =>
       req<BuyerRequestOut>('/api/v1/buyer-requests', { method: 'POST', body: JSON.stringify(data), token }),
     fulfill: (id: string, token: string) =>
       req<BuyerRequestOut>(`/api/v1/buyer-requests/${id}/fulfill`, { method: 'PATCH', token }),

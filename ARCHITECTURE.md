@@ -710,10 +710,12 @@ Web: `BusinessDashboardClient.tsx`, reached via a "View Analytics" link on `Busi
 | Method | Path | What it does | Auth? |
 |--------|------|-------------|-------|
 | GET | `/buyer-requests/cities/{slug}` | Open (non-flagged) requests for a city, newest first, limit 20 | No |
-| POST | `/buyer-requests` | Create request -> status='open' | Yes |
+| POST | `/buyer-requests` | Create request -> status='open'. Optional `subcategory_slug` (must be a type of the category, else 422). After the response, matching claimed owners are notified (2026-11-23) | Yes |
 | POST | `/buyer-requests/{id}/report` | Report a request — 3 reports auto-flags it (hidden from the public feed), same BL-04 pattern as listing reports (added 2026-07-27) | Yes |
 | PATCH | `/buyer-requests/{id}/fulfill` | Mark fulfilled -> drops out of public feed | Yes, owner/admin |
 | DELETE | `/buyer-requests/{id}` | Soft-delete | Yes, owner/admin |
+
+**Leads to owners (2026-11-23):** the post form has optional type chips (catalog subcategories) stored in `buyer_requests.subcategory_slug`. After create, a background task (`services/buyer_request_leads.py`) notifies claimed owners of businesses with the same city + category + type (one notice per owner, max 20, never the requester, never unclaimed businesses — Raj's call): in-app + push (`type='buyer_request_match'`, link `/{city}#buyer-requests`) and an email if the owner's account has one (request text escaped, phone + WhatsApp button). A request without a type in a category that has types notifies nobody (stops old app builds spamming every Services business); categories without types match on category.
 
 "Wanted" posts — a buyer describes what they're looking for (category, description, budget, contact number) instead of a seller posting a listing. Web: `BuyerRequestsSection.tsx` on `[city]/CityHomeClient.tsx`, plus `admin/buyer-requests/page.tsx` for moderation (mirrors `admin/reports/page.tsx`). Mobile (added 2026-07-27 — the feature didn't exist on mobile at all before this): `mobile/src/components/BuyerRequestsSection.tsx` on `HomeScreen.tsx`. The `fulfill`/`delete` endpoints existed since the feature's original build but neither platform's UI ever called them until 2026-07-27 — a posted request just sat "open" forever with no way to close it except getting flagged; both platforms now have "Mark fulfilled"/delete for the poster's own requests. Also added the same day: an explicit, editable "Contact number" field on the post form on both platforms — previously the contact number was silently pulled from the poster's account phone and never shown or editable.
 
