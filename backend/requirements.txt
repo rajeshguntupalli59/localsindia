@@ -16,7 +16,7 @@ python-multipart==0.0.9
 aiofiles==25.1.0
 setuptools>=70.0.0
 anthropic>=0.40.0
-google-genai>=1.0.0
+google-genai==2.9.0  # pinned 2026-11-23: 3.x calls the v1 API where our models 404 (chatbot was down)
 azure-identity>=1.19.0
 slowapi==0.1.9
 qrcode[pil]==8.2

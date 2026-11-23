@@ -123,6 +123,9 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 
 ## 6. Changelog (dated, most recent first — append here after notable sessions)
 
+### 2026-11-23 — Chatbot was down: google-genai 3.x
+- Live check after the business-search deploy: every chat got the "temporarily unavailable" fallback. Log: `models/gemini-flash-latest is not found for API version v1`. `requirements.txt` had `google-genai>=1.0.0`, so each deploy installed the newest (3.x from 11-12; 3.6.1 now), which calls the v1 API. Reproduced locally with 3.6.1; 2.9.0 works. Pinned `google-genai==2.9.0`. Chatbot likely broken since the first deploy after 11-12.
+
 ### 2026-11-23 — Backend outage (~11 min) + deploy script fix; GSC notices
 - 16:05–16:16 UTC backend down (health 503, site pages 500). Cause: Kudu slow all day; `az webapp deploy` returned 504 while Azure kept building, the retry loop uploaded again on top, wiping wwwroot mid-build → container started with no packages (`uvicorn: not found`). Azure fell back to the previous build; ba97d1b's backend (chat business search) did not deploy.
 - Fix in `backend-azure.yml`: after every upload (504 or not) wait for Azure's own result for that deployment (`az webapp log deployment list`, status 4 ok / 3 failed, up to 15 min) and only re-upload after a real failure; never re-upload while it's still building. Max 2 attempts.
