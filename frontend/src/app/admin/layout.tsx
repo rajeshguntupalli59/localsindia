@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { ClipboardList, CalendarDays, Flag, Users, LayoutDashboard, LogOut, Activity, ShieldCheck, QrCode, Megaphone, Send, Search, Rss, DollarSign, FileCheck, PhoneCall, MessageCircleQuestion } from 'lucide-react';
+import { api } from '@/lib/api';
 
 const NAV = [
   { href: '/admin', exact: true, icon: <LayoutDashboard className="w-4 h-4" />, label: 'Dashboard', badge: null },
@@ -28,26 +29,26 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
   const pathname = usePathname();
 
-  // Read synchronously so there's no blank-flash on first render
-  const [role, setRole] = useState<string | null>(() => {
-    if (typeof window === 'undefined') return null;
-    try {
-      const u = JSON.parse(localStorage.getItem('user') ?? '{}');
-      return u.role === 'admin' ? 'admin' : null;
-    } catch { return null; }
-  });
+  // Render nothing until the BACKEND confirms an admin session. A role in
+  // localStorage proves nothing — anyone can set it — so we verify the stored
+  // token with GET /auth/me (role comes from the DB record). The backend
+  // already rejects forged tokens and gates every admin endpoint; this just
+  // stops the admin UI itself from rendering for someone who isn't an admin.
+  const [role, setRole] = useState<string | null>(null);
 
   useEffect(() => {
-    const stored = localStorage.getItem('user');
-    if (!stored) { router.replace('/admin/login'); return; }
-    try {
-      const u = JSON.parse(stored);
-      if (u.role !== 'admin') { router.replace('/admin/login'); return; }
-      setRole(u.role);
-      // Warm up the backend immediately so the page's data fetch hits a live server
-      const apiBase = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
-      fetch(`${apiBase}/api/v1/health`).catch(() => {});
-    } catch { router.replace('/admin/login'); }
+    const token = localStorage.getItem('access_token');
+    if (!token) { router.replace('/admin/login'); return; }
+    let cancelled = false;
+    api.auth.getMe(token)   // also warms the backend before the page's own fetch
+      .then(u => {
+        if (cancelled) return;
+        if (u.role !== 'admin') { localStorage.clear(); router.replace('/admin/login'); return; }
+        localStorage.setItem('user', JSON.stringify(u));
+        setRole('admin');
+      })
+      .catch(() => { if (!cancelled) { localStorage.clear(); router.replace('/admin/login'); } });
+    return () => { cancelled = true; };
   }, [router]);
 
   const handleLogout = () => {

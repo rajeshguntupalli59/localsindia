@@ -123,6 +123,10 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 
 ## 6. Changelog (dated, most recent first — append here after notable sessions)
 
+### 2026-11-23 — Admin panel session gate (security)
+- Reported: admin panel opens without login. Root cause: `admin/layout.tsx` trusted `localStorage.user.role==='admin'` (anyone can set it) → admin shells rendered. Backend was NEVER exposed: all 33 admin routes use `get_current_admin`, role from DB via signed JWT; live probe confirmed no token→403, forged JWT→401, writes→403. So forged access only showed empty shells (every fetch 403s) — no data leak, no actions.
+- Fix (frontend only): layout now verifies the stored token with `GET /auth/me` and renders only when the backend confirms role==='admin', else clears storage + redirects to `/admin/login`. Tests: `admin/layout.test.tsx` (4). No backend/DB change.
+
 ### 2026-11-23 — Chatbot was down: google-genai 3.x
 - Live check after the business-search deploy: every chat got the "temporarily unavailable" fallback. Log: `models/gemini-flash-latest is not found for API version v1`. `requirements.txt` had `google-genai>=1.0.0`, so each deploy installed the newest (3.x from 11-12; 3.6.1 now), which calls the v1 API. Reproduced locally with 3.6.1; 2.9.0 works. Pinned `google-genai==2.9.0`. Chatbot likely broken since the first deploy after 11-12.
 
