@@ -123,6 +123,11 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 
 ## 6. Changelog (dated, most recent first — append here after notable sessions)
 
+### 2026-11-23 — Security audit + open-redirect fix
+- Full attack-surface sweep (all routers). Backend SOUND: admin gating (role from DB via signed JWT), IDOR checks (tickets/uploads/notifications/payments/businesses all verify ownership), payment verify (HMAC constant-time + order bound to user + replay guard), no mass-assignment (/me, business/listing updates whitelist fields), JWT (sig + pinned alg + token-type), SQL injection safe (only structure interpolated, input bound), OTP brute-force lockout, CORS allowlist, no PII in public-profile, no committed secrets. Live probes: dev-login 403, cron no/ wrong secret 422/403, admin forged 401.
+- FIXED (frontend): open redirect — post-login `?redirect=` guard only checked `startsWith('/')`, so `//evil.com` / `/\evil.com` sent users off-site. New `lib/safeRedirect.ts` `safePath()` rejects `//`, `/\`, whitespace; wired into `auth/login/page.tsx`. Tests `safeRedirect.test.ts` (3).
+- Low-priority, NOT changed: `/phone/check` enumeration (normal), localhost in CORS, upload trusts content-type (Cloudinary rejects non-images).
+
 ### 2026-11-23 — Admin panel session gate (security)
 - Reported: admin panel opens without login. Root cause: `admin/layout.tsx` trusted `localStorage.user.role==='admin'` (anyone can set it) → admin shells rendered. Backend was NEVER exposed: all 33 admin routes use `get_current_admin`, role from DB via signed JWT; live probe confirmed no token→403, forged JWT→401, writes→403. So forged access only showed empty shells (every fetch 403s) — no data leak, no actions.
 - Fix (frontend only): layout now verifies the stored token with `GET /auth/me` and renders only when the backend confirms role==='admin', else clears storage + redirects to `/admin/login`. Tests: `admin/layout.test.tsx` (4). No backend/DB change.

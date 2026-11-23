@@ -12,6 +12,7 @@ import Script from 'next/script';
 import { useRouter, useSearchParams } from 'next/navigation';
 import SiteLogo from '@/components/site-logo/SiteLogo';
 import { usePrefs } from '@/context/PrefsContext';
+import { safePath } from '@/lib/safeRedirect';
 import { LANGUAGES } from '@/components/language-selector/LanguageSelector';
 import { RECAPTCHA_SITE_KEY, getRecaptchaToken } from '@/lib/recaptcha';
 
@@ -41,7 +42,8 @@ const VALUE_PROPS: { icon: LucideIcon; title: string; subtitle: string }[] = [
 ];
 
 function getPostLoginRedirect(redirectParam: string | null): string {
-  if (redirectParam && redirectParam.startsWith('/')) return redirectParam;
+  const safe = safePath(redirectParam);   // reject off-site "//evil.com" / "/\evil.com"
+  if (safe) return safe;
   const city = typeof window !== 'undefined' ? localStorage.getItem('li_city') : null;
   // The home page's header never reflects auth state (it always shows "Sign
   // In", unlike every other page's SiteHeader) — landing a freshly-logged-in
