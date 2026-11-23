@@ -157,3 +157,12 @@ async def test_chat_logs_business_search(client, db, town):
         await client.post("/api/v1/chat", json={"message": msg, "city_slug": town.slug})
     row = (await db.execute(select(ChatbotQuestion).where(ChatbotQuestion.question == msg))).scalar_one()
     assert row.results_count == 0 and row.search_query == "dentists"
+
+
+@pytest.mark.asyncio
+async def test_markdown_bold_is_removed_from_reply(client, town):
+    session = _Session([_Resp(text="I found **37 dentists**. Try __Smile Clinic__ – **Madhapur**.")])
+    with patch("app.core.config.settings.GOOGLE_AI_KEY", "fake"), \
+         patch("app.routers.chat.genai.Client", return_value=_Client(session)):
+        r = await client.post("/api/v1/chat", json={"message": "dentists", "city_slug": town.slug})
+    assert r.json()["reply"] == "I found 37 dentists. Try Smile Clinic – Madhapur."

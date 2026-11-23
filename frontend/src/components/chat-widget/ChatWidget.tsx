@@ -156,7 +156,7 @@ export default function ChatWidget() {
               {messages.map((msg, i) => (
                 <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   <div className="max-w-[82%] space-y-2">
-                    <div className={`rounded-2xl px-3 py-2 text-sm leading-relaxed ${
+                    <div className={`rounded-2xl px-3 py-2 text-sm leading-relaxed whitespace-pre-line ${
                       msg.role === 'user'
                         ? 'bg-orange-500 text-white rounded-br-sm'
                         : 'bg-white text-slate-700 rounded-bl-sm shadow-sm border border-slate-100'

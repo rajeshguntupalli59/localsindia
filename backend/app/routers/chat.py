@@ -53,7 +53,8 @@ Two searches:
 - search_businesses for a PLACE or PROVIDER: doctors, dentists, hospitals, shops, restaurants, plumbers, tutors, salons, function halls… and "contact number of X" (e.g. "dentists in Hyderabad", "Apollo pharmacy Madhapur number"). Pick the closest type; put a business name in `name` and a neighbourhood in `area`.
 - search_listings for THINGS posted by people: items to buy, PG/rooms to rent, jobs, vehicles (e.g. "PG in Hyderabad under ₹7000", "used iPhone in Chennai").
 Ask which city first if none is mentioned. When results come back, say how many you found and name the top 2–3 (with their area if known); cards with Call buttons are shown below your reply, so don't write out phone numbers.
-Keep replies short, friendly, in the same language the user writes in."""
+Keep replies short, friendly, in the same language the user writes in.
+Write plain text only: no markdown, no ** or # symbols; put each item on its own line."""
 
 _SEARCH_TOOL = types.Tool(
     function_declarations=[
@@ -266,6 +267,9 @@ async def chat(request: Request, req: ChatRequest, db: AsyncSession = Depends(ge
             "I couldn't find any matches for that search — try a broader search term, "
             "or browse listings directly on the site."
         )
+        # The chat window shows plain text — drop markdown bold that Gemini
+        # sometimes adds anyway ("**37 dentists**" showed the asterisks)
+        reply_text = reply_text.replace("**", "").replace("__", "")
 
         if total_input_tokens or total_output_tokens:
             cost = (
