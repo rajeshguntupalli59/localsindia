@@ -12,9 +12,11 @@ from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.category_catalog import CATALOG, subcategory_entry
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.limiter import limiter
+from app.models.business import Business
 from app.models.chatbot_question import ChatbotQuestion
 from app.models.city import City
 from app.models.llm_usage_log import LlmUsageLog
@@ -47,7 +49,10 @@ Common questions:
 - Cost: free to post and browse.
 - Why "under review": every listing gets a quick admin spam check first.
 
-Call search_listings when the user wants to FIND, SEARCH, or LOOK FOR something (e.g. "PG in Hyderabad under ₹7000", "iPhone in Chennai", "tiffin near Ameerpet"). Ask which city first if none is mentioned.
+Two searches:
+- search_businesses for a PLACE or PROVIDER: doctors, dentists, hospitals, shops, restaurants, plumbers, tutors, salons, function halls… and "contact number of X" (e.g. "dentists in Hyderabad", "Apollo pharmacy Madhapur number"). Pick the closest type; put a business name in `name` and a neighbourhood in `area`.
+- search_listings for THINGS posted by people: items to buy, PG/rooms to rent, jobs, vehicles (e.g. "PG in Hyderabad under ₹7000", "used iPhone in Chennai").
+Ask which city first if none is mentioned. When results come back, say how many you found and name the top 2–3 (with their area if known); cards with Call buttons are shown below your reply, so don't write out phone numbers.
 Keep replies short, friendly, in the same language the user writes in."""
 
 _SEARCH_TOOL = types.Tool(
@@ -74,6 +79,29 @@ _SEARCH_TOOL = types.Tool(
 )
 
 
+# Business types the bot can search by — every catalog subcategory slug
+_BUSINESS_TYPES = [sub["slug"] for c in CATALOG for sub in c.get("subcategories", [])]
+_BUSINESS_TOOL = types.FunctionDeclaration(
+    name="search_businesses",
+    description=(
+        "Search the LocalsIndia business directory (35,000+ real businesses: doctors, shops, services, "
+        "restaurants, schools…) in one city. Give at least one of type / name / area. Types: "
+        + ", ".join(f"{sub['slug']}={sub['name']}" for c in CATALOG for sub in c.get("subcategories", []))
+    ),
+    parameters=types.Schema(
+        type=types.Type.OBJECT,
+        properties={
+            "city_slug": types.Schema(type=types.Type.STRING, description="City slug such as 'hyderabad', 'chennai', 'bengaluru'"),
+            "type": types.Schema(type=types.Type.STRING, enum=_BUSINESS_TYPES, description="Closest business type"),
+            "name": types.Schema(type=types.Type.STRING, description="Words from the business name, if the user named one"),
+            "area": types.Schema(type=types.Type.STRING, description="Neighbourhood, e.g. 'Madhapur'"),
+        },
+        required=["city_slug"],
+    ),
+)
+_SEARCH_TOOL.function_declarations.append(_BUSINESS_TOOL)
+
+
 class ChatMessage(BaseModel):
     role: str   # "user" or "assistant"
     content: str
@@ -93,9 +121,19 @@ class ListingSnippet(BaseModel):
     whatsapp_url: str | None
 
 
+class BusinessSnippet(BaseModel):
+    id: str
+    name: str
+    locality: str | None
+    phone: str | None
+    city_slug: str
+    type_name: str | None
+
+
 class ChatResponse(BaseModel):
     reply: str
     listings: list[ListingSnippet] | None = None
+    businesses: list[BusinessSnippet] | None = None
 
 
 async def _log_question(
@@ -137,6 +175,7 @@ async def chat(request: Request, req: ChatRequest, db: AsyncSession = Depends(ge
         user_text = f"[User's current city: {req.city_slug}] {req.message}"
 
     found_listings: list[dict] = []
+    found_businesses: list[Business] = []
     resolved_city_slug: str | None = None
     search_query: str | None = None
     search_total: int | None = None
@@ -170,7 +209,7 @@ async def chat(request: Request, req: ChatRequest, db: AsyncSession = Depends(ge
         for _ in range(3):
             fn_call = None
             for part in response.candidates[0].content.parts:
-                if part.function_call and part.function_call.name == "search_listings":
+                if part.function_call and part.function_call.name in ("search_listings", "search_businesses"):
                     fn_call = part.function_call
                     break
 
@@ -180,8 +219,6 @@ async def chat(request: Request, req: ChatRequest, db: AsyncSession = Depends(ge
 
             args = dict(fn_call.args)
             resolved_city_slug = args.get("city_slug") or req.city_slug or "hyderabad"
-            query = args.get("query", "")
-            search_query = query
             search_total = 0
 
             city_row = await db.execute(
@@ -189,7 +226,22 @@ async def chat(request: Request, req: ChatRequest, db: AsyncSession = Depends(ge
             )
             city = city_row.scalar_one_or_none()
 
-            if city:
+            if not city:
+                search_query = args.get("query") or args.get("type") or args.get("name") or ""
+                tool_result = f"City '{resolved_city_slug}' not found on LocalsIndia."
+            elif fn_call.name == "search_businesses":
+                btype = args.get("type") if subcategory_entry(args.get("type")) else None
+                search_query = " ".join(x for x in (btype, args.get("name"), args.get("area")) if x)
+                found_businesses, search_total = await search_svc.search_businesses(
+                    db, city_id=city.id, type=btype, name=args.get("name"), area=args.get("area"), limit=5)
+                if found_businesses:
+                    tool_result = f"Found {search_total} businesses. Top {len(found_businesses)}:\n" + "\n".join(
+                        f"- {b.name}{' | ' + b.locality if b.locality else ''}" for b in found_businesses)
+                else:
+                    tool_result = f"No businesses found for '{search_query}' in {resolved_city_slug}."
+            else:
+                query = args.get("query", "")
+                search_query = query
                 result = await search_svc.search_listings(db, city_id=city.id, q=query, page_size=5)
                 found_listings = result["items"]
                 search_total = result["total"]
@@ -201,12 +253,10 @@ async def chat(request: Request, req: ChatRequest, db: AsyncSession = Depends(ge
                     tool_result = f"Found {result['total']} listings. Top 5:\n{snippets_text}"
                 else:
                     tool_result = f"No listings found for '{query}' in {resolved_city_slug}."
-            else:
-                tool_result = f"City '{resolved_city_slug}' not found on LocalsIndia."
 
             response = chat_session.send_message(
                 types.Part.from_function_response(
-                    name="search_listings",
+                    name=fn_call.name,
                     response={"result": tool_result},
                 )
             )
@@ -251,4 +301,16 @@ async def chat(request: Request, req: ChatRequest, db: AsyncSession = Depends(ge
         for item in found_listings
     ] or None
 
-    return ChatResponse(reply=reply_text, listings=listing_snippets)
+    business_snippets = [
+        BusinessSnippet(
+            id=str(b.id),
+            name=b.name,
+            locality=b.locality,
+            phone=b.phone,
+            city_slug=resolved_city_slug,
+            type_name=(subcategory_entry(b.subcategory_slug) or (None, {}))[1].get("name"),
+        )
+        for b in found_businesses
+    ] or None
+
+    return ChatResponse(reply=reply_text, listings=listing_snippets, businesses=business_snippets)

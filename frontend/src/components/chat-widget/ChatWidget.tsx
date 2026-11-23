@@ -1,9 +1,10 @@
 'use client';
 import { useState, useRef, useEffect, FormEvent } from 'react';
-import { MessageCircle, X, Send, ChevronRight } from 'lucide-react';
+import { MessageCircle, X, Send, ChevronRight, Phone } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { chatSuggestions, cityNameFromSlug } from '@/lib/chatSuggestions';
 
 interface ListingSnippet {
   id: string;
@@ -13,18 +14,35 @@ interface ListingSnippet {
   whatsapp_url: string | null;
 }
 
+interface BusinessSnippet {
+  id: string;
+  name: string;
+  locality: string | null;
+  phone: string | null;
+  city_slug: string;
+  type_name: string | null;
+}
+
 interface Message {
   role: 'user' | 'assistant';
   content: string;
   listings?: ListingSnippet[];
+  businesses?: BusinessSnippet[];
 }
 
 const WELCOME: Message = {
   role: 'assistant',
-  content: "Hi! I'm the LocalsIndia assistant. Ask me to find listings (\"PG in Hyderabad under ₹7000\") or ask anything about the platform.",
+  content: "Hi! I'm the LocalsIndia assistant. Ask me to find doctors, shops and services near you, things for sale, or anything about the site.",
 };
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend-in.azurewebsites.net';
+
+// The greeting card shows once per visitor, until they use it or close it
+const PEEK_KEY = 'li_chat_peek';
+const PEEK_DELAY_MS = 3000;
+const CITY_SLUG = /^[a-z0-9-]+$/;
+const readStore = (k: string) => { try { return localStorage.getItem(k); } catch { return null; } };
+const writeStore = (k: string, v: string) => { try { localStorage.setItem(k, v); } catch { /* private mode */ } };
 
 export default function ChatWidget() {
   const pathname = usePathname();
@@ -32,20 +50,54 @@ export default function ChatWidget() {
   const [messages, setMessages] = useState<Message[]>([WELCOME]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [peek, setPeek] = useState(false);
+  const [citySlug, setCitySlug] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const noPeek = !!pathname && (pathname.startsWith('/auth') || pathname.startsWith('/admin'));
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading]);
 
+  // Greeting card a few seconds after the page loads — once per visitor
+  useEffect(() => {
+    setCitySlug(readStore('li_city'));
+    if (noPeek || readStore(PEEK_KEY)) return;
+    const t = setTimeout(() => setPeek(true), PEEK_DELAY_MS);
+    return () => clearTimeout(t);
+  }, [noPeek]);
+
   if (pathname?.startsWith('/auth')) return null;
+
+  const suggestions = chatSuggestions(citySlug);
+  const cityName = citySlug && CITY_SLUG.test(citySlug) ? cityNameFromSlug(citySlug) : null;
+
+  function closePeek() {
+    setPeek(false);
+    writeStore(PEEK_KEY, 'closed');
+  }
+
+  function toggleChat() {
+    if (peek) { setPeek(false); writeStore(PEEK_KEY, 'used'); }
+    setOpen(v => !v);
+  }
+
+  function ask(question: string) {
+    setPeek(false);
+    writeStore(PEEK_KEY, 'used');
+    setOpen(true);
+    void sendText(question);
+  }
 
   async function send(e: FormEvent) {
     e.preventDefault();
-    const text = input.trim();
+    await sendText(input);
+  }
+
+  async function sendText(raw: string) {
+    const text = raw.trim();
     if (!text || loading) return;
 
-    const citySlug = typeof window !== 'undefined' ? (localStorage.getItem('li_city') ?? undefined) : undefined;
     const history = messages.slice(1).map(m => ({ role: m.role, content: m.content }));
 
     setMessages(prev => [...prev, { role: 'user', content: text }]);
@@ -56,13 +108,14 @@ export default function ChatWidget() {
       const res = await fetch(`${API_URL}/api/v1/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text, city_slug: citySlug, history }),
+        body: JSON.stringify({ message: text, city_slug: citySlug ?? undefined, history }),
       });
       const data = await res.json();
       setMessages(prev => [...prev, {
         role: 'assistant',
         content: data.reply,
         listings: data.listings ?? undefined,
+        businesses: data.businesses ?? undefined,
       }]);
     } catch {
       setMessages(prev => [...prev, { role: 'assistant', content: 'Something went wrong. Please try again.' }]);
@@ -138,9 +191,49 @@ export default function ChatWidget() {
                         </div>
                       </div>
                     ))}
+                    {msg.businesses?.map(b => (
+                      <div key={b.id} className="bg-white rounded-xl border border-slate-100 shadow-sm p-2.5">
+                        <p className="text-[13px] font-semibold text-slate-800 line-clamp-1">{b.name}</p>
+                        <p className="text-[11px] text-slate-500 mt-0.5 line-clamp-1">
+                          {[b.locality, b.type_name].filter(Boolean).join(' · ') || 'Local business'}
+                        </p>
+                        <div className="flex items-center gap-2 mt-2">
+                          {b.phone && (
+                            <a
+                              href={`tel:${b.phone}`}
+                              className="flex-1 flex items-center justify-center gap-1 text-[11px] bg-orange-500 text-white rounded-lg py-1 font-medium"
+                            >
+                              <Phone className="w-3 h-3" /> Call
+                            </a>
+                          )}
+                          <Link
+                            href={`/${b.city_slug}/businesses/${b.id}`}
+                            className="flex items-center gap-0.5 text-[11px] text-slate-500 hover:text-orange-500 whitespace-nowrap"
+                          >
+                            View <ChevronRight className="w-3 h-3" />
+                          </Link>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               ))}
+
+              {/* One-tap questions until the visitor asks something */}
+              {messages.length === 1 && !loading && (
+                <div className="flex flex-wrap gap-1.5 pl-1">
+                  {suggestions.map(q => (
+                    <button
+                      key={q}
+                      type="button"
+                      onClick={() => void sendText(q)}
+                      className="text-[12px] px-2.5 py-1 rounded-full border border-orange-200 bg-white text-orange-600 hover:bg-orange-50 transition-colors"
+                    >
+                      {q}
+                    </button>
+                  ))}
+                </div>
+              )}
 
               {loading && (
                 <div className="flex justify-start">
@@ -180,9 +273,49 @@ export default function ChatWidget() {
         )}
       </AnimatePresence>
 
+      {/* Greeting card — small, beside the icon, never covers the page */}
+      <AnimatePresence>
+        {peek && !open && !noPeek && (
+          <motion.div
+            role="dialog"
+            aria-label="Chat assistant suggestions"
+            initial={{ opacity: 0, y: 8, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 8, scale: 0.97 }}
+            transition={{ duration: 0.2 }}
+            className="relative w-[260px] bg-white rounded-2xl shadow-xl border border-slate-100 p-3.5"
+          >
+            <button
+              type="button"
+              onClick={closePeek}
+              aria-label="Close"
+              className="absolute top-2 right-2 text-slate-400 hover:text-slate-600"
+            >
+              <X className="w-4 h-4" />
+            </button>
+            <p className="text-sm font-semibold text-slate-800 pr-5 leading-snug">
+              👋 Need help finding something{cityName ? ` in ${cityName}` : ''}?
+            </p>
+            <p className="text-[11px] text-slate-500 mt-0.5 mb-2.5">Ask our assistant, it&apos;s free.</p>
+            <div className="flex flex-col gap-1.5">
+              {suggestions.map(q => (
+                <button
+                  key={q}
+                  type="button"
+                  onClick={() => ask(q)}
+                  className="text-left text-[13px] px-3 py-1.5 rounded-xl border border-orange-200 text-orange-600 hover:bg-orange-50 transition-colors"
+                >
+                  {q}
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Floating trigger */}
       <motion.button
-        onClick={() => setOpen(v => !v)}
+        onClick={toggleChat}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         className="w-12 h-12 bg-orange-500 hover:bg-orange-600 text-white rounded-full shadow-xl flex items-center justify-center transition-colors"

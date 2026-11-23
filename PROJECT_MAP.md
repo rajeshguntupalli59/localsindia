@@ -123,6 +123,10 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 
 ## 6. Changelog (dated, most recent first — append here after notable sessions)
 
+### 2026-11-23 — Chatbot finds businesses + greeting card
+- Bot could only search classified ads (~19 live), so asking for dentists/shops found nothing. New Gemini tool `search_businesses` (type from the catalog, name words, area) over the 35k directory; replies come with business cards (Call / View) on web and in the app (app part needs the next build). Checked with 3 real Gemini calls: "dentists near me" → businesses/dentists, "used iPhone" → listings, "Apollo pharmacy Madhapur" → businesses/pharmacies + name + area.
+- Web: small greeting card above the chat icon ~3s after load, once per visitor (`li_chat_peek`), questions "Dentists / Hospitals / Restaurants in {City}" (`lib/chatSuggestions.ts`); tap = opens chat and asks. Raj chose the card over an auto-opening full window (covers the page on phones; Google penalises intrusive mobile pop-ups). Tests: `test_chat_business_search.py`, `chatSuggestions.test.ts`.
+
 ### 2026-11-23 — Buyer requests → matching business owners
 - Request form (web + app) has optional type chips (Plumbers, Tutors…), stored in new `buyer_requests.subcategory_slug` (migration `b7c8d9e0f1a2`). After posting, claimed owners of businesses in the same city + category + type get an in-app/push notice and an email (if their account has one). Claimed only (Raj: option A); untyped requests in typed categories notify nobody; max 20 owners. Service `services/buyer_request_leads.py`, tests `test_buyer_request_leads.py`. Design: `docs/superpowers/specs/2026-11-23-buyer-request-leads-design.md`.
 - At launch: 0 open requests in big cities, ~3–4 claimed owners — reach grows with claims. App part needs the next build; app notification taps don't open anything yet (all types).

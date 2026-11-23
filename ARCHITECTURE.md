@@ -755,7 +755,7 @@ Separately (not a cron change): "Mark as Sold" on `MyListingsScreen.tsx` is now 
 
 | Method | Path | What it does | Auth? |
 |--------|------|-------------|-------|
-| POST | `/chat` | AI chatbot via **Gemini 2.0 Flash** (`google-genai` SDK). Body: `{message, city_slug?, history?}`. Returns `{reply, listings[]?}`. Rate-limited: 5/min + 20/hr per IP via slowapi. Needs `GOOGLE_AI_KEY` Azure env var. Anthropic permanently blocked from Azure East Asia (403 on all calls). | No |
+| POST | `/chat` | AI chatbot via **Gemini 2.0 Flash** (`google-genai` SDK). Body: `{message, city_slug?, history?}`. Returns `{reply, listings[]?, businesses[]?}` — two Gemini tools: `search_listings` (classified ads) and, since 2026-11-23, `search_businesses` (`city_slug`, `type` = catalog subcategory slug enum, `name` words, `area` locality; `search_svc.search_businesses`, top 5 in the businesses-list order, nothing without a filter). Business cards: `{id, name, locality, phone, city_slug, type_name}`. Web widget: greeting card next to the icon ~3s after load, once per visitor (`li_chat_peek` in localStorage), 3 city-aware questions (`lib/chatSuggestions.ts`); not on /auth or /admin; never a full-screen pop-up (Google mobile interstitial rule). Rate-limited: 5/min + 20/hr per IP via slowapi. Needs `GOOGLE_AI_KEY` Azure env var. Anthropic permanently blocked from Azure East Asia (403 on all calls). | No |
 
 ### Saved Searches / Alerts: `/api/v1/saved-searches`
 

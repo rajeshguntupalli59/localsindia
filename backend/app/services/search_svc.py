@@ -105,3 +105,42 @@ async def search_listings(
         "page": page,
         "page_size": page_size,
     }
+
+
+async def search_businesses(
+    db: AsyncSession,
+    *,
+    city_id: uuid.UUID,
+    type: str | None = None,
+    name: str | None = None,
+    area: str | None = None,
+    limit: int = 5,
+):
+    """Businesses in a city for the chatbot: by type (catalog subcategory slug),
+    words in the name (all must appear), and/or area (locality). Same order as
+    the businesses list. With no filter at all → nothing (never a whole city).
+    Returns (businesses, total matching)."""
+    from sqlalchemy import func, select
+    from app.models.business import Business
+
+    name_words = [w for w in (name or "").split() if w][:5]
+    area = (area or "").strip()
+    if not (type or name_words or area):
+        return [], 0
+
+    conds = [Business.city_id == city_id, Business.deleted_at.is_(None)]
+    if type:
+        conds.append(Business.subcategory_slug == type)
+    for w in name_words:
+        conds.append(Business.name.ilike(f"%{w}%"))
+    if area:
+        conds.append(Business.locality.ilike(f"%{area}%"))
+
+    total = await db.scalar(select(func.count()).select_from(Business).where(*conds)) or 0
+    rows = (await db.execute(
+        select(Business).where(*conds)
+        .order_by(Business.verified.desc(), Business.owner_id.is_(None),
+                  Business.avg_rating.desc().nulls_last(), Business.phone.is_(None), Business.name)
+        .limit(limit)
+    )).scalars().all()
+    return list(rows), total

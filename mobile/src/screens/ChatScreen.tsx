@@ -19,15 +19,25 @@ interface ListingSnippet {
   whatsapp_url: string | null;
 }
 
+interface BusinessSnippet {
+  id: string;
+  name: string;
+  locality: string | null;
+  phone: string | null;
+  city_slug: string;
+  type_name: string | null;
+}
+
 interface Message {
   role: 'user' | 'assistant';
   content: string;
   listings?: ListingSnippet[];
+  businesses?: BusinessSnippet[];
 }
 
 const WELCOME: Message = {
   role: 'assistant',
-  content: "Hi! I'm the LocalsIndia assistant 👋\n\nAsk me to find listings (e.g. \"PG in Hyderabad under ₹7000\") or ask anything about the app!",
+  content: "Hi! I'm the LocalsIndia assistant 👋\n\nAsk me to find doctors, shops and services near you (e.g. \"dentists in Hyderabad\"), things for sale, or anything about the app!",
 };
 
 export default function ChatScreen({ navigation }: any) {
@@ -66,6 +76,7 @@ export default function ChatScreen({ navigation }: any) {
         role: 'assistant',
         content: data.reply,
         listings: data.listings ?? undefined,
+        businesses: data.businesses ?? undefined,
       }]);
     } catch {
       setMessages(prev => [...prev, { role: 'assistant', content: 'Something went wrong. Please try again.' }]);
@@ -135,6 +146,27 @@ export default function ChatScreen({ navigation }: any) {
                       <Text style={styles.viewLink}>View →</Text>
                     </TouchableOpacity>
                   )}
+                </View>
+              </View>
+            ))}
+            {msg.businesses?.map(b => (
+              <View key={b.id} style={styles.listingCard}>
+                <Text style={styles.listingTitle} numberOfLines={1}>{b.name}</Text>
+                <Text style={styles.bizMeta} numberOfLines={1}>
+                  {[b.locality, b.type_name].filter(Boolean).join(' · ') || 'Local business'}
+                </Text>
+                <View style={styles.listingActions}>
+                  {b.phone && (
+                    <TouchableOpacity style={styles.callBtn} onPress={() => Linking.openURL(`tel:${b.phone}`)}>
+                      <Ionicons name="call" size={13} color="white" />
+                      <Text style={styles.waBtnText}>Call</Text>
+                    </TouchableOpacity>
+                  )}
+                  <TouchableOpacity
+                    onPress={() => navigation.navigate('BusinessDetail', { businessId: b.id, citySlug: b.city_slug })}
+                  >
+                    <Text style={styles.viewLink}>View →</Text>
+                  </TouchableOpacity>
                 </View>
               </View>
             ))}
@@ -225,6 +257,16 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
   },
   waBtnText: { color: 'white', fontSize: 11, fontWeight: '600' },
+  bizMeta: { fontSize: 12, color: '#64748b', marginTop: 2 },
+  callBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#f97316',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
   viewLink: { color: '#f97316', fontSize: 12, fontWeight: '600' },
 
   typingBubble: { paddingVertical: 12, paddingHorizontal: 16 },
