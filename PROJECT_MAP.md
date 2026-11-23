@@ -123,6 +123,11 @@ The original 5 cron-scheduled workflows were manually triggered and verified wor
 
 ## 6. Changelog (dated, most recent first — append here after notable sessions)
 
+### 2026-11-23 — Backend outage (~11 min) + deploy script fix; GSC notices
+- 16:05–16:16 UTC backend down (health 503, site pages 500). Cause: Kudu slow all day; `az webapp deploy` returned 504 while Azure kept building, the retry loop uploaded again on top, wiping wwwroot mid-build → container started with no packages (`uvicorn: not found`). Azure fell back to the previous build; ba97d1b's backend (chat business search) did not deploy.
+- Fix in `backend-azure.yml`: after every upload (504 or not) wait for Azure's own result for that deployment (`az webapp log deployment list`, status 4 ok / 3 failed, up to 15 min) and only re-upload after a real failure; never re-upload while it's still building. Max 2 attempts.
+- GSC messages: 5xx (11-11) — all example URLs now 404/308, validation running since 11-18. Merchant listings + Product snippets (11-20) — non-critical; added `brand` from the seller's own Brand answer (`productBrand`); return policy/shipping/reviews left out on purpose (would be invented for private sellers).
+
 ### 2026-11-23 — Chatbot finds businesses + greeting card
 - Bot could only search classified ads (~19 live), so asking for dentists/shops found nothing. New Gemini tool `search_businesses` (type from the catalog, name words, area) over the 35k directory; replies come with business cards (Call / View) on web and in the app (app part needs the next build). Checked with 3 real Gemini calls: "dentists near me" → businesses/dentists, "used iPhone" → listings, "Apollo pharmacy Madhapur" → businesses/pharmacies + name + area.
 - Web: small greeting card above the chat icon ~3s after load, once per visitor (`li_chat_peek`), questions "Dentists / Hospitals / Restaurants in {City}" (`lib/chatSuggestions.ts`); tap = opens chat and asks. Raj chose the card over an auto-opening full window (covers the page on phones; Google penalises intrusive mobile pop-ups). Tests: `test_chat_business_search.py`, `chatSuggestions.test.ts`.

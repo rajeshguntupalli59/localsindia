@@ -15,3 +15,13 @@ export function aggregateRating(reviews: Pick<ListingReview, 'rating'>[]) {
     worstRating: 1,
   };
 }
+
+// schema.org Brand from the seller's own "Brand" answer (cars, bikes, phones,
+// laptops, TVs, appliances, fashion). "Other" / blank → omitted, never guessed.
+export function productBrand(details: Record<string, unknown> | null | undefined) {
+  const raw = details?.brand;
+  if (typeof raw !== 'string') return null;
+  const name = raw.trim();
+  if (!name || name.toLowerCase() === 'other') return null;
+  return { '@type': 'Brand', name };
+}

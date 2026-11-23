@@ -4,7 +4,7 @@ import type { Listing, ListingReview } from '@/lib/types';
 import ListingDetailClient from './ListingDetailClient';
 import { listingIdFromParam, listingPath, realImages } from '@/lib/utils';
 import { serializeJsonLd } from '@/lib/jsonLd';
-import { aggregateRating } from '@/lib/productJsonLd';
+import { aggregateRating, productBrand } from '@/lib/productJsonLd';
 import { listingDescription, listingTitle } from '@/lib/listingSeo';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://localsindia-backend-in.azurewebsites.net';
@@ -67,6 +67,7 @@ export default async function ListingPage({ params }: { params: { id: string } }
   const id = listingIdFromParam(params.id);
   const listing = await fetchListing(id);
   const rating = aggregateRating(await fetchReviews(id));
+  const brand = listing ? productBrand(listing.category_details) : null;
 
   // Google requires offers or aggregateRating on a Product — without either it's an error, so skip it
   const jsonLd = listing && (listing.price !== null || rating) ? {
@@ -75,6 +76,7 @@ export default async function ListingPage({ params }: { params: { id: string } }
     name: listing.title,
     description: listing.description,
     ...(realImages(listing.images)[0] ? { image: realImages(listing.images)[0].url } : {}),
+    ...(brand ? { brand } : {}),
     ...(listing.price !== null ? {
       offers: {
         '@type': 'Offer',

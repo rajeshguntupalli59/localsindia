@@ -75,27 +75,49 @@ jobs:
           # complete Kudu deployments, 11 minutes apart, from one push).
           # --track-status false makes this step measure only what it can
           # legitimately retry on: did the artifact actually deploy.
-          MAX_ATTEMPTS=3
+          #
+          # 2026-11-23 outage (~11 min): when Kudu is slow the upload call
+          # itself returns HTTP 504 while Azure KEEPS building that deploy.
+          # Retrying straight away started a second deploy on top, which wiped
+          # wwwroot mid-build; the container restarted with no packages
+          # ("uvicorn: not found"). So after every upload — 504 or not — we
+          # wait for Azure's own verdict on that deployment (status 4 =
+          # success, 3 = failed) and only upload again after a real failure.
+          RG=localsindia-rg; APP=localsindia-backend-in
+          MAX_ATTEMPTS=2
           for attempt in $(seq 1 "$MAX_ATTEMPTS"); do
             echo "::group::Deploy attempt $attempt/$MAX_ATTEMPTS"
-            if az webapp deploy \
-              --resource-group localsindia-rg \
-              --name localsindia-backend-in \
+            # 30s margin for clock skew between this runner and Azure
+            SINCE=$(date -u -d '30 seconds ago' +%Y-%m-%dT%H:%M:%S)
+            az webapp deploy \
+              --resource-group "$RG" \
+              --name "$APP" \
               --src-path backend.zip \
               --type zip \
               --restart true \
               --track-status false \
-              --timeout 300000; then
-              echo "::endgroup::"
-              echo "Deploy succeeded on attempt $attempt"
+              --timeout 300000 \
+              || echo "Upload call returned an error (often a 504 while Azure keeps building) - checking Azure's own result"
+            echo "::endgroup::"
+            RESULT=""
+            for i in $(seq 1 60); do   # up to 15 min
+              LATEST=$(az webapp log deployment list -g "$RG" -n "$APP" \
+                --query "[?start_time >= '$SINCE'] | [?message == 'OneDeploy'] | [0].status" -o tsv 2>/dev/null || true)
+              echo "$(date -u +%H:%M:%S) Azure deployment status: ${LATEST:-not started yet}"
+              if [ "$LATEST" = "4" ]; then RESULT=ok; break; fi
+              if [ "$LATEST" = "3" ]; then RESULT=failed; break; fi
+              sleep 15
+            done
+            if [ "$RESULT" = "ok" ]; then
+              echo "Deploy succeeded on attempt $attempt (Azure status 4)"
               exit 0
             fi
-            echo "::endgroup::"
-            echo "Deploy attempt $attempt failed."
-            if [ "$attempt" -lt "$MAX_ATTEMPTS" ]; then
-              echo "Retrying in 20s..."
-              sleep 20
+            if [ -z "$RESULT" ]; then
+              # Still building after 15 min: never start another deploy on top
+              echo "Azure is still building after 15 min - not retrying (a second deploy would wipe it)."
+              exit 1
             fi
+            echo "Azure reports deploy attempt $attempt failed (status 3)."
           done
           echo "All $MAX_ATTEMPTS deploy attempts failed."
           exit 1
